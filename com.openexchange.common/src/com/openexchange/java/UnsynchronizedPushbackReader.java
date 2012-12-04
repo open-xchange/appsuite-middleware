@@ -54,7 +54,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 /**
- * {@link UnsynchronizedPushbackReader} - Copy from {@link java.io.PushbackReader}. but without synchronization.
+ * {@link UnsynchronizedPushbackReader} - Copy of {@link java.io.PushbackReader}. but without synchronization.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

@@ -56,6 +56,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -218,19 +219,21 @@ public class DispatcherServlet extends SessionServlet {
         httpResponse.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         Tools.disableCaching(httpResponse);
 
-        final String action = httpRequest.getParameter(PARAMETER_ACTION);
         AJAXState state = null;
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
             final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-            final String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
-			final String action2 = requestDataTools.getAction(httpRequest);
-			ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action2));
-            if (session == null && dispatcher.mayOmitSession(module, action2)) {
-            	session = fakeSession();
-            }
-            if (null == session) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+            ServerSession session;
+            {
+                final String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
+    			final String action = requestDataTools.getAction(httpRequest);
+    			session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
+                if (session == null && dispatcher.mayOmitSession(module, action)) {
+                	session = fakeSession();
+                }
+                if (null == session) {
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+                }
             }
             /*
              * Parse AJAXRequestData
@@ -270,11 +273,13 @@ public class DispatcherServlet extends SessionServlet {
                 return;
             }
             LOG.error(e.getMessage(), e);
-            APIResponseRenderer.writeResponse(new Response().setException(e), action, httpRequest, httpResponse);
+            final String action = httpRequest.getParameter(PARAMETER_ACTION);
+            APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? httpRequest.getMethod().toUpperCase(Locale.US) : action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
             LOG.error(e.getMessage(), e);
             final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            APIResponseRenderer.writeResponse(new Response().setException(exception), action, httpRequest, httpResponse);
+            final String action = httpRequest.getParameter(PARAMETER_ACTION);
+            APIResponseRenderer.writeResponse(new Response().setException(exception), null == action ? httpRequest.getMethod().toUpperCase(Locale.US) : action, httpRequest, httpResponse);
         } finally {
             if (null != state) {
                 dispatcher.end(state);
