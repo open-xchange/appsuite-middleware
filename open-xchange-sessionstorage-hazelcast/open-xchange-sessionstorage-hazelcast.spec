@@ -48,6 +48,12 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Dec 04 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+First release candidate for 7.0.0
+* Tue Dec 04 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+prepare for 7.0.0 release
+* Tue Nov 20 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+prepare for next EDP drop
 * Tue Nov 13 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 First release candidate for EDP drop #6
 * Tue Nov 06 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>

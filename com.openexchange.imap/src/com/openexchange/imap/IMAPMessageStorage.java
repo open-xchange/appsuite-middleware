@@ -1745,7 +1745,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
          * Sort according to order direction
          */
         final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
-        final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
+        final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, getLocale());
         final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
             @Override
@@ -1760,9 +1760,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (null != future) {
             final ThreadableMapping threadableMapping = getFrom(future);
             for (final List<MailMessage> thread : list) {
-                threadableMapping.checkFor(new ArrayList<MailMessage>(thread), thread); // Iterate over copy
-                // Sort thread
-                Collections.sort(thread, threadComparator);
+                if (threadableMapping.checkFor(new ArrayList<MailMessage>(thread), thread)) { // Iterate over copy
+                    // Re-Sort thread
+                    Collections.sort(thread, threadComparator);
+                }
             }
         }
         if (null != indexRange) {
