@@ -63,6 +63,7 @@ import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
@@ -296,9 +297,7 @@ public final class ThreadSortUtil {
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Response[] r;
                 {
-                    final String commandStart = "THREAD REFERENCES UTF-8 ";
-                    final String command =
-                        new StringBuilder(commandStart.length() + sortRange.length()).append(commandStart).append(sortRange).toString();
+                    final String command = new StringAllocator("THREAD REFERENCES UTF-8 ").append(sortRange).toString();
                     final long start = System.currentTimeMillis();
                     r = p.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
@@ -318,15 +317,15 @@ public final class ThreadSortUtil {
                         final IMAPResponse ir = (IMAPResponse) r[i];
                         if (ir.keyEquals(threadStr)) {
                             retval = ir.toString();
+                            r[i] = null;
                         }
-                        r[i] = null;
                     }
                     p.notifyResponseHandlers(r);
                 } else if (response.isBAD()) {
-                    throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(
+                    throw new ProtocolException(new StringAllocator("IMAP server does not support THREAD command: ").append(
                         response.toString()).toString());
                 } else if (response.isNO()) {
-                    throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(
+                    throw new ProtocolException(new StringAllocator("IMAP server does not support THREAD command: ").append(
                         response.toString()).toString());
                 } else {
                     p.handleResult(response);

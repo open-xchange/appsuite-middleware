@@ -157,22 +157,12 @@ final class ThreadSortParser {
     }
 
     private MessageInfo getMessageID(final String threadList) {
-        if (DEBUG) {
-            LOG.debug(new StringBuilder("Parsing messageID: ").append(threadList).toString());
-        }
-        final MessageInfo messageId = MessageInfo.valueOf(threadList, 0, threadList.indexOf('}') + 1);
-        if (DEBUG) {
-            LOG.debug(new StringBuilder("Parsed number: ").append(messageId).toString());
-        }
-        return messageId;
+        return MessageInfo.valueOf(threadList, 0, threadList.indexOf('}') + 1);
     }
 
     private int findMatchingBracket(final String threadList) {
         int openingBrackets = 0;
         int pos = 0;
-        if (DEBUG) {
-            LOG.debug(new StringBuilder("findMatchingBracket: ").append(threadList).toString());
-        }
         do {
             final char actual = threadList.charAt(pos);
             if (actual == '(') {
@@ -180,15 +170,9 @@ final class ThreadSortParser {
             } else if (actual == ')') {
                 openingBrackets--;
             }
-            if (DEBUG) {
-                LOG.debug(new StringBuilder("Char: ").append(actual).append(" Pos ").append(pos).toString());
-            }
             pos++;
         } while ((openingBrackets > 0) && (pos < threadList.length()));
         pos--;
-        if (DEBUG) {
-            LOG.debug(new StringBuilder("Found: ").append(pos).toString());
-        }
         return pos;
     }
 
