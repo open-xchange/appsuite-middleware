@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange admin solr plugin console bundle
-Bundle-SymbolicName: com.openexchange.admin.solr
-Bundle-Version: 6.23.0
-Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.apache.commons.cli,
- com.openexchange.solr
