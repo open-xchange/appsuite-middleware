@@ -71,6 +71,7 @@ import org.glassfish.grizzly.servlet.ServletHandler;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.service.http.HttpContext;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * OSGi customized {@link ServletHandler}.

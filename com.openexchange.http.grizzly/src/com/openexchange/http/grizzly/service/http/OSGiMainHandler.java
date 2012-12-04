@@ -71,6 +71,7 @@ import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
 import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * OSGi Main HttpHandler.

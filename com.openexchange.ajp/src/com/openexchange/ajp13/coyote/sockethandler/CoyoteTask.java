@@ -58,13 +58,13 @@ import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
 import com.openexchange.ajp13.coyote.Constants;
-import com.openexchange.ajp13.coyote.ExceptionUtils;
 import com.openexchange.ajp13.watcher.AJPv13TaskMonitor;
 import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.log.LogFactory;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * {@link CoyoteTask} - The coyote task.
