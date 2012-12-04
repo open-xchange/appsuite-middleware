@@ -51,6 +51,8 @@ package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -92,15 +94,22 @@ public final class EnlargeResourceDescription extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         final Log log = com.openexchange.log.Log.loggerFor(EnlargeResourceDescription.class);
         log.info("Performing update task " + EnlargeResourceDescription.class.getSimpleName());
-        final Connection con = Database.get(params.getContextId(), true);
+        final Connection con = Database.getNoTimeout(params.getContextId(), true);
         try {
+            con.setAutoCommit(false);
             for (final String table : new String[] { "resource", "del_resource" }) {
                 checkAndModifyColumns(con, table, new Column("description", "TEXT"));
             }
+            con.commit();
         } catch (final SQLException e) {
+            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final Exception e) {
+            rollback(con);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            Database.back(params.getContextId(), true, con);
+            autocommit(con);
+            Database.backNoTimeout(params.getContextId(), true, con);
         }
         log.info(EnlargeResourceDescription.class.getSimpleName() + " successfully performed.");
     }
