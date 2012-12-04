@@ -1,3 +1,9 @@
+open-xchange-eas-provisioning-sms (7.0.0-1) unstable; urgency=low
+
+  * First release candidate for 7.0.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 04 Dec 2012 13:48:15 +0100
+
 open-xchange-eas-provisioning-sms (7.0.0-0) unstable; urgency=low
 
   * prepare for 7.0.0 release

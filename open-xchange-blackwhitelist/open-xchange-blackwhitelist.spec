@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 5
+%define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -54,6 +54,10 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %doc com.openexchange.blackwhitelist/ChangeLog
 
 %changelog
+* Tue Dec 04 2012 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 7.0.0
+* Tue Dec 04 2012 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.0.0 release
 * Mon Nov 26 2012 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2012-11-28
 * Wed Nov 14 2012 Carsten Hoeger <choeger@open-xchange.com>
@@ -71,9 +75,9 @@ Second release candidate for 6.22.1
 * Fri Oct 26 2012 Carsten Hoeger <choeger@open-xchange.com>
 Third release build for EDP drop #5
 * Fri Oct 26 2012 Carsten Hoeger <choeger@open-xchange.com>
-Second release build for EDP drop #5
-* Fri Oct 26 2012 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 6.22.1
+* Fri Oct 26 2012 Carsten Hoeger <choeger@open-xchange.com>
+Second release build for EDP drop #5
 * Fri Oct 26 2012 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 6.22.1
 * Thu Oct 11 2012 Carsten Hoeger <choeger@open-xchange.com>
