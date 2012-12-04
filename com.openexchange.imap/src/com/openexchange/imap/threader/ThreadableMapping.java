@@ -141,8 +141,10 @@ public final class ThreadableMapping {
      * 
      * @param toCheck The {@link Iterable} to check
      * @param thread The thread to add into
+     * @return Whether <code>thread</code> has been changed as a result of this call
      */
-    public void checkFor(final Iterable<MailMessage> toCheck, final List<MailMessage> thread) {
+    public boolean checkFor(final Iterable<MailMessage> toCheck, final List<MailMessage> thread) {
+        boolean changed = false;
         final Set<MessageKey> processed = new HashSet<MessageKey>(thread.size());
         for (final MailMessage mail : toCheck) {
             final String messageId = mail.getMessageId();
@@ -153,6 +155,7 @@ public final class ThreadableMapping {
                     for (final MailMessage candidate : referencees) {
                         if (processed.add(keyFor(candidate))) {
                             thread.add(candidate);
+                            changed = true;
                         }
                     }
                 }
@@ -166,12 +169,14 @@ public final class ThreadableMapping {
                         for (final MailMessage candidate : references) {
                             if (processed.add(keyFor(candidate))) {
                                 thread.add(candidate);
+                                changed = true;
                             }
                         }
                     }
                 }
             }
         }
+        return changed;
     }
 
     /**
