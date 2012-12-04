@@ -258,6 +258,14 @@ public class RefresherTest extends TestCase {
                 public Set<String> getGroupNames() {
                     throw new UnsupportedOperationException();
                 }
+                @Override
+                public Set<?> getAllKeys() throws OXException {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public Set<?> getKeysInRange(int start, int end) throws OXException {
+                    throw new UnsupportedOperationException();
+                }
             };
             @Override
             public void freeCache(final String name) {

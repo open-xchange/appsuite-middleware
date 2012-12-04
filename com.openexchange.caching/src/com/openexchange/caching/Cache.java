@@ -322,4 +322,20 @@ public interface Cache {
      * @return a set of group names
      */
     public Set<String> getGroupNames() throws OXException;
+    
+    /**
+     * Gets all the set of keys in the cache
+     * @return a set of keys in the cache
+     * @throws OXException
+     */
+    public Set<?> getAllKeys() throws OXException;
+    
+    /**
+     * Get a ranged set of keys
+     * @param start of range
+     * @param end of range
+     * @return a set of keys in cache
+     * @throws OXException
+     */
+    public Set<?> getKeysInRange(int start, int end) throws OXException;
 }

@@ -340,4 +340,34 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     public Set<String> getGroupNames() {
         return groupNames;
     }
+
+    @Override
+    public Set<?> getAllKeys() throws OXException {
+        Set<Object> set = new HashSet<Object>();
+        
+        Object[] keys = cacheControl.getMemoryCache().getKeyArray();
+        int i = 0;
+        while (i < keys.length) {
+            set.add(keys[i++]);
+        }
+        
+        return set;
+    }
+
+    @Override
+    public Set<?> getKeysInRange(int start, int end) throws OXException {
+        if (start < 0 || end < 0 || start <= end) {
+            Set<Object> set = new HashSet<Object>();
+        
+            Object[] keys = cacheControl.getMemoryCache().getKeyArray();
+            int i = start;
+            while (i < end) {
+                set.add(keys[i++]);
+            }
+        
+            return set;
+        }
+        
+        throw new OXException(666, "Illegal start,end range (" + start + ", " + end + ")");
+    }
 }

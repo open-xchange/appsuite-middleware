@@ -282,4 +282,14 @@ public final class LocalCache extends DefaultCacheKeyService implements Cache, S
         throw CacheExceptionCode.UNSUPPORTED_OPERATION.create("LocalCache.getGroupNames()");
     }
 
+    @Override
+    public Set<?> getAllKeys() throws OXException {
+        throw CacheExceptionCode.UNSUPPORTED_OPERATION.create("LocalCache.getAllKeys()");
+    }
+
+    @Override
+    public Set<?> getKeysInRange(int start, int end) throws OXException {
+        throw CacheExceptionCode.UNSUPPORTED_OPERATION.create("LocalCache.getKeysInRange(int,int)");
+    }
+
 }
