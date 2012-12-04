@@ -1745,7 +1745,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
          * Sort according to order direction
          */
         final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
-        final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
+        final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, getLocale());
         final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
             @Override

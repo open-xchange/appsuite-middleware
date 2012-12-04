@@ -269,13 +269,14 @@ public final class ThreadSortUtil {
         /*
          * Now parse the odd THREAD response string.
          */
-        List<ThreadSortNode> pulledUp = null;
-        if ((threadResponse.indexOf('(') != -1) && (threadResponse.indexOf(')') != -1)) {
-            final ThreadSortParser tp = new ThreadSortParser();
-            tp.parse(threadResponse.substring(threadResponse.indexOf('('), threadResponse.lastIndexOf(')') + 1));
-            pulledUp = ThreadSortParser.pullUpFirst(tp.getParsedList());
+        final int openPos = threadResponse.indexOf('(');
+        final int endPos = threadResponse.lastIndexOf(')');
+        if ((openPos < 0) || (endPos < 0)) {
+            return null;
         }
-        return pulledUp;
+        final ThreadSortParser tp = new ThreadSortParser();
+        tp.parse(threadResponse.substring(openPos, endPos + 1));
+        return ThreadSortParser.pullUpFirst(tp.getParsedList());
     }
 
     /**
