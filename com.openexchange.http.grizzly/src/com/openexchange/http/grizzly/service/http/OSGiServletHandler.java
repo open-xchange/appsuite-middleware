@@ -71,6 +71,7 @@ import org.glassfish.grizzly.servlet.ServletHandler;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.service.http.HttpContext;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.log.LogProperties;
 import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
@@ -317,30 +318,35 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
          */
         private void handleThrowable(Throwable throwable, ServletRequest request, ServletResponse response) {
             ExceptionUtils.handleThrowable(throwable);
-            StringAllocator allocator = new StringAllocator(128).append("Error processing request: ");
+            
+            StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
+            if(LogProperties.isEnabled()) {
+                logBuilder.append(LogProperties.getAndPrettyPrint());
+            }
+            
             if(request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
                 HttpServletRequest httpServletRequest = (HttpServletRequest) request;
                 HttpServletResponse httpServletResponse= (HttpServletResponse) response;
-                appendHttpServletRequestInfo(allocator, httpServletRequest);
+                appendHttpServletRequestInfo(logBuilder, httpServletRequest);
                 // 500 - Internal Server Error
                 httpServletResponse.setStatus(500);
             } else {
-                appendServletRequestInfo(allocator, request);
+                appendServletRequestInfo(logBuilder, request);
             }
-            LOG.error(allocator.toString(), throwable);
+            LOG.error(logBuilder.toString(), throwable);
         }
 
         // ------------------------------------------------------- Protected Methods
 
         /**
          * Add ServletName and Parameters of the request to the log string allocator.
-         * @param allocator
-         * @param request
+         * @param logBuilder The existing StringBuilder user for building the log message
+         * @param request The Request that couldn't be executed successfully.
          */
-        private void appendServletRequestInfo(StringAllocator allocator, ServletRequest request) {
-            allocator.append("servlet name=''");
-            allocator.append(servlet.getServletConfig().getServletName());
-            allocator.append("servlet parameters=''");
+        private void appendServletRequestInfo(StringBuilder logBuilder, ServletRequest request) {
+            logBuilder.append("servlet name=''");
+            logBuilder.append(servlet.getServletConfig().getServletName());
+            logBuilder.append("servlet parameters=''");
             @SuppressWarnings("unchecked")
             Enumeration<String> parameterNames = request.getParameterNames();
             boolean firstParam=true;
@@ -348,32 +354,32 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
                 if(firstParam) {
                     String name = parameterNames.nextElement();
                     String value = request.getParameter(name);
-                    allocator.append(name);
-                    allocator.append("=");
-                    allocator.append(value);
+                    logBuilder.append(name);
+                    logBuilder.append("=");
+                    logBuilder.append(value);
                     firstParam=false;
                 } else {
-                    allocator.append("&");
+                    logBuilder.append("&");
                     String name = parameterNames.nextElement();
                     String value = request.getParameter(name);
-                    allocator.append(name);
-                    allocator.append("=");
-                    allocator.append(value);
+                    logBuilder.append(name);
+                    logBuilder.append("=");
+                    logBuilder.append(value);
                 }
             }
         }
 
         /**
          * Add Uri and QueryString of the httpServletRequest to the log string allocator
-         * @param allocator The log string allocator
-         * @param httpServletRequest The HttpServletRequest
+         * @param logBuilder The existing StringBuilder user for building the log message
+         * @param httpServletRequest The HttpServletRequest that couldn't be executed successfully
          */
-        private void appendHttpServletRequestInfo(StringAllocator allocator, HttpServletRequest httpServletRequest) {
-            allocator.append("request-URI=''");
-            allocator.append(httpServletRequest.getRequestURI());
-            allocator.append("'', query-string=''");
-            allocator.append(httpServletRequest.getQueryString());
-            allocator.append("''");
+        private void appendHttpServletRequestInfo(StringBuilder logBuilder, HttpServletRequest httpServletRequest) {
+            logBuilder.append("request-URI=''");
+            logBuilder.append(httpServletRequest.getRequestURI());
+            logBuilder.append("'', query-string=''");
+            logBuilder.append(httpServletRequest.getQueryString());
+            logBuilder.append("''");
         }
 
         protected void addFilter(final Filter filter) {
