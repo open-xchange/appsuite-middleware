@@ -655,7 +655,10 @@ public final class Tools {
     }
 
     public static void modifyColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
-        final StringBuffer sql = new StringBuffer("ALTER TABLE ");
+        if (null == cols || cols.length == 0) {
+            return;
+        }
+        final StringBuilder sql = new StringBuilder("ALTER TABLE ");
         sql.append(tableName);
         for (final Column column : cols) {
             sql.append(" MODIFY COLUMN ");
