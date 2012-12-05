@@ -1,10 +1,13 @@
 # Specifies the configuration tree path to  JSlob path mapping
 # <config-tree-path> + ">" + <JSlob-id>//<JSlob-path>
-# my/config/tree/path>my/jslob/path
+# my/config/tree/path>my/jslob//subpath
 
-# Language
+# Core LOB
+language > io.ox/core//language
+timezone > io.ox/core//timezone
+serverVersion > io.ox/core//serverVersion
+folder > io.ox/core//folder
 
-language > core//language
-timezone > core//timezone
-serverVersion > core//serverVersion
-folder > core//folder
+# Timezones
+availableTimeZones > io.ox/core/settingOptions//availableTimeZones
+
