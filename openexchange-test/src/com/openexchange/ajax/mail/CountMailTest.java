@@ -60,8 +60,6 @@ import com.openexchange.ajax.mail.actions.NewMailRequest;
  */
 public class CountMailTest extends AbstractMailTest {
 
-    protected String folder;
-
     public CountMailTest(final String name) {
         super(name);
     }
@@ -69,18 +67,18 @@ public class CountMailTest extends AbstractMailTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        folder = getSentFolder();
     }
 
     @Override
     public void tearDown() throws Exception {
-        clearFolder(folder);
+        clearFolder(getInboxFolder());
         super.tearDown();
     }
 
     public void testCounting() throws Exception {
-        clearFolder(folder);
-        assertEquals("Should be empty", 0, count(folder));
+        String inboxFolder = getInboxFolder();
+        clearFolder(inboxFolder);
+        assertEquals("Should be empty", 0, count(inboxFolder));
 
         final String eml =
             ("Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
@@ -96,12 +94,12 @@ public class CountMailTest extends AbstractMailTest {
             "consider changing to a mail reader or gateway that understands how to \n" +
             "properly handle MIME multipart messages.").replaceAll("#ADDR#", getSendAddress());
         for (int number = 1; number < 10; number++) {
-            getClient().execute(new NewMailRequest(getInboxFolder(), eml, -1, true));
-            assertEquals("Does not contain the expected number of elements in folder "+folder, number, count(folder) );
+            getClient().execute(new NewMailRequest(inboxFolder, eml, -1, true));
+            assertEquals("Does not contain the expected number of elements in folder "+inboxFolder, number, count(inboxFolder) );
         }
 
-        clearFolder(folder);
-        assertEquals("Should be empty again", 0, count(folder) );
+        clearFolder(inboxFolder);
+        assertEquals("Should be empty again", 0, count(inboxFolder) );
     }
 
 }

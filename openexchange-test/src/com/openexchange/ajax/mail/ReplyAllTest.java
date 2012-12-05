@@ -89,7 +89,7 @@ public class ReplyAllTest extends AbstractReplyTest {
         return returnees;
     }
 
-    public void testShouldReplyToSenderAndAllRecipients() throws OXException, IOException, SAXException, JSONException, OXException {
+    public void no_testShouldReplyToSenderAndAllRecipients() throws OXException, IOException, SAXException, JSONException, OXException {
         final AJAXClient client1 = new AJAXClient(User.User1);
         final AJAXClient client2 = new AJAXClient(User.User2);
         {

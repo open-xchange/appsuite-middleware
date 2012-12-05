@@ -71,6 +71,9 @@ import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
 import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * OSGi Main HttpHandler.
@@ -156,9 +159,12 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     httpHandler.service(request, response);
                 } catch(Throwable t) {
                     ExceptionUtils.handleThrowable(t);
-                    final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(128).append("Error processing request: ");
-                    appendRequestInfo(tmp, request);
-                    LOG.error(tmp.toString(), t);
+                    StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
+                    if(LogProperties.isEnabled()) {
+                        logBuilder.append(LogProperties.getAndPrettyPrint());
+                    }
+                    appendRequestInfo(logBuilder, request);
+                    LOG.error(logBuilder.toString(), t);
                     // 500 - Internal Server Error
                     response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
                 } finally {
@@ -191,7 +197,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * 
      * @param builder The builder to append to
      */
-    private void appendRequestInfo(final StringAllocator builder, Request request) {
+    private void appendRequestInfo(final StringBuilder builder, Request request) {
         builder.append("request-URI=''");
         builder.append(request.getRequestURI());
         builder.append("'', query-string=''");
