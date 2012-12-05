@@ -655,17 +655,11 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return The appropriate hash
      */
     public static String getHash(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client) {
-        final String retval;
-        switch (cookieHash) {
-        default:
-        case CALCULATE:
-            retval = HashCalculator.getHash(req, client);
-            break;
-        case REMEMBER:
-            retval = hash;
-            break;
+        if (CookieHashSource.REMEMBER == cookieHash) {
+            return hash;
         }
-        return retval;
+        // Default is calculate
+        return HashCalculator.getHash(req, client);
     }
 
     /**
