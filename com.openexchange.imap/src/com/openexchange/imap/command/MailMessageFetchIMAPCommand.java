@@ -1014,14 +1014,14 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      */
     public static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
         final StringBuilder command = new StringBuilder(128);
-        final boolean envelope;
+        final boolean sizeIncluded;
         if (fp.contains(FetchProfile.Item.ENVELOPE)) {
             if (loadBody) {
                 command.append("INTERNALDATE");
-                envelope = false;
+                sizeIncluded = false;
             } else {
                 command.append("ENVELOPE INTERNALDATE RFC822.SIZE");
-                envelope = true;
+                sizeIncluded = true;
             }
         } else if (fp.contains(ENVELOPE_ONLY)) {
             if (loadBody) {
@@ -1029,10 +1029,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             } else {
                 command.append("ENVELOPE INTERNALDATE");
             }
-            envelope = false;
+            sizeIncluded = false;
         } else {
             command.append("INTERNALDATE");
-            envelope = false;
+            sizeIncluded = false;
         }
         if (fp.contains(FetchProfile.Item.FLAGS)) {
             command.append(" FLAGS");
@@ -1052,7 +1052,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 command.append(" RFC822.HEADER");
             }
         }
-        if (!envelope && fp.contains(IMAPFolder.FetchProfileItem.SIZE)) {
+        if (!sizeIncluded && fp.contains(IMAPFolder.FetchProfileItem.SIZE)) {
             command.append(" RFC822.SIZE");
         }
         /*
