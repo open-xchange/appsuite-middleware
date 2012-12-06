@@ -74,6 +74,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
@@ -239,8 +240,7 @@ public class AppStoreServiceImpl implements AppStoreService {
                 application.setName(app.getName());
                 retval.add(application);
             } finally {
-                br.close();
-                fr.close();
+                Streams.close(br, fr);
             }
         }
 
