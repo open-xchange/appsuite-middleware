@@ -1618,7 +1618,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private List<List<MailMessage>> threadedMessagesWithoutBody(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final IMAPFolder sentFolder, final int messageCount, final boolean mergeWithSent, final boolean merged, final boolean cached, final List<ThreadSortNode> threadList, final FetchProfile fetchProfile, final boolean descending, final int limit) throws MessagingException, OXException {
         final boolean logIt = DEBUG;
         final long st = logIt ? System.currentTimeMillis() : 0L;
-        Future<ThreadableMapping> future = null;
+        Future<ThreadableMapping> submittedTask = null;
         final Map<MessageInfo, MailMessage> mapping;
         if (mergeWithSent && merged) {
             final Map<String, TIntList> m = ThreadSortUtil.extractSeqNumsAsMap(threadList);
@@ -1708,7 +1708,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                     
                 };
-                future = ThreadPools.getThreadPool().submit(task, CallerRunsBehavior.<ThreadableMapping> getInstance());
+                submittedTask = ThreadPools.getThreadPool().submit(task, CallerRunsBehavior.<ThreadableMapping> getInstance());
             }
             final TIntList seqNums = ThreadSortUtil.extractSeqNumsAsList(threadList);
             final TLongObjectMap<MailMessage> messages =
@@ -1757,8 +1757,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         /*
          * Check for available mapping indicating that sent folder results have to be merged
          */
-        if (null != future) {
-            final ThreadableMapping threadableMapping = getFrom(future);
+        if (null != submittedTask) {
+            final ThreadableMapping threadableMapping = getFrom(submittedTask);
             for (final List<MailMessage> thread : list) {
                 if (threadableMapping.checkFor(new ArrayList<MailMessage>(thread), thread)) { // Iterate over copy
                     // Re-Sort thread
