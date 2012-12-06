@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.apps.manifests.json.osgi;
+package com.openexchange.apps.manifests.json;
 
 import java.util.ArrayList;
 import java.util.Collections;

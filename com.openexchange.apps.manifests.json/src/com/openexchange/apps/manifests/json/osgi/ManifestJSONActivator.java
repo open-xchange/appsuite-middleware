@@ -55,6 +55,7 @@ import java.io.FileReader;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.apps.manifests.json.ManifestActionFactory;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Streams;
