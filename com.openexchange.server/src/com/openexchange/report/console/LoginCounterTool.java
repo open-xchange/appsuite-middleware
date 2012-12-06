@@ -116,10 +116,9 @@ public final class LoginCounterTool {
             String source = unquote(cmd.getOptionValue('s'));
             try {
                 startDate = sdf.parse(source);
-                throw new java.text.ParseException("ewrwer", 0);
             } catch (java.text.ParseException e) {
                 // args=[-s, 2012-09-24, 00:00:00, -e, 2012-09-25, 23:59:59]
-                if (args.length == 6) {
+                if (args.length >= 6) {
                     final Pattern appendix = Pattern.compile("[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}");
                     String input = unquote(args[2]);
                     if (appendix.matcher(input).matches()) {
