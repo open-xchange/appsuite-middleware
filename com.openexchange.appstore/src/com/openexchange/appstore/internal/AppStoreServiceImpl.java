@@ -223,7 +223,9 @@ public class AppStoreServiceImpl implements AppStoreService {
                 fr.close();
                 fr = new FileReader(manifestFile);
                 br = new BufferedReader(fr);
-                sb = new com.openexchange.java.StringAllocator();
+                if (sb.length() > 0) {
+                    sb.reinitTo(0);
+                }
                 while ((line = br.readLine()) != null) {
                     sb.append(line);
                     sb.append(lineSeparator);
