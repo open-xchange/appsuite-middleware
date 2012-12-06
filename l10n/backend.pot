@@ -7876,6 +7876,12 @@ msgid ""
 "Upload file's content type \"%1$s\" does not match given file filter \"%2$s\""
 msgstr ""
 
+#. Request rejected because its size exceeds the maximum configured size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:128
+msgid ""
+"Request rejected because its size exceeds the maximum configured size of %1$s"
+msgstr ""
+
 #. *
 #. * A DBPooling error occurred
 #.
