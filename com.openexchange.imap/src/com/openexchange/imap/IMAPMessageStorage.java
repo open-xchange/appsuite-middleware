@@ -415,8 +415,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     return extractPlainText(content, new StringBuilder(type).append('/').append(subtype).toString());
                 } catch (final OXException e) {
                     if (!subtype.startsWith("htm")) {
-                        final StringBuilder sb =
-                            new StringBuilder("Failed extracting plain text from \"text/").append(subtype).append("\" part:\n");
+                        final com.openexchange.java.StringAllocator sb =
+                            new com.openexchange.java.StringAllocator("Failed extracting plain text from \"text/").append(subtype).append("\" part:\n");
                         sb.append(" context=").append(session.getContextId());
                         sb.append(", user=").append(session.getUserId());
                         sb.append(", account=").append(accountId);
@@ -632,7 +632,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final Exception nextException = e.getNextException();
                 if ((nextException instanceof BadCommandException) || (nextException instanceof CommandFailedException)) {
                     if (DEBUG) {
-                        final StringBuilder sb = new StringBuilder(128).append("Fetch with fetch profile failed: ");
+                        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("Fetch with fetch profile failed: ");
                         for (final Item item : fetchProfile.getItems()) {
                             sb.append(item.getClass().getSimpleName()).append(',');
                         }
@@ -659,7 +659,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * May occur while parsing invalid BODYSTRUCTURE response
                  */
                 if (DEBUG) {
-                    final StringBuilder sb = new StringBuilder(128).append("Fetch with fetch profile failed: ");
+                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("Fetch with fetch profile failed: ");
                     for (final Item item : fetchProfile.getItems()) {
                         sb.append(item.getClass().getSimpleName()).append(',');
                     }
@@ -1106,7 +1106,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                      * Perform some debug logs for traceability...
                      */
                     if (DEBUG) {
-                        final StringBuilder sb = new StringBuilder(128);
+                        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
                         sb.append("Generic messaging error occurred for mail \"").append(msgUID).append("\" in folder \"");
                         sb.append(fullName).append("\" with login \"").append(imapConfig.getLogin()).append("\" on server \"");
                         sb.append(imapConfig.getServer()).append("\" (user=").append(session.getUserId());
@@ -1302,7 +1302,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                                 body).doCommand();
                     }
                     final long time = System.currentTimeMillis() - start;
-                    LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(size).append(" messages took ").append(time).append(
+                    LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP fetch for ").append(size).append(" messages took ").append(time).append(
                         "msec").toString());
                 } else {
                     if (filter == null) {
@@ -2657,7 +2657,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (DEBUG) {
                 final Exception next = e.getNextException();
                 if (next instanceof CommandFailedException) {
-                    final StringBuilder sb = new StringBuilder(8192);
+                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(8192);
                     sb.append("\r\nAPPEND command failed. Printing messages' headers for debugging purpose:\r\n");
                     for (int i = 0; i < mailMessages.length; i++) {
                         sb.append("----------------------------------------------------\r\n\r\n");

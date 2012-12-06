@@ -185,7 +185,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
     }
 
     private String buildStringList(final List<String> strings, final String delimiter) {
-        final StringBuilder sb = new StringBuilder();
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
         for (final Iterator<String> iter = strings.iterator(); iter.hasNext();) {
             sb.append(iter.next());
             if (iter.hasNext()) {

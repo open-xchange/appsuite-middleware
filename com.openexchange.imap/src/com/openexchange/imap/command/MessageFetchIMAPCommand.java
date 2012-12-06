@@ -362,7 +362,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
 
     @Override
     protected String getDebugInfo(final int argsIndex) {
-        final StringBuilder sb = new StringBuilder(command.length() + 64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(command.length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -394,7 +394,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -419,7 +419,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             if (pos >= 0 && ++pos < server.length()) {
                 server = server.substring(pos);
             }
-            final MessagingException e = new MessagingException(new StringBuilder(32).append("Expected ").append(length)
+            final MessagingException e = new MessagingException(new com.openexchange.java.StringAllocator(32).append("Expected ").append(length)
                     .append(" FETCH responses but got ").append(index).append(" from IMAP folder \"").append(imapFolder.getFullName())
                     .append("\" on server \"").append(server).append("\".").toString());
             LOG.warn(e.getMessage(), e);
@@ -745,7 +745,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
         public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws OXException {
             final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
             msg.setBodystructure(bs);
-            final StringBuilder sb = new StringBuilder();
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
             sb.append(bs.type).append('/').append(bs.subtype);
             if (bs.cParams != null) {
                 sb.append(bs.cParams);

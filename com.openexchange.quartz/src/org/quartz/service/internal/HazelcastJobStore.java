@@ -1081,7 +1081,7 @@ public class HazelcastJobStore implements JobStore {
         } finally {
             lock.unlock();
             if (LOG.isTraceEnabled()) {
-                StringBuilder sb = new StringBuilder("Releasing lock. ");
+                com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 for (OperableTrigger trigger : returnList) {
                     sb.append("\n    Trigger: ").append(trigger.getKey().getName());
@@ -1127,7 +1127,7 @@ public class HazelcastJobStore implements JobStore {
             lock.unlock();
             
             if (LOG.isTraceEnabled()) {
-                StringBuilder sb = new StringBuilder("Releasing lock. ");
+                com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 sb.append("\n    Trigger: ").append(trigger.getKey().getName());
                 
@@ -1212,7 +1212,7 @@ public class HazelcastJobStore implements JobStore {
         } finally {
             lock.unlock();
             if (LOG.isTraceEnabled()) {
-                StringBuilder sb = new StringBuilder("Releasing lock. ");
+                com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 for (OperableTrigger trigger : firedTriggers) {
                     sb.append("\n    Trigger: ").append(trigger.getKey().getName());
@@ -1320,7 +1320,7 @@ public class HazelcastJobStore implements JobStore {
         } finally {
             lock.unlock();
             if (LOG.isTraceEnabled()) {
-                StringBuilder sb = new StringBuilder("Releasing lock. ");
+                com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 sb.append("\n    Trigger: ").append(trigger.getKey().getName());          
                 

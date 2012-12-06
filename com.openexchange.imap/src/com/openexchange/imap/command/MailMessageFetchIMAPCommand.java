@@ -219,7 +219,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     @Override
     protected String getDebugInfo(final int argsIndex) {
-        final StringBuilder sb = new StringBuilder(command.length() + 64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(command.length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -251,7 +251,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -291,7 +291,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 server = server.substring(pos);
             }
             final MessagingException e =
-                new MessagingException(new StringBuilder(32).append("Expected ").append(length).append(" FETCH responses but got ").append(
+                new MessagingException(new com.openexchange.java.StringAllocator(32).append("Expected ").append(length).append(" FETCH responses but got ").append(
                     index).append(" from IMAP folder \"").append(imapFolder.getFullName()).append("\" on server \"").append(server).append(
                     "\".").toString());
             LOG.warn(e.getMessage(), e);
@@ -303,7 +303,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         try {
             return handleMessage(imapFolder.getMessage(seqNum));
         } catch (final Exception e) {
-            LOG.warn(new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(), e);
+            LOG.warn(new com.openexchange.java.StringAllocator(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(), e);
             return null;
         }
     }
@@ -312,7 +312,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         try {
             return handleMessage(imapFolder.getMessageByUID(uid));
         } catch (final Exception e) {
-            LOG.warn(new StringBuilder(128).append("Message uid=").append(uid).append(" discarded: ").append(e.getMessage()).toString(), e);
+            LOG.warn(new com.openexchange.java.StringAllocator(128).append("Message uid=").append(uid).append(" discarded: ").append(e.getMessage()).toString(), e);
             return null;
         }
     }
@@ -330,7 +330,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         } catch (final Exception e) {
             if (WARN) {
                 LOG.warn(
-                    new StringBuilder(128).append("Message #").append(message.getMessageNumber()).append(" discarded: ").append(
+                    new com.openexchange.java.StringAllocator(128).append("Message #").append(message.getMessageNumber()).append(" discarded: ").append(
                         e.getMessage()).toString(),
                     e);
             }
@@ -375,7 +375,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             if (WARN) {
                 final OXException imapExc = MimeMailException.handleMessagingException(e);
                 LOG.warn(
-                    new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(imapExc.getMessage()).toString(),
+                    new com.openexchange.java.StringAllocator(128).append("Message #").append(seqNum).append(" discarded: ").append(imapExc.getMessage()).toString(),
                     imapExc);
             }
             error = true;
@@ -386,7 +386,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
              */
             if (WARN) {
                 LOG.warn(
-                    new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(),
+                    new com.openexchange.java.StringAllocator(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(),
                     e);
             }
             error = true;
@@ -902,7 +902,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws OXException {
             final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-            final StringBuilder sb = new StringBuilder();
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
             sb.append(bs.type).append('/').append(bs.subtype);
             if (bs.cParams != null) {
                 sb.append(bs.cParams);

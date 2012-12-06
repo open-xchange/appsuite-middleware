@@ -166,7 +166,7 @@ public final class AllFetch {
             @Override
             public void handleItem(final Item item, final MailMessage m, final Log logger) throws OXException {
                 final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-                final StringBuilder sb = new StringBuilder();
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
                 sb.append(bs.type).append('/').append(bs.subtype);
                 if (bs.cParams != null) {
                     sb.append(bs.cParams);
@@ -222,7 +222,7 @@ public final class AllFetch {
                 if (null == addrs || addrs.length == 0) {
                     return null;
                 }
-                final StringBuilder sb = new StringBuilder(addrs.length * 16);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(addrs.length * 16);
                 sb.append(addrs[0].toString());
                 for (int i = 1; i < addrs.length; i++) {
                     sb.append(", ").append(addrs[i].toString());
@@ -631,7 +631,7 @@ public final class AllFetch {
      * @return A new protocol exception with appropriate message.
      */
     static ProtocolException missingFetchItem(final String itemName, final IMAPConfig config, final Session session) {
-        final StringBuilder sb = new StringBuilder(128).append("Missing ").append(itemName).append(" item in FETCH response.");
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("Missing ").append(itemName).append(" item in FETCH response.");
         sb.append(" Login=").append(config.getLogin()).append(", server=").append(config.getServer());
         sb.append(", user=").append(session.getUserId()).append(", context=").append(session.getContextId());
         return new ProtocolException(sb.toString());

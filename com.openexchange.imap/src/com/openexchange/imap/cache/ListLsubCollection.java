@@ -354,7 +354,7 @@ final class ListLsubCollection {
          * Debug logs
          */
         if (DEBUG) {
-            final StringBuilder sb = new StringBuilder(1024);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
             {
                 final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(listMap);
                 sb.append("LIST cache contains after (re-)initialization:\n");
@@ -365,7 +365,7 @@ final class ListLsubCollection {
             }
             {
                 final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(lsubMap);
-                sb.setLength(0);
+                sb.reinitTo(0);
                 sb.append("LSUB cache contains after (re-)initialization:\n");
                 for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
                     sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
@@ -423,7 +423,7 @@ final class ListLsubCollection {
         }
         if (DEBUG) {
             final long dur = System.currentTimeMillis() - st;
-            final StringBuilder sb = new StringBuilder(128);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
             sb.append("LIST/LSUB cache");
             if (doStatus || doGetAcl) {
                 sb.append(" (");
@@ -489,7 +489,7 @@ final class ListLsubCollection {
         }
         if (DEBUG) {
             final long dur = System.currentTimeMillis() - st;
-            final StringBuilder sb = new StringBuilder(64);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
             sb.append("LIST/LSUB cache built GETACL entries in ").append(dur).append("msec.");
             LOG.debug(sb.toString());
         }
@@ -1230,7 +1230,7 @@ final class ListLsubCollection {
             if (DEBUG) {
                 final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>();
                 tm.putAll(map);
-                final StringBuilder sb = new StringBuilder(1024);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
                 sb.append((lsub ? "LSUB" : "LIST") + " cache contains after adding single entry \"");
                 sb.append(fullName).append("\":\n");
                 for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
@@ -1995,7 +1995,7 @@ final class ListLsubCollection {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder(128).append("{ ").append(lsubMap == null ? "LSUB" : "LIST");
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("{ ").append(lsubMap == null ? "LSUB" : "LIST");
             sb.append(" fullName=\"").append(fullName).append('"');
             sb.append(", parent=");
             if (null == parent) {

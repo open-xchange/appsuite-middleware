@@ -256,11 +256,11 @@ public final class ConfigurationImpl implements ConfigurationService {
                 if (properties.containsKey(propName) && otherValue != null && !otherValue.equals(e.getValue())) {
                     final String otherFile = propertiesFiles.get(propName);
                     if (LOG.isDebugEnabled()) {
-                        final StringBuilder sb =
-                            new StringBuilder(64).append("Overwriting property ").append(propName).append(" from file '");
-                        sb.append(otherFile).append("' with property from file '").append(propFilePath).append("', overwriting value '");
-                        sb.append(otherValue).append("' with value '").append(e.getValue()).append("'.");
-                        LOG.debug(sb.toString());
+                        final com.openexchange.java.StringAllocator sa =
+                            new com.openexchange.java.StringAllocator(64).append("Overwriting property ").append(propName).append(" from file '");
+                        sa.append(otherFile).append("' with property from file '").append(propFilePath).append("', overwriting value '");
+                        sa.append(otherValue).append("' with value '").append(e.getValue()).append("'.");
+                        LOG.debug(sa.toString());
                     }
                 }
                 properties.put(propName, e.getValue().toString().trim());
