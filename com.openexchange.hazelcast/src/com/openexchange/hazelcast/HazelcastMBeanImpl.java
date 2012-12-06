@@ -119,6 +119,7 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
         List<String> members = listMembers();
         if (null != members) {
             if (members.remove(member)) {
+                getHazelcastInstance().getConfig().getNetworkConfig().getJoin().getTcpIpConfig().clear();
                 getHazelcastInstance().getConfig().getNetworkConfig().getJoin().getTcpIpConfig().setMembers(members);
             }
         }        
