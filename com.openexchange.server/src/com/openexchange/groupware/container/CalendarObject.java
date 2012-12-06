@@ -684,6 +684,7 @@ public abstract class CalendarObject extends CommonObject {
 		return b_start_date;
 	}
 
+	/** Checks if start date has been set and current value is not <code>null</code> */
 	public boolean containsStartDateAndIsNotNull() {
         return b_start_date && null != start_date;
     }
@@ -692,6 +693,7 @@ public abstract class CalendarObject extends CommonObject {
 		return b_end_date;
 	}
 
+	/** Checks if end date has been set and current value is not <code>null</code> */
 	public boolean containsEndDateAndIsNotNull() {
         return b_end_date && null != end_date;
     }
