@@ -963,8 +963,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             final Throwable cause = e.getCause();
             if (cause instanceof IOException) {
                 final IOException ioe = (IOException) cause;
-                LOG.warn("File upload failed", ioe);
-                throw AjaxExceptionCodes.HTTP_ERROR.create(ioe, Integer.valueOf(500), ioe.getMessage());
+                throw UploadException.UploadCode.UNEXPECTED_ERROR.create(ioe, ioe.getMessage());
             }
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
         }
