@@ -52,8 +52,8 @@ package com.openexchange.report.console;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.management.InstanceNotFoundException;
@@ -204,11 +204,20 @@ public final class LastLoginTimeStampTool {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
                 final Object[] params = new Object[] { Integer.valueOf(userId), Integer.valueOf(contextId), client };
                 final String[] signature = new String[] { int.class.getName(), int.class.getName(), String.class.getName() };
-                final Date ret = (Date) mbsc.invoke(Constants.OXTENDER_MONITOR_NAME, "getLastLoginTimeStamp", params, signature);
+                final List<Object[]> ret = (List<Object[]>) mbsc.invoke(Constants.OXTENDER_MONITOR_NAME, "getLastLoginTimeStamp", params, signature);
 
-                SimpleDateFormat sdf = new SimpleDateFormat(null == pattern ? "EEE, d MMM yyyy HH:mm:ss z" : pattern, Locale.US);
-                System.out.println(sdf.format(ret));
-
+                if (null == ret || ret.isEmpty()) {
+                    System.out.println("No matching entry found.");
+                } else if (1 == ret.size()) {
+                    SimpleDateFormat sdf = new SimpleDateFormat(null == pattern ? "EEE, d MMM yyyy HH:mm:ss z" : pattern, Locale.US);
+                    final Object[] objs = ret.get(0);
+                    System.out.println(sdf.format(objs[0]));
+                } else {
+                    SimpleDateFormat sdf = new SimpleDateFormat(null == pattern ? "EEE, d MMM yyyy HH:mm:ss z" : pattern, Locale.US);
+                    for (final Object[] objs : ret) {
+                        System.out.println(sdf.format(objs[0]) + " -- " + objs[1]);
+                    }
+                }
             } finally {
                 jmxConnector.close();
             }
