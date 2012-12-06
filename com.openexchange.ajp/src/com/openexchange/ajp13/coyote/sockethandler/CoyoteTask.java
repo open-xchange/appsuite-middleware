@@ -53,14 +53,13 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
 import com.openexchange.ajp13.coyote.Constants;
 import com.openexchange.ajp13.coyote.ExceptionUtils;
-import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
+import com.openexchange.ajp13.watcher.AJPv13TaskMonitor;
 import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.log.LogFactory;
 import com.openexchange.monitoring.MonitoringInfo;
@@ -139,17 +138,12 @@ public final class CoyoteTask implements Task<Object> {
     }
 
     /**
-     * The atomic integer to count active AJP tasks.
-     */
-    private static final AtomicInteger numRunning = new AtomicInteger();
-
-    /**
      * Increments/decrements the number of running AJP tasks.
      *
      * @param increment whether to increment or to decrement
      */
     private static void changeNumberOfRunningAJPTasks(final boolean increment) {
-        MonitoringInfo.setNumberOfRunningAJPListeners(increment ? numRunning.incrementAndGet() : numRunning.decrementAndGet());
+        MonitoringInfo.addNumberOfRunningAJPListeners(increment ? 1 : -1);
     }
 
     @Override

@@ -121,7 +121,24 @@ public class OXContextRestoreException extends Exception {
         /**
          * The context id wasn't found in the context_server2db_pool table
          */
-        CONTEXT_NOT_FOUND_IN_POOL_MAPPING("The context id wasn't found in the context_server2db_pool table");
+        CONTEXT_NOT_FOUND_IN_POOL_MAPPING("The context id wasn't found in the context_server2db_pool table"),
+        
+        /**
+         * The updateTask tables are incompatible
+         */
+        UPDATE_TASK_TABLES_INCOMPATIBLE("The updateTask tables are incompatible"),
+
+        /**
+         * No updateTask information found in dump
+         */
+        NO_UPDATE_TASK_INFORMATION_FOUND("No updateTask information found in dump"),
+
+        /**
+         * No entries in updateTask table
+         */
+        NO_ENTRIES_IN_UPDATE_TASK_TABLE("No entries in updateTask table"),
+        
+        ;
         
         private final String text;
 

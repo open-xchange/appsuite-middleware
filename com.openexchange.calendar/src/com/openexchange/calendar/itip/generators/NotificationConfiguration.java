@@ -55,7 +55,7 @@ package com.openexchange.calendar.itip.generators;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class NotificationConfiguration {
+public class NotificationConfiguration implements Cloneable {
     private boolean sendITIP;
     private boolean interestedInStateChanges;
     private boolean interestedInChanges;

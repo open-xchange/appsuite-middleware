@@ -2,7 +2,6 @@
 package com.openexchange.spamsettings.generic.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.DeferredActivator;

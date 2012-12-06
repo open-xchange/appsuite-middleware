@@ -218,7 +218,7 @@ public class Protocol {
 			return false;
 		}
 		switch(p.getId()) {
-		case CREATIONDATE: case GETETAG: case GETLASTMODIFIED: case RESOURCETYPE: case LOCKDISCOVERY: case SUPPORTEDLOCK: case SOURCE: return true;
+		case CREATIONDATE: case GETETAG: case RESOURCETYPE: case LOCKDISCOVERY: case SUPPORTEDLOCK: case SOURCE: return true;
 		default : return false;
 		}
 	}

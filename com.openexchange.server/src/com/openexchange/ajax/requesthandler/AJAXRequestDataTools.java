@@ -114,6 +114,7 @@ public class AJAXRequestDataTools {
      * @throws IOException If an I/O error occurs
      * @throws OXException If an OX error occurs
      */
+    @SuppressWarnings("unused")
     public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
         parseHostName(retval, req, session);
@@ -126,7 +127,6 @@ public class AJAXRequestDataTools {
          * Set the module
          */
         retval.setModule(getModule(prefix, req));
-
         /*
          * Set request URI
          */
@@ -239,10 +239,7 @@ public class AJAXRequestDataTools {
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
      */
     public static boolean parseBoolParameter(final String parameter) {
-        if (null == parameter) {
-            return false;
-        }
-        return BOOL_VALS.contains(parameter.trim().toLowerCase(Locale.ENGLISH));
+        return (null != parameter) && BOOL_VALS.contains(parameter.trim().toLowerCase(Locale.ENGLISH));
     }
 
     /**
@@ -301,8 +298,9 @@ public class AJAXRequestDataTools {
             pathInfo = pathInfo.substring(0, lastIndex);
         }
         String module = pathInfo.substring(prefix.length());
-        if (module.endsWith("/")) {
-        	module = module.substring(0, module.length()-1);
+        final int mlen = module.length()-1;
+        if ('/' == module.charAt(mlen)) {
+            module = module.substring(0, mlen);
         }
         return module;
     }

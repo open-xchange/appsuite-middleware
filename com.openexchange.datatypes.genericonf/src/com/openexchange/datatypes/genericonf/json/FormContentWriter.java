@@ -71,7 +71,7 @@ public class FormContentWriter {
         super();
     }
 
-    public JSONObject write(final DynamicFormDescription form, final Map<String, Object> content, final String urlPrefix) throws JSONException {
+    public static JSONObject write(final DynamicFormDescription form, final Map<String, Object> content, final String urlPrefix) throws JSONException {
         final JSONObject object = new JSONObject();
         if (form == null) {
             return object;
@@ -79,7 +79,9 @@ public class FormContentWriter {
         for (final FormElement element : form) {
             if (content.containsKey(element.getName())) {
                 final Object value = content.get(element.getName());
-                object.put(element.getName(), element.doSwitch(VALUE_WRITER, value, urlPrefix));
+                if (null != value && !"null".equals(value.toString())) {
+                    object.put(element.getName(), element.doSwitch(VALUE_WRITER, value, urlPrefix));
+                }
             }
         }
         return object;

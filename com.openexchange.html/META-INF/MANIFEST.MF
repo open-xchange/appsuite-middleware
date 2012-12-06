@@ -2,12 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange HTML Bundle
 Bundle-SymbolicName: com.openexchange.html
-Bundle-Version: 6.22.0
+Bundle-Version: 6.22.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
- lib/jTidy.jar,
- lib/org.apache.log4j_1.2.13.v200806030600.jar
+ lib/jTidy.jar
 Import-Package: com.openexchange.config,
  com.openexchange.dispatcher,
  com.openexchange.exception,
@@ -23,6 +22,25 @@ Import-Package: com.openexchange.config,
  org.apache.commons.httpclient;version="3.1.0",
  org.apache.commons.httpclient.methods;version="3.1.0",
  org.apache.commons.logging,
+ org.apache.log4j,
+ org.apache.log4j.chainsaw,
+ org.apache.log4j.config,
+ org.apache.log4j.helpers,
+ org.apache.log4j.jdbc,
+ org.apache.log4j.jmx,
+ org.apache.log4j.lf5,
+ org.apache.log4j.lf5.util,
+ org.apache.log4j.lf5.viewer,
+ org.apache.log4j.lf5.viewer.categoryexplorer,
+ org.apache.log4j.lf5.viewer.configure,
+ org.apache.log4j.net,
+ org.apache.log4j.nt,
+ org.apache.log4j.or,
+ org.apache.log4j.or.jms,
+ org.apache.log4j.or.sax,
+ org.apache.log4j.spi,
+ org.apache.log4j.varia,
+ org.apache.log4j.xml,
  org.htmlcleaner,
  org.jsoup,
  org.jsoup.examples,

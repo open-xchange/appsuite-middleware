@@ -78,13 +78,13 @@ public class MessagingAccountParser {
         final DefaultMessagingAccount account = new DefaultMessagingAccount();
 
         account.setId(accountJSON.optInt(ID));
-        if(accountJSON.has("displayName")) {
+        if (accountJSON.has("displayName")) {
             account.setDisplayName(accountJSON.optString("displayName"));
         }
         final MessagingService messagingService = registry.getMessagingService(accountJSON.getString(MESSAGING_SERVICE), userId, contextId);
         account.setMessagingService(messagingService);
-        if(accountJSON.has("configuration")) {
-            account.setConfiguration( new FormContentParser().parse(
+        if (accountJSON.has("configuration")) {
+            account.setConfiguration(FormContentParser.parse(
                 accountJSON.getJSONObject("configuration"),
                 messagingService.getFormDescription()));
         }

@@ -172,8 +172,7 @@ public final class HFactory {
    * @deprecated use getOrCreateCluster instead
    * 
    */
-  @Deprecated
-public static Cluster createCluster(String clusterName,
+  public static Cluster createCluster(String clusterName,
       CassandraHostConfigurator cassandraHostConfigurator) {
     return createCluster(clusterName, cassandraHostConfigurator, null);
   }

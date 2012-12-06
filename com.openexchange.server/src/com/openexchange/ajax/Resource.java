@@ -91,7 +91,7 @@ public class Resource extends DataServlet {
 			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
 				response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
-				writeResponse(response, httpServletResponse);
+				writeResponse(response, httpServletResponse, session);
 				return;
 			}
 
@@ -108,7 +108,7 @@ public class Resource extends DataServlet {
 			response.setException(oje);
 		}
 
-		writeResponse(response, httpServletResponse);
+		writeResponse(response, httpServletResponse, session);
 	}
 
 	@Override
@@ -128,7 +128,7 @@ public class Resource extends DataServlet {
 				} catch (final JSONException e) {
 					final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, data);
 					response.setException(exc);
-					writeResponse(response, httpServletResponse);
+					writeResponse(response, httpServletResponse, session);
 					LOG.error(exc.getMessage(), exc);
 					return;
 				}
@@ -138,7 +138,7 @@ public class Resource extends DataServlet {
 				} catch (final JSONException e) {
 					LOG.error(_doPut, e);
 					response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
-					writeResponse(response, httpServletResponse);
+					writeResponse(response, httpServletResponse, session);
 					return;
 				}
 
@@ -157,7 +157,7 @@ public class Resource extends DataServlet {
 				} catch (final JSONException e) {
 					LOG.error(_doPut, e);
 					response.setException(OXJSONExceptionCodes.JSON_READ_ERROR.create(e));
-					writeResponse(response, httpServletResponse);
+					writeResponse(response, httpServletResponse, session);
 					return;
 				}
 
@@ -177,7 +177,7 @@ public class Resource extends DataServlet {
 			response.setException(oje);
 		}
 
-		writeResponse(response, httpServletResponse);
+		writeResponse(response, httpServletResponse, session);
 	}
 
 	@Override

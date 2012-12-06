@@ -85,6 +85,7 @@ import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.DefaultHashKeyGenerator;
 import com.openexchange.java.HashKeyGenerator;
@@ -98,7 +99,7 @@ import com.openexchange.tools.servlet.http.Tools;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HttpServletRequestImpl implements HttpServletRequest {
+public final class HttpServletRequestImpl implements HttpServletRequest, Parameterizable {
 
     private static final org.apache.commons.logging.Log LOG =
         Log.valueOf(com.openexchange.log.LogFactory.getLog(HttpServletRequestImpl.class));
@@ -207,6 +208,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
      */
     public HttpServletRequestImpl(final HttpServletResponseImpl response) {
         super();
+        contentLength = -1L;
         max = AJPv13Config.getMaxRequestParameterCount();
         contextPath = "";
         requestedSessionIdFromCookie = true;
@@ -242,6 +244,15 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
      */
     public void dumpToBuffer(final byte[] bytes) {
         servletInputStream.dumpToBuffer(bytes);
+    }
+
+    /**
+     * Append specified bytes to buffer.
+     *
+     * @param bytes The bytes
+     */
+    public void appendToBuffer(final byte[] bytes) {
+        servletInputStream.appendToBuffer(bytes);
     }
 
     /**
@@ -341,6 +352,18 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
             parameters.put(name, newLinkedList(value));
         } else {
             values.add(value);
+        }
+    }
+
+    @Override
+    public void putParameter(String name, String value) {
+        if (null == name) {
+            throw new NullPointerException("name is null");
+        }
+        if (null == value) {
+            parameters.remove(name);
+        } else {
+            setParameter(name, value);
         }
     }
 
@@ -908,7 +931,12 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
     }
 
     public void setPathInfo(final String pathInfo) {
-        this.pathInfo = pathInfo;
+        if (null == pathInfo) {
+            this.pathInfo = null;
+        } else {
+            // Ensure starting slash '/' character
+            this.pathInfo = pathInfo.length() > 0 && '/' != pathInfo.charAt(0) ? '/' + pathInfo : pathInfo;
+        }
     }
 
     @Override

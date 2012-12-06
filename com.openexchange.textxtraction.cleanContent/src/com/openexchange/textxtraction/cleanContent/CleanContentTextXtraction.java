@@ -50,6 +50,7 @@
 package com.openexchange.textxtraction.cleanContent;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -83,17 +84,19 @@ public final class CleanContentTextXtraction implements DelegateTextXtraction {
     public String extractFrom(final InputStream inputStream, final String optMimeType) throws OXException {
         boolean extracted = false;
         try {
-            final SecureRequest request = new SecureRequest();
-            request.setOption(SecureOptions.JustAnalyze, true);
             /*
              * Note that the SecureRequest object is REUSED for all the file.
-             */  
-            // FIXME: After NewTikaTextXtractService has been refactored, 
-            // we maybe can use the FileInputStream directly instead of
-            // copying the file into a byte buffer.
-            byte[] byteArray = IOUtils.toByteArray(inputStream);
-            ByteBuffer buffer = ByteBuffer.wrap(byteArray);
-            request.setOption(SecureOptions.SourceDocument, buffer);
+             */ 
+            final SecureRequest request = new SecureRequest();
+            request.setOption(SecureOptions.JustAnalyze, true);             
+            if (inputStream instanceof FileInputStream) {
+                request.setOption(SecureOptions.SourceDocument, inputStream);
+            } else {      
+                byte[] byteArray = IOUtils.toByteArray(inputStream);
+                ByteBuffer buffer = ByteBuffer.wrap(byteArray);
+                request.setOption(SecureOptions.SourceDocument, buffer);
+            }
+            
             final TextAppendingElementHandler elementHandlerImpl = new TextAppendingElementHandler();
             request.setOption(SecureOptions.ElementHandler, elementHandlerImpl);
             request.setOption(SecureOptions.OutputType, OutputTypeOption.ToHandler);
@@ -109,6 +112,7 @@ public final class CleanContentTextXtraction implements DelegateTextXtraction {
                 extracted = true;
                 return elementHandlerImpl.getText();
             }
+            
             return null;
         } catch (final IOException e) {
             throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -195,5 +199,10 @@ public final class CleanContentTextXtraction implements DelegateTextXtraction {
         } catch (final RuntimeException e) {
             throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
         }
+    }
+
+    @Override
+    public boolean isDestructive() {
+        return true;
     }
 }

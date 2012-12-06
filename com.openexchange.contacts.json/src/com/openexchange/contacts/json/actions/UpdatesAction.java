@@ -54,8 +54,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
@@ -63,11 +61,8 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -91,120 +86,29 @@ public class UpdatesAction extends ContactAction {
      * Initializes a new {@link UpdatesAction}.
      * @param serviceLookup
      */
-    public UpdatesAction(final ServiceLookup serviceLookup) {
+    public UpdatesAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final int folder = req.getFolder();
-        final int[] columns = req.getColumns();
-        final long timestampLong = req.getTimestamp();
-        Date timestamp = new Date(timestampLong);
-        Date lastModified = null;
-        final TimeZone timeZone = req.getTimeZone();
-
-        String ignore = req.getIgnore();
-        if (ignore == null) {
-            ignore = "deleted";
-        }
-
-        boolean bIgnoreDelete = false;
-        if (ignore.indexOf("deleted") != -1) {
-            bIgnoreDelete = true;
-        }
-
-        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        final List<Contact> modifiedList = new ArrayList<Contact>();
-        final List<Contact> deletedList = new ArrayList<Contact>();
-        final Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
-        SearchIterator<Contact> it = null;
-        try {
-            it = contactInterface.getModifiedContactsInFolder(folder, columns, timestamp);
-            while (it.hasNext()) {
-                final Contact contact = it.next();
-                lastModified = contact.getLastModified();
-
-                // Correct last modified and creation date with users timezone
-                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                modifiedList.add(contact);
-
-                if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
-                    timestamp = lastModified;
-                }
-            }
-
-            if (!bIgnoreDelete) {
-                it = contactInterface.getDeletedContactsInFolder(folder, columns, timestamp);
-                while (it.hasNext()) {
-                    final Contact contact = it.next();
-                    lastModified = contact.getLastModified();
-
-                    // Correct last modified and creation date with users timezone
-                    contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-                    contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                    deletedList.add(contact);
-
-                    if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
-                        timestamp = lastModified;
-                    }
-                }
-            }
-            responseMap.put("modified", modifiedList);
-            responseMap.put("deleted", deletedList);
-
-        } finally {
-            if (it != null) {
-                it.close();
-            }
-        }
-
-        return new AJAXRequestResult(responseMap, timestamp, "contact");
-    }
-    
-    @Override
-    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
-        Date lastModified = new Date(0);
-        final ContactService contactService = getContactService();
-        final Date since = new Date(request.getTimestamp());
-        SearchIterator<Contact> searchIterator = null;
+    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
+        ContactService contactService = getContactService();
+        Date since = new Date(request.getTimestamp());
         /*
          * add modified contacts
          */
-        final List<Contact> modifiedContacts = new ArrayList<Contact>(); 
-        try {
-            searchIterator = contactService.getModifiedContacts(request.getSession(), request.getFolderID(), since, request.getFields());
-            while (searchIterator.hasNext()) {
-                final Contact contact = searchIterator.next();
-                lastModified = getLatestModified(lastModified, contact);
-                modifiedContacts.add(contact);
-            }
-        } finally {
-        	if (null != searchIterator) {
-        		searchIterator.close();
-        	}
-        }
+        List<Contact> modifiedContacts = new ArrayList<Contact>();
+        Date lastModified = addContacts(modifiedContacts, contactService.getModifiedContacts(
+            request.getSession(), request.getFolderID(), since, request.getFields()));
         /*
          * add deleted contacts
          */
-        final List<Contact> deletedContacts = new ArrayList<Contact>(); 
+        List<Contact> deletedContacts = new ArrayList<Contact>(); 
         if (false == "deleted".equals(request.getIgnore())) {
-	        try {
-	            searchIterator = contactService.getDeletedContacts(request.getSession(), request.getFolderID(), since, request.getFields());
-	            while (searchIterator.hasNext()) {
-	                final Contact contact = searchIterator.next();
-	                lastModified = getLatestModified(lastModified, contact);
-	                deletedContacts.add(contact);
-	            }
-	        } finally {
-	        	if (null != searchIterator) {
-	        		searchIterator.close();
-	        	}
-	        }
+            lastModified = addContacts(deletedContacts, contactService.getDeletedContacts(
+                request.getSession(), request.getFolderID(), since, request.getFields()));
         }
-        final Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
+        Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
         responseMap.put("modified", modifiedContacts);
         responseMap.put("deleted", deletedContacts);
         return new AJAXRequestResult(responseMap, lastModified, "contact");

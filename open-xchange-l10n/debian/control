@@ -107,6 +107,11 @@ Replaces: open-xchange-lang-zh-tw (<< 6.21.0-0)
 Conflicts: open-xchange-lang-zh-tw (<< 6.21.0-0)
 Description: Package containing Open-Xchange backend localization for zh_TW
 
+Package: open-xchange-l10n-de-ch
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Description: Package containing Open-Xchange backend localization for de_CH
+
 Package: open-xchange-l10n-ca-es
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
@@ -171,13 +176,13 @@ Conflicts: open-xchange-lang-community-ko-ko (<< 6.21.0-0)
 Description: Package containing Open-Xchange backend localization for ko_KO
  This localization package are driven by the community.
 
-Package: open-xchange-l10n-no-nb
-Architecture: all
-Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-Replaces: open-xchange-lang-community-no-nb (<< 6.21.0-0)
-Conflicts: open-xchange-lang-community-no-nb (<< 6.21.0-0)
-Description: Package containing Open-Xchange backend localization for no_NB
- This localization package are driven by the community.
+#Package: open-xchange-l10n-no-nb
+#Architecture: all
+#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+#Replaces: open-xchange-lang-community-no-nb (<< 6.21.0-0)
+#Conflicts: open-xchange-lang-community-no-nb (<< 6.21.0-0)
+#Description: Package containing Open-Xchange backend localization for no_NB
+# This localization package are driven by the community.
 
 Package: open-xchange-l10n-pt-br
 Architecture: all
@@ -219,13 +224,13 @@ Conflicts: open-xchange-lang-community-tr-tr (<< 6.21.0-0)
 Description: Package containing Open-Xchange backend localization for tr_TR
  This localization package are driven by the community.
 
-Package: open-xchange-l10n-vi-vi
-Architecture: all
-Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-Replaces: open-xchange-lang-community-vi-vi (<< 6.21.0-0)
-Conflicts: open-xchange-lang-community-vi-vi (<< 6.21.0-0)
-Description: Package containing Open-Xchange backend localization for vi_VI
- This localization package are driven by the community.
+#Package: open-xchange-l10n-vi-vi
+#Architecture: all
+#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+#Replaces: open-xchange-lang-community-vi-vi (<< 6.21.0-0)
+#Conflicts: open-xchange-lang-community-vi-vi (<< 6.21.0-0)
+#Description: Package containing Open-Xchange backend localization for vi_VI
+# This localization package are driven by the community.
 
 ##### http://wiki.debian.org/Renaming_a_Package #####
 
@@ -355,11 +360,11 @@ Depends: ${misc:Depends}, open-xchange-l10n-ko-ko
 Section: oldlibs
 Description: transitional dummy package
 
-Package: open-xchange-lang-community-no-nb
-Architecture: all
-Depends: ${misc:Depends}, open-xchange-l10n-no-nb
-Section: oldlibs
-Description: transitional dummy package
+#Package: open-xchange-lang-community-no-nb
+#Architecture: all
+#Depends: ${misc:Depends}, open-xchange-l10n-no-nb
+#Section: oldlibs
+#Description: transitional dummy package
 
 Package: open-xchange-lang-community-pt-br
 Architecture: all
@@ -391,8 +396,8 @@ Depends: ${misc:Depends}, open-xchange-l10n-tr-tr
 Section: oldlibs
 Description: transitional dummy package
 
-Package: open-xchange-lang-community-vi-vi
-Architecture: all
-Depends: ${misc:Depends}, open-xchange-l10n-vi-vi
-Section: oldlibs
-Description: transitional dummy package
+#Package: open-xchange-lang-community-vi-vi
+#Architecture: all
+#Depends: ${misc:Depends}, open-xchange-l10n-vi-vi
+#Section: oldlibs
+#Description: transitional dummy package

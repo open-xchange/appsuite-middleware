@@ -65,7 +65,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
@@ -87,6 +89,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
@@ -95,11 +98,16 @@ import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -414,6 +422,38 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     /**
+     * Gets the locale for given server session
+     * 
+     * @param session The server session
+     * @return The locale
+     */
+    protected static Locale localeFrom(final ServerSession session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        return session.getUser().getLocale();
+    }
+
+    /**
+     * Gets the locale for given session
+     * 
+     * @param session The session
+     * @return The locale
+     */
+    protected static Locale localeFrom(final Session session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser().getLocale();
+        }
+        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+    }
+
+    private static final AtomicLong REQUEST_NUMBER = new AtomicLong(0L);
+    private static final String PROP_REQUEST_NUMBER = "com.openexchange.ajax.requestNumber";
+
+    /**
      * The service method of HttpServlet is extended to catch bad exceptions and keep the AJP socket alive. Otherwise Apache thinks in a
      * balancer environment this AJP container is temporarily dead and redirects requests to other AJP containers. This will kill the users
      * session.
@@ -421,22 +461,26 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         incrementRequests();
+        final Props props = LogProperties.getLogProperties();
+        props.put(PROP_REQUEST_NUMBER, ForceLog.valueOf(Long.toString(REQUEST_NUMBER.incrementAndGet())));
         try {
+            // create a new HttpSession if missing
+            req.getSession(true);
+
             /*
              * Set 200 OK status code and JSON content by default
              */
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             super.service(new CountingHttpServletRequest(req), resp);
-        } catch (final ServletException x) {
-            throw x;
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             LOG.error(e.getMessage(), e);
             final ServletException se = new ServletException(e.getMessage());
             se.initCause(e);
             throw se;
         } finally {
             decrementRequests();
+            props.remove(PROP_REQUEST_NUMBER);
         }
     }
 
@@ -882,7 +926,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     protected static boolean mayUpload(final String action) {
-        return UPLOAD_ACTIONS.contains(action) || Arrays.asList("CSV", "VCARD","ICAL").contains(action); //Boo! Bad hack to get importer/export bundle working
+        return UPLOAD_ACTIONS.contains(action) || Arrays.asList("CSV", "VCARD","ICAL", "OUTLOOK_CSV").contains(action); //Boo! Bad hack to get importer/export bundle working
     }
 
     private static boolean isEmpty(final String string) {
@@ -974,10 +1018,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
          */
     }
 
-    protected void writeResponse(final Response response, final HttpServletResponse servletResponse) throws IOException {
+    protected void writeResponse(final Response response, final HttpServletResponse servletResponse, Session session) throws IOException {
         servletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
-            ResponseWriter.write(response, servletResponse.getWriter());
+            ResponseWriter.write(response, servletResponse.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(servletResponse);

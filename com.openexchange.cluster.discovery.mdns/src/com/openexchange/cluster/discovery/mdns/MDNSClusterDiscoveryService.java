@@ -55,8 +55,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.cluster.discovery.ClusterDiscoveryService;
-import com.openexchange.cluster.discovery.ClusterListener;
+import org.osgi.framework.BundleContext;
+import com.openexchange.cluster.discovery.AbstractClusterDiscoveryService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceEntry;
@@ -66,24 +66,29 @@ import com.openexchange.mdns.MDNSServiceEntry;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MDNSClusterDiscoveryService implements ClusterDiscoveryService {
+public final class MDNSClusterDiscoveryService extends AbstractClusterDiscoveryService {
 
     private final String serviceId;
-
     private final AtomicReference<MDNSService> serviceRef;
-
-    private final ClusterDiscoveryService delegate;
 
     /**
      * Initializes a new {@link MDNSClusterDiscoveryService}.
      * 
      * @param serviceId
      */
-    public MDNSClusterDiscoveryService(final String serviceId, final AtomicReference<MDNSService> serviceRef, final ClusterDiscoveryService delegate) {
-        super();
+    public MDNSClusterDiscoveryService(final String serviceId, final BundleContext context) {
+        super(context);
         this.serviceId = serviceId;
-        this.serviceRef = serviceRef;
-        this.delegate = delegate;
+        this.serviceRef = new AtomicReference<MDNSService>();
+    }
+
+    /**
+     * Sets the {@link MDNSService} instance
+     * 
+     * @param mdnsService The {@link MDNSService} instance
+     */
+    public void setMDNSService(final MDNSService mdnsService) {
+        serviceRef.set(mdnsService);
     }
 
     @Override
@@ -101,16 +106,6 @@ public final class MDNSClusterDiscoveryService implements ClusterDiscoveryServic
             }
         }
         return Collections.emptyList();
-    }
-
-    @Override
-    public void addListener(final ClusterListener listener) {
-        delegate.addListener(listener);
-    }
-
-    @Override
-    public void removeListener(final ClusterListener listener) {
-        delegate.removeListener(listener);
     }
 
 }

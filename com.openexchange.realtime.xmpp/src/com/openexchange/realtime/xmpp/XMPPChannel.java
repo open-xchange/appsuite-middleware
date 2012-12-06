@@ -82,7 +82,7 @@ public class XMPPChannel implements Channel {
     }
 
     @Override
-    public boolean canHandle(String namespace, ID recipient, ServerSession session) throws OXException {
+    public boolean canHandle(Class<? extends Stanza> stanzaClass, ID recipient, ServerSession session) throws OXException {
         return true;
     }
 

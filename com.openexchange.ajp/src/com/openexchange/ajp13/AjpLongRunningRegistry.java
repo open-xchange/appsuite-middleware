@@ -49,9 +49,9 @@
 
 package com.openexchange.ajp13;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServletRequest;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**
  * {@link AjpLongRunningRegistry} - A registry for long-running requests.
@@ -80,7 +80,7 @@ public final class AjpLongRunningRegistry {
      */
     public AjpLongRunningRegistry() {
         super();
-        map = new ConcurrentHashMap<AjpLongRunningRegistry.Key, Object>();
+        map = new NonBlockingHashMap<Key, Object>();
     }
 
     /**

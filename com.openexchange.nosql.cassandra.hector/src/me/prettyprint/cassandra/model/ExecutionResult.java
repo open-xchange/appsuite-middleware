@@ -38,8 +38,7 @@ public class ExecutionResult<T> implements ResultStatus {
   /**
    * @return the execution time, as already recorded, in nanos
    */
-  @Override
-public long getExecutionTimeNano() {
+  public long getExecutionTimeNano() {
     return execTime;
   }
 
@@ -48,8 +47,7 @@ public long getExecutionTimeNano() {
    * make the number more sensible
    * @return
    */
-  @Override
-public long getExecutionTimeMicro() {
+  public long getExecutionTimeMicro() {
     return execTime / MICRO_DENOM;
   }
 
@@ -64,8 +62,7 @@ public long getExecutionTimeMicro() {
   }
 
   /** The cassandra host that was actually used to execute the operation */
-  @Override
-public CassandraHost getHostUsed() {
+  public CassandraHost getHostUsed() {
     return this.cassandraHost;
   }
 

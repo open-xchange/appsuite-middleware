@@ -50,43 +50,55 @@
 package com.openexchange.sessiond.osgi;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+import java.util.ArrayList;
+import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.sessiond.impl.SessionControl;
+import com.openexchange.sessiond.impl.SessionHandler;
+import com.openexchange.sessiond.impl.SessionImpl;
 import com.openexchange.sessionstorage.SessionStorageService;
-
 
 /**
  * {@link SessionStorageServiceTracker}
- *
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<SessionStorageService, SessionStorageService> {
-    
+
     private final BundleContext context;
 
     /**
      * Initializes a new {@link SessionStorageServiceTracker}.
      */
-    public SessionStorageServiceTracker(BundleContext context) {
+    public SessionStorageServiceTracker(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public SessionStorageService addingService(ServiceReference<SessionStorageService> reference) {
-        SessionStorageService service = context.getService(reference);
+    public SessionStorageService addingService(final ServiceReference<SessionStorageService> reference) {
+        final SessionStorageService service = context.getService(reference);
         getServiceRegistry().addService(SessionStorageService.class, service);
+        final List<SessionControl> sessionControls = SessionHandler.getSessions();
+        if (!sessionControls.isEmpty()) {
+            final List<SessionImpl> sessions = new ArrayList<SessionImpl>(sessionControls.size());
+            for (final SessionControl sessionControl : sessionControls) {
+                sessions.add(sessionControl.getSession());
+            }
+            SessionHandler.storeSessions(sessions, service);
+        }
         return service;
     }
 
     @Override
-    public void modifiedService(ServiceReference<SessionStorageService> reference, SessionStorageService service) {
+    public void modifiedService(final ServiceReference<SessionStorageService> reference, final SessionStorageService service) {
         // nothing to do
     }
 
     @Override
-    public void removedService(ServiceReference<SessionStorageService> reference, SessionStorageService service) {
+    public void removedService(final ServiceReference<SessionStorageService> reference, final SessionStorageService service) {
         getServiceRegistry().removeService(SessionStorageService.class);
         context.ungetService(reference);
     }

@@ -25,8 +25,8 @@ public class HKerberosThriftClient extends HThriftClient implements HClient {
 
   private static Logger log = LoggerFactory.getLogger(HKerberosThriftClient.class);
   
-  private final Subject kerberosTicket;
-  private final String servicePrincipalName;
+  private Subject kerberosTicket;
+  private String servicePrincipalName;
 
   /**
    * Constructor
@@ -42,8 +42,7 @@ public class HKerberosThriftClient extends HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
-  @Override
-public HKerberosThriftClient open() {
+  public HKerberosThriftClient open() {
     if ( isOpen() ) {
       throw new IllegalStateException("Open called on already open connection. You should not have gotten here.");
     }

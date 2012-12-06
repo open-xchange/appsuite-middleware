@@ -49,20 +49,26 @@
 
 package com.openexchange.file.storage.webdav;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.apache.commons.logging.Log;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
+import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.webdav.services.WebDAVFileStorageServiceRegistry;
+import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.session.Session;
 
 /**
@@ -70,25 +76,37 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class WebDAVFileStorageService implements FileStorageService {
+public final class WebDAVFileStorageService implements AccountAware {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebDAVFileStorageService.class);
+
+    private static final String SERVICE_ID = WebDAVConstants.ID;
 
     /**
      * Creates a new WebDAV file storage service.
      *
      * @return A new WebDAV file storage service
-     * @throws OXException If creation fails
      */
-    public static WebDAVFileStorageService newInstance() throws OXException {
+    public static WebDAVFileStorageService newInstance() {
+        return new WebDAVFileStorageService();
+    }
+
+    /**
+     * Creates a new WebDAV file storage service.
+     * 
+     * @param compositeAccountManager The composite account manager
+     * @return A new WebDAV file storage service
+     */
+    public static WebDAVFileStorageService newInstance(final CompositeFileStorageAccountManagerProvider compositeAccountManager) {
         final WebDAVFileStorageService newInst = new WebDAVFileStorageService();
-        newInst.applyAccountManager();
+        newInst.applyCompositeAccountManager(compositeAccountManager);
         return newInst;
     }
 
     private final DynamicFormDescription formDescription;
-
     private final Set<String> secretProperties;
-
     private volatile FileStorageAccountManager accountManager;
+    private volatile CompositeFileStorageAccountManagerProvider compositeAccountManager;
 
     /**
      * Initializes a new {@link WebDAVFileStorageService}.
@@ -102,25 +120,37 @@ public final class WebDAVFileStorageService implements FileStorageService {
         secretProperties = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(WebDAVConstants.WEBDAV_PASSWORD)));
     }
 
-    private void applyAccountManager() throws OXException {
-        try {
-            accountManager =
-                WebDAVFileStorageServiceRegistry.getServiceRegistry().getService(FileStorageAccountManagerLookupService.class, true).getAccountManagerFor(
-                    this);
-        } catch (final OXException e) {
-            if (!FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.equals(e)) {
-                throw e;
+    private FileStorageAccountManager getAccountManager0() throws OXException {
+        FileStorageAccountManager m = accountManager;
+        if (null == m) {
+            synchronized (this) {
+                m = accountManager;
+                if (null == m) {
+                    final FileStorageAccountManagerLookupService lookupService = WebDAVServices.getService(FileStorageAccountManagerLookupService.class);
+                    m = lookupService.getAccountManagerFor(SERVICE_ID);
+                    accountManager = m;
+                }
             }
-            /*
-             * Retry
-             */
-            throw e;
         }
+        return m;
+    }
+
+    private void applyCompositeAccountManager(final CompositeFileStorageAccountManagerProvider compositeAccountManager) {
+        this.compositeAccountManager = compositeAccountManager;
+    }
+
+    /**
+     * Gets the composite account manager.
+     *
+     * @return The composite account manager
+     */
+    public CompositeFileStorageAccountManagerProvider getCompositeAccountManager() {
+        return compositeAccountManager;
     }
 
     @Override
     public String getId() {
-        return WebDAVConstants.ID;
+        return SERVICE_ID;
     }
 
     @Override
@@ -138,14 +168,74 @@ public final class WebDAVFileStorageService implements FileStorageService {
         return secretProperties;
     }
 
+    private static final class FileStorageAccountInfo {
+        protected final FileStorageAccount account;
+        protected final int ranking;
+
+        protected FileStorageAccountInfo(FileStorageAccount account, int ranking) {
+            super();
+            this.account = account;
+            this.ranking = ranking;
+        }
+    }
+
+    /**
+     * Gets all service's accounts associated with session user.
+     *
+     * @param session The session providing needed user data
+     * @return All accounts associated with session user.
+     * @throws OXException If listing fails
+     */
     @Override
-    public FileStorageAccountManager getAccountManager() {
-        return accountManager;
+    public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
+        final CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
+        if (null == compositeAccountManager) {
+            return getAccountManager0().getAccounts(session);
+        }
+        final Map<String, FileStorageAccountInfo> accountsMap = new LinkedHashMap<String, FileStorageAccountInfo>(8);
+        for (final FileStorageAccountManagerProvider provider : compositeAccountManager.providers()) {
+            for (final FileStorageAccount account : provider.getAccountManagerFor(SERVICE_ID).getAccounts(session)) {
+                final FileStorageAccountInfo info = new FileStorageAccountInfo(account, provider.getRanking());
+                final FileStorageAccountInfo prev = accountsMap.get(account.getId());
+                if (null == prev || prev.ranking < info.ranking) {
+                    // Replace with current
+                    accountsMap.put(account.getId(), info);
+                }
+            }
+        }
+        final List<FileStorageAccount> ret = new ArrayList<FileStorageAccount>(accountsMap.size());
+        for (final FileStorageAccountInfo info : accountsMap.values()) {
+            ret.add(info.account);
+        }
+        return ret;
+    }
+
+    @Override
+    public FileStorageAccountManager getAccountManager() throws OXException {
+        final CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
+        if (null == compositeAccountManager) {
+            return getAccountManager0();
+        }
+        try {
+            return compositeAccountManager.getAccountManagerFor(SERVICE_ID);
+        } catch (final OXException e) {
+            LOG.warn(e.getMessage(), e);
+            return getAccountManager0();
+        }
     }
 
     @Override
     public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
-        return new WebDAVFileStorageAccountAccess(this, accountManager.getAccount(accountId, session), session);
+        final FileStorageAccount account;
+        {
+            final CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
+            if (null == compositeAccountManager) {
+                account = getAccountManager0().getAccount(accountId, session);
+            } else {
+                account = compositeAccountManager.getAccountManager(accountId, session).getAccount(accountId, session);
+            }
+        }
+        return new WebDAVFileStorageAccountAccess(this, account, session);
     }
 
 }

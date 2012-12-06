@@ -14,6 +14,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-authentication-imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-authentication-kerberos"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-authorization-standard"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-cluster-discovery-static"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-cluster-discovery-mdns"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-dav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-smtp"/>
@@ -53,6 +55,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-passwordchange-database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-passwordchange-script"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-push-imapidle"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-parallels"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-spamhandler-parallels"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-push-mailnotify"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-push-malpoll"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-hostname-ldap"/>
@@ -63,6 +67,5 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-themes-default"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-gui-help-plugin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-meta"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-meta-centos"/>
 </provider>
 </psf>

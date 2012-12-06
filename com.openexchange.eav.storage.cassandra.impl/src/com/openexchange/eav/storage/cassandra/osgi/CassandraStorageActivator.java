@@ -53,7 +53,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.eav.EAVStorage;
 import com.openexchange.eav.storage.cassandra.impl.CassandraEAVStorageImpl;
-import com.openexchange.log.LogFactory;
 import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
 import com.openexchange.osgi.HousekeepingActivator;
 

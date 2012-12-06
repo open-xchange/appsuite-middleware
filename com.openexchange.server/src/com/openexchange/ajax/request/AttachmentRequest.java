@@ -55,9 +55,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -86,6 +86,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -125,6 +126,23 @@ public class AttachmentRequest extends CommonRequest {
         this.user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
         this.session = session;
+    }
+
+    private static Locale localeFrom(final ServerSession session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        return session.getUser().getLocale();
+    }
+
+    private static Locale localeFrom(final Session session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser().getLocale();
+        }
+        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
     }
 
     public static boolean hasPermission(final UserConfiguration userConfig) {
@@ -240,7 +258,7 @@ public class AttachmentRequest extends CommonRequest {
                 resp.setData(attachment.getId());
                 resp.setTimestamp(new Date(ts));
 
-                ResponseWriter.write(resp, w);
+                ResponseWriter.write(resp, w, localeFrom(session));
                 return true;
 
             } else if (AJAXServlet.ACTION_GET.equals(action)) {
@@ -336,9 +354,9 @@ public class AttachmentRequest extends CommonRequest {
                         try {
                             ids[i] = Integer.parseInt(idsArray.getString(i));
                         } catch (final NumberFormatException e1) {
-                            handle(e1);
+                            handle(e1, session);
                         } catch (final JSONException e1) {
-                            handle(e1);
+                            handle(e1, session);
                         }
                     }
                 }
@@ -356,13 +374,13 @@ public class AttachmentRequest extends CommonRequest {
          * catch (IOException x) { LOG.info("Lost contact to client: ",x); }
          */
         catch (final UnknownColumnException e) {
-            handle(e);
+            handle(e, session);
         } catch (final OXAborted x) {
             return true;
         } catch (final JSONException e) {
-            handle(e);
+            handle(e, session);
         } catch (final OXException e) {
-            handle(e);
+            handle(e, session);
         }
 
         return false;
@@ -379,7 +397,7 @@ public class AttachmentRequest extends CommonRequest {
     }
 
     public void numberError(final String parameter, final String value) {
-        handle(AttachmentExceptionCodes.INVALID_REQUEST_PARAMETER.create(parameter, value));
+        handle(AttachmentExceptionCodes.INVALID_REQUEST_PARAMETER.create(parameter, value), session);
     }
 
     // Actions
@@ -402,7 +420,7 @@ public class AttachmentRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.debug("", e);
             }
-            handle(t);
+            handle(t, session);
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
@@ -456,7 +474,7 @@ public class AttachmentRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.debug("", e);
             }
-            handle(t);
+            handle(t, session);
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
@@ -505,7 +523,7 @@ public class AttachmentRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.debug("", e);
             }
-            handle(t);
+            handle(t, session);
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
@@ -536,7 +554,7 @@ public class AttachmentRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.debug("", e);
             }
-            handle(t);
+            handle(t, session);
             return;
         } finally {
             try {
@@ -555,7 +573,7 @@ public class AttachmentRequest extends CommonRequest {
         resp.setData("");
         resp.setTimestamp(new Date(timestamp));
         try {
-            ResponseWriter.write(resp, w);
+            ResponseWriter.write(resp, w, localeFrom(session));
         } catch (final JSONException e) {
             LOG.debug("Cannot contact client", e);
         }
@@ -585,7 +603,7 @@ public class AttachmentRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
-            handle(t);
+            handle(t, session);
         } finally {
             try {
                 ATTACHMENT_BASE.finish();

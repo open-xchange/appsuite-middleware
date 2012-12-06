@@ -49,12 +49,12 @@
 
 package com.openexchange.server.osgi;
 
+import java.io.File;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletException;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
@@ -141,7 +141,9 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.index.IndexFacadeService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
@@ -153,6 +155,7 @@ import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.loginhandler.MailLoginHandler;
 import com.openexchange.mail.loginhandler.TransportLoginHandler;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.service.MailService;
@@ -165,6 +168,7 @@ import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
 import com.openexchange.osgi.BundleServiceTracker;
@@ -191,7 +195,9 @@ import com.openexchange.systemname.SystemNameService;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.images.ImageScalingService;
+import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
+import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
+import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.user.UserService;
@@ -202,12 +208,12 @@ import com.openexchange.xml.spring.SpringParser;
 
 /**
  * {@link ServerActivator} - The activator for server bundle.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ServerActivator extends HousekeepingActivator {
 
-	private static final class ServiceAdderTrackerCustomizer implements ServiceTrackerCustomizer<FileMetadataParserService,FileMetadataParserService> {
+    private static final class ServiceAdderTrackerCustomizer implements ServiceTrackerCustomizer<FileMetadataParserService, FileMetadataParserService> {
 
         private final BundleContext context;
 
@@ -235,7 +241,6 @@ public final class ServerActivator extends HousekeepingActivator {
         }
     }
 
-
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerActivator.class));
 
     /**
@@ -243,36 +248,32 @@ public final class ServerActivator extends HousekeepingActivator {
      */
     private static final String STR_IDENTIFIER = "identifier";
 
-    private static final Class<?>[] NEEDED_SERVICES_SERVER =
-        {
-            ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
-            TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
-            CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class, IDBasedFileAccessFactory.class,
-            FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class, CryptoService.class, HttpService.class,
-            SystemNameService.class, ImageScalingService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
-            TextXtractService.class, SecretEncryptionFactoryService.class
-        };
+    private static final Class<?>[] NEEDED_SERVICES_SERVER = {
+        ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
+        TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
+        CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class, IDBasedFileAccessFactory.class,
+        FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class, CryptoService.class, HttpService.class,
+        SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
+        TextXtractService.class, SecretEncryptionFactoryService.class };
 
     private static volatile BundleContext CONTEXT;
 
     /**
      * Gets the bundle context.
-     *
+     * 
      * @return The bundle context or <code>null</code> if not started, yet
      */
     public static BundleContext getContext() {
         return CONTEXT;
     }
 
-    private final List<ServiceTracker<?,?>> serviceTrackerList;
+    private final List<ServiceTracker<?, ?>> serviceTrackerList;
 
     private final List<EventHandlerRegistration> eventHandlerList;
 
     private final List<BundleActivator> activators;
 
     private final Starter starter;
-
-    private final AtomicBoolean started;
 
     private WhiteboardSecretService secretService;
 
@@ -281,9 +282,8 @@ public final class ServerActivator extends HousekeepingActivator {
      */
     public ServerActivator() {
         super();
-        this.started = new AtomicBoolean();
         this.starter = new Starter();
-        serviceTrackerList = new ArrayList<ServiceTracker<?,?>>();
+        serviceTrackerList = new ArrayList<ServiceTracker<?, ?>>();
         eventHandlerList = new ArrayList<EventHandlerRegistration>();
         activators = new ArrayList<BundleActivator>(8);
     }
@@ -337,15 +337,6 @@ public final class ServerActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        if (!started.compareAndSet(false, true)) {
-            /*
-             * Don't start the server again. A duplicate call to startBundle() is probably caused by temporary absent service(s) whose
-             * re-availability causes to trigger this method again.
-             */
-            LOG.info("A temporary absent service is available again");
-            return;
-        }
-        
         CONTEXT = context;
         JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 2500));
         Config.LoggerProvider = LoggerProvider.DISABLED;
@@ -364,13 +355,16 @@ public final class ServerActivator extends HousekeepingActivator {
                     registry.addService(classes[i], service);
                 }
             }
-        }        
+        }
         LOG.info("starting bundle: com.openexchange.server");
         /*
          * Add service trackers
          */
         // Configuration service load
-        final ServiceTracker<ConfigurationService,ConfigurationService> confTracker = new ServiceTracker<ConfigurationService,ConfigurationService>(context, ConfigurationService.class, new ConfigurationCustomizer(context));
+        final ServiceTracker<ConfigurationService, ConfigurationService> confTracker = new ServiceTracker<ConfigurationService, ConfigurationService>(
+            context,
+            ConfigurationService.class,
+            new ConfigurationCustomizer(context));
         confTracker.open(); // We need this for {@link Starter#start()}
         serviceTrackerList.add(confTracker);
         // move this to the required services once the database component gets into its own bundle.
@@ -396,7 +390,7 @@ public final class ServerActivator extends HousekeepingActivator {
         // contacts
         track(ContactInterfaceProvider.class, new ContactServiceListener(context));
         // ICal Parser
-        track(ICalParser.class, new RegistryCustomizer<ICalParser>(context, ICalParser.class){
+        track(ICalParser.class, new RegistryCustomizer<ICalParser>(context, ICalParser.class) {
 
             @Override
             protected ICalParser customize(final ICalParser service) {
@@ -427,7 +421,7 @@ public final class ServerActivator extends HousekeepingActivator {
         for (final EventHandlerRegistration ehr : eventHandlerList) {
             ehr.registerService(context);
         }
-        
+
         track(ManagementService.class, new ManagementServiceTracker(context));
         // TODO:
         /*-
@@ -453,6 +447,7 @@ public final class ServerActivator extends HousekeepingActivator {
         track(SearchService.class, new RegistryCustomizer<SearchService>(context, SearchService.class));
         // Login handler
         track(LoginHandlerService.class, new LoginHandlerCustomizer(context));
+        track(BlockingLoginHandlerService.class, new BlockingLoginHandlerCustomizer(context));
         // Multiple handler factory services
         track(MultipleHandlerFactoryService.class, new MultipleHandlerServiceTracker(context));
 
@@ -471,11 +466,18 @@ public final class ServerActivator extends HousekeepingActivator {
          * getNeededServices(), because publishing bundle needs the HttpService which is in turn provided by server
          */
         track(FileMetadataParserService.class, new ServiceAdderTrackerCustomizer(context));
+        
+        track(IndexFacadeService.class, new IndexFacadeCustomizer(context));
+
+        /*
+         * Track candidates for file storage
+         */
+        track(FileStorageFactoryCandidate.class, new CompositeFileStorageFactory());
 
         // Start up server the usual way
         starter.start();
         // Open service trackers
-        for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
+        for (final ServiceTracker<?, ?> tracker : serviceTrackerList) {
             tracker.open();
         }
         openTrackers();
@@ -487,7 +489,9 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
         registerService(UserService.class, ServerServiceRegistry.getInstance().getService(UserService.class, true));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
-        registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
+        registerService(
+            UserConfigurationService.class,
+            ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
         registerService(ContextService.class, ServerServiceRegistry.getInstance().getService(ContextService.class, true));
         // Register mail stuff
         {
@@ -497,6 +501,28 @@ public final class ServerActivator extends HousekeepingActivator {
             registerService(EventHandler.class, new MailSessionEventHandler(), serviceProperties);
             registerService(MailCounter.class, new MailCounterImpl());
             registerService(MailIdleCounter.class, new MailIdleCounterImpl());
+            registerService(MimeTypeMap.class, new MimeTypeMap() {
+
+                @Override
+                public String getContentType(final File file) {
+                    return MimeType2ExtMap.getContentType(file);
+                }
+
+                @Override
+                public String getContentType(final String fileName) {
+                    return MimeType2ExtMap.getContentType(fileName);
+                }
+
+                @Override
+                public String getContentTypeByExtension(final String extension) {
+                    return MimeType2ExtMap.getContentTypeByExtension(extension);
+                }
+
+                @Override
+                public List<String> getFileExtensions(final String mime) {
+                    return MimeType2ExtMap.getFileExtensions(mime);
+                }
+            });
         }
         // TODO: Register search service here until its encapsulated in an own bundle
         registerService(SearchService.class, new SearchServiceImpl());
@@ -504,7 +530,7 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(LoginHandlerService.class, new MailLoginHandler());
         registerService(LoginHandlerService.class, new TransportLoginHandler());
         registerService(LoginHandlerService.class, new LastLoginRecorder());
-//        registrationList.add(context.registerService(LoginHandlerService.class.getName(), new PasswordCrypter(), null));
+        // registrationList.add(context.registerService(LoginHandlerService.class.getName(), new PasswordCrypter(), null));
         // Register table creation for mail account storage.
         registerService(CreateTableService.class, new CreateMailAccountTables());
         registerService(CreateTableService.class, new CreateIDSequenceTable());
@@ -532,27 +558,27 @@ public final class ServerActivator extends HousekeepingActivator {
             props.put(STR_IDENTIFIER, "com.openexchange.contact");
             registerService(DataSource.class, new ContactDataSource(), props);
         }
-//        {
-//            final InlineImageDataSource dataSource = InlineImageDataSource.getInstance();
-//            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-//            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
-//            registerService(DataSource.class, dataSource, props);
-//            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
-//        }
-//        {
-//            final ContactImageDataSource dataSource = ContactImageDataSource.getInstance();
-//            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-//            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
-//            registerService(DataSource.class, dataSource, props);
-//            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
-//        }
-//        {
-//            final ManagedFileImageDataSource dataSource = new ManagedFileImageDataSource();
-//            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-//            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
-//            registerService(DataSource.class, dataSource, props);
-//            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
-//        }
+        // {
+        // final InlineImageDataSource dataSource = InlineImageDataSource.getInstance();
+        // final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+        // props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+        // registerService(DataSource.class, dataSource, props);
+        // ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
+        // }
+        // {
+        // final ContactImageDataSource dataSource = ContactImageDataSource.getInstance();
+        // final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+        // props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+        // registerService(DataSource.class, dataSource, props);
+        // ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
+        // }
+        // {
+        // final ManagedFileImageDataSource dataSource = new ManagedFileImageDataSource();
+        // final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+        // props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+        // registerService(DataSource.class, dataSource, props);
+        // ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
+        // }
         /*
          * Register data handlers
          */
@@ -645,7 +671,7 @@ public final class ServerActivator extends HousekeepingActivator {
             /*
              * Close service trackers
              */
-            for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
+            for (final ServiceTracker<?, ?> tracker : serviceTrackerList) {
                 tracker.close();
             }
             closeTrackers();
@@ -688,27 +714,27 @@ public final class ServerActivator extends HousekeepingActivator {
         http.registerServlet("/servlet/webdav.attachments", new com.openexchange.webdav.attachments(), null, null);
         http.registerServlet("/servlet/webdav.infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.freebusy", new com.openexchange.webdav.freebusy(), null, null);
-//        http.registerServlet(prefix+"tasks", new com.openexchange.ajax.Tasks(), null, null);
-//        http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
-//        http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);
+        // http.registerServlet(prefix+"tasks", new com.openexchange.ajax.Tasks(), null, null);
+        // http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
+        // http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);
 
         final String prefix = Dispatcher.PREFIX.get();
-        http.registerServlet(prefix+"mail.attachment", new com.openexchange.ajax.MailAttachment(), null, null);
+        http.registerServlet(prefix + "mail.attachment", new com.openexchange.ajax.MailAttachment(), null, null);
         // http.registerServlet(prefix+"calendar", new com.openexchange.ajax.Appointment(), null, null);
         // http.registerServlet(prefix+"config", new com.openexchange.ajax.ConfigMenu(), null, null);
         // http.registerServlet(prefix+"attachment", new com.openexchange.ajax.Attachment(), null, null);
         // http.registerServlet(prefix+"reminder", new com.openexchange.ajax.Reminder(), null, null);
         // http.registerServlet(prefix+"group", new com.openexchange.ajax.Group(), null, null);
         // http.registerServlet(prefix+"resource", new com.openexchange.ajax.Resource(), null, null);
-        http.registerServlet(prefix+"link", new com.openexchange.ajax.Link(), null, null);
-        http.registerServlet(prefix+"multiple", new com.openexchange.ajax.Multiple(), null, null);
+        http.registerServlet(prefix + "link", new com.openexchange.ajax.Link(), null, null);
+        http.registerServlet(prefix + "multiple", new com.openexchange.ajax.Multiple(), null, null);
         // http.registerServlet(prefix+"quota", new com.openexchange.ajax.Quota(), null, null);
-        http.registerServlet(prefix+"control", new com.openexchange.ajax.ConfigJump(), null, null);
+        http.registerServlet(prefix + "control", new com.openexchange.ajax.ConfigJump(), null, null);
         // http.registerServlet(prefix+"file", new com.openexchange.ajax.AJAXFile(), null, null);
         // http.registerServlet(prefix+"import", new com.openexchange.ajax.ImportServlet(), null, null);
         // http.registerServlet(prefix+"export", new com.openexchange.ajax.ExportServlet(), null, null);
-        //http.registerServlet(prefix+"image", new com.openexchange.image.servlet.ImageServlet(), null, null);
-        http.registerServlet(prefix+"sync", new com.openexchange.ajax.SyncServlet(), null, null);
+        // http.registerServlet(prefix+"image", new com.openexchange.image.servlet.ImageServlet(), null, null);
+        http.registerServlet(prefix + "sync", new com.openexchange.ajax.SyncServlet(), null, null);
     }
 
 }

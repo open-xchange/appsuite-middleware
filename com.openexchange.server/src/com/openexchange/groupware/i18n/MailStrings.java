@@ -140,7 +140,7 @@ public class MailStrings implements LocalizableStrings {
 
     // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
     // Indicates the elapsed date for affected message's attachments
-    public static final String PUBLISHED_ATTACHMENTS_APPENDIX = "The links will be deleted by #DATE#";
+    public static final String PUBLISHED_ATTACHMENTS_APPENDIX = "The links will be deleted on #DATE#";
 
     // The greeting used for form mails. E.g.
     // "Dear Sir or Madam Jane Doe"

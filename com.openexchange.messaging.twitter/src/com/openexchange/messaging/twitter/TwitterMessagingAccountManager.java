@@ -75,9 +75,12 @@ public final class TwitterMessagingAccountManager extends DefaultMessagingAccoun
     protected MessagingAccount modifyIncoming(final MessagingAccount account) throws OXException {
         final Map<String, Object> configuration = account.getConfiguration();
         if (null != configuration) {
-            final Integer id = (Integer) configuration.get(TwitterConstants.TWITTER_OAUTH_ACCOUNT);
-            if (null != id) {
+            final Object value = configuration.get(TwitterConstants.TWITTER_OAUTH_ACCOUNT);
+            if (value instanceof Integer) {
+                final Integer id = (Integer) value;
                 configuration.put(TwitterConstants.TWITTER_OAUTH_ACCOUNT, id.toString());
+            } else {
+                configuration.remove(TwitterConstants.TWITTER_OAUTH_ACCOUNT);
             }
         }
         return account;

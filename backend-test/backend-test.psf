@@ -37,6 +37,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.microformats"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.templating"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.test"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.textxtraction"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.threadpool"/>
 </provider>
 </psf>

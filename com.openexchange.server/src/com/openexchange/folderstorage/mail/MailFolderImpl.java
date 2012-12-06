@@ -86,9 +86,9 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailFolderImpl} - A mail folder.
@@ -100,8 +100,9 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private static final long serialVersionUID = 6445442372690458946L;
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailFolderImpl.class));
-
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
 
     /**
      * The mail folder content type.
@@ -142,16 +143,11 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
 
     }
 
-    private MailFolderType mailFolderType;
-
+    private final MailFolderType mailFolderType;
     private final boolean cacheable;
-
     private final String fullName;
-
     private final int accountId;
-
     private final int userId;
-
     private final int contextId;
 
     private static final int BIT_USER_FLAG = (1 << 29);
@@ -185,7 +181,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
      * @param mailConfig The mail configuration
      * @param user The user
      * @param context The context
-     * @param fullnameProvider The (optional) fullname provider
+     * @param fullnameProvider The (optional) full name provider
      * @throws OXException If creation fails
      */
     public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final User user, final Context context, final DefaultFolderFullnameProvider fullnameProvider) throws OXException {
@@ -240,7 +236,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
         } else {
             mp = mailFolder.getOwnPermission();
-            mailFolderType = MailFolderType.NONE;
+            MailFolderType mailFolderType = MailFolderType.NONE;
             /*
              * Check if entity's permission allows to read the folder: Every mail folder listed is at least visible to user
              */
@@ -249,7 +245,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                     pe.setFolderPermission(Permission.READ_FOLDER);
                 }
             }
-            final boolean translateDefaultFolders = MailServiceRegistry.getServiceRegistry().getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.translateDefaultFolders", true);
+            final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            final boolean translateDefaultFolders = null == configurationService || configurationService.getBoolProperty("com.openexchange.mail.translateDefaultFolders", true);
             if (mailFolder.containsDefaultFolderType()) {
                 switch (mailFolder.getDefaultFolderType()) {
                 case INBOX:
@@ -312,6 +309,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             } else {
                 mailFolderType = MailFolderType.NONE;
             }
+            this.mailFolderType = mailFolderType;
         }
         if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
             // Cannot contain subfolders; therefore deny subfolder creation
@@ -344,19 +342,14 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             cache = false;
         } else if (mailFolder.isTrash()) { // Trash folder must not be cacheable
             cache = false;
-        } else if (isUnifiedMail()) { // Unified mail must not be cacheable
+        } else if (isUnifiedMail(mailFolder)) { // Unified mail must not be cacheable
             cache = false;
         }
         cacheable = cache;
     }
 
-    private boolean isUnifiedMail() throws OXException {
-        try {
-            return UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(MailServiceRegistry.getServiceRegistry().getService(
-                MailAccountStorageService.class).getMailAccount(accountId, userId, contextId).getMailProtocol());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+    private boolean isUnifiedMail(final MailFolder mailFolder) {
+        return PROTOCOL_UNIFIED_INBOX.equals(mailFolder.getProperty("protocol"));
     }
 
     /**

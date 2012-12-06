@@ -50,7 +50,6 @@
 package com.openexchange.groupware.contact.datasource;
 
 import java.io.InputStream;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.Data;
@@ -59,6 +58,7 @@ import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.image.ImageDataSource;
@@ -102,7 +102,7 @@ public final class ContactImageDataSource implements ImageDataSource {
     public String generateUrl(final ImageLocation imageLocation, final Session session) throws OXException {
         final StringBuilder sb = new StringBuilder(64);
         ImageUtility.startImageUrl(imageLocation, session, this, true, sb);
-        final Contact contact = optContact(imageLocation, session);
+        final Contact contact = optContact(session, imageLocation, ContactField.LAST_MODIFIED);
         if (null != contact) {
             sb.append('&').append("timestamp=").append(contact.getLastModified().getTime());
         }
@@ -140,7 +140,7 @@ public final class ContactImageDataSource implements ImageDataSource {
         // builder.append(delim).append(imageLocation.getId());
         // builder.append(delim).append(session.getUserId());
         // builder.append(delim).append(session.getContextId());
-        final Contact contact = optContact(imageLocation, session);
+        final Contact contact = optContact(session, imageLocation, ContactField.LAST_MODIFIED);
         if (null != contact) {
             builder.append(delim).append(contact.getLastModified().getTime());
         }
@@ -183,7 +183,7 @@ public final class ContactImageDataSource implements ImageDataSource {
         /*
          * Get contact
          */
-        final Contact contact = optContact(objectId, folder, session);
+        final Contact contact = optContact(session, objectId, folder, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE); 
         /*
          * Return contact image
          */
@@ -205,28 +205,42 @@ public final class ContactImageDataSource implements ImageDataSource {
         return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(imageBytes)), properties);
     }
 
-    private static Contact optContact(final ImageLocation imageLocation, final Session session) throws OXException {
-        return optContact(ImageUtility.getUnsignedInteger(imageLocation.getId()), ImageUtility.getUnsignedInteger(imageLocation.getFolder()), session);
+    /**
+     * Gets a contact with specified fields.
+     * 
+     * @param session The current session
+     * @param imageLocation The image location containing the contact information
+     * @param fields The contact fields to retrieve
+     * @return The contact, or <code>null</code> if it can't be found or loaded.
+     * @throws OXException
+     */
+    private static Contact optContact(Session session, ImageLocation imageLocation, ContactField...fields) throws OXException {
+        return optContact(session, ImageUtility.getUnsignedInteger(imageLocation.getId()), 
+            ImageUtility.getUnsignedInteger(imageLocation.getFolder()), fields);
     }
-
-    private static Contact optContact(final int objectId, final int folder, final Session session) throws OXException {
-    	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, false);
-    	if (null != contactService) {
-    		return contactService.getContact(session, Integer.toString(folder),Integer.toString(objectId), 
-    				new ContactField[] { ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.LAST_MODIFIED } );
-    	} else {
-    		return null;
-    	}    	
-//        try {
-//            final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class);
-//            if (null == discoveryService) {
-//                return null;
-//            }
-//            final ContactInterface contactInterface = discoveryService.newContactInterface(folder, session);
-//            return contactInterface.getObjectById(objectId, folder);
-//        } catch (final OXException e) {
-//            throw new OXException(e);
-//        }
+    
+    /**
+     * Gets a contact with specified fields.
+     * 
+     * @param objectId The object ID of the contact to get
+     * @param folder The parent folder ID of the contact to get
+     * @param session The current session
+     * @param fields The contact fields to retrieve
+     * @return The contact, or <code>null</code> if it can't be found or loaded.
+     * @throws OXException
+     */
+    private static Contact optContact(Session session, int objectID, int folderID, ContactField...fields) throws OXException {
+        ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, false);
+        try {
+            return contactService.getContact(session, Integer.toString(folderID),Integer.toString(objectID), fields);
+        } catch (OXException e) {
+            if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e) || ContactExceptionCodes.NOT_IN_FOLDER.equals(e)) {
+                LOG.debug("unable to get contact", e);
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**

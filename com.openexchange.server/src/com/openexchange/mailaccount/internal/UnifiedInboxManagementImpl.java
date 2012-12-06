@@ -264,8 +264,10 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                stmt = connection.prepareStatement("SELECT id FROM user_mail_account WHERE cid = 1337 AND user = 17 AND url LIKE ?");
-                stmt.setString(1, UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX + '%');
+                stmt = connection.prepareStatement("SELECT id FROM user_mail_account WHERE cid = ? AND user = ? AND url LIKE ?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setString(3, UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX + '%');
                 rs = stmt.executeQuery();
                 return rs.next() ? rs.getInt(1) : -1;
             } catch (final SQLException e) {

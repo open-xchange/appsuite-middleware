@@ -60,6 +60,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.classloader.osgi.DynamicClassLoaderActivator;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.log.LogFactory;
@@ -80,12 +81,10 @@ public final class GlobalActivator implements BundleActivator {
     private static final Log LOG = LogFactory.getLog(GlobalActivator.class);
 
     private Initialization initialization;
-
     protected ServiceTracker<StringParser,StringParser> parserTracker = null;
-
     private ServiceRegistration<StringParser> parserRegistration;
-
     private List<ServiceTracker<?,?>> trackers;
+    private volatile DynamicClassLoaderActivator dynamicClassLoaderActivator;
 
     /**
      * Initializes a new {@link GlobalActivator}
@@ -126,6 +125,10 @@ public final class GlobalActivator implements BundleActivator {
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
+
+            final DynamicClassLoaderActivator dynamicClassLoaderActivator = new DynamicClassLoaderActivator();
+            dynamicClassLoaderActivator.start(context);
+            this.dynamicClassLoaderActivator = dynamicClassLoaderActivator;
 
             LOG.debug("Global bundle successfully started");
         } catch (final Throwable t) {
@@ -183,6 +186,11 @@ public final class GlobalActivator implements BundleActivator {
     @Override
     public void stop(final BundleContext context) throws Exception {
         try {
+            final DynamicClassLoaderActivator dynamicClassLoaderActivator = this.dynamicClassLoaderActivator;
+            if (null != dynamicClassLoaderActivator) {
+                dynamicClassLoaderActivator.stop(context);
+                this.dynamicClassLoaderActivator = null;
+            }
             if (null != trackers) {
                 while (!trackers.isEmpty()) {
                     trackers.remove(0).close();

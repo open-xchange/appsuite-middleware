@@ -52,7 +52,6 @@ import org.apache.commons.logging.Log;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.eav.UUIDService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.uuid.impl.UUIDServiceImpl;
 

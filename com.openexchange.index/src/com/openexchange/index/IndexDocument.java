@@ -49,7 +49,6 @@
 
 package com.openexchange.index;
 
-import java.util.Map;
 
 /**
  * {@link IndexDocument} - Represents an indexed document.
@@ -58,28 +57,10 @@ import java.util.Map;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexDocument<V> {
-
-    /**
-     * The document's type.
-     */
-    public static enum Type {
-        MAIL, CONTACT, APPOINTMENT, TASK, INFOSTORE_DOCUMENT;
-    }
-
     /**
      * Gets the object associated with this index document.
      * 
      * @return The associated object
      */
     public V getObject();
-    
-    public Map<String, Object> getProperties();
-
-    /**
-     * Gets the document's type.
-     * 
-     * @return The type
-     */
-    Type getType();
-
 }

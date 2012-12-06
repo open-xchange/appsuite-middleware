@@ -52,15 +52,15 @@ package com.openexchange.realtime.atmosphere;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link OXRTConversionHandler} - Handles Conversion of Stanzas for a given
- * namespace. 
- *
+ * {@link OXRTConversionHandler} - Handles Conversion of Stanzas for a given namespace by telling the Stanza payload the format it should
+ * convert itslef into, getting the MessageDispatcher and delegating the further processing of the Stanza.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class OXRTConversionHandler implements OXRTHandler {
@@ -70,27 +70,31 @@ public class OXRTConversionHandler implements OXRTHandler {
      */
     public static final AtomicReference<ServiceLookup> SERVICES_REFERENCE = new AtomicReference<ServiceLookup>();
 
-    private final String namespace, format;
-    
+    private final String format;
+    private final Class<? extends Stanza> stanzaClass;
+
     /**
      * Initializes a new {@link OXRTConversionHandler}.
-     * @param namespace the namespace of Stanzas this OXRTConversionHandler can handle
+     * 
+     * @param elementPath the path to an element in a namespace this OXRTConversionHandler can handle
      * @param format the format of POJOs that incoming Stanzas should be converted to
      */
-    public OXRTConversionHandler(String namespace, String format) {
-        super();
-        this.namespace = namespace;
+    public OXRTConversionHandler(Class<? extends Stanza> stanzaClass, String format) {
+        this.stanzaClass = stanzaClass;
         this.format = format;
     }
-    
+
     @Override
-    public String getNamespace() {
-        return namespace;
+    public Class<? extends Stanza> getStanzaClass() {
+        return stanzaClass; 
     }
 
     @Override
     public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        stanza.setPayload(stanza.getPayload().to(format, session));
+        Payload payload = stanza.getPayload();
+        if(payload != null) {
+            stanza.setPayload(payload.to(format, session));
+        }
         send(stanza, session);
     }
 
@@ -99,10 +103,10 @@ public class OXRTConversionHandler implements OXRTHandler {
         stanza.setPayload(stanza.getPayload().to("json", session));
         sender.send(stanza);
     }
-    
+
     /**
-     * Send the Stanza by getting the MessageDispatcher service and letting it
-     * handle the further processing of the Stanza. 
+     * Send the Stanza by getting the MessageDispatcher service and letting it handle the further processing of the Stanza.
+     * 
      * @param stanza the stanza to send
      * @param session the associated ServerSession
      * @throws OXException when sending the Stanza fails

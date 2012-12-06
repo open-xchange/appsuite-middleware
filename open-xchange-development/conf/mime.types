@@ -14,10 +14,11 @@ application/dsptype tsp
 application/ecmascript ecma
 application/excel xls
 application/font-tdpfr pfr
+application/font-woff woff
 application/futuresplash spl
 application/ghostview
 application/hyperstudio stk
-application/javascript js
+application/javascript
 application/json json
 application/mac-binhex40 hqx
 application/mac-compactpro cpt
@@ -387,7 +388,7 @@ application/x-httpd-php3 php3
 application/x-httpd-php3-preprocessed php3p
 application/x-httpd-php3-source phps
 application/x-java class
-application/x-javascript js
+application/x-javascript
 application/x-kdelnk
 application/x-koan skp skd skt skm
 application/x-latex latex
@@ -554,6 +555,7 @@ multipart/digest
 multipart/mixed
 multipart/parallel
 multipart/report
+text/cache-manifest appcache
 text/calendar ics ifb
 text/comma-separated-values csv
 text/css css
@@ -561,6 +563,7 @@ text/csv csv
 text/english
 text/enriched rtx
 text/html html htm
+text/javascript js
 text/mathml mml
 text/plain txt asc c cc h hh cpp hpp text conf def list log in
 text/prs.lines.tag dsc

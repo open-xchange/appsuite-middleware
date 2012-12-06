@@ -60,8 +60,9 @@ import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
-import com.openexchange.index.solr.internal.filestore.SolrFilestoreIndexAccess;
-import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
+import com.openexchange.index.solr.internal.attachments.SolrAttachmentIndexAccess;
+import com.openexchange.index.solr.internal.infostore.SolrInfostoreIndexAccess;
+import com.openexchange.index.solr.internal.mail.SolrMailIndexAccess;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.solr.SolrCoreIdentifier;
@@ -200,11 +201,17 @@ public class SolrIndexFacadeService implements IndexFacadeService {
         // TODO: Add other modules 
         switch(module) {
         
+//            case Types.EMAIL:
+//                return new MailSolrIndexAccess(identifier);
+            
             case Types.EMAIL:
-                return new MailSolrIndexAccess(identifier);
+                return new SolrMailIndexAccess(identifier);
                 
             case Types.INFOSTORE:
-                return new SolrFilestoreIndexAccess(identifier);
+                return new SolrInfostoreIndexAccess(identifier);
+                
+            case Types.ATTACHMENT:
+                return new SolrAttachmentIndexAccess(identifier);
                 
             default:
                 throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);

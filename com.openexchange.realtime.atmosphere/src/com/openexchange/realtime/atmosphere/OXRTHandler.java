@@ -68,17 +68,17 @@ import com.openexchange.tools.session.ServerSession;
 public interface OXRTHandler {
     
     /**
-     * Get the namespace of this OXRTHandler.
-     * @return the namespace this OXRTHandler is able to process
+     * Get the complete path to an element in a namespace that this OXRTHandler is able to process.
+     * @return the elementPath of elements this OXRTHandler is able to process.
      */
-	public String getNamespace();
+	public Class<? extends Stanza> getStanzaClass();
 	
 	/**
 	 * Handle an incoming {@link Stanza}.
 	 * <p>
 	 * Channel handlers can decide to delegate the processing of stanzas to the
 	 * proper {@OXRTHandler} when they can't be handled internally. The
-	 * OXRTHandler's concern is to process it so that the stanza can be handled
+	 * OXRTHandler's concern is to process and validate it so that the stanza can be handled
 	 * by the MessageDispatcher.
 	 * </p>
 	 * @param stanza the incoming stanza to process
@@ -99,4 +99,5 @@ public interface OXRTHandler {
 	 * @throws OXException
 	 */
 	public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException;
+	
 }

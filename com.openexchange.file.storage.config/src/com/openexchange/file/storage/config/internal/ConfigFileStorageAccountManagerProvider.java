@@ -53,8 +53,10 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.config.ConfigFileStorageAccount;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -76,14 +78,14 @@ public final class ConfigFileStorageAccountManagerProvider implements FileStorag
     }
 
     @Override
-    public boolean supports(final FileStorageService service) {
-        final Map<String, ConfigFileStorageAccount> accounts = parser.getAccountsFor(service.getId());
+    public boolean supports(final String serviceId) {
+        final Map<String, ConfigFileStorageAccountImpl> accounts = parser.getAccountsFor(serviceId);
         return (null != accounts && !accounts.isEmpty());
     }
 
     @Override
-    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
-        return new ConfigFileStorageAccountManager(service);
+    public FileStorageAccountManager getAccountManagerFor(final String serviceId) throws OXException {
+        return new ConfigFileStorageAccountManager(Services.getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId));
     }
 
     @Override
@@ -92,12 +94,23 @@ public final class ConfigFileStorageAccountManagerProvider implements FileStorag
     }
 
     @Override
-    public FileStorageAccountManager getAccountManager(String accountId, Session session) throws OXException {
-        ConfigFileStorageAccount storageAccount = parser.get(accountId);
+    public FileStorageAccountManager getAccountManager(final String accountId, final Session session) throws OXException {
+        final ConfigFileStorageAccount storageAccount = parser.get(accountId);
         if (null == storageAccount) {
             return null;
         }
-        return new ConfigFileStorageAccountManager(storageAccount.getFileStorageService());
+        FileStorageService fileStorageService = storageAccount.getFileStorageService();
+        if (null == fileStorageService) {
+            try {
+                fileStorageService = Services.getService(FileStorageServiceRegistry.class).getFileStorageService(storageAccount.getServiceId());
+            } catch (final OXException e) {
+                if (FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.equals(e)) {
+                    return null;
+                }
+                throw e;
+            }
+        }
+        return new ConfigFileStorageAccountManager(fileStorageService);
     }
 
 }

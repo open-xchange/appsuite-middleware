@@ -75,7 +75,6 @@ import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -138,6 +137,7 @@ import com.openexchange.i18n.tools.replacement.StringReplacement;
 import com.openexchange.i18n.tools.replacement.TaskActionReplacement;
 import com.openexchange.i18n.tools.replacement.TaskPriorityReplacement;
 import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -343,11 +343,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     @Override
     public void appointmentWaiting(final Appointment appointmentObj, final Session session) {
-        sendNotification(null, appointmentObj, session, new AppointmentState(
-                new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_NONE),
-                new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_NONE_ACCEPTED),
-                Notifications.APPOINTMENT_CONFIRMATION_MAIL,
-                State.Type.NONE_ACCEPTED), false, false, false);
     }
 
     @Override
@@ -563,7 +558,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                             (CalendarDataObject) oldApp);
                     }
                 } catch (final Exception e) {
-                    if (e instanceof OXException || e instanceof OXException) {
+                    if (e instanceof OXException) {
                         final StringBuilder builder = new StringBuilder(256).append(
                             "Could not set correct recurrence information in notification for appointment").append(title).append(" (").append(
                             newObj.getObjectID()).append("). Cause:\n");
@@ -1292,8 +1287,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     private static boolean isAscii(final byte[] bytes) {
         boolean isAscci = true;
         for (int i = 0; isAscci && (i < bytes.length); i++) {
-            final byte b = bytes[i];
-            isAscci = (b < 128 && b >= 0);
+            isAscci = (bytes[i] >= 0);
         }
         return isAscci;
     }

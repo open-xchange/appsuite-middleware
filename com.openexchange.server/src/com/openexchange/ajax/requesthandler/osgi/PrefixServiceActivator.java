@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.osgi;
 
+import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.config.ConfigurationService;
@@ -88,7 +89,14 @@ public class PrefixServiceActivator extends HousekeepingActivator {
 	        ServerServiceRegistry.getInstance().addService(DispatcherPrefixService.class, prefixService);
 	        ImageMatcher.setPrefixService(prefixService);
 	        registerService(DispatcherPrefixService.class, prefixService);
-		} catch (final Throwable t) {
+		} catch (final Exception e) {
+            final Log log = com.openexchange.log.Log.loggerFor(PrefixServiceActivator.class);
+            log.error("DispatcherPrefixService could not be registered", e);
+            throw e;
+        } catch (final Error e) {
+		    final Log log = com.openexchange.log.Log.loggerFor(PrefixServiceActivator.class);
+		    log.error("DispatcherPrefixService could not be registered", e);
+		    throw e;
 		}
 
 	}

@@ -449,6 +449,7 @@ public class Login extends AJAXServlet {
             @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 final Response response = new Response();
+                Session session = null;
                 try {
                     final String sessionId = req.getParameter(PARAMETER_SESSION);
                     if (null == sessionId) {
@@ -470,7 +471,7 @@ public class Login extends AJAXServlet {
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_IP_PARAM);
                     }
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
-                    final Session session = sessiondService.getSession(sessionId);
+                    session = sessiondService.getSession(sessionId);
                     final LoginConfiguration conf = confReference.get();
                     if (session != null) {
                         SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr(), conf.ipCheckWhitelist);
@@ -501,7 +502,7 @@ public class Login extends AJAXServlet {
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
                 resp.setStatus(HttpServletResponse.SC_OK);
                 try {
-                    ResponseWriter.write(response, resp.getWriter());
+                    ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
                 } catch (final JSONException e) {
                     log(RESPONSE_ERROR, e);
                     sendError(resp);
@@ -727,7 +728,7 @@ public class Login extends AJAXServlet {
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
                 try {
                     if (response.hasError()) {
-                        ResponseWriter.write(response, resp.getWriter());
+                        ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
                     } else {
                         ((JSONObject) response.getData()).write(resp.getWriter());
                     }
@@ -918,7 +919,7 @@ public class Login extends AJAXServlet {
             req.getSession();
             final Response response = new Response();
             response.setData("1");
-            ResponseWriter.write(response, resp.getWriter());
+            ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
         } finally {
             if (LogProperties.isEnabled()) {
                 final Props properties = LogProperties.optLogProperties();

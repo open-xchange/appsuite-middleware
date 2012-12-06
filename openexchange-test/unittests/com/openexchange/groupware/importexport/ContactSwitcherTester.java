@@ -69,7 +69,7 @@ import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFo
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
 import com.openexchange.groupware.contact.helpers.SplitBirthdayFieldsSetter;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.importexport.importers.OutlookCSVContactImporter;
+import com.openexchange.importexport.importers.CSVContactImporter;
 
 /**
  * This tests setting and getting options of the Switchers used in ...contact.helpers.
@@ -202,17 +202,19 @@ public class ContactSwitcherTester extends TestCase {
 		//setting up a proper setter for SimpleDateFormat
 		final ContactSwitcherForSimpleDateFormat switcher = new ContactSwitcherForSimpleDateFormat();
 		switcher.setDelegate(new ContactSetter());
-		switcher.addDateFormat( OutlookCSVContactImporter.getAmericanDateNotation());
-		switcher.addDateFormat( OutlookCSVContactImporter.getGermanDateNotation());
+		SimpleDateFormat americanDateFormat = new SimpleDateFormat("yyyy/dd/MM");
+		SimpleDateFormat germanDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+		switcher.addDateFormat( americanDateFormat);
+		switcher.addDateFormat( germanDateFormat);
 
 		//setting
 		String value = "1981/03/05";
 		conObj = (Contact) field.doSwitch(switcher, conObj, value);
-		assertEquals("Setting of date via Outlook-simple-date value does work" , conObj.getBirthday(), OutlookCSVContactImporter.getAmericanDateNotation().parse(value));
+		assertEquals("Setting of date via Outlook-simple-date value does work" , conObj.getBirthday(), americanDateFormat.parse(value));
 
 		value = "05.03.1981";
 		conObj = (Contact) field.doSwitch(switcher, conObj, value);
-		assertEquals("Setting of date via Outlook-simple-date value does work" , conObj.getBirthday(), OutlookCSVContactImporter.getGermanDateNotation().parse(value));
+		assertEquals("Setting of date via Outlook-simple-date value does work" , conObj.getBirthday(), germanDateFormat.parse(value));
 	}
 
 	public void testBooleanSwitchingForBug7710() throws OXException{

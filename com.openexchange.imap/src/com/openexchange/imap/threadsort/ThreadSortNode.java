@@ -62,9 +62,9 @@ import java.util.List;
 public class ThreadSortNode {
 
     /**
-     * The number of this tree node's message.
+     * The message information of this tree node's message.
      */
-    final MessageId msgId;
+    final MessageInfo msgInfo;
 
     /**
      * The UID.
@@ -76,10 +76,11 @@ public class ThreadSortNode {
     /**
      * Initializes a new {@link ThreadSortNode}.
      *
-     * @param msgId The identifier of this tree node's message.
+     * @param msgInfo The  message information of this tree node's message.
      */
-    public ThreadSortNode(final MessageId msgId, final long uid) {
-        this.msgId = msgId;
+    public ThreadSortNode(final MessageInfo msgInfo, final long uid) {
+        super();
+        this.msgInfo = msgInfo;
         childs = new ArrayList<ThreadSortNode>();
         this.uid = uid;
     }
@@ -104,7 +105,7 @@ public class ThreadSortNode {
 
     @Override
     public String toString() {
-        return new StringBuilder().append(msgId).append(' ').append(childs).toString();
+        return new StringBuilder().append(msgInfo).append(' ').append(childs).toString();
     }
 
     /**
@@ -117,12 +118,12 @@ public class ThreadSortNode {
     }
 
     /**
-     * Gets the message identifier
+     * Gets the message information of this tree node's message.
      *
-     * @return The message identifier
+     * @return The message information of this tree node's message
      */
-    public MessageId getMsgId() {
-        return msgId;
+    public MessageInfo getMsgInfo() {
+        return msgInfo;
     }
 
     /**
@@ -131,7 +132,7 @@ public class ThreadSortNode {
      * @return The number of this tree node's message.
      */
     public int getMsgNum() {
-        return msgId.getMessageNumber();
+        return msgInfo.getMessageNumber();
     }
 
     /**
@@ -158,7 +159,7 @@ public class ThreadSortNode {
     }
 
     private static boolean checkFullName(final String fullName, final ThreadSortNode node) {
-        if (!fullName.equals(node.msgId.getFullName())) {
+        if (!fullName.equals(node.msgInfo.getFullName())) {
             return false;
         }
         final List<ThreadSortNode> childs = node.getChilds();
@@ -184,7 +185,7 @@ public class ThreadSortNode {
             return;
         }
         for (final ThreadSortNode node : threadList) {
-            node.msgId.setFullName(fullName);
+            node.msgInfo.setFullName(fullName);
             applyFullName(fullName, node.getChilds());
         }
     }

@@ -62,10 +62,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 public final class FileStorageActivator extends HousekeepingActivator {
 
     private volatile OSGIFileStorageServiceRegistry registry;
-
     private volatile OSGIFileStorageAccountManagerLookupService lookupService;
-
-    private volatile OSGIEventAdminLookup eventAdminLookup;
 
     /**
      * Initializes a new {@link FileStorageActivator}.
@@ -95,11 +92,8 @@ public final class FileStorageActivator extends HousekeepingActivator {
             /*
              * Start provider tracking
              */
-            final OSGIEventAdminLookup eventAdminLookup = new OSGIEventAdminLookup();
-            eventAdminLookup.start(context);
-            final OSGIFileStorageAccountManagerLookupService lookupService = new OSGIFileStorageAccountManagerLookupService(eventAdminLookup);
+            final OSGIFileStorageAccountManagerLookupService lookupService = new OSGIFileStorageAccountManagerLookupService();
             lookupService.start(context);
-            this.eventAdminLookup = eventAdminLookup;
             this.lookupService = lookupService;
             /*
              * Register services
@@ -135,11 +129,6 @@ public final class FileStorageActivator extends HousekeepingActivator {
             if (null != registry) {
                 registry.stop();
                 this.registry = null;
-            }
-            final OSGIEventAdminLookup eventAdminLookup = this.eventAdminLookup;
-            if (null != eventAdminLookup) {
-                eventAdminLookup.stop();
-                this.eventAdminLookup = null;
             }
             cleanUp();
         } catch (final Exception e) {

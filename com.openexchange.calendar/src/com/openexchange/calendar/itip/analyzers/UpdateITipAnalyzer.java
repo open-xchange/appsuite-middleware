@@ -147,25 +147,28 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (message.getOwner() > 0 && message.getOwner() != session.getUserId()) {
             owner = message.getOwner();
         }
-
+        if (owner != session.getUserId()) {
+            OXFolderAccess oxfs = new OXFolderAccess(ctx);
+            FolderObject defaultFolder = oxfs.getDefaultFolder(owner, FolderObject.CALENDAR);
+            EffectivePermission permission = oxfs.getFolderPermission(
+                defaultFolder.getObjectID(),
+                session.getUserId(),
+                UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx));
+            if (permission.canCreateObjects()) {
+                original.setParentFolderID(defaultFolder.getObjectID());
+            } else {
+                analysis.addAnnotation(new ITipAnnotation(Messages.SHARED_FOLDER, locale));
+                return analysis;
+            }
+        }
+        
         if (differ && message.getDataObject() != null) {
             CalendarDataObject dataObject = message.getDataObject().clone();
             ensureParticipant(dataObject, session, owner);
-
-            if (owner != session.getUserId()) {
-                OXFolderAccess oxfs = new OXFolderAccess(ctx);
-                FolderObject defaultFolder = oxfs.getDefaultFolder(owner, FolderObject.CALENDAR);
-                EffectivePermission permission = oxfs.getFolderPermission(
-                    defaultFolder.getObjectID(),
-                    session.getUserId(),
-                    UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx));
-                if (permission.canCreateObjects()) {
-                    dataObject.setParentFolderID(defaultFolder.getObjectID());
-                } else {
-                    analysis.addAnnotation(new ITipAnnotation(Messages.SHARED_FOLDER, locale));
-                    return analysis;
-                }
+            if (original != null) {
+                dataObject.setParentFolderID(original.getParentFolderID());
             }
+            
         	change.setNewAppointment(dataObject);
 
             change.setConflicts(util.getConflicts(message.getDataObject(), session));

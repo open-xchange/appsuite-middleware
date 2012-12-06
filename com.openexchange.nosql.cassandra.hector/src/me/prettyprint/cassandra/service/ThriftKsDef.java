@@ -131,8 +131,7 @@ public class ThriftKsDef implements KeyspaceDefinition {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
   }
 
-  @Override
-public boolean isDurableWrites() {
+  public boolean isDurableWrites() {
     return durableWrites;
   }
 

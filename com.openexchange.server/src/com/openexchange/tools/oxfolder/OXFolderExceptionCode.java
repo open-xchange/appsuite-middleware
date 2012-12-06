@@ -52,7 +52,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      * Operation was canceled due to a missing folder attribute
      * </p>
      */
-    MISSING_FOLDER_ATTRIBUTE(OXFolderExceptionMessage.MISSING_FOLDER_ATTRIBUTE_MSG, Category.CATEGORY_ERROR, 7),
+    MISSING_FOLDER_ATTRIBUTE(OXFolderExceptionMessage.MISSING_FOLDER_ATTRIBUTE_MSG, Category.CATEGORY_USER_INPUT, 7),
     /**
      * Folder %1$s does not exist in context %2$s
      * <p>
@@ -477,6 +477,10 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      * Operation may only be performed for context administrator.
      */
     ADMIN_OP_ONLY(OXFolderExceptionMessage.ADMIN_OP_ONLY_MSG, Category.CATEGORY_PERMISSION_DENIED, 89),
+    /**
+     * Folder %1$s must not be deleted in context %2$s.
+     */
+    DELETE_DENIED(OXFolderExceptionMessage.DELETE_DENIED_MSG, Category.CATEGORY_PERMISSION_DENIED, 90),
 
     ;
 

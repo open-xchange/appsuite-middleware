@@ -56,6 +56,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.json.FileStorageAccountConstants;
@@ -94,8 +95,14 @@ public class AllAction extends AbstractFileStorageAccountAction {
 
         final JSONArray result = new JSONArray();
 
-        for (final FileStorageService messagingService : services) {
-            for (final FileStorageAccount account : messagingService.getAccountManager().getAccounts(session)) {
+        for (final FileStorageService fsService : services) {
+            final List<FileStorageAccount> userAccounts;
+            if (fsService instanceof AccountAware) {
+                userAccounts = ((AccountAware) fsService).getAccounts(session);
+            } else {
+                userAccounts = fsService.getAccountManager().getAccounts(session);
+            }
+            for (final FileStorageAccount account : userAccounts) {
                 result.put(writer.write(account));
             }
         }

@@ -69,7 +69,9 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
+import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -283,6 +285,7 @@ public abstract class MailConfig {
         }
         mailConfig.accountId = accountId;
         mailConfig.session = session;
+        mailConfig.applyStandardNames(mailAccount);
         fillLoginAndPassword(mailConfig, session, UserStorage.getStorageUser(userId, contextId).getLoginInfo(), mailAccount);
         String serverURL = MailConfig.getMailServerURL(mailAccount);
         if (serverURL == null) {
@@ -589,25 +592,94 @@ public abstract class MailConfig {
                 mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, mailAccount.getId(), mailAccount.getLogin(), mailAccount.getMailServer());
             }
         }
+        mailConfig.doCustomParsing(mailAccount, session);
     }
+
+    private static final int LENGTH = 6;
 
     /*-
      * Member section
      */
 
     protected int accountId;
-
     protected Session session;
-
     protected String login;
-
     protected String password;
+    protected final String[] standardNames;
+    protected final String[] standardFullNames;
 
     /**
      * Initializes a new {@link MailConfig}
      */
     protected MailConfig() {
         super();
+        standardFullNames = new String[LENGTH];
+        standardNames = new String[LENGTH];
+    }
+
+    /**
+     * Gets the standard names.
+     * 
+     * @return The standard names
+     */
+    public String[] getStandardNames() {
+        final String[] ret = new String[LENGTH];
+        System.arraycopy(standardNames, 0, ret, 0, LENGTH);
+        return ret;
+    }
+
+    /**
+     * Gets the standard full names.
+     * 
+     * @return The standard full names
+     */
+    public String[] getStandardFullNames() {
+        final String[] ret = new String[LENGTH];
+        System.arraycopy(standardFullNames, 0, ret, 0, LENGTH);
+        return ret;
+    }
+
+    /**
+     * Applies folder name information from given mail account
+     * 
+     * @param mailAccount The mail account
+     */
+    public void applyStandardNames(final MailAccount mailAccount) {
+        if (null == mailAccount) {
+            return;
+        }
+        put(StorageUtility.INDEX_CONFIRMED_HAM, mailAccount.getConfirmedHam(), standardNames);
+        put(StorageUtility.INDEX_CONFIRMED_SPAM, mailAccount.getConfirmedSpam(), standardNames);
+        put(StorageUtility.INDEX_DRAFTS, mailAccount.getDrafts(), standardNames);
+        put(StorageUtility.INDEX_SENT, mailAccount.getSent(), standardNames);
+        put(StorageUtility.INDEX_SPAM, mailAccount.getSpam(), standardNames);
+        put(StorageUtility.INDEX_TRASH, mailAccount.getTrash(), standardNames);
+
+        put(StorageUtility.INDEX_CONFIRMED_HAM, mailAccount.getConfirmedHamFullname(), standardFullNames);
+        put(StorageUtility.INDEX_CONFIRMED_SPAM, mailAccount.getConfirmedSpamFullname(), standardFullNames);
+        put(StorageUtility.INDEX_DRAFTS, mailAccount.getDraftsFullname(), standardFullNames);
+        put(StorageUtility.INDEX_SENT, mailAccount.getSentFullname(), standardFullNames);
+        put(StorageUtility.INDEX_SPAM, mailAccount.getSpamFullname(), standardFullNames);
+        put(StorageUtility.INDEX_TRASH, mailAccount.getTrashFullname(), standardFullNames);
+    }
+
+    private static void put(final int index, final String value, final String[] arr) {
+        if (isEmpty(value)) {
+            return;
+        }
+        arr[index] = MailFolderUtility.prepareMailFolderParam(value).getFullname();
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     @Override
@@ -775,6 +847,20 @@ public abstract class MailConfig {
      */
     public void setPassword(final String password) {
         this.password = password;
+    }
+
+    /**
+     * Performs optional custom parsing.
+     * <p>
+     * Returns <code>false</code> by default.
+     * 
+     * @param account The associated mail account
+     * @param session The user's session
+     * @return <code>true</code> if custom parsing has been performed; otherwise <code>false</code>
+     * @throws OXException If custom parsing fails
+     */
+    protected boolean doCustomParsing(MailAccount account, Session session) throws OXException {
+        return false;
     }
 
     /**

@@ -53,7 +53,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,6 +63,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.parsing.POParser;
 import com.openexchange.i18n.parsing.Translations;
+import com.openexchange.java.Streams;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -72,40 +72,50 @@ public class POTranslationsDiscoverer extends FileDiscoverer {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(POTranslationsDiscoverer.class));
 
+    /**
+     * Initializes a new {@link POTranslationsDiscoverer}.
+     * 
+     * @param dir The directory
+     * @throws FileNotFoundException If directory could not be found
+     */
     public POTranslationsDiscoverer(final File dir) throws FileNotFoundException {
         super(dir);
     }
 
+    /**
+     * Gets the translations available by <code>.po</code> files.
+     * 
+     * @return The translations
+     */
     public List<Translations> getTranslations() {
         final String[] files = getFilesFromLanguageFolder(".po");
         if (files.length == 0) {
+            LOG.info("No .po files found in directory \"" + getDirectory() + "\"");
             return Collections.emptyList();
         }
         final List<Translations> list = new ArrayList<Translations>(files.length);
+        final File directory = getDirectory();
         for (final String file : files) {
-            Locale l = null;
             InputStream input = null;
-
             try {
-                l = getLocale(file);
-                final File poFile = new File(getDirectory(), file);
-                input = new BufferedInputStream(new FileInputStream(poFile));
-                // POParser remembers headers of PO file. Therefore a new one is needed for every file.
-                final Translations translations = new POParser().parse(input, poFile.getAbsolutePath());
-                translations.setLocale(l);
-                list.add(translations);
+                final Locale l = getLocale(file);
+                if (null == l) {
+                    LOG.warn(".po file does not match name pattern: " + file);
+                } else {
+                    final File poFile = new File(directory, file);
+                    input = new BufferedInputStream(new FileInputStream(poFile));
+                    // POParser remembers headers of PO file. Therefore a new one is needed for every file.
+                    final Translations translations = new POParser().parse(input, poFile.getAbsolutePath());
+                    translations.setLocale(l);
+                    list.add(translations);
+                    LOG.info("Parsed .po file \"" + file + "\" for locale: " + l);
+                }
             } catch (final FileNotFoundException e) {
                 LOG.error("File disappeared?", e);
             } catch (final OXException e) {
                 LOG.error("Could not parse po file: ", e);
             } finally {
-                if (null != input) {
-                    try {
-                        input.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                }
+                Streams.close(input);
             }
         }
         return list;

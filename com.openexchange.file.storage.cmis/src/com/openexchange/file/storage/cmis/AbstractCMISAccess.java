@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.cmis;
 
+import org.apache.chemistry.opencmis.commons.exceptions.CmisBaseException;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.session.Session;
 
@@ -93,6 +95,20 @@ public abstract class AbstractCMISAccess {
         this.account = account;
         this.session = session;
         this.cmisSession = cmisSession;
+    }
+
+    /**
+     * Handles specified CMIS error.
+     * 
+     * @param e The CMIS error
+     * @return The appropriate <tt>OXException</tt> instance
+     */
+    protected static OXException handleCmisException(final CmisBaseException e) {
+        final String errorContent = e.getErrorContent();
+        if (null == errorContent) {
+            return CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+        }
+        return CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage() + " - " + errorContent);
     }
 
 }

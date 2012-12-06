@@ -69,7 +69,7 @@ import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
- * {@link SMTPCapabilityCache} - A cache for CAPABILITY and greeting from IMAP servers.
+ * {@link SMTPCapabilityCache} - A cache for CAPABILITY and greeting from SMTP servers.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

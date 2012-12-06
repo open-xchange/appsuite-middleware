@@ -54,11 +54,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
@@ -92,7 +93,7 @@ public class AJPv13TaskWatcher {
      */
     public AJPv13TaskWatcher(final ThreadPoolService threadPoolService) {
         super();
-        tasks = new ConcurrentHashMap<Long, com.openexchange.ajp13.watcher.Task>();
+        tasks = new NonBlockingHashMap<Long, com.openexchange.ajp13.watcher.Task>();
         /*
          * Start keep-alive task
          */
@@ -309,8 +310,6 @@ public class AJPv13TaskWatcher {
              * Log exceeded task if it is not marked as a long-running task
              */
             {
-                final Throwable t = new Throwable();
-                t.setStackTrace(task.getStackTrace());
                 final Map<String, Object> taskProperties;
                 {
                     final Props taskProps = LogProperties.optLogProperties(task.getThread());
@@ -321,11 +320,13 @@ public class AJPv13TaskWatcher {
                     logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
                     logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - task.getProcessingStartTime());
                     logBuilder.append("msec");
-                    log.info(logBuilder.toString(), t);
+                    logBuilder.append('\n');
+                    appendStackTrace(task.getStackTrace(), logBuilder);
+                    log.info(logBuilder);
                 } else {
                     final StringBuilder logBuilder = new StringBuilder(512);
                     final Map<String, String> sorted = new TreeMap<String, String>();
-                    for (final Map.Entry<String, Object> entry : taskProperties.entrySet()) {
+                    for (final Entry<String, Object> entry : taskProperties.entrySet()) {
                         final String propertyName = entry.getKey();
                         final Object value = entry.getValue();
                         if (null != value) {
@@ -340,11 +341,41 @@ public class AJPv13TaskWatcher {
                     logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
                     logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - task.getProcessingStartTime());
                     logBuilder.append("msec");
-                    log.info(logBuilder.toString(), t);
+                    logBuilder.append('\n');
+                    appendStackTrace(task.getStackTrace(), logBuilder);
+                    log.info(logBuilder);
                 }
             }
             if (max > 0 && task.getProcessingStartTime() < max) {
                 task.cancel();
+            }
+        }
+
+        private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+            if (null == trace) {
+                return;
+            }
+            for (final StackTraceElement ste : trace) {
+                final String className = ste.getClassName();
+                if (null != className) {
+                    sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                    if (ste.isNativeMethod()) {
+                        sb.append("(Native Method)");
+                    } else {
+                        final String fileName = ste.getFileName();
+                        if (null == fileName) {
+                            sb.append("(Unknown Source)");
+                        } else {
+                            final int lineNumber = ste.getLineNumber();
+                            sb.append('(').append(fileName);
+                            if (lineNumber >= 0) {
+                                sb.append(':').append(lineNumber);
+                            }
+                            sb.append(')');
+                        }
+                    }
+                    sb.append('\n');
+                }
             }
         }
 

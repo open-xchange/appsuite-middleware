@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class ConnectionManagerListenersHandler implements Serializable {
 
-    private final Map<String ,ConnectionManagerListener> listeners = new HashMap<String, ConnectionManagerListener>();
+    private Map<String ,ConnectionManagerListener> listeners = new HashMap<String, ConnectionManagerListener>();
 
     public void put(String listenerName, ConnectionManagerListener listener) {
         listeners.put(listenerName, listener);

@@ -68,10 +68,24 @@ public class FileStorageAccountParser {
 
     private final FileStorageServiceRegistry registry;
 
+    /**
+     * Initializes a new {@link FileStorageAccountParser}.
+     * 
+     * @param serviceRegistry The service registry
+     */
     public FileStorageAccountParser(final FileStorageServiceRegistry serviceRegistry) {
+        super();
         registry = serviceRegistry;
     }
 
+    /**
+     * Parses specified account's JSON representation to a {@code FileStorageAccount}.
+     * 
+     * @param accountJSON
+     * @return
+     * @throws OXException
+     * @throws JSONException
+     */
     public FileStorageAccount parse(final JSONObject accountJSON) throws OXException, JSONException {
         final DefaultFileStorageAccount account = new DefaultFileStorageAccount();
 
@@ -83,7 +97,7 @@ public class FileStorageAccountParser {
             registry.getFileStorageService(accountJSON.getString(FileStorageAccountConstants.FILE_STORAGE_SERVICE));
         account.setFileStorageService(fsService);
         if (accountJSON.has(FileStorageAccountConstants.CONFIGURATION)) {
-            account.setConfiguration(new FormContentParser().parse(
+            account.setConfiguration(FormContentParser.parse(
                 accountJSON.getJSONObject(FileStorageAccountConstants.CONFIGURATION),
                 fsService.getFormDescription()));
         }

@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.atmosphere.cpr.AtmosphereHandler;
@@ -75,7 +76,11 @@ import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.StanzaSender;
+import com.openexchange.realtime.atmosphere.impl.stanza.BuilderSelector;
+import com.openexchange.realtime.atmosphere.impl.stanza.StanzaBuilder;
+import com.openexchange.realtime.atmosphere.impl.stanza.StanzaWriter;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -97,7 +102,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     // TODO: Figure Out JSONP and Long-Polling State management. Hot-Swap the
     // AtmosphereResource.
-    // TODO: Close connections and get rid of em
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
 
@@ -106,7 +110,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     private final HandlerLibrary library;
 
     // Keep track of sessionID -> RTAtmosphereState to uniquely identify connected clients
-    private ConcurrentHashMap<String, RTAtmosphereState> sessionIdToState;
+    private final ConcurrentHashMap<String, RTAtmosphereState> sessionIdToState;
 
     // Keep track of user@context -> {context/user/resource1, context/user/resource2, ...} for canHandle/isConnected
     private final Map<String, Set<String>> userToBroadcasterIDs;
@@ -139,6 +143,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     public void onRequest(AtmosphereResource resource) throws IOException {
         // Log all events on the console, including WebSocket events for debugging
         resource.addEventListener(new WebSocketEventListenerAdapter());
+
         AtmosphereRequest request = resource.getRequest();
         AtmosphereResponse response = resource.getResponse();
         String method = request.getMethod();
@@ -149,33 +154,27 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         if (method.equalsIgnoreCase("GET")) {
             if (request.getHeader("negotiating") == null) {
                 try {
-                    LOG.info("GET Request:");
-                    LOG.info("Broadcasters before Request");
-                    printBroadcasters();
+                    printBroadcasters("Broadcasters before GET Request");
+                    printSessions("Sessions before GET Request");
                     // create state {id, session, atmoResource} and track ServerSession -> AtmosphereState
                     ServerSession serverSession = getServerSession(getSessionFromHeader(request), getSessionFromParameters(request));
                     RTAtmosphereState atmosphereState = trackState(resource, serverSession);
-                    /*
-                     * Create new broadcaster for AtmosphereResource (if none already exists) Id will be formed like /context/user/resource
-                     */
+
+                    // Create new broadcaster for AtmosphereResource (if none already exists) Id will be formed like /context/user/resource
                     String broadcasterId = generateBroadcasterId(atmosphereState.id);
                     Broadcaster broadcaster = BroadcasterFactory.getDefault().lookup(broadcasterId, true);
+                    atmosphereState.atmosphereResource.addEventListener(new AtmosphereResourceCleanupListener(resource, broadcaster));
                     broadcaster.addAtmosphereResource(atmosphereState.atmosphereResource);
-                    atmosphereState.atmosphereResource.addEventListener(new AtmosphereResourceCleanupListener(
-                        atmosphereState.atmosphereResource,
-                        broadcaster));
-                    /*
-                     * TODO: configure broadcaster lifetime, listeners, schedule keepalive messages etc.
-                     */
 
                     // keep track of connected users
                     trackConnectedUsers(atmosphereState.id.toGeneralForm().toString(), broadcasterId);
 
                     // finally suspend the resource
                     resource.suspend();
-                    LOG.info("Broadcasters after Request");
-                    printBroadcasters();
+                    printBroadcasters("Broadcasters after GET Request");
+                    printSessions("Sessions after GET Request");
                 } catch (OXException e) {
+                    // TODO:ExceptionHandling to connected clients
                     writeExceptionToResource(e, resource);
                     LOG.error(e);
                 }
@@ -183,13 +182,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 response.getWriter().write("OK");
             }
             /*
-             * Use POST request to synchronously send data over the server. First Post should contain handshake information. No need to
-             * track state, as we answer over the previously suspended get request
+             * Use POST request to synchronously send data over the server.No need to track state, as we answer over the previously
+             * suspended get request
              */
         } else if (method.equalsIgnoreCase("POST")) {
-            LOG.info("POST Request:");
-            LOG.info("Broadcasters before Request");
-            printBroadcasters();
+            printBroadcasters("Broadcasters before POST Request");
+            printSessions("Sessions before POST Request");
             String postData = request.getReader().readLine();
             if (postData != null) {
                 try {
@@ -198,7 +196,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         getSessionFromHeader(request),
                         getSessionFromParameters(request),
                         getSessionFromPostData(postData));
-                    
+
                     RTAtmosphereState atmosphereState = sessionIdToState.get(serverSession.getSessionID());
 
                     if (atmosphereState == null) {
@@ -206,9 +204,14 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         LOG.info("tracked session:" + sessionIdToState.keys());
                         throw ex;
                     }
-                    handleIncoming(StanzaParser.parse(postData), atmosphereState);
-                    LOG.info("Broadcasters after Request");
-                    printBroadcasters();
+                    JSONObject json = new JSONObject(postData);
+                    StanzaBuilder<? extends Stanza> stanzaBuilder = BuilderSelector.getBuilder(atmosphereState.id, json);
+                    handleIncoming(stanzaBuilder.build(), atmosphereState);
+                    printBroadcasters("Broadcasters after POST Request");
+                    printSessions("Sessions after POST Request");
+                } catch (JSONException illEx) {
+                    LOG.error(illEx);
+                    writeExceptionToResource(illEx, resource);
                 } catch (IllegalArgumentException illEx) {
                     LOG.error(illEx);
                     writeExceptionToResource(illEx, resource);
@@ -220,7 +223,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         }
     }
 
-    private void printBroadcasters() {
+    private void printBroadcasters(String preString) {
+        if(LOG.isDebugEnabled()) {
         List<Broadcaster> broadcasters = new ArrayList(BroadcasterFactory.getDefault().lookupAll());
         Collections.sort(broadcasters, new Comparator<Broadcaster>() {
 
@@ -229,9 +233,10 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 return b1.getID().compareTo(b2.getID());
             }
         });
-        StringBuilder sb  = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("\n--------------------------------------------------------------------------------\n");
-        sb.append("List of Broadcasters:\n");
+        sb.append(preString);
+        sb.append(":\n");
         for (Broadcaster broadcaster : broadcasters) {
             sb.append(broadcaster.getID()).append(":");
             Collection<AtmosphereResource> atmosphereResources = broadcaster.getAtmosphereResources();
@@ -241,7 +246,30 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             }
         }
         sb.append("--------------------------------------------------------------------------------\n");
-        LOG.info(sb.toString());
+            LOG.debug(sb.toString());
+        }
+    }
+    
+    private void printSessions(String preString) {
+        if (LOG.isDebugEnabled()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("\n--------------------------------------------------------------------------------\n");
+            sb.append(preString);
+            sb.append(":\n");
+            Set<Entry<String,RTAtmosphereState>> sessionSet = sessionIdToState.entrySet();
+            sb.append("\tSessions: " + sessionSet.size()).append('\n');
+            for (Entry<String, RTAtmosphereState> entry : sessionSet) {
+                String session = entry.getKey();
+                RTAtmosphereState resource = entry.getValue();
+                sb.append("\t\t");
+                sb.append("Session: ").append(session);
+                sb.append(" <-> ");
+                sb.append("Resource: ").append(resource.atmosphereResource.uuid());
+                sb.append('\n');
+            }
+            sb.append("--------------------------------------------------------------------------------\n");
+            LOG.debug(sb.toString());
+        }
     }
 
     /**
@@ -264,8 +292,10 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     public void onStateChange(AtmosphereResourceEvent event) throws IOException {
         AtmosphereResource resource = event.getResource();
         AtmosphereResponse response = resource.getResponse();
-        LOG.info("\nonStateChange called\n Resource: " + resource.uuid() + "\nBroadcaster: " + event.broadcaster().getID() + "\nMessage: " + event.getMessage());
         if (event.isSuspended()) {
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("\n\nonStateChange: Writing message: "+event.getMessage().toString()+" to resource: "+resource.uuid()+"\n\n");
+            }
             response.getWriter().write(event.getMessage().toString());
             switch (resource.transport()) {
             case JSONP:
@@ -278,8 +308,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 break;
             }
         } else if (!event.isResuming()) {
-            LOG.info("Event wasn't resuming remote connection got closed by proxy or browser.");
-            LOG.info("BroadcasterId: " + event.broadcaster().getID() + "Resource: " + event.getResource().uuid() + "SessionId:" + sessionIdToState);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Event wasn't resuming remote connection got closed by proxy or browser: \n"
+                    + "BroadcasterId: " + event.broadcaster().getID() + "\n"
+                    + "Resource: " + event.getResource().uuid() + "\n"
+                );
+            }
         }
     }
 
@@ -406,8 +440,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         /*
          * Broadcast stanza to all entities matching the user@context by using a wildcard for the resource: /user@context/*
          */
-        MetaBroadcaster.getDefault().broadcastTo(contextAndUser+"/*", stanzaAsJSON);
-        //chat: talk to everybody aka "/"
+        MetaBroadcaster.getDefault().broadcastTo(contextAndUser + "/*", stanzaAsJSON);
+        // chat: talk to everybody aka "/"
         //MetaBroadcaster.getDefault().broadcastTo("/", stanzaAsJSON);
     }
 
@@ -483,24 +517,23 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         if (isInternal(stanza)) {
             handleInternally(stanza, atmosphereState);
         } else {
-            stampStanza(stanza, atmosphereState);
             dispatchStanza(stanza, atmosphereState);
         }
     }
 
     private boolean isInternal(Stanza stanza) {
-        return stanza.getNamespace().startsWith("ox:");
+        boolean isInternal = false;
+        return isInternal;
     }
 
     /**
-     * Handle the Stanza internally instead of handing it over to the message dispatcher. Handshaking and other internal stuff happens here.
+     * Handle the Stanza internally instead of handing it over to the message dispatcher.
      * 
      * @param stanza the incoming stanza
      * @param serverSession the associated serverSession
      * @throws OXException
      */
     private void handleInternally(Stanza stanza, RTAtmosphereState atmosphereState) {
-        LOG.info("Handle internally: " + stanza);
     }
 
     /**
@@ -520,20 +553,10 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         return sb.toString();
     }
 
-    /**
-     * Stamp the stanza, iow. set the sender of the stanza.
-     * 
-     * @param stanza the stanza to stamp
-     * @param state the associated atmosphereState
-     */
-    private void stampStanza(Stanza stanza, RTAtmosphereState state) {
-        stanza.setFrom(state.id);
-    }
-
     private void dispatchStanza(Stanza stanza, RTAtmosphereState atmosphereState) throws OXException {
-        OXRTHandler transformer = library.getHandlerFor(stanza.getNamespace());
+        OXRTHandler transformer = library.getHandlerFor(stanza.getClass());
         if (transformer == null) {
-            throw OXException.general("No transformer for namespace " + stanza.getNamespace());
+            throw OXException.general("No transformer for " + stanza);
         }
         transformer.incoming(stanza, atmosphereState.session);
     }
@@ -546,13 +569,11 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @throws OXException if no transformer for the given Stanza can be found
      */
     public void handleOutgoing(Stanza stanza, ServerSession serverSession) throws OXException {
-        OXRTHandler transformer = library.getHandlerFor(stanza.getNamespace());
+        OXRTHandler transformer = library.getHandlerFor(stanza.getClass());
         if (transformer == null) {
-            throw OXException.general("No transformer for namespace " + stanza.getNamespace());
+            throw OXException.general("No transformer for " + stanza);
         }
-        /*
-         * Let the transformer handle the processing of the stanza. hand over this as reference for sending after transforming
-         */
+        // Let the transformer handle the processing of the stanza. hand over this as reference for sending after transforming
         transformer.outgoing(stanza, serverSession, this);
     }
 

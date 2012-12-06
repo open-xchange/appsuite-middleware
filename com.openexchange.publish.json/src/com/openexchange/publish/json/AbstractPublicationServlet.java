@@ -57,6 +57,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -77,22 +78,22 @@ public abstract class AbstractPublicationServlet extends PermissionServlet{
         x.log(com.openexchange.exception.Log.valueOf(getLog()));
         final Response response = new Response(getSessionObject(req));
         response.setException(x);
-        writeResponseSafely(response, resp);
+        writeResponseSafely(response, resp, getSessionObject(req));
     }
 
-    protected void writeData(final Object data, final HttpServletResponse resp) {
+    protected void writeData(final Object data, final HttpServletResponse resp, final Session session) {
         final Response response = new Response();
         response.setData(data);
-        writeResponseSafely(response, resp);
+        writeResponseSafely(response, resp, session);
     }
 
     protected OXException wrapThrowable(final Throwable t) {
         return THROWABLE.create(t, t.getMessage());
     }
 
-    protected void writeResponseSafely(final Response response, final HttpServletResponse resp) {
+    protected void writeResponseSafely(final Response response, final HttpServletResponse resp, final Session session) {
         try {
-            writeResponse(response, resp);
+            writeResponse(response, resp, session);
         } catch (final IOException e) {
             getLog().error(e.getMessage(), e);
         }

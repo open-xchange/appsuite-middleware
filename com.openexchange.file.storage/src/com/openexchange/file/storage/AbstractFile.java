@@ -60,10 +60,9 @@ import com.openexchange.file.storage.meta.FileComparator;
 import com.openexchange.file.storage.meta.FileFieldGet;
 import com.openexchange.file.storage.meta.FileFieldHandling;
 
-
 /**
- * {@link AbstractFile}
- *
+ * {@link AbstractFile} - An abstract file.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractFile implements File {
@@ -84,12 +83,12 @@ public abstract class AbstractFile implements File {
     }
 
     @Override
-    public void copyInto(final File other, final Field...fields) {
+    public void copyInto(final File other, final Field... fields) {
         FileFieldHandling.copy(this, other, fields);
     }
 
     @Override
-    public void copyFrom(final File other, final Field...fields) {
+    public void copyFrom(final File other, final Field... fields) {
         FileFieldHandling.copy(other, this, fields);
     }
 
@@ -99,9 +98,10 @@ public abstract class AbstractFile implements File {
 
             @Override
             public Object handle(final Field field, final Object... args) {
-                final Set set = get(0,Set.class,args);
+                @SuppressWarnings("unchecked")
+                final Set<Object> set = get(0, Set.class, args);
                 final int comparison = new FileComparator(field).compare(AbstractFile.this, other);
-                if(comparison != 0) {
+                if (comparison != 0) {
                     set.add(field);
                 }
                 return set;
@@ -111,11 +111,11 @@ public abstract class AbstractFile implements File {
     }
 
     @Override
-    public boolean equals(final File other, final Field criterium, final Field...criteria) {
+    public boolean equals(final File other, final Field criterium, final Field... criteria) {
         final List<Field> fields = new ArrayList<Field>(1 + criteria.length);
 
         for (final Field field : fields) {
-            if(0 != new FileComparator(field).compare(this, other)) {
+            if (0 != new FileComparator(field).compare(this, other)) {
                 return false;
             }
         }
@@ -124,7 +124,7 @@ public abstract class AbstractFile implements File {
 
     @Override
     public boolean equals(final Object other) {
-        return equals((File)other, File.Field.ID, File.Field.values());
+        return equals((File) other, File.Field.ID, File.Field.values());
     }
 
     @Override
@@ -147,7 +147,7 @@ public abstract class AbstractFile implements File {
 
     /**
      * Converts specified wildcard string to a regular expression
-     *
+     * 
      * @param wildcard The wildcard string to convert
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */

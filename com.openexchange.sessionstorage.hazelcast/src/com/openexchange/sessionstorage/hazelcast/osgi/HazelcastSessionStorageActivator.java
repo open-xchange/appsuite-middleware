@@ -50,86 +50,118 @@
 package com.openexchange.sessionstorage.hazelcast.osgi;
 
 import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.hazelcast.config.MapConfig;
+import com.hazelcast.config.MaxSizeConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.crypto.CryptoService;
-import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageConfiguration;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
-import com.openexchange.sessionstorage.hazelcast.exceptions.OXHazelcastSessionStorageExceptionCodes;
-import com.openexchange.timer.TimerService;
+import com.openexchange.sessionstorage.hazelcast.Services;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link HazelcastSessionStorageActivator}
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
     private static Log LOG = LogFactory.getLog(HazelcastSessionStorageActivator.class);
 
-    private HazelcastSessionStorageService service;
-
-    private ConfigurationService configService;
-
-    private CryptoService cryptoService;
-
-    private HazelcastInstance hazelcast;
-
-    private TimerService timerService;
-
-    private ServiceRegistry registry;
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CryptoService.class, HazelcastInstance.class, TimerService.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.sessionstorage.hazelcast");
-        configService = getService(ConfigurationService.class);
-        cryptoService = getService(CryptoService.class);
-        hazelcast = getService(HazelcastInstance.class);
-        timerService = getService(TimerService.class);
-        registry = HazelcastSessionStorageServiceRegistry.getRegistry();
-        registry.addService(ConfigurationService.class, configService);
-        registry.addService(CryptoService.class, cryptoService);
-        registry.addService(HazelcastInstance.class, hazelcast);
-        registry.addService(TimerService.class, timerService);
-        boolean enabled = configService.getBoolProperty("com.openexchange.sessionstorage.hazelcast.enabled", false);
-        long lifetime = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.defaultLifetime", 604800);
+        Services.setServiceLookup(this);
+        final ConfigurationService configService = getService(ConfigurationService.class);
+        final boolean enabled = configService.getBoolProperty("com.openexchange.sessionstorage.hazelcast.enabled", false);
         if (enabled) {
-            String encryptionKey = configService.getProperty("com.openexchange.sessionstorage.hazelcast.encryptionKey");
-            if (encryptionKey == null) {
-                OXException e = OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_NO_ENCRYPTION_KEY.create();
-                LOG.error(e.getMessage(), e);
-                throw e;
+            final MapConfig mapConfig = new MapConfig();
+            {
+                final String mapName = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.name");
+                final int backupCount = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.backupcount", 1);
+                final int asyncBackup = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.asyncbackup", 0);
+                mapConfig.setName(mapName);
+                mapConfig.setBackupCount(backupCount);
+                mapConfig.setAsyncBackupCount(asyncBackup);
+                mapConfig.setTimeToLiveSeconds(0);
+                mapConfig.setMaxIdleSeconds(0);
+                mapConfig.setEvictionPolicy("NONE");
+                mapConfig.setEvictionPercentage(25);
+                final MaxSizeConfig maxSizeConfig = new MaxSizeConfig();
+                maxSizeConfig.setSize(0);
+                mapConfig.setMaxSizeConfig(maxSizeConfig);
+                mapConfig.setMergePolicy("hz.LATEST_UPDATE");
             }
-            HazelcastSessionStorageConfiguration config = new HazelcastSessionStorageConfiguration(
-                encryptionKey,
-                lifetime,
-                cryptoService,
-                timerService);
-            service = new HazelcastSessionStorageService(config);
-            registerService(SessionStorageService.class, service);
+            final HazelcastSessionStorageConfiguration config = new HazelcastSessionStorageConfiguration(mapConfig);
+            // Track HazelcastInstance
+            final BundleContext context = this.context;
+            track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
+
+                private volatile ServiceRegistration<SessionStorageService> sessionStorageRegistration;
+
+                @Override
+                public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
+                    final HazelcastInstance hazelcastInstance = context.getService(reference);
+                    HazelcastSessionStorageService.setHazelcastInstance(hazelcastInstance);
+                    sessionStorageRegistration = context.registerService(SessionStorageService.class, new HazelcastSessionStorageService(
+                        config,
+                        hazelcastInstance), null);
+                    return hazelcastInstance;
+                }
+
+                @Override
+                public void modifiedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
+                    // Ignore
+                }
+
+                @Override
+                public void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
+                    final ServiceRegistration<SessionStorageService> sessionStorageRegistration = this.sessionStorageRegistration;
+                    if (null != sessionStorageRegistration) {
+                        sessionStorageRegistration.unregister();
+                        this.sessionStorageRegistration = null;
+                    }
+                    context.ungetService(reference);
+                    HazelcastSessionStorageService.setHazelcastInstance(null);
+                }
+            });
+            openTrackers();
         }
+    }
+
+    @Override
+    public <S> boolean removeService(final Class<? extends S> clazz) {
+        return super.removeService(clazz);
+    }
+
+    @Override
+    public <S> boolean addService(final Class<S> clazz, final S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> void registerService(final Class<S> clazz, final S service) {
+        super.registerService(clazz, service);
     }
 
     @Override
     public void stopBundle() throws Exception {
         LOG.info("Stopping bundle: com.openexchange.sessionstorage.hazelcast");
-        if (service != null) {
-            service.cleanUp();
-            service.removeCleanupTask();
-            unregisterServices();
-        }
-        closeTrackers();
-        cleanUp();
+        super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
 }

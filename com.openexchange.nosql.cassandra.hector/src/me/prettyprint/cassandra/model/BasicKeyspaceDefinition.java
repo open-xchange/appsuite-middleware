@@ -21,8 +21,8 @@ public class BasicKeyspaceDefinition implements KeyspaceDefinition {
   private String strategyClass;
   private int replicationFactor;
   private boolean durableWrites = true;
-  private final Map<String, String> strategyOptions;
-  private final List<ColumnFamilyDefinition> columnFamilyList;
+  private Map<String, String> strategyOptions;
+  private List<ColumnFamilyDefinition> columnFamilyList;
 
   public BasicKeyspaceDefinition(){
     this.columnFamilyList = new ArrayList<ColumnFamilyDefinition>();
@@ -82,8 +82,7 @@ public class BasicKeyspaceDefinition implements KeyspaceDefinition {
     this.strategyOptions.remove( field );
   }
   
-  @Override
-public boolean isDurableWrites() {
+  public boolean isDurableWrites() {
     return durableWrites;
   }
 

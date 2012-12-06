@@ -68,6 +68,7 @@ import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PasswordChangeServlet}
@@ -102,11 +103,12 @@ public final class PasswordChangeServlet extends SessionServlet {
             actionGet(req, resp);
         } catch (final OXException e) {
             LOG.error("PasswordChangeServlet.doGet()", e);
-            final Response response = new Response(getSessionObject(req));
+            final ServerSession session = getSessionObject(req);
+            final Response response = new Response(session);
             response.setException(e);
             final PrintWriter writer = resp.getWriter();
             try {
-                ResponseWriter.write(response, resp.getWriter());
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             } catch (final JSONException e1) {
                 final ServletException se = new ServletException(e1);
                 se.initCause(e1);
@@ -131,7 +133,7 @@ public final class PasswordChangeServlet extends SessionServlet {
             response.setException(e);
             final PrintWriter writer = resp.getWriter();
             try {
-                ResponseWriter.write(response, resp.getWriter());
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(getSessionObject(req)));
             } catch (final JSONException e1) {
                 final ServletException se = new ServletException(e1);
                 se.initCause(e1);
@@ -147,7 +149,7 @@ public final class PasswordChangeServlet extends SessionServlet {
                 e.getMessage()));
             final PrintWriter writer = resp.getWriter();
             try {
-                ResponseWriter.write(response, resp.getWriter());
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(getSessionObject(req)));
             } catch (final JSONException e1) {
                 final ServletException se = new ServletException(e1);
                 se.initCause(e1);
@@ -217,7 +219,7 @@ public final class PasswordChangeServlet extends SessionServlet {
          */
         response.setData(JSONObject.NULL);
         response.setTimestamp(null);
-        ResponseWriter.write(response, resp.getWriter());
+        ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
     }
 
     private static String checkStringParam(final HttpServletRequest req, final String paramName) throws OXException {

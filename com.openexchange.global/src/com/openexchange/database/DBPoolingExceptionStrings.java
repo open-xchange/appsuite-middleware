@@ -85,9 +85,9 @@ public class DBPoolingExceptionStrings implements LocalizableStrings {
     public static final String NO_DRIVER_MSG = "Driver class %1$s missing.";
 
     // The pool throws this exception if it believes the connection does not belong to it.
-    // "Return" in terms of giving a previously obtained pooled connection back into connection pool
-    // %1$d is replace with some database connection pool identifier.
-    public static final String RETURN_FAILED_MSG = "Connection to pool %1$d can not be returned";
+    // "Return" in terms of giving a previously obtained pooled connection back into connection pool.
+    // %1$s is replaced with the object identifier of the database connection object.
+    public static final String RETURN_FAILED_MSG = "Object %1$s does not belong to this pool. The object will be removed. If there was a previous message about this object not having been returned to the pool, the object was just in use too long.";
 
     // A property defining the server name was not found in the configuration properties files.
     public static final String NO_SERVER_NAME_MSG = "Server name is not defined.";

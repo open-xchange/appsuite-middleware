@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.json.osgi;
 
-import com.openexchange.log.LogFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
@@ -63,7 +62,7 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.i18n.I18nService;
-import com.openexchange.index.IndexFacadeService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.rdiff.RdiffService;
 
 /**
@@ -84,7 +83,6 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
             Services.setServiceLookup(this);
             rememberTracker(new ServiceTracker<I18nService, I18nService>(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
             trackService(RdiffService.class);
-            trackService(IndexFacadeService.class);
             openTrackers();
             // registerModule(AccountActionFactory.INSTANCE, "infostore");
             registerModule(FileActionFactory.INSTANCE, "infostore");

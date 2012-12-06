@@ -93,7 +93,8 @@ public enum DBPoolingExceptionCodes {
      */
     NO_DRIVER(NO_DRIVER_MSG, Category.CATEGORY_CONFIGURATION, 8),
     /**
-     * Connection to pool %1$d can not be returned
+     * Object %1$s does not belong to this pool. The object will be removed. If there was a previous
+     * message about this object not having been returned to the pool, the object was just in use too long.
      */
     RETURN_FAILED(RETURN_FAILED_MSG, Category.CATEGORY_ERROR, 9),
     /**

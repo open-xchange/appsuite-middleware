@@ -49,33 +49,48 @@
 
 package com.openexchange.index.solr.internal.attachments;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.common.SolrInputDocument;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.index.Attachment;
+import com.openexchange.groupware.attach.index.Attachment;
+import com.openexchange.groupware.attach.index.AttachmentIndexField;
+import com.openexchange.groupware.attach.index.AttachmentUUID;
+import com.openexchange.groupware.attach.index.SearchTerm;
+import com.openexchange.index.AccountFolders;
 import com.openexchange.index.FacetParameters;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
+import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
+import com.openexchange.index.SearchHandler;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
+import com.openexchange.index.solr.internal.Services;
+import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.solr.SolrCoreIdentifier;
-
+import com.openexchange.solr.SolrProperties;
 
 /**
  * {@link SolrAttachmentIndexAccess}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachment> {
 
     /**
      * Initializes a new {@link SolrAttachmentIndexAccess}.
+     * 
      * @param identifier
      */
-    protected SolrAttachmentIndexAccess(SolrCoreIdentifier identifier) {
+    public SolrAttachmentIndexAccess(SolrCoreIdentifier identifier) {
         super(identifier);
     }
 
@@ -86,80 +101,217 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
 
     @Override
     public Set<? extends IndexField> getIndexedFields() {
-        // FIXME: fill with life
-        return Collections.EMPTY_SET;
+        return SolrAttachmentField.getIndexedFields();
     }
 
     @Override
     public void addEnvelopeData(IndexDocument<Attachment> document) throws OXException {
-        // TODO Auto-generated method stub
-        
+        addDocument(convertToDocument(document));
     }
 
     @Override
     public void addEnvelopeData(Collection<IndexDocument<Attachment>> documents) throws OXException {
-        // TODO Auto-generated method stub
+        if (documents.isEmpty()) {
+            return;
+        }
         
+        List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
+        for (IndexDocument<Attachment> document : documents) {
+            inputDocuments.add(convertToDocument(document));
+        }
+
+        addDocuments(inputDocuments);
     }
 
     @Override
     public void addContent(IndexDocument<Attachment> document, boolean full) throws OXException {
-        // TODO Auto-generated method stub
-        
+        addDocument(convertToDocument(document));
     }
 
     @Override
     public void addContent(Collection<IndexDocument<Attachment>> documents, boolean full) throws OXException {
-        // TODO Auto-generated method stub
+        if (documents.isEmpty()) {
+            return;
+        }
         
+        List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
+        for (IndexDocument<Attachment> document : documents) {
+            inputDocuments.add(convertToDocument(document));
+        }
+
+        addDocuments(inputDocuments);
     }
 
     @Override
     public void addAttachments(IndexDocument<Attachment> document, boolean full) throws OXException {
-        // TODO Auto-generated method stub
-        
+        addDocument(convertToDocument(document));
     }
 
     @Override
     public void addAttachments(Collection<IndexDocument<Attachment>> documents, boolean full) throws OXException {
-        // TODO Auto-generated method stub
+        if (documents.isEmpty()) {
+            return;
+        }
         
-    }
+        List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
+        for (IndexDocument<Attachment> document : documents) {
+            inputDocuments.add(convertToDocument(document));
+        }
 
-    @Override
-    public void change(IndexDocument<Attachment> document, Set<? extends IndexField> fields) throws OXException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void change(Collection<IndexDocument<Attachment>> documents, Set<? extends IndexField> fields) throws OXException {
-        // TODO Auto-generated method stub
-        
+        addDocuments(inputDocuments);
     }
 
     @Override
     public void deleteById(String id) throws OXException {
-        // TODO Auto-generated method stub
-        
+        deleteDocumentById(id);
     }
 
     @Override
     public void deleteByQuery(QueryParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
+        Set<AttachmentIndexField> fields = EnumSet.noneOf(AttachmentIndexField.class);
+        fields.add(AttachmentIndexField.MODULE);
+        fields.add(AttachmentIndexField.SERVICE);
+        fields.add(AttachmentIndexField.ACCOUNT);
+        fields.add(AttachmentIndexField.FOLDER);
+        fields.add(AttachmentIndexField.OBJECT_ID);
+        fields.add(AttachmentIndexField.ATTACHMENT_ID);
         
+        IndexResult<Attachment> indexResult = query(parameters, fields);
+        List<IndexDocument<Attachment>> documents = indexResult.getResults();
+        Set<String> uuids = new HashSet<String>(documents.size());
+        for (IndexDocument<Attachment> document : documents) {
+            uuids.add(AttachmentUUID.newUUID(contextId, userId, document.getObject()).toString());
+        }
+        
+        String deleteQuery = buildQueryStringWithOr(SolrAttachmentField.UUID.solrName(), uuids);
+        if (deleteQuery != null) {
+            deleteDocumentsByQuery(deleteQuery);
+        }
     }
 
     @Override
     public IndexResult<Attachment> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        SolrQuery solrQuery = buildSolrQuery(parameters);
+        setSortAndOrder(parameters, solrQuery, SolrAttachmentField.class);
+        Set<SolrAttachmentField> solrFields = checkAndConvert(fields);
+        setFieldList(solrQuery, solrFields);
+        List<IndexDocument<Attachment>> results = queryChunkWise(new SolrAttachmentDocumentConverter(), solrQuery, parameters.getOff(), parameters.getLen(), 100);
+        if (results.isEmpty()) {
+            return Indexes.emptyResult();
+        }
+        
+        return new SolrIndexResult<Attachment>(results.size(), results, null);
     }
-
+    
     @Override
     public IndexResult<Attachment> query(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
         // TODO Auto-generated method stub
         return null;
+    }
+    
+    private Set<SolrAttachmentField> checkAndConvert(Set<? extends IndexField> fields) {
+        Set<SolrAttachmentField> set;
+        if (fields == null) {
+            set = EnumSet.allOf(SolrAttachmentField.class);
+        } else {
+            set = EnumSet.noneOf(SolrAttachmentField.class);
+            for (IndexField indexField : fields) {
+                if (indexField instanceof AttachmentIndexField) {
+                    set.add(SolrAttachmentField.solrFieldFor((AttachmentIndexField) indexField));
+                }
+            }
+        }
+        
+        return set;
+    }
+
+    private SolrQuery buildSolrQuery(QueryParameters parameters) {
+        SearchHandler searchHandler = parameters.getHandler();
+        if (searchHandler == null) {
+            throw new IllegalArgumentException("Parameter `search handler` must not be null!");
+        }
+        
+        ConfigurationService config = Services.getService(ConfigurationService.class);
+        SolrQuery solrQuery;
+        switch (searchHandler) {            
+            case SIMPLE: 
+            {
+                Object searchTerm = parameters.getSearchTerm();
+                if (searchTerm == null || !(searchTerm instanceof String)) {
+                    throw new IllegalArgumentException("Parameter `searchTerm` must not be null and of type java.lang.String!");
+                }
+                
+                solrQuery = new SolrQuery((String) searchTerm);
+                solrQuery.setQueryType(config.getProperty(SolrProperties.SIMPLE_HANLDER));
+                addFilterQueries(parameters, solrQuery);
+                break;
+            }
+            
+            case ALL_REQUEST:
+            {
+                solrQuery = new SolrQuery("*:*");
+                solrQuery.setQueryType(config.getProperty(SolrProperties.ALL_HANLDER));                
+                addFilterQueries(parameters, solrQuery);             
+                break;
+            }
+            
+            case GET_REQUEST:
+            {                
+                Set<String> ids = parameters.getIndexIds();
+                if (ids == null) {
+                    throw new IllegalArgumentException("Parameter `indexIds` must not be null!");
+                }
+                
+                solrQuery = new SolrQuery(stringSetToQuery(ids));
+                solrQuery.setQueryType(config.getProperty(SolrProperties.GET_HANDLER));
+                addFilterQueries(parameters, solrQuery);
+                break;
+            }
+            
+            case CUSTOM:
+            {
+                Object termObject = parameters.getSearchTerm();
+                if (termObject == null || !(termObject instanceof SearchTerm<?>)) {
+                    throw new IllegalArgumentException("Parameter `searchTerm` must not be null and must be instance of com.openexchange.index.attachments.SearchTerm<?>!");
+                }
+                
+                String queryString = SolrAttachmentSearchTermVisitor.toQuery((SearchTerm<?>) termObject);
+                solrQuery = new SolrQuery(queryString);
+                solrQuery.setQueryType(config.getProperty(SolrProperties.CUSTOM_HANLDER));
+                addFilterQueries(parameters, solrQuery);
+                break;
+            }
+            
+            default:
+                throw new IllegalArgumentException("Search handler " + searchHandler.toString() + " is not valid for this action.");
+        }
+        
+        return solrQuery;
+    }
+    
+    private void addFilterQueries(QueryParameters parameters, SolrQuery solrQuery) {
+        Integer module = parameters.getModule() < 0 ? null : new Integer(parameters.getModule());
+        addFilterQueryIfNotNull(solrQuery, buildQueryString(SolrAttachmentField.MODULE.solrName(), module));
+        
+        Set<AccountFolders> all = parameters.getAccountFolders();
+        Set<String> queries = new HashSet<String>();
+        if (all != null) {
+            for (AccountFolders accountFolders : all) {
+                String account = accountFolders.getAccount();
+                Set<String> folders = accountFolders.getFolders();
+                if (folders.isEmpty()) {
+                    queries.add(buildQueryString(SolrAttachmentField.ACCOUNT.solrName(), account));
+                } else {
+                    queries.add(catenateQueriesWithAnd(buildQueryString(SolrAttachmentField.ACCOUNT.solrName(), account), buildQueryStringWithOr(SolrAttachmentField.FOLDER.solrName(), folders)));
+                }
+            }
+        }
+        
+        addFilterQueryIfNotNull(solrQuery, catenateQueriesWithOr(queries.toArray(new String[queries.size()])));
+    }  
+
+    private SolrInputDocument convertToDocument(IndexDocument<Attachment> document) throws OXException {
+        return SolrAttachmentDocumentConverter.convertStatic(contextId, userId, document);
     }
 
 }

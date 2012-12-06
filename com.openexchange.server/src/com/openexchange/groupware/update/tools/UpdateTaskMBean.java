@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.tools;
 import static com.openexchange.groupware.update.tools.Utility.parsePositiveInt;
 import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -72,7 +73,6 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
@@ -80,6 +80,7 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateProcess;
+import com.openexchange.log.LogFactory;
 
 /**
  * MBean for update task toolkit.
@@ -366,7 +367,11 @@ public final class UpdateTaskMBean implements DynamicMBean {
         try {
             final int contextId = UpdateTaskToolkit.getContextIdBySchema(schemaName);
             final int poolId = Database.resolvePool(contextId, true);
-            final ExecutedTask[] tasks = store.getExecutedTasks(poolId, schemaName);
+            ExecutedTask[] tasks = store.getExecutedTasks(poolId, schemaName);
+            if (null == tasks) {
+                tasks = new ExecutedTask[0];
+            }
+            Arrays.sort(tasks);
             retval = new TabularDataSupport(taskListType, tasks.length, 1);
             for (final ExecutedTask task : tasks) {
                 final CompositeDataSupport data = new CompositeDataSupport(taskType, taskTypeNames, new Object[] { task.getTaskName(), B(task.isSuccessful()), task.getLastModified() });

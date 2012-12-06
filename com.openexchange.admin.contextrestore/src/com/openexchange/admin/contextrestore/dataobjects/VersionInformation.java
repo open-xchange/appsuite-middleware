@@ -63,26 +63,32 @@ public class VersionInformation {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (!(obj instanceof VersionInformation)) {
             return false;
-        if (getClass() != obj.getClass())
-            return false;
+        }
         VersionInformation other = (VersionInformation) obj;
-        if (admin_compatible != other.admin_compatible)
+        if (admin_compatible != other.admin_compatible) {
             return false;
-        if (gw_compatible != other.gw_compatible)
+        }
+        if (gw_compatible != other.gw_compatible) {
             return false;
-        if (locked != other.locked)
+        }
+        if (locked != other.locked) {
             return false;
+        }
         if (server == null) {
-            if (other.server != null)
+            if (other.server != null) {
                 return false;
-        } else if (!server.equals(other.server))
+            }
+        } else if (!server.equals(other.server)) {
             return false;
-        if (version != other.version)
+        }
+        if (version != other.version) {
             return false;
+        }
         return true;
     }
 

@@ -49,10 +49,8 @@
 
 package com.openexchange.index.solr;
 
-import java.util.Collections;
 import java.util.Random;
 import junit.framework.TestCase;
-import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
@@ -130,9 +128,8 @@ public class MailSolrIndexAccessTest extends TestCase {
     }
     
     private void searchAndCheckLength(MockMailSolrIndexAccess indexAccess, int off, int len, int expected) throws Exception {        
-        QueryParameters parameters = new QueryParameters.Builder(Collections.EMPTY_MAP)
+        QueryParameters parameters = new QueryParameters.Builder()
             .setHandler(SearchHandler.ALL_REQUEST)
-            .setType(Type.MAIL)
             .setOffset(off)
             .setLength(len)
             .build();

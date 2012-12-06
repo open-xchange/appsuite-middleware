@@ -16,6 +16,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.DiscardBehavior;
 
+// FIXME: Maybe delete or use hazelcast
 public class SolrCoreLoginHandler implements LoginHandlerService {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrCoreLoginHandler.class));
@@ -37,17 +38,25 @@ public class SolrCoreLoginHandler implements LoginHandlerService {
 			
 			@Override
 			public Object call() throws Exception {
-				try {
-                    // TODO: extend with other modules
-                    final SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, Types.EMAIL);
-                    final ConfigurationService config = Services.getService(ConfigurationService.class);
-                    final boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
-                    if (isSolrNode && !embeddedAccess.hasActiveCore(identifier)) {
-                        embeddedAccess.startCore(identifier);
-                    }
-                } catch (OXException e) {
-                    LOG.warn("Error durig core start up.", e);
-                }
+//				try {
+//                    // TODO: extend with other modules
+//                    final SolrCoreIdentifier mailIdentifier = new SolrCoreIdentifier(contextId, userId, Types.EMAIL);
+//                    final SolrCoreIdentifier infostoreIdentifier = new SolrCoreIdentifier(contextId, userId, Types.INFOSTORE);
+//                    final SolrCoreIdentifier attachmentIdentifier = new SolrCoreIdentifier(contextId, userId, Types.ATTACHMENT);
+//                    final ConfigurationService config = Services.getService(ConfigurationService.class);
+//                    final boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
+//                    if (isSolrNode && !embeddedAccess.hasActiveCore(mailIdentifier)) {
+//                        embeddedAccess.startCore(mailIdentifier);
+//                    }
+//                    if (isSolrNode && !embeddedAccess.hasActiveCore(infostoreIdentifier)) {
+//                        embeddedAccess.startCore(infostoreIdentifier);
+//                    }
+//                    if (isSolrNode && !embeddedAccess.hasActiveCore(attachmentIdentifier)) {
+//                        embeddedAccess.startCore(attachmentIdentifier);
+//                    }
+//                } catch (OXException e) {
+//                    LOG.warn("Error durig core start up.", e);
+//                }
 				
                 return null;
 			}

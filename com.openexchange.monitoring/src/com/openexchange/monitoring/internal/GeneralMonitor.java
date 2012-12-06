@@ -118,7 +118,7 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
 
     @Override
     public int getNumberOfRunningAJPListeners() {
-        return MonitoringInfo.getNumberOfRunningAJPListeners();
+        return (int) MonitoringInfo.getNumberOfRunningAJPListeners();
     }
 
     @Override

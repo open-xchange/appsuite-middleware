@@ -56,8 +56,7 @@ public class HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
-  @Override
-public Cassandra.Client getCassandra() {
+  public Cassandra.Client getCassandra() {
     if ( !isOpen() ) {
       throw new IllegalStateException("getCassandra called on client that was not open. You should not have gotten here.");
     }
@@ -70,8 +69,7 @@ public Cassandra.Client getCassandra() {
   /**
    * {@inheritDoc}
    */
-  @Override
-public Cassandra.Client getCassandra(String keyspaceNameArg) {
+  public Cassandra.Client getCassandra(String keyspaceNameArg) {
     getCassandra();
     if ( keyspaceNameArg != null && !StringUtils.equals(keyspaceName, keyspaceNameArg)) {
       if ( log.isDebugEnabled() )
@@ -91,8 +89,7 @@ public Cassandra.Client getCassandra(String keyspaceNameArg) {
   /**
    * {@inheritDoc}
    */
-  @Override
-public HThriftClient close() {
+  public HThriftClient close() {
     if ( log.isDebugEnabled() ) {
       log.debug("Closing client {}", this);
     }
@@ -115,8 +112,7 @@ public HThriftClient close() {
   /**
    * {@inheritDoc}
    */
-  @Override
-public HThriftClient open() {
+  public HThriftClient open() {
     if ( isOpen() ) {
       throw new IllegalStateException("Open called on already open connection. You should not have gotten here.");
     }
@@ -154,8 +150,7 @@ public HThriftClient open() {
   /**
    * {@inheritDoc}
    */
-  @Override
-public boolean isOpen() {
+  public boolean isOpen() {
     boolean open = false;
     if (transport != null) {
       open = transport.isOpen();
@@ -194,16 +189,14 @@ public boolean isOpen() {
   /**
    * {@inheritDoc}
    */
-  @Override
-public void startToUse() {
+  public void startToUse() {
       useageStartTime = System.currentTimeMillis();
   }
 
   /**
    * {@inheritDoc}
    */
-  @Override
-public long getSinceLastUsed() {
+  public long getSinceLastUsed() {
 	  return System.currentTimeMillis() - useageStartTime;
   }
 

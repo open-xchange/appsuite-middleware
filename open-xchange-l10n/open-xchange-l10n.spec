@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -242,6 +242,19 @@ Authors:
     Open-Xchange
 
 #-------------------------------------------------------------------------------------
+%package de-ch
+Group:          Applications/Productivity
+Summary:        Package containing Open-Xchange backend localization for de_CH
+
+%description de-ch
+Package containing Open-Xchange backend localization for de_CH
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
 
 %package ca-es
 Group:      Applications/Productivity
@@ -371,19 +384,19 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
-%package no-nb
-Group:      Applications/Productivity
-Summary:    Package containing Open-Xchange backend localization for no_NB
-Provides:       open-xchange-lang-community-no-nb = %{version}
-Obsoletes:      open-xchange-lang-community-no-nb <= %{version}
-
-%description no-nb
-Package containing Open-Xchange backend localization for no_NB
-This localization package are driven by the community.
-
-Authors:
---------
-    Open-Xchange
+#%package no-nb
+#Group:      Applications/Productivity
+#Summary:    Package containing Open-Xchange backend localization for no_NB
+#Provides:       open-xchange-lang-community-no-nb = %{version}
+#Obsoletes:      open-xchange-lang-community-no-nb <= %{version}
+#
+#%description no-nb
+#Package containing Open-Xchange backend localization for no_NB
+#This localization package are driven by the community.
+#
+#Authors:
+#--------
+#    Open-Xchange
 
 #-------------------------------------------------------------------------------------
 
@@ -467,19 +480,19 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
-%package vi-vi
-Group:      Applications/Productivity
-Summary:    Package containing Open-Xchange backend localization for vi_VI
-Provides:       open-xchange-lang-community-vi-vi = %{version}
-Obsoletes:      open-xchange-lang-community-vi-vi <= %{version}
-
-%description vi-vi
-Package containing Open-Xchange backend localization for vi_VI
-This localization package are driven by the community.
-
-Authors:
---------
-    Open-Xchange
+#%package vi-vi
+#Group:      Applications/Productivity
+#Summary:    Package containing Open-Xchange backend localization for vi_VI
+#Provides:       open-xchange-lang-community-vi-vi = %{version}
+#Obsoletes:      open-xchange-lang-community-vi-vi <= %{version}
+#
+#%description vi-vi
+#Package containing Open-Xchange backend localization for vi_VI
+#This localization package are driven by the community.
+#
+#Authors:
+#--------
+#    Open-Xchange
 
 #-------------------------------------------------------------------------------------
 
@@ -491,7 +504,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-for LANG in ca_ES cs_CZ da_DK de_DE el_GR es_ES eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO sk_SK sv_SV tr_TR zh_CN zh_TW ru_RU; do \
+for LANG in ca_ES cs_CZ da_DK de_DE el_GR es_ES eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO sk_SK sv_SV tr_TR zh_CN zh_TW ru_RU de_CH; do \
     PACKAGE_EXTENSION=$(echo ${LANG} | tr '[:upper:]_' '[:lower:]-'); \
     ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -Dlanguage=${LANG} -f build/build.xml clean build; \
 done
@@ -629,7 +642,28 @@ done
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*ru_RU*
 
+%files de-ch
+%defattr(-,root,root)
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*de_CH*
+
 %changelog
+* Mon Nov 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2012-11-28
+* Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth release candidate for 6.22.1
+* Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.1
+* Tue Nov 06 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.1
+* Fri Nov 02 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.1
+* Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.1
 * Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 6.22.0
 * Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
@@ -638,6 +672,10 @@ Fourth release candidate for 6.22.0
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.0
+* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>

@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
-import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -317,8 +316,7 @@ public class OXContextMySQLStorageCommon {
             boolean cs2dbBroken = false;
             stmt2 = configCon.prepareStatement("SELECT db_schema,write_db_pool_id FROM context_server2db_pool WHERE cid=?");
             stmt2.setInt(1, contextId);
-            stmt2.executeQuery();
-            ResultSet rs = stmt2.getResultSet();
+            ResultSet rs = stmt2.executeQuery();
             String dbSchema = null;
             int poolId = -1;
             if (!rs.next()) {
@@ -351,15 +349,13 @@ public class OXContextMySQLStorageCommon {
                     // if not, delete it
                     stmt2 = configCon.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE db_schema=?");
                     stmt2.setString(1, dbSchema);
-                    stmt2.executeQuery();
-                    rs = stmt2.getResultSet();
+                    rs = stmt2.executeQuery();
     
                     if (!rs.next()) {
                         // get auth data from db_pool to delete schema
                         stmt3 = configCon.prepareStatement("SELECT url,driver,login,password FROM db_pool WHERE db_pool_id=?");
                         stmt3.setInt(1, poolId);
-                        stmt3.executeQuery();
-                        final ResultSet rs3 = stmt3.getResultSet();
+                        final ResultSet rs3 = stmt3.executeQuery();
     
                         if (!rs3.next()) {
                             throw new StorageException("Unable to determine authentication data of pool_id " + poolId);

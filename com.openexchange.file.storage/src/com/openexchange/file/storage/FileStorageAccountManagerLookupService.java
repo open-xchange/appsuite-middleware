@@ -63,11 +63,11 @@ public interface FileStorageAccountManagerLookupService {
     /**
      * Gets the appropriate {@link FileStorageAccountManager account manager} for specified {@link FileStorageService file storage service}.
      *
-     * @param service The file storage service
+     * @param serviceId The file storage service identifier
      * @return The appropriate account manager for specified file storage service.
      * @throws OXException If look-up fails
      */
-    FileStorageAccountManager getAccountManagerFor(FileStorageService service) throws OXException;
+    FileStorageAccountManager getAccountManagerFor(String serviceId) throws OXException;
 
     /**
      * Gets the appropriate file storage account manager for specified account identifier and session.

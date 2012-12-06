@@ -49,28 +49,28 @@
 
 package com.openexchange.http.grizzly.osgi;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
 import org.glassfish.grizzly.comet.CometAddOn;
+import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
+import org.glassfish.grizzly.websockets.WebSocketApplication;
+import org.glassfish.grizzly.websockets.WebSocketEngine;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
-import com.openexchange.http.grizzly.addons.GrizzlOXAddOn;
-import com.openexchange.http.grizzly.services.atmosphere.AtmosphereService;
-import com.openexchange.http.grizzly.services.atmosphere.AtmosphereServiceImpl;
-import com.openexchange.http.grizzly.services.http.HttpServiceFactory;
+import com.openexchange.http.grizzly.addon.GrizzlOXAddOn;
+import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
+import com.openexchange.http.grizzly.service.atmosphere.AtmosphereServiceImpl;
+import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link GrizzlyActivator}
@@ -90,33 +90,25 @@ public class GrizzlyActivator extends HousekeepingActivator {
         return new Class[] { ConfigurationService.class, RequestWatcherService.class };
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.HousekeepingActivator#handleAvailability(java.lang.Class)
-     */
     @Override
     protected void handleAvailability(Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Service " + clazz.getName() + " is available again.");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Service " + clazz.getName() + " is available again.");
         }
         Object service = getService(clazz);
         GrizzlyServiceRegistry.getInstance().addService(clazz, service);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.HousekeepingActivator#handleUnavailability(java.lang.Class)
-     */
     @Override
     protected void handleUnavailability(Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Service " + clazz.getName() + " is no longer available.");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Service " + clazz.getName() + " is no longer available.");
         }
         GrizzlyServiceRegistry.getInstance().removeService(clazz);
     }
 
     @Override
-    protected void startBundle() throws OXException, ServletException, NamespaceException {
+    protected void startBundle() throws OXException {
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Starting Grizzly server.");
@@ -147,7 +139,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             // create addons based on given configuration
             final ConfigurationService configService = grizzlyServiceRegistry.getService(ConfigurationService.class);
             if (configService == null) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
+                throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getName());
             }
 
             /*
@@ -163,7 +155,10 @@ public class GrizzlyActivator extends HousekeepingActivator {
              *  create, configure and start server
              */
             grizzly = new HttpServer();
+            
             final NetworkListener networkListener = new NetworkListener("http-listener", httpHost, 8080);
+            networkListener.setChunkingEnabled(false);
+            
             
             if (hasJMXEnabled) {
                 if (LOG.isInfoEnabled()) {
@@ -177,6 +172,17 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     LOG.info("Enabling WebSockets for Grizzly server.");
                 }
                 networkListener.registerAddOn(new WebSocketAddOn());
+                WebSocketEngine.getEngine().register(new WebSocketApplication() {
+                    
+                    @Override
+                    public boolean isApplicationRequest(HttpRequestPacket request) {
+                        return "/echo".equals(request.getRequestURI());
+                    }
+
+                    public void onMessage(WebSocket socket, String data) {
+                        socket.send(data);
+                    }
+                });
             }
             
             if (hasCometEnabled) {
@@ -187,9 +193,19 @@ public class GrizzlyActivator extends HousekeepingActivator {
             }
 
             if (LOG.isInfoEnabled()) {
-                LOG.info("Enabling BackendRouteAddon for Grizzly server.");
+                LOG.info("Enabling GrizzlOXAddon for Grizzly server.");
             }
             networkListener.registerAddOn(new GrizzlOXAddOn());
+
+            /*
+             * AtmosphereServiceImpl that contains the framework to handle requests dispatched from the atmosphere servlet
+             */
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Registering Atmosphere service for Grizzly server.");
+            }
+            AtmosphereServiceImpl atmosphereServiceImpl = new AtmosphereServiceImpl(grizzly, context.getBundle());
+            registerService(AtmosphereService.class, atmosphereServiceImpl);
+            
             
             if (LOG.isInfoEnabled()) {
                 LOG.info(String.format(
@@ -197,17 +213,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     httpHost,
                     Integer.valueOf(httpPort)));
             }
-            
-            
-            
-
-            /*
-             * AtmosphereServiceImpl that contains the framework to handle requests dispatched from the atmosphere servlet
-             */
-            AtmosphereServiceImpl atmosphereServiceImpl = new AtmosphereServiceImpl(grizzly, context.getBundle());
-            registerService(AtmosphereService.class, atmosphereServiceImpl);
-            
-            
             grizzly.addListener(networkListener);
             grizzly.start();
 
@@ -215,14 +220,13 @@ public class GrizzlyActivator extends HousekeepingActivator {
              * Servicefactory that creates instances of the HttpService interface that grizzly implements. Each distinct bundle that uses
              * getService() will get its own instance of HttpServiceImpl
              */
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Registering OSGi HttpService for Grizzly server.");
+            }
             serviceFactory = new HttpServiceFactory(grizzly, context.getBundle());
             registerService(HttpService.class.getName(), serviceFactory);
             
-         
-
-            
-            
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
         }
 
@@ -237,11 +241,11 @@ public class GrizzlyActivator extends HousekeepingActivator {
         GrizzlyServiceRegistry.getInstance().clearRegistry();
         
         if (LOG.isInfoEnabled()) {
-            LOG.info("Unregistering HttpService");
+            LOG.info("Unregistering services.");
         }
         unregisterServices();
         if (LOG.isInfoEnabled()) {
-            LOG.info("Stopping Grizzly OSGi HttpService");
+            LOG.info("Stopping Grizzly.");
         }
         grizzly.stop();
     }

@@ -35,13 +35,13 @@
 
 package com.openexchange.java;
 
+import java.lang.reflect.Field;
 import java.util.AbstractQueue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 /**
  * An unbounded thread-safe {@linkplain Queue queue} based on linked nodes.
@@ -184,26 +184,42 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
          * Constructs a new node.  Uses relaxed write because item can
          * only be seen after publication via casNext.
          */
-        Node(final E item) {
-            itemUpdater.set(this, item);
+        Node(E item) {
+            UNSAFE.putObject(this, itemOffset, item);
         }
 
-        boolean casItem(final E cmp, final E val) {
-            return itemUpdater.compareAndSet(this, cmp, val);
+        boolean casItem(E cmp, E val) {
+            return UNSAFE.compareAndSwapObject(this, itemOffset, cmp, val);
         }
 
-        void lazySetNext(final Node<E> val) {
-            nextUpdater.lazySet(this, val);
+        void lazySetNext(Node<E> val) {
+            UNSAFE.putOrderedObject(this, nextOffset, val);
         }
 
-        boolean casNext(final Node<E> cmp, final Node<E> val) {
-            return nextUpdater.compareAndSet(this, cmp, val);
+        boolean casNext(Node<E> cmp, Node<E> val) {
+            return UNSAFE.compareAndSwapObject(this, nextOffset, cmp, val);
         }
 
         // Unsafe mechanics
 
-        private static final AtomicReferenceFieldUpdater<Node, Object> itemUpdater = AtomicReferenceFieldUpdater.newUpdater(Node.class, Object.class, "item");
-        private static final AtomicReferenceFieldUpdater<Node, Node> nextUpdater = AtomicReferenceFieldUpdater.newUpdater(Node.class, Node.class, "next");
+        private static final sun.misc.Unsafe UNSAFE;
+        private static final long itemOffset;
+        private static final long nextOffset;
+
+        static {
+            try {
+                final Field theUnsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+                theUnsafeField.setAccessible(true);
+                UNSAFE = (sun.misc.Unsafe) theUnsafeField.get(null);
+                Class k = Node.class;
+                itemOffset = UNSAFE.objectFieldOffset
+                    (k.getDeclaredField("item"));
+                nextOffset = UNSAFE.objectFieldOffset
+                    (k.getDeclaredField("next"));
+            } catch (Exception e) {
+                throw new Error(e);
+            }
+        }
     }
 
     /**
@@ -251,11 +267,11 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
      * @throws NullPointerException if the specified collection or any
      *         of its elements are null
      */
-    public Java7ConcurrentLinkedQueue(final Collection<? extends E> c) {
+    public Java7ConcurrentLinkedQueue(Collection<? extends E> c) {
         Node<E> h = null, t = null;
-        for (final E e : c) {
+        for (E e : c) {
             checkNotNull(e);
-            final Node<E> newNode = new Node<E>(e);
+            Node<E> newNode = new Node<E>(e);
             if (h == null) {
                 h = t = newNode;
             } else {
@@ -281,7 +297,7 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
      * @throws NullPointerException if the specified element is null
      */
     @Override
-    public boolean add(final E e) {
+    public boolean add(E e) {
         return offer(e);
     }
 
@@ -289,7 +305,7 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
      * Try to CAS head to p. If successful, repoint old head to itself
      * as sentinel for succ(), below.
      */
-    final void updateHead(final Node<E> h, final Node<E> p) {
+    final void updateHead(Node<E> h, Node<E> p) {
         if (h != p && casHead(h, p)) {
             h.lazySetNext(h);
         }
@@ -300,8 +316,8 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
      * linked to self, which will only be true if traversing with a
      * stale pointer that is now off the list.
      */
-    final Node<E> succ(final Node<E> p) {
-        final Node<E> next = p.next;
+    final Node<E> succ(Node<E> p) {
+        Node<E> next = p.next;
         return (p == next) ? head : next;
     }
 
@@ -313,12 +329,12 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
      * @throws NullPointerException if the specified element is null
      */
     @Override
-    public boolean offer(final E e) {
+    public boolean offer(E e) {
         checkNotNull(e);
         final Node<E> newNode = new Node<E>(e);
 
         for (Node<E> t = tail, p = t;;) {
-            final Node<E> q = p.next;
+            Node<E> q = p.next;
             if (q == null) {
                 // p is last node
                 if (p.casNext(null, newNode)) {
@@ -351,7 +367,7 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
         restartFromHead:
         for (;;) {
             for (Node<E> h = head, p = h, q;;) {
-                final E item = p.item;
+                E item = p.item;
 
                 if (item != null && p.casItem(item, null)) {
                     // Successful CAS is the linearization point
@@ -379,7 +395,7 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
         restartFromHead:
         for (;;) {
             for (Node<E> h = head, p = h, q;;) {
-                final E item = p.item;
+                E item = p.item;
                 if (item != null || (q = p.next) == null) {
                     updateHead(h, p);
                     return item;
@@ -405,7 +421,7 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
         restartFromHead:
         for (;;) {
             for (Node<E> h = head, p = h, q;;) {
-                final boolean hasItem = (p.item != null);
+                boolean hasItem = (p.item != null);
                 if (hasItem || (q = p.next) == null) {
                     updateHead(h, p);
                     return hasItem ? p : null;
@@ -468,12 +484,12 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
      * @return {@code true} if this queue contains the specified element
      */
     @Override
-    public boolean contains(final Object o) {
+    public boolean contains(Object o) {
         if (o == null) {
             return false;
         }
         for (Node<E> p = first(); p != null; p = succ(p)) {
-            final E item = p.item;
+            E item = p.item;
             if (item != null && o.equals(item)) {
                 return true;
             }
@@ -493,17 +509,17 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
      * @return {@code true} if this queue changed as a result of the call
      */
     @Override
-    public boolean remove(final Object o) {
+    public boolean remove(Object o) {
         if (o == null) {
             return false;
         }
         Node<E> pred = null;
         for (Node<E> p = first(); p != null; p = succ(p)) {
-            final E item = p.item;
+            E item = p.item;
             if (item != null &&
                 o.equals(item) &&
                 p.casItem(item, null)) {
-                final Node<E> next = succ(p);
+                Node<E> next = succ(p);
                 if (pred != null && next != null) {
                     pred.casNext(p, next);
                 }
@@ -527,7 +543,7 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
      * @throws IllegalArgumentException if the collection is this queue
      */
     @Override
-    public boolean addAll(final Collection<? extends E> c) {
+    public boolean addAll(Collection<? extends E> c) {
         if (c == this) {
             // As historically specified in AbstractQueue#addAll
             throw new IllegalArgumentException();
@@ -535,9 +551,9 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
 
         // Copy c into a private chain of Nodes
         Node<E> beginningOfTheEnd = null, last = null;
-        for (final E e : c) {
+        for (E e : c) {
             checkNotNull(e);
-            final Node<E> newNode = new Node<E>(e);
+            Node<E> newNode = new Node<E>(e);
             if (beginningOfTheEnd == null) {
                 beginningOfTheEnd = last = newNode;
             } else {
@@ -551,7 +567,7 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
 
         // Atomically append the chain at the tail of this collection
         for (Node<E> t = tail, p = t;;) {
-            final Node<E> q = p.next;
+            Node<E> q = p.next;
             if (q == null) {
                 // p is last node
                 if (p.casNext(null, beginningOfTheEnd)) {
@@ -598,9 +614,9 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
     @Override
     public Object[] toArray() {
         // Use ArrayList to deal with resizing.
-        final ArrayList<E> al = new ArrayList<E>();
+        ArrayList<E> al = new ArrayList<E>();
         for (Node<E> p = first(); p != null; p = succ(p)) {
-            final E item = p.item;
+            E item = p.item;
             if (item != null) {
                 al.add(item);
             }
@@ -646,12 +662,12 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T[] toArray(final T[] a) {
+    public <T> T[] toArray(T[] a) {
         // try to use sent-in array
         int k = 0;
         Node<E> p;
         for (p = first(); p != null && k < a.length; p = succ(p)) {
-            final E item = p.item;
+            E item = p.item;
             if (item != null) {
                 a[k++] = (T)item;
             }
@@ -664,9 +680,9 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
         }
 
         // If won't fit, use ArrayList version
-        final ArrayList<E> al = new ArrayList<E>();
+        ArrayList<E> al = new ArrayList<E>();
         for (Node<E> q = first(); q != null; q = succ(q)) {
-            final E item = q.item;
+            E item = q.item;
             if (item != null) {
                 al.add(item);
             }
@@ -721,7 +737,7 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
          */
         private E advance() {
             lastRet = nextNode;
-            final E x = nextItem;
+            E x = nextItem;
 
             Node<E> pred, p;
             if (nextNode == null) {
@@ -738,14 +754,14 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
                     nextItem = null;
                     return x;
                 }
-                final E item = p.item;
+                E item = p.item;
                 if (item != null) {
                     nextNode = p;
                     nextItem = item;
                     return x;
                 } else {
                     // skip over nulls
-                    final Node<E> next = succ(p);
+                    Node<E> next = succ(p);
                     if (pred != null && next != null) {
                         pred.casNext(p, next);
                     }
@@ -769,7 +785,7 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
 
         @Override
         public void remove() {
-            final Node<E> l = lastRet;
+            Node<E> l = lastRet;
             if (l == null) {
                 throw new IllegalStateException();
             }
@@ -786,7 +802,7 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
      * the proper order, followed by a null
      * @param s the stream
      */
-    private void writeObject(final java.io.ObjectOutputStream s)
+    private void writeObject(java.io.ObjectOutputStream s)
         throws java.io.IOException {
 
         // Write out any hidden stuff
@@ -794,7 +810,7 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
 
         // Write out all elements in the proper order.
         for (Node<E> p = first(); p != null; p = succ(p)) {
-            final Object item = p.item;
+            Object item = p.item;
             if (item != null) {
                 s.writeObject(item);
             }
@@ -808,7 +824,7 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
      * Reconstitutes the instance from a stream (that is, deserializes it).
      * @param s the stream
      */
-    private void readObject(final java.io.ObjectInputStream s)
+    private void readObject(java.io.ObjectInputStream s)
         throws java.io.IOException, ClassNotFoundException {
         s.defaultReadObject();
 
@@ -817,7 +833,6 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
         Object item;
         while ((item = s.readObject()) != null) {
             @SuppressWarnings("unchecked")
-            final
             Node<E> newNode = new Node<E>((E) item);
             if (h == null) {
                 h = t = newNode;
@@ -838,24 +853,37 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
      *
      * @param v the element
      */
-    private static void checkNotNull(final Object v) {
+    private static void checkNotNull(Object v) {
         if (v == null) {
             throw new NullPointerException();
         }
     }
 
-    private boolean casTail(final Node<E> cmp, final Node<E> val) {
-        return tailUpdater.compareAndSet(this, cmp, val);
+    private boolean casTail(Node<E> cmp, Node<E> val) {
+        return UNSAFE.compareAndSwapObject(this, tailOffset, cmp, val);
     }
 
-    private boolean casHead(final Node<E> cmp, final Node<E> val) {
-        return headUpdater.compareAndSet(this, cmp, val);
+    private boolean casHead(Node<E> cmp, Node<E> val) {
+        return UNSAFE.compareAndSwapObject(this, headOffset, cmp, val);
     }
 
     // Unsafe mechanics
 
-    private static final AtomicReferenceFieldUpdater<Java7ConcurrentLinkedQueue, Node> headUpdater = AtomicReferenceFieldUpdater.newUpdater(Java7ConcurrentLinkedQueue.class, Node.class, "head");
-    private static final AtomicReferenceFieldUpdater<Java7ConcurrentLinkedQueue, Node> tailUpdater = AtomicReferenceFieldUpdater.newUpdater(Java7ConcurrentLinkedQueue.class, Node.class, "tail");
-
+    private static final sun.misc.Unsafe UNSAFE;
+    private static final long headOffset;
+    private static final long tailOffset;
+    static {
+        try {
+            final Field theUnsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+            theUnsafeField.setAccessible(true);
+            UNSAFE = (sun.misc.Unsafe) theUnsafeField.get(null);
+            Class k = Java7ConcurrentLinkedQueue.class;
+            headOffset = UNSAFE.objectFieldOffset
+                (k.getDeclaredField("head"));
+            tailOffset = UNSAFE.objectFieldOffset
+                (k.getDeclaredField("tail"));
+        } catch (Exception e) {
+            throw new Error(e);
+        }
+    }
 }
-

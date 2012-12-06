@@ -50,8 +50,6 @@
 package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import org.osgi.framework.Bundle;

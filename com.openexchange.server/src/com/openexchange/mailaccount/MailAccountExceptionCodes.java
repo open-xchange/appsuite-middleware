@@ -144,6 +144,21 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
 
     ;
 
+    private static final String PREFIX = "ACC";
+
+    /**
+     * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.
+     *
+     * @param e The {@code OXException} to check
+     * @return <code>true</code> if prefix is equal; otherwise <code>false</code>
+     */
+    public static boolean hasPrefix(final OXException e) {
+        if (null == e) {
+            return false;
+        }
+        return PREFIX.equals(e.getPrefix());
+    }
+
     /**
      * Message of the exception.
      */
@@ -174,7 +189,7 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "ACC";
+        return PREFIX;
     }
 
     @Override

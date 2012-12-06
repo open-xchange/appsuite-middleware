@@ -262,7 +262,8 @@ public final class AJPv13Config implements Initialization {
                 servletConfigs = "servletConfig";
             }
             final File servletConfigsFile = configurationService.getDirectory(servletConfigs);
-            if (LOG.isTraceEnabled() && ((null == servletConfigsFile) || !servletConfigsFile.exists() || !servletConfigsFile.isDirectory())) {
+            final boolean nonExisting = (null == servletConfigsFile) || !servletConfigsFile.exists() || !servletConfigsFile.isDirectory();
+            if (LOG.isTraceEnabled() && nonExisting) {
                 LOG.trace(servletConfigsFile + " does not exist or is not a directory");
             }
             /*
@@ -277,7 +278,7 @@ public final class AJPv13Config implements Initialization {
             /*
              * Log info
              */
-            logInfo();
+            logInfo(nonExisting ? " (non-existing)" : " (exists)");
         } catch (final FileNotFoundException e) {
             throw new AJPv13Exception(AJPv13Exception.AJPCode.FILE_NOT_FOUND, true, e, AJP_PROP_FILE_NAME);
         } catch (final IOException e) {
@@ -285,9 +286,9 @@ public final class AJPv13Config implements Initialization {
         }
     }
 
-    private static void logInfo() {
+    private static void logInfo(final String desc) {
         if (LOG.isInfoEnabled()) {
-            final StringBuilder logBuilder = new StringBuilder(1000);
+            final StringBuilder logBuilder = new StringBuilder(1024);
             logBuilder.append("\nAJP CONFIGURATION:\n");
             logBuilder.append("\tAJP_PORT=").append(instance.port).append('\n');
             logBuilder.append("\tAJP_SERVER_THREAD_SIZE=").append(instance.serverThreadSize).append('\n');
@@ -302,7 +303,7 @@ public final class AJPv13Config implements Initialization {
             logBuilder.append("\tSERVLET_POOL_SIZE=").append(instance.servletPoolSize).append('\n');
             logBuilder.append("\tAJP_JVM_ROUTE=").append(instance.jvmRoute).append('\n');
             logBuilder.append("\tAJP_LOG_FORWARD_REQUEST=").append(instance.logForwardRequest).append('\n');
-            logBuilder.append("\tAJP_SERVLET_CONFIG_DIR=").append(instance.servletConfigs).append('\n');
+            logBuilder.append("\tAJP_SERVLET_CONFIG_DIR=").append(instance.servletConfigs).append(null == desc ? "" : desc).append('\n');
             logBuilder.append("\tAJP_BIND_ADDR=").append(
                 instance.ajpBindAddr == null ? "* (all interfaces)" : instance.ajpBindAddr.toString());
             LOG.info(logBuilder.toString());

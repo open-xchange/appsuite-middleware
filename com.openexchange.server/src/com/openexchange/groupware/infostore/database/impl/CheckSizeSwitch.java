@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
+import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Charsets;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;

@@ -54,6 +54,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
@@ -78,104 +80,87 @@ public class MailFolder implements Serializable, Cloneable {
     }
 
     private DefaultFolderType defaulFolderType;
-
     private boolean b_defaulFolderType;
 
     private String name;
-
     private boolean b_name;
 
     private String fullname;
-
     private boolean b_fullname;
 
     private String parentFullname;
-
     private boolean b_parentFullname;
 
     private boolean subscribed;
-
     private boolean b_subscribed;
 
     /**
      * Flag to indicate whether this mail folder contains subfolders.
      */
     private boolean hasSubfolders;
-
     private boolean b_hasSubfolders;
 
     /**
      * Flag to indicate whether this mail folder contains _subscribed_ subfolders.
      */
     private boolean hasSubscribedSubfolders;
-
     private boolean b_hasSubscribedSubfolders;
 
     private boolean exists;
-
     private boolean b_exists;
 
     /**
      * Flag to indicate whether this mail folder is able to hold messages.
      */
     private boolean holdsMessages;
-
     private boolean b_holdsMessages;
 
     /**
      * Flag to indicate whether this mail folder is able to hold (sub)folders.
      */
     private boolean holdsFolders;
-
     private boolean b_holdsFolders;
 
     private int messageCount;
-
     private boolean b_messageCount;
 
     private int newMessageCount;
-
     private boolean b_newMessageCount;
 
     private int unreadMessageCount;
-
     private boolean b_unreadMessageCount;
 
     private int deletedMessageCount;
-
     private boolean b_deletedMessageCount;
 
     private char separator;
-
     private boolean b_separator;
 
     private MailPermission ownPermission;
-
     private boolean b_ownPermission;
 
     private boolean supportsUserFlags;
-
     private boolean b_supportsUserFlags;
 
     private boolean rootFolder;
-
     private boolean b_rootFolder;
 
     private boolean defaultFolder;
-
     private boolean b_defaultFolder;
 
     private List<MailPermission> permissions;
-
     private boolean b_permissions;
 
     private boolean shared;
-
     private boolean b_shared;
 
     private String owner;
-
     private boolean b_owner;
+
+    private boolean isPublic;
+    private boolean b_public;
+
+    private final ConcurrentMap<String, Object> properties;
 
     /**
      * Virtual name of mailbox's root folder
@@ -185,7 +170,7 @@ public class MailFolder implements Serializable, Cloneable {
     public static final String DEFAULT_FOLDER_NAME = "E-Mail";
 
     /**
-     * Virtual fullname of mailbox's root folder
+     * Virtual full name of mailbox's root folder
      *
      * @value "default"
      */
@@ -197,6 +182,54 @@ public class MailFolder implements Serializable, Cloneable {
     public MailFolder() {
         super();
         defaulFolderType = DefaultFolderType.NONE;
+        properties = new ConcurrentHashMap<String, Object>(4);
+    }
+
+    /**
+     * Checks presence of named property.
+     * 
+     * @param name The name
+     * @return <code>true</code> if present; otherwise <code>false</code>
+     */
+    public boolean containsProperty(final String name) {
+        return properties.containsKey(name);
+    }
+
+    /**
+     * Gets specified property.
+     * 
+     * @param name The name
+     * @return The value or <code>null</code>
+     */
+    public Object getProperty(final String name) {
+        return properties.get(name);
+    }
+
+    /**
+     * Sets given property
+     * <p>
+     * If value is <code>null</code>, a remove is performed.
+     * 
+     * @param name The name
+     * @param value The value
+     */
+    public void setProperty(final String name, final Object value) {
+        if (null == value) {
+            properties.remove(name);
+        } else {
+            properties.put(name, value);
+        }
+    }
+
+    /**
+     * Sets the property if absent.
+     * 
+     * @param name The name
+     * @param value The value
+     * @return The previous value or <code>null</code> for successful insertion
+     */
+    public Object setPropertyIfAbsent(String name, Object value) {
+        return properties.putIfAbsent(name, value);
     }
 
     @Override
@@ -226,25 +259,25 @@ public class MailFolder implements Serializable, Cloneable {
     }
 
     /**
-     * Gets the fullname.
+     * Gets the full name.
      *
-     * @return The fullname ({@link #DEFAULT_FOLDER_ID} if this mail folder denotes the root folder)
+     * @return The full name ({@link #DEFAULT_FOLDER_ID} if this mail folder denotes the root folder)
      */
     public String getFullname() {
         return fullname;
     }
 
     /**
-     * Checks if fullname is set through {@link #setFullname(String)}.
+     * Checks if full name is set through {@link #setFullname(String)}.
      *
-     * @return <code>true</code> if fullname is set; otherwise <code>false</code>
+     * @return <code>true</code> if full name is set; otherwise <code>false</code>
      */
     public boolean containsFullname() {
         return b_fullname;
     }
 
     /**
-     * Removes the fullname.
+     * Removes the full name.
      */
     public void removeFullname() {
         fullname = null;
@@ -252,11 +285,11 @@ public class MailFolder implements Serializable, Cloneable {
     }
 
     /**
-     * Sets this mail folder's fullname.
+     * Sets this mail folder's full name.
      * <p>
      * If this mail folder denotes the root folder, {@link #DEFAULT_FOLDER_ID} is supposed to be set as fullname.
      *
-     * @param fullname the fullname to set
+     * @param fullname the full name to set
      */
     public void setFullname(final String fullname) {
         this.fullname = fullname;
@@ -1100,7 +1133,7 @@ public class MailFolder implements Serializable, Cloneable {
     }
 
     /**
-     * Removes the supports-user-flags flag.
+     * Removes the shared flag.
      */
     public void removeShared() {
         shared = false;
@@ -1115,6 +1148,42 @@ public class MailFolder implements Serializable, Cloneable {
     public void setShared(final boolean shared) {
         this.shared = shared;
         b_shared = true;
+    }
+
+    /**
+     * Checks if this folder is public.
+     *
+     * @return <code>true</code> if this folder is public; otherwise <code>false</code>
+     */
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    /**
+     * Checks if the public flag was set.
+     *
+     * @return <code>true</code> if public flag is set; otherwise <code>false</code>
+     */
+    public boolean containsPublic() {
+        return b_public;
+    }
+
+    /**
+     * Removes the public flag.
+     */
+    public void removePublic() {
+        isPublic = false;
+        b_public = false;
+    }
+
+    /**
+     * Sets the public flag.
+     *
+     * @param isPublic The public flag to set
+     */
+    public void setPublic(final boolean isPublic) {
+        this.isPublic = isPublic;
+        b_public = true;
     }
 
     /**

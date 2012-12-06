@@ -229,7 +229,7 @@ public class Multiple extends SessionServlet {
             jsonObj.put(MultipleHandler.ROUTE, Tools.getRoute(req.getSession(true).getId()));
             jsonObj.put(MultipleHandler.REMOTE_ADDRESS, req.getRemoteAddr());
             final Dispatcher dispatcher = getDispatcher();
-            StringBuilder moduleCandidate = new StringBuilder();
+            final StringBuilder moduleCandidate = new StringBuilder(32);
             boolean handles = false;
             for (final String component : SPLIT.split(module, 0)) {
                 moduleCandidate.append(component);
@@ -238,6 +238,19 @@ public class Multiple extends SessionServlet {
                     break;
                 }
                 moduleCandidate.append('/');
+            }
+            if (MODULE_MAIL.equals(module)) {
+                if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
+                    if (MailRequest.isMove(jsonObj)) {
+                        handles = false;
+                    } else if (MailRequest.isStoreFlags(jsonObj)) {
+                        handles = false;
+                    } else if (MailRequest.isColorLabel(jsonObj)) {
+                        handles = false;
+                    }
+                } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
+                    handles = false;
+                }
             }
             if (handles) {
                 final AJAXRequestData request = MultipleAdapter.parse(moduleCandidate.toString(), module.substring(moduleCandidate.length()), action, jsonObj, session, Tools.considerSecure(req));
@@ -260,7 +273,7 @@ public class Multiple extends SessionServlet {
                     jsonWriter.value(result.getResultObject());
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
-                    ResponseWriter.writeException(e, jsonWriter);
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
                     return state;
                 } finally {
                 	jsonWriter.endObject();
@@ -281,20 +294,20 @@ public class Multiple extends SessionServlet {
                     }
                     final Collection<OXException> warnings = multipleHandler.getWarnings();
                     if (null != warnings && !warnings.isEmpty()) {
-                        ResponseWriter.writeException(warnings.iterator().next(), jsonWriter);
+                        ResponseWriter.writeException(warnings.iterator().next(), jsonWriter, localeFrom(session));
                     }
                 } catch (final OXException e) {
                     if (jsonWriter.isExpectingValue()) {
                         jsonWriter.value("");
                     }
-                    ResponseWriter.writeException(e, jsonWriter);
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
                 } catch (final JSONException e) {
                     final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                     LOG.error(oje.getMessage(), oje);
                     if (jsonWriter.isExpectingValue()) {
                         jsonWriter.value("");
                     }
-                    ResponseWriter.writeException(oje, jsonWriter);
+                    ResponseWriter.writeException(oje, jsonWriter, localeFrom(session));
                 } finally {
                     multipleHandler.close();
                     jsonWriter.endObject();
@@ -317,13 +330,13 @@ public class Multiple extends SessionServlet {
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     jsonWriter.object();
-                    ResponseWriter.writeException(e, jsonWriter);
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
                     jsonWriter.endObject();
                 } catch (final JSONException e) {
                     final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                     LOG.error(oje.getMessage(), oje);
                     jsonWriter.object();
-                    ResponseWriter.writeException(oje, jsonWriter);
+                    ResponseWriter.writeException(oje, jsonWriter, localeFrom(session));
                     jsonWriter.endObject();
                 }
             } else if (MODULE_MAIL.equals(module)) {
@@ -366,13 +379,13 @@ public class Multiple extends SessionServlet {
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     jsonWriter.object();
-                    ResponseWriter.writeException(e, jsonWriter);
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
                     jsonWriter.endObject();
                 } catch (final JSONException e) {
                     final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                     LOG.error(oje.getMessage(), oje);
                     jsonWriter.object();
-                    ResponseWriter.writeException(oje, jsonWriter);
+                    ResponseWriter.writeException(oje, jsonWriter, localeFrom(session));
                     jsonWriter.endObject();
                 }
             } else if (MODULE_ATTACHMENTS.equals(module)) {
@@ -382,7 +395,7 @@ public class Multiple extends SessionServlet {
                 final OXException OXException = AjaxExceptionCodes.UNKNOWN_MODULE.create( module);
                 LOG.error(OXException.getMessage(), OXException);
                 jsonWriter.object();
-                ResponseWriter.writeException(OXException, jsonWriter);
+                ResponseWriter.writeException(OXException, jsonWriter, localeFrom(session));
                 jsonWriter.endObject();
             }
         } catch (final JSONException e) {

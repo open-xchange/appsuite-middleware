@@ -38,54 +38,46 @@ public class ThriftColumnFamilyTemplate<K, N> extends ColumnFamilyTemplate<K, N>
     super(keyspace, columnFamily, keySerializer, topSerializer);
   }
 
-  @Override
-public <T> T doExecuteSlice(K key, HSlicePredicate<N> predicate, ColumnFamilyRowMapper<K, N, T> mapper) {
+  public <T> T doExecuteSlice(K key, HSlicePredicate<N> predicate, ColumnFamilyRowMapper<K, N, T> mapper) {
     return mapper.mapRow(doExecuteSlice(key,predicate));
   }
 
-  @Override
-public ColumnFamilyResult<K, N> doExecuteSlice(final K key, final HSlicePredicate<N> workingSlicePredicate) {    
+  public ColumnFamilyResult<K, N> doExecuteSlice(final K key, final HSlicePredicate<N> workingSlicePredicate) {    
     return new ColumnFamilyResultWrapper<K, N>(keySerializer, topSerializer, 
         sliceInternal(key, workingSlicePredicate));
   }
 
-  @Override
-public ColumnFamilyResult<K, N> doExecuteMultigetSlice(final Iterable<K> keys, final HSlicePredicate<N> workingSlicePredicate) {    
+  public ColumnFamilyResult<K, N> doExecuteMultigetSlice(final Iterable<K> keys, final HSlicePredicate<N> workingSlicePredicate) {    
     return new ColumnFamilyResultWrapper<K, N>(keySerializer, topSerializer, 
         multigetSliceInternal(keys, workingSlicePredicate));
   }
 
-  @Override
-public <V> MappedColumnFamilyResult<K, N, V> doExecuteMultigetSlice(final Iterable<K> keys, 
+  public <V> MappedColumnFamilyResult<K, N, V> doExecuteMultigetSlice(final Iterable<K> keys, 
       final HSlicePredicate<N> workingSlicePredicate,
       final ColumnFamilyRowMapper<K, N, V> mapper) {    
     return new MappedColumnFamilyResultWrapper<K,N,V>(keySerializer, topSerializer, 
         multigetSliceInternal(keys, workingSlicePredicate), mapper);    
   }
 
-  @Override
-protected <V> ColumnFamilyResult<K, N> doExecuteIndexedSlices(final IndexedSlicesPredicate<K, N, V> predicate) {
+  protected <V> ColumnFamilyResult<K, N> doExecuteIndexedSlices(final IndexedSlicesPredicate<K, N, V> predicate) {
     return new ColumnFamilyResultWrapper<K, N>(keySerializer, topSerializer,
         indexedSlicesInternal(predicate, activeSlicePredicate));
   }
 
-  @Override
-protected <V> ColumnFamilyResult<K, N> doExecuteIndexedSlices(IndexedSlicesPredicate<K, N, V> predicate,
+  protected <V> ColumnFamilyResult<K, N> doExecuteIndexedSlices(IndexedSlicesPredicate<K, N, V> predicate,
       HSlicePredicate<N> slicePredicate) {
     return new ColumnFamilyResultWrapper<K, N>(keySerializer, topSerializer,
         indexedSlicesInternal(predicate, slicePredicate));
   }
 
-  @Override
-protected <R,V> MappedColumnFamilyResult<K, N, R> doExecuteIndexedSlices(
+  protected <R,V> MappedColumnFamilyResult<K, N, R> doExecuteIndexedSlices(
       IndexedSlicesPredicate<K, N, V> predicate,
       ColumnFamilyRowMapper<K, N, R> mapper) {
     return new MappedColumnFamilyResultWrapper<K,N,R>(keySerializer, topSerializer, 
         indexedSlicesInternal(predicate, activeSlicePredicate), mapper);
   }
 
-  @Override
-protected <R, V> MappedColumnFamilyResult<K, N, R> doExecuteIndexedSlices(IndexedSlicesPredicate<K, N, V> predicate,
+  protected <R, V> MappedColumnFamilyResult<K, N, R> doExecuteIndexedSlices(IndexedSlicesPredicate<K, N, V> predicate,
       HSlicePredicate<N> slicePredicate, ColumnFamilyRowMapper<K, N, R> mapper) {
     return new MappedColumnFamilyResultWrapper<K,N,R>(keySerializer, topSerializer, 
         indexedSlicesInternal(predicate, slicePredicate), mapper);

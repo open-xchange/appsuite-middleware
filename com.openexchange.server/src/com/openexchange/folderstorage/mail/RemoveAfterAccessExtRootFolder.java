@@ -81,7 +81,8 @@ public final class RemoveAfterAccessExtRootFolder extends ExternalMailAccountRoo
 
     @Override
     public boolean loadSubfolders() {
-        return true;
+        // return true;
+        return false;
     }
 
     @Override

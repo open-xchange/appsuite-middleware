@@ -38,8 +38,7 @@ public interface Cluster {
     *
     * @deprecated use {@link #describeClusterName()}
     */
-  @Deprecated
-String getClusterName() throws HectorException;
+  String getClusterName() throws HectorException;
 
   String describeClusterName() throws HectorException;
 

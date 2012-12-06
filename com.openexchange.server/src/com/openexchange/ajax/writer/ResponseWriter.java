@@ -299,12 +299,26 @@ public final class ResponseWriter {
      * Writes specified exception to given JSON object using passed locale.
      *
      * @param json The JSON object
+     * @param errorKey The key value for the error value inside the JSON object
      * @param exception The exception to write
      * @param locale The locale
      * @throws JSONException If writing JSON fails
      */
     public static void addException(final JSONObject json, final OXException exception, final Locale locale) throws JSONException {
-        json.put(ERROR, exception.getDisplayMessage(locale));
+        addException(json, ERROR, exception, locale);
+    }
+
+    /**
+     * Writes specified exception to given JSON object using passed locale.
+     *
+     * @param json The JSON object
+     * @param errorKey The key value for the error value inside the JSON object
+     * @param exception The exception to write
+     * @param locale The locale
+     * @throws JSONException If writing JSON fails
+     */
+    public static void addException(final JSONObject json, String errorKey, final OXException exception, final Locale locale) throws JSONException {
+        json.put(errorKey, exception.getDisplayMessage(locale));
         /*
          * Put argument JSON array for compatibility reasons
          */
@@ -450,10 +464,10 @@ public final class ResponseWriter {
      * @param writer - the <code>{@link JSONWriter}</code> to write to
      * @throws JSONException - if writing fails
      */
-    public static void write(final Response response, final JSONWriter writer) throws JSONException {
+    public static void write(final Response response, final JSONWriter writer, final Locale locale) throws JSONException {
         writer.object();
         final JSONObject json = new JSONObject();
-        write(response, json);
+        write(response, json, locale);
         final Set<Map.Entry<String, Object>> entrySet = json.entrySet();
         final int len = entrySet.size();
         final Iterator<Map.Entry<String, Object>> iter = entrySet.iterator();
@@ -617,7 +631,12 @@ public final class ResponseWriter {
         {
             final List<Category> categories = exc.getCategories();
             if (1 == categories.size()) {
-                writer.key(ERROR_CATEGORIES).value(categories.get(0).toString());
+                final Category category = categories.get(0);
+                writer.key(ERROR_CATEGORIES).value(category.toString());
+                final int number = Categories.getFormerCategoryNumber(category);
+                if (number > 0) {
+                    writer.key(ERROR_CATEGORY).value(number);
+                }
             } else {
                 writer.key(ERROR_CATEGORIES);
                 writer.array();
@@ -641,6 +660,13 @@ public final class ResponseWriter {
         writer.key(ERROR_ID).value(exc.getExceptionId());
         writeProblematic(exc, writer);
         writeTruncated(exc, writer);
+        if (exc.getLogArgs() != null) {
+            final JSONArray array = new JSONArray();
+            for (final Object tmp : exc.getLogArgs()) {
+                array.put(tmp);
+            }
+            writer.key(ResponseFields.ERROR_PARAMS).value(array);
+        }
         // Write stack trace
         if (includeStackTraceOnError()) {
             writer.key(ERROR_STACK);

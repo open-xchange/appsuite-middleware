@@ -71,6 +71,13 @@ public class FileStorageAccountWriter {
         super();
     }
 
+    /**
+     * Writes given account into its JSON representation.
+     *
+     * @param account The account
+     * @return The resulting JSON
+     * @throws JSONException If writing JSON fails
+     */
     public JSONObject write(final FileStorageAccount account) throws JSONException {
         final JSONObject accountJSON = new JSONObject();
         accountJSON.put(FileStorageAccountConstants.ID, account.getId());
@@ -79,7 +86,7 @@ public class FileStorageAccountWriter {
         accountJSON.put(FileStorageAccountConstants.FILE_STORAGE_SERVICE, fsService.getId());
         final DynamicFormDescription formDescription = fsService.getFormDescription();
         if (null != formDescription && null != account.getConfiguration()) {
-            final JSONObject configJSON = new FormContentWriter().write(formDescription, account.getConfiguration(), null);
+            final JSONObject configJSON = FormContentWriter.write(formDescription, account.getConfiguration(), null);
             accountJSON.put(FileStorageAccountConstants.CONFIGURATION, configJSON);
         }
         return accountJSON;

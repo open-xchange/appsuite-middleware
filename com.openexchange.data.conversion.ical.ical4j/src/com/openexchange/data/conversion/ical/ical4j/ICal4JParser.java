@@ -65,25 +65,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.Completed;
 import net.fortuna.ical4j.model.property.DateProperty;
-import net.fortuna.ical4j.model.property.DtEnd;
-import net.fortuna.ical4j.model.property.DtStart;
-import net.fortuna.ical4j.model.property.Due;
 import net.fortuna.ical4j.util.CompatibilityHints;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.FreeBusyInformation;
@@ -99,7 +93,6 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.log.LogFactory;
-
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
@@ -124,6 +117,8 @@ public class ICal4JParser implements ICalParser {
         WEEKDAYS.put("SA", Integer.valueOf(CalendarObject.SATURDAY));
         WEEKDAYS.put("SO", Integer.valueOf(CalendarObject.SUNDAY));
     }
+
+	private int limit = -1;
 
     public ICal4JParser() {
         CompatibilityHints.setHintEnabled(
@@ -159,11 +154,13 @@ public class ICal4JParser implements ICalParser {
             while(true) {
                 final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
                 if(calendar == null) { break; }
-                int i = 0;
-                for(final Object componentObj : calendar.getComponents("VEVENT")) {
+                ComponentList vevents = calendar.getComponents("VEVENT");
+                int myLimit = limit < 0 ? vevents.size() : limit < vevents.size() ? limit : vevents.size(); 
+                for(int i = 0; i < myLimit; i++) {
+                	final Object componentObj = vevents.get(i);
                     final Component vevent = (Component) componentObj;
                     try {
-                        appointments.add(convertAppointment(i++, (VEvent)vevent, defaultTZ, ctx, warnings ));
+                        appointments.add(convertAppointment(i, (VEvent)vevent, defaultTZ, ctx, warnings ));
                     } catch (final ConversionError conversionError) {
                         errors.add(conversionError);
                     }
@@ -204,11 +201,12 @@ public class ICal4JParser implements ICalParser {
                 if (null == calendar) { 
                 	break; 
                 }
-                int i = 0;
-                for (Object componentObj : calendar.getComponents("VFREEBUSY")) {
-                    Component vevent = (Component) componentObj;
+                ComponentList freebusies = calendar.getComponents("VFREEBUSY");
+                int myLimit = limit < 0 ? freebusies.size() : limit < freebusies.size() ? limit : freebusies.size();
+                for (int i = 0; i < myLimit; i++) {
+                    Component vevent = (Component) freebusies.get(i);
                     try {
-                        fbInfos.add(convertFreeBusy(i++, (VFreeBusy)vevent, defaultTZ, ctx, warnings));
+                        fbInfos.add(convertFreeBusy(i, (VFreeBusy)vevent, defaultTZ, ctx, warnings));
                     } catch (ConversionError conversionError) {
                         errors.add(conversionError);
                     }
@@ -283,11 +281,14 @@ public class ICal4JParser implements ICalParser {
             while(true) {
                 final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
                 if(calendar == null) { break; }
-                int i = 0;
-                for(final Object componentObj : calendar.getComponents("VTODO")) {
-                    final Component vtodo = (Component) componentObj;
+
+                ComponentList todos = calendar.getComponents("VTODO");
+                int myLimit = limit < 0 ? todos.size() : limit < todos.size() ? limit : todos.size();
+
+                for(int i = 0; i < myLimit; i++) {
+                    final Component vtodo = (Component) todos.get(i);
                     try {
-                        tasks.add(convertTask(i++, (VToDo) vtodo, defaultTZ, ctx, warnings ));
+                        tasks.add(convertTask(i, (VToDo) vtodo, defaultTZ, ctx, warnings ));
                     } catch (final ConversionError conversionError) {
                         errors.add(conversionError);
                     }
@@ -371,7 +372,7 @@ public class ICal4JParser implements ICalParser {
         }
         Parameter tzid = dateProperty.getParameter("TZID");
 		String tzidName = tzid.getValue();
-		TimeZone inTZID = (null != tzid) ? TimeZone.getTimeZone(tzidName) : null;
+		TimeZone inTZID = TimeZone.getTimeZone(tzidName);
 		
         /* now, if the Java core devs had been smart, they'd made TimeZone.getTimeZone(name,fallback) public. But they did not, so have to do this: */
 		if(inTZID.getID().equals("GMT") && ! tzidName.equals("GMT")){
@@ -414,7 +415,7 @@ public class ICal4JParser implements ICalParser {
                 if(line.startsWith("BEGIN:VCALENDAR")) {
                     beginFound = true;
                 } else if ( !beginFound && !"".equals(line)) {
-                    throw new ConversionError(-1, ConversionWarning.Code.DOES_NOT_LOOK_LIKE_ICAL_FILE);
+                    continue; // ignore bad lines between "VCALENDAR" Tags.
                 }
                 if(!line.startsWith("END:VCALENDAR")){ //hack to fix bug 11958
                 	if(line.matches("^\\s*BEGIN:VTIMEZONE")){
@@ -554,5 +555,10 @@ public class ICal4JParser implements ICalParser {
         }
 		return line;
     }
+
+	@Override
+	public void setLimit(int amount) {
+		this.limit = amount;
+	}
 
 }

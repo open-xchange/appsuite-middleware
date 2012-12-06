@@ -49,8 +49,6 @@
 
 package com.openexchange.oauth.tumblr;
 
-import java.util.Map;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
@@ -63,7 +61,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class TumblrOAuthServiceMetadata extends AbstractOAuthServiceMetaData {
 
-	private ServiceLookup services;
+	private final ServiceLookup services;
 	
 	public TumblrOAuthServiceMetadata(ServiceLookup services) {
 		super();

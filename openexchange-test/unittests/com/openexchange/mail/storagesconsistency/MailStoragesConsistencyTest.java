@@ -233,9 +233,9 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                             OrderDirection.ASC,
                             FIELDS_ID);
                     assertTrue("Size mismatch: " + trashed.length + " but should be " + numTrashedMails, trashed.length == numTrashedMails);
-                    final Set<Long> oldIds = new HashSet<Long>(numTrashedMails);
+                    final Set<String> oldIds = new HashSet<String>(numTrashedMails);
                     for (int i = 0; i < trashed.length; i++) {
-                        oldIds.add(Long.valueOf(trashed[i].getMailId()));
+                        oldIds.add(trashed[i].getMailId());
                     }
                     /*
                      * Alter trash's content through clearing temporary folder by folder storage

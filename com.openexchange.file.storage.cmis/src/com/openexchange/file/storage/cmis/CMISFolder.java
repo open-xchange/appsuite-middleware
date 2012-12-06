@@ -59,6 +59,7 @@ import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.Property;
 import org.apache.chemistry.opencmis.commons.data.Ace;
 import org.apache.chemistry.opencmis.commons.data.Acl;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
@@ -71,6 +72,8 @@ import com.openexchange.file.storage.FileStoragePermission;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CMISFolder extends DefaultFileStorageFolder {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CMISFolder.class);
 
     private final int userId;
 
@@ -157,9 +160,11 @@ public final class CMISFolder extends DefaultFileStorageFolder {
                 if (null != properties) {
                     final Map<String, Object> props = new HashMap<String, Object>(properties.size());
                     for (final Property<?> entry : properties) {
-                        final List<String> values = entry.getValue();
+                        final List<?> values = entry.getValues();
                         if (null != values && 1 == values.size()) {
                             props.put(entry.getId(), values.get(0));
+                        } else {
+                            LOG.debug("CMIS folder property \"" + entry.getId() + "\" is a multiple: " + values);
                         }
                     }
                     if (!props.isEmpty()) {

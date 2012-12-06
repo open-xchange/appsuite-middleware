@@ -50,9 +50,9 @@
 package com.openexchange.imap.notify.internal;
 
 import java.util.Iterator;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.imap.services.IMAPServiceRegistry;
@@ -86,7 +86,7 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
      */
     private IMAPNotifierRegistry() {
         super();
-        map = new ConcurrentHashMap<Key, ConcurrentMap<Integer, IMAPNotifierTask>>();
+        map = new NonBlockingHashMap<Key, ConcurrentMap<Integer, IMAPNotifierTask>>();
         final String notifierFullNames = IMAPProperties.getInstance().getNotifyFullNames();
         if (isEmpty(notifierFullNames)) {
             fullNames = null;
@@ -113,7 +113,7 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
         final Key key = keyFor(session);
         ConcurrentMap<Integer, IMAPNotifierTask> tasks = map.get(key);
         if (null == tasks) {
-            final ConcurrentMap<Integer, IMAPNotifierTask> newtasks = new ConcurrentHashMap<Integer, IMAPNotifierTask>();
+            final ConcurrentMap<Integer, IMAPNotifierTask> newtasks = new NonBlockingHashMap<Integer, IMAPNotifierTask>();
             tasks = map.putIfAbsent(key, newtasks);
             if (null == tasks) {
                 tasks = newtasks;

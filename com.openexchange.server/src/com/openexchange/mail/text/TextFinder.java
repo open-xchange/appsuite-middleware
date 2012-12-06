@@ -145,7 +145,11 @@ public final class TextFinder {
                     textIsHtml = true;
                     //content = htmlService.getConformHTML(content, "UTF-8");
                     // content = content.replaceAll("(\r?\n)+", "");// .replaceAll("(  )+", "");
-                    content = new Renderer(new Segment(new Source(content), 0, content.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
+                    try {
+                        content = new Renderer(new Segment(new Source(content), 0, content.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
+                    } catch (final StackOverflowError parserOverflow) {
+                        content = extractPlainText(content);
+                    }
                 } else {
                     content = extractPlainText(content);
                     textIsHtml = false;

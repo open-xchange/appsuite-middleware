@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open Xchange AWS S3 filestorage bundle
+Bundle-SymbolicName: com.openexchange.aws.s3
+Bundle-Version: 6.21.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.amazonaws,
+ com.amazonaws.services.s3,
+ com.amazonaws.services.s3.model,
+ com.amazonaws.services.s3.transfer,
+ com.openexchange.cache.dynamic,
+ com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.groupware.filestore,
+ com.openexchange.i18n,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.tools.file.external,
+ org.apache.commons.logging,
+ org.osgi.framework
+Bundle-Activator: com.openexchange.aws.s3.osgi.AWSS3Activator
+Export-Package: com.openexchange.aws.s3

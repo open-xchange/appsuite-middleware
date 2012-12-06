@@ -64,10 +64,16 @@ public class XMPPIq extends XMPPStanza {
 
     /**
      * Initializes a new {@link XMPPIq}.
+     * 
      * @param session
      */
     protected XMPPIq(ServerSession session) {
         super(session);
+    }
+
+    public XMPPIq(Match xml, ServerSession session) {
+        super(session);
+        parseXml(xml);
     }
 
     public static enum Type {
@@ -88,6 +94,22 @@ public class XMPPIq extends XMPPStanza {
         this.payload = payload;
     }
 
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public JID getFrom() {
+        return from;
+    }
+
+    public void setFrom(JID from) {
+        this.from = from;
+    }
+
     @Override
     public String toXML(ServerSession session) throws OXException {
         Match document = JOOX.$("iq").attr("type", type.toString());
@@ -102,6 +124,26 @@ public class XMPPIq extends XMPPStanza {
         }
 
         return document.toString();
+    }
+
+    private void parseXml(Match xml) {
+        String f = xml.attr("from");
+        if (f != null) {
+            from = new JID(f);
+        }
+
+        String t = xml.attr("to");
+        if (t != null) {
+            to = new JID(t);
+        }
+
+        type = Type.valueOf(xml.attr("type"));
+        setId(xml.attr("id"));
+
+        Match body = xml.child();
+        if (body != null) {
+            setPayload(new Payload(body.toString(), "xmpp"));
+        }
     }
 
 }

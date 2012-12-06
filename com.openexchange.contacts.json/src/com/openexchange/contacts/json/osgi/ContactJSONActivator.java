@@ -54,7 +54,6 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.converters.ContactJSONResultConverter;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 
 /**
  * {@link ContactJSONActivator} - OSGi Activator for the Contact JSON interface.
@@ -65,7 +64,7 @@ public class ContactJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ContactInterfaceDiscoveryService.class, ContactService.class };
+        return new Class[] { ContactService.class };
     }
 
     @Override

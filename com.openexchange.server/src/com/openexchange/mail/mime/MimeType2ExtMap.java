@@ -134,7 +134,7 @@ public final class MimeType2ExtMap {
                             if (file.exists()) {
                                 if (debugEnabled) {
                                     sb.setLength(0);
-                                    LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
+                                    LOG.debug(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
                                 }
                                 loadInternal(file);
                             }
@@ -150,7 +150,7 @@ public final class MimeType2ExtMap {
                             if (file.exists()) {
                                 if (debugEnabled) {
                                     sb.setLength(0);
-                                    LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
+                                    LOG.debug(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
                                 }
                                 loadInternal(file);
                             }
@@ -161,7 +161,7 @@ public final class MimeType2ExtMap {
                             final URL url = e.nextElement();
                             if (debugEnabled) {
                                 sb.setLength(0);
-                                LOG.info(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
+                                LOG.debug(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
                             }
                             loadInternal(url);
                         }
@@ -171,7 +171,7 @@ public final class MimeType2ExtMap {
                             final URL url = e.nextElement();
                             if (debugEnabled) {
                                 sb.setLength(0);
-                                LOG.info(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
+                                LOG.debug(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
                             }
                             loadInternal(url);
                         }
@@ -184,15 +184,15 @@ public final class MimeType2ExtMap {
                             if (file.exists()) {
                                 if (debugEnabled) {
                                     sb.setLength(0);
-                                    LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
+                                    LOG.debug(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
                                 }
                                 loadInternal(file);
                             }
                         }
 
                     }
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("MIMEType2ExtMap successfully initialized");
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("MIMEType2ExtMap successfully initialized");
                     }
                 } catch (final IOException e) {
                     LOG.error(e.getMessage(), e);

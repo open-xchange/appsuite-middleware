@@ -49,6 +49,7 @@
 
 package com.openexchange.exception;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -121,7 +122,10 @@ public class OXExceptionFactory {
         return create(code, (Throwable) null, args);
     }
 
-    private static final Set<Category.EnumType> DISPLAYABLE = EnumSet.of(
+    /**
+     * The set containing category types appropriate for being displayed.
+     */
+    public static final Set<Category.EnumType> DISPLAYABLE = Collections.unmodifiableSet(EnumSet.of(
         Category.EnumType.CAPACITY,
         Category.EnumType.CONFLICT,
         Category.EnumType.CONNECTIVITY,
@@ -130,7 +134,7 @@ public class OXExceptionFactory {
         Category.EnumType.TRUNCATED,
         Category.EnumType.TRY_AGAIN,
         Category.EnumType.USER_INPUT,
-        Category.EnumType.WARNING);
+        Category.EnumType.WARNING));
 
     /**
      * Creates a new {@link OXException} instance pre-filled with specified code's attributes.
@@ -147,7 +151,9 @@ public class OXExceptionFactory {
             ret = new OXException(code.getNumber(), code.getMessage(), cause, args);
         } else {
             if (DISPLAYABLE.contains(category.getType())) {
-                ret = new OXException(code.getNumber(), code.getMessage(), cause, args).setLogMessage(code.getMessage(), args);
+                // Displayed message is equal to logged one
+                final String message = code.getMessage();
+                ret = new OXException(code.getNumber(), message, cause, args).setLogMessage(message, args);
             } else {
                 ret = new OXException(
                     code.getNumber(),
