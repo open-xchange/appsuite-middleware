@@ -81,8 +81,12 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
     }
 
     private JSONArray readManifests() {
-        File file = new File(getService(ConfigurationService.class).getProperty("com.openexchange.apps.manifestPath"));
+        final String property = getService(ConfigurationService.class).getProperty("com.openexchange.apps.manifestPath");
+        if (null == property) {
+            return new JSONArray(0);
+        }
 
+        File file = new File(property);
         JSONArray array = new JSONArray();
         if (file.exists()) {
             for (File f : file.listFiles()) {
