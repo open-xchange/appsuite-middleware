@@ -92,6 +92,9 @@ import com.openexchange.sql.grammar.UPDATE;
 public class AppStoreServiceImpl implements AppStoreService {
 
     static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(AppStoreServiceImpl.class);
+
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+
     private final ServiceLookup serviceLookup;
 
     /**
@@ -205,10 +208,11 @@ public class AppStoreServiceImpl implements AppStoreService {
             BufferedReader br = new BufferedReader(fr);
             try {
                 com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
+                final String lineSeparator = LINE_SEPARATOR;
                 String line;
                 while ((line = br.readLine()) != null) {
                     sb.append(line);
-                    sb.append(System.getProperty("line.separator"));
+                    sb.append(lineSeparator);
                 }
 
                 Application application = new Application();
@@ -221,7 +225,7 @@ public class AppStoreServiceImpl implements AppStoreService {
                 sb = new com.openexchange.java.StringAllocator();
                 while ((line = br.readLine()) != null) {
                     sb.append(line);
-                    sb.append(System.getProperty("line.separator"));
+                    sb.append(lineSeparator);
                 }
 
                 application.setManifest(sb.toString());
