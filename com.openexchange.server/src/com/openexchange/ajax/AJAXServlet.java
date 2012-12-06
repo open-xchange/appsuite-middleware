@@ -960,6 +960,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             @SuppressWarnings("unchecked") final List<FileItem> tmp = upload.parseRequest(req);
             items = tmp;
         } catch (final FileUploadException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                final IOException ioe = (IOException) cause;
+                LOG.warn("File upload failed", ioe);
+                throw AjaxExceptionCodes.HTTP_ERROR.create(ioe, Integer.valueOf(500), ioe.getMessage());
+            }
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
         }
         /*
