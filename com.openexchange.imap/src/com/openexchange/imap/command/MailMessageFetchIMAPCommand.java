@@ -73,6 +73,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
@@ -1013,7 +1014,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @return The FETCH items to craft a FETCH command
      */
     public static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
-        final StringBuilder command = new StringBuilder(128);
+        final StringAllocator command = new StringAllocator(128);
         final boolean sizeIncluded;
         if (fp.contains(FetchProfile.Item.ENVELOPE)) {
             if (loadBody) {
