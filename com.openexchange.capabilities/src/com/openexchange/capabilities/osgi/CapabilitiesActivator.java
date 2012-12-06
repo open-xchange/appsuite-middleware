@@ -58,33 +58,30 @@ import com.openexchange.osgi.SimpleRegistryListener;
 
 public class CapabilitiesActivator extends HousekeepingActivator {
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class<?>[]{ConfigurationService.class};
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-		final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, context);
-		registerService(CapabilityService.class, capService);
-		
-		track(Capability.class, new SimpleRegistryListener<Capability>() {
+    @Override
+    protected void startBundle() throws Exception {
+        final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, context);
+        registerService(CapabilityService.class, capService);
 
-			@Override
-			public void added(ServiceReference<Capability> ref,
-					Capability service) {
-				capService.getCapability(service.getId()).learnFrom(service);
-			}
+        track(Capability.class, new SimpleRegistryListener<Capability>() {
 
-			@Override
-			public void removed(ServiceReference<Capability> ref,
-					Capability service) {
-				
-			}
-			
-		});
-		
-	}
+            @Override
+            public void added(ServiceReference<Capability> ref, Capability service) {
+                capService.getCapability(service.getId()).learnFrom(service);
+            }
 
+            @Override
+            public void removed(ServiceReference<Capability> ref, Capability service) {
+                // Nothing
+            }
+
+        });
+
+    }
 
 }
