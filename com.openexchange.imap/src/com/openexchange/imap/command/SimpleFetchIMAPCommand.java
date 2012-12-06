@@ -76,9 +76,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -868,76 +868,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      * @return The FETCH items to craft a FETCH command
      */
     private static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
-        final StringBuilder command = new StringBuilder(128);
-        final boolean envelope;
-        if (fp.contains(FetchProfile.Item.ENVELOPE)) {
-            if (loadBody) {
-                command.append("INTERNALDATE");
-                envelope = false;
-            } else {
-                command.append("ENVELOPE INTERNALDATE RFC822.SIZE");
-                envelope = true;
-            }
-        } else {
-            command.append("INTERNALDATE");
-            envelope = false;
-        }
-        if (fp.contains(FetchProfile.Item.FLAGS)) {
-            command.append(" FLAGS");
-        }
-        if (fp.contains(FetchProfile.Item.CONTENT_INFO)) {
-            command.append(" BODYSTRUCTURE");
-        }
-        if (fp.contains(UIDFolder.FetchProfileItem.UID)) {
-            command.append(" UID");
-        }
-        boolean allHeaders = false;
-        if (fp.contains(IMAPFolder.FetchProfileItem.HEADERS) && !loadBody) {
-            allHeaders = true;
-            if (isRev1) {
-                command.append(" BODY.PEEK[HEADER]");
-            } else {
-                command.append(" RFC822.HEADER");
-            }
-        }
-        if (!envelope && fp.contains(IMAPFolder.FetchProfileItem.SIZE)) {
-            command.append(" RFC822.SIZE");
-        }
-        /*
-         * If we're not fetching all headers, fetch individual headers
-         */
-        if (!allHeaders && !loadBody) {
-            final String[] hdrs = fp.getHeaderNames();
-            if (hdrs.length > 0) {
-                command.append(' ');
-                if (isRev1) {
-                    command.append("BODY.PEEK[HEADER.FIELDS (");
-                } else {
-                    command.append("RFC822.HEADER.LINES (");
-                }
-                command.append(hdrs[0]);
-                for (int i = 1; i < hdrs.length; i++) {
-                    command.append(' ');
-                    command.append(hdrs[i]);
-                }
-                if (isRev1) {
-                    command.append(")]");
-                } else {
-                    command.append(')');
-                }
-            }
-        }
-        if (loadBody) {
-            /*
-             * Load full message
-             */
-            if (isRev1) {
-                command.append(" BODY.PEEK[]");
-            } else {
-                command.append(" RFC822");
-            }
-        }
-        return command.toString();
+        return MailMessageFetchIMAPCommand.getFetchCommand(isRev1, fp, loadBody);
     }
 
     /**
