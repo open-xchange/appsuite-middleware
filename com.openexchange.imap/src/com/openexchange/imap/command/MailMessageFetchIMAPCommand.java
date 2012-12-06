@@ -999,7 +999,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * This is the Envelope item. Despite of JavaMail's ENVELOPE item, this item does not include INTERNALDATE nor RFC822.SIZE; it solely
      * consists of the ENVELOPE.
      * <p>
-     * The Envelope is an aggregration of the common attributes of a Message. Implementations should include the following attributes: From,
+     * The Envelope is an aggregation of the common attributes of a Message. Implementations should include the following attributes: From,
      * To, Cc, Bcc, ReplyTo, Subject and Date. More items may be included as well.
      */
     public static final FetchProfile.Item ENVELOPE_ONLY = new FetchItem("ENVELOPE_ONLY");
