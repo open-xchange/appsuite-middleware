@@ -222,24 +222,22 @@ public class DispatcherServlet extends SessionServlet {
         AJAXState state = null;
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
-            final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-            ServerSession session;
+            final AJAXRequestData requestData;
+            final ServerSession session;
+            /*
+             * Parse & acquire session
+             */
             {
+                final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
                 final String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
     			final String action = requestDataTools.getAction(httpRequest);
-    			session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
-                if (session == null && dispatcher.mayOmitSession(module, action)) {
-                	session = fakeSession();
-                }
-                if (null == session) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
-                }
+    			session = getSession(httpRequest, dispatcher, module, action);
+                /*
+                 * Parse AJAXRequestData
+                 */
+                requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get());
+                requestData.setSession(session);
             }
-            /*
-             * Parse AJAXRequestData
-             */
-            final AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get());
-            requestData.setSession(session);
             /*
              * Start dispatcher processing
              */
@@ -285,6 +283,17 @@ public class DispatcherServlet extends SessionServlet {
                 dispatcher.end(state);
             }
         }
+    }
+
+    private ServerSession getSession(final HttpServletRequest httpRequest, final Dispatcher dispatcher, final String module, final String action) throws OXException {
+        ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
+        if (session == null && dispatcher.mayOmitSession(module, action)) {
+        	session = fakeSession();
+        }
+        if (null == session) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+        }
+        return session;
     }
 
 	private ServerSession fakeSession() {
