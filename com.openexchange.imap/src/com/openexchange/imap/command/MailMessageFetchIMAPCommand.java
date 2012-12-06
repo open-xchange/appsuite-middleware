@@ -1027,7 +1027,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             if (loadBody) {
                 command.append("INTERNALDATE");
             } else {
-                command.append("ENVELOPE");
+                command.append("ENVELOPE INTERNALDATE");
             }
             envelope = false;
         } else {
