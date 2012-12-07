@@ -163,7 +163,7 @@ public class Multiple extends SessionServlet {
                 if (mi != null) {
                     try {
                         mi.close(true);
-                    } catch (final OXException e) {
+                    } catch (final Exception e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }
