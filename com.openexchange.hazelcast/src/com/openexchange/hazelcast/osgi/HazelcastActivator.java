@@ -110,7 +110,7 @@ public class HazelcastActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         final Log logger = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
         final ConfigurationService service = getService(ConfigurationService.class);
-        if (null != service && !service.getBoolProperty("com.openexchange.hazelcast.enabled", true)) {
+        if (null == service || !service.getBoolProperty("com.openexchange.hazelcast.enabled", false)) {
             logger.info("Startup of bundle disabled: com.openexchange.hazelcast");
             return;
         }
