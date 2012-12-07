@@ -1431,9 +1431,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             boolean merged = false;
             boolean cached = false;
             List<ThreadSortNode> threadList = null;
-            
+
             final boolean useImapThreaderIfSupported = false && useImapThreaderIfSupported();
-            
+
             if (!body && imapConfig.getImapCapabilities().hasThreadReferences() && useImapThreaderIfSupported) {
                 /*
                  * Parse THREAD response to a list structure and extract sequence numbers
@@ -1443,10 +1443,68 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 threadList = ThreadSortUtil.parseThreadResponse(threadResponse);
                 ThreadSortNode.applyFullName(fullName, threadList);
             } else if (useReferenceOnlyThreader()) {
-                final List<Conversation> conversations = Conversations.conversationsFor(imapFolder, limit);
+                final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), true);
+                final Future<ThreadableMapping> submittedTask = mergeWithSent ? getThreadableMapping(sentFolder, limit, fetchProfile) : null;
+                final List<Conversation> conversations = Conversations.conversationsFor(imapFolder, limit, fetchProfile);
                 Conversations.fold(conversations);
-                threadList = Conversations.toNodeList(conversations);
-                ThreadSortNode.applyFullName(fullName, threadList);
+                // Comparator
+                final MailMessageComparator threadComparator = MailSortField.RECEIVED_DATE.equals(sortField) ? OrderDirection.DESC.equals(order) ? COMPARATOR_DESC : COMPARATOR_ASC : COMPARATOR_DESC;
+                // Sort
+                List<List<MailMessage>> list = new ArrayList<List<MailMessage>>(conversations.size());
+                for (final Conversation conversation : conversations) {
+                    list.add(conversation.getMessages(threadComparator));
+                }
+                // Sort root elements
+                {
+                    final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+                    final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), null);
+                    final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
+    
+                        @Override
+                        public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
+                            return comparator.compare(o1.get(0), o2.get(0));
+                        }
+                    };
+                    Collections.sort(list, listComparator);
+                }
+                /*
+                 * Check for available mapping indicating that sent folder results have to be merged
+                 */
+                if (null != submittedTask) {
+                    final ThreadableMapping threadableMapping = getFrom(submittedTask);
+                    for (final List<MailMessage> thread : list) {
+                        if (threadableMapping.checkFor(new ArrayList<MailMessage>(thread), thread)) { // Iterate over copy
+                            // Re-Sort thread
+                            Collections.sort(thread, threadComparator);
+                        }
+                    }
+                }
+                if (null != indexRange) {
+                    final int fromIndex = indexRange.start;
+                    int toIndex = indexRange.end;
+                    final int size = list.size();
+                    if ((fromIndex) > size) {
+                        /*
+                         * Return empty iterator if start is out of range
+                         */
+                        return Collections.emptyList();
+                    }
+                    /*
+                     * Reset end index if out of range
+                     */
+                    if (toIndex >= size) {
+                        toIndex = size;
+                    }
+                    list = list.subList(fromIndex, toIndex);
+                }
+                /*
+                 * Apply account identifier
+                 */
+                for (final List<MailMessage> conversation : list) {
+                    setAccountInfo(conversation);                
+                }
+                // Return list
+                return list;
             } else {
                 /*
                  * Need to use in-application Threader
@@ -1673,68 +1731,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         } else {
             if (mergeWithSent && !merged) {
-                // Add 'References' to FetchProfile if absent
-                {
-                    boolean found = false;
-                    final String hdrReferences = MessageHeaders.HDR_REFERENCES;
-                    final String[] headerNames = fetchProfile.getHeaderNames();
-                    for (int i = 0; !found && i < headerNames.length; i++) {
-                        if (hdrReferences.equalsIgnoreCase(headerNames[i])) {
-                            found = true;
-                        }
-                    }
-                    if (!found) {
-                        fetchProfile.add(hdrReferences);
-                    }
-                }
-                // Add ENVELOPE_ONLY item to FetchProfile if absent (for 'Message-Id' header)
-                {
-                    boolean found = false;
-                    final Item envelope = FetchProfile.Item.ENVELOPE;
-                    final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
-                    final Item[] items = fetchProfile.getItems();
-                    for (int i = 0; !found && i < items.length; i++) {
-                        final Item cur = items[i];
-                        if (envelope == cur || envelopeOnly == cur) {
-                            found = true;
-                        }
-                    }
-                    if (!found) {
-                        fetchProfile.add(envelopeOnly);
-                    }
-                }
-                // Add UID item to FetchProfile if absent
-                {
-                    boolean found = false;
-                    final Item uid = UIDFolder.FetchProfileItem.UID;
-                    final Item[] items = fetchProfile.getItems();
-                    for (int i = 0; !found && i < items.length; i++) {
-                        final Item cur = items[i];
-                        if (uid == cur) {
-                            found = true;
-                        }
-                    }
-                    if (!found) {
-                        fetchProfile.add(uid);
-                    }
-                }
-                // Get ThreadableMapping
-                final Props props = LogProperties.optLogProperties(Thread.currentThread());
-                final Task<ThreadableMapping> task = new AbstractTrackableTask<ThreadableMapping>() {
-
-                    @Override
-                    public ThreadableMapping call() throws Exception {
-                        final List<MailMessage> mails = Threadables.getAllMailsFrom(sentFolder, limit, fetchProfile);
-                        return new ThreadableMapping(threadList.size()).initWith(mails);
-                    }
-
-                    @Override
-                    public Map<String, Object> optLogProperties() {
-                        return props == null ? null : props.getMap();
-                    }
-                    
-                };
-                submittedTask = ThreadPools.getThreadPool().submit(task, CallerRunsBehavior.<ThreadableMapping> getInstance());
+                submittedTask = getThreadableMapping(sentFolder, limit, fetchProfile);
             }
             final TIntList seqNums = ThreadSortUtil.extractSeqNumsAsList(threadList);
             final TLongObjectMap<MailMessage> messages =
@@ -1813,6 +1810,81 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return new PropertizedList<List<MailMessage>>(list).setProperty("cached", Boolean.valueOf(cached)).setProperty(
             "more",
             Integer.valueOf(messageCount));
+    }
+
+    private static Future<ThreadableMapping> getThreadableMapping(final IMAPFolder sentFolder, final int limit, final FetchProfile fetchProfile) {
+        // Add 'References' to FetchProfile if absent
+        {
+            boolean found = false;
+            final String hdrReferences = MessageHeaders.HDR_REFERENCES;
+            final String[] headerNames = fetchProfile.getHeaderNames();
+            for (int i = 0; !found && i < headerNames.length; i++) {
+                if (hdrReferences.equalsIgnoreCase(headerNames[i])) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                fetchProfile.add(hdrReferences);
+            }
+        }
+        // Add 'Message-Id' to FetchProfile if absent
+        {
+            boolean found = false;
+            final Item envelope = FetchProfile.Item.ENVELOPE;
+            final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
+            final Item[] items = fetchProfile.getItems();
+            for (int i = 0; !found && i < items.length; i++) {
+                final Item cur = items[i];
+                if (envelope == cur || envelopeOnly == cur) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                final String hdrMessageId = MessageHeaders.HDR_MESSAGE_ID;
+                final String[] headerNames = fetchProfile.getHeaderNames();
+                for (int i = 0; !found && i < headerNames.length; i++) {
+                    if (hdrMessageId.equalsIgnoreCase(headerNames[i])) {
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    fetchProfile.add(envelopeOnly);
+                }
+            }
+        }
+        // Add UID item to FetchProfile if absent
+        {
+            boolean found = false;
+            final Item uid = UIDFolder.FetchProfileItem.UID;
+            final Item[] items = fetchProfile.getItems();
+            for (int i = 0; !found && i < items.length; i++) {
+                final Item cur = items[i];
+                if (uid == cur) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                fetchProfile.add(uid);
+            }
+        }
+        // Get ThreadableMapping
+        final IMAPFolder sent = sentFolder;
+        final Props props = LogProperties.optLogProperties(Thread.currentThread());
+        final Task<ThreadableMapping> task = new AbstractTrackableTask<ThreadableMapping>() {
+
+            @Override
+            public ThreadableMapping call() throws Exception {
+                final List<MailMessage> mails = Threadables.getAllMailsFrom(sent, limit, fetchProfile);
+                return new ThreadableMapping(64).initWith(mails);
+            }
+
+            @Override
+            public Map<String, Object> optLogProperties() {
+                return props == null ? null : props.getMap();
+            }
+
+        };
+        return ThreadPools.getThreadPool().submit(task, CallerRunsBehavior.<ThreadableMapping> getInstance());
     }
 
     @Override
