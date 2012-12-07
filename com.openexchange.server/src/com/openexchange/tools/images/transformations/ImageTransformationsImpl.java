@@ -455,6 +455,6 @@ public class ImageTransformationsImpl implements ImageTransformations {
             // ImageIO has problems reading icons: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6633448
             return false;
         }
-        return false;
+        return true;
     }
 }
