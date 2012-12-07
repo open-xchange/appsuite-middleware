@@ -1550,14 +1550,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     private final void simpleDataCheck(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid) throws OXException {
         // Both, start and end date are set
-        if (cdao.containsStartDate() && cdao.containsEndDate() && cdao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
+        if (cdao.getStartDate() != null && cdao.getEndDate() != null && cdao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
             throw OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create();
         }
         // Only start date is set
-        if (cdao.containsStartDate() && !cdao.containsEndDate() && edao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
+        if (cdao.getStartDate() != null && cdao.getEndDate() == null && edao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
             throw OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create();
         }// Only end date is set
-        if (!cdao.containsStartDate() && cdao.containsEndDate() && cdao.getEndDate().getTime() < edao.getStartDate().getTime()) {
+        if (cdao.getStartDate() == null && cdao.getEndDate() != null && cdao.getEndDate().getTime() < edao.getStartDate().getTime()) {
             throw OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create();
         }
         if (cdao.containsUntil() && cdao.getUntil() != null) {
