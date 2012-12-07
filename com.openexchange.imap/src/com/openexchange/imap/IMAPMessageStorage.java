@@ -1416,10 +1416,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Parse THREAD response to a list structure and extract sequence numbers
                  */
-                threadList =
-                    ThreadSortUtil.parseThreadResponse(ThreadSortUtil.getThreadResponse(
-                        imapFolder,
-                        limit <= 0 ? "ALL" : (Integer.toString(messageCount - limit + 1) + ':' + Integer.toString(messageCount))));
+                final String sortRange = limit <= 0 ? "ALL" : (Integer.toString(messageCount - limit + 1) + ':' + Integer.toString(messageCount));
+                final String threadResponse = ThreadSortUtil.getThreadResponse(imapFolder, sortRange);
+                threadList = ThreadSortUtil.parseThreadResponse(threadResponse);
                 ThreadSortNode.applyFullName(fullName, threadList);
             } else {
                 /*
