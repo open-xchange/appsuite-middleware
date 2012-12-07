@@ -322,7 +322,7 @@ public final class Conversations {
 
     private static List<ThreadSortNode> toThreadSortNodes(final List<MailMessage> messages) {
         final List<ThreadSortNode> ret = new ArrayList<ThreadSortNode>(messages.size());
-        for (MailMessage message : messages) {
+        for (final MailMessage message : messages) {
             ret.add(toThreadSortNode((IDMailMessage) message));
         }
         return ret;
