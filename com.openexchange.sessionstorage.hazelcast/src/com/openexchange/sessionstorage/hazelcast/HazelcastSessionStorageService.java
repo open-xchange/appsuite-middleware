@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -436,18 +437,31 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public Session getAnyActiveSessionForUser(final int userId, final int contextId) {
+        SqlPredicate predicate = new SqlPredicate("contextId = " + contextId + " AND userId = " + userId);
         try {
-            final Session[] userSessions = getUserSessions(userId, contextId);
-            if (null != userSessions && userSessions.length > 0) {
-                return userSessions[0];
+            /*
+             * try to lookup session from local keyset first
+             */
+            for (HazelcastStoredSession session : filterLocal(predicate, true)) {
+                if (null != session && session.getUserId() == userId && session.getContextId() == contextId) {
+                    return new HazelcastStoredSession(session);
+                }
             }
-            return null;
-        } catch (final HazelcastException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
+            /*
+             * also query cluster if not yet found 
+             */
+            for (HazelcastStoredSession session : filter(predicate, true)) {
+                if (null != session && session.getUserId() == userId && session.getContextId() == contextId) {
+                    return new HazelcastStoredSession(session);
+                }
             }
-            return null;
+        } catch (HazelcastException e) {
+            LOG.debug(e.getMessage(), e);
         }
+        /*
+         * not found
+         */
+        return null;
     }
 
     @Override
@@ -600,11 +614,38 @@ public class HazelcastSessionStorageService implements SessionStorageService {
      * @return The stored sessions matching the predicate, or an empty collection if none were found
      */
     private Collection<HazelcastStoredSession> filter(Predicate<?, ?> predicate, boolean failIfPaused) {
-        IMap<String, HazelcastStoredSession> sessions = sessionsUnchecked(true);
+        IMap<String, HazelcastStoredSession> sessions = sessionsUnchecked(failIfPaused);
         if (null != sessions) {
             return sessions.values(predicate);
         } else {
             return Collections.emptyList();    
         }
     }
+    
+    /**
+     * Filters the locally available stored sessions by a {@link Predicate}.
+     * 
+     * @param predicate The predicate to use for filtering
+     * @param failIfPaused <code>true</code> to abort if the hazelcast instance is paused, <code>false</code>, otherwise
+     * @return The stored sessions matching the predicate, or an empty collection if none were found
+     */
+    private Collection<HazelcastStoredSession> filterLocal(Predicate<?, ?> predicate, boolean failIfPaused) {
+        IMap<String, HazelcastStoredSession> sessions = sessionsUnchecked(failIfPaused);
+        if (null != sessions) {
+            Collection<HazelcastStoredSession> values = new ArrayList<HazelcastStoredSession>();
+            Set<String> localKeySet = sessions.localKeySet(predicate);
+            if (null != localKeySet && 0 < localKeySet.size()) {
+                for (String key : localKeySet) {
+                    HazelcastStoredSession storedSession = sessions.get(key);
+                    if (null != storedSession) {
+                        values.add(storedSession);
+                    }
+                }
+            }            
+            return values;
+        } else {
+            return Collections.emptyList();    
+        }
+    }
+    
 }
