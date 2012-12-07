@@ -342,7 +342,7 @@ public final class Threadables {
                         if (limit < 0 || limit >= messageCount) {
                             sb.append("1:*");
                         } else {
-                            sb.append(messageCount - limit + 1).append(':').append(messageCount);
+                            sb.append(messageCount - limit + 1).append(':').append('*');
                         }
                     }
                     sb.append(" (").append(getFetchCommand(protocol.isREV1(), fetchProfile, false)).append(')');
