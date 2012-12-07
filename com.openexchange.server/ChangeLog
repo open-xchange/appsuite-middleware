@@ -1,3 +1,7 @@
+* 2012-12-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24114: Added null guard & added logging information to track missing session
+
 * 2012-12-07 - martin.herfurth@open-xchange.com
 
  - Fix for bug 24102: Fixed NPE.
