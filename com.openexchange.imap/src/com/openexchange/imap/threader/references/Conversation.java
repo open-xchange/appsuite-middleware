@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.mail.MailSortField;
@@ -176,7 +177,7 @@ public final class Conversation {
      * @return <code>true</code> if references; otherwise <code>false</code>
      */
     public boolean references(final Conversation other) {
-        return this.references.isEmpty() ? false : new HashSet<String>(this.references).removeAll(other.messageIds);
+        return this.references.isEmpty() ? false : containsAny(this.references, other.messageIds);
     }
 
     /**
@@ -186,7 +187,23 @@ public final class Conversation {
      * @return <code>true</code> if referenced-by; otherwise <code>false</code>
      */
     public boolean isReferencedBy(final Conversation other) {
-        return other.references.isEmpty() ? false : new HashSet<String>(this.messageIds).removeAll(other.references);
+        return other.references.isEmpty() ? false : containsAny(this.messageIds, other.references);
+    }
+
+    /**
+     * Checks if at least one element is in both collections.
+     * 
+     * @param set1 The first collection, must not be <code>null</code>
+     * @param set2 The second collection, must not be <code>null</code>
+     * @return <code>true</code> if the intersection of the collections is non-empty
+     */
+    private static boolean containsAny(final Set<String> set1, final Set<String> set2) {
+        for (final Iterator<String> it = set2.iterator(); it.hasNext();) {
+            if (set1.contains(it.next())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
