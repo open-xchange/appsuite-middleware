@@ -644,9 +644,12 @@ public final class SessionHandler {
                 LOG.error("Unable to look-up session cache", e);
             }
         }
+        /*-
+         * Ensure session is available in session storage
         if (null != sessionControl) {
             storeSession(sessionControl.getSession(), getServiceRegistry().getService(SessionStorageService.class), true);
         }
+        */
         return sessionControl;
     }
 
