@@ -1,6 +1,7 @@
 * 2012-12-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 24114: Added null guard & added logging information to track missing session
+ - Fix for bug 24106: Changed directory lookup to prefer first-level sub-directories prior to performing a recursive look-up
 
 * 2012-12-07 - martin.herfurth@open-xchange.com
 
