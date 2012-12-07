@@ -88,6 +88,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
@@ -772,7 +773,13 @@ public abstract class SessionServlet extends AJAXServlet {
         if (mayUseFallbackSession) {
             return (ServerSession) req.getAttribute(PUBLIC_SESSION_KEY);
         }
-
+        // No session found
+        final Props props = LogProperties.optLogProperties();
+        if (null != props) {
+            final HttpServletRequest httpRequest = (HttpServletRequest) req;
+            props.put("javax.servlet.pathInfo", ForceLog.valueOf(httpRequest.getPathInfo()));
+            props.put("javax.servlet.queryString", ForceLog.valueOf(httpRequest.getQueryString()));
+        }
         return null;
     }
 
