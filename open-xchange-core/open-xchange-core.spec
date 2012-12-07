@@ -213,23 +213,29 @@ fi
 # SoftwareChange_Request-1223
 # SoftwareChange_Request-1237
 # SoftwareChange_Request-1243
+# SoftwareChange_Request-1245
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/ox-scriptconf.sh
 jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
 jopts=${jopts//\"/}
 nopts=$jopts
-if ! echo $nopts | grep "DisableExplicitGC" > /dev/null; then
-    nopts="$nopts -XX:+DisableExplicitGC"
-fi
 # -----------------------------------------------------------------------
 permval=$(echo $nopts | sed 's;^.*MaxPermSize=\([0-9]*\).*$;\1;')
 if [ $permval -lt 256 ]; then
     nopts=$(echo $nopts | sed "s;\(^.*MaxPermSize=\)[0-9]*\(.*$\);\1256\2;")
 fi
 # -----------------------------------------------------------------------
-for opt in "-server" "-Djava.awt.headless=true"; do
+for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
+        "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=80" \
+        "-XX:+UseCMSInitiatingOccupancyOnly"; do
     if ! echo $nopts | grep -- $opt > /dev/null; then
         nopts="$nopts $opt"
+    fi
+done
+# -----------------------------------------------------------------------
+for opt in "-XX:+UnlockExperimentalVMOptions" "-XX:+UseG1GC"; do
+    if echo $nopts | grep -- $opt > /dev/null; then
+        nopts=$(echo $nopts | sed "s;$opt;;")
     fi
 done
 if [ "$jopts" != "$nopts" ]; then
