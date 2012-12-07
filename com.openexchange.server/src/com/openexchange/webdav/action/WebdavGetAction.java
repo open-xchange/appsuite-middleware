@@ -116,9 +116,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 			}
 
 		} catch (final IOException e) {
-			final WebdavProtocolException wpe = WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			wpe.initCause(e);
-            throw wpe;
+			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e, new Object[0]);
 		} finally {
 			if(out != null) {
 				try {
