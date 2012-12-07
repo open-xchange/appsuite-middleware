@@ -128,6 +128,8 @@ import com.openexchange.imap.threader.Threadable;
 import com.openexchange.imap.threader.ThreadableMapping;
 import com.openexchange.imap.threader.Threadables;
 import com.openexchange.imap.threader.Threadables.ThreadableResult;
+import com.openexchange.imap.threader.references.Conversation;
+import com.openexchange.imap.threader.references.Conversations;
 import com.openexchange.imap.threadsort.MessageInfo;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
@@ -256,6 +258,23 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
                     b = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.imap.useImapThreaderIfSupported", true));
                     useImapThreaderIfSupported = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
+    private static volatile Boolean useReferenceOnlyThreader;
+    /** <b>Only</b> applies to: getThreadSortedMessages(...) in ISimplifiedThreadStructure */
+    static boolean useReferenceOnlyThreader() {
+        Boolean b = useReferenceOnlyThreader;
+        if (null == b) {
+            synchronized (IMAPMessageStorage.class) {
+                b = useReferenceOnlyThreader;
+                if (null == b) {
+                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    b = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.imap.useReferenceOnlyThreader", true));
+                    useReferenceOnlyThreader = b;
                 }
             }
         }
@@ -1420,9 +1439,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final String threadResponse = ThreadSortUtil.getThreadResponse(imapFolder, sortRange);
                 threadList = ThreadSortUtil.parseThreadResponse(threadResponse);
                 ThreadSortNode.applyFullName(fullName, threadList);
+            } else if (useReferenceOnlyThreader()) {
+                final List<Conversation> conversations = Conversations.conversationsFor(imapFolder, limit);
+                Conversations.fold(conversations);
+                threadList = Conversations.toNodeList(conversations);
+                ThreadSortNode.applyFullName(fullName, threadList);
             } else {
                 /*
-                 * Need to use in-application Threader because of missing capability or merging with sent messages
+                 * Need to use in-application Threader
                  */
                 final boolean logIt = INFO; // TODO: Switch to DEBUG
                 final long st = logIt ? System.currentTimeMillis() : 0L;

@@ -62,8 +62,11 @@ import javax.mail.UIDFolder;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.threadsort.MessageInfo;
+import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
@@ -205,33 +208,74 @@ public final class Conversations {
     }
 
     /**
+     * Transforms conversations to list of <tt>ThreadSortNode</tt>s.
+     * 
+     * @param conversations The conversations to transform
+     * @return The resulting list of <tt>ThreadSortNode</tt>s
+     */
+    public static List<ThreadSortNode> toNodeList(final List<Conversation> conversations) {
+        if (null == conversations) {
+            return Collections.emptyList();
+        }
+        final List<ThreadSortNode> list = new ArrayList<ThreadSortNode>(conversations.size());
+        for (final Conversation conversation : conversations) {
+            final List<MailMessage> messages = conversation.getMessages();
+            final ThreadSortNode root = toThreadSortNode((IDMailMessage) messages.remove(0));
+            root.addChildren(toThreadSortNodes(messages));
+            list.add(root);
+        }
+        return list;
+    }
+
+    private static ThreadSortNode toThreadSortNode(final IDMailMessage message) {
+        return new ThreadSortNode(new MessageInfo(message.getSeqnum()).setFullName(message.getFolder()), message.getUid());
+    }
+
+    private static List<ThreadSortNode> toThreadSortNodes(final List<MailMessage> messages) {
+        final List<ThreadSortNode> ret = new ArrayList<ThreadSortNode>(messages.size());
+        for (MailMessage message : messages) {
+            ret.add(toThreadSortNode((IDMailMessage) message));
+        }
+        return ret;
+    }
+
+    /**
      * Folds specified conversations.
      * 
      * @param toFold The conversations to fold
      * @return The folded conversations
      */
     public static List<Conversation> fold(final List<Conversation> toFold) {
-        while (true) {
-            Conversation[] pair = null;
-            for (final Iterator<Conversation> it1 = toFold.iterator(); null == pair && it1.hasNext();) {
-                final Conversation conversation = it1.next();
-                for (final Conversation other : toFold) {
-                    if (conversation != other) {
-                        if (conversation.references(other) || conversation.isReferencedBy(other)) {
-                            it1.remove();
-                            pair = new Conversation[] { conversation, other};
-                            break;
-                        }
-                    }
+        int lastProcessed = -1;
+        Iterator<Conversation> iter = toFold.iterator();
+        int i = 0;
+        while (iter.hasNext()) {
+            final Conversation conversation = iter.next();
+            if ((i > lastProcessed)) {
+                fold(conversation, iter);
+                lastProcessed = i++;
+                iter = toFold.iterator();
+                i = 0;
+            } else {
+                i++;
+            }
+        }
+        return toFold;
+    }
+
+    private static boolean fold(final Conversation conversation, final Iterator<Conversation> iter) {
+        boolean folded = false;
+        while (iter.hasNext()) {
+            final Conversation other = iter.next();
+            if (conversation != other) {
+                if (conversation.references(other) || conversation.isReferencedBy(other)) {
+                    iter.remove();
+                    conversation.join(other);
+                    folded = true;
                 }
             }
-            if (null == pair) {
-                // No further pair found
-                return toFold;
-            }
-            final Conversation join = new Conversation(pair[0]).join(pair[1]);
-            toFold.add(0, join);
         }
+        return folded;
     }
 
     /** Checks for an empty string */
