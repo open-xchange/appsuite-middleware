@@ -68,13 +68,13 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link ConfigurationImpl}
@@ -529,6 +529,13 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
         });
         if (subDirs != null) {
+            // Check first-level sub-directories first
+            for (final File subDir : subDirs) {
+                if (subDir.isDirectory() && directoryName.equals(subDir.getName())) {
+                    return subDir;
+                }
+            }
+            // Then check recursively
             for (final File subDir : subDirs) {
                 final File dir = traverseForDir(subDir, directoryName);
                 if (dir != null) {
