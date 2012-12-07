@@ -72,6 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.log.LogFactory;
+import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
