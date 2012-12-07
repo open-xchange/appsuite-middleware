@@ -211,27 +211,27 @@ public final class Conversations {
      * @return The folded conversations
      */
     public static List<Conversation> fold(final List<Conversation> toFold) {
-        Conversation[] pair = null;
-        for (final Iterator<Conversation> it1 = toFold.iterator(); null == pair && it1.hasNext();) {
-            final Conversation conversation = it1.next();
-            for (final Iterator<Conversation> it2 = toFold.iterator(); null == pair && it2.hasNext();) {
-                final Conversation other = it2.next();
-                if (conversation != other) {
-                    if (conversation.references(other) || conversation.isReferencedBy(other)) {
-                        it1.remove();
-                        it2.remove();
-                        pair = new Conversation[] { conversation, other};
+        while (true) {
+            Conversation[] pair = null;
+            for (final Iterator<Conversation> it1 = toFold.iterator(); null == pair && it1.hasNext();) {
+                final Conversation conversation = it1.next();
+                for (final Conversation other : toFold) {
+                    if (conversation != other) {
+                        if (conversation.references(other) || conversation.isReferencedBy(other)) {
+                            it1.remove();
+                            pair = new Conversation[] { conversation, other};
+                            break;
+                        }
                     }
                 }
             }
+            if (null == pair) {
+                // No further pair found
+                return toFold;
+            }
+            final Conversation join = new Conversation(pair[0]).join(pair[1]);
+            toFold.add(0, join);
         }
-        if (null == pair) {
-            // No further pair found
-            return toFold;
-        }
-        final Conversation join = new Conversation(pair[0]).join(pair[1]);
-        toFold.add(0, join);
-        return fold(toFold);
     }
 
     /** Checks for an empty string */

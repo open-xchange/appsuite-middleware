@@ -176,7 +176,7 @@ public final class Conversation {
      * @return <code>true</code> if references; otherwise <code>false</code>
      */
     public boolean references(final Conversation other) {
-        return new HashSet<String>(this.references).removeAll(other.messageIds);
+        return this.references.isEmpty() ? false : new HashSet<String>(this.references).removeAll(other.messageIds);
     }
 
     /**
@@ -186,7 +186,7 @@ public final class Conversation {
      * @return <code>true</code> if referenced-by; otherwise <code>false</code>
      */
     public boolean isReferencedBy(final Conversation other) {
-        return new HashSet<String>(this.messageIds).removeAll(other.references);
+        return other.references.isEmpty() ? false : new HashSet<String>(this.messageIds).removeAll(other.references);
     }
 
     /**
