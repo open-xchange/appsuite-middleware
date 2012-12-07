@@ -65,6 +65,8 @@ import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -311,10 +313,10 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             } else {
                 folderobject.fill(oxfolderAccess.getFolderObject(folderobject.getObjectID()), false);
                 if (!folderobject.exists(ctx)) {
-                    throw OXFolderExceptionCode.NOT_EXISTS.create(folderobject.getObjectID(), ctx.getContextId());
+                    throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(folderobject.getObjectID()), Integer.valueOf(ctx.getContextId()));
                 }
                 if (clientLastModified != null && oxfolderAccess.getFolderLastModified(folderobject.getObjectID()).after(clientLastModified)) {
-                    throw OXFolderExceptionCode.CONCURRENT_MODIFICATION.create(folderobject.getObjectID(), ctx.getContextId());
+                    throw OXFolderExceptionCode.CONCURRENT_MODIFICATION.create(Integer.valueOf(folderobject.getObjectID()), Integer.valueOf(ctx.getContextId()));
                 }
                 final EffectivePermission effectivePerm =
                     oxfolderAccess.getFolderPermission(folderobject.getObjectID(), userId, userConfiguration);
@@ -351,6 +353,10 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                 folderobject.getObjectID();
                 final long lastModfified = System.currentTimeMillis();
                 manager.updateFolder(folderobject, false, false, lastModfified);
+                {
+                    CacheFolderStorage.getInstance().removeSingleFromCache(Integer.toString(folderobject.getObjectID()), FolderStorage.REAL_TREE_ID, userId, session, false);
+                    CacheFolderStorage.getInstance().removeSingleFromCache(Integer.toString(folderobject.getParentFolderID()), FolderStorage.REAL_TREE_ID, userId, session, false);
+                }
             }
             return folderobject;
         } catch (final SQLException e) {
@@ -395,10 +401,10 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                     Integer.valueOf(ctx.getContextId()));
             }
             if (!folderobject.exists(ctx)) {
-                throw OXFolderExceptionCode.NOT_EXISTS.create(folderId, ctx.getContextId());
+                throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()));
             }
             if (clientLastModified != null && oxfolderAccess.getFolderLastModified(folderId).after(clientLastModified)) {
-                throw OXFolderExceptionCode.CONCURRENT_MODIFICATION.create(folderId, ctx.getContextId());
+                throw OXFolderExceptionCode.CONCURRENT_MODIFICATION.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()));
             }
             final EffectivePermission effectivePerm = folderobject.getEffectiveUserPermission(userId, userConfiguration);
             if (!effectivePerm.hasModuleAccess(module)) {
@@ -433,6 +439,10 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             }
             final long lastModified = System.currentTimeMillis();
             OXFolderManager.getInstance(session, oxfolderAccess).deleteFolder(folderobject, false, lastModified);
+            {
+                CacheFolderStorage.getInstance().removeSingleFromCache(Integer.toString(folderId), FolderStorage.REAL_TREE_ID, userId, session, true);
+                CacheFolderStorage.getInstance().removeSingleFromCache(Integer.toString(folderobject.getParentFolderID()), FolderStorage.REAL_TREE_ID, userId, session, false);
+            }
             return folderId;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -757,10 +767,10 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                     Integer.valueOf(ctx.getContextId()));
             }
             if (!folderobject.exists(ctx)) {
-                throw OXFolderExceptionCode.NOT_EXISTS.create(objectID, ctx.getContextId());
+                throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(objectID), Integer.valueOf(ctx.getContextId()));
             }
             if (clientLastModified != null && oxfolderAccess.getFolderLastModified(objectID).after(clientLastModified)) {
-                throw OXFolderExceptionCode.CONCURRENT_MODIFICATION.create(objectID, ctx.getContextId());
+                throw OXFolderExceptionCode.CONCURRENT_MODIFICATION.create(Integer.valueOf(objectID), Integer.valueOf(ctx.getContextId()));
             }
             final EffectivePermission effectivePerm = folderobject.getEffectiveUserPermission(userId, userConfiguration);
             if (!effectivePerm.hasModuleAccess(folderobject.getModule())) {
