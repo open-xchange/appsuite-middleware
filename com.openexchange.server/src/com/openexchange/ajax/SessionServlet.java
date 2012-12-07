@@ -156,8 +156,8 @@ public abstract class SessionServlet extends AJAXServlet {
             checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
             hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
             clientWhitelist = new ClientWhitelist().add(config.getInitParameter(Property.IP_CHECK_WHITELIST.getPropertyName()));
-            String ipMaskV4 = config.getInitParameter(ServerConfig.Property.IP_MASK_V4.getPropertyName());
-            String ipMaskV6 = config.getInitParameter(ServerConfig.Property.IP_MASK_V6.getPropertyName());
+            final String ipMaskV4 = config.getInitParameter(ServerConfig.Property.IP_MASK_V4.getPropertyName());
+            final String ipMaskV6 = config.getInitParameter(ServerConfig.Property.IP_MASK_V6.getPropertyName());
             allowedSubnet = new SubnetMask(ipMaskV4, ipMaskV6);
         }
         initRanges(config);
@@ -777,8 +777,15 @@ public abstract class SessionServlet extends AJAXServlet {
         final Props props = LogProperties.optLogProperties();
         if (null != props) {
             final HttpServletRequest httpRequest = (HttpServletRequest) req;
-            props.put("javax.servlet.pathInfo", ForceLog.valueOf(httpRequest.getPathInfo()));
-            props.put("javax.servlet.queryString", ForceLog.valueOf(httpRequest.getQueryString()));
+            props.put("javax.servlet.servletPath", ForceLog.valueOf(httpRequest.getServletPath()));
+            final String pathInfo = httpRequest.getPathInfo();
+            if (null != pathInfo) {
+                props.put("javax.servlet.pathInfo", ForceLog.valueOf(pathInfo));
+            }
+            final String queryString = httpRequest.getQueryString();
+            if (null != queryString) {
+                props.put("javax.servlet.queryString", ForceLog.valueOf(queryString));
+            }
         }
         return null;
     }
