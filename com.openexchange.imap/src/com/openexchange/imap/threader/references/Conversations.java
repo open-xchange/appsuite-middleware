@@ -59,15 +59,18 @@ import java.util.List;
 import javax.mail.FetchProfile;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
+import javax.mail.FetchProfile.Item;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.command.MailMessageFetchIMAPCommand;
 import com.openexchange.imap.threadsort.MessageInfo;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
@@ -104,6 +107,78 @@ public final class Conversations {
         FETCH_PROFILE_CONVERSATION = fp;
     }
 
+    static FetchProfile checkFetchProfile(final FetchProfile fetchProfile) {
+        // Add 'References' to FetchProfile if absent
+        {
+            boolean found = false;
+            final String hdrReferences = MessageHeaders.HDR_REFERENCES;
+            final String[] headerNames = fetchProfile.getHeaderNames();
+            for (int i = 0; !found && i < headerNames.length; i++) {
+                if (hdrReferences.equalsIgnoreCase(headerNames[i])) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                fetchProfile.add(hdrReferences);
+            }
+        }
+        // Add 'In-Reply-To' to FetchProfile if absent
+        {
+            boolean found = false;
+            final String hdrInReplyTo = MessageHeaders.HDR_IN_REPLY_TO;
+            final String[] headerNames = fetchProfile.getHeaderNames();
+            for (int i = 0; !found && i < headerNames.length; i++) {
+                if (hdrInReplyTo.equalsIgnoreCase(headerNames[i])) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                fetchProfile.add(hdrInReplyTo);
+            }
+        }
+        // Add 'Message-Id' to FetchProfile if absent
+        {
+            boolean found = false;
+            final Item envelope = FetchProfile.Item.ENVELOPE;
+            final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
+            final Item[] items = fetchProfile.getItems();
+            for (int i = 0; !found && i < items.length; i++) {
+                final Item cur = items[i];
+                if (envelope == cur || envelopeOnly == cur) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                final String hdrMessageId = MessageHeaders.HDR_MESSAGE_ID;
+                final String[] headerNames = fetchProfile.getHeaderNames();
+                for (int i = 0; !found && i < headerNames.length; i++) {
+                    if (hdrMessageId.equalsIgnoreCase(headerNames[i])) {
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    fetchProfile.add(envelopeOnly);
+                }
+            }
+        }
+        // Add UID item to FetchProfile if absent
+        {
+            boolean found = false;
+            final Item uid = UIDFolder.FetchProfileItem.UID;
+            final Item[] items = fetchProfile.getItems();
+            for (int i = 0; !found && i < items.length; i++) {
+                final Item cur = items[i];
+                if (uid == cur) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                fetchProfile.add(uid);
+            }
+        }
+        return fetchProfile;
+    }
+
     /**
      * Retrieves <b><small>UNFOLDED</small></b> conversations for specified IMAP folder.
      * 
@@ -112,8 +187,21 @@ public final class Conversations {
      * @return The unfolded conversations
      * @throws MessagingException If a messaging error occurs
      */
+    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int limit) throws MessagingException {
+        return conversationsFor(imapFolder, limit, null);
+    }
+
+    /**
+     * Retrieves <b><small>UNFOLDED</small></b> conversations for specified IMAP folder.
+     * 
+     * @param imapFolder The IMAP folder
+     * @param limit The limit
+     * @param fetchProfile The fetch profile
+     * @return The unfolded conversations
+     * @throws MessagingException If a messaging error occurs
+     */
     @SuppressWarnings("unchecked")
-    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int limit) throws MessagingException{
+    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -139,7 +227,8 @@ public final class Conversations {
                             sb.append(messageCount - limit + 1).append(':').append('*');
                         }
                     }
-                    sb.append(" (").append(getFetchCommand(protocol.isREV1(), FETCH_PROFILE_CONVERSATION, false)).append(')');
+                    final FetchProfile fp = null == fetchProfile ? FETCH_PROFILE_CONVERSATION : checkFetchProfile(fetchProfile);
+                    sb.append(" (").append(getFetchCommand(protocol.isREV1(), fp, false)).append(')');
                     command = sb.toString();
                     sb = null;
                     final long start = System.currentTimeMillis();
