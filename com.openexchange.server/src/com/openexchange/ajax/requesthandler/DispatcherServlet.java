@@ -72,6 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.log.LogFactory;
+import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -270,11 +271,24 @@ public class DispatcherServlet extends SessionServlet {
                 httpResponse.sendError(((Integer) logArgs[0]).intValue(), null == statusMsg ? null : statusMsg.toString());
                 return;
             }
-            LOG.error(e.getMessage(), e);
+            
+            if(LogProperties.isEnabled()) {
+                StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
+                logBuilder.append(LogProperties.getAndPrettyPrint());
+                LOG.error(logBuilder.toString(),e);
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
             APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? httpRequest.getMethod().toUpperCase(Locale.US) : action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            if(LogProperties.isEnabled()) {
+                StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
+                logBuilder.append(LogProperties.getAndPrettyPrint());
+                LOG.error(logBuilder.toString(),e);
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
             final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
             APIResponseRenderer.writeResponse(new Response().setException(exception), null == action ? httpRequest.getMethod().toUpperCase(Locale.US) : action, httpRequest, httpResponse);
