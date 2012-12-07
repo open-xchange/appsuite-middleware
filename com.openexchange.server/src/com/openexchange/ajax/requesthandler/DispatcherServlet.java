@@ -72,6 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.log.LogFactory;
+import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -222,24 +223,22 @@ public class DispatcherServlet extends SessionServlet {
         AJAXState state = null;
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
-            final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-            ServerSession session;
+            final AJAXRequestData requestData;
+            final ServerSession session;
+            /*
+             * Parse & acquire session
+             */
             {
+                final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
                 final String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
     			final String action = requestDataTools.getAction(httpRequest);
-    			session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
-                if (session == null && dispatcher.mayOmitSession(module, action)) {
-                	session = fakeSession();
-                }
-                if (null == session) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
-                }
+    			session = getSession(httpRequest, dispatcher, module, action);
+                /*
+                 * Parse AJAXRequestData
+                 */
+                requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get());
+                requestData.setSession(session);
             }
-            /*
-             * Parse AJAXRequestData
-             */
-            final AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get());
-            requestData.setSession(session);
             /*
              * Start dispatcher processing
              */
@@ -272,11 +271,24 @@ public class DispatcherServlet extends SessionServlet {
                 httpResponse.sendError(((Integer) logArgs[0]).intValue(), null == statusMsg ? null : statusMsg.toString());
                 return;
             }
-            LOG.error(e.getMessage(), e);
+            
+            if(LogProperties.isEnabled()) {
+                StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
+                logBuilder.append(LogProperties.getAndPrettyPrint());
+                LOG.error(logBuilder.toString(),e);
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
             APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? httpRequest.getMethod().toUpperCase(Locale.US) : action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            if(LogProperties.isEnabled()) {
+                StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
+                logBuilder.append(LogProperties.getAndPrettyPrint());
+                LOG.error(logBuilder.toString(),e);
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
             final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
             APIResponseRenderer.writeResponse(new Response().setException(exception), null == action ? httpRequest.getMethod().toUpperCase(Locale.US) : action, httpRequest, httpResponse);
@@ -285,6 +297,17 @@ public class DispatcherServlet extends SessionServlet {
                 dispatcher.end(state);
             }
         }
+    }
+
+    private ServerSession getSession(final HttpServletRequest httpRequest, final Dispatcher dispatcher, final String module, final String action) throws OXException {
+        ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
+        if (session == null && dispatcher.mayOmitSession(module, action)) {
+        	session = fakeSession();
+        }
+        if (null == session) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+        }
+        return session;
     }
 
 	private ServerSession fakeSession() {
