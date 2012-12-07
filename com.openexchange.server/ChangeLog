@@ -9,7 +9,7 @@
 
 * 2012-12-06 - thorben.betten@open-xchange.com
 
- - Fix for bug 24068: Throw proper HTTP error (500) if upload quota exceeded
+ - Fix for bug 24068: Throw proper error if upload quota exceeded
  - Fix for bug 24095: Fixed logincounter CLI
  - Fix for bug 24088: Deal with possibly duplicate folders
 
