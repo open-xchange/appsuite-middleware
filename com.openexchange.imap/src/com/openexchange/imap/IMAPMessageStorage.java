@@ -1633,7 +1633,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         } finally {
             
             final long dur = System.currentTimeMillis() - timeStamp;
-            LOG.info("\tIMAPMessageStorage.getThreadSortedMessages() took " + dur + "msec");
+            LOG.info("\tIMAPMessageStorage.getThreadSortedMessages() for " + fullName + " took " + dur + "msec");
             
         }
     }
