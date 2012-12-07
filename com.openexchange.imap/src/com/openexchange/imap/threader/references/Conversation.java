@@ -171,6 +171,16 @@ public final class Conversation {
     }
 
     /**
+     * Checks if this conversation references OR is referenced by given conversation
+     * 
+     * @param other The other conversation
+     * @return <code>true</code> if references or referenced-by; otherwise <code>false</code>
+     */
+    public boolean referencesOrIsReferencedBy(final Conversation other) {
+        return (this.references.isEmpty() ? false : containsAny(this.references, other.messageIds)) || (other.references.isEmpty() ? false : containsAny(this.messageIds, other.references));
+    }
+
+    /**
      * Checks if this conversation references to given conversation
      * 
      * @param other The other conversation possibly referenced

@@ -357,7 +357,7 @@ public final class Conversations {
         while (iter.hasNext()) {
             final Conversation other = iter.next();
             if (conversation != other) {
-                if (conversation.references(other) || conversation.isReferencedBy(other)) {
+                if (conversation.referencesOrIsReferencedBy(other)) {
                     iter.remove();
                     conversation.join(other);
                     folded = true;
