@@ -50,11 +50,6 @@ public class HazelcastActivator extends HousekeepingActivator {
     protected static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
 
     /**
-     * The {@code AtomicReference} for {@code HazelcastInstance}.
-     */
-    protected static final AtomicReference<HazelcastInstance> REF_HAZELCAST_INSTANCE = HazelcastInitializer.REF_HAZELCAST_INSTANCE;
-
-    /**
      * The {@code AtomicReference} for {@code ClusterDiscoveryService}.
      */
     protected final AtomicReference<ClusterDiscoveryService> clusterDiscoveryServiceReference;
@@ -240,10 +235,10 @@ public class HazelcastActivator extends HousekeepingActivator {
             }
 
             private void shutdown() {
-                final HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
+                final HazelcastInstance hazelcastInstance = HazelcastInitializer.REF_HAZELCAST_INSTANCE.get();
                 if (null != hazelcastInstance) {
                     hazelcastInstance.getLifecycleService().shutdown();
-                    REF_HAZELCAST_INSTANCE.set(null);
+                    HazelcastInitializer.REF_HAZELCAST_INSTANCE.set(null);
                 }
                 Hazelcast.shutdownAll();
             }
