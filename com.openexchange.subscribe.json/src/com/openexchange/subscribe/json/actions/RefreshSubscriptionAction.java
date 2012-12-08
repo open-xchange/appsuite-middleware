@@ -133,7 +133,7 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 
         int resultCode = services.getService(SubscriptionExecutionService.class).executeSubscriptions(subscriptionsToRefresh, subscribeRequest.getServerSession());
 
-		return new AJAXRequestResult(resultCode, "json");
+		return new AJAXRequestResult(Integer.valueOf(resultCode), "json");
 	}
 
 }
