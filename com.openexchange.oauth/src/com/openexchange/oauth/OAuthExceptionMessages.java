@@ -140,6 +140,9 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
 
 	public static final String INVALID_ACCOUNT_MSG = "The account is invalid, please recreate it.";
 
+	// Please provide a display name.
+    public static final String MISSING_DISPLAY_NAME_MSG = "Please provide a display name.";
+
     /**
      * Initializes a new {@link OAuthExceptionMessages}.
      */

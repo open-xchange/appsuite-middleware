@@ -110,7 +110,14 @@ public enum OAuthExceptionCodes implements OXExceptionCode {
      * The request sent was missing its body
      */
     MISSING_BODY(OAuthExceptionMessages.MISSING_BODY_MSG, Category.CATEGORY_ERROR, 12), 
+    /**
+     * The account is invalid, please recreate it.
+     */
     INVALID_ACCOUNT(OAuthExceptionMessages.INVALID_ACCOUNT_MSG, Category.CATEGORY_ERROR, 13),
+    /**
+     * Please provide a display name.
+     */
+    MISSING_DISPLAY_NAME(OAuthExceptionMessages.MISSING_DISPLAY_NAME_MSG, Category.CATEGORY_USER_INPUT, 14),
     ;
 
     private final Category category;
