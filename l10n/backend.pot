@@ -3701,6 +3701,11 @@ msgstr ""
 msgid "The account is invalid, please recreate it."
 msgstr ""
 
+#. Please provide a display name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:144
+msgid "Please provide a display name."
+msgstr ""
+
 #. *
 #. * Cannot change password for any reason.
 #.
