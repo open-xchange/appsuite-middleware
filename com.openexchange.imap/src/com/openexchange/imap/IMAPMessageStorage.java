@@ -1396,7 +1396,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
-        final long timeStamp = System.currentTimeMillis();
+        final long timeStamp = DEBUG ? System.currentTimeMillis() : 0L;
 
         IMAPFolder sentFolder = null;
         try {
@@ -1467,9 +1467,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     };
                     Collections.sort(list, listComparator);
                 }
-                /*
-                 * Check for available mapping indicating that sent folder results have to be merged
-                 */
+                // Check for available mapping indicating that sent folder results have to be merged
                 if (null != submittedTask) {
                     final ThreadableMapping threadableMapping = getFrom(submittedTask);
                     for (final List<MailMessage> thread : list) {
@@ -1484,14 +1482,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     int toIndex = indexRange.end;
                     final int size = list.size();
                     if ((fromIndex) > size) {
-                        /*
-                         * Return empty iterator if start is out of range
-                         */
+                        // Return empty iterator if start is out of range
                         return Collections.emptyList();
                     }
-                    /*
-                     * Reset end index if out of range
-                     */
+                    // Reset end index if out of range
                     if (toIndex >= size) {
                         toIndex = size;
                     }
@@ -1500,9 +1494,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Apply account identifier
                  */
-                for (final List<MailMessage> conversation : list) {
-                    setAccountInfo(conversation);                
-                }
+                setAccountInfo2(list);
                 // Return list
                 return list;
             } else {
@@ -1692,10 +1684,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {
-            
-            final long dur = System.currentTimeMillis() - timeStamp;
-            LOG.info("\tIMAPMessageStorage.getThreadSortedMessages() for " + fullName + " took " + dur + "msec");
-            
+            if (DEBUG) {
+                final long dur = System.currentTimeMillis() - timeStamp;
+                LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages() for " + fullName + " took " + dur + "msec");
+            }
         }
     }
 
@@ -3693,6 +3685,28 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         }
         return mailMessages;
+    }
+
+    /**
+     * Sets account ID and name in given instances of {@link MailMessage}.
+     * 
+     * @param mailMessages The {@link MailMessage} instances
+     * @return The given instances of {@link MailMessage} each with account ID and name set
+     * @throws OXException If mail account cannot be obtained
+     */
+    private <C extends Collection<MailMessage>, W extends Collection<C>> W setAccountInfo2(final W col) throws OXException {
+        final MailAccount account = getMailAccount();
+        final String name = account.getName();
+        final int id = account.getId();
+        for (final C mailMessages : col) {
+            for (final MailMessage mailMessage : mailMessages) {
+                if (null != mailMessage) {
+                    mailMessage.setAccountId(id);
+                    mailMessage.setAccountName(name);
+                }
+            }
+        }
+        return col;
     }
 
     private MailMessage[] convert2Mails(final Message[] msgs, final MailField[] fields) throws OXException {

@@ -234,8 +234,8 @@ public final class Conversations {
                     final long start = System.currentTimeMillis();
                     r = protocol.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
-                    if (log.isInfoEnabled()) {
-                        log.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
+                    if (log.isDebugEnabled()) {
+                        log.debug('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
                     }
                     mailInterfaceMonitor.addUseTime(dur);
                 }
@@ -340,8 +340,8 @@ public final class Conversations {
         int i = 0;
         while (iter.hasNext()) {
             final Conversation conversation = iter.next();
-            if ((i > lastProcessed)) {
-                fold(conversation, iter);
+            if (i > lastProcessed) {
+                joinWith(conversation, iter);
                 lastProcessed = i++;
                 iter = toFold.iterator();
                 i = 0;
@@ -352,19 +352,16 @@ public final class Conversations {
         return toFold;
     }
 
-    private static boolean fold(final Conversation conversation, final Iterator<Conversation> iter) {
-        boolean folded = false;
+    private static void joinWith(final Conversation conversation, final Iterator<Conversation> iter) {
         while (iter.hasNext()) {
             final Conversation other = iter.next();
             if (conversation != other) {
                 if (conversation.referencesOrIsReferencedBy(other)) {
                     iter.remove();
                     conversation.join(other);
-                    folded = true;
                 }
             }
         }
-        return folded;
     }
 
     /** Checks for an empty string */
