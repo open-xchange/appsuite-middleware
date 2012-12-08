@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
+import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
@@ -181,11 +182,7 @@ public final class CSVLibrary {
         } catch (final IOException e) {
             throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
         } finally {
-            try {
-                isr.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(isr);
         }
         return bob.toString();
     }
