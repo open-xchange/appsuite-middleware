@@ -1426,6 +1426,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             final MailFields usedFields = new MailFields(mailFields);
             usedFields.add(MailField.THREAD_LEVEL);
+            usedFields.add(MailField.RECEIVED_DATE);
             usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
             boolean merged = false;
