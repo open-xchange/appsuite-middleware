@@ -156,8 +156,6 @@ public final class CSVLibrary {
     }
 
     public static String transformInputStreamToString(final InputStream is, final String encoding) throws OXException{
-    	boolean isUTF8 = encoding.equalsIgnoreCase("UTF-8");
-
         final InputStreamReader isr;
         try {
             isr = new InputStreamReader(is, encoding);
@@ -165,10 +163,11 @@ public final class CSVLibrary {
             LOG.fatal(e);
             throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
         }
-        final StringAllocator bob = new StringAllocator(8192);
-        boolean firstPartSpecialTreatment = isUTF8;
         try {
-            char[] buf = new char[512];
+            final StringAllocator bob = new StringAllocator(8192);
+            boolean isUTF8 = encoding.equalsIgnoreCase("UTF-8");
+            boolean firstPartSpecialTreatment = isUTF8;
+            final char[] buf = new char[512];
             int length = -1;
             while ((length = isr.read(buf)) > 0) {
             	if(firstPartSpecialTreatment){
@@ -179,12 +178,12 @@ public final class CSVLibrary {
             		bob.append(buf, 0, length);
             	}
             }
+            return bob.toString();
         } catch (final IOException e) {
             throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
         } finally {
             Streams.close(isr);
         }
-        return bob.toString();
     }
 
 	private static int lengthOfBOM(char[] buf) {
