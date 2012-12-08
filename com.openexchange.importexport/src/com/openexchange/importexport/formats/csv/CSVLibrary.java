@@ -168,7 +168,7 @@ public final class CSVLibrary {
         try {
             char[] buf = new char[512];
             int length = -1;
-            while ((length = isr.read(buf)) != -1) {
+            while ((length = isr.read(buf)) > 0) {
             	if(firstPartSpecialTreatment){
             		firstPartSpecialTreatment = false;
             		int offset = lengthOfBOM(buf);
