@@ -248,7 +248,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private static final boolean LOOK_UP_INBOX_ONLY = true;
 
     private static volatile Boolean useImapThreaderIfSupported;
-    /** <b>Only</b> applies to: getThreadSortedMessages(...) in ISimplifiedThreadStructure */
+    /** <b>Only</b> applies to: getThreadSortedMessages(...) in ISimplifiedThreadStructure. Default is <code>false</code> */
     static boolean useImapThreaderIfSupported() {
         Boolean b = useImapThreaderIfSupported;
         if (null == b) {
@@ -256,7 +256,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 b = useImapThreaderIfSupported;
                 if (null == b) {
                     final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
-                    b = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.imap.useImapThreaderIfSupported", true));
+                    b = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.imap.useImapThreaderIfSupported", false));
                     useImapThreaderIfSupported = b;
                 }
             }
@@ -265,7 +265,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private static volatile Boolean useReferenceOnlyThreader;
-    /** <b>Only</b> applies to: getThreadSortedMessages(...) in ISimplifiedThreadStructure */
+    /** <b>Only</b> applies to: getThreadSortedMessages(...) in ISimplifiedThreadStructure. Default is <code>true</code> */
     static boolean useReferenceOnlyThreader() {
         Boolean b = useReferenceOnlyThreader;
         if (null == b) {
@@ -1432,10 +1432,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             boolean merged = false;
             boolean cached = false;
             List<ThreadSortNode> threadList = null;
-
-            final boolean useImapThreaderIfSupported = false && useImapThreaderIfSupported();
-
-            if (!body && imapConfig.getImapCapabilities().hasThreadReferences() && useImapThreaderIfSupported) {
+            if (!body && imapConfig.getImapCapabilities().hasThreadReferences() && useImapThreaderIfSupported()) {
                 /*
                  * Parse THREAD response to a list structure and extract sequence numbers
                  */
