@@ -1448,7 +1448,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final List<Conversation> conversations = Conversations.conversationsFor(imapFolder, limit, fetchProfile);
                 Conversations.fold(conversations);
                 // Comparator
-                final MailMessageComparator threadComparator = MailSortField.RECEIVED_DATE.equals(sortField) ? OrderDirection.DESC.equals(order) ? COMPARATOR_DESC : COMPARATOR_ASC : COMPARATOR_DESC;
+                final MailMessageComparator threadComparator = COMPARATOR_DESC;
                 // Sort
                 List<List<MailMessage>> list = new ArrayList<List<MailMessage>>(conversations.size());
                 for (final Conversation conversation : conversations) {
