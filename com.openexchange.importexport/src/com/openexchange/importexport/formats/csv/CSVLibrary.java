@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -163,7 +164,7 @@ public final class CSVLibrary {
             LOG.fatal(e);
             throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
         }
-        final StringBuilder bob = new StringBuilder();
+        final StringAllocator bob = new StringAllocator(8192);
         boolean firstPartSpecialTreatment = isUTF8;
         try {
             char[] buf = new char[512];
