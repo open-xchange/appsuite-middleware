@@ -57,7 +57,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
-import com.openexchange.hazelcast.osgi.HazelcastActivator;
+import com.openexchange.hazelcast.init.HazelcastInitializer;
 
 
 /**
@@ -78,7 +78,7 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
 
     @Override
     public void remove(final String name) {
-        final HazelcastInstance hazelcastInstance = HazelcastActivator.REF_HAZELCAST_INSTANCE.get();
+        final HazelcastInstance hazelcastInstance = HazelcastInitializer.REF_HAZELCAST_INSTANCE.get();
         if (null == hazelcastInstance) {
             return;
         }
@@ -87,7 +87,7 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
 
     @Override
     public void put(final String name, final String value) throws MBeanException {
-        final HazelcastInstance hazelcastInstance = HazelcastActivator.REF_HAZELCAST_INSTANCE.get();
+        final HazelcastInstance hazelcastInstance = HazelcastInitializer.REF_HAZELCAST_INSTANCE.get();
         if (null == hazelcastInstance) {
             throw new MBeanException(null, "HazelcastInstance is absent.");
         }
@@ -96,7 +96,7 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
 
     @Override
     public String get(final String name) {
-        final HazelcastInstance hazelcastInstance = HazelcastActivator.REF_HAZELCAST_INSTANCE.get();
+        final HazelcastInstance hazelcastInstance = HazelcastInitializer.REF_HAZELCAST_INSTANCE.get();
         if (null == hazelcastInstance) {
             return "null";
         }
@@ -144,7 +144,7 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
      * @throws MBeanException If there's no Hazelcast instance
      */
     private static HazelcastInstance getHazelcastInstance() throws MBeanException {
-        HazelcastInstance hazelcastInstance = HazelcastActivator.REF_HAZELCAST_INSTANCE.get();
+        HazelcastInstance hazelcastInstance = HazelcastInitializer.REF_HAZELCAST_INSTANCE.get();
         if (null == hazelcastInstance) {
             throw new MBeanException(null, "HazelcastInstance is absent.");
         }
