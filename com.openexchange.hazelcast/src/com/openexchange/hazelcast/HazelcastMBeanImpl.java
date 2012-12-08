@@ -52,6 +52,7 @@ package com.openexchange.hazelcast;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
@@ -67,6 +68,8 @@ import com.openexchange.hazelcast.init.HazelcastInitializer;
  */
 public final class HazelcastMBeanImpl extends StandardMBean implements HazelcastMBean {
 
+    private static final AtomicReference<HazelcastInstance> REF_HAZELCAST_INSTANCE = HazelcastInitializer.REF_HAZELCAST_INSTANCE;
+
     /**
      * Initializes a new {@link HazelcastMBeanImpl}.
      * 
@@ -78,7 +81,7 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
 
     @Override
     public void remove(final String name) {
-        final HazelcastInstance hazelcastInstance = HazelcastInitializer.REF_HAZELCAST_INSTANCE.get();
+        final HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
         if (null == hazelcastInstance) {
             return;
         }
@@ -87,7 +90,7 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
 
     @Override
     public void put(final String name, final String value) throws MBeanException {
-        final HazelcastInstance hazelcastInstance = HazelcastInitializer.REF_HAZELCAST_INSTANCE.get();
+        final HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
         if (null == hazelcastInstance) {
             throw new MBeanException(null, "HazelcastInstance is absent.");
         }
@@ -96,7 +99,7 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
 
     @Override
     public String get(final String name) {
-        final HazelcastInstance hazelcastInstance = HazelcastInitializer.REF_HAZELCAST_INSTANCE.get();
+        final HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
         if (null == hazelcastInstance) {
             return "null";
         }
@@ -144,7 +147,7 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
      * @throws MBeanException If there's no Hazelcast instance
      */
     private static HazelcastInstance getHazelcastInstance() throws MBeanException {
-        HazelcastInstance hazelcastInstance = HazelcastInitializer.REF_HAZELCAST_INSTANCE.get();
+        HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
         if (null == hazelcastInstance) {
             throw new MBeanException(null, "HazelcastInstance is absent.");
         }

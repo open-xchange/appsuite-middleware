@@ -235,10 +235,11 @@ public class HazelcastActivator extends HousekeepingActivator {
             }
 
             private void shutdown() {
-                final HazelcastInstance hazelcastInstance = HazelcastInitializer.REF_HAZELCAST_INSTANCE.get();
+                final AtomicReference<HazelcastInstance> reference = HazelcastInitializer.REF_HAZELCAST_INSTANCE;
+                final HazelcastInstance hazelcastInstance = reference.get();
                 if (null != hazelcastInstance) {
                     hazelcastInstance.getLifecycleService().shutdown();
-                    HazelcastInitializer.REF_HAZELCAST_INSTANCE.set(null);
+                    reference.set(null);
                 }
                 Hazelcast.shutdownAll();
             }
@@ -253,6 +254,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         super.registerService(clazz, service);
     }
 
+    /** Simple command provider */
     public static final class UtilCommandProvider implements CommandProvider {
 
         private final HazelcastInitializer initializer;
