@@ -200,7 +200,7 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     @Override
     public IndexResult<MailMessage> query0(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

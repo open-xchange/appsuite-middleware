@@ -61,7 +61,7 @@ public class SimSecretService implements SecretService {
 
     @Override
     public String getSecret(final Session session) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

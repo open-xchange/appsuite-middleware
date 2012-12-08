@@ -169,7 +169,7 @@ public class SimSession implements Session {
 
     @Override
     public String getHash() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -179,7 +179,7 @@ public class SimSession implements Session {
      */
     @Override
     public void setLocalIp(final String ip) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -189,7 +189,7 @@ public class SimSession implements Session {
      */
     @Override
     public void setHash(final String hash) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -213,13 +213,13 @@ public class SimSession implements Session {
 
     @Override
     public String getClient() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public void setClient(final String client) {
-        // TODO Auto-generated method stub
+        // Nothing to do
     }
 
 }

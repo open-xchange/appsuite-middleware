@@ -165,7 +165,7 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
     
     @Override
     public IndexResult<Attachment> query0(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
     

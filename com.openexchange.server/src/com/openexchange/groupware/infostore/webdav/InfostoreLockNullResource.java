@@ -461,7 +461,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 
 	@Override
     public void transferLock(final WebdavLock lock) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 
 	}
 

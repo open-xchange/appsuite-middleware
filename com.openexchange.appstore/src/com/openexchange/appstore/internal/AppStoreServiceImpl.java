@@ -163,7 +163,7 @@ public class AppStoreServiceImpl implements AppStoreService {
 
     @Override
     public List<Application> list(String category) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

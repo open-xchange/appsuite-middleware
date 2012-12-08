@@ -80,7 +80,7 @@ public class SimMQService implements MQService {
 
     @Override
     public Queue getManagementQueue() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -96,43 +96,43 @@ public class SimMQService implements MQService {
 
     @Override
     public List<String> getConnectionFactoryNames() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public <CF extends ConnectionFactory> CF lookupConnectionFactory(final String name) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public <CF extends ConnectionFactory> CF lookupDefaultConnectionFactory() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public Queue lookupQueue(final String name) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public Queue lookupQueue(final String name, final boolean createIfAbsent, final Map<String, Object> params) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public Topic lookupTopic(final String name) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public Topic lookupTopic(final String name, final boolean createIfAbsent) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -141,7 +141,7 @@ public class SimMQService implements MQService {
      */
     @Override
     public Queue lookupLocalOnlyQueue(final String name) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -150,7 +150,7 @@ public class SimMQService implements MQService {
      */
     @Override
     public Queue lookupLocalOnlyQueue(final String name, final boolean createIfAbsent, final Map<String, Object> params) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -159,7 +159,7 @@ public class SimMQService implements MQService {
      */
     @Override
     public Topic lookupLocalOnlyTopic(final String name) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -168,7 +168,7 @@ public class SimMQService implements MQService {
      */
     @Override
     public Topic lookupLocalOnlyTopic(final String name, final boolean createIfAbsent) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -177,7 +177,7 @@ public class SimMQService implements MQService {
      */
     @Override
     public boolean isLocalOnlyQueue(final String name) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -186,7 +186,7 @@ public class SimMQService implements MQService {
      */
     @Override
     public boolean isLocalOnlyTopic(final String name) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -195,7 +195,7 @@ public class SimMQService implements MQService {
      */
     @Override
     public void deleteQueue(final String name) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 
@@ -204,7 +204,7 @@ public class SimMQService implements MQService {
      */
     @Override
     public void deleteLocaleQueue(final String name) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 
@@ -213,7 +213,7 @@ public class SimMQService implements MQService {
      */
     @Override
     public void deleteTopic(final String name) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 
@@ -222,7 +222,7 @@ public class SimMQService implements MQService {
      */
     @Override
     public void deleteLocaleTopic(final String name) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 

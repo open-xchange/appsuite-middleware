@@ -357,13 +357,13 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     @Override
     public void setTransactional(final boolean transactional) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void setRequestTransactional(final boolean transactional) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 

@@ -161,7 +161,7 @@ public class SimAccountManager implements MessagingAccountManager {
      */
     @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -170,7 +170,7 @@ public class SimAccountManager implements MessagingAccountManager {
      */
     @Override
     public boolean hasAccount(final Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 

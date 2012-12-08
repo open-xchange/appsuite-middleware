@@ -194,7 +194,7 @@ public class LdapContactStorage extends DefaultContactStorage {
 
     @Override
     public void updateReferences(Session session, Contact contact) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
     }
 
     @Override

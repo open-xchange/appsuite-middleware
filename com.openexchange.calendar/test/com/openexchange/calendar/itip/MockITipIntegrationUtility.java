@@ -133,7 +133,7 @@ public class MockITipIntegrationUtility implements ITipIntegrationUtility {
 	@Override
     public int getFolderIdForUser(int appId, int userId, int contextId)
 			throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return 0;
 	}
 
@@ -141,7 +141,7 @@ public class MockITipIntegrationUtility implements ITipIntegrationUtility {
 	@Override
 	public Appointment loadAppointment(Appointment appointment, Session session)
 			throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
