@@ -970,7 +970,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                     throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, limit);
                 }
             }
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : cause.getMessage());
         }
         /*
          * Create the upload event
