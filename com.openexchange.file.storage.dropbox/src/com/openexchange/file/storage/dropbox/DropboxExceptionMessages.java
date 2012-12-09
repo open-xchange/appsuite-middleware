@@ -88,6 +88,9 @@ public final class DropboxExceptionMessages implements LocalizableStrings {
     // Versioning not supported by Dropbox file storage.
     public static final String VERSIONING_NOT_SUPPORTED_MSG = "Versioning not supported by Dropbox file storage.";
 
+    // Missing configuration for account "%1$s".
+    public static final String MISSING_CONFIG_MSG = "Missing configuration for account \"%1$s\".";
+
     /**
      * Initializes a new {@link DropboxExceptionMessages}.
      */

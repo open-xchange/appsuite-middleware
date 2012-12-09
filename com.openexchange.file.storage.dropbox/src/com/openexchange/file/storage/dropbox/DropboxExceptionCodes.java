@@ -101,6 +101,10 @@ public enum DropboxExceptionCodes implements OXExceptionCode {
      * Versioning not supported by Dropbox file storage.
      */
     VERSIONING_NOT_SUPPORTED(DropboxExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 13),
+    /**
+     * Missing configuration for account "%1$s".
+     */
+    MISSING_CONFIG(DropboxExceptionMessages.MISSING_CONFIG_MSG, Category.CATEGORY_CONFIGURATION, 14)
 
     ;
 

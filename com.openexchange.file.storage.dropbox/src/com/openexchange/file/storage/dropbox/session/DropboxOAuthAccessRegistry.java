@@ -52,6 +52,7 @@ package com.openexchange.file.storage.dropbox.session;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.sessiond.SessiondService;
 
 /**
@@ -83,12 +84,12 @@ public final class DropboxOAuthAccessRegistry {
     }
 
     /**
-     * Adds specified facebook OAuth access.
+     * Adds specified Dropbox OAuth access.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @param fbOAuthInfo The facebook OAuth access to add
+     * @param fbOAuthInfo The Dropbox OAuth access to add
      * @return The previous associated session, or <code>null</code> if there was no session.
      */
     public DropboxOAuthAccess addSession(final int contextId, final int userId, final String accountId, final DropboxOAuthAccess fbOAuthInfo) {
@@ -105,12 +106,12 @@ public final class DropboxOAuthAccessRegistry {
     }
 
     /**
-     * Check presence of the facebook OAuth access associated with given user-context-pair.
+     * Check presence of the Dropbox OAuth access associated with given user-context-pair.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return <code>true</code> if such a facebook OAuth access is present; otherwise <code>false</code>
+     * @return <code>true</code> if such a Dropbox OAuth access is present; otherwise <code>false</code>
      */
     public boolean containsSession(final int contextId, final int userId, final String accountId) {
         final ConcurrentMap<String, DropboxOAuthAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
@@ -118,12 +119,12 @@ public final class DropboxOAuthAccessRegistry {
     }
 
     /**
-     * Gets the facebook OAuth access associated with given user-context-pair.
+     * Gets the Dropbox OAuth access associated with given user-context-pair.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return The facebook OAuth access or <code>null</code>
+     * @return The Dropbox OAuth access or <code>null</code>
      */
     public DropboxOAuthAccess getSession(final int contextId, final int userId, final String accountId) {
         final ConcurrentMap<String, DropboxOAuthAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
@@ -135,10 +136,10 @@ public final class DropboxOAuthAccessRegistry {
      *
      * @param contextId The context identifier
      * @param userId The user identifier
-     * @return <code>true</code> if a facebook OAuth access for given user-context-pair was found and removed; otherwise <code>false</code>
+     * @return <code>true</code> if a Dropbox OAuth access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removeSessionIfLast(final int contextId, final int userId) {
-        final SessiondService sessiondService = FacebookMessagingServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+        final SessiondService sessiondService = DropboxServices.getService(SessiondService.class);
         if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
             /*
              * No sessions left for user
@@ -153,12 +154,12 @@ public final class DropboxOAuthAccessRegistry {
     }
 
     /**
-     * Purges specified user's facebook OAuth access.
+     * Purges specified user's Dropbox OAuth access.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return <code>true</code> if a facebook OAuth access for given user-context-pair was found and purged; otherwise <code>false</code>
+     * @return <code>true</code> if a Dropbox OAuth access for given user-context-pair was found and purged; otherwise <code>false</code>
      */
     public boolean purgeUserAccess(final int contextId, final int userId, final String accountId) {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
@@ -177,9 +178,9 @@ public final class DropboxOAuthAccessRegistry {
     }
 
     /**
-     * Gets a {@link Iterator iterator} over the facebook OAuth access instances in this registry.
+     * Gets a {@link Iterator iterator} over the Dropbox OAuth access instances in this registry.
      *
-     * @return A {@link Iterator iterator} over the facebook OAuth access instances in this registry.
+     * @return A {@link Iterator iterator} over the Dropbox OAuth access instances in this registry.
      */
     Iterator<ConcurrentMap<String, DropboxOAuthAccess>> iterator() {
         return map.values().iterator();

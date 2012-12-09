@@ -49,45 +49,85 @@
 
 package com.openexchange.file.storage.dropbox;
 
-import com.openexchange.file.storage.FileStorageConstants;
+import com.openexchange.config.ConfigurationService;
 
 /**
- * {@link DropboxConstants} - Provides useful constants for Dropbox file storage.
- *
+ * {@link DropboxConfiguration}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropboxConstants implements FileStorageConstants {
+public final class DropboxConfiguration {
+
+    private static final DropboxConfiguration INSTANCE = new DropboxConfiguration();
 
     /**
-     * The identifier for Dropbox file storage service.
+     * Gets the {@link DropboxConfiguration instance}.
+     * 
+     * @return The instance
      */
-    public static final String ID = "com.openexchange.file.storage.dropbox";
-
-    /**
-     * The configuration property name for Dropbox API key.
-     */
-    public static final String API_KEY = "apiKey";
-
-    /**
-     * The configuration property name for Dropbox secret key.
-     */
-    public static final String SECRET_KEY = "secretKey";
-
-    /**
-     * The default API key.
-     */
-    public static final String KEY_API = "d36ebc9e274a89e3bd0c239cea4acb48";
-
-    /**
-     * The default secret key.
-     */
-    public static final String KEY_SECRET = "903e8006dbad9204bb74c26eb3ca2310";
-
-    /**
-     * Initializes a new {@link DropboxConstants}.
-     */
-    private DropboxConstants() {
-        super();
+    public static DropboxConfiguration getInstance() {
+        return INSTANCE;
     }
 
+    /*-
+     * ----------------------------------------------------------------------------------
+     * --------------------------------- MEMBER SECTION ---------------------------------
+     * ----------------------------------------------------------------------------------
+     */
+
+    private String apiKey;
+
+    private String secretKey;
+
+    /**
+     * Initializes a new {@link DropboxConfiguration}.
+     */
+    private DropboxConfiguration() {
+        super();
+        reset();
+    }
+
+    private void reset() {
+        apiKey = DropboxConstants.KEY_API;
+        secretKey = DropboxConstants.KEY_SECRET;
+    }
+
+    /**
+     * Configures this {@link DropboxConfiguration instance} using given {@link ConfigurationService configuration service}.
+     * 
+     * @param configurationService The configuration service
+     */
+    public void configure(final ConfigurationService configurationService) {
+        {
+            apiKey = configurationService.getProperty("com.openexchange.file.storage.dropbox.apiKey", DropboxConstants.KEY_API).trim();
+        }
+        {
+            secretKey = configurationService.getProperty("com.openexchange.file.storage.dropbox.secretKey", DropboxConstants.KEY_SECRET).trim();
+        }
+    }
+
+    /**
+     * Drops this {@link DropboxConfiguration instance}.
+     */
+    public void drop() {
+        reset();
+    }
+
+    /**
+     * Gets the API key.
+     * 
+     * @return The API key
+     */
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    /**
+     * Gets the secret key.
+     * 
+     * @return The secret key
+     */
+    public String getSecretKey() {
+        return secretKey;
+    }
 }

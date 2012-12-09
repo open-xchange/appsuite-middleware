@@ -49,7 +49,11 @@
 
 package com.openexchange.file.storage.dropbox;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import org.scribe.model.Token;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.dropbox.session.DropboxOAuthAccess;
 import com.openexchange.session.Session;
 
 /**
@@ -59,34 +63,45 @@ import com.openexchange.session.Session;
  */
 public abstract class AbstractDropboxAccess {
 
-    /**
-     * The string constant for <code>'/'</code> character.
-     */
-    protected static final String SLASH = "/";
-
-    /**
-     * The root URL of Dropbox server as specified through account configuration.
-     */
-    protected final String rootUrl;
-
-    /**
-     * The session.
-     */
+    protected final DropboxOAuthAccess dropboxOAuthAccess;
     protected final Session session;
-
-    /**
-     * The associated file account.
-     */
     protected final FileStorageAccount account;
+    protected final long dropboxUserId;
+    protected final String dropboxUserName;
+    protected final org.scribe.oauth.OAuthService dropboxOAuthService;
+    protected final Token dropboxAccessToken;
 
     /**
      * Initializes a new {@link AbstractDropboxAccess}.
      */
-    protected AbstractDropboxAccess(final String rootUrl, final FileStorageAccount account, final Session session) {
+    protected AbstractDropboxAccess(final DropboxOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session) {
         super();
-        this.rootUrl = rootUrl;
+        this.dropboxOAuthAccess = dropboxOAuthAccess;
         this.account = account;
         this.session = session;
+        // Other fields
+        this.dropboxUserId = dropboxOAuthAccess.getDropboxUserId();
+        this.dropboxUserName = dropboxOAuthAccess.getDropboxUserName();
+        this.dropboxOAuthService = dropboxOAuthAccess.getDropboxOAuthService();
+        this.dropboxAccessToken = dropboxOAuthAccess.getDropboxAccessToken();
+    }
+
+    public String getDropboxUserName() {
+        return dropboxUserName;
+    }
+
+    /**
+     * URL-encodes specified string.
+     *
+     * @param string The string
+     * @return The URL-encoded string
+     */
+    protected static String encode(final String string) {
+        try {
+            return URLEncoder.encode(string, "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            return string;
+        }
     }
 
 }

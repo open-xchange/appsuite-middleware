@@ -50,9 +50,7 @@
 package com.openexchange.file.storage.dropbox;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +107,6 @@ public final class DropboxFileStorageService implements AccountAware {
     public static final int DEFAULT_ATTR_EXPIRATION_PERIOD = 300000;
 
     private final DynamicFormDescription formDescription;
-    private final Set<String> secretProperties;
     private volatile FileStorageAccountManager accountManager;
     private volatile CompositeFileStorageAccountManagerProvider compositeAccountManager;
 
@@ -119,11 +116,13 @@ public final class DropboxFileStorageService implements AccountAware {
     private DropboxFileStorageService() {
         super();
         final DynamicFormDescription tmpDescription = new DynamicFormDescription();
-        tmpDescription.add(FormElement.input(DropboxConstants.DROPBOX_LOGIN, FormStrings.FORM_LABEL_LOGIN, true, ""));
-        tmpDescription.add(FormElement.password(DropboxConstants.DROPBOX_PASSWORD, FormStrings.FORM_LABEL_PASSWORD, true, ""));
+        /*
+         * API & secret key
+         */
+        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
+        oauthAccount.setOption("type", "com.openexchange.oauth.dropbox");
+        tmpDescription.add(oauthAccount);
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
-        secretProperties = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(DropboxConstants.DROPBOX_PASSWORD)));
-        // Configuration
     }
 
     private FileStorageAccountManager getAccountManager0() throws OXException {
@@ -171,7 +170,7 @@ public final class DropboxFileStorageService implements AccountAware {
 
     @Override
     public Set<String> getSecretProperties() {
-        return secretProperties;
+        return Collections.emptySet();
     }
 
     private static final class FileStorageAccountInfo {
@@ -241,7 +240,8 @@ public final class DropboxFileStorageService implements AccountAware {
                 account = compositeAccountManager.getAccountManager(accountId, session).getAccount(accountId, session);
             }
         }
-        return new CIFSAccountAccess(this, account, session);
+        //return new CIFSAccountAccess(this, account, session);
+        return null;
     }
 
 }
