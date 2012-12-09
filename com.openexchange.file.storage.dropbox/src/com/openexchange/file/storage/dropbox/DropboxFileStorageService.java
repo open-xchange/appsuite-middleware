@@ -70,7 +70,7 @@ import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.session.Session;
 
 /**
- * {@link DropboxFileStorageService}
+ * {@link DropboxFileStorageService} - The Dropbox file storage service.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -81,19 +81,19 @@ public final class DropboxFileStorageService implements AccountAware {
     private static final String SERVICE_ID = DropboxConstants.ID;
 
     /**
-     * Creates a new CIFS/SMB file storage service.
+     * Creates a new Dropbox file storage service.
      * 
-     * @return A new CIFS/SMB file storage service
+     * @return A new Dropbox file storage service
      */
     public static DropboxFileStorageService newInstance() {
         return new DropboxFileStorageService();
     }
 
     /**
-     * Creates a new CIFS/SMB file storage service.
+     * Creates a new Dropbox file storage service.
      * 
      * @param compositeAccountManager The composite account manager
-     * @return A new CIFS/SMB file storage service
+     * @return A new Dropbox file storage service
      */
     public static DropboxFileStorageService newInstance(final CompositeFileStorageAccountManagerProvider compositeAccountManager) {
         final DropboxFileStorageService newInst = new DropboxFileStorageService();
@@ -160,7 +160,7 @@ public final class DropboxFileStorageService implements AccountAware {
 
     @Override
     public String getDisplayName() {
-        return "CIFS/SMB File Storage Service";
+        return "Dropbox File Storage Service";
     }
 
     @Override
