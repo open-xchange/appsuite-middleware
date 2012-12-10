@@ -350,13 +350,14 @@ public final class Conversations {
         Iterator<Conversation> iter = toFold.iterator();
         int i = 0;
         while (iter.hasNext()) {
-            final Conversation conversation = iter.next();
             if (i > lastProcessed) {
-                foldInto(conversation, iter);
-                lastProcessed = i++;
+                foldInto(iter.next(), iter);
+                lastProcessed = i;
                 iter = toFold.iterator();
                 i = 0;
             } else {
+                // Consume, but ignore
+                iter.next();
                 i++;
             }
         }
@@ -366,11 +367,9 @@ public final class Conversations {
     private static void foldInto(final Conversation conversation, final Iterator<Conversation> iter) {
         while (iter.hasNext()) {
             final Conversation other = iter.next();
-            if (conversation != other) {
-                if (conversation.referencesOrIsReferencedBy(other)) {
-                    iter.remove();
-                    conversation.join(other);
-                }
+            if (conversation.referencesOrIsReferencedBy(other)) {
+                iter.remove();
+                conversation.join(other);
             }
         }
     }
