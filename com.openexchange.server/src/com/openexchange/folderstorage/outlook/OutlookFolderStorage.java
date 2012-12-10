@@ -1629,7 +1629,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     // Create return array
                     final List<SortableId> ret = new ArrayList<SortableId>(ids.length + 1);
                     int ordinal = 0;
-                    ret.add(new OutlookId(defaultFolderId, ordinal++, FolderStrings.DEFAULT_INFOSTORE_FOLDER_NAME));
+                    ret.add(new OutlookId(defaultFolderId, ordinal++, FolderStrings.DEFAULT_FILES_FOLDER_NAME));
                     for (int i = 0; i < ids.length; i++) {
                         final String id = ids[i];
                         ret.add(new OutlookId(id, ordinal++, id2name.get(id)));
@@ -2717,7 +2717,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             folder.setParentID(INFOSTORE);
         } else if (showPersonalBelowInfoStore(session) && id.equals(getDefaultInfoStoreFolderId(session))) {
             folder.setParentID(INFOSTORE);
-            folder.setName(FolderStrings.DEFAULT_INFOSTORE_FOLDER_NAME);
+            folder.setName(FolderStrings.DEFAULT_FILES_FOLDER_NAME);
         }
     }
 
