@@ -134,7 +134,8 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
          * Get all private folders
          */
         final TimeZone timeZone = Tools.getTimeZone(timeZoneId);
-        final String altNames = request.getParameter("altNames");
+        final String sAltNames = "altNames";
+        final String altNames = request.getParameter(sAltNames);
         final FolderResponse<UserizedFolder[]> privateResp =
             folderService.getVisibleFolders(
                 treeId,
@@ -143,7 +144,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 all,
                 session,
                 new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(
-                    "mailRootFolders", mailRootFolders).put("altNames", altNames));
+                    "mailRootFolders", mailRootFolders).put(sAltNames, altNames));
         /*
          * Get all shared folders
          */
@@ -154,7 +155,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 SharedType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put("altNames", altNames));
+                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames));
         /*
          * Get all public folders
          */
@@ -165,7 +166,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 PublicType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put("altNames", altNames));
+                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames));
         /*
          * Determine max. last-modified time stamp
          */
