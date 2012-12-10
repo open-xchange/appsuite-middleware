@@ -39,7 +39,7 @@ public class CustomUpdateRequestProcessorFactory extends UpdateRequestProcessorF
 
   @Override
   public UpdateRequestProcessor getInstance(SolrQueryRequest req, SolrQueryResponse rsp, UpdateRequestProcessor next) {
-    // TODO Auto-generated method stub
+    // Nothing to do
     return null;
   }
 }

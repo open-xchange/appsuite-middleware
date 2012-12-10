@@ -113,7 +113,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     private static final String SERVICE_ID = "com.openexchange.jslob.config";
     
-    private static final String CORE = "core";
+    private static final String CORE = "io.ox/core";
     
     
     /*-
@@ -180,7 +180,7 @@ public final class ConfigJSlobService implements JSlobService {
                         {
                             final int pathSep = jslobPath.indexOf("//");
                             if (pathSep < 0) {
-                                jslobName = "core";
+                                jslobName = CORE;
                             } else {
                                 jslobName = jslobPath.substring(0, pathSep);
                                 jslobPath = jslobPath.substring(pathSep + 2);
@@ -442,19 +442,18 @@ public final class ConfigJSlobService implements JSlobService {
 				
 				for (final Entry<String, Object> entry : jObject.entrySet()) {
 					String path = attribute2ConfigTreeMap.get(entry.getKey());
-					pathsToPurge.add(Arrays.asList(new JSONPathElement(entry.getKey())));
-					if (null == path) {
-						path = entry.getKey();
+					if (path != null) {
+						pathsToPurge.add(Arrays.asList(new JSONPathElement(entry.getKey())));
+						if (path.length() > 0 && path.charAt(0) == '/') {
+							path = path.substring(1);
+						}
+						if (path.endsWith("/")) {
+							path = path.substring(0, path.length() - 1);
+						}
+						final Setting setting = configTree.getSettingByPath(path);
+						setting.setSingleValue(entry.getValue());
+						saveSettingWithSubs(stor, setting);
 					}
-					if (path.length() > 0 && path.charAt(0) == '/') {
-						path = path.substring(1);
-					}
-					if (path.endsWith("/")) {
-						path = path.substring(0, path.length() - 1);
-					}
-					final Setting setting = configTree.getSettingByPath(path);
-					setting.setSingleValue(entry.getValue());
-					saveSettingWithSubs(stor, setting);
 				}
             }
             

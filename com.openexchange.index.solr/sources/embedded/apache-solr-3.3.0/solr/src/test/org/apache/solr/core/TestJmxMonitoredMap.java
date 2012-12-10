@@ -140,7 +140,7 @@ public class TestJmxMonitoredMap extends LuceneTestCase {
     }
 
     public URL[] getDocs() {
-      // TODO Auto-generated method stub
+      // Nothing to do
       return null;
     }
 

@@ -73,6 +73,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
@@ -218,7 +219,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     @Override
     protected String getDebugInfo(final int argsIndex) {
-        final StringBuilder sb = new StringBuilder(command.length() + 64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(command.length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -250,7 +251,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -290,7 +291,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 server = server.substring(pos);
             }
             final MessagingException e =
-                new MessagingException(new StringBuilder(32).append("Expected ").append(length).append(" FETCH responses but got ").append(
+                new MessagingException(new com.openexchange.java.StringAllocator(32).append("Expected ").append(length).append(" FETCH responses but got ").append(
                     index).append(" from IMAP folder \"").append(imapFolder.getFullName()).append("\" on server \"").append(server).append(
                     "\".").toString());
             LOG.warn(e.getMessage(), e);
@@ -302,7 +303,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         try {
             return handleMessage(imapFolder.getMessage(seqNum));
         } catch (final Exception e) {
-            LOG.warn(new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(), e);
+            LOG.warn(new com.openexchange.java.StringAllocator(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(), e);
             return null;
         }
     }
@@ -311,7 +312,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         try {
             return handleMessage(imapFolder.getMessageByUID(uid));
         } catch (final Exception e) {
-            LOG.warn(new StringBuilder(128).append("Message uid=").append(uid).append(" discarded: ").append(e.getMessage()).toString(), e);
+            LOG.warn(new com.openexchange.java.StringAllocator(128).append("Message uid=").append(uid).append(" discarded: ").append(e.getMessage()).toString(), e);
             return null;
         }
     }
@@ -329,7 +330,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         } catch (final Exception e) {
             if (WARN) {
                 LOG.warn(
-                    new StringBuilder(128).append("Message #").append(message.getMessageNumber()).append(" discarded: ").append(
+                    new com.openexchange.java.StringAllocator(128).append("Message #").append(message.getMessageNumber()).append(" discarded: ").append(
                         e.getMessage()).toString(),
                     e);
             }
@@ -374,7 +375,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             if (WARN) {
                 final OXException imapExc = MimeMailException.handleMessagingException(e);
                 LOG.warn(
-                    new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(imapExc.getMessage()).toString(),
+                    new com.openexchange.java.StringAllocator(128).append("Message #").append(seqNum).append(" discarded: ").append(imapExc.getMessage()).toString(),
                     imapExc);
             }
             error = true;
@@ -385,7 +386,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
              */
             if (WARN) {
                 LOG.warn(
-                    new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(),
+                    new com.openexchange.java.StringAllocator(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(),
                     e);
             }
             error = true;
@@ -901,7 +902,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws OXException {
             final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-            final StringBuilder sb = new StringBuilder();
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
             sb.append(bs.type).append('/').append(bs.subtype);
             if (bs.cParams != null) {
                 sb.append(bs.cParams);
@@ -999,7 +1000,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * This is the Envelope item. Despite of JavaMail's ENVELOPE item, this item does not include INTERNALDATE nor RFC822.SIZE; it solely
      * consists of the ENVELOPE.
      * <p>
-     * The Envelope is an aggregration of the common attributes of a Message. Implementations should include the following attributes: From,
+     * The Envelope is an aggregation of the common attributes of a Message. Implementations should include the following attributes: From,
      * To, Cc, Bcc, ReplyTo, Subject and Date. More items may be included as well.
      */
     public static final FetchProfile.Item ENVELOPE_ONLY = new FetchItem("ENVELOPE_ONLY");
@@ -1013,26 +1014,26 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @return The FETCH items to craft a FETCH command
      */
     public static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
-        final StringBuilder command = new StringBuilder(128);
-        final boolean envelope;
+        final StringAllocator command = new StringAllocator(128);
+        final boolean sizeIncluded;
         if (fp.contains(FetchProfile.Item.ENVELOPE)) {
             if (loadBody) {
                 command.append("INTERNALDATE");
-                envelope = false;
+                sizeIncluded = false;
             } else {
                 command.append("ENVELOPE INTERNALDATE RFC822.SIZE");
-                envelope = true;
+                sizeIncluded = true;
             }
         } else if (fp.contains(ENVELOPE_ONLY)) {
             if (loadBody) {
                 command.append("INTERNALDATE");
             } else {
-                command.append("ENVELOPE");
+                command.append("ENVELOPE INTERNALDATE");
             }
-            envelope = false;
+            sizeIncluded = false;
         } else {
             command.append("INTERNALDATE");
-            envelope = false;
+            sizeIncluded = false;
         }
         if (fp.contains(FetchProfile.Item.FLAGS)) {
             command.append(" FLAGS");
@@ -1052,7 +1053,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 command.append(" RFC822.HEADER");
             }
         }
-        if (!envelope && fp.contains(IMAPFolder.FetchProfileItem.SIZE)) {
+        if (!sizeIncluded && fp.contains(IMAPFolder.FetchProfileItem.SIZE)) {
             command.append(" RFC822.SIZE");
         }
         /*

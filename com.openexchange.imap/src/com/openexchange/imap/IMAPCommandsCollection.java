@@ -170,7 +170,7 @@ public final class IMAPCommandsCollection {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder(set.size() * 8);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(set.size() * 8);
             for (final String cap : set) {
                 sb.append(' ').append(cap);
             }
@@ -3187,7 +3187,7 @@ public final class IMAPCommandsCollection {
          */
         final boolean quote = PATTERN_QUOTE_ARG.matcher(lfolder).find() || "NIL".equalsIgnoreCase(lfolder);
         final boolean escape = PATTERN_ESCAPE_ARG.matcher(lfolder).find();
-        final StringBuilder sb = new StringBuilder(lfolder.length() + 8);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(lfolder.length() + 8);
         if (escape) {
             sb.append(lfolder.replaceAll(REPLPAT_BACKSLASH, REPLACEMENT_BACKSLASH).replaceAll(REPLPAT_QUOTE, REPLACEMENT_QUOTE));
         } else {

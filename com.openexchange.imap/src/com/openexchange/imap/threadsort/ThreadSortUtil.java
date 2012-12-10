@@ -230,7 +230,7 @@ public final class ThreadSortUtil {
     public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname, final char separator, final String threadResponse) {
         final char[] chars = threadResponse.toCharArray();
         final List<ExtendedMimeMessage> tmp = new ArrayList<ExtendedMimeMessage>();
-        final StringBuilder sb = new StringBuilder(8);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(8);
         int i = 0;
         while (i < chars.length) {
             char c = chars[i++];
@@ -240,7 +240,7 @@ public final class ThreadSortUtil {
             }
             if (sb.length() > 0) {
                 tmp.add(new ExtendedMimeMessage(folderFullname, separator, Integer.parseInt(sb.toString())));
-                sb.setLength(0);
+                sb.reinitTo(0);
             }
         }
         return tmp.toArray(new ExtendedMimeMessage[tmp.size()]);
@@ -341,9 +341,11 @@ public final class ThreadSortUtil {
     static String toUnifiedThreadResponse(final String resp) {
         final Matcher matcher = PATTERN_NUM.matcher(resp);
         final StringBuffer sb = new StringBuffer(resp.length() << 1);
-        final StringBuilder tmp = new StringBuilder(8);
+        final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(8);
         while (matcher.find()) {
-            tmp.setLength(0);
+            if (tmp.length() > 0) {
+                tmp.reinitTo(0);
+            }
             matcher.appendReplacement(sb, tmp.append('{').append(matcher.group()).append('}').toString());
         }
         matcher.appendTail(sb);

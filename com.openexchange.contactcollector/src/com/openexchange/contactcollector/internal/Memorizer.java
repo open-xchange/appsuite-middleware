@@ -359,15 +359,15 @@ public class Memorizer implements Runnable {
         final String val = MimeUtility.unfold(value);
         final Matcher m = ENC_PATTERN.matcher(val);
         if (m.find()) {
-            final StringBuilder sb = new StringBuilder(val.length());
+            final com.openexchange.java.StringAllocator sa = new com.openexchange.java.StringAllocator(val.length());
             int lastMatch = 0;
             do {
-                sb.append(val.substring(lastMatch, m.start()));
-                sb.append(Matcher.quoteReplacement(MimeUtility.decodeWord(m.group())));
+                sa.append(val.substring(lastMatch, m.start()));
+                sa.append(Matcher.quoteReplacement(MimeUtility.decodeWord(m.group())));
                 lastMatch = m.end();
             } while (m.find());
-            sb.append(val.substring(lastMatch));
-            return sb.toString();
+            sa.append(val.substring(lastMatch));
+            return sa.toString();
         }
         return val;
     }

@@ -2609,7 +2609,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         final String destFullname = destFolder.getFullName();
         final IMAPFolder newFolder;
         {
-            final StringBuilder sb = new StringBuilder();
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
             if (destFullname.length() > 0) {
                 sb.append(destFullname).append(getSeparator(destFolder));
             }

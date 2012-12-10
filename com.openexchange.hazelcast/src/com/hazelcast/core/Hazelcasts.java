@@ -54,7 +54,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.hazelcast.ClassLoaderAware;
-import com.openexchange.hazelcast.osgi.HazelcastActivator;
+import com.openexchange.hazelcast.init.HazelcastInitializer;
 
 /**
  * <div style="margin-left: 0.1in; background-color:white;">
@@ -176,7 +176,7 @@ public final class Hazelcasts {
      * @return The <tt>HazelcastInstance</tt> or <code>null</code> if not initialized, yet
      */
     public static HazelcastInstance getHazelcastInstance() {
-        return HazelcastActivator.REF_HAZELCAST_INSTANCE.get();
+        return HazelcastInitializer.REF_HAZELCAST_INSTANCE.get();
     }
 
     private static ThreadLocal<ClassLoaderModifier> MODIFIER = new ThreadLocal<ClassLoaderModifier>();

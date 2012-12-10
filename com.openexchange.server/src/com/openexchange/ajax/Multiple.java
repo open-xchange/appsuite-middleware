@@ -139,6 +139,9 @@ public class Multiple extends SessionServlet {
             AJAXState state = null;
             try {
                 final ServerSession session = getSessionObject(req);
+                if (session == null) {
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+                }
                 for (int a = 0; a < length; a++) {
                     state = parseActionElement(respArr, dataArray, a, session, req, state);
                 }
@@ -160,7 +163,7 @@ public class Multiple extends SessionServlet {
                 if (mi != null) {
                     try {
                         mi.close(true);
-                    } catch (final OXException e) {
+                    } catch (final Exception e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }

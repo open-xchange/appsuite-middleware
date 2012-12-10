@@ -81,7 +81,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public void addBundleListener(final BundleListener arg0) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -90,7 +90,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public void addFrameworkListener(final FrameworkListener arg0) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -99,7 +99,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public void addServiceListener(final ServiceListener arg0) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -108,7 +108,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public void addServiceListener(final ServiceListener arg0, final String arg1) throws InvalidSyntaxException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -117,7 +117,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public Filter createFilter(final String arg0) throws InvalidSyntaxException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -126,7 +126,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public ServiceReference[] getAllServiceReferences(final String arg0, final String arg1) throws InvalidSyntaxException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -135,7 +135,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public Bundle getBundle() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -144,7 +144,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public Bundle getBundle(final long arg0) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -153,7 +153,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public Bundle[] getBundles() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -162,7 +162,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public File getDataFile(final String arg0) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -171,7 +171,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public String getProperty(final String arg0) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -180,7 +180,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public ServiceReference getServiceReference(final String arg0) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -189,7 +189,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public ServiceReference[] getServiceReferences(final String arg0, final String arg1) throws InvalidSyntaxException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -198,7 +198,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public Bundle installBundle(final String arg0) throws BundleException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -207,7 +207,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public Bundle installBundle(final String arg0, final InputStream arg1) throws BundleException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -216,7 +216,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public void removeBundleListener(final BundleListener arg0) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -225,7 +225,7 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public void removeFrameworkListener(final FrameworkListener arg0) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -234,55 +234,55 @@ public class SimBundleContext implements BundleContext {
      */
     @Override
     public void removeServiceListener(final ServiceListener arg0) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public ServiceRegistration<?> registerService(final String[] clazzes, final Object service, final Dictionary<String, ?> properties) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public ServiceRegistration<?> registerService(final String clazz, final Object service, final Dictionary<String, ?> properties) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public <S> ServiceRegistration<S> registerService(final Class<S> clazz, final S service, final Dictionary<String, ?> properties) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public <S> ServiceReference<S> getServiceReference(final Class<S> clazz) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public <S> Collection<ServiceReference<S>> getServiceReferences(final Class<S> clazz, final String filter) throws InvalidSyntaxException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public <S> S getService(final ServiceReference<S> reference) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public boolean ungetService(final ServiceReference<?> reference) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
     @Override
     public Bundle getBundle(final String location) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

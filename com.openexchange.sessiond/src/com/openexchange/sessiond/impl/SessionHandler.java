@@ -310,9 +310,19 @@ public final class SessionHandler {
         return retval;
     }
 
-    public static SessionControl getAnyActiveSessionForUser(final int userId, final int contextId, final boolean includeLongTerm) {
+    /**
+     * Gets an active session of an user if available.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param includeLongTerm <code>true</code> to also lookup the long term sessions, <code>false</code>, otherwise
+     * @param includeStorage <code>true</code> to also lookup the distributed session storage, <code>false</code>, otherwise
+     * @return
+     */
+    public static SessionControl getAnyActiveSessionForUser(final int userId, final int contextId, final boolean includeLongTerm, 
+        final boolean includeStorage) {
         SessionControl retval = sessionDataRef.get().getAnyActiveSessionForUser(userId, contextId, includeLongTerm);
-        if (retval == null) {
+        if (retval == null && includeStorage) {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
@@ -634,9 +644,12 @@ public final class SessionHandler {
                 LOG.error("Unable to look-up session cache", e);
             }
         }
+        /*-
+         * Ensure session is available in session storage
         if (null != sessionControl) {
             storeSession(sessionControl.getSession(), getServiceRegistry().getService(SessionStorageService.class), true);
         }
+        */
         return sessionControl;
     }
 

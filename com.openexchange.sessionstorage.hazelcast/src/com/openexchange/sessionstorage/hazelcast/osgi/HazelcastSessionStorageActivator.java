@@ -76,6 +76,11 @@ import com.openexchange.threadpool.ThreadPoolService;
 public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
     private static Log LOG = LogFactory.getLog(HazelcastSessionStorageActivator.class);
+    
+    /**
+     * Name of the distributed sessions map. Should be changed when the serialized session object changes to avoid serialization issues.
+     */
+    private static final String MAP_NAME = "sessions";
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -91,10 +96,9 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         if (enabled) {
             final MapConfig mapConfig = new MapConfig();
             {
-                final String mapName = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.name");
                 final int backupCount = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.backupcount", 1);
                 final int asyncBackup = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.asyncbackup", 0);
-                mapConfig.setName(mapName);
+                mapConfig.setName(MAP_NAME);
                 mapConfig.setBackupCount(backupCount);
                 mapConfig.setAsyncBackupCount(asyncBackup);
                 mapConfig.setTimeToLiveSeconds(0);

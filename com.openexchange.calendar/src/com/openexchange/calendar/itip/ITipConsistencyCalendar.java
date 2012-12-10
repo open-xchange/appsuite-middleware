@@ -150,13 +150,13 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 
 		@Override
         public void beforeUpdate(final CalendarDataObject cdao) {
-			// TODO Auto-generated method stub
+			// Nothing to do
 
 		}
 
 		@Override
         public void afterUpdate(final CalendarDataObject cdao) {
-			// TODO Auto-generated method stub
+			// Nothing to do
 
 		}
 

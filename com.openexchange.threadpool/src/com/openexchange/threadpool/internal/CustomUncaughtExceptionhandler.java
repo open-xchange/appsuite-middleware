@@ -74,7 +74,7 @@ final class CustomUncaughtExceptionhandler implements UncaughtExceptionHandler {
          * Gather thread information
          */
         final Map<Thread, StackTraceElement[]> stackMap = Thread.getAllStackTraces();
-        final StringBuilder sb = new StringBuilder(256);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
         for (final Thread thread : stackMap.keySet()) {
             sb.append(thread.getName()).append(" ID:").append(thread.getId());
             sb.append(" State:").append(thread.getState()).append(" Prio:").append(thread.getPriority()).append('\n');
@@ -84,7 +84,7 @@ final class CustomUncaughtExceptionhandler implements UncaughtExceptionHandler {
         LOG.fatal(sb.toString());
     }
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb) {
         if (null == trace) {
             sb.append("<missing stack trace>\n");
             return;

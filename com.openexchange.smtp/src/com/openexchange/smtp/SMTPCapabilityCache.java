@@ -219,7 +219,7 @@ public final class SMTPCapabilityCache {
                 }
                 final InputStream in = s.getInputStream();
                 final OutputStream out = s.getOutputStream();
-                final StringBuilder sb = new StringBuilder(512);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
                 /*
                  * Read IMAP server greeting on connect
                  */
@@ -238,8 +238,10 @@ public final class SMTPCapabilityCache {
                         sb.append(c);
                     }
                 }
-                /*final String greeting = */sb.toString();
-                sb.setLength(0);
+                /*final String greeting = sb.toString();*/
+                if (sb.length() > 0) {
+                    sb.reinitTo(0);
+                }
                 if (skipLF) {
                     /*
                      * Consume final LF

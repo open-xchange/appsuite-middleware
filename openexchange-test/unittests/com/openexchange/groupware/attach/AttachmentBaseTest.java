@@ -640,26 +640,26 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
         @Override
         public DBProvider getProvider() {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return null;
         }
 
 
         @Override
         public Context getContext() {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return null;
         }
 
         @Override
         public User getUser() {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return null;
         }
 
         @Override
         public Session getSession() {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return null;
         }
 

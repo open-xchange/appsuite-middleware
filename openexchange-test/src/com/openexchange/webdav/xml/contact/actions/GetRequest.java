@@ -71,7 +71,7 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
 
     @Override
     public RequestEntity getEntity() throws OXException, IOException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

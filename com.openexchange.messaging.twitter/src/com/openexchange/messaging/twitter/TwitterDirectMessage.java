@@ -218,7 +218,7 @@ public final class TwitterDirectMessage implements MessagingMessage {
 
     @Override
     public void writeTo(final OutputStream os) throws IOException, OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
     }
 
     @Override

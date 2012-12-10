@@ -86,25 +86,25 @@ public class SolrAttachmentSearchTermVisitorTest {
             
             @Override
             public boolean haveTranslatorForHandler(String handler) {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return false;
             }
             
             @Override
             public Map<String, String> getTranslatorMap() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return null;
             }
             
             @Override
             public String getTranslatorForHandler(String handler) {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return null;
             }
             
             @Override
             public Map<String, String> getRawMapping() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return null;
             }
             
@@ -115,7 +115,7 @@ public class SolrAttachmentSearchTermVisitorTest {
             
             @Override
             public Set<String> getKeys() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return null;
             }
             
@@ -129,7 +129,7 @@ public class SolrAttachmentSearchTermVisitorTest {
             
             @Override
             public Set<String> getHandlers() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return null;
             }
         };

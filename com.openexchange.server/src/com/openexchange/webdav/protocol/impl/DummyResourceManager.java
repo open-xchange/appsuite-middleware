@@ -160,13 +160,13 @@ public final class DummyResourceManager implements WebdavFactory {
 
 	@Override
     public void beginRequest() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 
 	}
 
 	@Override
     public void endRequest(final int status) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 
 	}
 

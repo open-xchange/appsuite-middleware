@@ -202,7 +202,7 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
     }
     
     private void checkJobInfo() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 }

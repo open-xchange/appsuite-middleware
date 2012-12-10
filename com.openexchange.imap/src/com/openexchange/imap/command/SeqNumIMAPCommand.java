@@ -102,7 +102,7 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
         sb.append("UID FETCH ");
         sb.append(args[argsIndex]);
         sb.append(" (UID)");

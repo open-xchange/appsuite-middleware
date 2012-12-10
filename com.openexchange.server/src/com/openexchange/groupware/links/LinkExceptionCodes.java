@@ -98,7 +98,7 @@ public enum LinkExceptionCodes implements OXExceptionCode {
     }
 
     public String getHelp() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

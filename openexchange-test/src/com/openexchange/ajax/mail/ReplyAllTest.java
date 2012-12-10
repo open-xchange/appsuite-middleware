@@ -89,7 +89,13 @@ public class ReplyAllTest extends AbstractReplyTest {
         return returnees;
     }
 
-    public void no_testShouldReplyToSenderAndAllRecipients() throws OXException, IOException, SAXException, JSONException, OXException {
+    public void testDummy() throws Exception {
+        // Disabled test below because sending mails do not cover an estimateable time frame
+        final String mail1 = new AJAXClient(User.User1).getValues().getSendAddress();
+        assertTrue(mail1.length() > 0);
+    }
+
+    public void no_testShouldReplyToSenderAndAllRecipients() throws OXException, IOException, SAXException, JSONException {
         final AJAXClient client1 = new AJAXClient(User.User1);
         final AJAXClient client2 = new AJAXClient(User.User2);
         {

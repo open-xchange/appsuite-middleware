@@ -19,55 +19,55 @@ public class ITipSession implements Session {
 
 	@Override
     public String getLocalIp() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
     public void setLocalIp(final String ip) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 
 	}
 
 	@Override
     public String getLoginName() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
     public boolean containsParameter(final String name) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return false;
 	}
 
 	@Override
     public Object getParameter(final String name) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
     public String getPassword() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
     public String getRandomToken() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
     public String getSecret() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
     public String getSessionID() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
@@ -78,55 +78,55 @@ public class ITipSession implements Session {
 
 	@Override
     public String getUserlogin() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
     public String getLogin() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
     public void setParameter(final String name, final Object value) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 
 	}
 
 	@Override
     public void removeRandomToken() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 
 	}
 
 	@Override
     public String getAuthId() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
     public String getHash() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
     public void setHash(final String hash) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 
 	}
 
 	@Override
     public String getClient() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
     public void setClient(final String client) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 
 	}
 

@@ -95,7 +95,7 @@ public class LinkedInSubscriptionsOAuthAccountDeleteListener implements OAuthAcc
      */
     @Override
     public void onBeforeOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 

@@ -47,13 +47,11 @@
  *
  */
 
-package com.openexchange.apps.manifests.json.osgi;
+package com.openexchange.apps.manifests.json;
 
 import java.util.Arrays;
 import java.util.Collection;
-
 import org.json.JSONArray;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -61,28 +59,26 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ManifestActionFactory}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ManifestActionFactory implements AJAXActionServiceFactory {
 
-	private AJAXActionService all;
+    private final AJAXActionService all;
 
-	public ManifestActionFactory(ServiceLookup services,
-			JSONArray manifests) {
-		super();
-		all = new AllAction(services, manifests);
-	}
+    public ManifestActionFactory(ServiceLookup services, JSONArray manifests) {
+        super();
+        all = new AllAction(services, manifests);
+    }
 
-	@Override
-	public Collection<?> getSupportedServices() {
-		return Arrays.asList("all");
-	}
+    @Override
+    public Collection<?> getSupportedServices() {
+        return Arrays.asList("all");
+    }
 
-	@Override
-	public AJAXActionService createActionService(String action)
-			throws OXException {
-		return all;
-	}
+    @Override
+    public AJAXActionService createActionService(String action) throws OXException {
+        return all;
+    }
 
 }

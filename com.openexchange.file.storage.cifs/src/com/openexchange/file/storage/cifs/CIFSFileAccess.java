@@ -104,43 +104,43 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
 
     @Override
     public void startTransaction() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void commit() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void rollback() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void finish() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void setTransactional(final boolean transactional) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void setRequestTransactional(final boolean transactional) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void setCommitsTransaction(final boolean commits) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -540,13 +540,13 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
 
     @Override
     public void unlock(final String folderId, final String id) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void lock(final String folderId, final String id, final long diff) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
