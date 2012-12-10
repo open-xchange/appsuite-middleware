@@ -1433,6 +1433,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             boolean cached = false;
             List<ThreadSortNode> threadList = null;
             if (!body && imapConfig.getImapCapabilities().hasThreadReferences() && useImapThreaderIfSupported()) {
+                if (DEBUG) {
+                    LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages(): Using IMAP server's THREAD=REFERENCES threader.");
+                }
                 /*
                  * Parse THREAD response to a list structure and extract sequence numbers
                  */
@@ -1441,6 +1444,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 threadList = ThreadSortUtil.parseThreadResponse(threadResponse);
                 ThreadSortNode.applyFullName(fullName, threadList);
             } else if (useReferenceOnlyThreader()) {
+                if (DEBUG) {
+                    LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages(): Using built-in by-reference-only threader.");
+                }
                 final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), true);
                 final Future<ThreadableMapping> submittedTask = mergeWithSent ? getThreadableMapping(sentFolder, limit, fetchProfile) : null;
                 final List<Conversation> conversations = Conversations.conversationsFor(imapFolder, limit, fetchProfile);
@@ -1496,10 +1502,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 // Return list
                 return list;
             } else {
+                if (DEBUG) {
+                    LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages(): Using built-in LZW threader.");
+                }
                 /*
                  * Need to use in-application Threader
                  */
-                final boolean logIt = INFO; // TODO: Switch to DEBUG
+                final boolean logIt = DEBUG;
                 final long st = logIt ? System.currentTimeMillis() : 0L;
                 if (mergeWithSent) {
                     final Future<ThreadableResult> future;
