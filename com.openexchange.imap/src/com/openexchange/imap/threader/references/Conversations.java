@@ -341,7 +341,7 @@ public final class Conversations {
         while (iter.hasNext()) {
             final Conversation conversation = iter.next();
             if (i > lastProcessed) {
-                joinWith(conversation, iter);
+                foldInto(conversation, iter);
                 lastProcessed = i++;
                 iter = toFold.iterator();
                 i = 0;
@@ -352,7 +352,7 @@ public final class Conversations {
         return toFold;
     }
 
-    private static void joinWith(final Conversation conversation, final Iterator<Conversation> iter) {
+    private static void foldInto(final Conversation conversation, final Iterator<Conversation> iter) {
         while (iter.hasNext()) {
             final Conversation other = iter.next();
             if (conversation != other) {
