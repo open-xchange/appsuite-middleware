@@ -78,4 +78,20 @@ public final class StorageParametersUtility {
         return null != permissionsHandling && "inherit".equalsIgnoreCase(permissionsHandling.toString());
     }
 
+    /**
+     * Gets specified boolean parameter.
+     * 
+     * @param name The name
+     * @param params The storage parameters
+     * @return <code>true</code> if boolean parameter is present and set to <code>true</code>; otherwise <code>false</code>
+     */
+    public static boolean getBoolParameter(final String name, final StorageParameters params) {
+        final FolderServiceDecorator decorator = params.getDecorator();
+        if (null == decorator) {
+            return false;
+        }
+        final Object tmp = decorator.getProperty(name);
+        return null != tmp && ((tmp instanceof Boolean) ? ((Boolean) tmp).booleanValue() : "true".equalsIgnoreCase(tmp.toString()));
+    }
+
 }
