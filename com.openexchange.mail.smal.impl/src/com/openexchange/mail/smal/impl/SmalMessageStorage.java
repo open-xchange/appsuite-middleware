@@ -71,6 +71,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
+import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -100,7 +101,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
+public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure {
 
     private final IMailMessageStorage messageStorage;
 
@@ -122,6 +123,14 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     }
 
     @Override
+    public List<List<MailMessage>> getThreadSortedMessages(String folder, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] fields) throws OXException {
+        if (messageStorage instanceof ISimplifiedThreadStructure) {
+            return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(folder, includeSent, cache, indexRange, max, sortField, order, fields);
+        }
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+    }
+
+    @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
         final String[] newIds = messageStorage.appendMessages(destFolder, msgs);
         /*
@@ -138,8 +147,6 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
         return newIds;
     }
-
-    
 
     @Override
     public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
