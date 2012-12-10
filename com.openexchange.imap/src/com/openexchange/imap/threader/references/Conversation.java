@@ -117,7 +117,6 @@ public final class Conversation {
     public Conversation(final Collection<MailMessage> messages) {
         this();
         if (null != messages) {
-            final Set<MailMessageWrapper> thisMessages = this.messages;
             for (final MailMessage message : messages) {
                 addMessage(message);
             }
@@ -140,13 +139,13 @@ public final class Conversation {
     private void addWrapper(final MailMessageWrapper mmw) {
         if (messages.add(mmw)) {
             final String messageId = mmw.message.getMessageId();
-            if (!isEmpty(messageId)) {
+            if (null != messageId) {
                 messageIds.add(messageId);
             }
             final String[] sReferences = mmw.message.getReferences();
             if (null != sReferences) {
                 for (final String sReference : sReferences) {
-                    if (!isEmpty(sReference)) {
+                    if (null != sReference) {
                         references.add(sReference);
                     }
                 }
@@ -292,15 +291,4 @@ public final class Conversation {
         }
     } // End of class MailMessageWrapper
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
 }

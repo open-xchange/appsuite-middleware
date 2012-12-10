@@ -125,15 +125,26 @@ public final class Conversations {
         // Add 'In-Reply-To' to FetchProfile if absent
         {
             boolean found = false;
-            final String hdrInReplyTo = MessageHeaders.HDR_IN_REPLY_TO;
-            final String[] headerNames = fetchProfile.getHeaderNames();
-            for (int i = 0; !found && i < headerNames.length; i++) {
-                if (hdrInReplyTo.equalsIgnoreCase(headerNames[i])) {
+            final Item envelope = FetchProfile.Item.ENVELOPE;
+            final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
+            final Item[] items = fetchProfile.getItems();
+            for (int i = 0; !found && i < items.length; i++) {
+                final Item cur = items[i];
+                if (envelope == cur || envelopeOnly == cur) {
                     found = true;
                 }
             }
             if (!found) {
-                fetchProfile.add(hdrInReplyTo);
+                final String hdrInReplyTo = MessageHeaders.HDR_IN_REPLY_TO;
+                final String[] headerNames = fetchProfile.getHeaderNames();
+                for (int i = 0; !found && i < headerNames.length; i++) {
+                    if (hdrInReplyTo.equalsIgnoreCase(headerNames[i])) {
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    fetchProfile.add(hdrInReplyTo);
+                }
             }
         }
         // Add 'Message-Id' to FetchProfile if absent

@@ -1508,7 +1508,7 @@ public abstract class MailMessage extends MailPart {
      */
     public String[] getReferences() {
         final String references = getFirstHeader(HDR_REFERENCES);
-        if (isEmpty(references)) {
+        if (null == references) {
             return null;
         }
         return SPLIT.split(MimeMessageUtility.decodeMultiEncodedHeader(references));
