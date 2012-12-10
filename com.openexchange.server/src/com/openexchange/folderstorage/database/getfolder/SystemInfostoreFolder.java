@@ -89,14 +89,15 @@ public final class SystemInfostoreFolder {
      * Gets the database folder representing system infostore folder.
      *
      * @param fo The folder object fetched from database
+     * @param altNames TODO
      * @return The database folder representing system infostore folder
      */
-    public static DatabaseFolder getSystemInfostoreFolder(final FolderObject fo) {
+    public static DatabaseFolder getSystemInfostoreFolder(final FolderObject fo, boolean altNames) {
         /*
          * The system infostore folder
          */
         final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
-        retval.setName(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME);
+        retval.setName(altNames ? FolderStrings.SYSTEM_FILES_FOLDER_NAME : FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME);
         retval.setContentType(InfostoreContentType.getInstance());
         // Enforce getSubfolders() on storage
         retval.setSubfolderIDs(null);

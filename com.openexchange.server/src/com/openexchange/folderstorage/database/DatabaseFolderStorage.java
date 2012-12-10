@@ -828,7 +828,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                          * A non-virtual database folder
                          */
                         final FolderObject fo = getFolderObject(folderId, ctx, con);
-                        retval = DatabaseFolderConverter.convert(fo, user, userConfiguration, ctx, storageParameters.getSession(), con);
+                        final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+                        retval = DatabaseFolderConverter.convert(fo, user, userConfiguration, ctx, storageParameters.getSession(), altNames, con);
                     }
                 }
             } else {
@@ -926,10 +927,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 if (!map.isEmpty()) {
                     final Session session = storageParameters.getSession();
+                    final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
                     for (final FolderObject folderObject : getFolderObjects(map.keys(), ctx, con)) {
                         if (null != folderObject) {
                             final int index = map.get(folderObject.getObjectID());
-                            ret[index] = DatabaseFolderConverter.convert(folderObject, user, userConfiguration, ctx, session, con);
+                            ret[index] = DatabaseFolderConverter.convert(folderObject, user, userConfiguration, ctx, session, altNames, con);
                         }
                     }
                 }
