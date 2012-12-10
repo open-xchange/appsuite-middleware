@@ -148,7 +148,8 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     final Throwable trace = new Throwable();
                     trace.setStackTrace(entry.getStackTrace());
                     Props logProperties = LogProperties.optLogProperties(entry.getThread());
-
+                    logBuilder.append("Request\n");
+                    
                     // If we have additional log properties from the ThreadLocal add it to the logBuilder
                     if (logProperties != null) {
                         Map<String, Object> propertyMap = logProperties.getMap();
@@ -161,16 +162,25 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                                 sorted.put(propertyName, value.toString());
                             }
                         }
+                        logBuilder.append("with properties:\n");
                         // And add them to the logBuilder
                         for (Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
                             logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append('\n');
                         }
                     }
 
+                    String requestParameters = entry.getRequestParameters();
+                    if(!requestParameters.isEmpty()) {
+                        logBuilder
+                        .append("with parameters:\n")
+                        .append(requestParameters).append("\n");
+                    }
+                    
                     RequestWatcherServiceImpl.LOG.info(
-                        logBuilder.append("Request for url: ").append(entry.getRequestUrl()).append("\nwith parameters: ").append(
-                            entry.getRequestParameters()).append("\nwith thread: ").append(entry.getThreadInfo()).append("\nwith age: ").append(
-                            entry.getAge()).append(" ms").append("\nexceeds max. age of: ").append(requestMaxAge).append(" ms.").toString(),
+                        logBuilder
+                        .append("with age: ").append(entry.getAge()).append(" ms").append("\n")
+                        .append("exceeds max. age of: ").append(requestMaxAge).append(" ms.")
+                        .toString(),
                         trace);
                 }
             },
