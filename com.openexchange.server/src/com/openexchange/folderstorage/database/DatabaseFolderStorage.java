@@ -1265,8 +1265,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
+                final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
                 final List<String[]> subfolderIds =
-                    SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, con);
+                    SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, altNames, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {

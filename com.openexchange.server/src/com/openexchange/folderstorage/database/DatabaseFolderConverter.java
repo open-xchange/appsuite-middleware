@@ -131,7 +131,7 @@ public final class DatabaseFolderConverter {
             @Override
             public DatabaseFolder convert(final FolderObject fo, final boolean altNames) throws OXException {
                 final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
-                retval.setName(FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);
+                retval.setName(altNames ? FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);
                 return retval;
             }
         });
@@ -140,7 +140,7 @@ public final class DatabaseFolderConverter {
             @Override
             public DatabaseFolder convert(final FolderObject fo, final boolean altNames) throws OXException {
                 final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
-                retval.setName(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME);
+                retval.setName(altNames ? FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME : FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME);
                 return retval;
             }
         });

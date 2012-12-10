@@ -130,6 +130,10 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         identifiers.add(FolderStrings.VIRTUAL_LIST_CONTACT_FOLDER_NAME);
         identifiers.add(FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME);
         identifiers.add(FolderStrings.VIRTUAL_LIST_TASK_FOLDER_NAME);
+        identifiers.add(FolderStrings.SYSTEM_FILES_FOLDER_NAME);
+        identifiers.add(FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME);
+        identifiers.add(FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME);
+        identifiers.add(FolderStrings.VIRTUAL_LIST_FILES_FOLDER_NAME);
     }
 
     /**
