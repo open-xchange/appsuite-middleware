@@ -99,72 +99,11 @@ import com.openexchange.tools.session.ServerSession;
 
 public class Multiple extends SessionServlet {
 
-    private static final class CallableImpl implements Callable<Object> {
-
-        private final JsonDataResponse jsonDataResponse;
-        private final ServerSession session;
-        private final String module;
-        private final HttpServletRequest req;
-
-        protected CallableImpl(final JsonDataResponse jsonDataResponse, final ServerSession session, final String module, final HttpServletRequest req) {
-            super();
-            this.jsonDataResponse = jsonDataResponse;
-            this.session = session;
-            this.module = module;
-            this.req = req;
-        }
-
-        @Override
-        public Object call() throws Exception {
-            performActionElement(jsonDataResponse, module, session, req);
-            return null;
-        }
-    } // End of class
-
-    private static final class JsonDataResponse {
-
-        private final JSONObject dataObject;
-        private volatile JSONValue responseObject;
-
-        protected JsonDataResponse(final JSONObject dataObject) {
-            super();
-            this.dataObject = dataObject;
-        }
-        
-        /**
-         * Gets the data object
-         *
-         * @return The data object
-         */
-        public JSONObject getDataObject() {
-            return dataObject;
-        }
-        
-        /**
-         * Gets the response object
-         *
-         * @return The response object
-         */
-        public JSONValue getResponseObject() {
-            return responseObject;
-        }
-
-        /**
-         * Sets the response object
-         * 
-         * @param responseObject The response object to set
-         */
-        public void setResponseObject(final JSONValue responseObject) {
-            this.responseObject = responseObject;
-        }
-
-    } // End of class JsonDataResponse
-
     private static final long serialVersionUID = 3029074251138469122L;
 
     protected static final String MODULE = "module";
 
-    protected static final String MODULE_INFOSTORE = "infostore";
+    // protected static final String MODULE_INFOSTORE = "infostore";
 
     protected static final String MODULE_FOLDER = "folder";
 
@@ -307,7 +246,7 @@ public class Multiple extends SessionServlet {
         jDataResponse.setResponseObject(jWriter.getObject());
     }
 
-    protected static final AJAXState parseActionElement(final JsonDataResponse jDataResponse , final ServerSession session, final HttpServletRequest req, final AJAXState state) throws JSONException, OXException {
+    protected static final AJAXState parseActionElement(final JsonDataResponse jDataResponse , final ServerSession session, final HttpServletRequest req, final AJAXState state) throws OXException {
         final OXJSONWriter jWriter = new OXJSONWriter();
         final JSONObject jsonObj = jDataResponse.getDataObject();
         final AJAXState ajaxState = doAction(DataParser.checkString(jsonObj, MODULE), jsonObj.optString(PARAMETER_ACTION), jsonObj, session, req, jWriter, state);
@@ -545,5 +484,66 @@ public class Multiple extends SessionServlet {
         }
         return null;
     }
+
+    private static final class CallableImpl implements Callable<Object> {
+
+        private final JsonDataResponse jsonDataResponse;
+        private final ServerSession session;
+        private final String module;
+        private final HttpServletRequest req;
+
+        protected CallableImpl(final JsonDataResponse jsonDataResponse, final ServerSession session, final String module, final HttpServletRequest req) {
+            super();
+            this.jsonDataResponse = jsonDataResponse;
+            this.session = session;
+            this.module = module;
+            this.req = req;
+        }
+
+        @Override
+        public Object call() throws Exception {
+            performActionElement(jsonDataResponse, module, session, req);
+            return null;
+        }
+    } // End of class
+
+    private static final class JsonDataResponse {
+
+        private final JSONObject dataObject;
+        private volatile JSONValue responseObject;
+
+        protected JsonDataResponse(final JSONObject dataObject) {
+            super();
+            this.dataObject = dataObject;
+        }
+        
+        /**
+         * Gets the data object
+         *
+         * @return The data object
+         */
+        public JSONObject getDataObject() {
+            return dataObject;
+        }
+        
+        /**
+         * Gets the response object
+         *
+         * @return The response object
+         */
+        public JSONValue getResponseObject() {
+            return responseObject;
+        }
+
+        /**
+         * Sets the response object
+         * 
+         * @param responseObject The response object to set
+         */
+        public void setResponseObject(final JSONValue responseObject) {
+            this.responseObject = responseObject;
+        }
+
+    } // End of class JsonDataResponse
 
 }
