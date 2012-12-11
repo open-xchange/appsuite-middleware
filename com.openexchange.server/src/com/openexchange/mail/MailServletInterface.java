@@ -109,6 +109,9 @@ public abstract class MailServletInterface {
         return new MailServletInterfaceImpl(session);
     }
 
+    /**
+     * Mail monitor
+     */
     public static final MailInterfaceMonitor mailInterfaceMonitor = new MailInterfaceMonitor();
 
     /**

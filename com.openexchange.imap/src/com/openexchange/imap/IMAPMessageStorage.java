@@ -207,8 +207,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private static final boolean INFO = LOG.isInfoEnabled();
-
     private static final int READ_ONLY = Folder.READ_ONLY;
 
     private static final int READ_WRITE = Folder.READ_WRITE;
