@@ -155,10 +155,10 @@ public class Multiple extends SessionServlet {
                 int concurrentTasksCount = 0;
                 // Build-up mapping & schedule for serial or concurrent execution
                 final ConcurrentTIntObjectHashMap<JsonDataResponse> mapping = new ConcurrentTIntObjectHashMap<JsonDataResponse>(length);
-                for (int a = 0; a < length; a++) {
-                    final JSONObject dataObject = dataArray.getJSONObject(a);
+                for (int pos = 0; pos < length; pos++) {
+                    final JSONObject dataObject = dataArray.getJSONObject(pos);
                     final JsonDataResponse jsonDataResponse = new JsonDataResponse(dataObject);
-                    mapping.put(a, jsonDataResponse);
+                    mapping.put(pos, jsonDataResponse);
                     if (!dataObject.hasAndNotNull(MODULE)) {
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(MODULE);
                     }
@@ -198,8 +198,8 @@ public class Multiple extends SessionServlet {
                 /*
                  * Add single responses to JSON array
                  */
-                for (int a = 0; a < length; a++) {
-                    respArr.put(mapping.get(a).getResponseObject());
+                for (int pos = 0; pos < length; pos++) {
+                    respArr.put(mapping.get(pos).getResponseObject());
                 }
             } catch (final JSONException e) {
                 log(RESPONSE_ERROR, e);
