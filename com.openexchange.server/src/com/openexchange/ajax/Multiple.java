@@ -181,20 +181,10 @@ public class Multiple extends SessionServlet {
 
 
     protected static final AJAXState parseActionElement(final JSONArray respArr, final JSONObject jsonObj , final ServerSession session, final HttpServletRequest req, final AJAXState state) throws JSONException, OXException {
-        final String module;
-        final String action;
-
-        if (jsonObj.has(MODULE)) {
-            module = DataParser.checkString(jsonObj, MODULE);
-        } else {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MODULE);
+        if (!jsonObj.has(MODULE)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MODULE);
         }
-
-        action = jsonObj.optString(PARAMETER_ACTION);
-
-        final OXJSONWriter jWriter = new OXJSONWriter(respArr);
-
-        return doAction(module, action, jsonObj, session, req, jWriter, state);
+        return doAction(DataParser.checkString(jsonObj, MODULE), jsonObj.optString(PARAMETER_ACTION), jsonObj, session, req, new OXJSONWriter(respArr), state);
     }
 
     private static final void writeMailRequest(final HttpServletRequest req) throws JSONException {
