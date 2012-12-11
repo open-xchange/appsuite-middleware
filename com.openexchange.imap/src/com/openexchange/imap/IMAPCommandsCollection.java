@@ -3263,7 +3263,7 @@ public final class IMAPCommandsCollection {
      * @param command The command
      * @return The responses
      */
-    protected static Response[] performCommand(final IMAPProtocol p, final String command) {
+    public static Response[] performCommand(final IMAPProtocol p, final String command) {
         return performCommand(p, command, null);
     }
 
@@ -3275,7 +3275,7 @@ public final class IMAPCommandsCollection {
      * @param args The argument
      * @return The responses
      */
-    protected static Response[] performCommand(final IMAPProtocol p, final String command, final Argument args) {
+    public static Response[] performCommand(final IMAPProtocol p, final String command, final Argument args) {
         final long start = System.currentTimeMillis();
         final Response[] responses = p.command(command, args);
         final long time = System.currentTimeMillis() - start;
