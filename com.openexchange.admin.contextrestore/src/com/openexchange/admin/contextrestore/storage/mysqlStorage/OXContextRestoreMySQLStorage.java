@@ -52,6 +52,9 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
         boolean doRollback = false;
         try {
             File file = new File("/tmp/" + poolidandschema.getSchema() + ".txt");
+            if (!file.exists()) {
+                file = new File(poolidandschema.getFileName());
+            }
             BufferedReader reader = new BufferedReader(new FileReader(file));
             try {
                 connection = Database.get(poolId, poolidandschema.getSchema());
@@ -82,11 +85,10 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                 close(reader);
             }
             connection.commit();
-            connection.setAutoCommit(true);
             connection2.commit();
-            connection2.setAutoCommit(true);
             doRollback = false;
 
+            connection2.setAutoCommit(true);
             prepareStatement3 = connection2.prepareStatement("SELECT `filestore_name`, `uri` FROM `context` INNER JOIN `filestore` ON context.filestore_id = filestore.id WHERE cid=?");
             prepareStatement3.setInt(1, ctx.getId().intValue());
             final ResultSet executeQuery = prepareStatement3.executeQuery();
@@ -104,7 +106,12 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             }
             closeSQLStuff(prepareStatement, prepareStatement2, prepareStatement3);
             if (null != connection) {
+                autocommit(connection);
                 Database.back(poolId, connection);
+            }
+            if (null != connection2) {
+                autocommit(connection2);
+                Database.back(poolId, connection2);
             }
         }
     }
@@ -240,6 +247,24 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
     private static void closeSQLStuff(final ResultSet result, final Statement stmt) {
         closeSQLStuff(result);
         closeSQLStuff(stmt);
+    }
+
+    /**
+     * Convenience method to set the auto-commit of a connection to <code>true</code>.
+     *
+     * @param con connection that should go into auto-commit mode.
+     */
+    private static void autocommit(final Connection con) {
+        if (null == con) {
+            return;
+        }
+        try {
+            if (!con.isClosed() && !con.getAutoCommit()) {
+                con.setAutoCommit(true);
+            }
+        } catch (final SQLException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     /**
