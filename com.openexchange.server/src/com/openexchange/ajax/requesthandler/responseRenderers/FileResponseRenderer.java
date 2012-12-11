@@ -54,7 +54,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
-import javax.activation.FileTypeMap;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,6 +68,7 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.servlet.http.Tools;
@@ -320,7 +320,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         String contentType = file.getContentType();
         if (null == contentType || !contentType.startsWith("image/")) {
             final String fileName = file.getName();
-            if (fileName == null || !(contentType = FileTypeMap.getDefaultFileTypeMap().getContentType(fileName)).startsWith("image/")) {
+            if (fileName == null || !(contentType = MimeType2ExtMap.getContentType(fileName)).startsWith("image/")) {
                 return false;
             }
         }
