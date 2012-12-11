@@ -142,6 +142,10 @@ public final class Conversation {
             if (null != messageId) {
                 messageIds.add(messageId);
             }
+            final String inReplyTo = mmw.message.getInReplyTo();
+            if (null != inReplyTo) {
+                references.add(inReplyTo);
+            }
             final String[] sReferences = mmw.message.getReferences();
             if (null != sReferences) {
                 for (final String sReference : sReferences) {
