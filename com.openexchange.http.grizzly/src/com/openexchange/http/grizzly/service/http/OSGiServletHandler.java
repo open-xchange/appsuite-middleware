@@ -292,7 +292,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
                 try {
                     filter.doFilter(request, response, this);
-                } catch(Throwable throwable) {
+                } catch (Throwable throwable) {
                     handleThrowable(throwable, request, response);
                 }
                 return;
@@ -312,21 +312,22 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         /**
          * Let the ExceptionUtils handle the Throwable for us and set a proper HttpStatus on the response.
+         * 
          * @param throwable The Throwable that needs to be handled.
          * @param request The request that couldn't be serviced because of throwable
          * @param response The associated Response
          */
         private void handleThrowable(Throwable throwable, ServletRequest request, ServletResponse response) {
             ExceptionUtils.handleThrowable(throwable);
-            
+
             StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
-            if(LogProperties.isEnabled()) {
+            if (LogProperties.isEnabled()) {
                 logBuilder.append(LogProperties.getAndPrettyPrint());
             }
-            
-            if(request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
+
+            if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
                 HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-                HttpServletResponse httpServletResponse= (HttpServletResponse) response;
+                HttpServletResponse httpServletResponse = (HttpServletResponse) response;
                 appendHttpServletRequestInfo(logBuilder, httpServletRequest);
                 // 500 - Internal Server Error
                 httpServletResponse.setStatus(500);
@@ -338,8 +339,36 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         // ------------------------------------------------------- Protected Methods
 
+        protected void addFilter(final Filter filter) {
+            if (filter == null) {
+                throw new IllegalArgumentException("Obligatory parameter is null: filter");
+            }
+            synchronized (lock) {
+                // Don't ad Filters twice
+                boolean isAlreadyAdded = false;
+                for (Filter currentFilter : filters) {
+                    if (currentFilter != null && currentFilter.getClass().equals(filter.getClass())) {
+                        isAlreadyAdded = true;
+                        LOG.error("Tried to add Filter " + filter + " multiple times.");
+                        break;
+                    }
+                }
+                if (!isAlreadyAdded) {
+                    if (n == filters.length) {
+                        Filter[] newFilters = new Filter[n + 4];
+                        System.arraycopy(filters, 0, newFilters, 0, n);
+                        filters = newFilters;
+                    }
+
+                    filters[n++] = filter;
+                }
+            }
+        }
+
+        // --------------------------------------------------------- Private Methods
         /**
          * Add ServletName and Parameters of the request to the log string allocator.
+         * 
          * @param logBuilder The existing StringBuilder user for building the log message
          * @param request The Request that couldn't be executed successfully.
          */
@@ -347,17 +376,16 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
             logBuilder.append("servlet name=''");
             logBuilder.append(servlet.getServletConfig().getServletName());
             logBuilder.append("servlet parameters=''");
-            @SuppressWarnings("unchecked")
-            Enumeration<String> parameterNames = request.getParameterNames();
-            boolean firstParam=true;
-            while(parameterNames.hasMoreElements()) {
-                if(firstParam) {
+            @SuppressWarnings("unchecked") Enumeration<String> parameterNames = request.getParameterNames();
+            boolean firstParam = true;
+            while (parameterNames.hasMoreElements()) {
+                if (firstParam) {
                     String name = parameterNames.nextElement();
                     String value = request.getParameter(name);
                     logBuilder.append(name);
                     logBuilder.append("=");
                     logBuilder.append(value);
-                    firstParam=false;
+                    firstParam = false;
                 } else {
                     logBuilder.append("&");
                     String name = parameterNames.nextElement();
@@ -371,6 +399,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         /**
          * Add Uri and QueryString of the httpServletRequest to the log string allocator
+         * 
          * @param logBuilder The existing StringBuilder user for building the log message
          * @param httpServletRequest The HttpServletRequest that couldn't be executed successfully
          */
@@ -381,29 +410,6 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
             logBuilder.append(httpServletRequest.getQueryString());
             logBuilder.append("''");
         }
-
-        protected void addFilter(final Filter filter) {
-            boolean isAlreadyAdded = false;
-            for (Filter currentFilter : filters) {
-                if (currentFilter!=null && currentFilter.equals(filter)) {
-                    isAlreadyAdded = true;
-                    break;
-                }
-            }
-            if (!isAlreadyAdded) {
-                synchronized (lock) {
-                    if (n == filters.length) {
-                        Filter[] newFilters = new Filter[n + 4];
-                        System.arraycopy(filters, 0, newFilters, 0, n);
-                        filters = newFilters;
-                    }
-
-                    filters[n++] = filter;
-                }
-            }
-        }
-
-        // --------------------------------------------------------- Private Methods
 
         private void requestDestroyed(ServletRequestEvent event) {
             // TODO don't create the event unless necessary
