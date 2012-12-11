@@ -117,10 +117,20 @@ public class Multiple extends SessionServlet {
 
     private static volatile Dispatcher dispatcher;
 
+    /**
+     * Sets the dispatcher instance.
+     * 
+     * @param dispatcher The dispatcher to set
+     */
     public static void setDispatcher(final Dispatcher dispatcher) {
         Multiple.dispatcher = dispatcher;
     }
 
+    /**
+     * Gets the dispatcher instance
+     * 
+     * @return The dispatcher instance or <code>null</code>
+     */
     private static Dispatcher getDispatcher() {
         return dispatcher;
     }
