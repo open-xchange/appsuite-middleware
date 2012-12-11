@@ -53,10 +53,10 @@ import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
@@ -160,8 +160,8 @@ public class Multiple extends SessionServlet {
                     throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
                 }
                 // Distinguish between serially and concurrently executable requests
-                final Queue<JsonDataResponse> serialTasks = new LinkedList<Multiple.JsonDataResponse>();
-                final ThreadPoolCompletionService<Object> concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
+                List<JsonDataResponse> serialTasks = null;
+                ThreadPoolCompletionService<Object> concurrentTasks = null;
                 int concurrentTasksCount = 0;
                 // Build-up mapping & schedule for serial or concurrent execution
                 final ConcurrentTIntObjectHashMap<JsonDataResponse> mapping = new ConcurrentTIntObjectHashMap<JsonDataResponse>(length);
@@ -175,31 +175,42 @@ public class Multiple extends SessionServlet {
                     // Check if module indicates serial or concurrent execution
                     final String module = dataObject.getString(MODULE);
                     if (MODULE_MAIL.equals(module)) {
-                        serialTasks.offer(jsonDataResponse);
+                        if (null == serialTasks) {
+                            serialTasks = new ArrayList<JsonDataResponse>(length);
+                        }
+                        serialTasks.add(jsonDataResponse);
                     } else {
+                        if (null == concurrentTasks) {
+                            concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
+                        }
                         concurrentTasks.submit(new CallableImpl(jsonDataResponse, session, module, req));
                         concurrentTasksCount++;
                     }
                 }
-                for (final JsonDataResponse jDataResponse : serialTasks) {
-                    state = parseActionElement(jDataResponse, session, req, state);
+                if (null != serialTasks) {
+                    // Execute serial tasks with current thread
+                    for (final JsonDataResponse jDataResponse : serialTasks) {
+                        state = parseActionElement(jDataResponse, session, req, state);
+                    }
                 }
-                // Await completion service
-                for (int i = 0; i < concurrentTasksCount; i++) {
-                    try {
-                        concurrentTasks.take().get();
-                    } catch (final InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                    } catch (final ExecutionException e) {
-                        final Throwable cause = e.getCause();
-                        if (cause instanceof JSONException) {
-                            throw (JSONException) cause;
+                if (null != concurrentTasks) {
+                    // Await completion service
+                    for (int i = 0; i < concurrentTasksCount; i++) {
+                        try {
+                            concurrentTasks.take().get();
+                        } catch (final InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                        } catch (final ExecutionException e) {
+                            final Throwable cause = e.getCause();
+                            if (cause instanceof JSONException) {
+                                throw (JSONException) cause;
+                            }
+                            if (cause instanceof OXException) {
+                                throw (OXException) cause;
+                            }
+                            ThreadPools.launderThrowable(e, RuntimeException.class);
                         }
-                        if (cause instanceof OXException) {
-                            throw (OXException) cause;
-                        }
-                        ThreadPools.launderThrowable(e, RuntimeException.class);
                     }
                 }
                 // Don't forget to write mail request
