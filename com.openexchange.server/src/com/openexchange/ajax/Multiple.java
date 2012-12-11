@@ -151,7 +151,7 @@ public class Multiple extends SessionServlet {
                 }
                 // Distinguish between serially and concurrently executable requests
                 final Queue<JsonDataResponse> serialTasks = new LinkedList<Multiple.JsonDataResponse>();
-                final ThreadPoolCompletionService<Object> concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool());
+                final ThreadPoolCompletionService<Object> concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
                 int concurrentTasksCount = 0;
                 // Build-up mapping & schedule for serial or concurrent execution
                 final ConcurrentTIntObjectHashMap<JsonDataResponse> mapping = new ConcurrentTIntObjectHashMap<JsonDataResponse>(length);
