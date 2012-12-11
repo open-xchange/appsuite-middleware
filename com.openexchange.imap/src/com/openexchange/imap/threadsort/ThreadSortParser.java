@@ -89,14 +89,14 @@ final class ThreadSortParser {
     private void parse(final String threadList, final List<ThreadSortNode> recthreads) throws OXException {
         final boolean debug = DEBUG;
         if (debug) {
-            LOG.debug(new StringBuilder("Start parse: ").append(threadList).toString());
+            LOG.debug(new com.openexchange.java.StringAllocator("Start parse: ").append(threadList).toString());
         }
         final int length = threadList.length();
         if (threadList.charAt(0) == '{') {
             // Now in a thread the thread starts normally with a number.
             final MessageInfo message = getMessageID(threadList);
             if (debug) {
-                LOG.debug(new StringBuilder("Found message: ").append(message).toString());
+                LOG.debug(new com.openexchange.java.StringAllocator("Found message: ").append(message).toString());
             }
             final ThreadSortNode actual = new ThreadSortNode(message, -1L);
             recthreads.add(actual);
@@ -122,14 +122,14 @@ final class ThreadSortParser {
             int pos = 0;
             do {
                 if (debug) {
-                    LOG.debug(new StringBuilder("Position: ").append(pos).toString());
+                    LOG.debug(new com.openexchange.java.StringAllocator("Position: ").append(pos).toString());
                 }
                 final int closingBracket = findMatchingBracket(threadList.substring(pos));
                 if (closingBracket == -1) {
                     throw IMAPException.create(IMAPException.Code.THREAD_SORT_PARSING_ERROR, "Closing parenthesis not found.");
                 }
                 if (debug) {
-                    LOG.debug(new StringBuilder("Closing bracket: ").append((pos + closingBracket)).toString());
+                    LOG.debug(new com.openexchange.java.StringAllocator("Closing bracket: ").append((pos + closingBracket)).toString());
                 }
                 final String subList = threadList.substring(pos + 1, pos + closingBracket);
                 if (subList.charAt(0) == '(') {
@@ -149,7 +149,7 @@ final class ThreadSortParser {
                 pos += closingBracket + 1;
             } while (pos < length);
             if (debug) {
-                LOG.debug(new StringBuilder("List: ").append(recthreads).toString());
+                LOG.debug(new com.openexchange.java.StringAllocator("List: ").append(recthreads).toString());
             }
         } else {
             throw IMAPException.create(IMAPException.Code.THREAD_SORT_PARSING_ERROR, "Found unexpected character: " + threadList.charAt(0));

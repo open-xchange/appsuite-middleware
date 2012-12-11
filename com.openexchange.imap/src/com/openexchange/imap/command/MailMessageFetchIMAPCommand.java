@@ -602,7 +602,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 h = new InternetHeaders();
                 if (null == headerStream) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug(new StringBuilder(32).append("Cannot retrieve headers from message #").append(msg.getSeqnum()).append(
+                        logger.debug(new com.openexchange.java.StringAllocator(32).append("Cannot retrieve headers from message #").append(msg.getSeqnum()).append(
                             " in folder ").append(msg.getFolder()).toString());
                     }
                 } else {

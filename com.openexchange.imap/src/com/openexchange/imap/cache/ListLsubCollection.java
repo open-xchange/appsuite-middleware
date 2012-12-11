@@ -217,7 +217,7 @@ final class ListLsubCollection {
         deprecated.set(true);
         stamp = 0;
         if (DEBUG) {
-            final StringBuilder builder = new StringBuilder("Cleared LIST/LSUB cache.\n");
+            final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator("Cleared LIST/LSUB cache.\n");
             appendStackTrace(new Throwable().getStackTrace(), builder);
             LOG.debug(builder.toString());
         }
@@ -2055,7 +2055,7 @@ final class ListLsubCollection {
 
     } // End of class ListLsubEntryImpl
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb) {
         if (null == trace) {
             sb.append("<missing stack trace>\n");
             return;

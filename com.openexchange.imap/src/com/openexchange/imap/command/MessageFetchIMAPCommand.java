@@ -256,7 +256,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             if (0 == length) {
                 returnDefaultValue = true;
             } else {
-                args = isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
+                args = isSequential ? new String[] { new com.openexchange.java.StringAllocator(32).append(seqNums[0]).append(':').append(
                     seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
                     seqNums,
                     keepOrder,
@@ -274,7 +274,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 if (0 == length) {
                     returnDefaultValue = true;
                 } else {
-                    args = isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
+                    args = isSequential ? new String[] { new com.openexchange.java.StringAllocator(32).append(seqNums[0]).append(':').append(
                         seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
                         seqNums,
                         true,
@@ -288,7 +288,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 if (0 == length) {
                     returnDefaultValue = true;
                 } else {
-                    args = isSequential ? new String[] { new StringBuilder(32).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
+                    args = isSequential ? new String[] { new com.openexchange.java.StringAllocator(32).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
                         uids,
                         false,
                         LENGTH_WITH_UID + command.length());
@@ -302,7 +302,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             if (0 == length) {
                 returnDefaultValue = true;
             } else {
-                args = isSequential ? new String[] { new StringBuilder(64).append(msgs[0].getMessageNumber()).append(':').append(
+                args = isSequential ? new String[] { new com.openexchange.java.StringAllocator(64).append(msgs[0].getMessageNumber()).append(':').append(
                     msgs[msgs.length - 1].getMessageNumber()).toString() } : IMAPNumArgSplitter.splitMessageArg(
                     msgs,
                     keepOrder,
@@ -310,7 +310,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 seqNumFetcher = keepOrder ? new MsgSeqNumFetcher(msgs) : null;
             }
         } else {
-            throw new MessagingException(new StringBuilder("Invalid array type! ").append(arr.getClass().getName()).toString());
+            throw new MessagingException(new com.openexchange.java.StringAllocator("Invalid array type! ").append(arr.getClass().getName()).toString());
         }
     }
 
@@ -491,14 +491,14 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
              * Discard corrupt message
              */
             final OXException imapExc = MimeMailException.handleMessagingException(e);
-            LOG.error(new StringBuilder(128).append("Message #").append(msg.getMessageNumber()).append(" discarded: ").append(
+            LOG.error(new com.openexchange.java.StringAllocator(128).append("Message #").append(msg.getMessageNumber()).append(" discarded: ").append(
                 imapExc.getMessage()).toString(), imapExc);
             error = true;
         } catch (final OXException e) {
             /*
              * Discard corrupt message
              */
-            LOG.error(new StringBuilder(128).append("Message #").append(msg.getMessageNumber()).append(" discarded: ").append(
+            LOG.error(new com.openexchange.java.StringAllocator(128).append("Message #").append(msg.getMessageNumber()).append(" discarded: ").append(
                 e.getMessage()).toString(), e);
             error = true;
         }
@@ -663,7 +663,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 h = new InternetHeaders();
                 if (null == headerStream) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug(new StringBuilder(32).append("Cannot retrieve headers from message #").append(msg.getMessageNumber()).append(
+                        logger.debug(new com.openexchange.java.StringAllocator(32).append("Cannot retrieve headers from message #").append(msg.getMessageNumber()).append(
                             " in folder ").append(msg.getFullname()).toString());
                     }
                 } else {
@@ -788,7 +788,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             }
             if (null == msgStream) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn(new StringBuilder(32).append("Cannot retrieve body from message #").append(msg.getMessageNumber()).append(
+                    logger.warn(new com.openexchange.java.StringAllocator(32).append("Cannot retrieve body from message #").append(msg.getMessageNumber()).append(
                         " in folder ").append(msg.getFullname()).toString());
                 }
             } else {
