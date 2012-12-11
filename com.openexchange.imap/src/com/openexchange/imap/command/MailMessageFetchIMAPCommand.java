@@ -823,8 +823,8 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                     }
                 }
             }
-            msg.addHeader("In-Reply-To", env.inReplyTo);
-            msg.addHeader("Message-Id", env.messageId);
+            msg.setHeader("In-Reply-To", env.inReplyTo);
+            msg.setHeader("Message-Id", env.messageId);
             msg.setSubject(MimeMessageUtility.decodeEnvelopeSubject(env.subject));
             msg.setSentDate(env.date);
         }

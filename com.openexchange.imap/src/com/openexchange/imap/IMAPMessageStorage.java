@@ -95,7 +95,6 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.StoreClosedException;
-import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParameterList;
@@ -275,6 +274,23 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
                     b = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.imap.useReferenceOnlyThreader", true));
                     useReferenceOnlyThreader = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
+    private static volatile Boolean byEnvelope;
+    /** <b>Only</b> applies to: getThreadSortedMessages(...) in ISimplifiedThreadStructure. Default is <code>true</code> */
+    static boolean byEnvelope() {
+        Boolean b = byEnvelope;
+        if (null == b) {
+            synchronized (IMAPMessageStorage.class) {
+                b = byEnvelope;
+                if (null == b) {
+                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    b = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.imap.useReferenceOnlyThreaderByEnvelope", true));
+                    byEnvelope = b;
                 }
             }
         }
@@ -1448,8 +1464,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages(): Using built-in by-reference-only threader.");
                 }
                 final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), true);
-                final Future<ThreadableMapping> submittedTask = mergeWithSent ? getThreadableMapping(sentFolder, limit, fetchProfile) : null;
-                final List<Conversation> conversations = Conversations.conversationsFor(imapFolder, limit, fetchProfile);
+                final boolean byEnvelope = byEnvelope();
+                final Future<ThreadableMapping> submittedTask = mergeWithSent ? getThreadableMapping(sentFolder, limit, fetchProfile, byEnvelope) : null;
+                final List<Conversation> conversations = Conversations.conversationsFor(imapFolder, limit, fetchProfile, byEnvelope);
                 Conversations.fold(conversations);
                 // Comparator
                 final MailMessageComparator threadComparator = COMPARATOR_DESC;
@@ -1730,7 +1747,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         } else {
             if (mergeWithSent && !merged) {
-                submittedTask = getThreadableMapping(sentFolder, limit, fetchProfile);
+                submittedTask = getThreadableMapping(sentFolder, limit, fetchProfile, byEnvelope());
             }
             final TIntList seqNums = ThreadSortUtil.extractSeqNumsAsList(threadList);
             final TLongObjectMap<MailMessage> messages =
@@ -1811,61 +1828,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             Integer.valueOf(messageCount));
     }
 
-    private static Future<ThreadableMapping> getThreadableMapping(final IMAPFolder sentFolder, final int limit, final FetchProfile fetchProfile) {
-        // Add 'References' to FetchProfile if absent
-        {
-            boolean found = false;
-            final String hdrReferences = MessageHeaders.HDR_REFERENCES;
-            final String[] headerNames = fetchProfile.getHeaderNames();
-            for (int i = 0; !found && i < headerNames.length; i++) {
-                if (hdrReferences.equalsIgnoreCase(headerNames[i])) {
-                    found = true;
-                }
-            }
-            if (!found) {
-                fetchProfile.add(hdrReferences);
-            }
-        }
-        // Add 'Message-Id' to FetchProfile if absent
-        {
-            boolean found = false;
-            final Item envelope = FetchProfile.Item.ENVELOPE;
-            final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
-            final Item[] items = fetchProfile.getItems();
-            for (int i = 0; !found && i < items.length; i++) {
-                final Item cur = items[i];
-                if (envelope == cur || envelopeOnly == cur) {
-                    found = true;
-                }
-            }
-            if (!found) {
-                final String hdrMessageId = MessageHeaders.HDR_MESSAGE_ID;
-                final String[] headerNames = fetchProfile.getHeaderNames();
-                for (int i = 0; !found && i < headerNames.length; i++) {
-                    if (hdrMessageId.equalsIgnoreCase(headerNames[i])) {
-                        found = true;
-                    }
-                }
-                if (!found) {
-                    fetchProfile.add(envelopeOnly);
-                }
-            }
-        }
-        // Add UID item to FetchProfile if absent
-        {
-            boolean found = false;
-            final Item uid = UIDFolder.FetchProfileItem.UID;
-            final Item[] items = fetchProfile.getItems();
-            for (int i = 0; !found && i < items.length; i++) {
-                final Item cur = items[i];
-                if (uid == cur) {
-                    found = true;
-                }
-            }
-            if (!found) {
-                fetchProfile.add(uid);
-            }
-        }
+    private static Future<ThreadableMapping> getThreadableMapping(final IMAPFolder sentFolder, final int limit, final FetchProfile fetchProfile, final boolean byEnvelope) {
+        Conversations.checkFetchProfile(fetchProfile, byEnvelope);
         // Get ThreadableMapping
         final IMAPFolder sent = sentFolder;
         final Props props = LogProperties.optLogProperties(Thread.currentThread());
