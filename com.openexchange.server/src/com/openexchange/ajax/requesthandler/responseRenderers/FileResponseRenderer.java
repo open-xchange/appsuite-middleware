@@ -66,6 +66,7 @@ import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
+import com.openexchange.ajax.requesthandler.Utils;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.images.ImageTransformationService;
@@ -127,7 +128,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         IFileHolder file = (IFileHolder) result.getResultObject();
         final String fileContentType = file.getContentType();
         final String fileName = file.getName();
-
+        // Check certain parameters
         String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
         if (null == contentType) {
             contentType = fileContentType;
@@ -139,47 +140,47 @@ public class FileResponseRenderer implements ResponseRenderer {
         String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
         if (null == contentDisposition) {
             contentDisposition = file.getDisposition();
+        } else {
+            contentDisposition = Utils.encodeUrl(contentDisposition);
         }
-
+        // Write to Servlet's output stream
         InputStream documentData = null;
         try {
-            file = transformIfImage(request, file);
-            InputStream stream = file.getStream();
-            if (null == stream) {
-                // React with 404
+            file = transformIfImage(request, file, delivery);
+            if (null == file) {
+                // Quit with 404
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found.");
                 return;
             }
-            documentData = new BufferedInputStream(stream);
+            documentData = null == file.getStream() ? null : new BufferedInputStream(file.getStream());
+            if (null == documentData) {
+                // Quit with 404
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found.");
+                return;
+            }
             final String userAgent = req.getHeader("user-agent");
-            if (SAVE_AS_TYPE.equals(contentType) || (delivery != null && delivery.equalsIgnoreCase(DOWNLOAD))) {
-                if (null == contentDisposition) {
-                    final StringBuilder sb = new StringBuilder(32).append("attachment");
-                    DownloadUtility.appendFilenameParameter(fileName, SAVE_AS_TYPE, userAgent, sb);
-                    resp.setHeader("Content-Disposition", sb.toString());
-                } else {
-                    final StringBuilder sb = new StringBuilder(32).append(contentDisposition.trim());
-                    DownloadUtility.appendFilenameParameter(file.getName(), SAVE_AS_TYPE, userAgent, sb);
-                    resp.setHeader("Content-Disposition", sb.toString());
-                    //Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);
-                }
+            if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
+                final StringBuilder sb = new StringBuilder(32);
+                sb.append(isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
+                DownloadUtility.appendFilenameParameter(file.getName(), null, userAgent, sb);
+                resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(contentType);
             } else {
                 final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, fileContentType, contentDisposition, userAgent);
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
-                    if (contentDisposition == null) {
+                    if (isEmpty(contentDisposition)) {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     } else {
-                        if (contentDisposition.indexOf(';') < 0) {
+                        if (contentDisposition.indexOf(';') >= 0) {
+                            resp.setHeader("Content-Disposition", contentDisposition.trim());
+                        } else {
                             final String disposition = checkedDownload.getContentDisposition();
                             final int pos = disposition.indexOf(';');
                             if (pos >= 0) {
-                                resp.setHeader("Content-Disposition", contentDisposition + disposition.substring(pos));
+                                resp.setHeader("Content-Disposition", contentDisposition.trim() + disposition.substring(pos));
                             } else {
-                                resp.setHeader("Content-Disposition", contentDisposition);
+                                resp.setHeader("Content-Disposition", contentDisposition.trim());
                             }
-                        } else {
-                            resp.setHeader("Content-Disposition", contentDisposition);
                         }
                     }
                 }
@@ -222,9 +223,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 outputStream.write(buf, 0, read);
             }
             outputStream.flush();
-        } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final OXException e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {
             close(file);
@@ -232,7 +231,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
-    private IFileHolder transformIfImage(AJAXRequestData request, IFileHolder file) throws IOException, OXException {
+    private static final int SIZE_LIMIT = 1048576; // 1MB
+
+    private IFileHolder transformIfImage(AJAXRequestData request, IFileHolder file, String delivery) throws IOException, OXException {
         /*
          * check input
          */
@@ -242,9 +243,21 @@ public class FileResponseRenderer implements ResponseRenderer {
         /*
          * build transformations
          */
-        ImageTransformations transformations = scaler.transfom(file.getStream());
-        // rotate by default
-        if (false == request.isSet("rotate") || request.getParameter("rotate", boolean.class)) {
+        final InputStream stream = file.getStream();
+        if (null == stream) {
+            LOG.warn("(Possible) Image file misses stream data");
+            return file;
+        }
+        // mark stream if possible
+        final boolean markSupported = stream.markSupported();
+        if (markSupported) {
+            stream.mark(131072); // 128KB
+        }
+        // start transformations: scale, rotate, ...
+        ImageTransformations transformations = scaler.transfom(stream);
+        // rotate by default when not delivering as download
+        Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
+        if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
             transformations.rotate();
         }
         if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
@@ -260,8 +273,9 @@ public class FileResponseRenderer implements ResponseRenderer {
             ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
             transformations.scale(maxWidth, maxHeight, scaleType);
         }
-        // compress by default
-        if (false == request.isSet("compress") || request.getParameter("compress", boolean.class)) {
+        // compress by default when not delivering as download
+        Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
+        if ((null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery)) || (null != compress && compress.booleanValue())) {
             transformations.compress();
         }
         /*
@@ -269,12 +283,39 @@ public class FileResponseRenderer implements ResponseRenderer {
          */
         InputStream transformed = transformations.getInputStream(file.getContentType());
         if (null == transformed) {
-            LOG.warn("Got no resulting input stream from transformation, falling back to original input");
-            return file;
+            LOG.warn("Got no resulting input stream from transformation, trying to recover original input");
+            if (markSupported) {
+                try {
+                    stream.reset();
+                    return file;
+                } catch (Exception e) {
+                    LOG.warn("Error resetting input stream", e);
+                }
+            }
+            LOG.error("Unable to transform image from " + file);
+            return null;
         }
         return new FileHolder(transformed, -1, file.getContentType(), file.getName());
     }
-    
+
+    /**
+     * Checks specified <i>Content-Disposition</i> value against passed {@link IFileHolder file}.
+     * <p>
+     * E.g. <code>"inline"</code> is not allowed for <code>"text/html"</code> MIME type.
+     *
+     * @param contentDisposition The <i>Content-Disposition</i> value to cehck
+     * @param file The file
+     * @return The checked <i>Content-Disposition</i> value
+     */
+    private String checkedContentDisposition(final String contentDisposition, final IFileHolder file) {
+        final String ct = toLowerCase(file.getContentType()); // null-safe
+        if (null == ct || ct.startsWith("text/htm")) {
+            final int pos = contentDisposition.indexOf(';');
+            return pos > 0 ? "attachment" + contentDisposition.substring(pos) : "attachment";
+        }
+        return contentDisposition;
+    }
+
     private boolean isImage(final IFileHolder file) {
         String contentType = file.getContentType();
         if (null == contentType || !contentType.startsWith("image/")) {
@@ -284,6 +325,31 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
         }
         return true;
+    }
+
+    private String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
+
+    private boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
