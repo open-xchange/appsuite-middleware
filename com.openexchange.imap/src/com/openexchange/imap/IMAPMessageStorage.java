@@ -1460,11 +1460,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 threadList = ThreadSortUtil.parseThreadResponse(threadResponse);
                 ThreadSortNode.applyFullName(fullName, threadList);
             } else if (useReferenceOnlyThreader()) {
-                if (DEBUG) {
-                    LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages(): Using built-in by-reference-only threader.");
-                }
                 final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), true);
                 final boolean byEnvelope = byEnvelope();
+                if (DEBUG) {
+                    LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages(): Using built-in by-reference-only threader." + (byEnvelope ? " Preferring ENVELOPE." : ""));
+                }
                 final Future<ThreadableMapping> submittedTask = mergeWithSent ? getThreadableMapping(sentFolder, limit, fetchProfile, byEnvelope) : null;
                 final List<Conversation> conversations = Conversations.conversationsFor(imapFolder, limit, fetchProfile, byEnvelope);
                 Conversations.fold(conversations);
