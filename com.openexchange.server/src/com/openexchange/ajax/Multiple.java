@@ -221,14 +221,7 @@ public class Multiple extends SessionServlet {
                 log(RESPONSE_ERROR, e);
                 sendError(resp);
             } finally {
-                final MailServletInterface mi = (MailServletInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
-                if (mi != null) {
-                    try {
-                        mi.close(true);
-                    } catch (final Exception e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                }
+                close((MailServletInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE));
                 if (state != null) {
                     getDispatcher().end(state);
                 }
@@ -239,14 +232,6 @@ public class Multiple extends SessionServlet {
         final Writer writer = resp.getWriter();
         writeTo(respArr, writer);
         writer.flush();
-    }
-
-    private static void writeTo(final JSONArray respArr, final Writer writer) throws IOException {
-        try {
-            respArr.write(writer);
-        } catch (final JSONException e) {
-            throw new IOException(e.getMessage(), e);
-        }
     }
 
     protected static final void performActionElement(final JsonDataResponse jDataResponse, final String module, final ServerSession session, final HttpServletRequest req) {
@@ -500,6 +485,26 @@ public class Multiple extends SessionServlet {
             }
         }
         return null;
+    }
+
+    /** Writes JSON array to given writer. */
+    private static void writeTo(final JSONArray respArr, final Writer writer) throws IOException {
+        try {
+            respArr.write(writer);
+        } catch (final JSONException e) {
+            throw new IOException(e.getMessage(), e);
+        }
+    }
+
+    /** Close passed {@link MailServletInterface} instance. */
+    private static void close(final MailServletInterface mi) {
+        if (mi != null) {
+            try {
+                mi.close(true);
+            } catch (final Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
     }
 
     private static final class CallableImpl implements Callable<Object> {
