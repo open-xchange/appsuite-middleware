@@ -70,11 +70,12 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.LifecycleEvent;
-import com.hazelcast.core.LifecycleListener;
 import com.hazelcast.core.LifecycleEvent.LifecycleState;
+import com.hazelcast.core.LifecycleListener;
 import com.hazelcast.impl.GroupProperties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.HazelcastMBean;
+import com.openexchange.hazelcast.init.HazelcastInitializer.InitMode;
 import com.openexchange.hazelcast.osgi.HazelcastActivator;
 import com.openexchange.tools.strings.TimeSpanParser;
 
@@ -201,7 +202,10 @@ public final class HazelcastInitializer {
             /*
              * Create appropriate Hazelcast instance from configuration
              */
+            LOG.debug("Creating new hazelcast instance...");
+            long hzStart = System.currentTimeMillis(); 
             final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
+            LOG.info("New hazelcast instance successfully created in " + (System.currentTimeMillis() - hzStart) + "msec.\n");
             hazelcastInstance.getLifecycleService().addLifecycleListener(new LifecycleListener() {
 
                 @Override
