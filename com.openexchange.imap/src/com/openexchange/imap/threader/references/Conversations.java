@@ -295,9 +295,9 @@ public final class Conversations {
                                 final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, sep);
                                 {
                                     final String inReplyTo = message.getFirstHeader(sInReplyTo);
-                                    if (!isEmpty(inReplyTo)) {
+                                    if (null != inReplyTo) {
                                         final String references = message.getFirstHeader(sReferences);
-                                        if (isEmpty(references)) {
+                                        if (null == references) {
                                             message.setHeader(sReferences, inReplyTo);
                                         } else {
                                             if (references.indexOf(inReplyTo) < 0) {

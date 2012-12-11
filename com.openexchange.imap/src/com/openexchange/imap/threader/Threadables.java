@@ -79,6 +79,7 @@ import com.openexchange.imap.threader.ThreadableCache.ThreadableCacheEntry;
 import com.openexchange.imap.threader.nntp.ThreadableImpl;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -364,9 +365,25 @@ public final class Threadables {
                         final String fullName = imapFolder.getFullName();
                         final char sep = imapFolder.getSeparator();
                         final String sFetch = "FETCH";
+                        final String sInReplyTo = "In-Reply-To";
+                        final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
                             if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
-                                mails.add(handleFetchRespone((FetchResponse) r[j], fullName, sep));
+                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, sep);
+                                {
+                                    final String inReplyTo = message.getFirstHeader(sInReplyTo);
+                                    if (null != inReplyTo) {
+                                        final String references = message.getFirstHeader(sReferences);
+                                        if (null == references) {
+                                            message.setHeader(sReferences, inReplyTo);
+                                        } else {
+                                            if (references.indexOf(inReplyTo) < 0) {
+                                                message.setHeader(sReferences, new StringAllocator(references).append(' ').append(inReplyTo).toString());
+                                            }
+                                        }
+                                    }
+                                }
+                                mails.add(message);
                                 r[j] = null;
                             }
                         }

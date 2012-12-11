@@ -146,11 +146,13 @@ public final class Conversation {
             if (null != inReplyTo) {
                 references.add(inReplyTo);
             }
-            final String[] sReferences = mmw.message.getReferences();
-            if (null != sReferences) {
-                for (final String sReference : sReferences) {
-                    if (null != sReference) {
-                        references.add(sReference);
+            else {
+                final String[] sReferences = mmw.message.getReferences();
+                if (null != sReferences) {
+                    for (final String sReference : sReferences) {
+                        if (null != sReference) {
+                            references.add(sReference);
+                        }
                     }
                 }
             }

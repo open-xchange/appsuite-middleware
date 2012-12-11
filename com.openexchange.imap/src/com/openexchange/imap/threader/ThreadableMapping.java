@@ -173,16 +173,18 @@ public final class ThreadableMapping {
                     }
                 }
             }
-            final String[] sReferences = mail.getReferences();
-            if (null != sReferences) {
-                for (final String sReference : sReferences) {
-                    // Those mails that are referenced by specified mail
-                    final List<MailMessage> references = messageIdMap.get(sReference);
-                    if (null != references) {
-                        for (final MailMessage candidate : references) {
-                            if (processed.add(keyFor(candidate))) {
-                                thread.add(candidate);
-                                changed = true;
+            else {
+                final String[] sReferences = mail.getReferences();
+                if (null != sReferences) {
+                    for (final String sReference : sReferences) {
+                        // Those mails that are referenced by specified mail
+                        final List<MailMessage> references = messageIdMap.get(sReference);
+                        if (null != references) {
+                            for (final MailMessage candidate : references) {
+                                if (processed.add(keyFor(candidate))) {
+                                    thread.add(candidate);
+                                    changed = true;
+                                }
                             }
                         }
                     }
