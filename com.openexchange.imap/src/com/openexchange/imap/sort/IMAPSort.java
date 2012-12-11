@@ -66,6 +66,7 @@ import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.command.MessageFetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
@@ -337,8 +338,8 @@ public final class IMAPSort {
 
         @Override
         public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-            final String command = new StringBuilder("UID SORT (").append(descending ? "REVERSE " : "").append("ARRIVAL) UTF-8 ALL").toString();
-            final Response[] r = p.command(command, null);
+            final String command = new StringAllocator("UID SORT (").append(descending ? "REVERSE " : "").append("ARRIVAL) UTF-8 ALL").toString();
+            final Response[] r = IMAPCommandsCollection.performCommand(p, command);
             final Response response = r[r.length - 1];
             final TLongList list = new TLongArrayList(256);
             if (response.isOK()) {

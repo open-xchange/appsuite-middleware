@@ -80,7 +80,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
     /**
      * Name of the distributed sessions map. Should be changed when the serialized session object changes to avoid serialization issues.
      */
-    private static final String MAP_NAME = "sessions";
+    private static final String MAP_NAME = "sessions-0";
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -98,6 +98,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
             {
                 final int backupCount = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.backupcount", 1);
                 final int asyncBackup = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.asyncbackup", 0);
+                boolean readBackupData = configService.getBoolProperty("com.openexchange.sessionstorage.hazelcast.readbackupdata", true);
                 mapConfig.setName(MAP_NAME);
                 mapConfig.setBackupCount(backupCount);
                 mapConfig.setAsyncBackupCount(asyncBackup);
@@ -105,6 +106,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                 mapConfig.setMaxIdleSeconds(0);
                 mapConfig.setEvictionPolicy("NONE");
                 mapConfig.setEvictionPercentage(25);
+                mapConfig.setReadBackupData(readBackupData);
                 final MaxSizeConfig maxSizeConfig = new MaxSizeConfig();
                 maxSizeConfig.setSize(0);
                 mapConfig.setMaxSizeConfig(maxSizeConfig);
