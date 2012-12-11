@@ -150,8 +150,13 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         	mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
         }
         if (mailInterface == null) {
-            mailInterface = MailServletInterface.getInstance(mailRequest.getSession());
-            state.putProperty(PROPERTY_MAIL_IFACE, mailInterface);
+            final MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
+            mailInterface = state.putProperty(PROPERTY_MAIL_IFACE, newMailInterface);
+            if (null == mailInterface) {
+                mailInterface = newMailInterface;
+            } else {
+                newMailInterface.close(true);
+            }
         }
         return mailInterface;
     }
