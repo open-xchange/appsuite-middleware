@@ -257,14 +257,11 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     @Override
     public Session lookupSession(final String sessionId) throws OXException {
         try {
-            final IMap<String, HazelcastStoredSession> sessions = sessions(true);
-            if (null != sessionId && sessions.containsKey(sessionId)) {
-                final HazelcastStoredSession s = sessions.get(sessionId);
-                s.setLastAccess(System.currentTimeMillis());
-                sessions.replace(sessionId, s);
-                return s;
+            HazelcastStoredSession storedSession = sessions(true).get(sessionId);
+            if (null == storedSession) {
+                throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
             }
-            throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
+            return storedSession;
         } catch (final HazelcastException e) {
             throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(e, sessionId);
         } catch (final OXException e) {
@@ -317,8 +314,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     public void addSession(final Session session) throws OXException {
         if (null != session) {
             try {
-                final HazelcastStoredSession ss = new HazelcastStoredSession(session);
-                sessions(false).put(session.getSessionID(), ss);
+                sessions(false).set(session.getSessionID(), new HazelcastStoredSession(session), 0, TimeUnit.SECONDS);
             } catch (final HazelcastException e) {
                 throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
             } catch (final OXException e) {
@@ -400,30 +396,40 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public boolean hasForContext(final int contextId) {
+        SqlPredicate predicate = new SqlPredicate("contextId = " + contextId);
         try {
-            for (HazelcastStoredSession session : filter(new SqlPredicate("contextId = " + contextId), true)) {
+            /*
+             * try to lookup session from local keyset first
+             */
+            for (HazelcastStoredSession session : filterLocal(predicate, true)) {
                 if (null != session && session.getContextId() == contextId) {
                     return true;
                 }
             }
-        } catch (final HazelcastException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
+            /*
+             * also query cluster if not yet found 
+             */
+            for (HazelcastStoredSession session : filter(predicate, true)) {
+                if (null != session && session.getContextId() == contextId) {
+                    return true;
+                }
             }
+        } catch (HazelcastException e) {
+            LOG.debug(e.getMessage(), e);
         }
+        /*
+         * none found
+         */
         return false;
     }
 
     @Override
     public Session[] getUserSessions(final int userId, final int contextId) {
         try {
-            final List<HazelcastStoredSession> found = new ArrayList<HazelcastStoredSession>();
-            final long now = System.currentTimeMillis();
+            List<HazelcastStoredSession> found = new ArrayList<HazelcastStoredSession>();
             for (HazelcastStoredSession session : filter(new SqlPredicate("contextId = " + contextId + " AND userId = " + userId), true)) {
                 if (null != session && session.getUserId() == userId && session.getContextId() == contextId) {
-                    final HazelcastStoredSession ss = new HazelcastStoredSession(session);
-                    ss.setLastAccess(now);
-                    found.add(ss);
+                    found.add(session);
                 }
             }
             return found.toArray(new Session[found.size()]);
@@ -575,12 +581,14 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     @Override
     public void changePassword(final String sessionId, final String newPassword) throws OXException {
         try {
-            final Session s = lookupSession(sessionId);
-            final HazelcastStoredSession ss = new HazelcastStoredSession(s);
-            ss.setPassword(newPassword);
-            ss.setLastAccess(System.currentTimeMillis());
-            sessions(false).replace(sessionId, new HazelcastStoredSession(s), ss);
-        } catch (final HazelcastException e) {
+            IMap<String, HazelcastStoredSession> sessions = sessions(true);
+            HazelcastStoredSession storedSession = sessions.get(sessionId);
+            if (null == storedSession) {
+                throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
+            }
+            storedSession.setPassword(newPassword);
+            sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
+        } catch (HazelcastException e) {
             if (DEBUG) {
                 LOG.debug(e.getMessage(), e);
             }
