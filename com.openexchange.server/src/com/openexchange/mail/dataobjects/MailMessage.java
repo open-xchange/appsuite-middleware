@@ -87,6 +87,7 @@ public abstract class MailMessage extends MailPart {
 
     private static final String HDR_REFERENCES = MessageHeaders.HDR_REFERENCES;
     private static final String HDR_MESSAGE_ID = MessageHeaders.HDR_MESSAGE_ID;
+    private static final String HDR_IN_REPLY_TO = MessageHeaders.HDR_IN_REPLY_TO;
 
     /*-
      * ------------------- Flags ------------------------------
@@ -1497,6 +1498,15 @@ public abstract class MailMessage extends MailPart {
      */
     public String getMessageId() {
         return getFirstHeader(HDR_MESSAGE_ID);
+    }
+
+    /**
+     * Gets the <i>In-Reply-To</i> value.
+     * 
+     * @return The <i>In-Reply-To</i> value or <code>null</code>
+     */
+    public String getInReplyTo() {
+        return getFirstHeader(HDR_IN_REPLY_TO);
     }
 
     private static final Pattern SPLIT = Pattern.compile(" +");

@@ -57,9 +57,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import javax.mail.FetchProfile;
+import javax.mail.FetchProfile.Item;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
-import javax.mail.FetchProfile.Item;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
@@ -97,14 +97,19 @@ public final class Conversations {
         super();
     }
 
-    static final FetchProfile FETCH_PROFILE_CONVERSATION;
+    static final FetchProfile FETCH_PROFILE_CONVERSATION_BY_HEADERS;
+    static final FetchProfile FETCH_PROFILE_CONVERSATION_BY_ENVELOPE;
     static {
-        final FetchProfile fp = new FetchProfile();
+        FetchProfile fp = new FetchProfile();
         fp.add(UIDFolder.FetchProfileItem.UID);
         fp.add("References");
         fp.add("Message-Id");
         fp.add("In-Reply-To");
-        FETCH_PROFILE_CONVERSATION = fp;
+        FETCH_PROFILE_CONVERSATION_BY_HEADERS = fp;
+        fp = new FetchProfile();
+        fp.add(UIDFolder.FetchProfileItem.UID);
+        fp.add(MailMessageFetchIMAPCommand.ENVELOPE_ONLY);
+        FETCH_PROFILE_CONVERSATION_BY_ENVELOPE = fp;
     }
 
     static FetchProfile checkFetchProfile(final FetchProfile fetchProfile) {
@@ -227,7 +232,7 @@ public final class Conversations {
                             sb.append(messageCount - limit + 1).append(':').append('*');
                         }
                     }
-                    final FetchProfile fp = null == fetchProfile ? FETCH_PROFILE_CONVERSATION : checkFetchProfile(fetchProfile);
+                    final FetchProfile fp = null == fetchProfile ? FETCH_PROFILE_CONVERSATION_BY_HEADERS : checkFetchProfile(fetchProfile);
                     sb.append(" (").append(getFetchCommand(protocol.isREV1(), fp, false)).append(')');
                     command = sb.toString();
                     sb = null;
