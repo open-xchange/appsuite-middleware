@@ -67,10 +67,13 @@ import com.meterware.httpunit.WebResponse;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class TestServletTest {
-    
+
     private final String URL = "http://localhost/servlet/TestServlet";
-    private final String PUT_STRING = "A PUT String with Umlaut";
-    
+
+    private final String PUTSTRING = "A PÜT String with Umlaut";
+
+    private final String QUERYSTRING = "?";
+
     @Test
     public void testGetMethod() throws Exception {
         WebConversation conversation = new WebConversation();
@@ -82,11 +85,28 @@ public class TestServletTest {
     @Test
     public void testPutMethod() throws IOException, SAXException {
         WebConversation conversation = new WebConversation();
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(PUT_STRING.getBytes("UTF-8"));
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(PUTSTRING.getBytes("UTF-8"));
         WebRequest request = new PutMethodWebRequest("http://localhost/servlet/TestServlet", byteArrayInputStream, "text/xml");
         WebResponse response = conversation.getResponse(request);
         HTMLElement[] paragraphs = response.getElementsByTagName("p");
-        assertEquals("The transfered content differs", "The content: " + PUT_STRING, paragraphs[4].getText());
+        assertEquals("The transfered content differs", "The content: " + PUTSTRING, paragraphs[4].getText());
+    }
+
+    /**
+     * Test if we can send a get request with more than the allowed max amount of parameters (30 by default).
+     * Expects an HttpInternalErrorException when the requests receives a 500 because of too many parameters.
+     * @throws Exception
+     */
+    @Test(expected = com.meterware.httpunit.HttpInternalErrorException.class)
+    public void testMaxParam() throws Exception {
+        WebConversation conversation = new WebConversation();
+        WebRequest request = new GetMethodWebRequest(URL);
+        for (int i = 0; i <31; i++) {
+            request.setParameter("param" + i, "value" + i);
+        }
+        WebResponse response = conversation.getResponse(request);
+        int responseCode = response.getResponseCode();
+        System.out.println(responseCode);
     }
 
 }
