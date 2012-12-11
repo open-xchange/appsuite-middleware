@@ -584,9 +584,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        if (!mailMessage.containsReferences()) {
-                            mailMessage.setReferences(hdr.getValue());
-                        }
+                        mailMessage.setReferences(hdr.getValue());
                     }
                 });
             }
