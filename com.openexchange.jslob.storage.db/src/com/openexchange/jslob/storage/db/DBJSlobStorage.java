@@ -50,6 +50,7 @@
 package com.openexchange.jslob.storage.db;
 
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -519,6 +520,8 @@ public final class DBJSlobStorage implements JSlobStorage {
                 }
                 con.commit();
                 committed = true;
+            } catch (final DataTruncation e) {
+                throw JSlobExceptionCodes.JSLOB_TOO_BIG.create(e, id.getId());
             } catch (final SQLException e) {
                 throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {

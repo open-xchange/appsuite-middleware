@@ -57,9 +57,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import javax.mail.FetchProfile;
+import javax.mail.FetchProfile.Item;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
-import javax.mail.FetchProfile.Item;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
@@ -97,33 +97,30 @@ public final class Conversations {
         super();
     }
 
-    static final FetchProfile FETCH_PROFILE_CONVERSATION;
+    static final FetchProfile FETCH_PROFILE_CONVERSATION_BY_HEADERS;
+    static final FetchProfile FETCH_PROFILE_CONVERSATION_BY_ENVELOPE;
     static {
-        final FetchProfile fp = new FetchProfile();
+        FetchProfile fp = new FetchProfile();
         fp.add(UIDFolder.FetchProfileItem.UID);
         fp.add("References");
         fp.add("Message-Id");
         fp.add("In-Reply-To");
-        FETCH_PROFILE_CONVERSATION = fp;
+        FETCH_PROFILE_CONVERSATION_BY_HEADERS = fp;
+        fp = new FetchProfile();
+        fp.add(UIDFolder.FetchProfileItem.UID);
+        fp.add(MailMessageFetchIMAPCommand.ENVELOPE_ONLY);
+        FETCH_PROFILE_CONVERSATION_BY_ENVELOPE = fp;
     }
 
-    static FetchProfile checkFetchProfile(final FetchProfile fetchProfile) {
-        // Add 'References' to FetchProfile if absent
-        {
-            boolean found = false;
-            final String hdrReferences = MessageHeaders.HDR_REFERENCES;
-            final String[] headerNames = fetchProfile.getHeaderNames();
-            for (int i = 0; !found && i < headerNames.length; i++) {
-                if (hdrReferences.equalsIgnoreCase(headerNames[i])) {
-                    found = true;
-                }
-            }
-            if (!found) {
-                fetchProfile.add(hdrReferences);
-            }
-        }
-        // Add 'In-Reply-To' to FetchProfile if absent
-        {
+    /**
+     * Checks specified {@link FetchProfile} to contain needed items/headers for building up conversations.
+     * 
+     * @param fetchProfile The fetch profile to check
+     * @param byEnvelope <code>true</code> to use ENVELOPE fetch item; other <code>false</code> to use single headers (<i>"References"</i>, <i>"In-Reply-To"</i>, and <i>"Message-Id"</i>)
+     * @return The fetch profile ready for building up conversations
+     */
+    public static FetchProfile checkFetchProfile(final FetchProfile fetchProfile, final boolean byEnvelope) {
+        if (byEnvelope) {
             boolean found = false;
             final Item envelope = FetchProfile.Item.ENVELOPE;
             final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
@@ -135,40 +132,71 @@ public final class Conversations {
                 }
             }
             if (!found) {
-                final String hdrInReplyTo = MessageHeaders.HDR_IN_REPLY_TO;
+                fetchProfile.add(envelopeOnly);
+            }
+        } else {
+            // Add 'References' to FetchProfile if absent
+            {
+                boolean found = false;
+                final String hdrReferences = MessageHeaders.HDR_REFERENCES;
                 final String[] headerNames = fetchProfile.getHeaderNames();
                 for (int i = 0; !found && i < headerNames.length; i++) {
-                    if (hdrInReplyTo.equalsIgnoreCase(headerNames[i])) {
+                    if (hdrReferences.equalsIgnoreCase(headerNames[i])) {
                         found = true;
                     }
                 }
                 if (!found) {
-                    fetchProfile.add(hdrInReplyTo);
+                    fetchProfile.add(hdrReferences);
                 }
             }
-        }
-        // Add 'Message-Id' to FetchProfile if absent
-        {
-            boolean found = false;
-            final Item envelope = FetchProfile.Item.ENVELOPE;
-            final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
-            final Item[] items = fetchProfile.getItems();
-            for (int i = 0; !found && i < items.length; i++) {
-                final Item cur = items[i];
-                if (envelope == cur || envelopeOnly == cur) {
-                    found = true;
-                }
-            }
-            if (!found) {
-                final String hdrMessageId = MessageHeaders.HDR_MESSAGE_ID;
-                final String[] headerNames = fetchProfile.getHeaderNames();
-                for (int i = 0; !found && i < headerNames.length; i++) {
-                    if (hdrMessageId.equalsIgnoreCase(headerNames[i])) {
+            // Add 'In-Reply-To' to FetchProfile if absent
+            {
+                boolean found = false;
+                final Item envelope = FetchProfile.Item.ENVELOPE;
+                final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
+                final Item[] items = fetchProfile.getItems();
+                for (int i = 0; !found && i < items.length; i++) {
+                    final Item cur = items[i];
+                    if (envelope == cur || envelopeOnly == cur) {
                         found = true;
                     }
                 }
                 if (!found) {
-                    fetchProfile.add(envelopeOnly);
+                    final String hdrInReplyTo = MessageHeaders.HDR_IN_REPLY_TO;
+                    final String[] headerNames = fetchProfile.getHeaderNames();
+                    for (int i = 0; !found && i < headerNames.length; i++) {
+                        if (hdrInReplyTo.equalsIgnoreCase(headerNames[i])) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        fetchProfile.add(hdrInReplyTo);
+                    }
+                }
+            }
+            // Add 'Message-Id' to FetchProfile if absent
+            {
+                boolean found = false;
+                final Item envelope = FetchProfile.Item.ENVELOPE;
+                final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
+                final Item[] items = fetchProfile.getItems();
+                for (int i = 0; !found && i < items.length; i++) {
+                    final Item cur = items[i];
+                    if (envelope == cur || envelopeOnly == cur) {
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    final String hdrMessageId = MessageHeaders.HDR_MESSAGE_ID;
+                    final String[] headerNames = fetchProfile.getHeaderNames();
+                    for (int i = 0; !found && i < headerNames.length; i++) {
+                        if (hdrMessageId.equalsIgnoreCase(headerNames[i])) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        fetchProfile.add(envelopeOnly);
+                    }
                 }
             }
         }
@@ -195,11 +223,12 @@ public final class Conversations {
      * 
      * @param imapFolder The IMAP folder
      * @param limit The limit
+     * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
      * @return The unfolded conversations
      * @throws MessagingException If a messaging error occurs
      */
-    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int limit) throws MessagingException {
-        return conversationsFor(imapFolder, limit, null);
+    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int limit, final boolean byEnvelope) throws MessagingException {
+        return conversationsFor(imapFolder, limit, null, byEnvelope);
     }
 
     /**
@@ -208,11 +237,12 @@ public final class Conversations {
      * @param imapFolder The IMAP folder
      * @param limit The limit
      * @param fetchProfile The fetch profile
+     * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
      * @return The unfolded conversations
      * @throws MessagingException If a messaging error occurs
      */
     @SuppressWarnings("unchecked")
-    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile) throws MessagingException {
+    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile, final boolean byEnvelope) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -238,7 +268,7 @@ public final class Conversations {
                             sb.append(messageCount - limit + 1).append(':').append('*');
                         }
                     }
-                    final FetchProfile fp = null == fetchProfile ? FETCH_PROFILE_CONVERSATION : checkFetchProfile(fetchProfile);
+                    final FetchProfile fp = null == fetchProfile ? (byEnvelope ? FETCH_PROFILE_CONVERSATION_BY_ENVELOPE : FETCH_PROFILE_CONVERSATION_BY_HEADERS) : checkFetchProfile(fetchProfile, byEnvelope);
                     sb.append(" (").append(getFetchCommand(protocol.isREV1(), fp, false)).append(')');
                     command = sb.toString();
                     sb = null;
@@ -258,15 +288,21 @@ public final class Conversations {
                         final String fullName = imapFolder.getFullName();
                         final char sep = imapFolder.getSeparator();
                         final String sFetch = "FETCH";
+                        final String sInReplyTo = "In-Reply-To";
+                        final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
                             if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
                                 final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, sep);
                                 {
-                                    final String inReplyTo = message.getFirstHeader("In-Reply-To");
+                                    final String inReplyTo = message.getFirstHeader(sInReplyTo);
                                     if (!isEmpty(inReplyTo)) {
-                                        final String references = message.getFirstHeader("References");
-                                        if (!isEmpty(references) && references.indexOf(inReplyTo) < 0) {
-                                            message.setHeader("References", new StringAllocator(references).append(' ').append(inReplyTo).toString());
+                                        final String references = message.getFirstHeader(sReferences);
+                                        if (isEmpty(references)) {
+                                            message.setHeader(sReferences, inReplyTo);
+                                        } else {
+                                            if (references.indexOf(inReplyTo) < 0) {
+                                                message.setHeader(sReferences, new StringAllocator(references).append(' ').append(inReplyTo).toString());
+                                            }
                                         }
                                     }
                                 }
