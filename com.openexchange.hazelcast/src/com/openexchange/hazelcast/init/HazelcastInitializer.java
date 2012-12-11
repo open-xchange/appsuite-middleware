@@ -75,7 +75,6 @@ import com.hazelcast.core.LifecycleListener;
 import com.hazelcast.impl.GroupProperties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.HazelcastMBean;
-import com.openexchange.hazelcast.init.HazelcastInitializer.InitMode;
 import com.openexchange.hazelcast.osgi.HazelcastActivator;
 import com.openexchange.tools.strings.TimeSpanParser;
 
@@ -177,6 +176,7 @@ public final class HazelcastInitializer {
     public InitMode init(final List<InetAddress> nodes, final boolean force, final long stamp, final Log logger) {
         synchronized (this) {
             final HazelcastInstance prevHazelcastInstance = REF_HAZELCAST_INSTANCE.get();
+            final boolean infoEnabled = logger.isInfoEnabled();
             if (null != prevHazelcastInstance) {
                 final long st = System.currentTimeMillis();
                 final Config config = prevHazelcastInstance.getConfig();
@@ -185,11 +185,13 @@ public final class HazelcastInitializer {
                     return InitMode.NONE;
                 }
                 if (false == force) {
-                    logger.info("\nHazelcast:\n\tRe-initialized without restart in " + (System.currentTimeMillis() - st) + "msec.\n");
+                    if (infoEnabled) {
+                        logger.info("\nHazelcast:\n\tRe-initialized without restart in " + (System.currentTimeMillis() - st) + "msec.\n");
+                    }
                     return InitMode.RE_INITIALIZED;
                 }
                 prevHazelcastInstance.getLifecycleService().restart();
-                if (logger.isInfoEnabled()) {
+                if (infoEnabled) {
                     logger.info("\nHazelcast:\n\tRe-started in " + (System.currentTimeMillis() - st) + "msec.\n");
                 }
                 return InitMode.RE_INITIALIZED;
@@ -202,10 +204,14 @@ public final class HazelcastInitializer {
             /*
              * Create appropriate Hazelcast instance from configuration
              */
-            LOG.debug("Creating new hazelcast instance...");
-            long hzStart = System.currentTimeMillis(); 
+            if (infoEnabled) {
+                LOG.info("\nHazelcast:\n\tCreating new hazelcast instance...");
+            }
+            long hzStart = infoEnabled ? System.currentTimeMillis() : 0L; 
             final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
-            LOG.info("New hazelcast instance successfully created in " + (System.currentTimeMillis() - hzStart) + "msec.\n");
+            if (infoEnabled) {
+                LOG.info("\nHazelcast:\n\tNew hazelcast instance successfully created in " + (System.currentTimeMillis() - hzStart) + "msec.\n");
+            }
             hazelcastInstance.getLifecycleService().addLifecycleListener(new LifecycleListener() {
 
                 @Override
@@ -220,7 +226,7 @@ public final class HazelcastInitializer {
             });
             activator.registerService(HazelcastInstance.class, hazelcastInstance);
             REF_HAZELCAST_INSTANCE.set(hazelcastInstance);
-            if (logger.isInfoEnabled()) {
+            if (infoEnabled) {
                 logger.info("\nHazelcast:\n\tStarted in " + (System.currentTimeMillis() - stamp) + "msec.\n");
             }
             /*
