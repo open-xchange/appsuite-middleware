@@ -143,7 +143,7 @@ public class Multiple extends SessionServlet {
                     throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
                 }
                 for (int a = 0; a < length; a++) {
-                    state = parseActionElement(respArr, dataArray, a, session, req, state);
+                    state = parseActionElement(respArr, dataArray.getJSONObject(a), session, req, state);
                 }
                 /*
                  * Don't forget to write mail request
@@ -180,9 +180,7 @@ public class Multiple extends SessionServlet {
     }
 
 
-    protected static final AJAXState parseActionElement(final JSONArray respArr, final JSONArray dataArray, final int pos, final ServerSession session, final HttpServletRequest req, final AJAXState state) throws JSONException, OXException {
-        final JSONObject jsonObj = dataArray.getJSONObject(pos);
-
+    protected static final AJAXState parseActionElement(final JSONArray respArr, final JSONObject jsonObj , final ServerSession session, final HttpServletRequest req, final AJAXState state) throws JSONException, OXException {
         final String module;
         final String action;
 
