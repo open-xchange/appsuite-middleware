@@ -130,15 +130,26 @@ public final class Conversations {
         // Add 'In-Reply-To' to FetchProfile if absent
         {
             boolean found = false;
-            final String hdrInReplyTo = MessageHeaders.HDR_IN_REPLY_TO;
-            final String[] headerNames = fetchProfile.getHeaderNames();
-            for (int i = 0; !found && i < headerNames.length; i++) {
-                if (hdrInReplyTo.equalsIgnoreCase(headerNames[i])) {
+            final Item envelope = FetchProfile.Item.ENVELOPE;
+            final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
+            final Item[] items = fetchProfile.getItems();
+            for (int i = 0; !found && i < items.length; i++) {
+                final Item cur = items[i];
+                if (envelope == cur || envelopeOnly == cur) {
                     found = true;
                 }
             }
             if (!found) {
-                fetchProfile.add(hdrInReplyTo);
+                final String hdrInReplyTo = MessageHeaders.HDR_IN_REPLY_TO;
+                final String[] headerNames = fetchProfile.getHeaderNames();
+                for (int i = 0; !found && i < headerNames.length; i++) {
+                    if (hdrInReplyTo.equalsIgnoreCase(headerNames[i])) {
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    fetchProfile.add(hdrInReplyTo);
+                }
             }
         }
         // Add 'Message-Id' to FetchProfile if absent
@@ -347,7 +358,7 @@ public final class Conversations {
             final Conversation conversation = iter.next();
             if (i > lastProcessed) {
                 foldInto(conversation, iter);
-                lastProcessed = i++;
+                lastProcessed = i;
                 iter = toFold.iterator();
                 i = 0;
             } else {
@@ -360,11 +371,9 @@ public final class Conversations {
     private static void foldInto(final Conversation conversation, final Iterator<Conversation> iter) {
         while (iter.hasNext()) {
             final Conversation other = iter.next();
-            if (conversation != other) {
-                if (conversation.referencesOrIsReferencedBy(other)) {
-                    iter.remove();
-                    conversation.join(other);
-                }
+            if (conversation.referencesOrIsReferencedBy(other)) {
+                iter.remove();
+                conversation.join(other);
             }
         }
     }
