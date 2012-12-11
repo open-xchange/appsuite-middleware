@@ -240,10 +240,17 @@ public class Multiple extends SessionServlet {
     }
 
     protected static final void performActionElement(final JsonDataResponse jDataResponse, final String module, final ServerSession session, final HttpServletRequest req) {
-        final OXJSONWriter jWriter = new OXJSONWriter();
-        final JSONObject jsonObj = jDataResponse.getDataObject();
-        doAction(module, jsonObj.optString(PARAMETER_ACTION), jsonObj, session, req, jWriter, null);
-        jDataResponse.setResponseObject(jWriter.getObject());
+        AJAXState ajaxState = null;
+        try {
+            final OXJSONWriter jWriter = new OXJSONWriter();
+            final JSONObject jsonObj = jDataResponse.getDataObject();
+            ajaxState = doAction(module, jsonObj.optString(PARAMETER_ACTION), jsonObj, session, req, jWriter, null);
+            jDataResponse.setResponseObject(jWriter.getObject());
+        } finally {
+            if (null != ajaxState) {
+                ajaxState.close();
+            }
+        }
     }
 
     protected static final AJAXState parseActionElement(final JsonDataResponse jDataResponse , final ServerSession session, final HttpServletRequest req, final AJAXState state) throws OXException {
