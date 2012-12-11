@@ -160,6 +160,7 @@ public final class ThreadableMapping {
                     }
                 }
             }
+            /*
             final String inReplyTo = mail.getInReplyTo();
             if (null != inReplyTo) {
                 // Those mails that are referenced by specified mail
@@ -173,18 +174,17 @@ public final class ThreadableMapping {
                     }
                 }
             }
-            else {
-                final String[] sReferences = mail.getReferences();
-                if (null != sReferences) {
-                    for (final String sReference : sReferences) {
-                        // Those mails that are referenced by specified mail
-                        final List<MailMessage> references = messageIdMap.get(sReference);
-                        if (null != references) {
-                            for (final MailMessage candidate : references) {
-                                if (processed.add(keyFor(candidate))) {
-                                    thread.add(candidate);
-                                    changed = true;
-                                }
+            */
+            final String[] sReferences = mail.getReferences();
+            if (null != sReferences) {
+                for (final String sReference : sReferences) {
+                    // Those mails that are referenced by specified mail
+                    final List<MailMessage> references = messageIdMap.get(sReference);
+                    if (null != references) {
+                        for (final MailMessage candidate : references) {
+                            if (processed.add(keyFor(candidate))) {
+                                thread.add(candidate);
+                                changed = true;
                             }
                         }
                     }

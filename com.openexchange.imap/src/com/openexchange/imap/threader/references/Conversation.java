@@ -138,21 +138,22 @@ public final class Conversation {
 
     private void addWrapper(final MailMessageWrapper mmw) {
         if (messages.add(mmw)) {
-            final String messageId = mmw.message.getMessageId();
+            final MailMessage message = mmw.message;
+            final String messageId = message.getMessageId();
             if (null != messageId) {
                 messageIds.add(messageId);
             }
-            final String inReplyTo = mmw.message.getInReplyTo();
+            /*
+            final String inReplyTo = message.getInReplyTo();
             if (null != inReplyTo) {
                 references.add(inReplyTo);
             }
-            else {
-                final String[] sReferences = mmw.message.getReferences();
-                if (null != sReferences) {
-                    for (final String sReference : sReferences) {
-                        if (null != sReference) {
-                            references.add(sReference);
-                        }
+            */
+            final String[] sReferences = message.getReferences();
+            if (null != sReferences) {
+                for (final String sReference : sReferences) {
+                    if (null != sReference) {
+                        references.add(sReference);
                     }
                 }
             }

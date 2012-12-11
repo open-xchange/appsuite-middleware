@@ -580,6 +580,15 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                         }
                     }
                 });
+                put(MessageHeaders.HDR_REFERENCES, new HeaderHandler() {
+
+                    @Override
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
+                        if (!mailMessage.containsReferences()) {
+                            mailMessage.setReferences(hdr.getValue());
+                        }
+                    }
+                });
             }
         };
 
