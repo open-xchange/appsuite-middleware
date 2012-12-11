@@ -244,10 +244,10 @@ public class FileResponseRenderer implements ResponseRenderer {
          */
         ImageTransformations transformations = scaler.transfom(file.getStream());
         // rotate by default when not delivering as download
-        if (false == request.isSet("rotate") && false == DOWNLOAD.equalsIgnoreCase(delivery) || 
-            request.getParameter("rotate", boolean.class)) {
+        Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
+        if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
             transformations.rotate();
-        }
+        }        
         if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
             int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
             int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
@@ -262,10 +262,10 @@ public class FileResponseRenderer implements ResponseRenderer {
             transformations.scale(maxWidth, maxHeight, scaleType);
         }
         // compress by default when not delivering as download
-        if (false == request.isSet("compress") && false == DOWNLOAD.equalsIgnoreCase(delivery) || 
-            request.getParameter("compress", boolean.class)) {
+        Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
+        if (null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != compress && compress.booleanValue()) {
             transformations.compress();
-        }
+        }        
         /*
          * transform
          */
