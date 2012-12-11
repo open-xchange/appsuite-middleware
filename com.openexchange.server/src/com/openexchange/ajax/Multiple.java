@@ -219,7 +219,7 @@ public class Multiple extends SessionServlet {
                 for (int pos = 0; pos < length; pos++) {
                     final JsonInOut jsonInOut = mapping.get(pos);
                     if (null != jsonInOut) {
-                        respArr.put(jsonInOut.getResponseObject());                        
+                        respArr.put(jsonInOut.getOutputObject());                        
                     }
                 }
             } catch (final JSONException e) {
@@ -249,9 +249,9 @@ public class Multiple extends SessionServlet {
         AJAXState ajaxState = null;
         try {
             final OXJSONWriter jWriter = new OXJSONWriter();
-            final JSONObject jsonObj = jsonInOut.getDataObject();
-            ajaxState = doAction(module, jsonObj.optString(PARAMETER_ACTION), jsonObj, session, req, jWriter, null);
-            jsonInOut.setResponseObject(jWriter.getObject());
+            final JSONObject inObject = jsonInOut.getInputObject();
+            ajaxState = doAction(module, inObject.optString(PARAMETER_ACTION), inObject, session, req, jWriter, null);
+            jsonInOut.setOutputObject(jWriter.getObject());
         } finally {
             if (null != ajaxState) {
                 ajaxState.close();
@@ -261,9 +261,9 @@ public class Multiple extends SessionServlet {
 
     protected static final AJAXState parseActionElement(final JsonInOut jsonInOut , final ServerSession session, final HttpServletRequest req, final AJAXState state) throws OXException {
         final OXJSONWriter jWriter = new OXJSONWriter();
-        final JSONObject jsonObj = jsonInOut.getDataObject();
-        final AJAXState ajaxState = doAction(DataParser.checkString(jsonObj, MODULE), jsonObj.optString(PARAMETER_ACTION), jsonObj, session, req, jWriter, state);
-        jsonInOut.setResponseObject(jWriter.getObject());
+        final JSONObject inObject = jsonInOut.getInputObject();
+        final AJAXState ajaxState = doAction(DataParser.checkString(inObject, MODULE), inObject.optString(PARAMETER_ACTION), inObject, session, req, jWriter, state);
+        jsonInOut.setOutputObject(jWriter.getObject());
         return ajaxState;
     }
 
@@ -542,39 +542,39 @@ public class Multiple extends SessionServlet {
 
     private static final class JsonInOut {
 
-        private final JSONObject dataObject;
-        private volatile JSONValue responseObject;
+        private final JSONObject inObject;
+        private volatile JSONValue outObject;
 
-        protected JsonInOut(final JSONObject dataObject) {
+        protected JsonInOut(final JSONObject inObject) {
             super();
-            this.dataObject = dataObject;
+            this.inObject = inObject;
         }
         
         /**
-         * Gets the data object
+         * Gets the input object
          *
-         * @return The data object
+         * @return The input object
          */
-        public JSONObject getDataObject() {
-            return dataObject;
+        public JSONObject getInputObject() {
+            return inObject;
         }
         
         /**
-         * Gets the response object
+         * Gets the output object
          *
-         * @return The response object
+         * @return The output object
          */
-        public JSONValue getResponseObject() {
-            return responseObject;
+        public JSONValue getOutputObject() {
+            return outObject;
         }
 
         /**
-         * Sets the response object
+         * Sets the output object
          * 
-         * @param responseObject The response object to set
+         * @param outObject The output object to set
          */
-        public void setResponseObject(final JSONValue responseObject) {
-            this.responseObject = responseObject;
+        public void setOutputObject(final JSONValue outObject) {
+            this.outObject = outObject;
         }
 
     } // End of class JsonDataResponse
