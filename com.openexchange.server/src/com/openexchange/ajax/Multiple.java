@@ -172,6 +172,7 @@ public class Multiple extends SessionServlet {
                     if (!dataObject.hasAndNotNull(MODULE)) {
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(MODULE);
                     }
+                    // Check if module indicates serial or concurrent execution
                     final String module = dataObject.getString(MODULE);
                     if (MODULE_MAIL.equals(module)) {
                         serialTasks.offer(jsonDataResponse);
@@ -201,15 +202,14 @@ public class Multiple extends SessionServlet {
                         ThreadPools.launderThrowable(e, RuntimeException.class);
                     }
                 }
-                /*
-                 * Don't forget to write mail request
-                 */
+                // Don't forget to write mail request
                 writeMailRequest(req);
-                /*
-                 * Add single responses to JSON array
-                 */
+                // Add single responses to JSON array
                 for (int pos = 0; pos < length; pos++) {
-                    respArr.put(mapping.get(pos).getResponseObject());
+                    final JsonDataResponse jDataResponse = mapping.get(pos);
+                    if (null != jDataResponse) {
+                        respArr.put(jDataResponse.getResponseObject());                        
+                    }
                 }
             } catch (final JSONException e) {
                 log(RESPONSE_ERROR, e);
