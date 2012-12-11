@@ -52,9 +52,6 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
         boolean doRollback = false;
         try {
             File file = new File("/tmp/" + poolidandschema.getSchema() + ".txt");
-            if (!file.exists()) {
-                file = new File(poolidandschema.getFileName());
-            }
             BufferedReader reader = new BufferedReader(new FileReader(file));
             try {
                 connection = Database.get(poolId, poolidandschema.getSchema());
