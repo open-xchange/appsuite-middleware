@@ -184,7 +184,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         enableDBGrouping = true;
         enableFolderCache = true;
         ignoreSharedAddressbook = false;
-        enableInternalUsersEdit = false;
+        enableInternalUsersEdit = true;
     }
 
     private void init() {
