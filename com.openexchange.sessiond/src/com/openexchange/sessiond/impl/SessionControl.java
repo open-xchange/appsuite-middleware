@@ -95,6 +95,19 @@ public class SessionControl {
     }
 
     /**
+     * Checks if this session control is elapsed.
+     * 
+     * @param defaultIdleTime The default idle time
+     * @return <code>true</code> if elapsed; otherwise <code>false</code>
+     */
+    public boolean isElapsed(final long defaultIdleTime) {
+        if (idleTime < 0) {
+            return lastAccessed.get() < (System.currentTimeMillis() - defaultIdleTime);
+        }
+        return lastAccessed.get() < (System.currentTimeMillis() - idleTime);
+    }
+
+    /**
      * Initializes a new {@link SessionControl}
      * 
      * @param session The stored session

@@ -775,7 +775,7 @@ final class SessionData {
         // Look-up volatile ones
         SessionControl control = volatileSessions.get(sessionId);
         if (null != control) {
-            return control;
+            return control.isElapsed(volatileMaxIdleTime()) ? null : control;
         }
         int i = 0;
         // Read-only access
