@@ -125,6 +125,7 @@ public class SmalSessionEventHandler implements EventHandler {
                         OXException e = IndexExceptionCodes.INDEXING_NOT_ENABLED.create(Types.EMAIL, userId, contextId);
                         LOG.debug("Skipping event handling execution because: " + e.getMessage());
                     }
+                    return;
                 }
                 
                 
