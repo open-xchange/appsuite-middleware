@@ -52,7 +52,6 @@ package com.openexchange.login.internal;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -129,6 +128,8 @@ public final class LoginPerformer {
         return SINGLETON;
     }
 
+    private static final Map<String, Object> EMPTY_MAP = Collections.<String, Object> emptyMap();
+
     /**
      * Performs the login for specified login request.
      *
@@ -137,7 +138,7 @@ public final class LoginPerformer {
      * @throws LoginException If login fails
      */
     public LoginResult doLogin(final LoginRequest request) throws OXException {
-        return doLogin(request, new HashMap<String, Object>());
+        return doLogin(request, EMPTY_MAP);
     }
 
     public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
@@ -157,7 +158,7 @@ public final class LoginPerformer {
      * @throws OXException If login fails
      */
     public LoginResult doAutoLogin(final LoginRequest request) throws OXException {
-        final HashMap<String, Object> properties = new HashMap<String, Object>();
+        final Map<String, Object> properties = EMPTY_MAP;
         return doLogin(request, properties, new LoginPerformerClosure() {
             @Override
             public Authenticated doAuthentication(final LoginResultImpl retval) throws OXException {
