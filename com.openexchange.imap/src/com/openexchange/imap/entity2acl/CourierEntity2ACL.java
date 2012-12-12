@@ -114,7 +114,7 @@ public class CourierEntity2ACL extends Entity2ACL {
             return null;
         }
         final String quotedDelim = Pattern.quote(String.valueOf(delim));
-        final String abstractPattern = new StringBuilder().append(SHARED_PREFIX).append(quotedDelim).append("([\\p{L}&&[^").append(
+        final String abstractPattern = new com.openexchange.java.StringAllocator().append(SHARED_PREFIX).append(quotedDelim).append("([\\p{L}&&[^").append(
             quotedDelim).append("]]+)").append(quotedDelim).append("\\p{L}+").toString();
         final Matcher m = Pattern.compile(abstractPattern, Pattern.CASE_INSENSITIVE).matcher(sharedFolderName);
         if (m.matches()) {
@@ -243,7 +243,7 @@ public class CourierEntity2ACL extends Entity2ACL {
         final int pos = Arrays.binarySearch(ids, sessionUser);
         if (pos >= 0) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder().append("Found multiple users with login \"").append(pattern).append(
+                LOG.warn(new com.openexchange.java.StringAllocator().append("Found multiple users with login \"").append(pattern).append(
                     "\" subscribed to IMAP server \"").append(imapAddr).append("\": ").append(Arrays.toString(ids)).append(
                     "\nThe session user's ID is returned."));
             }
@@ -251,7 +251,7 @@ public class CourierEntity2ACL extends Entity2ACL {
         }
         // Just select first user ID
         if (LOG.isWarnEnabled()) {
-            LOG.warn(new StringBuilder().append("Found multiple users with login \"").append(pattern).append(
+            LOG.warn(new com.openexchange.java.StringAllocator().append("Found multiple users with login \"").append(pattern).append(
                 "\" subscribed to IMAP server \"").append(imapAddr).append("\": ").append(Arrays.toString(ids)).append(
                 "\nThe first found user is returned."));
         }

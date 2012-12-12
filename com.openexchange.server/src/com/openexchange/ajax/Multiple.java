@@ -49,11 +49,16 @@
 
 package com.openexchange.ajax;
 
+import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -61,6 +66,7 @@ import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.request.AttachmentRequest;
@@ -84,6 +90,8 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -95,7 +103,7 @@ public class Multiple extends SessionServlet {
 
     protected static final String MODULE = "module";
 
-    protected static final String MODULE_INFOSTORE = "infostore";
+    // protected static final String MODULE_INFOSTORE = "infostore";
 
     protected static final String MODULE_FOLDER = "folder";
 
@@ -109,14 +117,23 @@ public class Multiple extends SessionServlet {
 
     private static volatile Dispatcher dispatcher;
 
+    /**
+     * Sets the dispatcher instance.
+     * 
+     * @param dispatcher The dispatcher to set
+     */
     public static void setDispatcher(final Dispatcher dispatcher) {
         Multiple.dispatcher = dispatcher;
     }
 
+    /**
+     * Gets the dispatcher instance
+     * 
+     * @return The dispatcher instance or <code>null</code>
+     */
     private static Dispatcher getDispatcher() {
         return dispatcher;
     }
-
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -133,8 +150,8 @@ public class Multiple extends SessionServlet {
                 Streams.close(reader);
             }
         }
-        final JSONArray respArr = new JSONArray();
         final int length = dataArray.length();
+        final JSONArray respArr = new JSONArray(length);
         if (length > 0) {
             AJAXState state = null;
             try {
@@ -142,13 +159,69 @@ public class Multiple extends SessionServlet {
                 if (session == null) {
                     throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
                 }
-                for (int a = 0; a < length; a++) {
-                    state = parseActionElement(respArr, dataArray, a, session, req, state);
+                // Distinguish between serially and concurrently executable requests
+                List<JsonInOut> serialTasks = null;
+                ThreadPoolCompletionService<Object> concurrentTasks = null;
+                int concurrentTasksCount = 0;
+                // Build-up mapping & schedule for serial or concurrent execution
+                final ConcurrentTIntObjectHashMap<JsonInOut> mapping = new ConcurrentTIntObjectHashMap<JsonInOut>(length);
+                for (int pos = 0; pos < length; pos++) {
+                    final JSONObject dataObject = dataArray.getJSONObject(pos);
+                    final JsonInOut jsonInOut = new JsonInOut(dataObject);
+                    mapping.put(pos, jsonInOut);
+                    if (!dataObject.hasAndNotNull(MODULE)) {
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(MODULE);
+                    }
+                    // Check if module indicates serial or concurrent execution
+                    final String module = dataObject.getString(MODULE);
+                    if (MODULE_MAIL.equals(module)) {
+                        if (null == serialTasks) {
+                            serialTasks = new ArrayList<JsonInOut>(length);
+                        }
+                        serialTasks.add(jsonInOut);
+                    } else {
+                        if (null == concurrentTasks) {
+                            concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
+                        }
+                        concurrentTasks.submit(new CallableImpl(jsonInOut, session, module, req));
+                        concurrentTasksCount++;
+                    }
                 }
-                /*
-                 * Don't forget to write mail request
-                 */
+                if (null != serialTasks) {
+                    // Execute serial tasks with current thread
+                    for (final JsonInOut jsonInOut : serialTasks) {
+                        state = parseActionElement(jsonInOut, session, req, state);
+                    }
+                }
+                if (null != concurrentTasks) {
+                    // Await completion service
+                    for (int i = 0; i < concurrentTasksCount; i++) {
+                        try {
+                            concurrentTasks.take().get();
+                        } catch (final InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                        } catch (final ExecutionException e) {
+                            final Throwable cause = e.getCause();
+                            if (cause instanceof JSONException) {
+                                throw (JSONException) cause;
+                            }
+                            if (cause instanceof OXException) {
+                                throw (OXException) cause;
+                            }
+                            ThreadPools.launderThrowable(e, RuntimeException.class);
+                        }
+                    }
+                }
+                // Don't forget to write mail request
                 writeMailRequest(req);
+                // Add single responses to JSON array
+                for (int pos = 0; pos < length; pos++) {
+                    final JsonInOut jsonInOut = mapping.get(pos);
+                    if (null != jsonInOut) {
+                        respArr.put(jsonInOut.getOutputObject());                        
+                    }
+                }
             } catch (final JSONException e) {
                 log(RESPONSE_ERROR, e);
                 sendError(resp);
@@ -159,14 +232,7 @@ public class Multiple extends SessionServlet {
                 log(RESPONSE_ERROR, e);
                 sendError(resp);
             } finally {
-                final MailServletInterface mi = (MailServletInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
-                if (mi != null) {
-                    try {
-                        mi.close(true);
-                    } catch (final Exception e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                }
+                close((MailServletInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE));
                 if (state != null) {
                     getDispatcher().end(state);
                 }
@@ -175,28 +241,30 @@ public class Multiple extends SessionServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         final Writer writer = resp.getWriter();
-        writer.write(respArr.toString());
+        writeTo(respArr, writer);
         writer.flush();
     }
 
-
-    protected static final AJAXState parseActionElement(final JSONArray respArr, final JSONArray dataArray, final int pos, final ServerSession session, final HttpServletRequest req, final AJAXState state) throws JSONException, OXException {
-        final JSONObject jsonObj = dataArray.getJSONObject(pos);
-
-        final String module;
-        final String action;
-
-        if (jsonObj.has(MODULE)) {
-            module = DataParser.checkString(jsonObj, MODULE);
-        } else {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MODULE);
+    protected static final void performActionElement(final JsonInOut jsonInOut, final String module, final ServerSession session, final HttpServletRequest req) {
+        AJAXState ajaxState = null;
+        try {
+            final OXJSONWriter jWriter = new OXJSONWriter();
+            final JSONObject inObject = jsonInOut.getInputObject();
+            ajaxState = doAction(module, inObject.optString(PARAMETER_ACTION), inObject, session, req, jWriter, null);
+            jsonInOut.setOutputObject(jWriter.getObject());
+        } finally {
+            if (null != ajaxState) {
+                ajaxState.close();
+            }
         }
+    }
 
-        action = jsonObj.optString(PARAMETER_ACTION);
-
-        final OXJSONWriter jWriter = new OXJSONWriter(respArr);
-
-        return doAction(module, action, jsonObj, session, req, jWriter, state);
+    protected static final AJAXState parseActionElement(final JsonInOut jsonInOut , final ServerSession session, final HttpServletRequest req, final AJAXState state) throws OXException {
+        final OXJSONWriter jWriter = new OXJSONWriter();
+        final JSONObject inObject = jsonInOut.getInputObject();
+        final AJAXState ajaxState = doAction(DataParser.checkString(inObject, MODULE), inObject.optString(PARAMETER_ACTION), inObject, session, req, jWriter, state);
+        jsonInOut.setOutputObject(jWriter.getObject());
+        return ajaxState;
     }
 
     private static final void writeMailRequest(final HttpServletRequest req) throws JSONException {
@@ -429,5 +497,86 @@ public class Multiple extends SessionServlet {
         }
         return null;
     }
+
+    /** Writes JSON array to given writer. */
+    private static void writeTo(final JSONArray respArr, final Writer writer) throws IOException {
+        try {
+            respArr.write(writer);
+        } catch (final JSONException e) {
+            throw new IOException(e.getMessage(), e);
+        }
+    }
+
+    /** Close passed {@link MailServletInterface} instance. */
+    private static void close(final MailServletInterface mi) {
+        if (mi != null) {
+            try {
+                mi.close(true);
+            } catch (final Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    private static final class CallableImpl implements Callable<Object> {
+
+        private final JsonInOut jsonDataResponse;
+        private final ServerSession session;
+        private final String module;
+        private final HttpServletRequest req;
+
+        protected CallableImpl(final JsonInOut jsonDataResponse, final ServerSession session, final String module, final HttpServletRequest req) {
+            super();
+            this.jsonDataResponse = jsonDataResponse;
+            this.session = session;
+            this.module = module;
+            this.req = req;
+        }
+
+        @Override
+        public Object call() throws Exception {
+            performActionElement(jsonDataResponse, module, session, req);
+            return null;
+        }
+    } // End of class
+
+    private static final class JsonInOut {
+
+        private final JSONObject inObject;
+        private volatile JSONValue outObject;
+
+        protected JsonInOut(final JSONObject inObject) {
+            super();
+            this.inObject = inObject;
+        }
+        
+        /**
+         * Gets the input object
+         *
+         * @return The input object
+         */
+        public JSONObject getInputObject() {
+            return inObject;
+        }
+        
+        /**
+         * Gets the output object
+         *
+         * @return The output object
+         */
+        public JSONValue getOutputObject() {
+            return outObject;
+        }
+
+        /**
+         * Sets the output object
+         * 
+         * @param outObject The output object to set
+         */
+        public void setOutputObject(final JSONValue outObject) {
+            this.outObject = outObject;
+        }
+
+    } // End of class JsonDataResponse
 
 }

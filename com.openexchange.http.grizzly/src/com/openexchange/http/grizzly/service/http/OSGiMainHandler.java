@@ -71,6 +71,9 @@ import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
 import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * OSGi Main HttpHandler.
@@ -154,11 +157,14 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     updateMappingInfo(request, alias, originalAlias);
 
                     httpHandler.service(request, response);
-                } catch(Throwable t) {
+                } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
-                    final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(128).append("Error processing request: ");
-                    appendRequestInfo(tmp, request);
-                    LOG.error(tmp.toString(), t);
+                    StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
+                    if (LogProperties.isEnabled()) {
+                        logBuilder.append(LogProperties.getAndPrettyPrint());
+                    }
+                    appendRequestInfo(logBuilder, request);
+                    LOG.error(logBuilder.toString(), t);
                     // 500 - Internal Server Error
                     response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
                 } finally {
@@ -185,13 +191,13 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             }
         }
     }
-    
+
     /**
      * Appends request information.
      * 
      * @param builder The builder to append to
      */
-    private void appendRequestInfo(final StringAllocator builder, Request request) {
+    private void appendRequestInfo(final StringBuilder builder, Request request) {
         builder.append("request-URI=''");
         builder.append(request.getRequestURI());
         builder.append("'', query-string=''");
@@ -239,12 +245,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             }
             OSGiServletHandler servletHandler = findOrCreateOSGiServletHandler(servlet, context, initparams);
             servletHandler.setServletPath(alias);
-
-            try {
-                addServletFilters(servletHandler);
-            } catch (OXException e) {
-                throw new ServletException(e);
-            }
+            addServletFilters(servletHandler);
 
             /*
              * Servlet would be started several times if registered with multiple aliases. Starting means: 1. Set ContextPath 2. Instantiate
@@ -260,10 +261,11 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     }
 
     /**
-     * @param servletHandler
-     * @throws OXException
+     * Add our default set of Filters to the ServletHandler.
+     * 
+     * @param servletHandler The ServletHandler with the FilterChain
      */
-    private void addServletFilters(OSGiServletHandler servletHandler) throws OXException {
+    private void addServletFilters(OSGiServletHandler servletHandler) {
         // wrap it
         servletHandler.addFilter(new WrappingFilter(), WrappingFilter.class.getName(), null);
 

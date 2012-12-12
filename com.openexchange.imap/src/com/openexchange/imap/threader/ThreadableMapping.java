@@ -148,7 +148,7 @@ public final class ThreadableMapping {
         final Set<MessageKey> processed = new HashSet<MessageKey>(thread.size());
         for (final MailMessage mail : toCheck) {
             final String messageId = mail.getMessageId();
-            if (!isEmpty(messageId)) {
+            if (null != messageId) {
                 // Those mails that refer to specified mail
                 final List<MailMessage> referencees = refsMap.get(messageId);
                 if (null != referencees) {
@@ -160,6 +160,21 @@ public final class ThreadableMapping {
                     }
                 }
             }
+            /*
+            final String inReplyTo = mail.getInReplyTo();
+            if (null != inReplyTo) {
+                // Those mails that are referenced by specified mail
+                final List<MailMessage> references = messageIdMap.get(inReplyTo);
+                if (null != references) {
+                    for (final MailMessage candidate : references) {
+                        if (processed.add(keyFor(candidate))) {
+                            thread.add(candidate);
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            */
             final String[] sReferences = mail.getReferences();
             if (null != sReferences) {
                 for (final String sReference : sReferences) {

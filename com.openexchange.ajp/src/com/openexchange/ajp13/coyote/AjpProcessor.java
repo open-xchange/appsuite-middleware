@@ -100,6 +100,7 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;

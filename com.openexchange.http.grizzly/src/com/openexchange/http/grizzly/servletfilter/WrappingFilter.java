@@ -60,6 +60,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
@@ -84,6 +86,25 @@ public class WrappingFilter implements Filter {
         
         // Create a Session if needed
         httpServletRequest.getSession(true);
+        
+        // Set LogProperties
+        if(LogProperties.isEnabled()) {
+            Props logProperties = LogProperties.getLogProperties();
+
+            // Servlet related properties
+            logProperties.put("com.openexchange.http.grizzly.requestURI", httpServletRequest.getRequestURI());
+            logProperties.put("com.openexchange.http.grizzly.servletPath", httpServletRequest.getServletPath());
+            logProperties.put("com.openexchange.http.grizzly.pathInfo", httpServletRequest.getPathInfo());
+            
+            // Remote infos
+            logProperties.put("com.openexchange.http.grizzly.remotePort", httpServletRequest.getRemotePort());
+            logProperties.put("com.openexchange.http.grizzly.requestIp", httpServletRequest.getRemoteAddr());
+            
+            // Names, addresses
+            logProperties.put("com.openexchange.http.grizzly.threadName", Thread.currentThread().getName());
+            logProperties.put("com.openexchange.http.grizzly.serverName", httpServletRequest.getServerName());
+        }
+        
         chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
     }
 

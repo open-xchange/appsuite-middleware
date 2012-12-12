@@ -580,6 +580,13 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                         }
                     }
                 });
+                put(MessageHeaders.HDR_REFERENCES, new HeaderHandler() {
+
+                    @Override
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
+                        mailMessage.setReferences(hdr.getValue());
+                    }
+                });
             }
         };
 
@@ -602,7 +609,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 h = new InternetHeaders();
                 if (null == headerStream) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug(new StringBuilder(32).append("Cannot retrieve headers from message #").append(msg.getSeqnum()).append(
+                        logger.debug(new com.openexchange.java.StringAllocator(32).append("Cannot retrieve headers from message #").append(msg.getSeqnum()).append(
                             " in folder ").append(msg.getFolder()).toString());
                     }
                 } else {
@@ -823,8 +830,8 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                     }
                 }
             }
-            msg.addHeader("In-Reply-To", env.inReplyTo);
-            msg.addHeader("Message-Id", env.messageId);
+            msg.setHeader("In-Reply-To", env.inReplyTo);
+            msg.setHeader("Message-Id", env.messageId);
             msg.setSubject(MimeMessageUtility.decodeEnvelopeSubject(env.subject));
             msg.setSentDate(env.date);
         }

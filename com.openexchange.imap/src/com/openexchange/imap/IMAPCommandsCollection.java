@@ -95,9 +95,9 @@ import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
 import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.util.IMAPUpdateableData;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
-import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.config.MailProperties;
@@ -222,16 +222,16 @@ public final class IMAPCommandsCollection {
                 /*
                  * Encode the mbox as per RFC2060
                  */
-                final String mboxName = prepareStringArgument(new StringBuilder("probe").append(
+                final String mboxName = prepareStringArgument(new StringAllocator("probe").append(
                     Long.toString(System.currentTimeMillis())).toString());
                 /*
                  * Perform command: CREATE
                  */
-                final StringBuilder sb = new StringBuilder(7 + mboxName.length());
-                final Response[] r = p.command(sb.append("CREATE ").append(mboxName).toString(), null);
+                final StringAllocator sb = new StringAllocator(7 + mboxName.length());
+                final Response[] r = performCommand(p, sb.append("CREATE ").append(mboxName).toString());
                 if (r[r.length - 1].isOK()) {
-                    sb.setLength(0);
-                    p.command(sb.append("DELETE ").append(mboxName).toString(), null);
+                    sb.reinitTo(0);
+                    performCommand(p, sb.append("DELETE ").append(mboxName).toString());
                     return Boolean.TRUE;
                 }
                 return Boolean.FALSE;
@@ -264,7 +264,7 @@ public final class IMAPCommandsCollection {
                 if (null == fullnamePrefix || fullnamePrefix.length() == 0) {
                     fullName = Long.toString(System.currentTimeMillis());
                 } else {
-                    fullName = new StringBuilder(64).append(fullnamePrefix).append(Long.toString(System.currentTimeMillis())).toString();
+                    fullName = new StringAllocator(64).append(fullnamePrefix).append(Long.toString(System.currentTimeMillis())).toString();
                 }
                 try {
                     Boolean retval = Boolean.TRUE;
@@ -359,16 +359,16 @@ public final class IMAPCommandsCollection {
                  * Encode the mbox as per RFC2060
                  */
                 final String now = Long.toString(System.currentTimeMillis());
-                final StringBuilder sb = new StringBuilder(now.length() + prefix.length() + 16);
+                final StringAllocator sb = new StringAllocator(now.length() + prefix.length() + 16);
                 final String mboxName = prepareStringArgument(sb.append(prefix).append(now).toString());
                 /*
                  * Perform command: CREATE
                  */
-                sb.setLength(0);
-                final Response[] r = p.command(sb.append("CREATE ").append(mboxName).toString(), null);
+                sb.reinitTo(0);
+                final Response[] r = performCommand(p, sb.append("CREATE ").append(mboxName).toString());
                 if (r[r.length - 1].isOK()) {
-                    sb.setLength(0);
-                    p.command(sb.append("DELETE ").append(mboxName).toString(), null);
+                    sb.reinitTo(0);
+                    performCommand(p, sb.append("DELETE ").append(mboxName).toString());
                     return Boolean.TRUE;
                 }
                 return Boolean.FALSE;
@@ -423,7 +423,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Perform command
                  */
-                final Response[] r = protocol.command("STATUS", args);
+                final Response[] r = performCommand(protocol, "STATUS", args);
                 final Response response = r[r.length - 1];
                 /*
                  * Look for STATUS responses
@@ -488,7 +488,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Execute
                  */
-                final Response[] r = protocol.command("GETACL", args);
+                final Response[] r = performCommand(protocol, "GETACL", args);
                 final Response response = r[r.length-1];
                 /*
                  * Grab all ACL responses
@@ -554,7 +554,7 @@ public final class IMAPCommandsCollection {
                  * Execute
                  */
                 final String command = "MYRIGHTS";
-                final Response[] r = protocol.command(command, args);
+                final Response[] r = performCommand(protocol, command, args);
                 final Response response = r[r.length-1];
                 /*
                  * Grab all responses
@@ -613,12 +613,7 @@ public final class IMAPCommandsCollection {
                  * If ignoreDeleted is true, perform via "SEARCH UNSEEN NOT DELETED" command
                  */
                 if (ignoreDeleted) {
-                    final Response[] r;
-                    {
-                        final long start = System.currentTimeMillis();
-                        r = protocol.command(COMMAND_SEARCH_UNSEEN_NOT_DELETED, null);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    }
+                    final Response[] r = performCommand(protocol, COMMAND_SEARCH_UNSEEN_NOT_DELETED);
                     int unread = 0;
                     final Response response = r[r.length - 1];
                     if (response.isOK()) {
@@ -682,7 +677,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Perform command
                  */
-                final Response[] r = protocol.command("STATUS", args);
+                final Response[] r = performCommand(protocol, "STATUS", args);
                 final Response response = r[r.length - 1];
                 /*
                  * Look for STATUS responses
@@ -745,7 +740,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Perform command
                  */
-                final Response[] r = protocol.command("STATUS", args);
+                final Response[] r = performCommand(protocol, "STATUS", args);
                 final Response response = r[r.length - 1];
                 /*
                  * Look for STATUS responses
@@ -808,7 +803,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Perform command
                  */
-                final Response[] r = protocol.command("STATUS", args);
+                final Response[] r = performCommand(protocol, "STATUS", args);
                 final Response response = r[r.length - 1];
                 /*
                  * Look for STATUS responses
@@ -871,7 +866,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Perform command
                  */
-                final Response[] r = protocol.command("STATUS", args);
+                final Response[] r = performCommand(protocol, "STATUS", args);
                 final Response response = r[r.length - 1];
                 /*
                  * Look for STATUS responses
@@ -1060,7 +1055,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Perform command
                  */
-                final Response[] r = p.command("GETQUOTAROOT", args);
+                final Response[] r = performCommand(p, "GETQUOTAROOT", args);
                 final Response response = r[r.length - 1];
                 /*
                  * Create map for parsed responses
@@ -1178,7 +1173,7 @@ public final class IMAPCommandsCollection {
                 public Object doCommand(final IMAPProtocol p) {
                     final Argument args = new Argument();
                     args.writeString(BASE64MailboxEncoder.encode(folder));
-                    p.command((subscribe ? "SUBSCRIBE" : "UNSUBSCRIBE"), args);
+                    performCommand(p, (subscribe ? "SUBSCRIBE" : "UNSUBSCRIBE"), args);
                     return null;
                 }
             });
@@ -1208,10 +1203,7 @@ public final class IMAPCommandsCollection {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Response[] r =
-                    p.command(
-                        new StringBuilder().append(COMMAND_LSUB).append(" \"\" ").append(prepareStringArgument(lfolder)).toString(),
-                        null);
+                final Response[] r = performCommand(p, new StringAllocator().append(COMMAND_LSUB).append(" \"\" ").append(prepareStringArgument(lfolder)).toString());
                 final Response response = r[r.length - 1];
                 if (response.isOK()) {
                     int res = -1;
@@ -1256,9 +1248,9 @@ public final class IMAPCommandsCollection {
                 final String original = prepareStringArgument(folder.getFullName());
                 final String newName = prepareStringArgument(renameFullname);
                 // Create command
-                final String command = new StringBuilder(32).append("RENAME ").append(original).append(' ').append(newName).toString();
+                final String command = new StringAllocator(32).append("RENAME ").append(original).append(' ').append(newName).toString();
                 // Issue command
-                final Response[] r = protocol.command(command, null);
+                final Response[] r = performCommand(protocol, command);
                 final Response response = r[r.length - 1];
                 if (response.isOK()) {
                     return Boolean.TRUE;
@@ -1274,7 +1266,7 @@ public final class IMAPCommandsCollection {
         });
         if (null == ret) {
             final ProtocolException pex =
-                new ProtocolException(new StringBuilder(64).append("IMAP folder \"").append(folder.getFullName()).append(
+                new ProtocolException(new StringAllocator(64).append("IMAP folder \"").append(folder.getFullName()).append(
                     "\" cannot be renamed.").toString());
             throw new MessagingException(pex.getMessage(), pex);
         }
@@ -1319,7 +1311,7 @@ public final class IMAPCommandsCollection {
                 // Create command
                 final String command;
                 {
-                    final StringBuilder cmdBuilder = new StringBuilder(32).append("CREATE ").append(mbox);
+                    final StringAllocator cmdBuilder = new StringAllocator(32).append("CREATE ").append(mbox);
                     if (null != specialUses && !specialUses.isEmpty()) {
                         cmdBuilder.append(" (USE (");
                         final Iterator<String> iterator = specialUses.iterator();
@@ -1332,7 +1324,7 @@ public final class IMAPCommandsCollection {
                     command = cmdBuilder.toString();
                 }
                 // Issue command
-                final Response[] r = protocol.command(command, null);
+                final Response[] r = performCommand(protocol, command);
                 final Response response = r[r.length - 1];
                 if (response.isOK()) {
                     /*
@@ -1342,7 +1334,7 @@ public final class IMAPCommandsCollection {
                         final ListInfo[] li = protocol.list("", fullName);
                         if (errorOnUnsupportedType && li != null && !li[0].hasInferiors) {
                             protocol.delete(fullName);
-                            throw new ProtocolException(new StringBuilder(32).append("Created IMAP folder \"").append(fullName).append(
+                            throw new ProtocolException(new StringAllocator(32).append("Created IMAP folder \"").append(fullName).append(
                                 "\" (").append(newFolder.getStore().toString()).append(") should hold folders AND messages, but can only hold messages.").toString());
                         }
                     }
@@ -1368,7 +1360,7 @@ public final class IMAPCommandsCollection {
         });
         if (null == ret) {
             final ProtocolException pex =
-                new ProtocolException(new StringBuilder(64).append("IMAP folder \"").append(newFolder.getFullName()).append(
+                new ProtocolException(new StringAllocator(64).append("IMAP folder \"").append(newFolder.getFullName()).append(
                     "\" (").append(newFolder.getStore().toString()).append(") cannot be created.").toString());
             throw new MessagingException(pex.getMessage(), pex);
         }
@@ -1400,7 +1392,7 @@ public final class IMAPCommandsCollection {
                 // Create command
                 final String command;
                 {
-                    final StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA ").append(mbox);
+                    final StringAllocator cmdBuilder = new StringAllocator(32).append("SETMETADATA ").append(mbox);
                     cmdBuilder.append("(");
                     for (final String specialUse : specialUses) {
                         if (specialUse.charAt(0) == '\\') {
@@ -1413,7 +1405,7 @@ public final class IMAPCommandsCollection {
                     command = cmdBuilder.toString();
                 }
                 // Issue command
-                final Response[] r = protocol.command(command, null);
+                final Response[] r = performCommand(protocol, command);
                 final Response response = r[r.length - 1];
                 if (response.isOK()) {
                     for (int i = 0, len = r.length - 1; i < len; i++) {
@@ -1488,11 +1480,7 @@ public final class IMAPCommandsCollection {
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
                     final String command = String.format(format, args[i], "-", ALL_COLOR_LABELS);
-                    {
-                        final long start = System.currentTimeMillis();
-                        r = p.command(command, null);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    }
+                    r = performCommand(p, command);
                     response = r[r.length - 1];
                     if (response.isOK()) {
                         notifyResponseHandlers(r, p);
@@ -1551,11 +1539,7 @@ public final class IMAPCommandsCollection {
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
                     final String command = String.format(format, args[i], "+", colorLabelFlag);
-                    {
-                        final long start = System.currentTimeMillis();
-                        r = p.command(command, null);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    }
+                    r = performCommand(p, command);
                     response = r[r.length - 1];
                     if (response.isOK()) {
                         notifyResponseHandlers(r, p);
@@ -1594,7 +1578,7 @@ public final class IMAPCommandsCollection {
 
                 @Override
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                    final Response[] r = protocol.command(COMMAND_CLOSE, null);
+                    final Response[] r = performCommand(protocol, COMMAND_CLOSE);
                     /*
                      * Grab last response that should indicate an OK
                      */
@@ -1625,7 +1609,7 @@ public final class IMAPCommandsCollection {
 
                 @Override
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                    final Response[] r = protocol.command(COMMAND_NOOP, null);
+                    final Response[] r = performCommand(protocol, COMMAND_NOOP);
                     /*
                      * Grab last response that should indicate an OK
                      */
@@ -1653,7 +1637,7 @@ public final class IMAPCommandsCollection {
 
                 @Override
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                    final Response[] r = protocol.command(new StringBuilder(COMMAND_NOOP).append(' ').append(clientIP).toString(), null);
+                    final Response[] r = performCommand(protocol, new StringAllocator(COMMAND_NOOP).append(' ').append(clientIP).toString());
                     /*
                      * Grab last response that should indicate an OK
                      */
@@ -1726,8 +1710,8 @@ public final class IMAPCommandsCollection {
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final String command =
-                    new StringBuilder(numArgument.length() + 16).append("SORT (").append(sortCrit).append(") UTF-8 ").append(numArgument).toString();
-                final Response[] r = p.command(command, null);
+                    new StringAllocator(numArgument.length() + 16).append("SORT (").append(sortCrit).append(") UTF-8 ").append(numArgument).toString();
+                final Response[] r = performCommand(p, command);
                 final Response response = r[r.length - 1];
                 final SmartIntArray sia = new SmartIntArray(32);
                 if (response.isOK()) {
@@ -1806,12 +1790,7 @@ public final class IMAPCommandsCollection {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Response[] r;
-                {
-                    final long start = System.currentTimeMillis();
-                    r = p.command(ignoreDeleted ? COMMAND_SEARCH_UNSEEN_NOT_DELETED : COMMAND_SEARCH_UNSEEN, null);
-                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                }
+                final Response[] r = performCommand(p, ignoreDeleted ? COMMAND_SEARCH_UNSEEN_NOT_DELETED : COMMAND_SEARCH_UNSEEN);
                 /*
                  * Result is something like: SEARCH 12 20 24
                  */
@@ -1958,7 +1937,7 @@ public final class IMAPCommandsCollection {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Response[] r = p.command(COMMAND_EXPUNGE, null);
+                final Response[] r = performCommand(p, COMMAND_EXPUNGE);
                 final Response response = r[r.length - 1];
                 if (response.isOK()) {
                     return Boolean.TRUE;
@@ -2004,13 +1983,7 @@ public final class IMAPCommandsCollection {
         boolean performFallback = !supportsUIDPLUS;
         if (supportsUIDPLUS) {
             try {
-                final long start = System.currentTimeMillis();
                 IMAPCommandsCollection.uidExpunge(imapFolder, uids);
-                MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                if (DEBUG) {
-                    LOG.debug(new StringBuilder(128).append(uids.length).append(" messages expunged in ").append(
-                        (System.currentTimeMillis() - start)).append("msec").toString());
-                }
             } catch (final FolderClosedException e) {
                 /*
                  * Not possible to retry since connection is broken
@@ -2046,7 +2019,7 @@ public final class IMAPCommandsCollection {
                 }
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(
-                        new StringBuilder(64).append("UID EXPUNGE failed: ").append(e.getMessage()).append(
+                        new StringAllocator(64).append("UID EXPUNGE failed: ").append(e.getMessage()).append(
                             ".\nPerforming fallback actions.").toString(),
                         e);
                 }
@@ -2096,7 +2069,7 @@ public final class IMAPCommandsCollection {
                     /*
                      * Perform command
                      */
-                    final Response[] r = p.command("SELECT", args);
+                    final Response[] r = performCommand(p, "SELECT", args);
                     /*
                      * Grab last response that should indicate an OK
                      */
@@ -2146,7 +2119,7 @@ public final class IMAPCommandsCollection {
                         /*
                          * Perform command
                          */
-                        final Response[] r = p.command(Folder.READ_ONLY == mode ? "EXAMINE" : "SELECT", args);
+                        final Response[] r = performCommand(p, Folder.READ_ONLY == mode ? "EXAMINE" : "SELECT", args);
                         /*
                          * Grab last response that should indicate an OK
                          */
@@ -2165,7 +2138,7 @@ public final class IMAPCommandsCollection {
                     /*
                      * Perform command
                      */
-                    final Response[] r = p.command("SELECT", args);
+                    final Response[] r = performCommand(p, "SELECT", args);
                     /*
                      * Grab last response that should indicate an OK
                      */
@@ -2201,7 +2174,7 @@ public final class IMAPCommandsCollection {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Response[] r = p.command(FETCH_FLAGS, null);
+                final Response[] r = performCommand(p, FETCH_FLAGS);
                 final int mlen = r.length - 1;
                 final Response response = r[mlen];
                 long[] retval = null;
@@ -2283,7 +2256,7 @@ public final class IMAPCommandsCollection {
     public static long[] seqNums2UID(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum) throws MessagingException {
         return seqNums2UID(
             imapFolder,
-            new String[] { new StringBuilder(16).append(startSeqNum).append(':').append(endSeqNum).toString() },
+            new String[] { new StringAllocator(16).append(startSeqNum).append(':').append(endSeqNum).toString() },
             endSeqNum - startSeqNum + 1);
     }
 
@@ -2335,7 +2308,7 @@ public final class IMAPCommandsCollection {
                      *             BAD - command unknown or arguments invalid
                      */
                     final String command = String.format(TEMPL_FETCH_UID, args[i]);
-                    r = p.command(command, null);
+                    r = performCommand(p, command);
                     final int len = r.length - 1;
                     response = r[len];
                     if (response.isOK()) {
@@ -2419,7 +2392,7 @@ public final class IMAPCommandsCollection {
                  *             BAD - command unknown or arguments invalid
                  */
                 final String command = String.format(TEMPL_FETCH_UID, "1:*");
-                r = p.command(command, null);
+                r = performCommand(p, command);
                 final int len = r.length - 1;
                 response = r[len];
                 if (response.isOK()) {
@@ -2499,7 +2472,7 @@ public final class IMAPCommandsCollection {
                      *             BAD - command unknown or arguments invalid
                      */
                     final String command = String.format(TEMPL_UID_FETCH_UID, args[k]);
-                    final Response[] r = p.command(command, null);
+                    final Response[] r = performCommand(p, command);
                     final int len = r.length - 1;
                     final Response response = r[len];
                     r[len] = null;
@@ -2531,7 +2504,7 @@ public final class IMAPCommandsCollection {
                     }
                 }
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder(128).append(imapFolder.getFullName()).append(
+                    LOG.debug(new StringAllocator(128).append(imapFolder.getFullName()).append(
                         ": IMAP resolve fetch >>>UID FETCH ... (UID)<<< for ").append(length).append(" messages took ").append(
                         (System.currentTimeMillis() - start)).append("msec").toString());
                 }
@@ -2580,7 +2553,7 @@ public final class IMAPCommandsCollection {
                      *             BAD - command unknown or arguments invalid
                      */
                     final String command = String.format(TEMPL_UID_FETCH_UID, args[k]);
-                    final Response[] r = p.command(command, null);
+                    final Response[] r = performCommand(p, command);
                     final int len = r.length - 1;
                     final Response response = r[len];
                     r[len] = null;
@@ -2612,7 +2585,7 @@ public final class IMAPCommandsCollection {
                     }
                 }
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder(128).append(imapFolder.getFullName()).append(
+                    LOG.debug(new StringAllocator(128).append(imapFolder.getFullName()).append(
                         ": IMAP resolve fetch >>>UID FETCH ... (UID)<<< for ").append(uids.length).append(" messages took ").append(
                         (System.currentTimeMillis() - start)).append("msec").toString());
                 }
@@ -2654,7 +2627,7 @@ public final class IMAPCommandsCollection {
                      *             BAD - command unknown or arguments invalid
                      */
                     final String command = String.format(TEMPL_UID_FETCH_UID, args[k]);
-                    final Response[] r = p.command(command, null);
+                    final Response[] r = performCommand(p, command);
                     final int len = r.length - 1;
                     final Response response = r[len];
                     r[len] = null;
@@ -2719,7 +2692,7 @@ public final class IMAPCommandsCollection {
                  *             NO - fetch error: can't fetch that data
                  *             BAD - command unknown or arguments invalid
                  */
-                final Response[] r = p.command(COMMAND_FETCH_UID_FLAGS, null);
+                final Response[] r = performCommand(p, COMMAND_FETCH_UID_FLAGS);
                 final int len = r.length - 1;
                 final Response response = r[len];
                 final List<IMAPUpdateableData> l = new ArrayList<IMAPUpdateableData>(len);
@@ -2859,7 +2832,7 @@ public final class IMAPCommandsCollection {
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
                     final String command = String.format(TEMPL_UID_EXPUNGE, args[i]);
-                    r = p.command(command, null);
+                    r = performCommand(p, command);
                     response = r[r.length - 1];
                     if (response.isOK()) {
                         continue Next;
@@ -2902,14 +2875,10 @@ public final class IMAPCommandsCollection {
     public static boolean supportsUserDefinedFlags(final IMAPFolder imapFolder) throws MessagingException {
         final Boolean val = (Boolean) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
-            /*
-             * (non-Javadoc)
-             * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun .mail.imap.protocol.IMAPProtocol)
-             */
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final String command = new StringBuilder("SELECT ").append(prepareStringArgument(imapFolder.getFullName())).toString();
-                final Response[] r = p.command(command, null);
+                final String command = new StringAllocator("SELECT ").append(prepareStringArgument(imapFolder.getFullName())).toString();
+                final Response[] r = performCommand(p, command);
                 final Response response = r[r.length - 1];
                 Boolean retval = Boolean.FALSE;
                 if (response.isOK()) {
@@ -3020,9 +2989,9 @@ public final class IMAPCommandsCollection {
                 final boolean isREV1 = p.isREV1();
                 final Response[] r;
                 if (isREV1) {
-                    r = p.command(COMMAND_FETCH_OXMARK_REV1, null);
+                    r = performCommand(p, COMMAND_FETCH_OXMARK_REV1);
                 } else {
-                    r = p.command(COMMAND_FETCH_OXMARK_RFC, null);
+                    r = performCommand(p, COMMAND_FETCH_OXMARK_RFC);
                 }
                 final Response response = r[r.length - 1];
                 try {
@@ -3111,7 +3080,7 @@ public final class IMAPCommandsCollection {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Response[] r = p.command(COMMAND_FETCH_ENV_UID, null);
+                final Response[] r = performCommand(p, COMMAND_FETCH_ENV_UID);
                 final Response response = r[r.length - 1];
                 final Long retval = Long.valueOf(-1L);
                 if (response.isOK()) {
@@ -3250,7 +3219,7 @@ public final class IMAPCommandsCollection {
      */
     protected static ProtocolException missingFetchItem(final String itemName) {
         return new ProtocolException(
-            new StringBuilder(48).append("Missing ").append(itemName).append(" item in FETCH response.").toString());
+            new StringAllocator(48).append("Missing ").append(itemName).append(" item in FETCH response.").toString());
     }
 
     /**
@@ -3285,6 +3254,33 @@ public final class IMAPCommandsCollection {
                 }
             }
         }
+    }
+
+    /**
+     * Performs specified command without arguments
+     * 
+     * @param p The IMAP protocol
+     * @param command The command
+     * @return The responses
+     */
+    public static Response[] performCommand(final IMAPProtocol p, final String command) {
+        return performCommand(p, command, null);
+    }
+
+    /**
+     * Performs specified command using given arguments
+     * 
+     * @param p The IMAP protocol
+     * @param command The command
+     * @param args The argument
+     * @return The responses
+     */
+    public static Response[] performCommand(final IMAPProtocol p, final String command, final Argument args) {
+        final long start = System.currentTimeMillis();
+        final Response[] responses = p.command(command, args);
+        final long time = System.currentTimeMillis() - start;
+        mailInterfaceMonitor.addUseTime(time);
+        return responses;
     }
 
 }

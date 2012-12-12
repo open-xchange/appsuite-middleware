@@ -248,7 +248,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -323,7 +323,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
             if (WARN) {
                 final OXException imapExc = MimeMailException.handleMessagingException(e);
                 LOG.warn(
-                    new StringBuilder(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(imapExc.getMessage()).toString(),
+                    new com.openexchange.java.StringAllocator(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(imapExc.getMessage()).toString(),
                     imapExc);
             }
             error = true;
@@ -333,7 +333,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
              */
             if (WARN) {
                 LOG.warn(
-                    new StringBuilder(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(e.getMessage()).toString(),
+                    new com.openexchange.java.StringAllocator(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(e.getMessage()).toString(),
                     e);
             }
             error = true;
@@ -494,7 +494,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 h = new InternetHeaders();
                 if (null == headerStream) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug(new StringBuilder(32).append("Cannot retrieve headers from message #").append(msg.getSeqnum()).append(
+                        logger.debug(new com.openexchange.java.StringAllocator(32).append("Cannot retrieve headers from message #").append(msg.getSeqnum()).append(
                             " in folder ").append(msg.getFolder()).toString());
                     }
                 } else {

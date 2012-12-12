@@ -141,7 +141,7 @@ public final class MoveIMAPCommand extends AbstractIMAPCommand<long[]> {
         this.fast = fast;
         this.destFolderName = prepareStringArgument(destFolderName);
         length = uids.length;
-        args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(uids[0]).append(':').append(
+        args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new com.openexchange.java.StringAllocator(64).append(uids[0]).append(':').append(
             uids[length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
             uids,
             false,
@@ -231,7 +231,7 @@ public final class MoveIMAPCommand extends AbstractIMAPCommand<long[]> {
         int pos = resp.indexOf(COPYUID);
         if (pos < 0) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(128).append("Missing COPYUID response code: ").append(resp).toString());
+                LOG.warn(new com.openexchange.java.StringAllocator(128).append("Missing COPYUID response code: ").append(resp).toString());
             }
             return true;
         }
@@ -268,7 +268,7 @@ public final class MoveIMAPCommand extends AbstractIMAPCommand<long[]> {
             }
             copyuidResp.fillResponse(uids, retval);
         } else {
-            LOG.error(new StringBuilder(128).append("Invalid COPYUID response: ").append(resp).toString());
+            LOG.error(new com.openexchange.java.StringAllocator(128).append("Invalid COPYUID response: ").append(resp).toString());
         }
         proceed = false;
         return true;

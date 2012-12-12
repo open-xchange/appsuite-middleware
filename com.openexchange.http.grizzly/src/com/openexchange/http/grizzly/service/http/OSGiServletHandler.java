@@ -71,6 +71,8 @@ import org.glassfish.grizzly.servlet.ServletHandler;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.service.http.HttpContext;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.log.LogProperties;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * OSGi customized {@link ServletHandler}.
@@ -290,7 +292,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
                 try {
                     filter.doFilter(request, response, this);
-                } catch(Throwable throwable) {
+                } catch (Throwable throwable) {
                     handleThrowable(throwable, request, response);
                 }
                 return;
@@ -310,81 +312,48 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         /**
          * Let the ExceptionUtils handle the Throwable for us and set a proper HttpStatus on the response.
+         * 
          * @param throwable The Throwable that needs to be handled.
          * @param request The request that couldn't be serviced because of throwable
          * @param response The associated Response
          */
         private void handleThrowable(Throwable throwable, ServletRequest request, ServletResponse response) {
             ExceptionUtils.handleThrowable(throwable);
-            StringAllocator allocator = new StringAllocator(128).append("Error processing request: ");
-            if(request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
+
+            StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
+            if (LogProperties.isEnabled()) {
+                logBuilder.append(LogProperties.getAndPrettyPrint());
+            }
+
+            if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
                 HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-                HttpServletResponse httpServletResponse= (HttpServletResponse) response;
-                appendHttpServletRequestInfo(allocator, httpServletRequest);
+                HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+                appendHttpServletRequestInfo(logBuilder, httpServletRequest);
                 // 500 - Internal Server Error
                 httpServletResponse.setStatus(500);
             } else {
-                appendServletRequestInfo(allocator, request);
+                appendServletRequestInfo(logBuilder, request);
             }
-            LOG.error(allocator.toString(), throwable);
+            LOG.error(logBuilder.toString(), throwable);
         }
 
         // ------------------------------------------------------- Protected Methods
 
-        /**
-         * Add ServletName and Parameters of the request to the log string allocator.
-         * @param allocator
-         * @param request
-         */
-        private void appendServletRequestInfo(StringAllocator allocator, ServletRequest request) {
-            allocator.append("servlet name=''");
-            allocator.append(servlet.getServletConfig().getServletName());
-            allocator.append("servlet parameters=''");
-            @SuppressWarnings("unchecked")
-            Enumeration<String> parameterNames = request.getParameterNames();
-            boolean firstParam=true;
-            while(parameterNames.hasMoreElements()) {
-                if(firstParam) {
-                    String name = parameterNames.nextElement();
-                    String value = request.getParameter(name);
-                    allocator.append(name);
-                    allocator.append("=");
-                    allocator.append(value);
-                    firstParam=false;
-                } else {
-                    allocator.append("&");
-                    String name = parameterNames.nextElement();
-                    String value = request.getParameter(name);
-                    allocator.append(name);
-                    allocator.append("=");
-                    allocator.append(value);
-                }
-            }
-        }
-
-        /**
-         * Add Uri and QueryString of the httpServletRequest to the log string allocator
-         * @param allocator The log string allocator
-         * @param httpServletRequest The HttpServletRequest
-         */
-        private void appendHttpServletRequestInfo(StringAllocator allocator, HttpServletRequest httpServletRequest) {
-            allocator.append("request-URI=''");
-            allocator.append(httpServletRequest.getRequestURI());
-            allocator.append("'', query-string=''");
-            allocator.append(httpServletRequest.getQueryString());
-            allocator.append("''");
-        }
-
         protected void addFilter(final Filter filter) {
-            boolean isAlreadyAdded = false;
-            for (Filter currentFilter : filters) {
-                if (currentFilter!=null && currentFilter.equals(filter)) {
-                    isAlreadyAdded = true;
-                    break;
-                }
+            if (filter == null) {
+                throw new IllegalArgumentException("Obligatory parameter is null: filter");
             }
-            if (!isAlreadyAdded) {
-                synchronized (lock) {
+            synchronized (lock) {
+                // Don't ad Filters twice
+                boolean isAlreadyAdded = false;
+                for (Filter currentFilter : filters) {
+                    if (currentFilter != null && currentFilter.getClass().equals(filter.getClass())) {
+                        isAlreadyAdded = true;
+                        LOG.error("Tried to add Filter " + filter + " multiple times.");
+                        break;
+                    }
+                }
+                if (!isAlreadyAdded) {
                     if (n == filters.length) {
                         Filter[] newFilters = new Filter[n + 4];
                         System.arraycopy(filters, 0, newFilters, 0, n);
@@ -397,6 +366,50 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
         }
 
         // --------------------------------------------------------- Private Methods
+        /**
+         * Add ServletName and Parameters of the request to the log string allocator.
+         * 
+         * @param logBuilder The existing StringBuilder user for building the log message
+         * @param request The Request that couldn't be executed successfully.
+         */
+        private void appendServletRequestInfo(StringBuilder logBuilder, ServletRequest request) {
+            logBuilder.append("servlet name=''");
+            logBuilder.append(servlet.getServletConfig().getServletName());
+            logBuilder.append("servlet parameters=''");
+            @SuppressWarnings("unchecked") Enumeration<String> parameterNames = request.getParameterNames();
+            boolean firstParam = true;
+            while (parameterNames.hasMoreElements()) {
+                if (firstParam) {
+                    String name = parameterNames.nextElement();
+                    String value = request.getParameter(name);
+                    logBuilder.append(name);
+                    logBuilder.append("=");
+                    logBuilder.append(value);
+                    firstParam = false;
+                } else {
+                    logBuilder.append("&");
+                    String name = parameterNames.nextElement();
+                    String value = request.getParameter(name);
+                    logBuilder.append(name);
+                    logBuilder.append("=");
+                    logBuilder.append(value);
+                }
+            }
+        }
+
+        /**
+         * Add Uri and QueryString of the httpServletRequest to the log string allocator
+         * 
+         * @param logBuilder The existing StringBuilder user for building the log message
+         * @param httpServletRequest The HttpServletRequest that couldn't be executed successfully
+         */
+        private void appendHttpServletRequestInfo(StringBuilder logBuilder, HttpServletRequest httpServletRequest) {
+            logBuilder.append("request-URI=''");
+            logBuilder.append(httpServletRequest.getRequestURI());
+            logBuilder.append("'', query-string=''");
+            logBuilder.append(httpServletRequest.getQueryString());
+            logBuilder.append("''");
+        }
 
         private void requestDestroyed(ServletRequestEvent event) {
             // TODO don't create the event unless necessary

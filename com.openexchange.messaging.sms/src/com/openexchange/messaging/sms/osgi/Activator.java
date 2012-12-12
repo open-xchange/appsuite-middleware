@@ -51,7 +51,6 @@ package com.openexchange.messaging.sms.osgi;
 
 import static com.openexchange.messaging.sms.osgi.MessagingSMSServiceRegistry.getServiceRegistry;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -69,9 +68,9 @@ public class Activator extends DeferredActivator {
     
     private static transient final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
 
-    private ServletRegisterer servletRegisterer;
+    private volatile ServletRegisterer servletRegisterer;
     
-    private ServiceRegistration<PreferencesItemService> serviceRegistration;
+    private volatile ServiceRegistration<PreferencesItemService> serviceRegistration;
         
     public Activator() {
         super();        
@@ -119,8 +118,10 @@ public class Activator extends DeferredActivator {
                 }
             }
             ServletRegisterer.PREFIX.set(getService(DispatcherPrefixService.class));
-            servletRegisterer = new ServletRegisterer();
+            final ServletRegisterer servletRegisterer = new ServletRegisterer();
+            this.servletRegisterer = servletRegisterer;
             servletRegisterer.registerServlet();
+
             serviceRegistration = context.registerService(PreferencesItemService.class, new SMSPreferencesItem(), null);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
@@ -131,13 +132,17 @@ public class Activator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
+            final ServiceRegistration<PreferencesItemService> serviceRegistration = this.serviceRegistration;
             if (null != serviceRegistration) {
                 serviceRegistration.unregister();
-                serviceRegistration = null;
+                this.serviceRegistration = null;
             }
 
-            servletRegisterer.unregisterServlet();
-            servletRegisterer = null;
+            final ServletRegisterer servletRegisterer = this.servletRegisterer;
+            if (null != servletRegisterer) {
+                servletRegisterer.unregisterServlet();
+                this.servletRegisterer = null;
+            }
             getServiceRegistry().clearRegistry();
             ServletRegisterer.PREFIX.set(null);
         } catch (final Throwable t) {

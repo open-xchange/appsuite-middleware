@@ -49,7 +49,7 @@
 
 package com.openexchange.imap;
 
-import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -332,7 +332,7 @@ public final class AllFetch {
                 {
                     final String lowCostItems = getFetchCommand(items);
                     command =
-                        new StringBuilder(12 + lowCostItems.length()).append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (").append(
+                        new com.openexchange.java.StringAllocator(12 + lowCostItems.length()).append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (").append(
                             lowCostItems).append(')').toString();
                 }
                 /*
@@ -341,12 +341,7 @@ public final class AllFetch {
                 final SBOutputStream sbout = DEBUG ? new SBOutputStream() : null;
                 final IMAPTracer.TracerState tracerState = DEBUG ? traceStateFor(protocol, sbout) : null;
                 try {
-                    final Response[] r;
-                    {
-                        final long start = System.currentTimeMillis();
-                        r = protocol.command(command, null);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    }
+                    final Response[] r = performCommand(protocol, command);
                     final int len = r.length - 1;
                     final Response response = r[len];
                     final List<MailMessage> l = new ArrayList<MailMessage>(len);
@@ -372,7 +367,7 @@ public final class AllFetch {
                                     l.add(m);
                                 } catch (final ProtocolException e) {
                                     if (tracerState != null) {
-                                        final StringBuilder sb = sbout.getTrace();
+                                        final com.openexchange.java.StringAllocator sb = sbout.getTrace();
                                         sb.insert(0, "\nIMAP trace:\n");
                                         sb.insert(0, e.getMessage());
                                         sb.insert(0, "Detected invalid FETCH response which will be ignored. Error:\n");
@@ -441,7 +436,7 @@ public final class AllFetch {
                 /*
                  * Trace was enabled before, thus write trace to previous output stream to maintain debug logs properly.
                  */
-                final StringBuilder sb = sbout.getTrace();
+                final com.openexchange.java.StringAllocator sb = sbout.getTrace();
                 try {
                     /*
                      * DON'T CLOSE THE WRITER BECAUSE IT CLOSES UNDERLYING STREAM, TOO!!!
@@ -539,14 +534,14 @@ public final class AllFetch {
      */
     private static final class SBOutputStream extends OutputStream {
 
-        private final StringBuilder sb;
+        private final com.openexchange.java.StringAllocator sb;
 
         /**
          * Initializes a new {@link SBOutputStream}.
          */
         public SBOutputStream() {
             super();
-            sb = new StringBuilder(8192);
+            sb = new com.openexchange.java.StringAllocator(8192);
         }
 
         @Override
@@ -575,7 +570,7 @@ public final class AllFetch {
          *
          * @return The trace
          */
-        public StringBuilder getTrace() {
+        public com.openexchange.java.StringAllocator getTrace() {
             return sb;
         }
 

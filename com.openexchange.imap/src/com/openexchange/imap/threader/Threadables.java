@@ -351,8 +351,8 @@ public final class Threadables {
                     final long start = System.currentTimeMillis();
                     r = protocol.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
-                    if (log.isInfoEnabled()) {
-                        log.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
+                    if (log.isDebugEnabled()) {
+                        log.debug('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
                     }
                     mailInterfaceMonitor.addUseTime(dur);
                 }
@@ -364,9 +364,19 @@ public final class Threadables {
                         final String fullName = imapFolder.getFullName();
                         final char sep = imapFolder.getSeparator();
                         final String sFetch = "FETCH";
+                        final String sInReplyTo = "In-Reply-To";
+                        final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
                             if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
-                                mails.add(handleFetchRespone((FetchResponse) r[j], fullName, sep));
+                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, sep);
+                                final String references = message.getFirstHeader(sReferences);
+                                if (null == references) {
+                                    final String inReplyTo = message.getFirstHeader(sInReplyTo);
+                                    if (null != inReplyTo) {
+                                        message.setHeader(sReferences, inReplyTo);
+                                    }
+                                }
+                                mails.add(message);
                                 r[j] = null;
                             }
                         }
@@ -481,8 +491,8 @@ public final class Threadables {
                     final long start = System.currentTimeMillis();
                     r = protocol.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
-                    if (log.isInfoEnabled()) {
-                        log.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
+                    if (log.isDebugEnabled()) {
+                        log.debug('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
                     }
                     mailInterfaceMonitor.addUseTime(dur);
                 }

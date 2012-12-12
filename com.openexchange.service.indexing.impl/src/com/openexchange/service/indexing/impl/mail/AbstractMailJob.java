@@ -141,15 +141,20 @@ public abstract class AbstractMailJob implements IndexingJob {
                     }
                 }
                     
-                String[] primaryContents = messageStorage.getPrimaryContents(info.folder, mailIds);                
+                String[] primaryContents = messageStorage.getPrimaryContents(info.folder, mailIds);
                 for (int i = 0; i < messages.length; i++) {
                     MailMessage message = messages[i];
                     if (message != null) {
                         ContentAwareMailMessage contentAwareMessage = new ContentAwareMailMessage(primaryContents[i], message);
                         documents.add(new StandardIndexDocument<MailMessage>(contentAwareMessage));
-                        IndexMailHandler handler = new IndexMailHandler(String.valueOf(info.accountId), info.folder, message.getMailId());
-                        parser.parseMailMessage(message, handler);
-                        attachments.addAll(handler.getAttachments());
+                        
+                        try {
+                            IndexMailHandler handler = new IndexMailHandler(String.valueOf(info.accountId), info.folder, message.getMailId());
+                            parser.parseMailMessage(message, handler);
+                            attachments.addAll(handler.getAttachments());
+                        } catch (Throwable t) {
+                            LOG.warn("Could not parse mail attachments. Indexing attachments will be skipped for this mail.", t);
+                        }
                     }
                 }
 
