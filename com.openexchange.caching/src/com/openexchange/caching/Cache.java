@@ -51,6 +51,7 @@ package com.openexchange.caching;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 
 /**
@@ -308,4 +309,33 @@ public interface Cache {
      * @return new instance of {@link CacheKey}
      */
     public CacheKey newCacheKey(int contextId, Serializable... objs);
+    
+    /**
+     * Gets the set of keys of objects currently in the group.
+     * @param group
+     * @return a set of keys
+     */
+    public Set<?> getGroupKeys(String group) throws OXException;
+    
+    /**
+     *  Gets the set of group names in the cache
+     * @return a set of group names
+     */
+    public Set<String> getGroupNames() throws OXException;
+    
+    /**
+     * Gets all the set of keys in the cache
+     * @return a set of keys in the cache
+     * @throws OXException
+     */
+    public Set<?> getAllKeys() throws OXException;
+    
+    /**
+     * Get a ranged set of keys
+     * @param start of range
+     * @param end of range
+     * @return a set of keys in cache
+     * @throws OXException
+     */
+    public Set<?> getKeysInRange(int start, int end) throws OXException;
 }
