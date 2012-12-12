@@ -1558,8 +1558,8 @@ public class HazelcastJobStore implements JobStore {
                 try {
                     Set<TriggerKey> hazelcastKeys = triggersByKey.keySet(new AcquiredAndExecutingTriggersPredicate(nodeIp));
                     clusterKeys = new HashSet<TriggerKey>(hazelcastKeys);
-                    clusterKeys.remove(locallyAcquiredTriggers);
-                    clusterKeys.remove(locallyExecutingTriggers);
+                    clusterKeys.removeAll(locallyAcquiredTriggers.keySet());
+                    clusterKeys.removeAll(locallyExecutingTriggers.keySet());
                 } finally {
                     lock.unlock();
                 }
