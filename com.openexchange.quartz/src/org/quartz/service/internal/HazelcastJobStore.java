@@ -760,9 +760,13 @@ public class HazelcastJobStore implements JobStore {
         lock.lock();
         try {
             ISet<TriggerKey> triggerKeys = triggersByJobKey.get(jobKey);
-            for (TriggerKey triggerKey : triggerKeys) {
-                OperableTrigger trigger = (OperableTrigger) triggersByKey.get(triggerKey).getTrigger();
-                resultTriggers.add(trigger);
+            if (triggerKeys != null) {
+                for (TriggerKey triggerKey : triggerKeys) {
+                    OperableTrigger trigger = (OperableTrigger) triggersByKey.get(triggerKey).getTrigger();
+                    if (trigger != null) {
+                        resultTriggers.add(trigger);
+                    }
+                }
             }
             
             return resultTriggers;
