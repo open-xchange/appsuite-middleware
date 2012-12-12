@@ -6,6 +6,10 @@
 
  - Fix for bug 24035: Corrected wrong contact references of distribution list members
 
+* 2012-11-28 - karsten.will@open-xchange.com
+
+ - Fix for bug 23994: Always returning correct result code.
+
 * 2012-11-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 23724: Reduce number of logged stack trace elements
