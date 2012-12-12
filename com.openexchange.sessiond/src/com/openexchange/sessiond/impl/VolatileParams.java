@@ -76,7 +76,9 @@ public final class VolatileParams implements Parameterized {
 
     @Override
     public <V> V getParameter(final String name) {
-        return parameters.getParameter(name);
+        @SuppressWarnings("unchecked")
+        V obj = (V) parameters.getParameter(name);
+        return obj;
     }
 
     @Override
