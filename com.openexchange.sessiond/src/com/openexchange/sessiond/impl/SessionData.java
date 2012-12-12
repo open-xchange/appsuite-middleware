@@ -775,7 +775,12 @@ final class SessionData {
         // Look-up volatile ones
         SessionControl control = volatileSessions.get(sessionId);
         if (null != control) {
-            return control.isElapsed(volatileMaxIdleTime()) ? null : control;
+            if (!control.isElapsed(volatileMaxIdleTime())) {
+                return control;
+            }
+            volatileSessions.remove(sessionId);
+            dropSession(control, volatileUserSessions);
+            return null;
         }
         int i = 0;
         // Read-only access
@@ -1122,25 +1127,27 @@ final class SessionData {
                 }
             }
 
-            private void dropSession(final SessionControl sessionControl, final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions) {
-                final SessionImpl session = sessionControl.getSession();
-                SessionHandler.postSessionRemoval(session);
-                final UserKey key = new UserKey(session.getUserId(), session.getContextId());
-                final Queue<String> queue = volatileUserSessions.remove(key);
-                if (null != queue) {
-                    queue.remove(session.getSessionID());
-                    if (!queue.isEmpty()) {
-                        final Queue<String> prev = volatileUserSessions.put(key, queue);
-                        if (null != prev) {
-                            queue.addAll(prev);
-                        }
-                    }
-                }
-                LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
-            }
         };
         final int frequencyTime = volatileFrequencyTime();
         volatileSessionsTimerTask = service.scheduleWithFixedDelay(task, frequencyTime, frequencyTime);
+    }
+
+    /** Drops volatile session */
+    protected static void dropSession(final SessionControl sessionControl, final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions) {
+        final SessionImpl session = sessionControl.getSession();
+        SessionHandler.postSessionRemoval(session);
+        final UserKey key = new UserKey(session.getUserId(), session.getContextId());
+        final Queue<String> queue = volatileUserSessions.remove(key);
+        if (null != queue) {
+            queue.remove(session.getSessionID());
+            if (!queue.isEmpty()) {
+                final Queue<String> prev = volatileUserSessions.put(key, queue);
+                if (null != prev) {
+                    queue.addAll(prev);
+                }
+            }
+        }
+        LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
     }
 
     public void removeTimerService() {
