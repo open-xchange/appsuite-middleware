@@ -54,7 +54,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SessionControl} - Holds a {@link Session} instance and remembers life-cycle timestamps such as last-accessed, creation-time, etc.
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -76,15 +76,40 @@ public class SessionControl {
     private final AtomicLong lastAccessed;
 
     /**
-     * Initializes a new {@link SessionControl}
-     *
-     * @param session The stored session
+     * The idle time.
      */
-    public SessionControl(final SessionImpl session) {
+    private final long idleTime;
+
+    /**
+     * Initializes a new {@link SessionControl}
+     * 
+     * @param session The stored session
+     * @param idleTime The session's allowed idle time or <code>-1</code> to use default setting
+     */
+    public SessionControl(final SessionImpl session, final long idleTime) {
         super();
         lastAccessed = new AtomicLong(System.currentTimeMillis());
         this.session = session;
         creationTime = System.currentTimeMillis();
+        this.idleTime = idleTime;
+    }
+
+    /**
+     * Initializes a new {@link SessionControl}
+     * 
+     * @param session The stored session
+     */
+    public SessionControl(final SessionImpl session) {
+        this(session, -1L); // Default idle time
+    }
+
+    /**
+     * Gets the idle time
+     * 
+     * @return The idle time
+     */
+    public long getIdleTime() {
+        return idleTime;
     }
 
     /**
@@ -108,7 +133,7 @@ public class SessionControl {
 
     /**
      * Gets the stored session
-     *
+     * 
      * @return The stored session
      */
     public SessionImpl getSession() {
@@ -117,7 +142,7 @@ public class SessionControl {
 
     /**
      * Gets the creation-time time stamp
-     *
+     * 
      * @return The creation-time time stamp
      */
     public long getCreationTime() {

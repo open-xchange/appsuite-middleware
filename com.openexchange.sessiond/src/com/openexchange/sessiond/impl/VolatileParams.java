@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,108 +47,61 @@
  *
  */
 
-package com.openexchange.login.internal;
+package com.openexchange.sessiond.impl;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.login.LoginRequest;
-import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.Parameterized;
 
 /**
- * Implements {@link AddSessionParameter}.
+ * {@link VolatileParams} - Parameters for a volatile session.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class AddSessionParameterImpl implements AddSessionParameter, Parameterized {
+public final class VolatileParams implements Parameterized {
 
-    private final String username;
-    private final LoginRequest request;
-    private final User user;
-    private final Context ctx;
-    private final Map<String, Object> parameters;
+    private final Parameterized parameters;
 
-    AddSessionParameterImpl(final String username, final LoginRequest request, final User user, final Context ctx) {
+    /**
+     * Initializes a new {@link VolatileParams}.
+     */
+    public VolatileParams(final Parameterized parameters) {
         super();
-        parameters = new HashMap<String, Object>(4);
-        this.username = username;
-        this.request = request;
-        this.user = user;
-        this.ctx = ctx;
-    }
-
-    @Override
-    public String getClientIP() {
-        return request.getClientIP();
-    }
-
-    @Override
-    public Context getContext() {
-        return ctx;
-    }
-
-    @Override
-    public String getFullLogin() {
-        return request.getLogin();
-    }
-
-    @Override
-    public String getUserLoginInfo() {
-        return username;
-    }
-
-    @Override
-    public String getPassword() {
-        return request.getPassword();
-    }
-
-    @Override
-    public int getUserId() {
-        return user.getId();
-    }
-
-    @Override
-    public String getAuthId() {
-        return request.getAuthId();
-    }
-
-    @Override
-    public String getHash() {
-        return request.getHash();
-    }
-
-    @Override
-    public String getClient() {
-        return request.getClient();
+        this.parameters = parameters;
     }
 
     @Override
     public Set<String> getParameterNames() {
-        return parameters.keySet();
+        return parameters.getParameterNames();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <V> V getParameter(final String name) {
-        try {
-            return (V) parameters.get(name);
-        } catch (final Exception e) {
-            return null;
-        }
+        return parameters.getParameter(name);
     }
 
     @Override
     public void setParameter(final String name, final Object value) {
-        if (null == name) {
-            parameters.remove(name);
-        } else {
-            parameters.put(name, value);
-        }
+        parameters.setParameter(name, value);
     }
 
     @Override
     public Object removeParameter(final String name) {
-        return parameters.remove(name);
+        return parameters.removeParameter(name);
     }
+
+    /**
+     * Gets denoted <code>long</code> value or given default value
+     */
+    public static long getLongValue(final Parameterized parameterized, final String name, final long defaultValue) {
+        if (null == parameterized) {
+            return defaultValue;
+        }
+        try {
+            final Object value = parameterized.getParameter(name);
+            return null == value ? defaultValue : ((value instanceof Number) ? ((Number) value).longValue() : Long.parseLong(value.toString()));
+        } catch (final NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
 }

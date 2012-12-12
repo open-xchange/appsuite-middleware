@@ -70,6 +70,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.Parameterized;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
@@ -87,6 +88,8 @@ import com.openexchange.timer.TimerService;
 final class SessionData {
 
     static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionData.class));
+
+    private static final String PARAM_IDLE_TIME = Parameterized.PARAM_IDLE_TIME;
 
     private final int maxSessions;
     private final long randomTokenTimeout;
@@ -596,8 +599,8 @@ final class SessionData {
      * @return The associated {@link SessionControl} instance
      * @throws OXException If add operation fails
      */
-    protected SessionControl addSession(final SessionImpl session, final boolean noLimit) throws OXException {
-        return addSession(session, noLimit, false);
+    protected SessionControl addSession(final SessionImpl session, final boolean noLimit, final Parameterized parameters) throws OXException {
+        return addSession(session, noLimit, parameters, false);
     }
 
     /**
@@ -609,14 +612,19 @@ final class SessionData {
      * @return The associated {@link SessionControl} instance
      * @throws OXException If add operation fails
      */
-    protected SessionControl addSession(final SessionImpl session, final boolean noLimit, final boolean addIfAbsent) throws OXException {
+    protected SessionControl addSession(final SessionImpl session, final boolean noLimit, final Parameterized parameters, final boolean addIfAbsent) throws OXException {
         if (!noLimit && countSessions() > maxSessions) {
             throw SessionExceptionCodes.MAX_SESSION_EXCEPTION.create();
         }
         final SessionControl control;
         // Check for volatile flag
         if (session.isVolatile()) {
-            control = new SessionControl(session);
+            control = new SessionControl(session, VolatileParams.getLongValue(parameters, PARAM_IDLE_TIME, -1L));
+            if (null != parameters) {
+                for (final String name : parameters.getParameterNames()) {
+                    session.setParameterIfAbsent(name, parameters.getParameter(name));
+                }
+            }
             final SessionControl prev = volatileSessions.put(session.getSessionID(), control);
             if (null != prev) {
                 final SessionImpl prevSession = prev.getSession();
@@ -1085,12 +1093,14 @@ final class SessionData {
             @Override
             public void run() {
                 try {
-                    final long maxStamp = System.currentTimeMillis() - maxIdleTime;
+                    final long now = System.currentTimeMillis();
+                    final long maxStamp = now - maxIdleTime;
                     if (LOG.isDebugEnabled()) {
                         int count = 0;
                         for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
                             final SessionControl sessionControl = it.next();
-                            if (sessionControl.getLastAccessed() < maxStamp) {
+                            final long idleTime = sessionControl.getIdleTime();
+                            if (sessionControl.getLastAccessed() < (idleTime < 0 ? maxStamp : (now - idleTime))) {
                                 it.remove();
                                 dropSession(sessionControl, volatileUserSessions);
                                 count++;
@@ -1100,7 +1110,8 @@ final class SessionData {
                     } else {
                         for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
                             final SessionControl sessionControl = it.next();
-                            if (sessionControl.getLastAccessed() < maxStamp) {
+                            final long idleTime = sessionControl.getIdleTime();
+                            if (sessionControl.getLastAccessed() < (idleTime < 0 ? maxStamp : (now - idleTime))) {
                                 it.remove();
                                 dropSession(sessionControl, volatileUserSessions);
                             }
