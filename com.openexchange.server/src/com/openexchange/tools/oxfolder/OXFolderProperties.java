@@ -389,7 +389,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             }
         }
         CacheFolderStorage.getInstance().clearCache(-1, contextId);
-        FolderMapManagement.getInstance().clear();
+        FolderMapManagement.getInstance().dropFor(contextId);
     }
 
     private static void updateGABWritePermission(final boolean enableInternalUsersEdit, final int contextId) {
