@@ -69,6 +69,11 @@ public interface Parameterized {
     public static final String PARAM_VOLATILE = "__volatile";
 
     /**
+     * The parameter name for idle time.
+     */
+    public static final String PARAM_IDLE_TIME = "__idleTime";
+
+    /**
      * Gets the denoted parameter.
      * 
      * @param name The name
