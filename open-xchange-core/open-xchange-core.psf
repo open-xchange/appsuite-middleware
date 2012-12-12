@@ -3,7 +3,7 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.0.0,com.openexchange.appsuite.config"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.apps.manifests.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,jcs_enhancement,com.openexchange.caching"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.calendar"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.calendar.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.capabilities"/>
