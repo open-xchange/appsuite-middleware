@@ -52,24 +52,71 @@ package com.openexchange.config.cascade;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link ConfigView}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ConfigView {
 
+    /**
+     * Sets denoted property
+     * 
+     * @param scope The property's scope
+     * @param property The property's name
+     * @param value The property's value
+     * @throws OXException If setting property fails for any reason
+     */
     <T> void set(String scope, String property, T value) throws OXException;
 
+    /**
+     * Gets coerced property value.
+     * 
+     * @param property The property name
+     * @param coerceTo The type to coerce to
+     * @return The coerced value
+     * @throws OXException If such a property does not exist
+     */
     <T> T get(String property, Class<T> coerceTo) throws OXException;
 
+    /**
+     * (Optionally) Gets coerced property value.
+     * 
+     * @param property The property name
+     * @param coerceTo The type to coerce to
+     * @param defaultValue The default value
+     * @return The coerced value or <code>defaultValue</code> if absent
+     * @throws OXException If such a property does not exist
+     */
     <T> T opt(String property, Class<T> coerceTo, T defaultValue) throws OXException;
 
+    /**
+     * Gets coerced property.
+     * 
+     * @param scope The property's scope
+     * @param property The property's name
+     * @param coerceTo The type to coerce to
+     * @return The coerced property
+     * @throws OXException If returning property fails
+     */
     <T> ConfigProperty<T> property(String scope, String property, Class<T> coerceTo) throws OXException;
 
+    /**
+     * Gets coerced composed property (all scopes combined).
+     * 
+     * @param property The property's name
+     * @param coerceTo The type to coerce to
+     * @return The coerced composed property
+     * @throws OXException If returning composed property fails
+     */
     <T> ComposedConfigProperty<T> property(String property, Class<T> coerceTo) throws OXException;
 
+    /**
+     * Gets all available properties.
+     * 
+     * @return All available properties
+     * @throws OXException If operation fails
+     */
     Map<String, ComposedConfigProperty<String>> all() throws OXException;
 
 }
