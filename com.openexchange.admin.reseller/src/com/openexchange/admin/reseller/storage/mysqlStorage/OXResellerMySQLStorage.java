@@ -509,7 +509,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             for (final ResellerAdmin adm : admins) {
                 final String name = adm.getName();
                 // cannot create radm with same name like master admin
-                if (name != null && mastercreds.getLogin().equals(name)) {
+                if (name != null && null != mastercreds && mastercreds.getLogin().equals(name)) {
                     return true;
                 }
                 String query = "SELECT sid FROM subadmin WHERE ";

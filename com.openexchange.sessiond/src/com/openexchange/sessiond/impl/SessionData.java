@@ -70,12 +70,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.Parameterized;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -87,6 +87,8 @@ import com.openexchange.timer.TimerService;
 final class SessionData {
 
     static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionData.class));
+
+    private static final String PARAM_IDLE_TIME = Parameterized.PARAM_IDLE_TIME;
 
     private final int maxSessions;
     private final long randomTokenTimeout;
@@ -117,7 +119,6 @@ final class SessionData {
 
     private final ConcurrentMap<String, SessionControl> volatileSessions;
     private final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions;
-    private volatile ScheduledTimerTask volatileSessionsTimerTask;
 
     SessionData(final long containerCount, final int maxSessions, final long randomTokenTimeout, final long longTermContainerCount, final boolean autoLogin) {
         super();
@@ -149,12 +150,6 @@ final class SessionData {
     }
 
     void clear() {
-        final ScheduledTimerTask volatileSessionsTimerTask = this.volatileSessionsTimerTask;
-        if (null != volatileSessionsTimerTask) {
-            volatileSessionsTimerTask.cancel();
-            ThreadPools.getTimerService().purge();
-            this.volatileSessionsTimerTask = null;
-        }
         volatileSessions.clear();
         volatileUserSessions.clear();
         wlock.lock();
@@ -596,8 +591,8 @@ final class SessionData {
      * @return The associated {@link SessionControl} instance
      * @throws OXException If add operation fails
      */
-    protected SessionControl addSession(final SessionImpl session, final boolean noLimit) throws OXException {
-        return addSession(session, noLimit, false);
+    protected SessionControl addSession(final SessionImpl session, final boolean noLimit, final Parameterized parameters) throws OXException {
+        return addSession(session, noLimit, parameters, false);
     }
 
     /**
@@ -609,14 +604,20 @@ final class SessionData {
      * @return The associated {@link SessionControl} instance
      * @throws OXException If add operation fails
      */
-    protected SessionControl addSession(final SessionImpl session, final boolean noLimit, final boolean addIfAbsent) throws OXException {
+    protected SessionControl addSession(final SessionImpl session, final boolean noLimit, final Parameterized parameters, final boolean addIfAbsent) throws OXException {
         if (!noLimit && countSessions() > maxSessions) {
             throw SessionExceptionCodes.MAX_SESSION_EXCEPTION.create();
         }
         final SessionControl control;
         // Check for volatile flag
         if (session.isVolatile()) {
-            control = new SessionControl(session);
+            final long idleTime = VolatileParams.getLongValue(parameters, PARAM_IDLE_TIME, -1L);
+            control = new SessionControl(session, idleTime);
+            if (null != parameters) {
+                for (final String name : parameters.getParameterNames()) {
+                    session.setParameterIfAbsent(name, parameters.getParameter(name));
+                }
+            }
             final SessionControl prev = volatileSessions.put(session.getSessionID(), control);
             if (null != prev) {
                 final SessionImpl prevSession = prev.getSession();
@@ -656,6 +657,11 @@ final class SessionData {
                 }
             }
             queue.offer(session.getSessionID());
+            final TimerService timerService = this.timerService.get();
+            if (null != timerService) {
+                final long delay = idleTime < 0 ? volatileMaxIdleTime() : idleTime;
+                timerService.schedule(new SessionRemoverTimerTask(session.getSessionID(), this), delay, TimeUnit.MILLISECONDS);
+            }
         } else {
             // Adding a session is a writing operation. Other threads requesting a session should be blocked.
             wlock.lock();
@@ -767,7 +773,12 @@ final class SessionData {
         // Look-up volatile ones
         SessionControl control = volatileSessions.get(sessionId);
         if (null != control) {
-            return control;
+            if (!control.isElapsed(volatileMaxIdleTime())) {
+                return control;
+            }
+            volatileSessions.remove(sessionId);
+            dropSession(control, volatileUserSessions);
+            return null;
         }
         int i = 0;
         // Read-only access
@@ -1059,79 +1070,48 @@ final class SessionData {
         return i.intValue();
     }
 
-    private static volatile Integer volatileFrequencyTime;
-    private static int volatileFrequencyTime() {
-        Integer i = volatileFrequencyTime;
-        if (null == i) {
-            synchronized (SessionData.class) {
-                i = volatileFrequencyTime;
-                if (null == i) {
-                    final ConfigurationService service = SessiondServiceRegistry.getServiceRegistry().getOptionalService(ConfigurationService.class);
-                    i = service == null ? Integer.valueOf(60000) : Integer.valueOf(service.getIntProperty("com.openexchange.sessiond.volatile.frequencyTime", 60000));
-                    volatileFrequencyTime = i;
+    /**
+     * Adds the specified timer service.
+     * 
+     * @param service The timer service
+     */
+    public void addTimerService(final TimerService service) {
+        timerService.set(service);
+    }
+
+    /**
+     * Drops specified volatile session.
+     * 
+     * @param sessionId The session identifier
+     */
+    protected void dropVolatileSession(final String sessionId) {
+        final SessionControl control = volatileSessions.remove(sessionId);
+        if (null != control) {
+            SessionData.dropSession(control, volatileUserSessions);            
+        }
+    }
+
+    /** Drops volatile session */
+    protected static void dropSession(final SessionControl sessionControl, final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions) {
+        final SessionImpl session = sessionControl.getSession();
+        SessionHandler.postSessionRemoval(session);
+        final UserKey key = new UserKey(session.getUserId(), session.getContextId());
+        final Queue<String> queue = volatileUserSessions.remove(key);
+        if (null != queue) {
+            queue.remove(session.getSessionID());
+            if (!queue.isEmpty()) {
+                final Queue<String> prev = volatileUserSessions.put(key, queue);
+                if (null != prev) {
+                    queue.addAll(prev);
                 }
             }
         }
-        return i.intValue();
+        LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
     }
 
-    public void addTimerService(final TimerService service) {
-        timerService.set(service);
-        final ConcurrentMap<String, SessionControl> volatileSessions = this.volatileSessions;
-        final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions = this.volatileUserSessions;
-        final int maxIdleTime = volatileMaxIdleTime();
-        final Runnable task = new Runnable() {
-            
-            @Override
-            public void run() {
-                try {
-                    final long maxStamp = System.currentTimeMillis() - maxIdleTime;
-                    if (LOG.isDebugEnabled()) {
-                        int count = 0;
-                        for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
-                            final SessionControl sessionControl = it.next();
-                            if (sessionControl.getLastAccessed() < maxStamp) {
-                                it.remove();
-                                dropSession(sessionControl, volatileUserSessions);
-                                count++;
-                            }
-                        }
-                        LOG.debug("Volatile session cleaner run finished: " + count + " volatile session(s) removed.");
-                    } else {
-                        for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
-                            final SessionControl sessionControl = it.next();
-                            if (sessionControl.getLastAccessed() < maxStamp) {
-                                it.remove();
-                                dropSession(sessionControl, volatileUserSessions);
-                            }
-                        }
-                    }
-                } catch (final Exception e) {
-                    LOG.warn(e.getMessage(), e);
-                }
-            }
-
-            private void dropSession(final SessionControl sessionControl, final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions) {
-                final SessionImpl session = sessionControl.getSession();
-                SessionHandler.postSessionRemoval(session);
-                final UserKey key = new UserKey(session.getUserId(), session.getContextId());
-                final Queue<String> queue = volatileUserSessions.remove(key);
-                if (null != queue) {
-                    queue.remove(session.getSessionID());
-                    if (!queue.isEmpty()) {
-                        final Queue<String> prev = volatileUserSessions.put(key, queue);
-                        if (null != prev) {
-                            queue.addAll(prev);
-                        }
-                    }
-                }
-                LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
-            }
-        };
-        final int frequencyTime = volatileFrequencyTime();
-        volatileSessionsTimerTask = service.scheduleWithFixedDelay(task, frequencyTime, frequencyTime);
-    }
-
+    /**
+     * Removes the timer service
+     */
     public void removeTimerService() {
         for (final ScheduledTimerTask timerTask : removers.values()) {
             timerTask.cancel();

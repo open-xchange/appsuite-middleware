@@ -104,7 +104,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             final Boolean parameter = parameterized.<Boolean> getParameter(PARAM_VOLATILE);
             isVolatile = null == parameter ? false : parameter.booleanValue();
         }
-        final SessionImpl session = SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext().getContextId(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient(), isVolatile);
+        final SessionImpl session = SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext().getContextId(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient(), isVolatile ? new VolatileParams(parameterized) : null);
         if (null == session) {
             return null;
         }

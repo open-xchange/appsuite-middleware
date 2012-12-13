@@ -294,8 +294,8 @@ public class ContactServiceImpl extends DefaultContactService {
             if (!GAB.equals(folderID) || !ContactExceptionCodes.NO_CHANGE_PERMISSION.equals(e) || !OXFolderProperties.isEnableInternalUsersEdit()) {
                 throw e;
             }
+            // Is global address book  AND  no change permission indicated  AND  editing users is enabled  ==>  Re-check
             OXFolderProperties.updatePermissions(true, contextID);
-            // check again
             permission = Tools.getPermission(contextID, folderID, userID);
             Check.canWriteOwn(permission, session);
         }

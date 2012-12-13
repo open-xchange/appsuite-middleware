@@ -51,13 +51,7 @@ package com.openexchange.tools.oxfolder;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
@@ -67,12 +61,12 @@ import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
-import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
@@ -374,94 +368,49 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
      * @param contextId The context identifier
      */
     public static void updatePermissions(final boolean enableInternalUsersEdit, final int contextId) {
-        /*
-         * Update permissions
-         */
-        updateGABWritePermission(enableInternalUsersEdit, contextId);
-        /*
-         * Clear folder cache to ensure removal of all cached instances of global address book
-         */
-        if (FolderCacheManager.isInitialized()) {
-            try {
-                FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ContextStorage.getStorageContext(contextId));
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
-        CacheFolderStorage.getInstance().clearCache(-1, contextId);
-        FolderMapManagement.getInstance().clear();
-    }
-
-    private static void updateGABWritePermission(final boolean enableInternalUsersEdit, final int contextId) {
         Connection con = null;
         try {
             con = Database.get(contextId, true);
+            /*
+             * Update permissions
+             */
+            updateGABWritePermission(enableInternalUsersEdit, contextId, con);
+            /*
+             * Clear folder cache to ensure removal of all cached instances of global address book
+             */
+            final int folderId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
+            if (FolderCacheManager.isInitialized()) {
+                final Context ctx = ContextStorage.getStorageContext(contextId);
+                try {
+                    final FolderObject fo = OXFolderLoader.loadFolderObjectFromDB(folderId, ctx, con, true, false, "oxfolder_tree", "oxfolder_permissions");
+                    FolderCacheManager.getInstance().putFolderObject(fo, ctx, true, null);
+                } catch (OXException e) {
+                    FolderCacheManager.getInstance().removeFolderObject(folderId, ctx);
+                }
+            }
+            CacheFolderStorage.getInstance().removeFromGlobalCache(FolderStorage.GLOBAL_ADDRESS_BOOK_ID, FolderStorage.REAL_TREE_ID, contextId);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-        }
-        if (null != con) {
-            PreparedStatement ps = null;
-            try {
-                ps = con.prepareStatement("UPDATE oxfolder_permissions SET owp = ? WHERE fuid = ?");
-                ps.setInt(1, enableInternalUsersEdit ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
-                ps.setInt(2, FolderObject.SYSTEM_LDAP_FOLDER_ID);
-                ps.executeUpdate();
-            } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
-            } finally {
-                DBUtils.closeSQLStuff(ps);
+        } finally {
+            if (null != con) {
                 Database.back(contextId, true, con);
             }
         }
     }
 
-    private static Map<String, Set<Integer>> getSchemasAndContexts() {
+    private static void updateGABWritePermission(final boolean enableInternalUsersEdit, final int contextId, final Connection con) {
+        PreparedStatement ps = null;
         try {
-            DatabaseService databaseService;
-            {
-                final com.openexchange.database.internal.Initialization dbInitialization = com.openexchange.database.internal.Initialization.getInstance();
-                databaseService = dbInitialization.getDatabaseService();
-                if (null == databaseService) {
-                    databaseService = dbInitialization.startIfAbsent(ServerServiceRegistry.getInstance().getService(ConfigurationService.class));
-                }
-                if (null == databaseService) {
-                    return Collections.emptyMap();
-                }
-            }
-            Connection con = null;
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                con = databaseService.getReadOnly();
-                stmt = con.prepareStatement("SELECT db_schema, cid FROM context_server2db_pool");
-                rs = stmt.executeQuery();
-
-                final Map<String, Set<Integer>> schemasAndContexts = new HashMap<String, Set<Integer>>();
-
-                while (rs.next()) {
-                    final String schemaName = rs.getString(1);
-                    final int contextId = rs.getInt(2);
-
-                    Set<Integer> contextIds = schemasAndContexts.get(schemaName);
-                    if (null == contextIds) {
-                        contextIds = new HashSet<Integer>();
-                        schemasAndContexts.put(schemaName, contextIds);
-                    }
-                    contextIds.add(Integer.valueOf(contextId));
-                }
-
-                return schemasAndContexts;
-            } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
-                if (con != null) {
-                    databaseService.backReadOnly(con);
-                }
-            }
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            ps = con.prepareStatement("UPDATE oxfolder_permissions SET owp = ? WHERE cid = ? AND fuid = ?");
+            ps.setInt(1, enableInternalUsersEdit ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
+            ps.setInt(2, contextId);
+            ps.setInt(3, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            ps.executeUpdate();
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
+        } finally {
+            DBUtils.closeSQLStuff(ps);
         }
-        return Collections.emptyMap();
     }
+
 }

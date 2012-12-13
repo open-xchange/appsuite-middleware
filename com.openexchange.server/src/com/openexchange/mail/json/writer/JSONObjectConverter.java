@@ -440,7 +440,7 @@ public final class JSONObjectConverter {
             final String content;
             {
                 final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                final String plainText = htmlService.html2text(htmlService.getConformHTML(htmlContent, (String) null), true);
+                final String plainText = htmlService.html2text(htmlContent, true);
                 content = HtmlProcessing.formatTextForDisplay(plainText, usm, displayMode);
             }
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);

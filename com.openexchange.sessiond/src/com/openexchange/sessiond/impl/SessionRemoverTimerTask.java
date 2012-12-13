@@ -47,62 +47,32 @@
  *
  */
 
-package com.openexchange.sessiond;
+package com.openexchange.sessiond.impl;
 
-import java.util.Set;
-import com.openexchange.session.Session;
+
 
 /**
- * {@link Parameterized} - Extends by the capability to store arbitrary parameters.
- * 
+ * {@link SessionRemoverTimerTask} - A one-shot timer task to remove a session after its expiry.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Parameterized {
+public final class SessionRemoverTimerTask implements Runnable {
+
+    private final String sessionId;
+    private final SessionData sessionData;
 
     /**
-     * The parameter name for a {@link Session session}.
+     * Initializes a new {@link SessionRemoverTimerTask}.
      */
-    public static final String PARAM_SESSION = "__session";
+    public SessionRemoverTimerTask(final String sessionId, final SessionData sessionData) {
+        super();
+        this.sessionId = sessionId;
+        this.sessionData = sessionData;
+    }
 
-    /**
-     * The parameter name for a volatile flag.
-     */
-    public static final String PARAM_VOLATILE = "__volatile";
-
-    /**
-     * The parameter name for idle time.
-     */
-    public static final String PARAM_IDLE_TIME = "__idleTime";
-
-    /**
-     * Gets the names of contained parameters.
-     * 
-     * @return The parameter names
-     */
-    Set<String> getParameterNames();
-
-    /**
-     * Gets the denoted parameter.
-     * 
-     * @param name The name
-     * @return The associated value or <code>null</code> if absent
-     */
-    <V> V getParameter(String name);
-
-    /**
-     * Stores given parameter.
-     * 
-     * @param name The name
-     * @param value The value; if <code>null</code> a remove is performed
-     */
-    void setParameter(String name, Object value);
-
-    /**
-     * Removes the denoted parameter.
-     * 
-     * @param name The name
-     * @return The removed value or <code>null</code> if there was none
-     */
-    Object removeParameter(String name);
+    @Override
+    public void run() {
+        sessionData.dropVolatileSession(sessionId);
+    }
 
 }

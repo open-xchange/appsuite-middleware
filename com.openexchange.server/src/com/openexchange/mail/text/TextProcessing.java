@@ -269,7 +269,7 @@ public final class TextProcessing {
              */
             final String html = readContent(mailPart, contentType);
             final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-            return htmlService.html2text(htmlService.getConformHTML(html, (String) null), true);
+            return htmlService.html2text(html, true);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }

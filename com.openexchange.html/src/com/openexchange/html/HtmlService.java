@@ -136,8 +136,6 @@ public interface HtmlService {
 
     /**
      * Converts specified HTML content to plain text.
-     * <p>
-     * <b>Note</b>: Specified HTML content needs to be validated as per {@link #getConformHTML(String, String)}
      *
      * @param htmlContent The <b>validated</b> HTML content
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>.<br>
