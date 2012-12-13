@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,93 +49,74 @@
 
 package com.openexchange.config.cascade.user;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
-import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigProviderService;
-import com.openexchange.context.ContextService;
+import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
 /**
- * {@link UserConfigProvider}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link BasicPropertyImpl}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UserConfigProvider implements ConfigProviderService {
+final class BasicPropertyImpl implements BasicProperty {
 
-    private static final String REGION_NAME = "User";
+    private static final String DYNAMIC_ATTR_PREFIX = UserConfigProvider.DYNAMIC_ATTR_PREFIX;
 
-    /** The attribute prefix */
-    static final String DYNAMIC_ATTR_PREFIX = "config/";
-
-    /** The service look-up */
-    final ServiceLookup services;
+    private final Context ctx;
+    private final User user;
+    private final String property;
+    private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link UserConfigProvider}.
-     * 
-     * @param services The service look-up
+     * Initializes a new {@link BasicPropertyImplementation}.
      */
-    public UserConfigProvider(final ServiceLookup services) {
+    BasicPropertyImpl(final String property, final User user, final Context ctx, final ServiceLookup services) {
         super();
+        this.ctx = ctx;
+        this.user = user;
+        this.property = property;
         this.services = services;
     }
 
-    /**
-     * Gets the associated user.
-     * 
-     * @param userId The user identifier
-     * @param ctx The context
-     * @return The user
-     * @throws OXException If obtaining user fails
-     */
-    private User getUser(final int userId, final Context ctx) throws OXException {
-        final CacheService cacheService = services.getService(CacheService.class);
-        if (cacheService == null) {
-            return services.getService(UserService.class).getUser(userId, ctx);
+    @Override
+    public String get() {
+        final Set<String> set = user.getAttributes().get(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString());
+        if (set == null || set.isEmpty()) {
+            return null;
         }
-        final Object obj = cacheService.getCache(REGION_NAME).get(cacheService.newCacheKey(ctx.getContextId(), userId));
-        if (obj instanceof User) {
-            return (User) obj;
-        }
-        return services.getService(UserService.class).getUser(userId, ctx);
+        return set.iterator().next();
     }
 
     @Override
-    public BasicProperty get(final String property, final int contextId, final int userId) throws OXException {
-        if (contextId == NO_CONTEXT && userId == NO_USER) {
-            return NO_PROPERTY;
-        }
-        final Context ctx = services.getService(ContextService.class).getContext(contextId);
-        final User user = getUser(userId, ctx);
-        return new BasicPropertyImpl(property, user, ctx, services);
+    public String get(final String metadataName) throws OXException {
+        return null;
     }
 
     @Override
-    public Collection<String> getAllPropertyNames(final int contextId, final int userId) throws OXException {
-        if (contextId == NO_CONTEXT && userId == NO_CONTEXT) {
-            return Collections.emptyList();
-        }
-        final User user = getUser(userId, services.getService(ContextService.class).getContext(contextId));
-        final Map<String, Set<String>> attributes = user.getAttributes();
-        final Set<String> allNames = new HashSet<String>();
-        final String dynamicAttrPrefix = DYNAMIC_ATTR_PREFIX;
-        final int snip = dynamicAttrPrefix.length();
-        for (final String name : attributes.keySet()) {
-            if (name.startsWith(dynamicAttrPrefix)) {
-                allNames.add(name.substring(snip));
-            }
-        }
-        return allNames;
+    public boolean isDefined() throws OXException {
+        return get() != null;
     }
 
+    @Override
+    public void set(final String value) throws OXException {
+        services.getService(UserService.class).setAttribute(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString(), value, user.getId(), ctx);
+    }
+
+    @Override
+    public void set(final String metadataName, final String value) throws OXException {
+        throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "user");
+    }
+
+    @Override
+    public List<String> getMetadataNames() throws OXException {
+        return Collections.emptyList();
+    }
 }
