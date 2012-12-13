@@ -47,48 +47,32 @@
  *
  */
 
-package com.openexchange.apps.manifests.json;
+package com.openexchange.apps.manifests.json.values;
 
-import java.util.Arrays;
-import java.util.Collection;
-import org.json.JSONArray;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.impl.Version;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ManifestActionFactory}
- * 
+ * {@link ServerVersion}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ManifestActionFactory implements AJAXActionServiceFactory {
-
-
-	private AJAXActionService all;
-	private ConfigAction config;
-
-	public ManifestActionFactory(ServiceLookup services,
-			JSONArray manifests, ServerConfigServicesLookup registry) {
-		super();
-		all = new AllAction(services, manifests);
-		config = new ConfigAction(services, manifests, registry);
-	}
-
+public class ServerVersion implements ComputedServerConfigValueService {
 
 	@Override
-	public Collection<?> getSupportedServices() {
-		return Arrays.asList("all", "config");
-	}
-
-	@Override
-	public AJAXActionService createActionService(String action)
-			throws OXException {
-		if (action.equals("config")) {
-			return config;
+	public void addValue(JSONObject serverConfig, AJAXRequestData request,
+			ServerSession session) throws OXException, JSONException {
+		
+		if (!serverConfig.has("serverVersion")) {
+			serverConfig.put("serverVersion", Version.getVersionString());
 		}
-		return all;
+		
 	}
 
 }

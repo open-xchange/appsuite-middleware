@@ -47,48 +47,44 @@
  *
  */
 
-package com.openexchange.apps.manifests.json;
+package com.openexchange.apps.manifests.json.values;
 
-import java.util.Arrays;
-import java.util.Collection;
-import org.json.JSONArray;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
+import java.util.Set;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.apps.manifests.ComputedServerConfigValueService;
+import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ManifestActionFactory}
- * 
+ * {@link Capabilities}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ManifestActionFactory implements AJAXActionServiceFactory {
+public class Capabilities implements ComputedServerConfigValueService {
+
+	private ServiceLookup services;
 
 
-	private AJAXActionService all;
-	private ConfigAction config;
-
-	public ManifestActionFactory(ServiceLookup services,
-			JSONArray manifests, ServerConfigServicesLookup registry) {
+	public Capabilities(ServiceLookup services) {
 		super();
-		all = new AllAction(services, manifests);
-		config = new ConfigAction(services, manifests, registry);
+		this.services = services;
 	}
 
 
 	@Override
-	public Collection<?> getSupportedServices() {
-		return Arrays.asList("all", "config");
-	}
-
-	@Override
-	public AJAXActionService createActionService(String action)
-			throws OXException {
-		if (action.equals("config")) {
-			return config;
-		}
-		return all;
+	public void addValue(JSONObject serverConfig, AJAXRequestData request,
+			ServerSession session) throws OXException, JSONException {
+		CapabilityService capabilityService = services.getService(CapabilityService.class);
+		Set<Capability> capabilities = capabilityService.getCapabilities(session);
+		serverConfig.put("capabilities", services.getService(SimpleConverter.class).convert("capability", "json", capabilities, session));
 	}
 
 }
