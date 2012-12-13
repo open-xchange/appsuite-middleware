@@ -79,6 +79,7 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
@@ -450,6 +451,11 @@ public class RdbContactStorage extends DefaultContactStorage {
                 if (false == targetPermission.canWriteOwnObjects()) {
                     throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contact.getObjectID(), contextID);
                 }                
+            } else if (FolderObject.SYSTEM_LDAP_FOLDER_ID == parse(folderId)) {
+                if (false == OXFolderProperties.isEnableInternalUsersEdit() && 
+                    session.getUserId() != serverSession.getContext().getMailadmin()) {
+                    throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(id), contextID);
+                }
             } else {
                 FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(parse(folderId), false);
                 EffectivePermission permission = folder.getEffectiveUserPermission(
