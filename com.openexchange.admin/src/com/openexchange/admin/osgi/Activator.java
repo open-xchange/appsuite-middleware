@@ -154,7 +154,10 @@ public class Activator extends HousekeepingActivator {
             tracker.close();
         }
         log.info("Stopping RMI...");
-        this.daemon.unregisterRMI(context);
+        final AdminDaemon daemon = this.daemon;
+        if (null != daemon) {
+            daemon.unregisterRMI(context);
+        }
         log.info("Thanks for using Open-Xchange AdminDaemon");
     }
 
