@@ -176,7 +176,10 @@ public class SecretActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         TokenBasedSecretService.RANDOM.set("unknown");
-        whiteboardSecretService.close();
+        final WhiteboardSecretService whiteboardSecretService = this.whiteboardSecretService;
+        if (null != whiteboardSecretService) {
+            whiteboardSecretService.close();
+        }
         super.stopBundle();
     }
 
