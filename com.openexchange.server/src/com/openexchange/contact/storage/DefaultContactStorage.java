@@ -168,7 +168,8 @@ public abstract class DefaultContactStorage implements ContactStorage {
     public void delete(Session session, String folderId, String[] ids, Date lastRead) throws OXException {
         SearchIterator<Contact> searchIterator = null;
         try {
-            searchIterator = this.all(session, folderId, new ContactField[] { ContactField.OBJECT_ID });
+            
+            searchIterator = this.list(session, folderId, ids, new ContactField[] { ContactField.OBJECT_ID });
             if (null != searchIterator) {
                 while (searchIterator.hasNext()) {
                     delete(session, folderId, String.valueOf(searchIterator.next().getObjectID()), lastRead);
