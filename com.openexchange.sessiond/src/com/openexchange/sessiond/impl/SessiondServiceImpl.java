@@ -84,6 +84,9 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     private final Lock migrateLock;
 
+    /**
+     * Initializes a new {@link SessiondServiceImpl}.
+     */
     public SessiondServiceImpl() {
         super();
         migrateLock = new ReentrantLock();
