@@ -49,12 +49,22 @@
 
 package com.openexchange.config.cascade.user.osgi;
 
+import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.user.UserConfigProvider;
+import com.openexchange.config.cascade.user.cache.PropertyMapManagement;
 import com.openexchange.context.ContextService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.user.UserService;
 
 /**
@@ -66,7 +76,7 @@ public class UserConfigCascadeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { UserService.class, ContextService.class, CacheService.class };
+        return new Class[] { UserService.class, ContextService.class, CacheService.class, SessiondService.class };
     }
 
     @Override
@@ -76,6 +86,39 @@ public class UserConfigCascadeActivator extends HousekeepingActivator {
         final Hashtable<String, Object> properties = new Hashtable<String, Object>(1);
         properties.put("scope", "user");
         registerService(ConfigProviderService.class, provider, properties);
+
+        {
+            final EventHandler eventHandler = new EventHandler() {
+
+                @Override
+                public void handleEvent(final Event event) {
+                    final String topic = event.getTopic();
+                    if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+                        handleDroppedSession((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
+                    } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
+                        @SuppressWarnings("unchecked")
+                        final Map<String, Session> map = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                        for (final Session session : map.values()) {
+                            handleDroppedSession(session);
+                        }
+                    }
+                }
+
+                private void handleDroppedSession(final Session session) {
+                    final SessiondService sessiondService = getService(SessiondService.class);
+                    final int contextId = session.getContextId();
+                    if (null == sessiondService.getAnyActiveSessionForUser(session.getUserId(), contextId)) {
+                        PropertyMapManagement.getInstance().dropFor(session);
+                    }
+                    if ((sessiondService instanceof SessiondServiceExtended) && !((SessiondServiceExtended) sessiondService).hasForContext(contextId)) {
+                        PropertyMapManagement.getInstance().dropFor(contextId);
+                    }
+                }
+            };
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+            dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            registerService(EventHandler.class, eventHandler, dict);
+        }
     }
 
 }

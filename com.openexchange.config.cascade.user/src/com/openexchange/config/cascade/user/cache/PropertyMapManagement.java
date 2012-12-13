@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.folderstorage.cache.memory;
+package com.openexchange.config.cascade.user.cache;
 
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -55,37 +55,38 @@ import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.session.Session;
 
 /**
- * {@link FolderMapManagement}
- *
+ * {@link PropertyMapManagement}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderMapManagement {
+public final class PropertyMapManagement {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderMapManagement.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PropertyMapManagement.class));
 
-    private static final FolderMapManagement INSTANCE = new FolderMapManagement();
+    private static final PropertyMapManagement INSTANCE = new PropertyMapManagement();
 
     /**
-     * Gets the {@link FolderMapManagement management} instance.
-     *
+     * Gets the {@link PropertyMapManagement management} instance.
+     * 
      * @return The management instance
      */
-    public static FolderMapManagement getInstance() {
+    public static PropertyMapManagement getInstance() {
         return INSTANCE;
     }
 
-    private final ConcurrentMap<Integer, ConcurrentMap<Integer, FolderMap>> map;
+    private final ConcurrentMap<Integer, ConcurrentMap<Integer, PropertyMap>> map;
 
     /**
-     * Initializes a new {@link FolderMapManagement}.
+     * Initializes a new {@link PropertyMapManagement}.
      */
-    private FolderMapManagement() {
+    private PropertyMapManagement() {
         super();
-        map = new NonBlockingHashMap<Integer, ConcurrentMap<Integer, FolderMap>>(64);
+        map = new NonBlockingHashMap<Integer, ConcurrentMap<Integer, PropertyMap>>(64);
     }
 
     /**
-     * Clears the folder management.
+     * Clears the property management.
      */
     public void clear() {
         map.clear();
@@ -93,100 +94,87 @@ public final class FolderMapManagement {
 
     /**
      * Drop caches for given context.
-     *
+     * 
      * @param contextId The context identifier
      */
     public void dropFor(final int contextId) {
         map.remove(Integer.valueOf(contextId));
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive folder cache for context ").append(contextId).toString());
+            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive property cache for context ").append(contextId).toString());
         }
     }
 
     /**
      * Drop caches for given session's user.
-     *
+     * 
      * @param session The session
      */
     public void dropFor(final Session session) {
-        final ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(session.getContextId()));
+        final ConcurrentMap<Integer, PropertyMap> contextMap = map.get(Integer.valueOf(session.getContextId()));
         if (null != contextMap) {
             contextMap.remove(Integer.valueOf(session.getUserId()));
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive folder cache for user ").append(session.getUserId()).append(" in context ").append(
-                session.getContextId()).toString());
+            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive property cache for user ").append(
+                session.getUserId()).append(" in context ").append(session.getContextId()).toString());
         }
     }
 
     /**
      * Drop caches for given session's user.
-     *
+     * 
      * @param userId The user identifier
      * @param contextId The context identifier
      */
     public void dropFor(final int userId, final int contextId) {
-        final ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(contextId));
+        final ConcurrentMap<Integer, PropertyMap> contextMap = map.get(Integer.valueOf(contextId));
         if (null != contextMap) {
             contextMap.remove(Integer.valueOf(userId));
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive folder cache for user ").append(userId).append(" in context ").append(
-                contextId).toString());
+            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive property cache for user ").append(userId).append(
+                " in context ").append(contextId).toString());
         }
     }
 
     /**
-     * Gets the folder map for specified session.
-     *
-     * @param session The session
-     * @return The folder map
+     * Gets the property map for specified session.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The property map
      */
-    public FolderMap getFor(final Session session) {
-        final Integer cid = Integer.valueOf(session.getContextId());
-        ConcurrentMap<Integer, FolderMap> contextMap = map.get(cid);
+    public PropertyMap getFor(final int userId, final int contextId) {
+        final Integer cid = Integer.valueOf(contextId);
+        ConcurrentMap<Integer, PropertyMap> contextMap = map.get(cid);
         if (null == contextMap) {
-            final ConcurrentMap<Integer, FolderMap> newMap = new NonBlockingHashMap<Integer, FolderMap>(256);
+            final ConcurrentMap<Integer, PropertyMap> newMap = new NonBlockingHashMap<Integer, PropertyMap>(256);
             contextMap = map.putIfAbsent(cid, newMap);
             if (null == contextMap) {
                 contextMap = newMap;
             }
         }
-        final Integer us = Integer.valueOf(session.getUserId());
-        FolderMap folderMap = contextMap.get(us);
-        if (null == folderMap) {
-            final FolderMap newFolderMap = new FolderMap(1024, 300, TimeUnit.SECONDS, session.getUserId(), session.getContextId());
-            folderMap = contextMap.putIfAbsent(us, newFolderMap);
-            if (null == folderMap) {
-                folderMap = newFolderMap;
+        final Integer us = Integer.valueOf(userId);
+        PropertyMap propertyMap = contextMap.get(us);
+        if (null == propertyMap) {
+            final PropertyMap newPropertyMap = new PropertyMap(1024, 300, TimeUnit.SECONDS);
+            propertyMap = contextMap.putIfAbsent(us, newPropertyMap);
+            if (null == propertyMap) {
+                propertyMap = newPropertyMap;
             }
         }
-        return folderMap;
+        return propertyMap;
     }
 
     /**
-     * Optionally gets the folder map for specified session.
-     *
-     * @param session The session
-     * @return The folder map or <code>null</code> if absent
-     */
-    public FolderMap optFor(final Session session) {
-        final ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(session.getContextId()));
-        if (null == contextMap) {
-            return null;
-        }
-        return contextMap.get(Integer.valueOf(session.getUserId()));
-    }
-
-    /**
-     * Optionally gets the folder map for specified user in given context.
-     *
+     * Optionally gets the property map for specified user in given context.
+     * 
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return The folder map or <code>null</code> if absent
+     * @return The property map or <code>null</code> if absent
      */
-    public FolderMap optFor(final int userId, final int contextId) {
-        final ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(contextId));
+    public PropertyMap optFor(final int userId, final int contextId) {
+        final ConcurrentMap<Integer, PropertyMap> contextMap = map.get(Integer.valueOf(contextId));
         if (null == contextMap) {
             return null;
         }

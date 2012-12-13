@@ -116,7 +116,7 @@ public final class TreeLockManagement {
      * @param contextId The context identifier
      */
     public void dropFor(final int contextId) {
-        map.get(Integer.valueOf(contextId));
+        map.remove(Integer.valueOf(contextId));
         if (LOG.isDebugEnabled()) {
             LOG.debug(new com.openexchange.java.StringAllocator("Cleaned folder locks for context ").append(contextId).toString());
         }

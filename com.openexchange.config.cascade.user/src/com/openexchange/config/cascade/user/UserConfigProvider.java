@@ -54,9 +54,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.config.cascade.user.cache.PropertyMap;
+import com.openexchange.config.cascade.user.cache.PropertyMapManagement;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -72,6 +75,8 @@ import com.openexchange.user.UserService;
  */
 public class UserConfigProvider implements ConfigProviderService {
 
+    private static final AtomicLong L = new AtomicLong();
+    
     private static final String REGION_NAME = "User";
 
     /** The attribute prefix */
@@ -115,9 +120,18 @@ public class UserConfigProvider implements ConfigProviderService {
         if (contextId == NO_CONTEXT && userId == NO_USER) {
             return NO_PROPERTY;
         }
-        final Context ctx = services.getService(ContextService.class).getContext(contextId);
-        final User user = getUser(userId, ctx);
-        return new BasicPropertyImpl(property, user, ctx, services);
+        final PropertyMap propertyMap = PropertyMapManagement.getInstance().getFor(userId, contextId);
+        BasicProperty basicProperty = propertyMap.get(property);
+        if (null == basicProperty) {
+            final Context ctx = services.getService(ContextService.class).getContext(contextId);
+            final User user = getUser(userId, ctx);
+            final BasicProperty loaded = new BasicPropertyImpl(property, user, ctx, services);
+            basicProperty = propertyMap.putIfAbsent(property, loaded);
+            if (null == basicProperty) {
+                basicProperty = loaded;
+            }
+        }
+        return basicProperty;
     }
 
     @Override
