@@ -73,8 +73,10 @@ public class UserConfigProvider implements ConfigProviderService {
 
     private static final String DYNAMIC_ATTR_PREFIX = "config/";
 
-    private final UserService users;
+    /** The user service */
+    final UserService users;
 
+    /** The context service */
     private final ContextService contexts;
 
     public UserConfigProvider(final UserService users, final ContextService contexts) {
