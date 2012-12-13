@@ -70,7 +70,7 @@ public class TestServletTest {
 
     private final String URL = "http://localhost/servlet/TestServlet";
 
-    private final String PUTSTRING = "A PÜT String with Umlaut";
+    private final String PUTSTRING = "A P\u00dcT String with Umlaut";
 
     private final String QUERYSTRING = "?";
 
