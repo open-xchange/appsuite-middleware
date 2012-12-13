@@ -55,8 +55,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.SortableId;
@@ -85,7 +85,6 @@ public final class FolderMap {
     protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(FolderMap.class);
 
     private final ConcurrentMap<Key, Wrapper> map;
-    private final Lock mapLock;
     private final int maxLifeMillis;
     private final int userId;
     private final int contextId;
@@ -99,9 +98,7 @@ public final class FolderMap {
      */
     public FolderMap(final int maxCapacity, final int maxLifeUnits, final TimeUnit unit, final int userId, final int contextId) {
         super();
-        final ReadWriteLock rwl = new ReentrantReadWriteLock();
-        mapLock = rwl.writeLock();
-        map = new LockBasedConcurrentMap<Key, Wrapper>(rwl.readLock(), mapLock, new MaxCapacityLinkedHashMap<Key, Wrapper>(maxCapacity));
+        map = new ConcurrentLinkedHashMap.Builder<Key, Wrapper>().maximumWeightedCapacity(maxCapacity).weigher(Weighers.entrySingleton()).build();
         this.maxLifeMillis = (int) unit.toMillis(maxLifeUnits);
         this.contextId = contextId;
         this.userId = userId;
@@ -160,16 +157,13 @@ public final class FolderMap {
             return null;
         }
         if (prev.elapsed(maxLifeMillis)) {
-            mapLock.lock();
-            try {
+            synchronized (map) {
                 prev = map.get(key);
                 if (prev.elapsed(maxLifeMillis)) {
                     shrink();
                     map.put(key, wrapper);
                     return null;
                 }
-            } finally {
-                mapLock.unlock();
             }
         }
         return prev.getValue();

@@ -53,14 +53,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.ajax.customizer.folder.AdditionalFieldsUtils;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
@@ -142,8 +142,7 @@ public final class FolderStorageActivator implements BundleActivator {
 
         protected DisplayNameFolderField() {
             super();
-            final ReadWriteLock rwl = new ReentrantReadWriteLock();
-            cache = new LockBasedConcurrentMap<Key, String>(rwl.readLock(), rwl.writeLock(), new MaxCapacityLinkedHashMap<Key, String>(1024));
+            cache = new ConcurrentLinkedHashMap.Builder<Key, String>().maximumWeightedCapacity(1024).weigher(Weighers.entrySingleton()).build();
         }
 
         @Override

@@ -342,6 +342,8 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     private final Context ctx;
 
+	private Set<String> extendedPermissions;
+
     /**
      * Initializes a new {@link UserConfiguration}.
      *
@@ -1178,6 +1180,9 @@ public final class UserConfiguration implements Serializable, Cloneable {
 	 * @return The extended permissions
 	 */
     public Set<String> getExtendedPermissions() {
+    	if (extendedPermissions != null) {
+    		return extendedPermissions;
+    	}
         Set<String> retval = new HashSet<String>();
         for (Permission p : Permission.values()) {
             if (hasPermissionInternal(p)) {
@@ -1209,7 +1214,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
         } catch (OXException x) {
             LOG.error(x.getMessage(), x);
         }
-        return retval;
+        return extendedPermissions = retval;
     }
 
 }
