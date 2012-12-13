@@ -113,11 +113,11 @@ public class UserConfigProvider implements ConfigProviderService {
     }
 
     @Override
-    public BasicProperty get(final String property, final int context, final int userId) throws OXException {
-        if (context == NO_CONTEXT && userId == NO_USER) {
+    public BasicProperty get(final String property, final int contextId, final int userId) throws OXException {
+        if (contextId == NO_CONTEXT && userId == NO_USER) {
             return NO_PROPERTY;
         }
-        final Context ctx = services.getService(ContextService.class).getContext(context);
+        final Context ctx = services.getService(ContextService.class).getContext(contextId);
         final User user = getUser(userId, ctx);
         return new BasicProperty() {
 
@@ -161,12 +161,12 @@ public class UserConfigProvider implements ConfigProviderService {
     }
 
     @Override
-    public Collection<String> getAllPropertyNames(final int context, final int userId) throws OXException {
-        if (context == NO_CONTEXT && userId == NO_CONTEXT) {
+    public Collection<String> getAllPropertyNames(final int contextId, final int userId) throws OXException {
+        if (contextId == NO_CONTEXT && userId == NO_CONTEXT) {
             return Collections.emptyList();
         }
         final User user =
-            services.getService(UserService.class).getUser(userId, services.getService(ContextService.class).getContext(context));
+            services.getService(UserService.class).getUser(userId, services.getService(ContextService.class).getContext(contextId));
         final Map<String, Set<String>> attributes = user.getAttributes();
         final Set<String> allNames = new HashSet<String>();
         final int snip = DYNAMIC_ATTR_PREFIX.length();
