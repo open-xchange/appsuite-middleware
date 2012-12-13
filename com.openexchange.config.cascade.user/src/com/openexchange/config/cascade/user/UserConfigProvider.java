@@ -126,6 +126,9 @@ public class UserConfigProvider implements ConfigProviderService {
         if (contextId == NO_CONTEXT && userId == NO_USER) {
             return NO_PROPERTY;
         }
+        
+        new Throwable().printStackTrace(System.out);
+        
         final PropertyMap propertyMap = PropertyMapManagement.getInstance().getFor(userId, contextId);
         BasicProperty basicProperty = propertyMap.get(property);
         if (null == basicProperty) {

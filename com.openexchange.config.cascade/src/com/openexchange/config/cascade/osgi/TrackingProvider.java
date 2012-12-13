@@ -62,45 +62,43 @@ import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link TrackingProvider}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class TrackingProvider implements ConfigProviderService {
 
-    private final ServiceTracker tracker;
+    private final ServiceTracker<ConfigProviderService, ConfigProviderService> tracker;
 
     /**
      * Initializes a new {@link TrackingProvider}.
-     * @param serverProviders
      */
-    public TrackingProvider(ServiceTracker providers) {
+    public TrackingProvider(ServiceTracker<ConfigProviderService, ConfigProviderService> providers) {
         super();
         this.tracker = providers;
     }
 
     @Override
     public BasicProperty get(final String property, int contextId, int userId) throws OXException {
-        ServiceReference[] serviceReferences = tracker.getServiceReferences();
-        if(serviceReferences == null) {
+        ServiceReference<ConfigProviderService>[] serviceReferences = tracker.getServiceReferences();
+        if (serviceReferences == null) {
             serviceReferences = new ServiceReference[0];
         }
-        Arrays.sort(serviceReferences, new Comparator<ServiceReference>() {
+        Arrays.sort(serviceReferences, new Comparator<ServiceReference<ConfigProviderService>>() {
 
             @Override
-            public int compare(ServiceReference o1, ServiceReference o2) {
-                Comparable p1 = (Comparable) o1.getProperty("priority");
-                Comparable p2 = (Comparable) o2.getProperty("priority");
-                if(p1 == null && p2 == null) {
+            public int compare(ServiceReference<ConfigProviderService> o1, ServiceReference<ConfigProviderService> o2) {
+                Comparable<Object> p1 = (Comparable<Object>) o1.getProperty("priority");
+                Comparable<Object> p2 = (Comparable<Object>) o2.getProperty("priority");
+                if (p1 == null && p2 == null) {
                     return 0;
                 }
-                if(p1 == null) {
+                if (p1 == null) {
                     return -1;
                 }
 
-                if(p2 == null) {
+                if (p2 == null) {
                     return 1;
                 }
                 return p1.compareTo(p2);
@@ -109,17 +107,17 @@ public class TrackingProvider implements ConfigProviderService {
         });
 
         BasicProperty first = null;
-        for (ServiceReference ref : serviceReferences) {
-            ConfigProviderService delegate = (ConfigProviderService) tracker.getService(ref);
+        for (ServiceReference<ConfigProviderService> ref : serviceReferences) {
+            ConfigProviderService delegate = tracker.getService(ref);
             BasicProperty prop = delegate.get(property, contextId, userId);
             if (first == null) {
                 first = prop;
             }
-            if(prop.isDefined()) {
+            if (prop.isDefined()) {
                 return prop;
             }
         }
-        if(first == null) {
+        if (first == null) {
             first = new BasicProperty() {
 
                 @Override
@@ -139,12 +137,14 @@ public class TrackingProvider implements ConfigProviderService {
 
                 @Override
                 public void set(String value) throws OXException {
-                    throw new UnsupportedOperationException("Can't save setting "+property+". No ConfigProvider is specified for this value");
+                    throw new UnsupportedOperationException(
+                        "Can't save setting " + property + ". No ConfigProvider is specified for this value");
                 }
 
                 @Override
                 public void set(String metadataName, String value) throws OXException {
-                    throw new UnsupportedOperationException("Can't save metadata "+metadataName+" on property "+property+". No ConfigProvider is specified for this value");
+                    throw new UnsupportedOperationException(
+                        "Can't save metadata " + metadataName + " on property " + property + ". No ConfigProvider is specified for this value");
                 }
 
                 @Override
@@ -159,7 +159,7 @@ public class TrackingProvider implements ConfigProviderService {
     @Override
     public Collection<String> getAllPropertyNames(int contextId, int userId) throws OXException {
         Object[] services = tracker.getServices();
-        if(services == null) {
+        if (services == null) {
             return Collections.emptyList();
         }
         Set<String> allNames = new HashSet<String>();
