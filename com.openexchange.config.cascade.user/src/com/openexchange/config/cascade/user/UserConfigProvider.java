@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
@@ -75,8 +74,6 @@ import com.openexchange.user.UserService;
  */
 public class UserConfigProvider implements ConfigProviderService {
 
-    private static final AtomicLong L = new AtomicLong();
-    
     private static final String REGION_NAME = "User";
 
     /** The attribute prefix */
