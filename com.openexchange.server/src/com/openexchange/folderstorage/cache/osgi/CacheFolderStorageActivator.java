@@ -293,6 +293,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     }
                     if ((sessiondService instanceof SessiondServiceExtended) && !((SessiondServiceExtended) sessiondService).hasForContext(contextId)) {
                         FolderMapManagement.getInstance().dropFor(contextId);
+                        TreeLockManagement.getInstance().dropFor(contextId);
+                        UserLockManagement.getInstance().dropFor(contextId);
                     }
                 }
             };
