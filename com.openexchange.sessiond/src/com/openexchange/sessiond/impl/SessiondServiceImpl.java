@@ -91,7 +91,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public boolean hasForContext(final int contextId) {
-        return SessionHandler.hasForContext(contextId);
+        return SessionHandler.hasForContext(contextId, false);
     }
 
     @Override
