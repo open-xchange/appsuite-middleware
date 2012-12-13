@@ -148,6 +148,8 @@ public class OXRequest extends Request {
      */
     private void registerNewSession(String sessionId) {
         session = new Session(sessionId);
+        session.setTimestamp(System.currentTimeMillis());
+        session.setSessionTimeout(grizzlyConfig.getCookieMaxInactivityInterval()*1000);
         sessions.put(sessionId, session);
         response.addCookie(createSessionCookie(sessionId));
         if (LogProperties.isEnabled()) {
