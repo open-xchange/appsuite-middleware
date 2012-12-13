@@ -53,8 +53,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -134,56 +134,50 @@ public final class FolderStorageActivator implements BundleActivator {
 			return true;
 		}
 
-	}
+    }
 
-	private static final class DisplayNameFolderField implements
-			AdditionalFolderField {
+    private static final class DisplayNameFolderField implements AdditionalFolderField {
 
-		private final ConcurrentMap<Key, String> cache;
+        private final ConcurrentMap<Key, String> cache;
 
-		protected DisplayNameFolderField() {
-			super();
-			final Lock lock = new ReentrantLock();
-			cache = new LockBasedConcurrentMap<Key, String>(lock, lock,
-					new MaxCapacityLinkedHashMap<Key, String>(1000));
-		}
+        protected DisplayNameFolderField() {
+            super();
+            final ReadWriteLock rwl = new ReentrantReadWriteLock();
+            cache = new LockBasedConcurrentMap<Key, String>(rwl.readLock(), rwl.writeLock(), new MaxCapacityLinkedHashMap<Key, String>(1024));
+        }
 
-		@Override
+        @Override
         public Object renderJSON(final Object value) {
-		    return value == null ? JSONObject.NULL : value;
-		}
+            return value == null ? JSONObject.NULL : value;
+        }
 
-		@Override
-        public Object getValue(final FolderObject folder,
-				final ServerSession session) {
-			final int createdBy = folder.getCreatedBy();
-			if (createdBy <= 0) {
-				return JSONObject.NULL;
-			}
-			final Context context = session.getContext();
-			final String displayName = cache.get(Key.valueOf(createdBy,
-					context.getContextId()));
-			return null == displayName ? UserStorage.getStorageUser(createdBy,
-					context).getDisplayName() : displayName;
-		}
+        @Override
+        public Object getValue(final FolderObject folder, final ServerSession session) {
+            final int createdBy = folder.getCreatedBy();
+            if (createdBy <= 0) {
+                return JSONObject.NULL;
+            }
+            final Context context = session.getContext();
+            final String displayName = cache.get(Key.valueOf(createdBy, context.getContextId()));
+            return null == displayName ? UserStorage.getStorageUser(createdBy, context).getDisplayName() : displayName;
+        }
 
-		@Override
+        @Override
         public String getColumnName() {
-			return "com.openexchange.folderstorage.displayName";
-		}
+            return "com.openexchange.folderstorage.displayName";
+        }
 
-		@Override
+        @Override
         public int getColumnID() {
-			return 3030;
-		}
+            return 3030;
+        }
 
-		@Override
-        public List<Object> getValues(final List<FolderObject> folder,
-				final ServerSession session) {
-			return AdditionalFieldsUtils.bulk(this, folder, session);
-		}
+        @Override
+        public List<Object> getValues(final List<FolderObject> folder, final ServerSession session) {
+            return AdditionalFieldsUtils.bulk(this, folder, session);
+        }
 
-	}
+    }
 
 	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log
 			.valueOf(com.openexchange.log.LogFactory
