@@ -211,6 +211,9 @@ public final class ConfigurationImpl implements ConfigurationService {
                     } catch (final FileNotFoundException e) {
                         // IGNORE
                         return;
+                    } catch (RuntimeException x) {
+                    	LOG.error(file, x);
+                    	throw x;
                     }
                     yamlPaths.put(file.getName(), file.getPath());
                     yamlFiles.put(file.getPath(), o);
