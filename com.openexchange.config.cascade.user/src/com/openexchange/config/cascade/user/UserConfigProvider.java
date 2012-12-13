@@ -63,6 +63,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -124,7 +125,7 @@ public class UserConfigProvider implements ConfigProviderService {
             public String get() {
                 final Map<String, Set<String>> attributes = user.getAttributes();
 
-                final Set<String> set = attributes.get(DYNAMIC_ATTR_PREFIX + property);
+                final Set<String> set = attributes.get(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString());
                 if (set == null || set.isEmpty()) {
                     return null;
                 }
@@ -143,7 +144,7 @@ public class UserConfigProvider implements ConfigProviderService {
 
             @Override
             public void set(final String value) throws OXException {
-                services.getService(UserService.class).setAttribute(DYNAMIC_ATTR_PREFIX + property, value, userId, ctx);
+                services.getService(UserService.class).setAttribute(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString(), value, userId, ctx);
             }
 
             @Override
