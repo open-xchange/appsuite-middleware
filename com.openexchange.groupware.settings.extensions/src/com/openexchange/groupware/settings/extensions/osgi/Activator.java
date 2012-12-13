@@ -55,6 +55,7 @@ import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -243,6 +244,7 @@ public class Activator extends HousekeepingActivator {
             System.arraycopy(path, 0, metadataPath, 1, path.length);
             metadataPath[metadataPath.length-1] = metadataName;
             metadataPath[0] = METADATA_PREFIX;
+            
 
             final PreferencesItemService metadataItem = new PreferencesItemService() {
 
@@ -267,12 +269,10 @@ public class Activator extends HousekeepingActivator {
                                 Object value = prop.get(metadataName);
                                 try {
                                     // Let's turn this into a nice object, if it conforms to JSON
-                                    value = new JSONObject("{value: "+value+"}").get("value");
-
+                                    value = new JSONTokener(value.toString()).nextValue();
                                 } catch (final JSONException x) {
                                     // Ah well, let's pretend it's a string.
                                 }
-
                                 setting.setSingleValue(value);
                             } catch (final OXException e) {
                                 throw new OXException(e);
