@@ -1,3 +1,8 @@
+* 2012-12-13 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24168: Added special handling for user contact updates  
+ - Fix for bug 24196: Fixed delete multiple 
+
 * 2012-12-13 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23733: Possible fix for slow sql queries..
