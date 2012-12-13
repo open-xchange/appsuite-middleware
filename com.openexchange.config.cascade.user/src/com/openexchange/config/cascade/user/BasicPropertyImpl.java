@@ -89,10 +89,7 @@ final class BasicPropertyImpl implements BasicProperty {
     @Override
     public String get() {
         final Set<String> set = user.getAttributes().get(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString());
-        if (set == null || set.isEmpty()) {
-            return null;
-        }
-        return set.iterator().next();
+        return set == null || set.isEmpty() ? null : set.iterator().next();
     }
 
     @Override
