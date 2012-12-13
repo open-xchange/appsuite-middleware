@@ -46,6 +46,7 @@ import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.HazelcastMBean;
+import com.openexchange.hazelcast.osgi.HazelcastActivator.InitMode;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceContainer;
@@ -108,6 +109,11 @@ public class HazelcastActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final Log logger = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
+        final ConfigurationService service = getService(ConfigurationService.class);
+        if (null == service || !service.getBoolProperty("com.openexchange.hazelcast.enabled", false)) {
+            logger.info("Startup of bundle disabled: com.openexchange.hazelcast");
+            return;
+        }
         final boolean infoEnabled = logger.isInfoEnabled();
         /*-
          * Look-up discovery service & obtain its addresses of known nodes in a cluster
