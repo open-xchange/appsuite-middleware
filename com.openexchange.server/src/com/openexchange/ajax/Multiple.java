@@ -192,6 +192,8 @@ public class Multiple extends SessionServlet {
                     for (final JsonInOut jsonInOut : serialTasks) {
                         state = parseActionElement(jsonInOut, session, req, state);
                     }
+                    // Don't forget to write mail request
+                    writeMailRequest(req);
                 }
                 if (null != concurrentTasks) {
                     // Await completion service
@@ -213,8 +215,6 @@ public class Multiple extends SessionServlet {
                         }
                     }
                 }
-                // Don't forget to write mail request
-                writeMailRequest(req);
                 // Add single responses to JSON array
                 for (int pos = 0; pos < length; pos++) {
                     final JsonInOut jsonInOut = mapping.get(pos);
