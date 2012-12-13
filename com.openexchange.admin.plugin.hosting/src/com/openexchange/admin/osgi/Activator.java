@@ -94,7 +94,10 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        this.starter.stop();
+        final PluginStarter starter = this.starter;
+        if (starter != null) {
+            starter.stop();
+        }
         closeTrackers();
         cleanUp();
     }
