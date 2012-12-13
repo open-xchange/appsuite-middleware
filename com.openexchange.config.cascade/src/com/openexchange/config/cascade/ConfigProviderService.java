@@ -117,8 +117,8 @@ public interface ConfigProviderService {
     /**
      * Gets all property names for specified user.
      * 
-     * @param property The property name
      * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The property names
      * @throws OXException If returning property names fails for any reason
      */
