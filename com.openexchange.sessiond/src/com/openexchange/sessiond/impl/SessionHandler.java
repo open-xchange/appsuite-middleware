@@ -255,9 +255,9 @@ public final class SessionHandler {
      * @param contextId The context identifier
      * @return <code>true</code> if at least one active session is found; otherwise <code>false</code>
      */
-    public static boolean hasForContext(final int contextId) {
+    public static boolean hasForContext(final int contextId, final boolean considerSessionStorage) {
         boolean hasForContext = sessionDataRef.get().hasForContext(contextId);
-        if (!hasForContext) {
+        if (!hasForContext && considerSessionStorage) {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {

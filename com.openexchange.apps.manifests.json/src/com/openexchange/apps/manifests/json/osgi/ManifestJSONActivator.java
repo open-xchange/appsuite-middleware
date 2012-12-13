@@ -52,12 +52,20 @@ package com.openexchange.apps.manifests.json.osgi;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
+import org.osgi.util.tracker.ServiceTracker;
+
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.apps.manifests.ComputedServerConfigValueService;
+import com.openexchange.apps.manifests.ServerConfigMatcherService;
 import com.openexchange.apps.manifests.json.ManifestActionFactory;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
@@ -68,18 +76,50 @@ import com.openexchange.log.LogFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ManifestJSONActivator extends AJAXModuleActivator {
-
     private static final Log LOG = LogFactory.getLog(ManifestJSONActivator.class);
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CapabilityService.class };
-    }
+	
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return new Class<?>[]{ConfigurationService.class, CapabilityService.class, SimpleConverter.class};
+	}
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new ManifestActionFactory(this, readManifests()), "apps/manifests");
-    }
+	@Override
+	protected void startBundle() throws Exception {
+		final ServiceTracker<ServerConfigMatcherService, ServerConfigMatcherService> matcherTracker = track(ServerConfigMatcherService.class);
+		final ServiceTracker<ComputedServerConfigValueService, ComputedServerConfigValueService> computedValueTracker = track(ComputedServerConfigValueService.class);
+		
+		registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
+			
+			@Override
+			public List<ServerConfigMatcherService> getMatchers() {
+				List<ServerConfigMatcherService> services = new ArrayList<ServerConfigMatcherService>();
+				Object[] tracked = matcherTracker.getServices();
+				if (tracked == null) {
+					return services;
+				}
+				for(Object service: tracked) {
+					services.add((ServerConfigMatcherService) service);
+				}
+				return services;
+			}
+			
+			@Override
+			public List<ComputedServerConfigValueService> getComputed() {
+				List<ComputedServerConfigValueService> services = new ArrayList<ComputedServerConfigValueService>();
+				Object[] tracked = computedValueTracker.getServices();
+				if (tracked == null) {
+					return services;
+				}
+				for(Object service: tracked) {
+					services.add((ComputedServerConfigValueService) service);
+				}
+				return services;
+			}
+		}), "apps/manifests");
+		
+		openTrackers();
+	}
 
     private JSONArray readManifests() {
         final String property = getService(ConfigurationService.class).getProperty("com.openexchange.apps.manifestPath");

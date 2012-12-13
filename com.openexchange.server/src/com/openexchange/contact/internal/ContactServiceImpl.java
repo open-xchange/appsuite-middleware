@@ -81,7 +81,6 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link ContactServiceImpl}
@@ -270,8 +269,6 @@ public class ContactServiceImpl extends DefaultContactService {
 		new EventClient(session).modify(storedContact, contact, targetFolder);
 	}
 
-	private static final String GAB = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-
 	@Override
     protected void doUpdateContact(final Session session, final String folderID, final String objectID, final Contact contact, final Date lastRead) throws OXException {
 		final int userID = session.getUserId();
@@ -285,20 +282,10 @@ public class ContactServiceImpl extends DefaultContactService {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		}
 		/*
-		 * check general permissions
+		 * check general permissions with regard to global address book
 		 */
-		EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		try {
-            Check.canWriteOwn(permission, session);
-        } catch (OXException e) {
-            if (!GAB.equals(folderID) || !ContactExceptionCodes.NO_CHANGE_PERMISSION.equals(e) || !OXFolderProperties.isEnableInternalUsersEdit()) {
-                throw e;
-            }
-            // Is global address book  AND  no change permission indicated  AND  editing users is enabled  ==>  Re-check
-            OXFolderProperties.updatePermissions(true, contextID);
-            permission = Tools.getPermission(contextID, folderID, userID);
-            Check.canWriteOwn(permission, session);
-        }
+		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+		Check.canWriteOwn(permission, session);
 		/*
 		 * check currently stored contact
 		 */

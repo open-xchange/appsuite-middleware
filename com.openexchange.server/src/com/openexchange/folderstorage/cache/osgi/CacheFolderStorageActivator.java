@@ -80,6 +80,7 @@ import com.openexchange.push.PushEventConstants;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -283,10 +284,17 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 }
 
                 private void handleDroppedSession(final Session session) {
-                    if (null == getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
+                    final SessiondService sessiondService = getService(SessiondService.class);
+                    final int contextId = session.getContextId();
+                    if (null == sessiondService.getAnyActiveSessionForUser(session.getUserId(), contextId)) {
                         FolderMapManagement.getInstance().dropFor(session);
                         TreeLockManagement.getInstance().dropFor(session);
                         UserLockManagement.getInstance().dropFor(session);
+                    }
+                    if ((sessiondService instanceof SessiondServiceExtended) && !((SessiondServiceExtended) sessiondService).hasForContext(contextId)) {
+                        FolderMapManagement.getInstance().dropFor(contextId);
+                        TreeLockManagement.getInstance().dropFor(contextId);
+                        UserLockManagement.getInstance().dropFor(contextId);
                     }
                 }
             };

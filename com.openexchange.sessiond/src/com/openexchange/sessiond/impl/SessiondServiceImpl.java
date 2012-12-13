@@ -84,6 +84,9 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     private final Lock migrateLock;
 
+    /**
+     * Initializes a new {@link SessiondServiceImpl}.
+     */
     public SessiondServiceImpl() {
         super();
         migrateLock = new ReentrantLock();
@@ -91,7 +94,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public boolean hasForContext(final int contextId) {
-        return SessionHandler.hasForContext(contextId);
+        return SessionHandler.hasForContext(contextId, false);
     }
 
     @Override

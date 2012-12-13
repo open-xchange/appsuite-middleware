@@ -173,3 +173,8 @@ com.openexchange.contact.storage.ldap.sorting=groupware
 # no results are available for this folder for the 'deleted' API call. 
 # Therefore, any synchronization-based usage will not be available.
 com.openexchange.contact.storage.ldap.ADS_deletion_support=false
+
+# Defines whether empty distribution lists, i.e. lists that do not contain any
+# member, are excluded or not. Possible values are 'true' and 'false'; 
+# defaults to 'true'.  
+com.openexchange.contact.storage.ldap.excludeEmptyLists=true

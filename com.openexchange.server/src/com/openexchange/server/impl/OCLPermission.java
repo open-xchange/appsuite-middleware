@@ -146,19 +146,12 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
     public static final int SYSTEM_SYSTEM = 1;
 
     private String name;
-
     private int fuid;
-
     private int entity = -1;
-
     private int fp;
-
     private int orp;
-
     private int owp;
-
     private int odp;
-
     private int system;
 
     /**
