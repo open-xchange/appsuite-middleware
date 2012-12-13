@@ -7,6 +7,7 @@
  - Fix for bug 24148: Added needed import
  - Fix for bug 24150: Null guard
  - Fix for bug 24147: Added null guard
+ - Fix for bug 23881: Backport to previous JCS library
 
 * 2012-12-10 - thorben.betten@open-xchange.com
 
@@ -63,6 +64,10 @@
 * 2012-11-29 - martin.herfurth@open-xchange.com
 
  - Fix for bug 24005: Fixed typos.
+
+* 2012-11-28 - karsten.will@open-xchange.com
+
+ - Fix for bug 23994: Always returning correct result code
 
 * 2012-11-27 - thorben.betten@open-xchange.com
 
