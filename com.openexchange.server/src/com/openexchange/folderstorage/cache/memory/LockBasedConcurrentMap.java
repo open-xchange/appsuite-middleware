@@ -64,12 +64,11 @@ import java.util.concurrent.locks.Lock;
 final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
 
     private final ConcurrentMap<K, V> delegate;
-
     private final Lock writeLock;
-
     private final Lock readLock;
 
     LockBasedConcurrentMap(final Lock readLock, final Lock writeLock, final ConcurrentMap<K, V> delegate) {
+        super();
         this.writeLock = writeLock;
         this.readLock = readLock;
         this.delegate = delegate;
