@@ -82,7 +82,7 @@ public class TrackingProvider implements ConfigProviderService {
     }
 
     @Override
-    public BasicProperty get(final String property, int context, int user) throws OXException {
+    public BasicProperty get(final String property, int contextId, int userId) throws OXException {
         ServiceReference[] serviceReferences = tracker.getServiceReferences();
         if(serviceReferences == null) {
             serviceReferences = new ServiceReference[0];
@@ -111,7 +111,7 @@ public class TrackingProvider implements ConfigProviderService {
         BasicProperty first = null;
         for (ServiceReference ref : serviceReferences) {
             ConfigProviderService delegate = (ConfigProviderService) tracker.getService(ref);
-            BasicProperty prop = delegate.get(property, context, user);
+            BasicProperty prop = delegate.get(property, contextId, userId);
             if (first == null) {
                 first = prop;
             }
@@ -157,7 +157,7 @@ public class TrackingProvider implements ConfigProviderService {
     }
 
     @Override
-    public Collection<String> getAllPropertyNames(int context, int user) throws OXException {
+    public Collection<String> getAllPropertyNames(int contextId, int userId) throws OXException {
         Object[] services = tracker.getServices();
         if(services == null) {
             return Collections.emptyList();
@@ -166,7 +166,7 @@ public class TrackingProvider implements ConfigProviderService {
 
         for (Object object : services) {
             ConfigProviderService configProvider = (ConfigProviderService) object;
-            Collection<String> names = configProvider.getAllPropertyNames(context, user);
+            Collection<String> names = configProvider.getAllPropertyNames(contextId, userId);
             allNames.addAll(names);
 
         }

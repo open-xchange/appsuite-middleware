@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,73 @@
  *
  */
 
-package com.openexchange.config.cascade.context;
+package com.openexchange.config.cascade.user;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigProviderService;
-import com.openexchange.context.ContextService;
+import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.user.UserService;
 
 /**
- * {@link AbstractContextBasedConfigProvider}
+ * {@link BasicPropertyImpl}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractContextBasedConfigProvider implements ConfigProviderService {
+final class BasicPropertyImpl implements BasicProperty {
 
-    protected ContextService contexts;
+    private static final String DYNAMIC_ATTR_PREFIX = UserConfigProvider.DYNAMIC_ATTR_PREFIX;
 
-    public AbstractContextBasedConfigProvider(final ContextService contexts) {
-        this.contexts = contexts;
+    private final Context ctx;
+    private final User user;
+    private final String property;
+    private final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link BasicPropertyImplementation}.
+     */
+    BasicPropertyImpl(final String property, final User user, final Context ctx, final ServiceLookup services) {
+        super();
+        this.ctx = ctx;
+        this.user = user;
+        this.property = property;
+        this.services = services;
     }
 
     @Override
-    public BasicProperty get(final String property, final int contextId, final int userId) throws OXException {
-        if (contextId == NO_CONTEXT) {
-            return NO_PROPERTY;
-        }
-        return get(property, contexts.getContext(contextId), userId);
+    public String get() {
+        final Set<String> set = user.getAttributes().get(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString());
+        return set == null || set.isEmpty() ? null : set.iterator().next();
     }
 
     @Override
-    public Collection<String> getAllPropertyNames(final int contextId, final int userId) throws OXException {
-        if (contextId == NO_CONTEXT) {
-            return Collections.emptyList();
-        }
-        return getAllPropertyNames(contexts.getContext(contextId));
+    public String get(final String metadataName) throws OXException {
+        return null;
     }
 
-    protected abstract Collection<String> getAllPropertyNames(Context context);
+    @Override
+    public boolean isDefined() throws OXException {
+        return get() != null;
+    }
 
-    protected abstract BasicProperty get(String property, Context context, int user) throws OXException;
+    @Override
+    public void set(final String value) throws OXException {
+        services.getService(UserService.class).setAttribute(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString(), value, user.getId(), ctx);
+    }
 
+    @Override
+    public void set(final String metadataName, final String value) throws OXException {
+        throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "user");
+    }
+
+    @Override
+    public List<String> getMetadataNames() throws OXException {
+        return Collections.emptyList();
+    }
 }
