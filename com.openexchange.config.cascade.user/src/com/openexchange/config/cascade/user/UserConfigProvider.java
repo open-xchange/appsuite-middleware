@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.user.UserService;
 
 /**
@@ -99,6 +100,12 @@ public class UserConfigProvider implements ConfigProviderService {
      * @throws OXException If obtaining user fails
      */
     private User getUser(final int userId, final Context ctx) throws OXException {
+    	// Most often we will talk about the current user, so let's try to quickly retrieve that one.
+    	ThreadLocalSessionHolder sessionHolder = ThreadLocalSessionHolder.getInstance();
+    	if (sessionHolder != null && sessionHolder.getContext() != null && sessionHolder.getContext().getContextId() == ctx.getContextId() && sessionHolder.getUser() != null && sessionHolder.getUser().getId() == userId) {
+    		return sessionHolder.getUser();
+    	}
+    
         final CacheService cacheService = services.getService(CacheService.class);
         if (cacheService == null) {
             return services.getService(UserService.class).getUser(userId, ctx);

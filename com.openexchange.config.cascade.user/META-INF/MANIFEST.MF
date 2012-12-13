@@ -17,5 +17,6 @@ Import-Package: com.openexchange.caching,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.sessiond.impl,
  com.openexchange.user,
  org.osgi.framework
