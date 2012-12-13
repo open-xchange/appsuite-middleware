@@ -173,6 +173,7 @@ public class LdapConfig {
     private DerefAliases derefAliases;
     private boolean connectionPooling;
     private boolean trustAllCerts;
+    private boolean excludeEmptyLists;
 
     /**
      * Initializes a new {@link LdapConfig}.
@@ -235,7 +236,8 @@ public class LdapConfig {
         }
         String derefAliasesValue = getProperty(properties, "derefAliases", "always");
         derefAliases = null != derefAliasesValue ? DerefAliases.valueOf(derefAliasesValue.toUpperCase()) : null;
-        setTrustAllCerts(Boolean.parseBoolean(getProperty(properties, "trustAllCerts", "false")));
+        trustAllCerts = Boolean.parseBoolean(getProperty(properties, "trustAllCerts", "false"));
+        excludeEmptyLists = Boolean.parseBoolean(getProperty(properties, "trustAllCerts", "true"));
     }
     
     private static String getProperty(Properties properties, String propertyName, String defaultValue) {
@@ -808,6 +810,24 @@ public class LdapConfig {
      */
     public void setTrustAllCerts(boolean trustAllCerts) {
         this.trustAllCerts = trustAllCerts;
+    }
+
+    /**
+     * Gets the excludeEmptyLists
+     *
+     * @return The excludeEmptyLists
+     */
+    public boolean isExcludeEmptyLists() {
+        return excludeEmptyLists;
+    }
+
+    /**
+     * Sets the excludeEmptyLists
+     *
+     * @param excludeEmptyLists The excludeEmptyLists to set
+     */
+    public void setExcludeEmptyLists(boolean excludeEmptyLists) {
+        this.excludeEmptyLists = excludeEmptyLists;
     }
 
 }
