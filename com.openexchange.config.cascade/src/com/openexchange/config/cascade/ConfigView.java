@@ -53,7 +53,7 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link ConfigView}
+ * {@link ConfigView} - A configuration view.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
