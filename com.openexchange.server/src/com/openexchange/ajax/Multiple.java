@@ -167,7 +167,7 @@ public class Multiple extends SessionServlet {
                 final ConcurrentTIntObjectHashMap<JsonInOut> mapping = new ConcurrentTIntObjectHashMap<JsonInOut>(length);
                 for (int pos = 0; pos < length; pos++) {
                     final JSONObject dataObject = dataArray.getJSONObject(pos);
-                    final JsonInOut jsonInOut = new JsonInOut(dataObject);
+                    final JsonInOut jsonInOut = new JsonInOut(pos, dataObject);
                     mapping.put(pos, jsonInOut);
                     if (!dataObject.hasAndNotNull(MODULE)) {
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(MODULE);
@@ -188,12 +188,18 @@ public class Multiple extends SessionServlet {
                     }
                 }
                 if (null != serialTasks) {
+                    final int size = serialTasks.size();
+                    final JSONArray serialResponses = new JSONArray(size);
                     // Execute serial tasks with current thread
                     for (final JsonInOut jsonInOut : serialTasks) {
-                        state = parseActionElement(jsonInOut, session, req, state);
+                        state = parseActionElement(jsonInOut.getInputObject(), serialResponses, session, req, state);
                     }
                     // Don't forget to write mail request
                     writeMailRequest(req);
+                    // Fill responses
+                    for (int i = 0; i < size; i++) {
+                        serialTasks.get(i).setOutputObject((JSONValue) serialResponses.get(i));
+                    }
                 }
                 if (null != concurrentTasks) {
                     // Await completion service
@@ -259,12 +265,12 @@ public class Multiple extends SessionServlet {
         }
     }
 
-    protected static final AJAXState parseActionElement(final JsonInOut jsonInOut , final ServerSession session, final HttpServletRequest req, final AJAXState state) throws OXException {
-        final OXJSONWriter jWriter = new OXJSONWriter();
-        final JSONObject inObject = jsonInOut.getInputObject();
-        final AJAXState ajaxState = doAction(DataParser.checkString(inObject, MODULE), inObject.optString(PARAMETER_ACTION), inObject, session, req, jWriter, state);
-        jsonInOut.setOutputObject(jWriter.getObject());
-        return ajaxState;
+    protected static final AJAXState parseActionElement(final JSONObject inObject, final JSONArray serialResponses, final ServerSession session, final HttpServletRequest req, final AJAXState state) throws OXException {
+        try {
+            return doAction(DataParser.checkString(inObject, MODULE), inObject.optString(PARAMETER_ACTION), inObject, session, req, new OXJSONWriter(serialResponses), state);
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
     private static final void writeMailRequest(final HttpServletRequest req) throws JSONException {
@@ -542,12 +548,23 @@ public class Multiple extends SessionServlet {
 
     private static final class JsonInOut {
 
+        private final int pos;
         private final JSONObject inObject;
         private volatile JSONValue outObject;
 
-        protected JsonInOut(final JSONObject inObject) {
+        protected JsonInOut(final int pos, final JSONObject inObject) {
             super();
+            this.pos = pos;
             this.inObject = inObject;
+        }
+        
+        /**
+         * Gets the (zero-based) position.
+         *
+         * @return The (zero-based) position
+         */
+        public int getPos() {
+            return pos;
         }
         
         /**
