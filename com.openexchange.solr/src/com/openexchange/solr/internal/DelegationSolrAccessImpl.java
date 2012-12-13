@@ -69,6 +69,7 @@ import org.apache.solr.common.params.SolrParams;
 import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.hazelcast.core.LifecycleService;
 import com.hazelcast.core.Member;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -363,7 +364,8 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 
     public void shutDown() throws OXException {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        if (hazelcast != null && hazelcast.getLifecycleService().isRunning()) {
+        LifecycleService lifecycleService = hazelcast.getLifecycleService();
+        if (hazelcast != null && lifecycleService != null && lifecycleService.isRunning()) {
             Collection<String> activeCores = embeddedAccess.getActiveCores();
             IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
             String localAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
