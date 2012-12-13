@@ -395,4 +395,10 @@ public class SimContactService implements ContactService {
         return null;
     }
 
+    @Override
+    public void updateUser(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
 }
