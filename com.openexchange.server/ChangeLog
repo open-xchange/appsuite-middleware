@@ -5,6 +5,7 @@
 * 2012-12-14 - marcus.klein@open-xchange.com
 
  - Fix for bug 23750: Extended the fragments of the formLogin action redirect URL with values needed by the App Suite frontend.
+ - Fix for bug 23957: Checking if old configuration directory exists before trying to find files there.
 
 * 2012-12-14 - martin.herfurth@open-xchange.com
 
