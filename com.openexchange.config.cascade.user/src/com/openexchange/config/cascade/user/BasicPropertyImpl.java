@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -70,26 +71,33 @@ final class BasicPropertyImpl implements BasicProperty {
 
     private static final String DYNAMIC_ATTR_PREFIX = UserConfigProvider.DYNAMIC_ATTR_PREFIX;
 
-    private final Context ctx;
-    private final User user;
+    private final int contextId;
+    private final int userId;
     private final String property;
     private final ServiceLookup services;
+    private volatile String value;
 
     /**
      * Initializes a new {@link BasicPropertyImplementation}.
+     * 
+     * @throws OXException If initialization fails 
      */
-    BasicPropertyImpl(final String property, final User user, final Context ctx, final ServiceLookup services) {
+    BasicPropertyImpl(final String property, final int userId, final int contextId, final ServiceLookup services) throws OXException {
         super();
-        this.ctx = ctx;
-        this.user = user;
+        this.contextId = contextId;
+        this.userId = userId;
+        // Preload value
+        final User user = services.getService(UserService.class).getUser(userId, services.getService(ContextService.class).getContext(contextId));
+        final Set<String> set = user.getAttributes().get(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString());
+        value = set == null || set.isEmpty() ? null : set.iterator().next();
+        // Assign rest
         this.property = property;
         this.services = services;
     }
 
     @Override
     public String get() {
-        final Set<String> set = user.getAttributes().get(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString());
-        return set == null || set.isEmpty() ? null : set.iterator().next();
+        return value;
     }
 
     @Override
@@ -104,7 +112,9 @@ final class BasicPropertyImpl implements BasicProperty {
 
     @Override
     public void set(final String value) throws OXException {
-        services.getService(UserService.class).setAttribute(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString(), value, user.getId(), ctx);
+        final Context context = services.getService(ContextService.class).getContext(contextId);
+        services.getService(UserService.class).setAttribute(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString(), value, userId, context);
+        this.value = value;
     }
 
     @Override
