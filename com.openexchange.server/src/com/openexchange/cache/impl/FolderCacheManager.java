@@ -56,9 +56,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
@@ -68,9 +68,9 @@ import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.caching.dynamic.Refresher;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
@@ -93,7 +93,7 @@ public final class FolderCacheManager {
 
     private volatile Cache folderCache;
 
-    private final Lock cacheLock;
+    private final ReadWriteLock cacheLock;
 
     /**
      * Initializes a new {@link FolderCacheManager}.
@@ -102,7 +102,7 @@ public final class FolderCacheManager {
      */
     private FolderCacheManager() throws OXException {
         super();
-        cacheLock = new ReentrantLock(true);
+        cacheLock = new ReentrantReadWriteLock(true);
         initCache();
     }
 
@@ -211,7 +211,7 @@ public final class FolderCacheManager {
     }
 
     Lock getCacheLock() {
-        return cacheLock;
+        return cacheLock.writeLock();
     }
 
     private class FolderFactory implements OXObjectFactory<FolderObject> {
@@ -292,7 +292,8 @@ public final class FolderCacheManager {
             return null;
         }
         final FolderObject retval;
-        cacheLock.lock();
+        final Lock readLock = cacheLock.readLock();
+        readLock.lock();
         try {
             final Object tmp = folderCache.get(getCacheKey(ctx.getContextId(), objectId));
             // Refresher uses Condition objects to prevent multiple threads loading same folder.
@@ -302,7 +303,7 @@ public final class FolderCacheManager {
                 retval = null;
             }
         } finally {
-            cacheLock.unlock();
+            readLock.unlock();
         }
         return null == retval ? retval : retval.clone();
     }
@@ -320,7 +321,8 @@ public final class FolderCacheManager {
         final CacheKey key = getCacheKey(ctx.getContextId(), folderId);
         final Cache folderCache = this.folderCache;
         if (folderCache.isReplicated()) {
-            cacheLock.lock();
+            final Lock writeLock = cacheLock.writeLock();
+            writeLock.lock();
             try {
                 final Object tmp = folderCache.get(key);
                 if (tmp instanceof FolderObject) {
@@ -338,7 +340,7 @@ public final class FolderCacheManager {
                     }
                 }
             } finally {
-                cacheLock.unlock();
+                writeLock.unlock();
             }
         }
         if (null != readCon) {
@@ -389,7 +391,8 @@ public final class FolderCacheManager {
     private FolderObject putIfAbsentInternal(final FolderProvider folderProvider, final Context ctx, final ElementAttributes elemAttribs) throws OXException {
         final CacheKey key = getCacheKey(ctx.getContextId(), folderProvider.getObjectID());
         final FolderObject retval;
-        cacheLock.lock();
+        final Lock writeLock = cacheLock.writeLock();
+        writeLock.lock();
         try {
             final Cache folderCache = this.folderCache;
             final Object tmp = folderCache.get(key);
@@ -428,7 +431,7 @@ public final class FolderCacheManager {
                 retval = null;
             }
         } finally {
-            cacheLock.unlock();
+            writeLock.unlock();
         }
         return null == retval ? retval : retval.clone();
     }
@@ -482,7 +485,8 @@ public final class FolderCacheManager {
          */
         final FolderObject clone = folderObj.clone();
         final CacheKey key = getCacheKey(ctx.getContextId(), folderObj.getObjectID());
-        cacheLock.lock();
+        final Lock writeLock = cacheLock.writeLock();
+        writeLock.lock();
         try {
             final Object tmp = folderCache.get(key);
             // If there is currently an object associated with this key in the region it is replaced.
@@ -523,7 +527,7 @@ public final class FolderCacheManager {
                 cond.signalAll();
             }
         } finally {
-            cacheLock.unlock();
+            writeLock.unlock();
         }
     }
 
@@ -542,14 +546,15 @@ public final class FolderCacheManager {
         // Remove object from cache if exist
         if (folderId > 0) {
             final CacheKey cacheKey = getCacheKey(ctx.getContextId(), folderId);
-            cacheLock.lock();
+            final Lock writeLock = cacheLock.writeLock();
+            writeLock.lock();
             try {
                 final Object tmp = folderCache.get(cacheKey);
                 if (!(tmp instanceof Condition)) {
                     folderCache.remove(cacheKey);
                 }
             } finally {
-                cacheLock.unlock();
+                writeLock.unlock();
             }
         }
         // Dirty hack
@@ -588,7 +593,8 @@ public final class FolderCacheManager {
         /*
          * Remove objects from cache
          */
-        cacheLock.lock();
+        final Lock writeLock = cacheLock.writeLock();
+        writeLock.lock();
         try {
             for (final CacheKey cacheKey : cacheKeys) {
                 final Object tmp = folderCache.get(cacheKey);
@@ -597,7 +603,7 @@ public final class FolderCacheManager {
                 }
             }
         } finally {
-            cacheLock.unlock();
+            writeLock.unlock();
         }
         // Dirty hack
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
