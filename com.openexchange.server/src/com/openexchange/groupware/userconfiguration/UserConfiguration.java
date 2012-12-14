@@ -1227,7 +1227,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
                         } catch (final OXException x) {
                             LOG.error(x.getMessage(), x);
                         }
-                    }
+                    } 
                     UserConfigurationStorage.getInstance().setExtendedPermissions(retval, userId, ctx);
                     this.extendedPermissions = retval;
                 }
