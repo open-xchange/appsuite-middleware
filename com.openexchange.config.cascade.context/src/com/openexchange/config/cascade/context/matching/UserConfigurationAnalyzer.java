@@ -49,14 +49,11 @@
 
 package com.openexchange.config.cascade.context.matching;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfiguration.Permission;
 
 
 /**
@@ -66,65 +63,18 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
  */
 public class UserConfigurationAnalyzer {
 
-	// Time for a little reflection magic
-    private static final Map<String, Method> getMethods = new HashMap<String, Method>();
-
-    static {
-        Method[] methods = UserConfiguration.class.getMethods();
-        for (Method method : methods) {
-            if (isCandidate(method)) {
-                getMethods.put(getName(method), method);
-            }
-        }
-    }
-
-
-    public Set<String> getTags(UserConfiguration configuration) {
+	public Set<String> getTags(UserConfiguration configuration) {
         Set<String> retval = new HashSet<String>();
-        for(Map.Entry<String, Method> entry : getMethods.entrySet()) {
-            String name = entry.getKey();
-            Method m = entry.getValue();
-
-            try {
-                Boolean active = (Boolean) m.invoke(configuration);
-                if(active) {
-                    retval.add(name);
-                }
-            } catch (IllegalArgumentException e) {
-                // Ignore
-            } catch (IllegalAccessException e) {
-                // Ignore
-            } catch (InvocationTargetException e) {
-                // Ignore
-            }
-
-
+        
+        int permissionBits = configuration.getPermissionBits();
+        
+        for (Permission p : Permission.values()) {
+        	if ( (permissionBits & p.getBit()) == p.getBit()) {
+        		retval.add("uc" + p.getTagName());
+        	}
         }
+
         return retval;
-    }
-
-
-    private static String getName(Method method) {
-        String name = method.getName();
-        StringBuilder nameBuilder = new StringBuilder("uc");
-        boolean collect = false;
-        for(char c : name.toCharArray()) {
-            if (Character.isUpperCase(c)) {
-                collect = true;
-            }
-            if(collect) {
-                nameBuilder.append(c);
-            }
-        }
-        return nameBuilder.toString();
-    }
-
-
-    private static boolean isCandidate(Method method) {
-        Class<?> cls = method.getReturnType();
-        boolean returnsBoolean = boolean.class.isAssignableFrom(cls) || Boolean.class.isAssignableFrom(cls);
-        boolean hasNoParameters = method.getParameterTypes().length==0;
-        return returnsBoolean && hasNoParameters;
     }
 
 }
