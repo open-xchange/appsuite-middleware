@@ -2,7 +2,6 @@ package com.openexchange.groupware.userconfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -26,6 +25,11 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     }
 
     @Override
+    public void initExtendedPermissions(final int userId, final Context ctx) {
+        delegate.initExtendedPermissions(userId, ctx);
+    }
+
+    @Override
     public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
         final UserConfiguration config = getOverride(userId, groups, ctx);
         if( config != null) {
@@ -35,9 +39,9 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     }
 
     @Override
-    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException {
-        List<UserConfiguration> retval = new ArrayList<UserConfiguration>();
-        for (User user : users) {
+    public UserConfiguration[] getUserConfiguration(final Context ctx, final User[] users) throws OXException {
+        final List<UserConfiguration> retval = new ArrayList<UserConfiguration>();
+        for (final User user : users) {
             retval.add(getUserConfiguration(user.getId(), user.getGroups(), ctx));
         }
         return retval.toArray(new UserConfiguration[retval.size()]);
