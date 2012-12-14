@@ -151,14 +151,14 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
-    public long attachmentAction(final int objectId, final int uid, final int folderId, final Session session, final Context c, final int numberOfAttachments) throws OXException {
-    	attachmentMemory.rememberAttachmentChange(uid, c.getContextId());
+    public long attachmentAction(final int folderId, final int objectId, final int userId, final Session session, final Context c, final int numberOfAttachments) throws OXException {
+    	attachmentMemory.rememberAttachmentChange(objectId, c.getContextId());
     	
-    	final long retval = delegate.attachmentAction(objectId, uid, folderId, session, c, numberOfAttachments);
+    	final long retval = delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments);
     	// Trigger Update Mail unless attachment is in create new limbo
-    	if (!createNewLimbo.containsKey(new AppointmentAddress(uid, c.getContextId()))) {
+    	if (!createNewLimbo.containsKey(new AppointmentAddress(objectId, c.getContextId()))) {
     		try {
-        		final CalendarDataObject reloaded = getObjectById(uid);
+        		final CalendarDataObject reloaded = getObjectById(objectId);
                 final ITipMailGenerator generator = generators.create(reloaded, reloaded, session, onBehalfOf(folderId));
                 final List<NotificationParticipant> recipients = generator.getRecipients();
                 for (final NotificationParticipant notificationParticipant : recipients) {
