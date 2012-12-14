@@ -163,7 +163,8 @@ public class SecretActivator extends HousekeepingActivator {
         /*
          * Create & open whiteboard service
          */
-        whiteboardSecretService = new WhiteboardSecretService(context);
+        final WhiteboardSecretService whiteboardSecretService = new WhiteboardSecretService(context);
+        this.whiteboardSecretService = whiteboardSecretService;
         whiteboardSecretService.open();
         /*
          * Register CryptoSecretEncryptionFactoryService
