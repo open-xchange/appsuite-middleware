@@ -1,6 +1,7 @@
 * 2012-12-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 24052: Sanitize script tags
+ - Fix for bug 23857: Keep background color when replacing <body> tag with <div> tag
 
 * 2012-12-14 - marcus.klein@open-xchange.com
 
