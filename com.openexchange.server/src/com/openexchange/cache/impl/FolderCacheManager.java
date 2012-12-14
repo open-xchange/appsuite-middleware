@@ -329,8 +329,9 @@ public final class FolderCacheManager {
         readLock.lock();
         try {
             final List<FolderObject> ret = new ArrayList<FolderObject>(objectIds.length);
-            for (int objectId : objectIds) {
-                final Object tmp = folderCache.get(getCacheKey(ctx.getContextId(), objectId));
+            final int contextId = ctx.getContextId();
+            for (final int objectId : objectIds) {
+                final Object tmp = folderCache.get(getCacheKey(contextId, objectId));
                 // Refresher uses Condition objects to prevent multiple threads loading same folder.
                 if (tmp instanceof FolderObject) {
                     ret.add(((FolderObject) tmp).clone());
