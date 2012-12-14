@@ -59,7 +59,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.login.LoginResult;
@@ -129,7 +128,7 @@ public final class LoginWriter {
             locale = ((ServerSession) session).getUser().getLocale();
         } else {
             try {
-                locale = UserStorage.getInstance().getUser(session.getUserId(), ContextStorage.getStorageContext(session.getContextId())).getLocale();
+                locale = UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
             } catch (final Exception e) {
                 // Ignore
             }
