@@ -1,3 +1,7 @@
+* 2012-12-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23750: Extended the fragments of the formLogin action redirect URL with values needed by the App Suite frontend.
+
 * 2012-12-14 - martin.herfurth@open-xchange.com
 
  - Fix for bug 24193: Mix-up of ids.

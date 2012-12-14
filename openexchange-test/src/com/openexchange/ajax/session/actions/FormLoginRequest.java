@@ -47,42 +47,44 @@
  *
  */
 
-package com.openexchange.ajax;
+package com.openexchange.ajax.session.actions;
 
-import com.openexchange.ajax.login.LoginTools;
-import junit.framework.TestCase;
-
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_ACTION;
+import static com.openexchange.ajax.Login.ACTION_FORMLOGIN;
+import static com.openexchange.ajax.fields.LoginFields.AUTHID_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.AUTOLOGIN_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.LOGIN_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.PASSWORD_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.VERSION_PARAM;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.session.LoginTools;
 
 /**
- * {@link LoginAddFragmentTest}
+ * {@link FormLoginRequest}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class LoginAddFragmentTest extends TestCase {
+public class FormLoginRequest extends AbstractRequest<FormLoginResponse> {
 
-    public LoginAddFragmentTest(String name) {
-        super(name);
+    public FormLoginRequest(String login, String password, String authId, String client, String version, boolean autologin) {
+        super(new Parameter[] {
+            new URLParameter(PARAMETER_ACTION, ACTION_FORMLOGIN),
+            new FieldParameter(LOGIN_PARAM, login),
+            new FieldParameter(PASSWORD_PARAM, password),
+            new FieldParameter(AUTHID_PARAM, authId),
+            new FieldParameter(CLIENT_PARAM, client),
+            new FieldParameter(VERSION_PARAM, version),
+            new FieldParameter(AUTOLOGIN_PARAM, Boolean.toString(autologin))
+        });
     }
 
-    public void assertFragment(String original, String expected) {
-        assertEquals(expected, new TestLogin().addFragmentParam(original, "session", "abcd"));
+    public FormLoginRequest(String login, String password) {
+        this(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, true);
     }
 
-    public void testSimple() {
-        assertFragment("http://www.open-xchange.com/index.html", "http://www.open-xchange.com/index.html#session=abcd");
-    }
-
-    public void testEnhanceExistingFragment() {
-        assertFragment("http://www.open-xchange.com/index.html#f=12&i=23", "http://www.open-xchange.com/index.html#f=12&i=23&session=abcd");
-    }
-
-    public void testDelimitedByQuestionMark() {
-        assertFragment("http://www.open-xchange.com/index.html#f=12&i=23?someParam=someValue", "http://www.open-xchange.com/index.html#f=12&i=23&session=abcd?someParam=someValue");
-    }
-
-    private static final class TestLogin extends Login {
-        public String addFragmentParam(String url, String param, String value) {
-            return LoginTools.addFragmentParameter(url, param, value);
-        }
+    @Override
+    public FormLoginParser getParser() {
+        return new FormLoginParser();
     }
 }

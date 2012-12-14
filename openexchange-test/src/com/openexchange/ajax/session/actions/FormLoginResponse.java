@@ -47,42 +47,49 @@
  *
  */
 
-package com.openexchange.ajax;
+package com.openexchange.ajax.session.actions;
 
-import com.openexchange.ajax.login.LoginTools;
-import junit.framework.TestCase;
-
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link LoginAddFragmentTest}
+ * Stores the values of the redirect URL returned by the formLogin action of the login servlet.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class LoginAddFragmentTest extends TestCase {
+public class FormLoginResponse extends AbstractAJAXResponse {
 
-    public LoginAddFragmentTest(String name) {
-        super(name);
+    private final String path;
+    private final String sessionId;
+    private final String login;
+    private final int userId;
+    private final String language;
+
+    protected FormLoginResponse(String path, String sessionId, String login, int userId, String language) {
+        super(null);
+        this.path = path;
+        this.sessionId = sessionId;
+        this.login = login;
+        this.userId = userId;
+        this.language = language;
     }
 
-    public void assertFragment(String original, String expected) {
-        assertEquals(expected, new TestLogin().addFragmentParam(original, "session", "abcd"));
+    public String getPath() {
+        return path;
     }
 
-    public void testSimple() {
-        assertFragment("http://www.open-xchange.com/index.html", "http://www.open-xchange.com/index.html#session=abcd");
+    public String getSessionId() {
+        return sessionId;
     }
 
-    public void testEnhanceExistingFragment() {
-        assertFragment("http://www.open-xchange.com/index.html#f=12&i=23", "http://www.open-xchange.com/index.html#f=12&i=23&session=abcd");
+    public String getLogin() {
+        return login;
     }
 
-    public void testDelimitedByQuestionMark() {
-        assertFragment("http://www.open-xchange.com/index.html#f=12&i=23?someParam=someValue", "http://www.open-xchange.com/index.html#f=12&i=23&session=abcd?someParam=someValue");
+    public int getUserId() {
+        return userId;
     }
 
-    private static final class TestLogin extends Login {
-        public String addFragmentParam(String url, String param, String value) {
-            return LoginTools.addFragmentParameter(url, param, value);
-        }
+    public String getLanguage() {
+        return language;
     }
 }

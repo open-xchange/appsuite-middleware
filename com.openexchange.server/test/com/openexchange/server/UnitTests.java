@@ -52,14 +52,6 @@ package com.openexchange.server;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest;
-import com.openexchange.ajax.parser.TaskLastModifiedTest;
-import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest;
-import com.openexchange.groupware.ldap.UserAttributeDiffTest;
-import com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest;
-import com.openexchange.tools.collections.OXCollectionsTest;
-import com.openexchange.tools.iterator.SearchIteratorDelegatorTest;
-import com.openexchange.tools.net.URIParserTest;
 
 /**
  * {@link UnitTests}
@@ -74,14 +66,15 @@ public class UnitTests {
 
     public static Test suite() {
         final TestSuite tests = new TestSuite();
-        tests.addTestSuite(ContactSearchtermSqlConverterTest.class);
-        tests.addTestSuite(TaskLastModifiedTest.class);
-        tests.addTest(new JUnit4TestAdapter(UserAttributeDiffTest.class));
-        tests.addTest(new JUnit4TestAdapter(JDBC4ConnectionReturnerTest.class));
-        tests.addTest(new JUnit4TestAdapter(TaskEndDateReplacementTest.class));
-        tests.addTestSuite(OXCollectionsTest.class);
-        tests.addTestSuite(SearchIteratorDelegatorTest.class);
-        tests.addTest(new JUnit4TestAdapter(URIParserTest.class));
+        tests.addTestSuite(com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest.class);
+        tests.addTestSuite(com.openexchange.ajax.parser.TaskLastModifiedTest.class);
+        tests.addTestSuite(com.openexchange.ajax.LoginAddFragmentTest.class);
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.groupware.ldap.UserAttributeDiffTest.class));
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest.class));
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest.class));
+        tests.addTestSuite(com.openexchange.tools.collections.OXCollectionsTest.class);
+        tests.addTestSuite(com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class);
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.tools.net.URIParserTest.class));
         return tests;
     }
 }

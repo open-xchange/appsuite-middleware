@@ -47,42 +47,58 @@
  *
  */
 
-package com.openexchange.ajax;
+package com.openexchange.ajax.session;
 
-import com.openexchange.ajax.login.LoginTools;
-import junit.framework.TestCase;
-
+import static com.openexchange.java.Autoboxing.I;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.session.actions.FormLoginRequest;
+import com.openexchange.ajax.session.actions.FormLoginResponse;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 
 /**
- * {@link LoginAddFragmentTest}
+ * Tests the action formLogin of the login servlet.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class LoginAddFragmentTest extends TestCase {
+public class FormLoginTest extends AbstractAJAXSession {
 
-    public LoginAddFragmentTest(String name) {
+    private String login;
+    private String password;
+
+    public FormLoginTest(String name) {
         super(name);
     }
 
-    public void assertFragment(String original, String expected) {
-        assertEquals(expected, new TestLogin().addFragmentParam(original, "session", "abcd"));
+    @Override
+    protected void setUp() throws Exception {
+        AJAXConfig.init();
+        login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
+        password = AJAXConfig.getProperty(Property.PASSWORD);
     }
 
-    public void testSimple() {
-        assertFragment("http://www.open-xchange.com/index.html", "http://www.open-xchange.com/index.html#session=abcd");
+    @Override
+    protected void tearDown() throws Exception {
+        login = null;
+        password = null;
+        super.tearDown();
     }
 
-    public void testEnhanceExistingFragment() {
-        assertFragment("http://www.open-xchange.com/index.html#f=12&i=23", "http://www.open-xchange.com/index.html#f=12&i=23&session=abcd");
-    }
-
-    public void testDelimitedByQuestionMark() {
-        assertFragment("http://www.open-xchange.com/index.html#f=12&i=23?someParam=someValue", "http://www.open-xchange.com/index.html#f=12&i=23&session=abcd?someParam=someValue");
-    }
-
-    private static final class TestLogin extends Login {
-        public String addFragmentParam(String url, String param, String value) {
-            return LoginTools.addFragmentParameter(url, param, value);
+    public void testFormLogin() throws Exception {
+        final AJAXSession session = new AJAXSession();
+        final AJAXClient myClient = new AJAXClient(session);
+        try {
+            FormLoginResponse response = myClient.execute(new FormLoginRequest(login, password));
+            assertNotNull("Path of redirect response is not found.", response.getPath());
+            assertNotNull("Session identifier not found as fragment.", response.getSessionId());
+            assertNotNull("Login string was not found as fragment.", response.getLogin());
+            assertNotSame("", I(-1), I(response.getUserId()));
+            assertNotNull("Language string was not found as fragment.", response.getLanguage());
+            session.setId(response.getSessionId());
+        } finally {
+            myClient.logout();
         }
     }
 }
