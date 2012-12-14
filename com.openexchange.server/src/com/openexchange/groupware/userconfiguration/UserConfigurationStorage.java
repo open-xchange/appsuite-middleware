@@ -188,6 +188,14 @@ public abstract class UserConfigurationStorage {
     protected abstract void stopInternal() throws OXException;
 
     /**
+     * Initializes the extended permission on the cached instance.
+     * 
+     * @param userId The user identifier
+     * @param ctx The context
+     */
+    public abstract void initExtendedPermissions(final int userId,final Context ctx);
+
+    /**
      * Determines the instance of <code>UserConfiguration</code> that
      * corresponds to given user ID. If <code>groups</code> argument is set,
      * user's groups need not to be loaded from user storage

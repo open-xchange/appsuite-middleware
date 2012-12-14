@@ -1180,7 +1180,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 	 * @return The extended permissions
 	 */
     public Set<String> getExtendedPermissions() {
-    	if (extendedPermissions != null) {
+        if (extendedPermissions != null) {
     		return extendedPermissions;
     	}
         Set<String> retval = new HashSet<String>();

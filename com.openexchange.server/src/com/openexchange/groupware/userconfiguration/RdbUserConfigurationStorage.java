@@ -95,6 +95,11 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
+    public void initExtendedPermissions(int userId, Context ctx) {
+        // Nothing
+    }
+
+    @Override
     public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
         try {
             return loadUserConfiguration(userId, groups, ctx);

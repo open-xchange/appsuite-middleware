@@ -127,7 +127,7 @@ public class UserConfigProvider implements ConfigProviderService {
             return NO_PROPERTY;
         }
         
-        // new Throwable().printStackTrace(System.out);
+        new Throwable().printStackTrace(System.out);
         
         final PropertyMap propertyMap = PropertyMapManagement.getInstance().getFor(userId, contextId);
         BasicProperty basicProperty = propertyMap.get(property);
