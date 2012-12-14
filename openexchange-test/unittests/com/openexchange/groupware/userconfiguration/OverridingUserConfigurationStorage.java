@@ -51,6 +51,7 @@ package com.openexchange.groupware.userconfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -77,8 +78,8 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     }
 
     @Override
-    public void initExtendedPermissions(final int userId, final Context ctx) {
-        delegate.initExtendedPermissions(userId, ctx);
+    public void setExtendedPermissions(Set<String> extendedPermissions, int userId, Context ctx) {
+        delegate.setExtendedPermissions(extendedPermissions, userId, ctx);
     }
 
     @Override

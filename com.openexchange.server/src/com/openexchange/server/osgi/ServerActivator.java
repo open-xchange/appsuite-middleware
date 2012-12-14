@@ -135,7 +135,6 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.userconfiguration.UserConfigInitializer;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
@@ -572,7 +571,6 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(LoginHandlerService.class, new MailLoginHandler());
         registerService(LoginHandlerService.class, new TransportLoginHandler());
         registerService(LoginHandlerService.class, new LastLoginRecorder());
-        registerService(LoginHandlerService.class, new UserConfigInitializer());
         // registrationList.add(context.registerService(LoginHandlerService.class.getName(), new PasswordCrypter(), null));
         // Register table creation for mail account storage.
         registerService(CreateTableService.class, new CreateMailAccountTables());

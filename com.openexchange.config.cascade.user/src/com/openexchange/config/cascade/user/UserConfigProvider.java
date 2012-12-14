@@ -121,22 +121,18 @@ public class UserConfigProvider implements ConfigProviderService {
         return services.getService(UserService.class).getUser(userId, ctx);
     }
 
-    // private static final AtomicLong L = new AtomicLong();
-
     @Override
     public BasicProperty get(final String property, final int contextId, final int userId) throws OXException {
         if (contextId == NO_CONTEXT && userId == NO_USER) {
             return NO_PROPERTY;
         }
-
-        // new Throwable().printStackTrace(System.out);
-
         final PropertyMap propertyMap = PropertyMapManagement.getInstance().getFor(userId, contextId);
         BasicProperty basicProperty = propertyMap.get(property);
         if (null == basicProperty) {
             final BasicProperty loaded = new BasicPropertyImpl(property, userId, contextId, services);
             
             // System.out.println("UserConfigProvider.get() invoked " + L.incrementAndGet() + " times: " + property + " -- " + userId + " -- " + contextId + " ==> " + loaded.get());
+            // new Throwable().printStackTrace(System.out);
             
             basicProperty = propertyMap.putIfAbsent(property, loaded);
             if (null == basicProperty) {

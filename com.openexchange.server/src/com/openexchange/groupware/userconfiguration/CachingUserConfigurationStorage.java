@@ -51,6 +51,7 @@ package com.openexchange.groupware.userconfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
@@ -176,13 +177,13 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public void initExtendedPermissions(final int userId,final Context ctx) {
+    public void setExtendedPermissions(Set<String> extendedPermissions, int userId, Context ctx) {
         if (cache == null) {
             return;
         }
         final UserConfiguration userConfig = (UserConfiguration) cache.get(getKey(userId, ctx));
         if (null != userConfig) {
-            userConfig.getExtendedPermissions();
+            userConfig.setExtendedPermissions(extendedPermissions);
         }
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.userconfiguration;
 
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -188,12 +189,13 @@ public abstract class UserConfigurationStorage {
     protected abstract void stopInternal() throws OXException;
 
     /**
-     * Initializes the extended permission on the cached instance.
+     * Sets the extended permission on the cached instance.
      * 
+     * @param extendedPermissions The extended permissions to set
      * @param userId The user identifier
      * @param ctx The context
      */
-    public abstract void initExtendedPermissions(final int userId,final Context ctx);
+    public abstract void setExtendedPermissions(Set<String> extendedPermissions, int userId, Context ctx);
 
     /**
      * Determines the instance of <code>UserConfiguration</code> that
