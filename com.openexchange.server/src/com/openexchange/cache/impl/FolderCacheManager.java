@@ -318,7 +318,7 @@ public final class FolderCacheManager {
      * objects will not affect cached versions
      * </p>
      *
-     * @return The matching <code>FolderObject</code> instance else <code>null</code>
+     * @return The matching <code>FolderObject</code> instances else an empty list
      */
     public List<FolderObject> getTrimedFolderObjects(final int[] objectIds, final Context ctx) {
         final Cache folderCache = this.folderCache;
