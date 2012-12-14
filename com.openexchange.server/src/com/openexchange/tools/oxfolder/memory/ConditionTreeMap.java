@@ -52,8 +52,6 @@ package com.openexchange.tools.oxfolder.memory;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.EmptyTIntSet;
 import gnu.trove.TIntCollection;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntProcedure;
@@ -470,34 +468,16 @@ public final class ConditionTreeMap {
              */
             final TIntObjectMap<FolderObject> m = new TIntObjectHashMap<FolderObject>(set.size());
             {
-                final TIntList toLoad = new TIntArrayList(set.size());
+                final TIntSet toLoad = new TIntHashSet(set);
                 final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
                 final boolean cacheEnabled = FolderCacheManager.isEnabled();
-                /*
-                 * Iterate set
-                 */
-                final TIntProcedure procedure = new TIntProcedure() {
-    
-                    @Override
-                    public boolean execute(final int folderId) {
-                        try {
-                            if (cacheEnabled) {
-                                final FolderObject fo = cacheManager.getFolderObject(folderId, ctx);
-                                if (null == fo) {
-                                    toLoad.add(folderId);
-                                } else {
-                                    m.put(folderId, fo);
-                                }
-                            } else {
-                                toLoad.add(folderId);
-                            }
-                            return true;
-                        } catch (final Exception e) {
-                            throw new ProcedureFailedException(e);
-                        }
+                if (cacheEnabled) {
+                    for (final FolderObject fo : cacheManager.getTrimedFolderObjects(set.toArray(), ctx)) {
+                        final int objectID = fo.getObjectID();
+                        toLoad.remove(objectID); // Needs not to be loaded; therefore removed from set
+                        m.put(objectID, fo);
                     }
-                };
-                set.forEach(procedure);
+                }
                 /*
                  * Loadees...
                  */
@@ -539,7 +519,7 @@ public final class ConditionTreeMap {
         }
     }
 
-    private static void loadBy(final TIntList toLoad, final TIntObjectMap<FolderObject> m, final boolean cacheEnabled, final FolderCacheManager cacheManager, final Context ctx) throws OXException {
+    private static void loadBy(final TIntSet toLoad, final TIntObjectMap<FolderObject> m, final boolean cacheEnabled, final FolderCacheManager cacheManager, final Context ctx) throws OXException {
         final DatabaseService service = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         Connection con = null;
         try {
@@ -552,7 +532,7 @@ public final class ConditionTreeMap {
         }
     }
 
-    private static void loadBy(final TIntList toLoad, final TIntObjectMap<FolderObject> m, final boolean cacheEnabled, final FolderCacheManager cacheManager, final Context ctx, final Connection con) throws OXException {
+    private static void loadBy(final TIntSet toLoad, final TIntObjectMap<FolderObject> m, final boolean cacheEnabled, final FolderCacheManager cacheManager, final Context ctx, final Connection con) throws OXException {
         if (null == con) {
             loadBy(toLoad, m, cacheEnabled, cacheManager, ctx);
             return;

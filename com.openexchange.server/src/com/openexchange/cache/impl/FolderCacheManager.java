@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -306,6 +307,39 @@ public final class FolderCacheManager {
             readLock.unlock();
         }
         return null == retval ? retval : retval.clone();
+    }
+
+    /**
+     * <p>
+     * Fetches <code>FolderObject</code>s which matches given object identifiers.
+     * </p>
+     * <p>
+     * <b>NOTE:</b> This method returns a clone of cached <code>FolderObject</code> instances. Thus any modifications made to the referenced
+     * objects will not affect cached versions
+     * </p>
+     *
+     * @return The matching <code>FolderObject</code> instance else <code>null</code>
+     */
+    public List<FolderObject> getTrimedFolderObjects(final int[] objectIds, final Context ctx) {
+        final Cache folderCache = this.folderCache;
+        if (null == folderCache) {
+            return Collections.emptyList();
+        }
+        final Lock readLock = cacheLock.readLock();
+        readLock.lock();
+        try {
+            final List<FolderObject> ret = new ArrayList<FolderObject>(objectIds.length);
+            for (int objectId : objectIds) {
+                final Object tmp = folderCache.get(getCacheKey(ctx.getContextId(), objectId));
+                // Refresher uses Condition objects to prevent multiple threads loading same folder.
+                if (tmp instanceof FolderObject) {
+                    ret.add(((FolderObject) tmp).clone());
+                }
+            }
+            return ret;
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
