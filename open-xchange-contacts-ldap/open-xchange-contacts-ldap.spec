@@ -46,19 +46,21 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     odir=/opt/open-xchange/etc/groupware/contacts-ldap
     ndir=/opt/open-xchange/etc/contacts-ldap
-    for i in $(find $odir -maxdepth 1 -name "mapping*.properties"); do
-	cp -a $i $ndir/$(basename $i) && rm $i || true
-    done
-    for i in $(find $odir -name "[0-9]*" -type d); do
-	npropdir=$ndir/$(basename $i)
-	if [ ! -d $npropdir ]; then
-	    mkdir $npropdir
-	    ox_update_permissions "$npropdir" root:open-xchange 750
-	fi
-	for prop in $(find $i -name "*.properties"); do
-	    cp -a $prop $npropdir && rm $prop || true
-	done
-    done
+    if [ -d $odir ]; then
+        for i in $(find $odir -maxdepth 1 -name "mapping*.properties"); do
+            cp -a $i $ndir/$(basename $i) && rm $i || true
+        done
+        for i in $(find $odir -name "[0-9]*" -type d); do
+            npropdir=$ndir/$(basename $i)
+            if [ ! -d $npropdir ]; then
+                mkdir $npropdir
+                ox_update_permissions "$npropdir" root:open-xchange 750
+            fi
+            for prop in $(find $i -name "*.properties"); do
+                cp -a $prop $npropdir && rm $prop || true
+            done
+        done
+    fi
 
     # SoftwareChange_Request-1080
     # -----------------------------------------------------------------------
