@@ -119,7 +119,7 @@ public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep
                 Pattern pattern = Pattern.compile(stringAvailableAfterLogin);
                 Matcher matcher = pattern.matcher(pageString);
                 if (!matcher.find()) {
-                    LOG.error("Page that does not have the link to imply a successful login : " + output.getWebResponse().getContentAsString());
+                    LOG.debug("Page that does not have the link to imply a successful login : " + output.getWebResponse().getContentAsString());
 //                    if (isDebuggingEnabled()){
 //                        openPageInBrowser(output);
 //                    }
