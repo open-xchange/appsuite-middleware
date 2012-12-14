@@ -177,13 +177,22 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public void setExtendedPermissions(Set<String> extendedPermissions, int userId, Context ctx) {
+    public void setExtendedPermissions(final Set<String> extendedPermissions, final int userId, final Context ctx) {
         if (cache == null) {
             return;
         }
         final UserConfiguration userConfig = (UserConfiguration) cache.get(getKey(userId, ctx));
         if (null != userConfig) {
             userConfig.setExtendedPermissions(extendedPermissions);
+        }
+    }
+
+    @Override
+    public Object getLock(final int userId, final Context ctx) {
+        try {
+            return getUserConfiguration(userId, null, ctx);
+        } catch (final OXException e) {
+            return new Object();
         }
     }
 

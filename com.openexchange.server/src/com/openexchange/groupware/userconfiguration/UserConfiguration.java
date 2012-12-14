@@ -342,6 +342,9 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     private final Context ctx;
 
+	/**
+	 * The set of extended permissions.
+	 */
 	private volatile Set<String> extendedPermissions;
 
     /**
@@ -1190,42 +1193,46 @@ public final class UserConfiguration implements Serializable, Cloneable {
 	 */
     public Set<String> getExtendedPermissions() {
         Set<String> retval = extendedPermissions;
-        if (retval != null) {
-            return retval;
-        }
-        retval = new HashSet<String>();
-        for (final Permission p : Permission.values()) {
-            if (hasPermissionInternal(p)) {
-                retval.add(p.name().toLowerCase());
-            }
-        }
-        // Now apply modifiers from the config cascade
-        final ConfigViewFactory configViews = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        if (configViews != null) {
-            try {
-                final ConfigView view = configViews.getView(getUserId(), getContext().getContextId());
-                final String[] searchPath = configViews.getSearchPath();
-                for (final String scope : searchPath) {
-                    final String permissions = view.property(PERMISSION_PROPERTY, String.class).precedence(scope).get();
-                    if (permissions != null) {
-                        for (String permissionModifier : P_SPLIT.split(permissions)) {
-                            final char firstChar = permissionModifier.charAt(0);
-                            if ('-' == firstChar) {
-                                retval.remove(permissionModifier.substring(1).toLowerCase());
-                                continue;
-                            } else if ('+' == firstChar) {
-                                permissionModifier = permissionModifier.substring(1);
-                            }
-                            retval.add(permissionModifier.toLowerCase());
+        if (retval == null) {
+            synchronized (UserConfigurationStorage.getInstance().getLock(userId, ctx)) {
+                retval = extendedPermissions;
+                if (retval == null) {
+                    retval = new HashSet<String>();
+                    for (final Permission p : Permission.values()) {
+                        if (hasPermissionInternal(p)) {
+                            retval.add(p.name().toLowerCase());
                         }
                     }
+                    // Now apply modifiers from the config cascade
+                    final ConfigViewFactory configViews = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+                    if (configViews != null) {
+                        try {
+                            final ConfigView view = configViews.getView(getUserId(), getContext().getContextId());
+                            final String[] searchPath = configViews.getSearchPath();
+                            for (final String scope : searchPath) {
+                                final String permissions = view.property(PERMISSION_PROPERTY, String.class).precedence(scope).get();
+                                if (permissions != null) {
+                                    for (String permissionModifier : P_SPLIT.split(permissions)) {
+                                        final char firstChar = permissionModifier.charAt(0);
+                                        if ('-' == firstChar) {
+                                            retval.remove(permissionModifier.substring(1).toLowerCase());
+                                            continue;
+                                        } else if ('+' == firstChar) {
+                                            permissionModifier = permissionModifier.substring(1);
+                                        }
+                                        retval.add(permissionModifier.toLowerCase());
+                                    }
+                                }
+                            }
+                        } catch (final OXException x) {
+                            LOG.error(x.getMessage(), x);
+                        }
+                    }
+                    UserConfigurationStorage.getInstance().setExtendedPermissions(retval, userId, ctx);
+                    this.extendedPermissions = retval;
                 }
-            } catch (final OXException x) {
-                LOG.error(x.getMessage(), x);
             }
         }
-        UserConfigurationStorage.getInstance().setExtendedPermissions(retval, userId, ctx);
-        this.extendedPermissions = retval;
         return retval;
     }
 

@@ -96,6 +96,12 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
+    public Object getLock(int userId, Context ctx) {
+        // Dummy object
+        return new Object();
+    }
+
+    @Override
     public void setExtendedPermissions(Set<String> extendedPermissions, int userId, Context ctx) {
         // Nothing to do
     }

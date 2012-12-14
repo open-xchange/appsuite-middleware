@@ -78,6 +78,11 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     }
 
     @Override
+    public Object getLock(int userId, Context ctx) {
+        return delegate.getLock(userId, ctx);
+    }
+
+    @Override
     public void setExtendedPermissions(Set<String> extendedPermissions, int userId, Context ctx) {
         delegate.setExtendedPermissions(extendedPermissions, userId, ctx);
     }
