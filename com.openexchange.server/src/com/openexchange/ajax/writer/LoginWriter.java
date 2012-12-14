@@ -59,6 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.login.LoginResult;
@@ -123,7 +124,17 @@ public final class LoginWriter {
      * @throws JSONException If writing to JSON object fails
      */
     public static void write(final Session session, final JSONObject json) throws JSONException {
-        write(session, json, Collections.<OXException> emptyList(), null);
+        Locale locale = null;
+        if (session instanceof ServerSession) {
+            locale = ((ServerSession) session).getUser().getLocale();
+        } else {
+            try {
+                locale = UserStorage.getInstance().getUser(session.getUserId(), ContextStorage.getStorageContext(session.getContextId())).getLocale();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+        write(session, json, Collections.<OXException> emptyList(), locale);
     }
 
     private static final String PARAMETER_USER_ID = AJAXServlet.PARAMETER_USER_ID;
