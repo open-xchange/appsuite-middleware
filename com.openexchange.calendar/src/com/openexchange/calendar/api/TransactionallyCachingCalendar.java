@@ -246,11 +246,11 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
 	}
 
 	@Override
-    public long attachmentAction(int objectId, int uid, int folderId,
+    public long attachmentAction(int folderId, int objectId, int userId,
 			Session session, Context c, int numberOfAttachments)
 			throws com.openexchange.exception.OXException {
 		cached.remove(objectId);
-		return delegate.attachmentAction(objectId, uid, folderId, session, c,
+		return delegate.attachmentAction(folderId, objectId, userId, session, c,
 				numberOfAttachments);
 	}
 

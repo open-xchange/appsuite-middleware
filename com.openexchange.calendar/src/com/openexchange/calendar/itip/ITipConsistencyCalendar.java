@@ -510,10 +510,10 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 	}
 
 	@Override
-    public long attachmentAction(final int objectId, final int uid, final int folderId,
+    public long attachmentAction(final int folderId, final int objectId, final int userId,
 			final Session session, final Context c, final int numberOfAttachments)
 			throws OXException {
-		return delegate.attachmentAction(objectId, uid, folderId, session, c,
+		return delegate.attachmentAction(folderId, objectId, userId, session, c,
 				numberOfAttachments);
 	}
 
