@@ -182,9 +182,9 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             return;
         }
         final UserConfiguration userConfig = (UserConfiguration) cache.get(getKey(userId, ctx));
-        if (null != userConfig) {
+        /*if (null != userConfig) {
             userConfig.setExtendedPermissions(extendedPermissions);
-        }
+        }*/
     }
 
     @Override
