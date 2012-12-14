@@ -67,16 +67,20 @@ import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.ObjectAlreadyExistsException;
+import org.quartz.Scheduler;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.Trigger.TriggerState;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
+import org.quartz.impl.DirectSchedulerFactory;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.impl.triggers.SimpleTriggerImpl;
 import org.quartz.jobs.NoOpJob;
+import org.quartz.service.internal.HazelcastJobStore;
 import org.quartz.simpl.CascadingClassLoadHelper;
+import org.quartz.simpl.SimpleThreadPool;
 import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.JobStore;
 import org.quartz.spi.OperableTrigger;
@@ -203,7 +207,7 @@ public class HazelcastJobStoreTest {
 //        
 //        
 //    }
-    
+
     /*
      * Tests from quartz sources
      */

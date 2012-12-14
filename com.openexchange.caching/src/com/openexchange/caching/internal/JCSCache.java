@@ -53,7 +53,9 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.CacheAccess;
 import org.apache.jcs.access.exception.ObjectExistsException;
@@ -88,6 +90,8 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     private final CompositeCache cacheControl;
 
     private volatile Boolean localOnly;
+    
+    private Set<String> groupNames;
 
     /**
      * Initializes a new {@link JCSCache}
@@ -105,6 +109,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
             tmp = null;
         }
         cacheControl = tmp;
+        groupNames = new HashSet<String>();
     }
 
     @Override
@@ -226,6 +231,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Serializable value) throws OXException {
         try {
+            groupNames.add(groupName);
             cache.putInGroup(key, groupName, value);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
@@ -235,6 +241,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws OXException {
         try {
+            groupNames.add(groupName);
             cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
@@ -283,11 +290,15 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public void removeFromGroup(final Serializable key, final String group) {
+        if (groupNames.contains(group))
+            groupNames.remove(group);
         cache.remove(key, group);
     }
 
     @Override
     public void localRemoveFromGroup(final Serializable key, final String group) {
+        if (groupNames.contains(group))
+            groupNames.remove(group);
         final GroupAttrName groupAttrName = getGroupAttrName(group, key);
         this.cacheControl.localRemove(groupAttrName);
     }
@@ -318,5 +329,45 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public CacheStatistics getStatistics() {
         return new CacheStatistics2JCS(cache.getStatistics());
+    }
+
+    @Override
+    public Set<?> getGroupKeys(String group) {
+        return cache.getGroupKeys(group);
+    }
+
+    @Override
+    public Set<String> getGroupNames() {
+        return groupNames;
+    }
+
+    @Override
+    public Set<?> getAllKeys() throws OXException {
+        Set<Object> set = new HashSet<Object>();
+        
+        Object[] keys = cacheControl.getMemoryCache().getKeyArray();
+        int i = 0;
+        while (i < keys.length) {
+            set.add(keys[i++]);
+        }
+        
+        return set;
+    }
+
+    @Override
+    public Set<?> getKeysInRange(int start, int end) throws OXException {
+        if (start < 0 || end < 0 || start <= end) {
+            Set<Object> set = new HashSet<Object>();
+        
+            Object[] keys = cacheControl.getMemoryCache().getKeyArray();
+            int i = start;
+            while (i < end) {
+                set.add(keys[i++]);
+            }
+        
+            return set;
+        }
+        
+        throw new OXException(666, "Illegal start,end range (" + start + ", " + end + ")");
     }
 }

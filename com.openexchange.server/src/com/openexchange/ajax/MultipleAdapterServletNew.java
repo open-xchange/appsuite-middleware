@@ -58,7 +58,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
@@ -244,11 +243,6 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         return false;
     }
 
-    /**
-     * The size of push-back buffer.
-     */
-    protected static final int pushbackSize = 8;
-
     protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
         retval.setMultipart(isFileUpload);
@@ -288,51 +282,23 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
              */
             UnsynchronizedPushbackReader reader = null;
             try {
-                reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req), pushbackSize);
-                {
-                    int count = 0;
-                    final char[] cbuf = new char[pushbackSize];
-                    while (count < pushbackSize && Character.isWhitespace((cbuf[count++] = (char) reader.read()))) {
-                        // Consume whitespaces
-                    }
-                    if (count >= pushbackSize) {
-                        reader.unread(cbuf);
-                        retval.setData(AJAXServlet.readFrom(reader));
-                    }
-                    final char nonWhitespace = cbuf[count - 1];
-                    if ('[' == nonWhitespace || '{' == nonWhitespace) {
-                        try {
-                            reader.unread(nonWhitespace);
-                            retval.setData(JSONObject.parse(reader));
-                        } catch (final JSONException e) {
-                            // No parseable JSON data
-                            reader.unread(cbuf, 0, count);
-                            final String body = AJAXServlet.readFrom(reader);
-                            if (startsWith('[', body)) {
-                                try {
-                                    retval.setData(new JSONArray(body));
-                                } catch (final JSONException je) {
-                                    retval.setData(body);
-                                }
-                            } else if (startsWith('{', body)) {
-                                try {
-                                    retval.setData(new JSONObject(body));
-                                } catch (final JSONException je) {
-                                    retval.setData(body);
-                                }
-                            } else {
-                                retval.setData(body);
-                            }
-                        }
+                reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
+                final int read = reader.read();
+                if (read < 0) {
+                    retval.setData(null);
+                } else {
+                    final char c = (char) read;
+                    reader.unread(c);
+                    if ('[' == c || '{' == c) {
+                        retval.setData(JSONObject.parse(reader));
                     } else {
-                        // No JSON data
-                        reader.unread(cbuf, 0, count);
                         retval.setData(AJAXServlet.readFrom(reader));
                     }
                 }
+            } catch (final JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             } finally {
                 Streams.close(reader);
-                reader = null;
             }
         }
         return retval;

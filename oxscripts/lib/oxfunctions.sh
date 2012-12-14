@@ -198,7 +198,10 @@ ox_set_property() {
     ox_system_type
     local type=$?
     if [ $type -eq $DEBIAN -o $type -eq $UCS ]; then
-	local origfile="${propfile}.dpkg-dist"
+	local origfile="${propfile}.dpkg-new"
+	if [ ! -e $origfile ]; then
+	    local origfile="${propfile}.dpkg-dist"
+	fi
     else
 	local origfile="${propfile}.rpmnew"
     fi

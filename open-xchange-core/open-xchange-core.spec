@@ -210,13 +210,37 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
-# SoftwareChange_Request-1214
-pfile=/opt/open-xchange/etc/file-logging.properties
-for opt in org.apache.cxf.level com.openexchange.soap.cxf.logger.level; do
-    if ! ox_exists_property $opt $pfile; then
-       ox_set_property $opt WARNING $pfile
+# SoftwareChange_Request-1223
+# SoftwareChange_Request-1237
+# SoftwareChange_Request-1243
+# SoftwareChange_Request-1245
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/ox-scriptconf.sh
+jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
+jopts=${jopts//\"/}
+nopts=$jopts
+# -----------------------------------------------------------------------
+permval=$(echo $nopts | sed 's;^.*MaxPermSize=\([0-9]*\).*$;\1;')
+if [ $permval -lt 256 ]; then
+    nopts=$(echo $nopts | sed "s;\(^.*MaxPermSize=\)[0-9]*\(.*$\);\1256\2;")
+fi
+# -----------------------------------------------------------------------
+for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
+        "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=80" \
+        "-XX:+UseCMSInitiatingOccupancyOnly"; do
+    if ! echo $nopts | grep -- $opt > /dev/null; then
+        nopts="$nopts $opt"
     fi
 done
+# -----------------------------------------------------------------------
+for opt in "-XX:+UnlockExperimentalVMOptions" "-XX:+UseG1GC"; do
+    if echo $nopts | grep -- $opt > /dev/null; then
+        nopts=$(echo $nopts | sed "s;$opt;;")
+    fi
+done
+if [ "$jopts" != "$nopts" ]; then
+   ox_set_property JAVA_XTRAOPTS \""$nopts"\" $pfile
+fi
 
 # SoftwareChange_Request-1184
 pfile=/opt/open-xchange/etc/file-logging.properties
@@ -236,13 +260,15 @@ if ! ox_exists_property com.openexchange.import.ical.limit $pfile; then
     ox_set_property com.openexchange.import.ical.limit 10000 $pfile
 fi
 
-# SoftwareChange_Request-1068
+# SoftwareChange_Request-1220
+# obsoletes SoftwareChange_Request-1068
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/ox-scriptconf.sh
 jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
 jopts=${jopts//\"/}
-if ! echo $jopts | grep "osgi.compatibility.bootdelegation" > /dev/null; then
-    ox_set_property JAVA_XTRAOPTS \""$jopts -Dosgi.compatibility.bootdelegation=true"\" $pfile
+if echo $jopts | grep "osgi.compatibility.bootdelegation" > /dev/null; then
+    jopts=$(echo $jopts | sed 's;-Dosgi.compatibility.bootdelegation=true;-Dosgi.compatibility.bootdelegation=false;')
+    ox_set_property JAVA_XTRAOPTS \""$jopts"\" $pfile
 fi
 
 # SoftwareChange_Request-1135
@@ -400,6 +426,8 @@ ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 %config(noreplace) /opt/open-xchange/etc/contextSets/index.yml
 
 %changelog
+* Wed Dec 12 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Build for public patch 2012-12-04
 * Mon Nov 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2012-11-28
 * Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>

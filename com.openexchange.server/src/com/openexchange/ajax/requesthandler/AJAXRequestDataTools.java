@@ -58,7 +58,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -67,6 +66,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -76,6 +76,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXRequestDataTools {
+
+    private static final String PARAMETER_ACTION = AJAXServlet.PARAMETER_ACTION;
 
     private static final AJAXRequestDataTools INSTANCE = new AJAXRequestDataTools();
 
@@ -105,11 +107,6 @@ public class AJAXRequestDataTools {
     protected static final Pattern SPLIT_CSV = Pattern.compile("\\s*,\\s*");
 
     /**
-     * The size of push-back buffer.
-     */
-    protected static final int pushbackSize = 8;
-
-    /**
      * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
      * 
      * @param req The HTTP Servlet request
@@ -121,7 +118,6 @@ public class AJAXRequestDataTools {
      * @throws IOException If an I/O error occurs
      * @throws OXException If an OX error occurs
      */
-    @SuppressWarnings("unused")
     public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
         parseHostName(retval, req, session);
@@ -187,51 +183,23 @@ public class AJAXRequestDataTools {
              */
             UnsynchronizedPushbackReader reader = null;
             try {
-                reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req), pushbackSize);
-                {
-                    int count = 0;
-                    final char[] cbuf = new char[pushbackSize];
-                    while (count < pushbackSize && Character.isWhitespace((cbuf[count++] = (char) reader.read()))) {
-                        // Consume whitespaces
-                    }
-                    if (count >= pushbackSize) {
-                        reader.unread(cbuf);
-                        retval.setData(AJAXServlet.readFrom(reader));
-                    }
-                    final char nonWhitespace = cbuf[count - 1];
-                    if ('[' == nonWhitespace || '{' == nonWhitespace) {
-                        try {
-                            reader.unread(nonWhitespace);
-                            retval.setData(JSONObject.parse(reader));
-                        } catch (final JSONException e) {
-                            // No parseable JSON data
-                            reader.unread(cbuf, 0, count);
-                            final String body = AJAXServlet.readFrom(reader);
-                            if (startsWith('[', body)) {
-                                try {
-                                    retval.setData(new JSONArray(body));
-                                } catch (final JSONException je) {
-                                    retval.setData(body);
-                                }
-                            } else if (startsWith('{', body)) {
-                                try {
-                                    retval.setData(new JSONObject(body));
-                                } catch (final JSONException je) {
-                                    retval.setData(body);
-                                }
-                            } else {
-                                retval.setData(body);
-                            }
-                        }
+                reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
+                final int read = reader.read();
+                if (read < 0) {
+                    retval.setData(null);
+                } else {
+                    final char c = (char) read;
+                    reader.unread(c);
+                    if ('[' == c || '{' == c) {
+                        retval.setData(JSONObject.parse(reader));
                     } else {
-                        // No JSON data
-                        reader.unread(cbuf, 0, count);
                         retval.setData(AJAXServlet.readFrom(reader));
                     }
                 }
+            } catch (final JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             } finally {
                 Streams.close(reader);
-                reader = null;
             }
         }
         return retval;
@@ -345,7 +313,7 @@ public class AJAXRequestDataTools {
      * @return The determined action
      */
     public String getAction(final HttpServletRequest req) {
-        final String action = req.getParameter("action");
+        final String action = req.getParameter(PARAMETER_ACTION);
         if (null == action) {
             return req.getMethod().toUpperCase(Locale.US);
         }

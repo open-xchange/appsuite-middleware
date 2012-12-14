@@ -74,7 +74,6 @@ public class DefaultDispatcher implements Dispatcher {
         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DefaultDispatcher.class));
 
     private final ConcurrentMap<String, AJAXActionServiceFactory> actionFactories;
-
     private final Queue<AJAXActionCustomizerFactory> customizerFactories;
 
     /**

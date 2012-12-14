@@ -51,19 +51,24 @@ package com.openexchange.http.grizzly.http.server;
 
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
+import java.nio.charset.Charset;
 import org.apache.commons.logging.Log;
+import org.glassfish.grizzly.Buffer;
 import org.glassfish.grizzly.ThreadCache;
 import org.glassfish.grizzly.http.Cookie;
+import org.glassfish.grizzly.http.Method;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.server.Session;
 import org.glassfish.grizzly.http.server.util.Globals;
+import org.glassfish.grizzly.utils.Charsets;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.tools.servlet.http.Cookies;
 
 /**
- * {@link OXRequest} 
+ * {@link OXRequest}
  * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
@@ -72,20 +77,18 @@ public class OXRequest extends Request {
     private static Log LOG = com.openexchange.log.Log.loggerFor(OXRequest.class);
 
     private static GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
-    
-    private static final ThreadCache.CachedTypeIndex<Request> CACHE_IDX =
-        ThreadCache.obtainIndex(Request.class, 16);
+
+    private static final ThreadCache.CachedTypeIndex<Request> CACHE_IDX = ThreadCache.obtainIndex(Request.class, 16);
 
     public static Request create() {
-        final Request request =
-                ThreadCache.takeFromCache(CACHE_IDX);
+        final Request request = ThreadCache.takeFromCache(CACHE_IDX);
         if (request != null) {
             return request;
         }
 
         return new OXRequest(new OXResponse());
     }
-    
+
     protected OXRequest(Response response) {
         super(response);
     }
@@ -125,14 +128,14 @@ public class OXRequest extends Request {
         if (!create) {
             return null;
         }
-        
+
         if (requestedSessionId != null && httpServerFilter.getConfiguration().isReuseSessionID()) {
             registerNewSession(requestedSessionId);
         } else {
             String sessionId = createSessionID();
             registerNewSession(sessionId);
-            if(LOG.isInfoEnabled()) {
-                LOG.info("Set new JSessionId Cookie: "+sessionId);
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Set new JSessionId Cookie: " + sessionId);
             }
         }
         return session;
@@ -140,22 +143,29 @@ public class OXRequest extends Request {
 
     /**
      * Register a new Session in the list of sessions, add it as Cookie to the Response and add the string value to the LogProperties.
-     * @param sessionId The new SessionId that has to be registered 
+     * 
+     * @param sessionId The new SessionId that has to be registered
      */
     private void registerNewSession(String sessionId) {
-      session = new Session(sessionId);
-      sessions.put(sessionId, session);
-      response.addCookie(createSessionCookie(sessionId));
-      LogProperties.putLogProperty("com.openexchange.httpSession", sessionId);
+        session = new Session(sessionId);
+        session.setTimestamp(System.currentTimeMillis());
+        session.setSessionTimeout(grizzlyConfig.getCookieMaxInactivityInterval()*1000);
+        sessions.put(sessionId, session);
+        response.addCookie(createSessionCookie(sessionId));
+        if (LogProperties.isEnabled()) {
+            Props logProperties = LogProperties.getLogProperties();
+            logProperties.put("com.openexchange.http.grizzly.session", sessionId);
+        }
     }
 
     /**
      * Remove invalid JSession cookie used in the Request. Cookies are invalid when:
-     * @param invalidSessionId The invalid sessionId requested by the browser/cookie  
+     * 
+     * @param invalidSessionId The invalid sessionId requested by the browser/cookie
      */
     private void removeInvalidSessionCookie(String invalidSessionId) {
-        if(LOG.isInfoEnabled()) {
-            LOG.info("Removing invalid JSessionId Cookie: "+invalidSessionId);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Removing invalid JSessionId Cookie: " + invalidSessionId);
         }
         for (Cookie cookie : cookies) {
             if (cookie.getName().startsWith(Globals.SESSION_COOKIE_NAME)) {
@@ -233,7 +243,7 @@ public class OXRequest extends Request {
         if (domain != null) {
             jSessionIdCookie.setDomain(domain);
         }
-        
+
         /*
          * Toggle the security of the cookie on when we are dealing with a https request or the forceHttps config option is true e.g. when A
          * proxy like apache terminates ssl in front of the backend. The exception from forced https is a request from the local LAN.
@@ -251,6 +261,71 @@ public class OXRequest extends Request {
         }
 
         return jSessionIdCookie;
+    }
+
+    /**
+     * Parse request parameters. This differs from the original implementation in a way that we don't use ISO-8859-1 as fallback encoding
+     * but the one configured in server.properties via "DefaultEncoding".
+     */
+    @Override
+    protected void parseRequestParameters() {
+
+        // getCharacterEncoding() may have been overridden to search for
+        // hidden form field containing request encoding
+        final String enc = getCharacterEncoding();
+
+        // Delay updating requestParametersParsed to TRUE until
+        // after getCharacterEncoding() has been called, because
+        // getCharacterEncoding() may cause setCharacterEncoding() to be
+        // called, and the latter will ignore the specified encoding if
+        // requestParametersParsed is TRUE
+        requestParametersParsed = true;
+
+        Charset charset;
+
+        if (enc != null) {
+            try {
+                charset = Charsets.lookupCharset(enc);
+            } catch (Exception e) {
+                charset = Charsets.lookupCharset(grizzlyConfig.getDefaultEncoding());
+            }
+        } else {
+            charset = Charsets.lookupCharset(grizzlyConfig.getDefaultEncoding());
+        }
+
+        parameters.setEncoding(charset);
+        parameters.setQueryStringEncoding(charset);
+
+        parameters.handleQueryParameters();
+
+        if (usingInputStream || usingReader) {
+            return;
+        }
+
+        if (!Method.POST.equals(getMethod())) {
+            return;
+        }
+
+        final int len = getContentLength();
+
+        if (len > 0) {
+
+            if (!checkPostContentType(getContentType()))
+                return;
+
+            try {
+                final Buffer formData = getPostBody(len);
+                parameters.processParameters(formData, formData.position(), len);
+            } catch (Exception ignored) {
+            } finally {
+                try {
+                    skipPostBody(len);
+                } catch (Exception e) {
+                    LOG.warn("Exception occurred during body skip", e);
+                }
+            }
+        }
+
     }
 
 }

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.openexchange.ajp13.coyote;
+package com.openexchange.tools.exceptions;
 
 import java.util.Map;
 import java.util.TreeMap;
