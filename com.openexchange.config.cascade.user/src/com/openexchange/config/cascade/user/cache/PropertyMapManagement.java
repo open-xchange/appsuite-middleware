@@ -157,7 +157,7 @@ public final class PropertyMapManagement {
         final Integer us = Integer.valueOf(userId);
         PropertyMap propertyMap = contextMap.get(us);
         if (null == propertyMap) {
-            final PropertyMap newPropertyMap = new PropertyMap(1024, 300, TimeUnit.SECONDS);
+            final PropertyMap newPropertyMap = new PropertyMap(1024, 60, TimeUnit.SECONDS);
             propertyMap = contextMap.putIfAbsent(us, newPropertyMap);
             if (null == propertyMap) {
                 propertyMap = newPropertyMap;
