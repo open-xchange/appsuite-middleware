@@ -130,10 +130,10 @@ public class UserConfigProvider implements ConfigProviderService {
         BasicProperty basicProperty = propertyMap.get(property);
         if (null == basicProperty) {
             final BasicProperty loaded = new BasicPropertyImpl(property, userId, contextId, services);
-            
-            // System.out.println("UserConfigProvider.get() invoked " + L.incrementAndGet() + " times: " + property + " -- " + userId + " -- " + contextId + " ==> " + loaded.get());
+
+            // System.out.println("UserConfigProvider.get() invoked: " + property + " -- " + userId + " -- " + contextId + " ==> " + loaded.get());
             // new Throwable().printStackTrace(System.out);
-            
+
             basicProperty = propertyMap.putIfAbsent(property, loaded);
             if (null == basicProperty) {
                 basicProperty = loaded;

@@ -57,6 +57,8 @@ import java.util.concurrent.TimeUnit;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.config.cascade.BasicProperty;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link PropertyMap} - An in-memory property map with LRU eviction policy.
@@ -124,7 +126,7 @@ public final class PropertyMap {
             synchronized (map) {
                 prev = map.get(propertyName);
                 if (prev.elapsed(maxLifeMillis)) {
-                    shrink();
+                    ThreadPools.getThreadPool().submit(new Shrinker(this));
                     map.put(propertyName, wrapper);
                     return null;
                 }
@@ -174,7 +176,7 @@ public final class PropertyMap {
         }
         if (wrapper.elapsed(maxLifeMillis)) {
             map.remove(propertyName);
-            shrink();
+            ThreadPools.getThreadPool().submit(new Shrinker(this));
             return null;
         }
         return wrapper.getValue();
@@ -194,7 +196,7 @@ public final class PropertyMap {
         }
         if (wrapper.elapsed(maxLifeMillis)) {
             map.remove(propertyName);
-            shrink();
+            ThreadPools.getThreadPool().submit(new Shrinker(this));
             return null;
         }
         return wrapper.getValue();
@@ -213,7 +215,7 @@ public final class PropertyMap {
         }
         if (wrapper.elapsed(maxLifeMillis)) {
             map.remove(propertyName);
-            shrink();
+            ThreadPools.getThreadPool().submit(new Shrinker(this));
             return null;
         }
         return wrapper.getValue();
@@ -268,5 +270,21 @@ public final class PropertyMap {
         }
 
     } // End of class Wrapper
+
+    private static final class Shrinker extends AbstractTask<Object> {
+
+        private final PropertyMap propertyMap;
+
+        Shrinker(PropertyMap propertyMap) {
+            super();
+            this.propertyMap = propertyMap;
+        }
+
+        @Override
+        public Object call() throws Exception {
+            propertyMap.shrink();
+            return null;
+        }
+    } // End of class Shrinker
 
 }

@@ -65,6 +65,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 
 /**
@@ -76,7 +77,7 @@ public class UserConfigCascadeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { UserService.class, ContextService.class, CacheService.class, SessiondService.class };
+        return new Class[] { UserService.class, ContextService.class, CacheService.class, SessiondService.class, ThreadPoolService.class };
     }
 
     @Override
