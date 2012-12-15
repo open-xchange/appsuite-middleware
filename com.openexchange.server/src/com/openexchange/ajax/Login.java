@@ -78,6 +78,7 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 import net.oauth.server.OAuthServlet;
 import org.apache.commons.logging.Log;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
@@ -1038,8 +1039,14 @@ public class Login extends AJAXServlet {
             // Write response
             final JSONObject json = new JSONObject();
             LoginWriter.write(result, json);
+            // Handle initial multiple
+            if (req.getParameter("multiple") != null) {
+            	JSONArray responses = Multiple.perform(new JSONArray(req.getParameter("multiple")), req, ServerSessionAdapter.valueOf(session));
+            	json.put("multiple", responses);
+            }
             // Append "config/modules"
             appendModules(session, json, req);
+            
             response.setData(json);
         } catch (final OXException e) {
             if (AjaxExceptionCodes.PREFIX.equals(e.getPrefix())) {

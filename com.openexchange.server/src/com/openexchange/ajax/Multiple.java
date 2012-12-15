@@ -150,15 +150,37 @@ public class Multiple extends SessionServlet {
                 Streams.close(reader);
             }
         }
-        final int length = dataArray.length();
+        JSONArray respArr = new JSONArray();
+
+        try {
+            final ServerSession session = getSessionObject(req);
+            if (session == null) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+            }
+            respArr = perform(dataArray, req, session);
+        } catch (final JSONException e) {
+            log(RESPONSE_ERROR, e);
+            sendError(resp);
+        } catch (final OXException e) {
+            log(RESPONSE_ERROR, e);
+            sendError(resp);
+        } catch (final RuntimeException e) {
+            log(RESPONSE_ERROR, e);
+            sendError(resp);
+        }
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        final Writer writer = resp.getWriter();
+        writeTo(respArr, writer);
+        writer.flush();
+    }
+    
+    public static JSONArray perform(JSONArray dataArray, HttpServletRequest req, ServerSession session) throws OXException, JSONException {
+    	final int length = dataArray.length();
         final JSONArray respArr = new JSONArray(length);
         if (length > 0) {
             AJAXState state = null;
             try {
-                final ServerSession session = getSessionObject(req);
-                if (session == null) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
-                }
                 // Distinguish between serially and concurrently executable requests
                 List<JsonInOut> serialTasks = null;
                 ThreadPoolCompletionService<Object> concurrentTasks = null;
@@ -228,15 +250,6 @@ public class Multiple extends SessionServlet {
                         respArr.put(jsonInOut.getOutputObject());                        
                     }
                 }
-            } catch (final JSONException e) {
-                log(RESPONSE_ERROR, e);
-                sendError(resp);
-            } catch (final OXException e) {
-                log(RESPONSE_ERROR, e);
-                sendError(resp);
-            } catch (final RuntimeException e) {
-                log(RESPONSE_ERROR, e);
-                sendError(resp);
             } finally {
                 close((MailServletInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE));
                 if (state != null) {
@@ -244,11 +257,7 @@ public class Multiple extends SessionServlet {
                 }
             }
         }
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-        final Writer writer = resp.getWriter();
-        writeTo(respArr, writer);
-        writer.flush();
+        return respArr;
     }
 
     protected static final void performActionElement(final JsonInOut jsonInOut, final String module, final ServerSession session, final HttpServletRequest req) {
