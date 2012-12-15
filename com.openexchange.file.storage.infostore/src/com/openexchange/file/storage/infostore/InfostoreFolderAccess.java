@@ -153,8 +153,8 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
     @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
         final FolderService service = Services.getService(FolderService.class);
-        UserizedFolder[] subfolders = service.getSubfolders(REAL_TREE_ID, "15", true, session, null).getResponse();
-        FileStorageFolder[] ret = new FileStorageFolder[subfolders.length];
+        final UserizedFolder[] subfolders = service.getSubfolders(REAL_TREE_ID, "15", true, session, null).getResponse();
+        final FileStorageFolder[] ret = new FileStorageFolder[subfolders.length];
         for (int i = 0; i < ret.length; i++) {
             ret[i] = FolderWriter.parseFolder(subfolders[i]);
         }
@@ -163,8 +163,13 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
-        // Nothing to do
-        return null;
+        final FolderService service = Services.getService(FolderService.class);
+        final UserizedFolder[] folders = service.getPath(REAL_TREE_ID, folderId, session, null).getResponse();
+        final FileStorageFolder[] ret = new FileStorageFolder[folders.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = FolderWriter.parseFolder(folders[i]);
+        }
+        return ret;
     }
 
     @Override
@@ -175,8 +180,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        // Nothing to do
-        return null;
+        return getFolder("9");
     }
 
     @Override
@@ -187,8 +191,13 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
-        // Nothing to do
-        return null;
+        final FolderService service = Services.getService(FolderService.class);
+        final UserizedFolder[] subfolders = service.getSubfolders(REAL_TREE_ID, parentIdentifier, all, session, null).getResponse();
+        final FileStorageFolder[] ret = new FileStorageFolder[subfolders.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = FolderWriter.parseFolder(subfolders[i]);
+        }
+        return ret;
     }
 
     @Override
