@@ -2471,13 +2471,33 @@ public class CalendarMySQL implements CalendarSqlImp {
     public final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException {
         return updateAppointment(cdao, edao, writecon, so, ctx, inFolder, clientLastModified, true, false);
     }
+    
+    private boolean isForbiddenPrivateMoveToPublicFolder(CalendarDataObject cdao, CalendarDataObject edao) {
+        if (!(cdao.getFolderMove() && cdao.getFolderType() == FolderObject.PUBLIC)) {
+            return false;
+        }
+        
+        if (edao.getPrivateFlag() && !cdao.containsPrivateFlag()) {
+            return true;
+        }
+        
+        if (edao.getPrivateFlag() && cdao.containsPrivateFlag() && cdao.getPrivateFlag()) {
+            return true;
+        }
+        
+        if (!edao.getPrivateFlag() && cdao.containsPrivateFlag() && cdao.getPrivateFlag()) {
+            return true;
+        }
+        
+        return false;
+    }
 
     private final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean clientLastModifiedCheck, final boolean skipParticipants) throws DataTruncation, SQLException, OXException {
         CalendarVolatileCache.getInstance().invalidateGroup(String.valueOf(cdao.getContextID()));
 
         final CalendarOperation co = new CalendarOperation();
 
-        if (cdao.getFolderMove() && cdao.getFolderType() == FolderObject.PUBLIC && edao.getPrivateFlag()) {
+        if (isForbiddenPrivateMoveToPublicFolder(cdao, edao)) {
             throw OXCalendarExceptionCodes.PRIVATE_MOVE_TO_PUBLIC.create();
         }
 
