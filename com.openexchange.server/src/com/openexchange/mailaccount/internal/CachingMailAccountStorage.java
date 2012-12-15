@@ -66,6 +66,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
@@ -79,6 +80,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -199,7 +201,19 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
             @Override
             public MailAccount load() throws OXException, OXException {
-                return d.getMailAccount(id, user, cid);
+                try {
+                    return d.getMailAccount(id, user, cid);
+                } catch (final OXException e) {
+                    if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
+                        throw e;
+                    }
+                    final Connection wcon = Database.get(cid, true);
+                    try {
+                        return d.getMailAccount(id, user, cid, wcon);
+                    } finally {
+                        Database.back(cid, true, wcon);
+                    }
+                }
             }
 
             @Override
