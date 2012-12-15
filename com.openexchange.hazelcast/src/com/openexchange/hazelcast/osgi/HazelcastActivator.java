@@ -87,7 +87,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         final Log logger = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
         final ConfigurationService service = getService(ConfigurationService.class);
         if (null != service && !service.getBoolProperty("com.openexchange.hazelcast.enabled", true)) {
-            logger.info("\nHazelcast\n\tStartup of bundle disabled: com.openexchange.hazelcast");
+            logger.info("\nHazelcast\n\tStartup of Hazelcast clustering and data distribution platform denied per configuration.");
             return;
         }
         final boolean infoEnabled = logger.isInfoEnabled();
