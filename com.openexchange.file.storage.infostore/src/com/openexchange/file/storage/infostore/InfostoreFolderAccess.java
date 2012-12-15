@@ -59,6 +59,7 @@ import com.openexchange.file.storage.infostore.folder.FolderWriter;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.tools.session.ServerSession;
 
@@ -151,8 +152,13 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
-        // Nothing to do
-        return null;
+        final FolderService service = Services.getService(FolderService.class);
+        UserizedFolder[] subfolders = service.getSubfolders(REAL_TREE_ID, "15", true, session, null).getResponse();
+        FileStorageFolder[] ret = new FileStorageFolder[subfolders.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = FolderWriter.parseFolder(subfolders[i]);
+        }
+        return ret;
     }
 
     @Override
