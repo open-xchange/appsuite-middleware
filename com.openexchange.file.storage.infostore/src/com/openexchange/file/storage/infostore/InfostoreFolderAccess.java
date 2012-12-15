@@ -54,6 +54,12 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.infostore.folder.FolderParser;
+import com.openexchange.file.storage.infostore.folder.FolderWriter;
+import com.openexchange.folderstorage.FolderResponse;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -64,68 +70,83 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
+    private static final String REAL_TREE_ID = FolderStorage.REAL_TREE_ID;
+
+    private final ServerSession session;
+
     /**
      * Initializes a new {@link InfostoreFolderAccess}.
      * @param session
      */
     public InfostoreFolderAccess(final ServerSession session) {
         super();
-        // TODO Auto-generated constructor stub
-
+        this.session = session;
     }
 
     @Override
     public void clearFolder(final String folderId) throws OXException {
-        // TODO Auto-generated method stub
-
+        final FolderService service = Services.getService(FolderService.class);
+        service.clearFolder(REAL_TREE_ID, folderId, session);
     }
 
     @Override
     public void clearFolder(final String folderId, final boolean hardDelete) throws OXException {
-        // TODO Auto-generated method stub
-
+        final FolderService service = Services.getService(FolderService.class);
+        service.clearFolder(REAL_TREE_ID, folderId, session);
     }
 
     @Override
     public String createFolder(final FileStorageFolder toCreate) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        final FolderService service = Services.getService(FolderService.class);
+        final FolderResponse<String> response = service.createFolder(FolderParser.parseFolder(toCreate), session);
+        return response.getResponse();
     }
 
     @Override
     public String deleteFolder(final String folderId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        final FolderService service = Services.getService(FolderService.class);
+        service.deleteFolder(REAL_TREE_ID, folderId, null, session);
+        return folderId;
     }
 
     @Override
     public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        final FolderService service = Services.getService(FolderService.class);
+        service.deleteFolder(REAL_TREE_ID, folderId, null, session);
+        return folderId;
     }
 
     @Override
     public boolean exists(final String folderId) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+        try {
+            final FolderService service = Services.getService(FolderService.class);
+            service.getFolder(REAL_TREE_ID, folderId, session, null);
+            return true;
+        } catch (final OXException e) {
+            return false;
+        }
     }
 
     @Override
     public Quota getFileQuota(final String folderId) throws OXException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public FileStorageFolder getFolder(final String folderId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        final FolderService service = Services.getService(FolderService.class);
+        return FolderWriter.parseFolder(service.getFolder(REAL_TREE_ID, folderId, session, null));
     }
 
     @Override
     public FileStorageFolder getPersonalFolder() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        final FolderService service = Services.getService(FolderService.class);
+        return FolderWriter.parseFolder(service.getDefaultFolder(
+            UserStorage.getStorageUser(session.getUserId(), session.getContext()),
+            REAL_TREE_ID,
+            FolderParser.getContentType(),
+            session,
+            null));
     }
 
     @Override
