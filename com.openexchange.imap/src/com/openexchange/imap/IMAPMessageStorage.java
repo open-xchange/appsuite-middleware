@@ -1518,7 +1518,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 return list;
             } else {
                 if (DEBUG) {
-                    LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages(): Using built-in LZW threader.");
+                    LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages(): Using built-in JWZ threader (http://www.jwz.org/doc/threading.html).");
                 }
                 /*
                  * Need to use in-application Threader
