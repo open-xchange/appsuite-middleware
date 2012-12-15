@@ -56,6 +56,7 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.infostore.folder.FolderParser;
 import com.openexchange.file.storage.infostore.folder.FolderWriter;
+import com.openexchange.file.storage.infostore.folder.ParsedFolder;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -202,14 +203,22 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public String moveFolder(final String folderId, final String newParentId) throws OXException {
-        // Nothing to do
-        return null;
+        final FolderService service = Services.getService(FolderService.class);
+        final ParsedFolder folder = new ParsedFolder();
+        folder.setID(folderId);
+        folder.setParentID(newParentId);
+        service.updateFolder(folder, null, session, null);
+        return folder.getNewID() == null ? folderId : folder.getNewID();
     }
 
     @Override
     public String renameFolder(final String folderId, final String newName) throws OXException {
-        // Nothing to do
-        return null;
+        final FolderService service = Services.getService(FolderService.class);
+        final ParsedFolder folder = new ParsedFolder();
+        folder.setID(folderId);
+        folder.setName(newName);
+        service.updateFolder(folder, null, session, null);
+        return folder.getNewID() == null ? folderId : folder.getNewID();
     }
 
     @Override
