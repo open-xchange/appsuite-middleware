@@ -13,8 +13,6 @@ default:
 
     forgotPassword: false
     
-    languages: 
-        en_US: 'English'
     
     copyright: '(C) 2012 Open-Xchange.'
     version: '7.0.0 Drop #6'

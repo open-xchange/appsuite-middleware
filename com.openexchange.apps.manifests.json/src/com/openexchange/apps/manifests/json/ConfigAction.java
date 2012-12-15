@@ -68,6 +68,7 @@ import com.openexchange.apps.manifests.ServerConfigMatcherService;
 import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
 import com.openexchange.apps.manifests.json.values.Capabilities;
 import com.openexchange.apps.manifests.json.values.Hosts;
+import com.openexchange.apps.manifests.json.values.Languages;
 import com.openexchange.apps.manifests.json.values.Manifests;
 import com.openexchange.apps.manifests.json.values.ServerVersion;
 import com.openexchange.config.ConfigurationService;
@@ -99,7 +100,8 @@ public class ConfigAction implements AJAXActionService {
 				new Manifests(services, manifests),
 				new Capabilities(services),
 				new Hosts(),
-				new ServerVersion()
+				new ServerVersion(),
+				new Languages(services)
 		};
 	}
 
@@ -147,7 +149,9 @@ public class ConfigAction implements AJAXActionService {
 	private boolean looksApplicable(Map value, AJAXRequestData requestData,
 			ServerSession session) throws OXException {
 		
-		
+		if (value == null) {
+			return false;
+		}
 		String host = (String) value.get("host");	
 		if (host != null) {
 			if (requestData.getHostname().equals(host) || host.equals("all")) {
