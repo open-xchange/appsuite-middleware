@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal;
 
+import static java.util.regex.Matcher.quoteReplacement;
 import java.net.URLDecoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -102,12 +103,11 @@ public final class SaneScriptTags {
             if (!m.find()) {
                 return html;
             }
-            final StringBuilder sb = new StringBuilder(html.length());
-            final MatcherReplacer mr = new MatcherReplacer(m, html);
+            final StringBuffer sb = new StringBuffer(html.length());
             do {
-                mr.appendLiteralReplacement(sb, Character.toString((char) Integer.parseInt(m.group(1), 16)));
+                m.appendReplacement(sb, quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
             } while (m.find());
-            mr.appendTail(sb);
+            m.appendTail(sb);
             return sb.toString();
         }
     }
@@ -119,12 +119,11 @@ public final class SaneScriptTags {
         if (!m.find()) {
             return html;
         }
-        final StringBuilder sb = new StringBuilder(html.length());
-        final MatcherReplacer mr = new MatcherReplacer(m, html);
+        final StringBuffer sb = new StringBuffer(html.length());
         do {
-            mr.appendLiteralReplacement(sb, "");
+            m.appendReplacement(sb, "");
         } while (m.find());
-        mr.appendTail(sb);
+        m.appendTail(sb);
         return sb.toString();
     }
 
@@ -137,12 +136,11 @@ public final class SaneScriptTags {
         if (!m.find()) {
             return htmlContent;
         }
-        final StringBuilder sb = new StringBuilder(htmlContent.length());
-        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+        final StringBuffer sb = new StringBuffer(htmlContent.length());
         do {
-            mr.appendLiteralReplacement(sb, "");
+            m.appendReplacement(sb, "");
         } while (m.find());
-        mr.appendTail(sb);
+        m.appendTail(sb);
         return sb.toString();
     }
 
