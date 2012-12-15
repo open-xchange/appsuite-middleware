@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.json.helpers.StringAllocator;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.Setting;
 
@@ -243,13 +244,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
      */
     @Override
     public String getPath() {
-        final String retval;
-        if (null == parent) {
-            retval = name;
-        } else {
-            retval = parent.getPath() + SEPARATOR + name;
-        }
-        return retval;
+        return null == parent ? name : new StringAllocator(parent.getPath()).append(SEPARATOR).append(name).toString();
     }
 
     /**

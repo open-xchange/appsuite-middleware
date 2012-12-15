@@ -65,6 +65,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.impl.AbstractSetting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -168,26 +169,33 @@ public final class PUTAction extends AbstractConfigAction {
      */
     private void saveSettingWithSubs(final SettingStorage storage, final Setting setting) throws OXException, JSONException {
         if (setting.isLeaf()) {
-            final String value = (String) setting.getSingleValue();
-            if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
-                final JSONArray array = new JSONArray(value);
-                if (array.length() == 0) {
-                    setting.setEmptyMultiValue();
-                } else {
-                    for (int i = 0; i < array.length(); i++) {
-                        setting.addMultiValue(array.getString(i));
+            if (!ignorees.contains(setting.getPath())) {
+                final String value = (String) setting.getSingleValue();
+                if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
+                    final JSONArray array = new JSONArray(value);
+                    if (array.length() == 0) {
+                        setting.setEmptyMultiValue();
+                    } else {
+                        for (int i = 0; i < array.length(); i++) {
+                            setting.addMultiValue(array.getString(i));
+                        }
                     }
+                    setting.setSingleValue(null);
                 }
-                setting.setSingleValue(null);
+                storage.save(setting);
             }
-            storage.save(setting);
         } else {
             final JSONObject json = new JSONObject(setting.getSingleValue().toString());
             final Iterator<String> iter = json.keys();
+            final StringBuilder sb = new StringBuilder(setting.getPath()).append(AbstractSetting.SEPARATOR);
+            final int reset = sb.length();
             OXException exc = null;
             while (iter.hasNext()) {
                 final String key = iter.next();
-                if (!ignorees.contains(key)) {
+                if (sb.length() > reset) {
+                    sb.setLength(reset);
+                }
+                if (!ignorees.contains(sb.append(key).toString())) {
                     final Setting sub = ConfigTree.getSettingByPath(setting, new String[] { key });
                     sub.setSingleValue(json.getString(key));
                     try {
