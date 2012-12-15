@@ -85,11 +85,11 @@ public final class SaneScriptTags {
         return s;
     }
 
-    private static final Pattern PAT_UNICODE_ENTITIES = Pattern.compile("%([0-9a-fA-F]{2,4})");
+    private static final Pattern PAT_URLDECODE_ENTITIES = Pattern.compile("%([0-9a-fA-F]{2})");
 
     private static String decode(final String html) {
         String ret = html;
-        while (PAT_UNICODE_ENTITIES.matcher(ret).find()) {
+        while (PAT_URLDECODE_ENTITIES.matcher(ret).find()) {
             ret = urlDecode(ret);
         }
         return ret;
@@ -99,7 +99,7 @@ public final class SaneScriptTags {
         try {
             return URLDecoder.decode(html, "UTF-8");
         } catch (final Exception e) {
-            final Matcher m = PAT_UNICODE_ENTITIES.matcher(html);
+            final Matcher m = PAT_URLDECODE_ENTITIES.matcher(html);
             if (!m.find()) {
                 return html;
             }
