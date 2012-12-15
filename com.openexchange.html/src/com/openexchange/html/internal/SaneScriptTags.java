@@ -112,7 +112,7 @@ public final class SaneScriptTags {
         }
     }
 
-    private static final Pattern PAT_CONCAT = Pattern.compile("[\"\u201d\u201c]\\+[\\\"\\u201d\\u201c]");
+    private static final Pattern PAT_CONCAT = Pattern.compile("[\"\u201d\u201c]\\+[\"\u201d\u201c]");
 
     private static String dropConcatenations(final String html) {
         final Matcher m = PAT_CONCAT.matcher(html);
