@@ -52,7 +52,7 @@ package com.openexchange.pop3.connect;
 import static com.openexchange.pop3.util.POP3StorageUtil.parseLoginDelaySeconds;
 import java.net.InetAddress;
 import java.util.concurrent.Callable;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.pop3.POP3Access;
