@@ -94,11 +94,13 @@ public class RssAction implements AJAXActionService {
 	@Override
 	public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
 		String sort = request.getParameter("sort"); //DATE or SOURCE
-		if (sort == null)
-			sort = "DATE";
+		if (sort == null) {
+            sort = "DATE";
+        }
 		String order = request.getParameter("order"); //ASC or DESC
-		if (order == null)
-			order = "DESC";
+		if (order == null) {
+            order = "DESC";
+        }
 		
 		List<URL> urls = new LinkedList<URL>();
 		List<SyndFeed> feeds = new LinkedList<SyndFeed>();
@@ -129,13 +131,13 @@ public class RssAction implements AJAXActionService {
 		} catch (UnsupportedEncodingException e) { 
 			/* yeah, right... not happening for UTF-8 */ 
 		} catch (MalformedURLException e) {
-			throw AjaxExceptionCodes.IMVALID_PARAMETER.create(urlString);
+			throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, urlString);
 		} catch (IllegalArgumentException e) {
-			throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e);
+			throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, e.getMessage());
 		} catch (IOException e) {
-			throw AjaxExceptionCodes.IO_ERROR.create(e);
+			throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
 		} catch (JSONException e) {
-			throw AjaxExceptionCodes.JSON_ERROR.create(e);
+			throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
 		}
 
 		RssPreprocessor preprocessor = new ImagePreprocessor().chain(new WhitelistPreprocessor());
@@ -152,8 +154,9 @@ public class RssAction implements AJAXActionService {
 					.setFeedTitle(feed.getTitle())
 					.setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
 				
-				if(feed.getImage() != null)
-					result.setImageUrl(feed.getImage().getLink());
+				if(feed.getImage() != null) {
+                    result.setImageUrl(feed.getImage().getLink());
+                }
 	
 				results.add(result);
 				
