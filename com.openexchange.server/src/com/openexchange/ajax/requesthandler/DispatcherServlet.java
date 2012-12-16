@@ -68,9 +68,11 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
+import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
@@ -273,19 +275,21 @@ public class DispatcherServlet extends SessionServlet {
                 httpResponse.sendError(((Integer) logArgs[0]).intValue(), null == statusMsg ? null : statusMsg.toString());
                 return;
             }
-            
-            if(LogProperties.isEnabled()) {
-                StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
-                logBuilder.append(LogProperties.getAndPrettyPrint());
-                LOG.error(logBuilder.toString(),e);
-            } else {
-                LOG.error(e.getMessage(), e);
+            // Handle other OXExceptions
+            if (e.isLoggable(LogLevel.ERROR)) {
+                if (LogProperties.isEnabled()) {
+                    StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
+                    logBuilder.append(LogProperties.getAndPrettyPrint());
+                    LOG.error(logBuilder.toString(), e);
+                } else {
+                    LOG.error(e.getMessage(), e);
+                }
             }
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
             APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? httpRequest.getMethod().toUpperCase(Locale.US) : action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
             if(LogProperties.isEnabled()) {
-                StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
+                StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
                 logBuilder.append(LogProperties.getAndPrettyPrint());
                 LOG.error(logBuilder.toString(),e);
             } else {
