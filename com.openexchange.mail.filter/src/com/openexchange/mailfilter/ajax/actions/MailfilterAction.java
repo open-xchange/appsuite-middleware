@@ -62,7 +62,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
 import org.apache.commons.logging.Log;
 import org.apache.jsieve.SieveException;

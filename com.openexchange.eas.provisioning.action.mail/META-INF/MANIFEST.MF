@@ -21,5 +21,6 @@ Import-Package: com.openexchange.config,
  com.openexchange.session,
  javax.mail,
  javax.mail.internet,
+ javax.mail.internet.idn,
  org.apache.commons.logging,
  org.osgi.framework

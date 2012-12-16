@@ -47,8 +47,9 @@
  *
  */
 
-package javax.mail.internet;
+package javax.mail.internet.idn;
 
+import javax.mail.internet.AddressException;
 import gnu.inet.encoding.IDNAException;
 import org.apache.commons.logging.LogFactory;
 

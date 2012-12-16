@@ -52,7 +52,7 @@ package com.openexchange.mail.autoconfig.internal;
 import java.util.LinkedList;
 import java.util.List;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;

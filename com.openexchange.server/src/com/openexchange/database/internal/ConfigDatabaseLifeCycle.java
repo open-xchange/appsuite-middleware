@@ -49,7 +49,7 @@
 
 package com.openexchange.database.internal;
 
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 
 /**
