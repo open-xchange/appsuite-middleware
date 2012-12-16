@@ -60,7 +60,7 @@ import org.apache.commons.logging.LogFactory;
 public final class IDNA {
 
     /**
-     * Initializes a new {@link IDNA}.
+     * No Initialization.
      */
     private IDNA() {
         super();
