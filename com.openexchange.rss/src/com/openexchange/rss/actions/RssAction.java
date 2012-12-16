@@ -53,6 +53,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -93,99 +94,94 @@ public class RssAction implements AJAXActionService {
 	}
 
 	@Override
-	public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-		String sort = request.getParameter("sort"); //DATE or SOURCE
-		if (sort == null) {
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
+        String sort = request.getParameter("sort"); // DATE or SOURCE
+        if (sort == null) {
             sort = "DATE";
         }
-		String order = request.getParameter("order"); //ASC or DESC
-		if (order == null) {
+        String order = request.getParameter("order"); // ASC or DESC
+        if (order == null) {
             order = "DESC";
         }
-		
-		List<URL> urls = new LinkedList<URL>();
-		List<SyndFeed> feeds = new LinkedList<SyndFeed>();
-		String urlString = "";
-		try {
-			JSONObject data = (JSONObject) request.getData();
-			JSONArray test = data.optJSONArray("feedUrl");
-			if(test != null)  {
-				for(int i = 0; i < test.length(); i++) {
-					urlString = test.getString(i);
-					urls.add(new URL(prepareUrlString(urlString)));
-				}
-			} else {
-				urlString = request.checkParameter("feedUrl");
-				urlString = urlDecodeSafe(urlString);
-				urls.add(new URL(prepareUrlString(urlString)));
-			}
-			for(URL url: urls) {
-				try {
-					feeds.add(fetcher.retrieveFeed(url));
-				} catch (FeedException e) {
-					LOG.info("Could not load RSS feed from " + url, e);
-				} catch (FetcherException e) {
-					LOG.info("Could not load RSS feed from " + url, e);
-				}
-			}
-			
-		} catch (UnsupportedEncodingException e) { 
-			/* yeah, right... not happening for UTF-8 */ 
-		} catch (MalformedURLException e) {
-			throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, urlString);
-		} catch (IllegalArgumentException e) {
-			throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, e.getMessage());
-		} catch (IOException e) {
-			throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-		} catch (JSONException e) {
-			throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-		}
 
-		RssPreprocessor preprocessor = new ImagePreprocessor().chain(new WhitelistPreprocessor());
-		List<RssResult> results = new LinkedList<RssResult>();
-		
-		for(SyndFeed feed: feeds) {
-			for(Object obj : feed.getEntries()) {
-				SyndEntry entry = (SyndEntry) obj;
-				RssResult result = new RssResult()
-					.setAuthor(entry.getAuthor())
-					.setSubject(entry.getTitle())
-					.setUrl(entry.getUri())
-					.setFeedUrl(feed.getLink())
-					.setFeedTitle(feed.getTitle())
-					.setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
-				
-				if(feed.getImage() != null) {
+        List<SyndFeed> feeds = new LinkedList<SyndFeed>();
+        {
+            String urlString = "";
+            try {
+                JSONObject data = (JSONObject) request.getData();
+                JSONArray test = data.optJSONArray("feedUrl");
+
+                final List<URL> urls;
+                if (test == null) {
+                    urlString = request.checkParameter("feedUrl");
+                    urlString = urlDecodeSafe(urlString);
+                    urls = Collections.singletonList(new URL(prepareUrlString(urlString)));
+                } else {
+                    final int length = test.length();
+                    urls = new ArrayList<URL>(length);
+                    for (int i = 0; i < length; i++) {
+                        urlString = test.getString(i);
+                        urls.add(new URL(prepareUrlString(urlString)));
+                    }
+                }
+                for (URL url : urls) {
+                    try {
+                        feeds.add(fetcher.retrieveFeed(url));
+                    } catch (FeedException e) {
+                        LOG.info("Could not load RSS feed from " + url, e);
+                    } catch (FetcherException e) {
+                        LOG.info("Could not load RSS feed from " + url, e);
+                    }
+                }
+
+            } catch (UnsupportedEncodingException e) {
+                /* yeah, right... not happening for UTF-8 */
+            } catch (MalformedURLException e) {
+                throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, urlString);
+            } catch (IllegalArgumentException e) {
+                throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, e.getMessage());
+            } catch (IOException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            }
+        }
+
+        List<RssResult> results = new ArrayList<RssResult>(feeds.size());
+        for (SyndFeed feed : feeds) {
+            for (Object obj : feed.getEntries()) {
+                SyndEntry entry = (SyndEntry) obj;
+                RssResult result = new RssResult().setAuthor(entry.getAuthor()).setSubject(entry.getTitle()).setUrl(entry.getUri()).setFeedUrl(
+                    feed.getLink()).setFeedTitle(feed.getTitle()).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
+
+                if (feed.getImage() != null) {
                     result.setImageUrl(feed.getImage().getLink());
                 }
-	
-				results.add(result);
-				
-				List<SyndContent> contents = entry.getContents();
-				boolean foundHtml = false;
-				for(SyndContent content: contents) {
-					if ("html".equals(content.getType())) {
-						foundHtml = true;
-						String htmlContent = preprocessor.process(content.getValue());
-						result
-							.setBody(htmlContent)
-							.setFormat("text/html");
-						break;
-					}
-					if(!foundHtml) {
-						result
-							.setBody(content.getValue())
-							.setFormat(content.getType());
-					}
-				}
-			}
-		}
-		
-		if (sort.equalsIgnoreCase("DATE")){
-			Collections.sort(results, new FeedByDateSorter(order));
-		}
-		return new AJAXRequestResult(results, "rss");
-	}
+
+                results.add(result);
+
+                RssPreprocessor preprocessor = new ImagePreprocessor().chain(new WhitelistPreprocessor());
+                List<SyndContent> contents = entry.getContents();
+                boolean foundHtml = false;
+                for (SyndContent content : contents) {
+                    if ("html".equals(content.getType())) {
+                        foundHtml = true;
+                        String htmlContent = preprocessor.process(content.getValue());
+                        result.setBody(htmlContent).setFormat("text/html");
+                        break;
+                    }
+                    if (!foundHtml) {
+                        result.setBody(content.getValue()).setFormat(content.getType());
+                    }
+                }
+            }
+        }
+
+        if (sort.equalsIgnoreCase("DATE")) {
+            Collections.sort(results, new FeedByDateSorter(order));
+        }
+        return new AJAXRequestResult(results, "rss");
+    }
 
 	private static String urlDecodeSafe(final String urlString) {
 	    if (isEmpty(urlString)) {
