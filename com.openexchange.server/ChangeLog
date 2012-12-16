@@ -1,3 +1,7 @@
+* 2012-12-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23791: Proper URL-decoding of RSS feed's URL
+
 * 2012-12-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 24208: Ignore JSlob core properties on config save-back operation
