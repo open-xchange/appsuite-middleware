@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -111,12 +112,12 @@ public class RssAction implements AJAXActionService {
 			if(test != null)  {
 				for(int i = 0; i < test.length(); i++) {
 					urlString = test.getString(i);
-					urls.add(new URL(urlString));
+					urls.add(new URL(prepareUrlString(urlString)));
 				}
 			} else {
 				urlString = request.checkParameter("feedUrl");
-				urlString = URLDecoder.decode(urlString, "UTF-8");
-				urls.add(new URL(urlString));
+				urlString = urlDecodeSafe(urlString);
+				urls.add(new URL(prepareUrlString(urlString)));
 			}
 			for(URL url: urls) {
 				try {
@@ -185,4 +186,59 @@ public class RssAction implements AJAXActionService {
 		}
 		return new AJAXRequestResult(results, "rss");
 	}
+
+	private static String urlDecodeSafe(final String urlString) {
+	    if (isEmpty(urlString)) {
+            return urlString;
+        }
+	    try {
+            final String ret = URLDecoder.decode(urlString, "ISO-8859-1");
+            if (isAscii(ret)) {
+                return ret;
+            }
+            return URLDecoder.decode(urlString, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return urlString;
+        }
+	}
+
+	/**
+     * Checks whether the specified string's characters are ASCII 7 bit
+     *
+     * @param s The string to check
+     * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
+     */
+    private static boolean isAscii(final String s) {
+        final char[] chars = s.toCharArray();
+        boolean isAscci = true;
+        for (int i = 0; (i < chars.length) && isAscci; i++) {
+            isAscci &= (chars[i] < 128);
+        }
+        return isAscci;
+    }
+
+	private static String prepareUrlString(final String urlString) {
+	    if (isEmpty(urlString)) {
+            return urlString;
+        }
+	    final String tmp = urlString.toLowerCase(Locale.US);
+        int pos = tmp.indexOf("http://");
+        if (pos < 0) {
+            pos = tmp.indexOf("https://");
+        }
+        return pos > 0 ? urlString.substring(pos) : urlString;
+	}
+
+	/** Checks for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 }
