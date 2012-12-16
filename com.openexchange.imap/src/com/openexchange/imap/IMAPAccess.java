@@ -71,7 +71,7 @@ import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import javax.mail.event.FolderEvent;
 import javax.mail.event.FolderListener;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;

@@ -61,7 +61,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
