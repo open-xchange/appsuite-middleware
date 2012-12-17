@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.infostore.folder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
@@ -92,7 +93,7 @@ public final class FolderWriter {
             ret.setName(folder.getName());
             ret.setParentId(folder.getParentID());
             ret.setPermissions(parsePermission(folder.getPermissions()));
-            ret.setOwnPermission(parsePermission(new Permission[] { folder.getOwnPermission() }).get(0));
+            ret.setOwnPermission(parsePermission(folder.getOwnPermission()));
             ret.setRootFolder(folder.getParentID() == null);
             ret.setSubscribed(folder.isSubscribed());
             {
@@ -106,18 +107,49 @@ public final class FolderWriter {
     }
 
     /**
+     * Parses given permission.
+     * 
+     * @param permission The permission to parse
+     * @return The parsed permission
+     * @throws OXException If parsing fails
+     */
+    public static FileStoragePermission parsePermission(final Permission permission) throws OXException {
+        if (null == permission) {
+            return null;
+        }
+        try {
+            final int entity = permission.getEntity();
+            final DefaultFileStoragePermission oclPerm = DefaultFileStoragePermission.newInstance();
+            oclPerm.setEntity(entity);
+            oclPerm.setGroup(permission.isGroup());
+            oclPerm.setAdmin(permission.isAdmin());
+            oclPerm.setAllPermissions(
+                permission.getFolderPermission(),
+                permission.getReadPermission(),
+                permission.getWritePermission(),
+                permission.getDeletePermission());
+                return (oclPerm);
+        } catch (final RuntimeException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
      * Parses given permissions.
      * 
-     * @param permissionsList The permissions to parse
+     * @param permissions The permissions to parse
      * @return The parsed permissions
      * @throws OXException If parsing fails
      */
-    public static List<FileStoragePermission> parsePermission(final Permission[] permissionsList) throws OXException {
+    public static List<FileStoragePermission> parsePermission(final Permission[] permissions) throws OXException {
+        if (null == permissions) {
+            return Collections.emptyList();
+        }
         try {
-            final int numberOfPermissions = permissionsList.length;
+            final int numberOfPermissions = permissions.length;
             final List<FileStoragePermission> perms = new ArrayList<FileStoragePermission>(numberOfPermissions);
             for (int i = 0; i < numberOfPermissions; i++) {
-                final Permission elem = permissionsList[i];
+                final Permission elem = permissions[i];
                 final int entity = elem.getEntity();
                 final DefaultFileStoragePermission oclPerm = DefaultFileStoragePermission.newInstance();
                 oclPerm.setEntity(entity);
