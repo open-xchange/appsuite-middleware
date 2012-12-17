@@ -11,7 +11,7 @@
     {
         "title": "Application Manager",
         "company": "Open-Xchange",
-        "icon": "apps.png",
+        "icon": "app-store.png",
         "category": "Basic",
         "settings": false,
         "visible": false,
@@ -57,7 +57,7 @@
     {
         "title": "Conversations",
         "company": "Open-Xchange",
-        "icon": "conversations.png",
+        "icon": "default.png",
         "category": "Productivity",
         "settings": false,
         "requires": "conversations",
@@ -95,7 +95,7 @@
     {
         "title": "Theme Maker",
         "company": "Mattes Inc.",
-        "icon": "theme-maker.png",
+        "icon": "default.png",
         "category": "Dev",
         "settings": false,
         "requires": "dev",
@@ -172,7 +172,7 @@
     {
         "title": "Compose email",
         "company": "Open-Xchange",
-        "icon": "mail-write.png",
+        "icon": "mail.png",
         "category": "Basic",
         "settings": false,
         "visible": false,
@@ -299,7 +299,7 @@
     },
     {
         "namespace": "portal",
-        "requires": "oauth",
+        "requires": "oauth facebook",
         "path": "plugins/portal/facebook/register"
     },
     {
@@ -312,7 +312,7 @@
     },
     {
         "namespace": "portal",
-        "requires": "oauth",
+        "requires": "oauth linkedin",
         "path": "plugins/portal/linkedIn/register"
     },
     {
@@ -343,11 +343,12 @@
     },
     {
         "namespace": "portal",
-        "requires": "oauth",
+        "requires": "oauth twitter",
         "path": "plugins/portal/twitter/register"
     },
     {
         "namespace": "portal",
+        "requires": "oxupdater",
         "path": "plugins/portal/updater/register"
     },
     {
