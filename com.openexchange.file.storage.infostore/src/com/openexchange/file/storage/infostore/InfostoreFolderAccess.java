@@ -57,6 +57,7 @@ import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.infostore.folder.FolderParser;
 import com.openexchange.file.storage.infostore.folder.FolderWriter;
 import com.openexchange.file.storage.infostore.folder.ParsedFolder;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -223,8 +224,10 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public String updateFolder(final String identifier, final FileStorageFolder toUpdate) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        final FolderService service = Services.getService(FolderService.class);
+        final Folder parsedFolder = FolderParser.parseFolder(toUpdate);
+        service.updateFolder(parsedFolder, null, session, null);
+        return parsedFolder.getNewID();
     }
 
 }
