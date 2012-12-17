@@ -68,4 +68,6 @@ public interface CapabilityService {
 	 * @throws OXException If capabilities cannot be determined
 	 */
 	public Set<Capability> getCapabilities(ServerSession session) throws OXException;
+	
+	public void declareCapability(String capability);
 }

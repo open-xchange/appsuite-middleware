@@ -47,69 +47,16 @@
  *
  */
 
-package com.openexchange.capabilities.osgi;
+package com.openexchange.capabilities;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
-
-import com.openexchange.capabilities.Capability;
-import com.openexchange.capabilities.CapabilityChecker;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.SimpleRegistryListener;
-
-public class CapabilitiesActivator extends HousekeepingActivator {
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final ServiceTracker<CapabilityChecker, CapabilityChecker> capCheckers = track(CapabilityChecker.class);
-    	
-    	
-    	final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, context) {
-        	
-        	@Override
-        	public List<CapabilityChecker> getCheckers() {
-        		Object[] services = capCheckers.getServices();
-        		if (services == null) {
-        			return Collections.emptyList();
-        		}
-        		List<CapabilityChecker> checkers = new ArrayList<CapabilityChecker>(services.length);
-
-        		for (Object service : services) {
-					checkers.add((CapabilityChecker) service);
-				}
-        		
-        		return checkers;
-        	}
-        };
-        
-        registerService(CapabilityService.class, capService);
-
-        track(Capability.class, new SimpleRegistryListener<Capability>() {
-
-            @Override
-            public void added(ServiceReference<Capability> ref, Capability service) {
-                capService.getCapability(service.getId()).learnFrom(service);
-            }
-
-            @Override
-            public void removed(ServiceReference<Capability> ref, Capability service) {
-                // Nothing
-            }
-
-        });
-
-        openTrackers();
-    }
-
+/**
+ * {@link CapabilityChecker}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public interface CapabilityChecker {
+	public boolean isEnabled(String capability, ServerSession session) throws OXException;
 }
