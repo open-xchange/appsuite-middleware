@@ -57,8 +57,8 @@ import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link FolderWriter}
@@ -81,7 +81,7 @@ public final class FolderWriter {
      * @return The written folder
      * @throws OXException If writing folder fails
      */
-    public static FileStorageFolder parseFolder(final Folder folder) throws OXException {
+    public static FileStorageFolder parseFolder(final UserizedFolder folder) throws OXException {
         try {
             final DefaultFileStorageFolder ret = new DefaultFileStorageFolder();
             ret.setCreationDate(folder.getCreationDate());
@@ -92,6 +92,7 @@ public final class FolderWriter {
             ret.setName(folder.getName());
             ret.setParentId(folder.getParentID());
             ret.setPermissions(parsePermission(folder.getPermissions()));
+            ret.setOwnPermission(parsePermission(new Permission[] { folder.getOwnPermission() }).get(0));
             ret.setRootFolder(folder.getParentID() == null);
             ret.setSubscribed(folder.isSubscribed());
             {
