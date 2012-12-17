@@ -131,11 +131,6 @@ public final class FacebookOAuthAccess {
     private final Token facebookAccessToken;
 
     /**
-     * The last-accessed time stamp.
-     */
-    private volatile long lastAccessed;
-
-    /**
      * Initializes a new {@link FacebookMessagingResource}.
      *
      * @param messagingAccount The facebook messaging account providing credentials and settings
@@ -215,15 +210,6 @@ public final class FacebookOAuthAccess {
                 throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(object.getString("message"));
             }
         }
-    }
-
-    /**
-     * Gets the last-accessed time stamp.
-     *
-     * @return The last-accessed time stamp
-     */
-    public long getLastAccessed() {
-        return lastAccessed;
     }
 
     @Override

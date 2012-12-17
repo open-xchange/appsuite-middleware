@@ -64,9 +64,9 @@ import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxServices;
-import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
@@ -127,11 +127,6 @@ public final class DropboxOAuthAccess {
      * The OAuth access token for Dropbox.
      */
     private final Token dropboxAccessToken;
-
-    /**
-     * The last-accessed time stamp.
-     */
-    private volatile long lastAccessed;
 
     /**
      * Initializes a new {@link FacebookMessagingResource}.
@@ -217,15 +212,6 @@ public final class DropboxOAuthAccess {
                 throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(object.get("message"));
             }
         }
-    }
-
-    /**
-     * Gets the last-accessed time stamp.
-     *
-     * @return The last-accessed time stamp
-     */
-    public long getLastAccessed() {
-        return lastAccessed;
     }
 
     @Override
