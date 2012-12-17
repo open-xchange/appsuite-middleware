@@ -50,8 +50,10 @@
 package com.openexchange.config.json.actions;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
@@ -105,8 +107,12 @@ public final class PUTAction extends AbstractConfigAction {
                         final int pos = line.indexOf('=');
                         if (pos > 0) {
                             final String sPath = preparePath(line.substring(0, pos));
-                            if (null != sPath) {
-                                ignorees.add(sPath);
+                            final int keyPos = sPath.lastIndexOf('/');
+                            final String key = sPath.substring(keyPos + 1);
+                            final String path = sPath.substring(0, keyPos);
+                            if (null != path) {
+                                ignorees.add('/' + path);
+                                ignorees.add("/meta/" + path);
                             }
                         }
                     }
@@ -119,8 +125,12 @@ public final class PUTAction extends AbstractConfigAction {
                         final int pos = line.indexOf('>');
                         if (pos > 0) {
                             final String sPath = preparePath(line.substring(pos + 1));
-                            if (null != sPath) {
-                                ignorees.add(sPath);
+                            final int keyPos = sPath.lastIndexOf('/');
+                            final String key = sPath.substring(keyPos + 1);
+                            final String path = sPath.substring(0, keyPos);
+                            if (null != path) {
+                                ignorees.add('/' + path);
+                                ignorees.add("/meta/" + path);
                             }
                         }
                     }
@@ -195,15 +205,19 @@ public final class PUTAction extends AbstractConfigAction {
                 if (sb.length() > reset) {
                     sb.setLength(reset);
                 }
-                if (!ignorees.contains(sb.append(key).toString())) {
-                    final Setting sub = ConfigTree.getSettingByPath(setting, new String[] { key });
-                    sub.setSingleValue(json.getString(key));
-                    try {
-                        // Catch single exceptions if GUI writes not writable fields.
-                        saveSettingWithSubs(storage, sub);
-                    } catch (final OXException e) {
-                        exc = e;
-                    }
+                String path = sb.append(key).toString();
+                System.out.println("Setting: " + path + ", key: " + key + ", setting: " + setting.getPath());
+                if (!ignorees.contains(path)) {
+                        final Setting sub = ConfigTree.getSettingByPath(setting, new String[] { key });
+                        sub.setSingleValue(json.getString(key));
+                        try {
+                            // Catch single exceptions if GUI writes not writable fields.
+                            saveSettingWithSubs(storage, sub);
+                        } catch (final OXException e) {
+                            exc = e;
+                        }
+                } else {
+                    System.out.println("Path ignored: " + path);
                 }
             }
             if (null != exc) {
@@ -231,5 +245,4 @@ public final class PUTAction extends AbstractConfigAction {
         }
         return COMMENT.matcher(line).find();
     }
-
 }
