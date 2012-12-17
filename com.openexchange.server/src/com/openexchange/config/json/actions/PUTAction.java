@@ -105,8 +105,11 @@ public final class PUTAction extends AbstractConfigAction {
                         final int pos = line.indexOf('=');
                         if (pos > 0) {
                             final String sPath = preparePath(line.substring(0, pos));
-                            if (null != sPath) {
-                                ignorees.add(sPath);
+                            final int keyPos = sPath.lastIndexOf('/');
+                            final String path = sPath.substring(0, keyPos);
+                            if (null != path) {
+                                ignorees.add('/' + path);
+                                ignorees.add("/meta/" + path);
                             }
                         }
                     }
@@ -119,8 +122,11 @@ public final class PUTAction extends AbstractConfigAction {
                         final int pos = line.indexOf('>');
                         if (pos > 0) {
                             final String sPath = preparePath(line.substring(pos + 1));
-                            if (null != sPath) {
-                                ignorees.add(sPath);
+                            final int keyPos = sPath.lastIndexOf('/');
+                            final String path = sPath.substring(0, keyPos);
+                            if (null != path) {
+                                ignorees.add('/' + path);
+                                ignorees.add("/meta/" + path);
                             }
                         }
                     }
@@ -231,5 +237,4 @@ public final class PUTAction extends AbstractConfigAction {
         }
         return COMMENT.matcher(line).find();
     }
-
 }
