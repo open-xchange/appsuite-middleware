@@ -572,7 +572,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (fieldSet.contains(MailField.FULL) || fieldSet.contains(MailField.BODY)) {
             final MailMessage[] mails = new MailMessage[uids.length];
             for (int j = 0; j < mails.length; j++) {
-                mails[j] = getMessageLong(fullName, uids[j], false);
+                try {
+                    mails[j] = getMessageLong(fullName, uids[j], false);
+                } catch (Exception e) {
+                    mails[j] = null;
+                }
             }
             return mails;
         }
