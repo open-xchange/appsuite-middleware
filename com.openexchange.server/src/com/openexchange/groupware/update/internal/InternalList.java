@@ -476,5 +476,8 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.RemoveUnnecessaryIndexes(),
         new com.openexchange.groupware.update.tasks.RemoveUnnecessaryIndexes2(),
 
+        // +++++++++++++++++++++++++++++++++ Version 6.22.1 starts here. +++++++++++++++++++++++++++++++++
+        new com.openexchange.groupware.update.tasks.ContactFixUserDistListReferencesTask(),
+        
     };
 }

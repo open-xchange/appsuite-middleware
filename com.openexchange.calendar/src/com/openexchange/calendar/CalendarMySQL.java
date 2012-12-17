@@ -650,7 +650,6 @@ public class CalendarMySQL implements CalendarSqlImp {
             sb.append(Participant.RESOURCE);
             sb.append(" AND pd.intfield06 != ");
             sb.append(Appointment.FREE);
-            sb.append(PDM_GROUP_BY_INTFIELD01);
             sb.append(UNION);
             sb.append("SELECT pdm.object_id, pdm.pfid, pdm.member_uid FROM prg_dates");
             sb.append(JOIN_PARTICIPANTS);
@@ -667,7 +666,6 @@ public class CalendarMySQL implements CalendarSqlImp {
             sb.append(Participant.RESOURCE);
             sb.append(" AND pd.intfield06 != ");
             sb.append(Appointment.FREE);
-            sb.append(PDM_GROUP_BY_INTFIELD01);
             pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             pst.setTimestamp(1, new Timestamp(d2.getTime()));
             pst.setTimestamp(2, new Timestamp(d1.getTime()));

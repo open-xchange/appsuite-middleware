@@ -57,7 +57,7 @@ import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Map;
 import javax.mail.MessagingException;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;

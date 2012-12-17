@@ -53,9 +53,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import org.scribe.model.Token;
 import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.session.AccessTokenPair;
-import com.dropbox.client2.session.AppKeyPair;
-import com.dropbox.client2.session.Session.AccessType;
 import com.dropbox.client2.session.WebAuthSession;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.dropbox.session.DropboxOAuthAccess;
@@ -75,9 +72,7 @@ public abstract class AbstractDropboxAccess {
     protected final String dropboxUserName;
     protected final org.scribe.oauth.OAuthService dropboxOAuthService;
     protected final Token dropboxAccessToken;
-
-    protected final WebAuthSession webAuthSession;
-    protected final DropboxAPI<WebAuthSession> mDBApi;
+    protected final DropboxAPI<WebAuthSession> dropboxAPI;
 
     /**
      * Initializes a new {@link AbstractDropboxAccess}.
@@ -92,14 +87,7 @@ public abstract class AbstractDropboxAccess {
         this.dropboxUserName = dropboxOAuthAccess.getDropboxUserName();
         this.dropboxOAuthService = dropboxOAuthAccess.getDropboxOAuthService();
         this.dropboxAccessToken = dropboxOAuthAccess.getDropboxAccessToken();
-        // Initialize Dropbox access
-        AppKeyPair appKeys = new AppKeyPair(DropboxConfiguration.getInstance().getApiKey(), DropboxConfiguration.getInstance().getSecretKey());
-        webAuthSession = new WebAuthSession(appKeys, AccessType.APP_FOLDER);
-        mDBApi = new DropboxAPI<WebAuthSession>(webAuthSession);
-        // re-auth specific stuff
-        AccessTokenPair reAuthTokens = new AccessTokenPair(dropboxAccessToken.getToken(), dropboxAccessToken.getSecret());
-        mDBApi.getSession().setAccessTokenPair(reAuthTokens);
-        // http://aaka.sh/patel/2011/12/20/authenticating-dropbox-java-api/
+        this.dropboxAPI = dropboxOAuthAccess.getDropboxAPI();
     }
 
     public String getDropboxUserName() {

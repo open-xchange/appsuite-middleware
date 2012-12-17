@@ -49,11 +49,13 @@
 
 package com.openexchange.http.grizzly.osgi;
 
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.HttpRequestPacket;
-import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.http.server.OXHttpServer;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
@@ -89,7 +91,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(GrizzlyActivator.class));
 
-    private HttpServer grizzly;
+    private OXHttpServer grizzly;
 
     private HttpServiceFactory serviceFactory;
 
@@ -151,7 +153,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             /*
              * create, configure and start server
              */
-            grizzly = new HttpServer();
+            grizzly = new OXHttpServer();
             
             ServerConfiguration serverConfiguration = grizzly.getServerConfiguration();
             serverConfiguration.setMaxRequestParameters(grizzlyConfig.getMaxRequestParameters());

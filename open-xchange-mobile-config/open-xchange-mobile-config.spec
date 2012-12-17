@@ -46,6 +46,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Wed Dec 12 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for public patch 2012-12-04
 * Mon Nov 26 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2012-11-28
 * Wed Nov 14 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>

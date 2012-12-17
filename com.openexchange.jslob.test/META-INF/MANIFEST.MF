@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.jslob.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.openexchange.jslob.test.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.jslob,
  com.openexchange.jslob.config,

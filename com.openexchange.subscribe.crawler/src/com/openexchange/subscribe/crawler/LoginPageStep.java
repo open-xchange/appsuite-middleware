@@ -129,7 +129,7 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
         } catch (final IOException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         } catch (final ElementNotFoundException e){
-            LOG.error("The page that does not contain the needed form : \n" + loginPage.getWebResponse().getContentAsString());
+            LOG.debug("The page that does not contain the needed form : \n" + loginPage.getWebResponse().getContentAsString());
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
     }
