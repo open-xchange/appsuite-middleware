@@ -70,9 +70,7 @@ import com.openexchange.http.grizzly.GrizzlyExceptionMessage;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
 import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
@@ -400,7 +398,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * @throws NamespaceException If <code>alias</code> has been registered.
      */
     private void validateAlias4RegOk(String alias) throws NamespaceException {
-        if (!alias.startsWith("/")) {
+        if ('/' != alias.charAt(0)) {
             // have to start with "/"
             String msg = new StringBuilder(64).append("Invalid alias '").append(alias).append("', have to start with '/'.").toString();
             LOG.warn(msg);

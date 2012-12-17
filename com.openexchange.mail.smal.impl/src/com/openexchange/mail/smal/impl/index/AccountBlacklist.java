@@ -113,7 +113,7 @@ public class AccountBlacklist {
                 allExternalAllowed = true;
                 allExternalForbidden = false;
                 blacklistedServers = Collections.EMPTY_SET;
-            } else if (blacklist.startsWith("*")) {
+            } else if ('*' == blacklist.charAt(0)) {
                 allExternalAllowed = false;
                 allExternalForbidden = true;
                 blacklistedServers = Collections.EMPTY_SET;

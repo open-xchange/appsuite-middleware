@@ -124,7 +124,7 @@ public class MultipleAdapter implements MultipleHandler {
             	}
             }
         }
-        if (path.startsWith("/")) {
+        if ('/' == path.charAt(0)) {
         	path = path.substring(1);
         }
         request.setModule(module);

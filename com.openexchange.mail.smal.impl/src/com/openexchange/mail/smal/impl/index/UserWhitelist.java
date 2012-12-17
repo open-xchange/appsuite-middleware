@@ -84,8 +84,8 @@ public class UserWhitelist {
             }
             
             whitelist = whitelist.trim();
-            if (whitelist.startsWith("*")) {
-                allowedUsers = Collections.EMPTY_SET;
+            if ('*' == whitelist.charAt(0)) {
+                allowedUsers = Collections.emptySet();
             } else {
                 allowedUsers = new HashSet<String>();
                 String[] names = whitelist.split(",");                

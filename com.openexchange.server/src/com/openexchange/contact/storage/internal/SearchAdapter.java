@@ -364,11 +364,11 @@ public class SearchAdapter {
     }
     
     private static String prepareForSearch(String pattern, boolean prependWildcard, boolean appendWildcard) {
-        if (prependWildcard && false == pattern.startsWith("*")) {
-            pattern = "*" + pattern;
+        if (prependWildcard && '*' != pattern.charAt(0)) {
+            pattern = '*' + pattern;
         }
-        if (prependWildcard && false == pattern.endsWith("*")) {
-            pattern = pattern + "*";
+        if (prependWildcard && '*' != pattern.charAt(0)) {
+            pattern = pattern + '*';
         }
         return pattern;
     }
