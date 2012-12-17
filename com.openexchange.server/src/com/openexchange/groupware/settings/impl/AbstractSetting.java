@@ -55,9 +55,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.json.helpers.StringAllocator;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.java.StringAllocator;
 
 /**
  * This class represents a single setting.
