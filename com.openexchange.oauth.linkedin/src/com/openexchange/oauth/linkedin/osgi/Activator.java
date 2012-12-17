@@ -50,6 +50,8 @@
 package com.openexchange.oauth.linkedin.osgi;
 
 import org.apache.commons.logging.Log;
+
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthService;
@@ -110,8 +112,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
-        return null;
+        return new Class<?>[]{CapabilityService.class};
     }
 
     @Override
@@ -119,6 +120,7 @@ public class Activator extends HousekeepingActivator {
         track(ConfigurationService.class, new ConfigurationServiceRegisterer(context, this));
         track(OAuthService.class, new OAuthServiceRegisterer(context, this));
         openTrackers();
+        getService(CapabilityService.class).declareCapability("linkedin");
     }
 
     @Override
