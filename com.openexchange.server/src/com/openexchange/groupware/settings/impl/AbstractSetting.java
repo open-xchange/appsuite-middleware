@@ -227,7 +227,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
     public int hashCode() {
         int retval = id ^ name.hashCode();
         if (isShared()) {
-            retval ^= Boolean.valueOf(isShared()).hashCode();
+            retval ^= Boolean.TRUE.hashCode();
         }
         return retval;
     }
