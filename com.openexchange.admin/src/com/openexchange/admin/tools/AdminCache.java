@@ -646,7 +646,7 @@ public class AdminCache {
                 bf = new BufferedReader(new FileReader(file), 2048);
                 String line = null;
                 while ((line = bf.readLine()) != null) {
-                    if ('#' != line.charAt(0)) {
+                    if (line.length() > 0 && '#' != line.charAt(0)) {
                         if (line.indexOf(':') >= 0) {
                             // ok seems to be a line with user:pass entry
                             final String[] user_pass_combination = line.split(":");
