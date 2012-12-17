@@ -296,7 +296,7 @@ public final class BrowserDetector {
              * Ex: Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)
              */
             versionStartIndex = (index + MSIE.length() + 1);
-            versionEndIndex = userAgent.indexOf(";", versionStartIndex);
+            versionEndIndex = userAgent.indexOf(';', versionStartIndex);
 
             browserName = MSIE;
             try {
