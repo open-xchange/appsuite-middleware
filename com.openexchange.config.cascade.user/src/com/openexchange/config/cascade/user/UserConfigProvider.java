@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
@@ -114,7 +115,11 @@ public class UserConfigProvider implements ConfigProviderService {
         if (cacheService == null) {
             return services.getService(UserService.class).getUser(userId, ctx);
         }
-        final Object obj = cacheService.getCache(REGION_NAME).get(cacheService.newCacheKey(ctx.getContextId(), userId));
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        if (cache == null) {
+            return services.getService(UserService.class).getUser(userId, ctx);
+        }
+        final Object obj = cache.get(cacheService.newCacheKey(ctx.getContextId(), userId));
         if (obj instanceof User) {
             return (User) obj;
         }
