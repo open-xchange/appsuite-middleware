@@ -53,10 +53,17 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CapabilityChecker}
+ * A {@link CapabilityChecker} can check capabilities
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface CapabilityChecker {
+	/**
+	 * Check whether the capability should be awarded for a certain user
+	 * @param capability the capability to check
+	 * @param session contains the users session for which to check
+	 * @return whether to award this capability or not
+	 * @throws OXException
+	 */
 	public boolean isEnabled(String capability, ServerSession session) throws OXException;
 }
