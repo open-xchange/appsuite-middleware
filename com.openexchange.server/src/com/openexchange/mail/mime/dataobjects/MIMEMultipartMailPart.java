@@ -502,7 +502,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(SIZE);
             final byte[] buf = new byte[BUFSIZE];
             int len = -1;
-            while ((len = inputStream.read(buf, 0, buf.length)) != -1) {
+            while ((len = inputStream.read(buf, 0, buf.length)) > 0) {
                 baos.write(buf, 0, len);
             }
             return baos.toByteArray();
@@ -846,7 +846,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             try {
                 final byte[] buf = new byte[8192];
                 int count = -1;
-                while ((count = in.read(buf, 0, buf.length)) != -1) {
+                while ((count = in.read(buf, 0, buf.length)) > 0) {
                     out.write(buf, 0, count);
                 }
             } finally {

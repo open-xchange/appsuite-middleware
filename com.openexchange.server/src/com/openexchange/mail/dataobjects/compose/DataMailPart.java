@@ -167,7 +167,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
             final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
             int len;
-            while ((len = in.read(bbuf)) != -1) {
+            while ((len = in.read(bbuf)) > 0) {
                 out.write(bbuf, 0, len);
             }
             out.flush();

@@ -233,7 +233,7 @@ public final class AJAXFile extends PermissionServlet {
             try {
                 contentInputStream = new FileInputStream(file.getFile());
                 final byte[] buffer = new byte[0xFFFF];
-                for (int len; (len = contentInputStream.read(buffer)) != -1;) {
+                for (int len; (len = contentInputStream.read(buffer)) > 0;) {
                     out.write(buffer, 0, len);
                 }
                 out.flush();

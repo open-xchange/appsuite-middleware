@@ -718,7 +718,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                         final byte[] buf = new byte[BUFLEN];
                         final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUFLEN << 2);
                         int read;
-                        while ((read = inputStream.read(buf, 0, BUFLEN)) >= 0) {
+                        while ((read = inputStream.read(buf, 0, BUFLEN)) > 0) {
                             out.write(buf, 0, read);
                         }
                         bytes = out.toByteArray();
