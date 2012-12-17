@@ -148,7 +148,9 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		}
 		try {
             String encoding = req.getCharacterEncoding();
-            encoding = encoding == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
+            if (encoding == null) {
+                encoding = ServerConfig.getProperty(Property.DefaultEncoding);
+            }
             final WebdavPath path = new WebdavPath();
             for(final String component : url.split("/+")) {
                 if(component.equals("")){
