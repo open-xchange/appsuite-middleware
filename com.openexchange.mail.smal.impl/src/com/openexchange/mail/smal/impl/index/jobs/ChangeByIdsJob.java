@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.mail;
+package com.openexchange.mail.smal.impl.index.jobs;
 
 import java.util.Arrays;
 import java.util.List;
@@ -60,9 +60,9 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.service.MailService;
+import com.openexchange.mail.smal.impl.SmalMailAccess;
+import com.openexchange.mail.smal.impl.index.FakeSession;
 import com.openexchange.service.indexing.JobInfo;
-import com.openexchange.service.indexing.impl.internal.FakeSession;
 import com.openexchange.service.indexing.impl.internal.Services;
 
 
@@ -71,7 +71,7 @@ import com.openexchange.service.indexing.impl.internal.Services;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ChangeByIdsJob extends AbstractMailJob {    
+public class ChangeByIdsJob extends AbstractMailJob {
 
     @Override
     public void execute(JobInfo jobInfo) throws OXException {
@@ -90,19 +90,18 @@ public class ChangeByIdsJob extends AbstractMailJob {
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
             final IndexAccess<MailMessage> mailIndex = indexFacade.acquireIndexAccess(Types.EMAIL, info.userId, info.contextId);
             final IndexAccess<Attachment> attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, info.userId, info.contextId);
-            MailService mailService = Services.getService(MailService.class);
             FakeSession fakeSession = new FakeSession(info.primaryPassword, info.userId, info.contextId);
-            MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = mailService.getMailAccess(fakeSession, info.accountId);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = SmalMailAccess.getUnwrappedInstance(fakeSession, info.accountId);
             try {
                 mailAccess.connect();
-                IMailFolderStorage folderStorage = mailAccess.getFolderStorage();                
+                IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
                 if (folderStorage.exists(info.folder)) {
                     String[] ids = (String[]) info.getProperty(IDS);
                     final List<String> toChange = Arrays.asList(ids);
                     changeMails(info, toChange, mailAccess.getMessageStorage(), mailIndex, attachmentIndex);
                 }
             } finally {
-                closeMailAccess(mailAccess);
+                SmalMailAccess.closeUnwrappedInstance(mailAccess);
                 closeIndexAccess(mailIndex);
                 closeIndexAccess(attachmentIndex);
                 

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.mail;
+package com.openexchange.mail.smal.impl.index.jobs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,7 +58,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -82,10 +81,10 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
-import com.openexchange.mail.service.MailService;
+import com.openexchange.mail.smal.impl.SmalMailAccess;
+import com.openexchange.mail.smal.impl.index.FakeSession;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
-import com.openexchange.service.indexing.impl.internal.FakeSession;
 import com.openexchange.service.indexing.impl.internal.Services;
 
 
@@ -121,9 +120,8 @@ public class MailFolderJob extends AbstractMailJob {
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
             IndexAccess<MailMessage> mailIndex = indexFacade.acquireIndexAccess(Types.EMAIL, info.userId, info.contextId);
             IndexAccess<Attachment> attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, info.userId, info.contextId);
-            MailService mailService = Services.getService(MailService.class);
             FakeSession fakeSession = new FakeSession(info.primaryPassword, info.userId, info.contextId);
-            MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = mailService.getMailAccess(fakeSession, info.accountId);        
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = SmalMailAccess.getUnwrappedInstance(fakeSession, info.accountId);
             try {
                 mailAccess.connect();
                 AccountFolders accountFolders = new AccountFolders(String.valueOf(info.accountId), Collections.singleton(info.folder));
@@ -193,7 +191,7 @@ public class MailFolderJob extends AbstractMailJob {
                         .setAccountFolders(Collections.singleton(accountFolders))
                         .setModule(Types.EMAIL)
                         .build();
-                    attachmentIndex.deleteByQuery(attachmentAllQuery);                
+                    attachmentIndex.deleteByQuery(attachmentAllQuery); 
                 }
             } catch (OXException e) {
                 /*
@@ -213,7 +211,7 @@ public class MailFolderJob extends AbstractMailJob {
                 
                 throw e;
             } finally {
-                closeMailAccess(mailAccess);
+                SmalMailAccess.closeUnwrappedInstance(mailAccess);
                 closeIndexAccess(mailIndex);
                 closeIndexAccess(attachmentIndex);
                 

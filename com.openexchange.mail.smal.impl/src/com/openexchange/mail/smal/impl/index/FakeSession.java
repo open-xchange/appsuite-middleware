@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
+package com.openexchange.mail.smal.impl.index;
 
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;

@@ -50,7 +50,9 @@
 package com.openexchange.service.indexing.hazelcast;
 
 import java.util.Collection;
+import java.util.concurrent.ConcurrentMap;
 import org.quartz.JobPersistenceException;
+import org.quartz.TriggerKey;
 import org.quartz.service.internal.HazelcastJobStore;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -75,5 +77,13 @@ public class TestableHazelcastJobStore extends HazelcastJobStore {
         }
         
         return hazelcast;
+    }
+    
+    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
+        return locallyAcquiredTriggers;
+    }
+    
+    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
+        return locallyExecutingTriggers;
     }
 }

@@ -78,7 +78,13 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.index.MailUtility;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.smal.impl.index.FakeSession;
 import com.openexchange.mail.smal.impl.index.IndexDocumentHelper;
+import com.openexchange.mail.smal.impl.index.jobs.AddByIdsJob;
+import com.openexchange.mail.smal.impl.index.jobs.ChangeByIdsJob;
+import com.openexchange.mail.smal.impl.index.jobs.MailJobInfo;
+import com.openexchange.mail.smal.impl.index.jobs.RemoveByIdsJob;
+import com.openexchange.mail.smal.impl.index.jobs.MailJobInfo.Builder;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -86,12 +92,6 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
-import com.openexchange.service.indexing.impl.internal.FakeSession;
-import com.openexchange.service.indexing.impl.mail.AddByIdsJob;
-import com.openexchange.service.indexing.impl.mail.ChangeByIdsJob;
-import com.openexchange.service.indexing.impl.mail.MailJobInfo;
-import com.openexchange.service.indexing.impl.mail.MailJobInfo.Builder;
-import com.openexchange.service.indexing.impl.mail.RemoveByIdsJob;
 import com.openexchange.session.Session;
 
 /**

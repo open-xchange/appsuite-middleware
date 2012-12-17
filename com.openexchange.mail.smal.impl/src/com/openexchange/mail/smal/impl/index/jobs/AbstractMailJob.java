@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.mail;
+package com.openexchange.mail.smal.impl.index.jobs;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,17 +71,14 @@ import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailUUID;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.impl.internal.Services;
-import com.openexchange.service.indexing.impl.internal.mail.IndexMailHandler;
 
 
 /**
@@ -92,8 +89,6 @@ import com.openexchange.service.indexing.impl.internal.mail.IndexMailHandler;
 public abstract class AbstractMailJob implements IndexingJob { 
     
     public static final String IDS = "ids";
-    
-    public static final String ALL_FOLDERS = "allFolders";
     
     protected static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractMailJob.class);
     
@@ -249,7 +244,7 @@ public abstract class AbstractMailJob implements IndexingJob {
             return;
         }
         
-        ChunkPerformer.perform(new Performable() {            
+        ChunkPerformer.perform(new Performable() {
             @Override
             public int perform(int off, int len) throws OXException {
                 if (LOG.isTraceEnabled()) {
@@ -300,20 +295,14 @@ public abstract class AbstractMailJob implements IndexingJob {
             @Override
             public int getInitialOffset() {
                 return 0;
-            }         
+            }
         });
-    }
-    
-    protected void closeMailAccess(MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess) {
-        if (mailAccess != null) {            
-            mailAccess.close(false);
-        }        
     }
     
     protected void closeIndexAccess(IndexAccess<?> indexAccess) throws OXException {
         if (indexAccess != null) {
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
             indexFacade.releaseIndexAccess(indexAccess);
-        }        
+        }
     }
 }

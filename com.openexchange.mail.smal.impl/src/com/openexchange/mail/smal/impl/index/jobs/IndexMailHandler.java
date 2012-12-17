@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal.mail;
+package com.openexchange.mail.smal.impl.index.jobs;
 
 import java.util.ArrayList;
 import java.util.Date;

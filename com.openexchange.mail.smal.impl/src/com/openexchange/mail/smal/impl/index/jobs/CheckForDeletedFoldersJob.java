@@ -47,23 +47,26 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.mail;
+package com.openexchange.mail.smal.impl.index.jobs;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
 import com.openexchange.groupware.attach.index.ORTerm;
 import com.openexchange.groupware.attach.index.ObjectIdTerm;
 import com.openexchange.groupware.attach.index.SearchTerm;
+import com.openexchange.groupware.tools.chunk.ChunkPerformer;
+import com.openexchange.groupware.tools.chunk.Performable;
 import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
@@ -71,9 +74,16 @@ import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
+import com.openexchange.index.solr.IndexFolderManager;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.index.MailUUID;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
+import com.openexchange.mail.smal.impl.index.FakeSession;
+import com.openexchange.mail.smal.impl.index.IndexableFoldersCalculator;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
 import com.openexchange.service.indexing.impl.internal.Services;
 
@@ -92,7 +102,7 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
                 throw new IllegalArgumentException("Job info must be an instance of MailJobInfo.");
             }
             
-            MailJobInfo info = (MailJobInfo) jobInfo;
+            final MailJobInfo info = (MailJobInfo) jobInfo;
             long start = System.currentTimeMillis();
             if (LOG.isDebugEnabled()) {
                 LOG.debug(this.getClass().getSimpleName() + " started performing. " + info.toString());
@@ -102,9 +112,16 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
             final IndexAccess<MailMessage> mailIndex = indexFacade.acquireIndexAccess(Types.EMAIL, info.userId, info.contextId);
             final IndexAccess<Attachment> attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, info.userId, info.contextId);
-            Set<String> allFolders = (Set<String>) info.getProperty(ALL_FOLDERS);
-            try {            
-                AccountFolders accountFolders = new AccountFolders(String.valueOf(info.accountId), allFolders);
+            FakeSession fakeSession = new FakeSession(info.primaryPassword, info.userId, info.contextId);
+            MailAccountStorageService storageService = SmalServiceLookup.getServiceStatic(MailAccountStorageService.class);
+            try {
+                Set<MailFolder> allFolders = IndexableFoldersCalculator.calculatePrivateMailFolders(fakeSession, storageService, info.accountId);
+                Set<String> fullNames = new HashSet<String>();
+                for (MailFolder folder : allFolders) {
+                    fullNames.add(folder.getFullname());
+                }
+                
+                AccountFolders accountFolders = new AccountFolders(String.valueOf(info.accountId), fullNames);
                 QueryParameters withFolders = new QueryParameters.Builder()
                     .setAccountFolders(Collections.singleton(accountFolders))
                     .setHandler(SearchHandler.ALL_REQUEST)
@@ -127,7 +144,7 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
                     uuidsInFolders.add(uuid);
                 }
                 
-                Set<MailUUID> allUUIDs = new HashSet<MailUUID>();
+                final Set<MailUUID> allUUIDs = new HashSet<MailUUID>();
                 for (IndexDocument<MailMessage> document : allMails.getResults()) {
                     MailMessage message = document.getObject();
                     MailUUID uuid = MailUUID.newUUID(info.contextId, info.userId, message);
@@ -139,54 +156,104 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
                         return;
                     }
                     
-                    MailUUID[] uuidArray = allUUIDs.toArray(new MailUUID[allUUIDs.size()]);
-                    String[] mailUUIDs = new String[allUUIDs.size()];
-                    Map<String, List<String>> deletedFullNames = new HashMap<String, List<String>>();
-                    for (int i = 0; i < uuidArray.length; i++) {
-                        MailUUID uuid = uuidArray[i];   
-                        mailUUIDs[i] = uuid.toString();                        
-                        
-                        List<String> mails = deletedFullNames.get(uuid.getFullName());
-                        if (mails == null) {
-                            mails = new ArrayList<String>();
-                            deletedFullNames.put(uuid.getFullName(), mails);
+                    final List<MailUUID> idsToDelete = new ArrayList<MailUUID>(allUUIDs);
+                    ChunkPerformer.perform(new Performable() {
+                        @Override
+                        public int perform(int off, int len) throws OXException {
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("Deleting a chunk of mails in folder " + info.folder + ": " + info.toString());
+                            }
+                            
+                            List<MailUUID> subList = idsToDelete.subList(off, len);
+                            Set<String> uuidStrings = new HashSet<String>();
+                            Map<String, List<String>> deletedFullNames = new HashMap<String, List<String>>();
+                            for (MailUUID uuid : subList) {
+                                uuidStrings.add(uuid.toString());
+                                
+                                List<String> mails = deletedFullNames.get(uuid.getFullName());
+                                if (mails == null) {
+                                    mails = new ArrayList<String>();
+                                    deletedFullNames.put(uuid.getFullName(), mails);
+                                }
+                                
+                                mails.add(uuid.getMailId());
+                            }
+                            
+                            QueryParameters deleteMailsQuery = new QueryParameters.Builder()
+                                .setHandler(SearchHandler.GET_REQUEST)
+                                .setIndexIds(uuidStrings)
+                                .build();
+                            mailIndex.deleteByQuery(deleteMailsQuery);
+                            
+                            /*
+                             * Delete attachments
+                             */
+                            for (String folder : deletedFullNames.keySet()) {
+                                List<String> objectIds = deletedFullNames.get(folder);
+                                SearchTerm<?>[] idTerms = new SearchTerm<?>[objectIds.size()];
+                                for (int i = 0; i < objectIds.size(); i++) {
+                                    String objectId = objectIds.get(i);
+                                    idTerms[i] = new ObjectIdTerm(objectId);
+                                }
+                                
+                                SearchTerm<?> orTerm = new ORTerm(idTerms);
+                                QueryParameters deleteAttachmentsQuery = new QueryParameters.Builder()
+                                    .setHandler(SearchHandler.CUSTOM)
+                                    .setSearchTerm(orTerm)
+                                    .setAccountFolders(Collections.singleton(new AccountFolders(String.valueOf(info.accountId), Collections.singleton(folder))))
+                                    .setModule(Types.EMAIL)
+                                    .build();
+                                attachmentIndex.deleteByQuery(deleteAttachmentsQuery);
+                            }
+
+                            return subList.size();
                         }
-                        
-                        mails.add(uuid.getMailId());                        
-                    }
-                    
-                    /*
-                     * Delete mails from mail index
-                     */
-                    QueryParameters deleteQuery = new QueryParameters.Builder()
-                        .setAccountFolders(Collections.singleton(new AccountFolders(String.valueOf(info.accountId))))
-                        .setHandler(SearchHandler.GET_REQUEST)
-                        .setIndexIds(new HashSet<String>(Arrays.asList(mailUUIDs)))
-                        .build();
-                
-                    mailIndex.deleteByQuery(deleteQuery);
-                    
-                    /*
-                     * Delete attachments
-                     */
-                    for (String folder : deletedFullNames.keySet()) {
-                        List<String> objectIds = deletedFullNames.get(folder);
-                        SearchTerm<?>[] idTerms = new SearchTerm<?>[objectIds.size()];
-                        for (int i = 0; i < objectIds.size(); i++) {
-                            String objectId = objectIds.get(i);
-                            idTerms[i] = new ObjectIdTerm(objectId);
+
+                        @Override
+                        public int getChunkSize() {
+                            return CHUNK_SIZE;
                         }
-                        
-                        SearchTerm<?> orTerm = new ORTerm(idTerms);
-                        QueryParameters deleteAttachmentsQuery = new QueryParameters.Builder()
-                            .setHandler(SearchHandler.CUSTOM)
-                            .setSearchTerm(orTerm)
-                            .setAccountFolders(Collections.singleton(new AccountFolders(String.valueOf(info.accountId), Collections.singleton(folder))))
-                            .setModule(Types.EMAIL)
-                            .build();
-                        attachmentIndex.deleteByQuery(deleteAttachmentsQuery);
-                    }                    
+
+                        @Override
+                        public int getLength() {
+                            return idsToDelete.size();
+                        }
+
+                        @Override
+                        public int getInitialOffset() {
+                            return 0;
+                        }
+                    });
                 }
+                
+                /*
+                 * Delete folders from DB
+                 */
+                Map<String, Boolean> indexedFolders = IndexFolderManager.getIndexedFolders(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId));
+                for (String fullName : fullNames) {
+                    indexedFolders.remove(fullName);
+                }
+                
+                for (String fullName : indexedFolders.keySet()) {
+                    IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), fullName);
+                }
+            } catch (OXException e) {
+                /*
+                 * If connect to mail access failed, reschedule this job
+                 * FIXME: This is just a workaround! We need to fix the mail implementation for this. 
+                 * The priority for acquiring a mail connection must be lower than for interactive connections.
+                 * Jobs should not fail because of missing connections and jobs must not block connections
+                 * for interactive uses (user activities).
+                 */
+                if (e.getCategory().equals(Category.CATEGORY_TRY_AGAIN)
+                    && e.getCode() == 2058) {
+                    LOG.warn("Could not connect mail access for job " + info + ". Rescheduling job to run again in 60 seconds.");
+                    IndexingService indexingService = Services.getService(IndexingService.class);
+                    indexingService.scheduleJob(false, info, new Date(System.currentTimeMillis() + 60000), -1L, IndexingService.DEFAULT_PRIORITY);
+                    return;
+                }
+                
+                throw e;
             } finally {
                 closeIndexAccess(mailIndex);
                 closeIndexAccess(attachmentIndex);
