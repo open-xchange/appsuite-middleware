@@ -260,7 +260,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
             fileName = object.getUid();
         }
         String fileExtension = getFileExtension().toLowerCase();
-        if ('.' == fileExtension.charAt(0)) {
+        if ('.' != fileExtension.charAt(0)) {
             fileExtension = "." + fileExtension;
         }
         return constructPathForChildResource(fileName + fileExtension);
