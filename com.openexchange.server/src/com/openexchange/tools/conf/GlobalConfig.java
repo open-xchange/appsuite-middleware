@@ -67,10 +67,10 @@ public class GlobalConfig {
     public static String getDatePattern(final String country) {
         try {
             final String returnPattern = datePattern.get(country.toUpperCase()).toString();
-            return returnPattern.substring(0, returnPattern.indexOf(" "));
+            return returnPattern.substring(0, returnPattern.indexOf(' '));
         } catch (final NullPointerException npe) {
             final String defaultPattern = datePattern.get("DEFAULT").toString();
-            return defaultPattern.substring(0, defaultPattern.indexOf(" "));
+            return defaultPattern.substring(0, defaultPattern.indexOf(' '));
         }
     }
 
