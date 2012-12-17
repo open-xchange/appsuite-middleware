@@ -73,6 +73,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
+    private static final String INFOSTORE_FOLDER_ID = "9";
+
     private static final String REAL_TREE_ID = FolderStorage.REAL_TREE_ID;
 
     private final ServerSession session;
@@ -185,7 +187,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        return getFolder("9");
+        return getFolder(INFOSTORE_FOLDER_ID);
     }
 
     @Override
