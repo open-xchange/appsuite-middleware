@@ -1,3 +1,9 @@
+open-xchange-blackwhitelist (7.0.0-2) unstable; urgency=low
+
+  * Second release candidate for 7.0.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 17 Dec 2012 17:35:57 +0100
+
 open-xchange-blackwhitelist (7.0.0-1) unstable; urgency=low
 
   * First release candidate for 7.0.0

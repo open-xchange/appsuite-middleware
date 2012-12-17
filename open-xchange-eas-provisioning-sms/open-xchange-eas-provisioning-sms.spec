@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-eas-provisioning-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -54,6 +54,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mobile
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Dec 17 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.0.0
 * Wed Dec 12 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2012-12-04
 * Tue Dec 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
