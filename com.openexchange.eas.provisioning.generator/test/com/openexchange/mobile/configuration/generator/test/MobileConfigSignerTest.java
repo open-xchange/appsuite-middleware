@@ -39,7 +39,7 @@ public class MobileConfigSignerTest {
         final MobileConfigSigner mobileConfigSigner = new MobileConfigSigner(fileWriter);
         final char[] buf = new char[1024];
         int read;
-        while (-1 != (read = fileReader.read(buf))) {
+        while ((read = fileReader.read(buf)) > 0) {
             mobileConfigSigner.write(buf, 0, read);
         }
         mobileConfigSigner.close();

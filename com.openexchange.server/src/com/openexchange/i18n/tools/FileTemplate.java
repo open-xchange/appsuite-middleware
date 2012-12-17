@@ -92,7 +92,7 @@ public class FileTemplate extends CompiledLineParserTemplate {
             final StringBuilder collect = new StringBuilder();
             char[] buf = new char[512];
             int length = -1;
-            while ((length = reader.read(buf)) != -1) {
+            while ((length = reader.read(buf)) > 0) {
                 collect.append(buf, 0, length);
             }
             return collect.toString();
