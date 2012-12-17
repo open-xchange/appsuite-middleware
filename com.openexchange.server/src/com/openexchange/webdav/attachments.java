@@ -335,7 +335,7 @@ public final class attachments extends OXServlet {
 
             final byte b[] = new byte[8192];
             int i = is.read(b);
-            while (i != -1) {
+            while (i > 0) {
                 os.write(b, 0, i);
                 i = is.read(b);
             }
