@@ -210,6 +210,15 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1252
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/whitelist.properties
+if ! grep -E '^html.tag.div.*bgcolor' $pfile > /dev/null; then
+    oval=$(ox_read_property html.tag.div ${pfile})
+    oval=${oval//\"/}
+    ox_set_property html.tag.div \""${oval}bgcolor,"\" $pfile
+fi
+
 # SoftwareChange_Request-1247
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/hazelcast.properties
