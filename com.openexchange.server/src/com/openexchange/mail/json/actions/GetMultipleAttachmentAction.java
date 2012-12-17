@@ -124,7 +124,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                 final InputStream zipInputStream = mf.getInputStream();
                 try {
                     final byte[] buffer = new byte[0xFFFF];
-                    for (int len; (len = zipInputStream.read(buffer, 0, buffer.length)) != -1;) {
+                    for (int len; (len = zipInputStream.read(buffer, 0, buffer.length)) > 0;) {
                         out.write(buffer, 0, len);
                     }
                     out.flush();

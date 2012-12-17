@@ -2257,7 +2257,7 @@ public final class MimeMessageConverter {
         final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
         final byte[] bbuf = new byte[DEFAULT_MESSAGE_SIZE];
         int read = -1;
-        while ((read = inputStream.read(bbuf, 0, bbuf.length)) != -1) {
+        while ((read = inputStream.read(bbuf, 0, bbuf.length)) > 0) {
             out.write(bbuf, 0, read);
         }
         return loadHeaders(out.toByteArray());
