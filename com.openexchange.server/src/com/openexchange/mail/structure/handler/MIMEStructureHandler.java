@@ -765,6 +765,8 @@ public final class MIMEStructureHandler implements StructureHandler {
             HeaderName.valueOf("Resent-Sender"),
             HeaderName.valueOf("Disposition-Notification-To")));
 
+    private static final Pattern P_DOUBLE_BACKSLASH = Pattern.compile(Pattern.quote("\\\\\\\""));
+
     private JSONObject generateHeadersObject(final Iterator<Entry<String, String>> iter, final JSONObject parent) throws OXException {
         try {
             final JSONObject hdrObject = new JSONObject();
@@ -787,7 +789,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                             final JSONObject addressJsonObject = new JSONObject();
                             final String personal = internetAddress.getPersonal();
                             if (null != personal) {
-                                addressJsonObject.put("personal", personal);
+                                addressJsonObject.put("personal", P_DOUBLE_BACKSLASH.matcher(personal).replaceAll("\\\""));
                             }
                             addressJsonObject.put("address", address);
                             ja.put(addressJsonObject);
