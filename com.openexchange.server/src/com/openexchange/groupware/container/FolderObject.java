@@ -1155,7 +1155,11 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      */
     public final EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig) throws OXException {
         if (!containsPermissions()) {
-            throw OXFolderExceptionCode.MISSING_PARAMETER.create("permissions");
+            try {
+                setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), userConfig.getContext(), null));
+            } catch (final SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            }
         }
         return calcEffectiveUserPermission(userId, userConfig);
     }
