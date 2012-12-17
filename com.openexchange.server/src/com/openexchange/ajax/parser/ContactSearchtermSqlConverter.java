@@ -259,7 +259,7 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 
 		value = value.replaceAll("\\*", "%");
 
-		int index = bob.lastIndexOf('=');
+		int index = bob.lastIndexOf("=");
 		bob.replace(index, index+1, "LIKE");
 
 		return value;
