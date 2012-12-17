@@ -3,7 +3,5 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.0.0,com.openexchange.apps.manifests.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.0.0,com.openexchange.appsuite.config"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.0.0,com.openexchange.capabilities"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.0.0,com.openexchange.capabilities.json"/>
 </provider>
 </psf>
