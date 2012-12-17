@@ -15,6 +15,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.0.0,open-xchange-admin-soap-usercopy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.0.0,open-xchange-admin-user-copy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.0.0,open-xchange-ajp"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.0.0,open-xchange-appsuite-backend"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.0.0,open-xchange-authentication-database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.0.0,open-xchange-authentication-imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.0.0,open-xchange-authentication-kerberos"/>
