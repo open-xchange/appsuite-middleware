@@ -261,7 +261,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
         }
         String fileExtension = getFileExtension().toLowerCase();
         if ('.' != fileExtension.charAt(0)) {
-            fileExtension = "." + fileExtension;
+            fileExtension = '.' + fileExtension;
         }
         return constructPathForChildResource(fileName + fileExtension);
     }
