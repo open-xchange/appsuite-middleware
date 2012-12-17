@@ -372,7 +372,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             try {
                 final byte[] buf = new byte[8192];
                 int read;
-                while ((read = data.read(buf)) != -1) {
+                while ((read = data.read(buf)) > 0) {
                     outputStream.write(buf, 0, read);
                 }
                 outputStream.flush();

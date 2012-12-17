@@ -135,7 +135,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
                 os = new UnsynchronizedByteArrayOutputStream();
                 final byte[] buffer = new byte[0xFFFF];
                 int bytesRead = 0;
-                while ((bytesRead = documentData.read(buffer)) != -1) {
+                while ((bytesRead = documentData.read(buffer)) > 0) {
                     os.write(buffer, 0, bytesRead);
                 }
                 os.flush();

@@ -154,7 +154,7 @@ public final class GetAction implements ETagAwareAJAXActionService {
             final InputStream contentInputStream = new FileInputStream(file.getFile());
             try {
                 final byte[] buffer = new byte[0xFFFF];
-                for (int len; (len = contentInputStream.read(buffer)) != -1;) {
+                for (int len; (len = contentInputStream.read(buffer)) > 0;) {
                     out.write(buffer, 0, len);
                 }
                 out.flush();
