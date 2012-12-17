@@ -90,6 +90,9 @@ public final class FolderParser {
      * @throws OXException If parsing folder fails
      */
     public static Folder parseFolder(final FileStorageFolder fsFolder) throws OXException {
+        if (null == fsFolder) {
+            return null;
+        }
         try {
             final ParsedFolder folder = new ParsedFolder();
             folder.setTreeID(REAL_TREE_ID);

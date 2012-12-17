@@ -83,6 +83,9 @@ public final class FolderWriter {
      * @throws OXException If writing folder fails
      */
     public static FileStorageFolder writeFolder(final UserizedFolder folder) throws OXException {
+        if (null == folder) {
+            return null;
+        }
         try {
             final DefaultFileStorageFolder ret = new DefaultFileStorageFolder();
             ret.setCreationDate(folder.getCreationDate());
