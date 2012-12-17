@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.grizzly.http.server;
+package org.glassfish.grizzly.http.server;
 
 import org.glassfish.grizzly.http.Cookie;
 import org.glassfish.grizzly.http.server.Response;

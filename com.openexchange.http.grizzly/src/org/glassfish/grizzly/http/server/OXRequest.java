@@ -47,10 +47,11 @@
  *
  */
 
-package com.openexchange.http.grizzly.http.server;
+package org.glassfish.grizzly.http.server;
 
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
+import java.io.UnsupportedEncodingException;
 import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.ThreadCache;
 import org.glassfish.grizzly.http.Cookie;
@@ -84,7 +85,8 @@ public class OXRequest extends Request {
             return request;
         }
 
-        return new OXRequest(new OXResponse());
+        OXRequest oxRequest = new OXRequest(new OXResponse());
+        return oxRequest;
     }
     
     protected OXRequest(Response response) {
