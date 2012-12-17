@@ -272,7 +272,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 				String preparedPattern = StringCollection.prepareForSearch((String)value, false, true);
 				if (containsWildcards(preparedPattern)) {
 					// use "LIKE" search 
-					final int index = stringBuilder.lastIndexOf('=');
+					final int index = stringBuilder.lastIndexOf("=");
 					stringBuilder.replace(index, index + 1, "LIKE");		
 				}
 				parameters.add(preparedPattern);
