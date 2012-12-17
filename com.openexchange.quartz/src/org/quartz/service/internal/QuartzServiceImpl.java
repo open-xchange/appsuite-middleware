@@ -84,119 +84,122 @@ public final class QuartzServiceImpl implements QuartzService {
     }
 
     @Override
-    public synchronized Scheduler getLocalScheduler() throws OXException {
-        if (localScheduler == null) {
-            ConfigurationService config = Services.getService(ConfigurationService.class);
-            boolean startLocalScheduler = config.getBoolProperty(QuartzProperties.START_LOCAL_SCHEDULER, true);
-            int localThreads = config.getIntProperty(QuartzProperties.LOCAL_THREADS, 3);
-            
-            Properties localProperties = new Properties();
-            localProperties.put("org.quartz.scheduler.instanceName", "OX-Local-Scheduler");
-            localProperties.put("org.quartz.scheduler.rmi.export", false);
-            localProperties.put("org.quartz.scheduler.rmi.proxy", false);
-            localProperties.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", false);
-            localProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
-            localProperties.put("org.quartz.threadPool.threadCount", String.valueOf(localThreads));
-            localProperties.put("org.quartz.threadPool.threadPriority", "5");
-            localProperties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", true);
-            localProperties.put("org.quartz.jobStore.misfireThreshold", "60000");
-            localProperties.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
-            localProperties.put("org.quartz.scheduler.jmx.export", true);
-            
-            try {
-                SchedulerFactory csf = new StdSchedulerFactory(localProperties);
-                localScheduler = csf.getScheduler();
-                if (startLocalScheduler) {
-                    localScheduler.start();
+    public Scheduler getLocalScheduler() throws OXException {
+        synchronized (clusteredSchedulers) {
+            if (localScheduler == null) {
+                ConfigurationService config = Services.getService(ConfigurationService.class);
+                boolean startLocalScheduler = config.getBoolProperty(QuartzProperties.START_LOCAL_SCHEDULER, true);
+                int localThreads = config.getIntProperty(QuartzProperties.LOCAL_THREADS, 3);
+
+                Properties localProperties = new Properties();
+                localProperties.put("org.quartz.scheduler.instanceName", "OX-Local-Scheduler");
+                localProperties.put("org.quartz.scheduler.rmi.export", false);
+                localProperties.put("org.quartz.scheduler.rmi.proxy", false);
+                localProperties.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", false);
+                localProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
+                localProperties.put("org.quartz.threadPool.threadCount", String.valueOf(localThreads));
+                localProperties.put("org.quartz.threadPool.threadPriority", "5");
+                localProperties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", true);
+                localProperties.put("org.quartz.jobStore.misfireThreshold", "60000");
+                localProperties.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
+                localProperties.put("org.quartz.scheduler.jmx.export", true);
+
+                try {
+                    SchedulerFactory csf = new StdSchedulerFactory(localProperties);
+                    localScheduler = csf.getScheduler();
+                    if (startLocalScheduler) {
+                        localScheduler.start();
+                    }
+                } catch (SchedulerException e) {
+                    throw new OXException(e);
                 }
-            } catch (SchedulerException e) {
-                throw new OXException(e);
             }
+            return localScheduler;
         }
-        
-        return localScheduler;
     }
 
     @Override
-    public synchronized Scheduler getClusteredScheduler(String name, boolean start, int threads) throws OXException {
+    public Scheduler getClusteredScheduler(String name, boolean start, int threads) throws OXException {
         if (name == null) {
             throw new IllegalArgumentException("Parameter 'name' must not be null!");
         }
 
-        Scheduler scheduler = clusteredSchedulers.get(name);
-        if (scheduler == null) {
-            Properties clusteredProperties = new Properties();
-            clusteredProperties.put("org.quartz.scheduler.instanceName", name);
-            clusteredProperties.put(
-                "org.quartz.scheduler.instanceId",
-                Services.getService(HazelcastInstance.class).getCluster().getLocalMember().getUuid());
-            clusteredProperties.put("org.quartz.scheduler.rmi.export", false);
-            clusteredProperties.put("org.quartz.scheduler.rmi.proxy", false);
-            clusteredProperties.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", false);
-            clusteredProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
-            clusteredProperties.put("org.quartz.threadPool.threadCount", String.valueOf(threads <= 0 ? 1 : threads));
-            clusteredProperties.put("org.quartz.threadPool.threadPriority", "5");
-            clusteredProperties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", true);
-            clusteredProperties.put("org.quartz.jobStore.misfireThreshold", "60000");
-            clusteredProperties.put("org.quartz.jobStore.class", "org.quartz.service.internal.HazelcastJobStore");
-            clusteredProperties.put("org.quartz.scheduler.jmx.export", true);
+        synchronized (clusteredSchedulers) {
+            Scheduler scheduler = clusteredSchedulers.get(name);
+            if (scheduler == null) {
+                Properties clusteredProperties = new Properties();
+                clusteredProperties.put("org.quartz.scheduler.instanceName", name);
+                clusteredProperties.put(
+                    "org.quartz.scheduler.instanceId",
+                    Services.getService(HazelcastInstance.class).getCluster().getLocalMember().getUuid());
+                clusteredProperties.put("org.quartz.scheduler.rmi.export", false);
+                clusteredProperties.put("org.quartz.scheduler.rmi.proxy", false);
+                clusteredProperties.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", false);
+                clusteredProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
+                clusteredProperties.put("org.quartz.threadPool.threadCount", String.valueOf(threads <= 0 ? 1 : threads));
+                clusteredProperties.put("org.quartz.threadPool.threadPriority", "5");
+                clusteredProperties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", true);
+                clusteredProperties.put("org.quartz.jobStore.misfireThreshold", "60000");
+                clusteredProperties.put("org.quartz.jobStore.class", "org.quartz.service.internal.HazelcastJobStore");
+                clusteredProperties.put("org.quartz.scheduler.jmx.export", true);
+                try {
+                    SchedulerFactory csf = new StdSchedulerFactory(clusteredProperties);
+                    scheduler = csf.getScheduler();
+                } catch (SchedulerException e) {
+                    throw new OXException(e);
+                }
+
+                clusteredSchedulers.put(name, scheduler);
+            }
             try {
-                SchedulerFactory csf = new StdSchedulerFactory(clusteredProperties);
-                scheduler = csf.getScheduler();
+                if (start && !scheduler.isStarted()) {
+                    scheduler.start();
+                }
             } catch (SchedulerException e) {
                 throw new OXException(e);
             }
-
-            clusteredSchedulers.put(name, scheduler);
+            return scheduler;
         }
-
-        try {
-            if (start && !scheduler.isStarted()) {
-                scheduler.start();
-            }
-        } catch (SchedulerException e) {
-            throw new OXException(e);
-        }
-
-        return scheduler;
     }
 
     @Override
-    public synchronized void releaseClusteredScheduler(String name) {
+    public void releaseClusteredScheduler(String name) {
         if (name == null) {
             return;
         }
 
-        try {
-            Scheduler scheduler = clusteredSchedulers.remove(name);
-            if (scheduler != null && scheduler.isStarted()) {
-                scheduler.shutdown(true);
-            }
-        } catch (SchedulerException e) {
-            LOG.warn("Could not stop clustered scheduler '" + name + "'.", e);
-        }
-    }
-    
-    public synchronized void shutdown() {
-        try {
-            if (localScheduler != null && localScheduler.isStarted()) {
-                localScheduler.shutdown();
-            }
-        } catch (SchedulerException e) {
-            LOG.warn("Could not stop local scheduler.", e);
-        }
-        
-        for (String name : clusteredSchedulers.keySet()) {
-            Scheduler scheduler = clusteredSchedulers.get(name);
+        synchronized (clusteredSchedulers) {
             try {
-                if (scheduler.isStarted()) {
-                    scheduler.shutdown();
+                Scheduler scheduler = clusteredSchedulers.remove(name);
+                if (scheduler != null && scheduler.isStarted()) {
+                    scheduler.shutdown(true);
                 }
             } catch (SchedulerException e) {
                 LOG.warn("Could not stop clustered scheduler '" + name + "'.", e);
             }
         }
-        
-        clusteredSchedulers.clear();
+    }
+    
+    public void shutdown() {
+        synchronized (clusteredSchedulers) {
+            try {
+                if (localScheduler != null && localScheduler.isStarted()) {
+                    localScheduler.shutdown();
+                }
+            } catch (SchedulerException e) {
+                LOG.warn("Could not stop local scheduler.", e);
+            }
+            for (String name : clusteredSchedulers.keySet()) {
+                Scheduler scheduler = clusteredSchedulers.get(name);
+                try {
+                    if (scheduler.isStarted()) {
+                        scheduler.shutdown();
+                    }
+                } catch (SchedulerException e) {
+                    LOG.warn("Could not stop clustered scheduler '" + name + "'.", e);
+                }
+            }
+            clusteredSchedulers.clear();
+        }
     }
 }
