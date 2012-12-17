@@ -207,7 +207,7 @@ public class ProxyServlet extends SessionServlet {
                 final ServletOutputStream outputStream = resp.getOutputStream();
                 final byte[] buf = new byte[8192];
                 int read = -1;
-                while ((read = responseStream.read(buf)) != -1) {
+                while ((read = responseStream.read(buf)) > 0) {
                     outputStream.write(buf, 0, read);
                 }
                 outputStream.flush();
