@@ -113,6 +113,13 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1247
+# -----------------------------------------------------------------------
+local pfile=/opt/open-xchange/etc/hazelcast.properties
+if ! ox_exists_property com.openexchange.hazelcast.enabled $pfile; then
+    ox_set_property com.openexchange.hazelcast.enabled true $pfile
+fi
+
 # SoftwareChange_Request-1223
 # SoftwareChange_Request-1237
 # SoftwareChange_Request-1243
