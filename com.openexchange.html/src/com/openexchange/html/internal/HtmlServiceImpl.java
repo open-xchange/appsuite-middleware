@@ -706,7 +706,7 @@ public final class HtmlServiceImpl implements HtmlService {
          * Specify pattern & matcher
          */
         final Pattern p = Pattern.compile(
-            sb.append(Pattern.quote("<!--" + commentId + " ")).append("(.+?)").append(Pattern.quote("-->")).toString(),
+            sb.append(Pattern.quote("<!--" + commentId + ' ')).append("(.+?)").append(Pattern.quote("-->")).toString(),
             Pattern.DOTALL);
         sb.setLength(0);
         final Matcher m = p.matcher(s);
