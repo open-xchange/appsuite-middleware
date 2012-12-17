@@ -104,6 +104,7 @@ import net.htmlparser.jericho.Source;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
@@ -574,7 +575,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             for (int j = 0; j < mails.length; j++) {
                 try {
                     mails[j] = getMessageLong(fullName, uids[j], false);
-                } catch (Exception e) {
+                } catch (final OXException e) {
+                    e.setCategory(Category.CATEGORY_WARNING);
+                    imapAccess.addWarnings(Collections.singletonList(e));
+                    mails[j] = null;
+                } catch (final Exception e) {
+                    OXException oxe = MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    oxe.setCategory(Category.CATEGORY_WARNING);
+                    imapAccess.addWarnings(Collections.singletonList(oxe));
                     mails[j] = null;
                 }
             }
