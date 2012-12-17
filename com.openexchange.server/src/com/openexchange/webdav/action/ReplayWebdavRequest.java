@@ -89,7 +89,7 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		final byte[] buffer = new byte[200];
 		int b = 0;
 
-		while((b = in.read(buffer))!=-1) {
+		while((b = in.read(buffer)) > 0) {
 			bout.write(buffer,0,b);
 		}
 		this.body = bout.toByteArray();
