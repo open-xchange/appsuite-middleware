@@ -79,7 +79,7 @@ import java.util.Vector;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceException;

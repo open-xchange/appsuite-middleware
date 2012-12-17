@@ -58,7 +58,7 @@ import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link GrizzlyConfig}
+ * {@link GrizzlyConfig} Collects and exposes configuration parameters needed by GrizzlOX
  * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
@@ -96,7 +96,7 @@ public class GrizzlyConfig implements Initialization {
 
     /** Unique backend route for every single backend behind the load balancer */
     private String backendRoute = "OX0";
-    
+
     // server properties
 
     /** Maximal age of a cookie in seconds. A negative value destroys the cookie when the browser exits. A value of 0 deletes the cookie. */
@@ -111,8 +111,11 @@ public class GrizzlyConfig implements Initialization {
     /** Make the cookie accessible only via http methods. This prevents Javascript access to the cookie / cross site scripting */
     private boolean isCookieHttpOnly = true;
 
+    /** Default encoding for incoming Http Requests, this value must be equal to the web server's default encoding */
+    private String defaultEncoding = "UTF-8";
+
     // sessiond properties
-    
+
     /** Is autologin enabled in the session.d properties? */
     private boolean isSessionAutologin = false;
 
@@ -135,10 +138,10 @@ public class GrizzlyConfig implements Initialization {
 
     private void init() throws OXException {
         ConfigurationService configService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if(configService == null) {
+        if (configService == null) {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
         }
-        
+
         // grizzly properties
         this.httpHost = configService.getProperty("com.openexchange.http.grizzly.httpNetworkListenerHost", "0.0.0.0");
         this.httpPort = configService.getIntProperty("com.openexchange.http.grizzly.httpNetworkListenerPort", 8080);
@@ -147,140 +150,143 @@ public class GrizzlyConfig implements Initialization {
         this.isCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
         this.maxRequestParameters = configService.getIntProperty("com.openexchange.http.grizzly.maxRequestParameters", 30);
         this.backendRoute = configService.getProperty("com.openexchange.http.grizzly.backendRoute", "OX0");
-        
+
         // server properties
         this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W")));
         this.cookieMaxInactivityInterval = configService.getIntProperty("com.openexchange.servlet.maxInactiveInterval", 1800);
         this.isCookieForceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", false);
         this.isCookieHttpOnly = configService.getBoolProperty("com.openexchange.cookie.httpOnly", true);
-        
+        this.defaultEncoding = configService.getProperty("DefaultEncoding", "UTF-8");
+
         // sessiond properties
         this.isSessionAutologin = configService.getBoolProperty("com.openexchange.sessiond.autologin", false);
 
     }
 
-    
+    /**
+     * Gets the started
+     * 
+     * @return The started
+     */
+    public AtomicBoolean getStarted() {
+        return started;
+    }
+
+    /**
+     * Gets the defaultEncoding used for incoming http requests
+     * 
+     * @return The defaultEncoding
+     */
+    public String getDefaultEncoding() {
+        return defaultEncoding;
+    }
+
     /**
      * Gets the httpHost
-     *
+     * 
      * @return The httpHost
      */
     public String getHttpHost() {
         return instance.httpHost;
     }
 
-    
     /**
      * Gets the httpPort
-     *
+     * 
      * @return The httpPort
      */
     public int getHttpPort() {
         return instance.httpPort;
     }
 
-    
     /**
      * Gets the hasJMXEnabled
-     *
+     * 
      * @return The hasJMXEnabled
      */
     public boolean isJMXEnabled() {
         return instance.isJMXEnabled;
     }
 
-    
     /**
      * Gets the hasWebsocketsEnabled
-     *
+     * 
      * @return The hasWebsocketsEnabled
      */
     public boolean isWebsocketsEnabled() {
         return instance.isWebsocketsEnabled;
     }
 
-    
     /**
      * Gets the hasCometEnabled
-     *
+     * 
      * @return The hasCometEnabled
      */
     public boolean isCometEnabled() {
         return instance.isCometEnabled;
     }
 
-    
     /**
      * Gets the maxRequestParameters
-     *
+     * 
      * @return The maxRequestParameters
      */
     public int getMaxRequestParameters() {
         return instance.maxRequestParameters;
     }
 
-    
     /**
      * Gets the backendRoute
-     *
+     * 
      * @return The backendRoute
      */
     public String getBackendRoute() {
         return instance.backendRoute;
     }
 
-    
     /**
      * Gets the cookieMaxAge
-     *
+     * 
      * @return The cookieMaxAge
      */
     public int getCookieMaxAge() {
         return instance.cookieMaxAge;
     }
 
-    
     /**
      * Gets the cookieMaxInactivityInterval
-     *
+     * 
      * @return The cookieMaxInactivityInterval
      */
     public int getCookieMaxInactivityInterval() {
         return instance.cookieMaxInactivityInterval;
     }
 
-    
     /**
      * Gets the isCookieForceHttps
-     *
+     * 
      * @return The isCookieForceHttps
      */
     public boolean isCookieForceHttps() {
         return instance.isCookieForceHttps;
     }
 
-    
     /**
      * Gets the isCookieHttpOnly
-     *
+     * 
      * @return The isCookieHttpOnly
      */
     public boolean isCookieHttpOnly() {
         return instance.isCookieHttpOnly;
     }
 
-    
     /**
      * Gets the isSessionAutologin
-     *
+     * 
      * @return The isSessionAutologin
      */
     public boolean isSessionAutologin() {
         return instance.isSessionAutologin;
     }
-    
-    
-    
-    
 
 }

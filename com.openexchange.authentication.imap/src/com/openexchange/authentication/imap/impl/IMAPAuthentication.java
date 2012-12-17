@@ -62,7 +62,7 @@ import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Store;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
 import com.openexchange.authentication.Authenticated;

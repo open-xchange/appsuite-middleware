@@ -51,7 +51,7 @@ package com.openexchange.smtp.config;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.transport.config.ITransportProperties;

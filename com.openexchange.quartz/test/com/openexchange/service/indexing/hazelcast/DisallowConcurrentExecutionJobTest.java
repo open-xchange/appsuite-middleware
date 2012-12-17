@@ -189,6 +189,18 @@ public class DisallowConcurrentExecutionJobTest {
     }
     
     @Test
+    public void testStartingAndStopping() throws Exception {
+        HazelcastJobStore jobStore = new TestableHazelcastJobStore();
+        DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
+        Scheduler scheduler = DirectSchedulerFactory.getInstance().getScheduler("sched1");
+        scheduler.start();
+        scheduler.standby();
+        scheduler.start();
+        scheduler.shutdown();
+    }
+    
+    
+    @Test
     public void testClusterSchedulerConcurrency() throws Exception {
         HazelcastJobStore jobStore = new TestableHazelcastJobStore();
 //        RAMJobStore jobStore = new RAMJobStore();

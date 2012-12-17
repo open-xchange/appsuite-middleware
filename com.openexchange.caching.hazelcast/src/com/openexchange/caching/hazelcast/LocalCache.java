@@ -52,6 +52,7 @@ package com.openexchange.caching.hazelcast;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -269,6 +270,26 @@ public final class LocalCache extends DefaultCacheKeyService implements Cache, S
     public CacheStatistics getStatistics() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public Set<?> getGroupKeys(String group) throws OXException { 
+        throw CacheExceptionCode.UNSUPPORTED_OPERATION.create("LocalCache.getGroupKeys()");
+    }
+
+    @Override
+    public Set<String> getGroupNames() throws OXException {
+        throw CacheExceptionCode.UNSUPPORTED_OPERATION.create("LocalCache.getGroupNames()");
+    }
+
+    @Override
+    public Set<?> getAllKeys() throws OXException {
+        throw CacheExceptionCode.UNSUPPORTED_OPERATION.create("LocalCache.getAllKeys()");
+    }
+
+    @Override
+    public Set<?> getKeysInRange(int start, int end) throws OXException {
+        throw CacheExceptionCode.UNSUPPORTED_OPERATION.create("LocalCache.getKeysInRange(int,int)");
     }
 
 }

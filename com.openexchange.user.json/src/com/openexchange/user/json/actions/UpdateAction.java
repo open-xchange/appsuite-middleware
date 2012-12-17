@@ -49,8 +49,15 @@
 
 package com.openexchange.user.json.actions;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Locale;
+
+import javax.activation.MimetypesFileTypeMap;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -66,8 +73,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.field.UserField;
@@ -113,73 +124,82 @@ public final class UpdateAction extends AbstractUserAction {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        /*
-         * Parse parameters
-         */
-        final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
-        final Date clientLastModified = new Date(checkLongParameter(AJAXServlet.PARAMETER_TIMESTAMP, request));
-        /*
-         * Get user service to get contact ID
-         */
-        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
-        final User storageUser = userService.getUser(id, session.getContext());
-        final int contactId = storageUser.getContactId();
-        /*
-         * Parse user & contact data
-         */
-        String timeZoneID = request.getParameter("timezone");
-        if (null == timeZoneID) {
-            timeZoneID = session.getUser().getTimeZone();
-        }
-        final JSONObject jData = (JSONObject) request.getData();
-        Contact parsedUserContact;
-        User parsedUser;
 		try {
+	        /*
+	         * Parse parameters
+	         */
+	        boolean containsImage = request.hasUploads();
+	
+	        final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
+	        final Date clientLastModified = new Date(checkLongParameter(AJAXServlet.PARAMETER_TIMESTAMP, request));
+	        /*
+	         * Get user service to get contact ID
+	         */
+	        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+	        final User storageUser = userService.getUser(id, session.getContext());
+	        final int contactId = storageUser.getContactId();
+	        /*
+	         * Parse user & contact data
+	         */
+	        String timeZoneID = request.getParameter("timezone");
+	        if (null == timeZoneID) {
+	            timeZoneID = session.getUser().getTimeZone();
+	        }
+	        final JSONObject jData = containsImage ? new JSONObject(request.getUploadEvent().getFormField("json")) : (JSONObject) request.getData();
+	        Contact parsedUserContact;
+	        User parsedUser;
 			parsedUserContact = ContactMapper.getInstance().deserialize(jData, CONTACT_FIELDS, timeZoneID);
 	        parsedUserContact.setObjectID(contactId);
 			jData.put(UserField.ID.getName(), id);
 			parsedUser = UserMapper.getInstance().deserialize(jData, USER_FIELDS, timeZoneID);
+		
+	        if (containsImage) {
+	        	setImageData(request, parsedUserContact);
+	        }
+	
+			
+	        /*
+	         * Update contact
+	         */
+	        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+	        if (parsedUserContact.containsDisplayName()) {
+	            final String displayName = parsedUserContact.getDisplayName();
+	            if (null != displayName) {
+	                if (isEmpty(displayName)) {
+	                    parsedUserContact.removeDisplayName();
+	                } else {
+	                    // Remove display name if equal to storage version to avoid update conflict
+	                    final Contact storageContact = contactService.getUser(session, id);
+	                    if (displayName.equals(storageContact.getDisplayName())) {
+	                        parsedUserContact.removeDisplayName();
+	                    }
+	                }
+	            }
+	        }
+	        contactService.updateContact(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), 
+	        		parsedUserContact, clientLastModified);
+	        /*
+	         * Update user if necessary, too
+	         */
+	        final String parsedTimeZone = parsedUser.getTimeZone();
+	        final Locale parsedLocale = parsedUser.getLocale();
+	        if ((null != parsedTimeZone) || (null != parsedLocale)) {
+	            if (null == parsedTimeZone) {
+	            	UserMapper.getInstance().get(UserField.TIME_ZONE).copy(storageUser, parsedUser);
+	            }
+	            if (null == parsedLocale) {
+	            	UserMapper.getInstance().get(UserField.LOCALE).copy(storageUser, parsedUser);
+	            }
+	            userService.updateUser(parsedUser, session.getContext());
+	        }
+	        /*
+	         * Return contact last-modified from server
+	         */
+	        return new AJAXRequestResult(new JSONObject(), parsedUserContact.getLastModified());
 		} catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
 		}
-        /*
-         * Update contact
-         */
-        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
-        if (parsedUserContact.containsDisplayName()) {
-            final String displayName = parsedUserContact.getDisplayName();
-            if (null != displayName) {
-                if (isEmpty(displayName)) {
-                    parsedUserContact.removeDisplayName();
-                } else {
-                    // Remove display name if equal to storage version to avoid update conflict
-                    final Contact storageContact = contactService.getUser(session, id);
-                    if (displayName.equals(storageContact.getDisplayName())) {
-                        parsedUserContact.removeDisplayName();
-                    }
-                }
-            }
-        }
-        contactService.updateContact(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), 
-        		parsedUserContact, clientLastModified);
-        /*
-         * Update user if necessary, too
-         */
-        final String parsedTimeZone = parsedUser.getTimeZone();
-        final Locale parsedLocale = parsedUser.getLocale();
-        if ((null != parsedTimeZone) || (null != parsedLocale)) {
-            if (null == parsedTimeZone) {
-            	UserMapper.getInstance().get(UserField.TIME_ZONE).copy(storageUser, parsedUser);
-            }
-            if (null == parsedLocale) {
-            	UserMapper.getInstance().get(UserField.LOCALE).copy(storageUser, parsedUser);
-            }
-            userService.updateUser(parsedUser, session.getContext());
-        }
-        /*
-         * Return contact last-modified from server
-         */
-        return new AJAXRequestResult(new JSONObject(), parsedUserContact.getLastModified());
+
     }
 
     private static boolean isEmpty(final String string) {
@@ -192,6 +212,76 @@ public final class UpdateAction extends AbstractUserAction {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+    
+    // Copied from RequestTools in contact module
+    
+    public static void setImageData(final AJAXRequestData request, final Contact contact) throws OXException {
+		UploadEvent uploadEvent = null;
+		try {
+		    uploadEvent = request.getUploadEvent();
+		    final UploadFile file = uploadEvent.getUploadFileByFieldName("file");
+		    if (null == file) {
+		        throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
+		    }
+		    setImageData(contact, file);
+		} finally {
+		    if (null != uploadEvent) {
+		        uploadEvent.cleanUp();
+		    }
+		}
+	}
+    
+    public static void setImageData(final Contact contact, final UploadFile file) throws OXException {
+        checkIsImageFile(file);
+        FileInputStream fis = null;
+        ByteArrayOutputStream outputStream = null;
+        try {
+            fis = new FileInputStream(file.getTmpFile());
+            outputStream = new UnsynchronizedByteArrayOutputStream((int) file.getSize());
+            final byte[] buf = new byte[2048];
+            int len = -1;
+            while ((len = fis.read(buf)) != -1) {
+                outputStream.write(buf, 0, len);
+            }
+            contact.setImage1(outputStream.toByteArray());
+            contact.setImageContentType(file.getContentType());
+        } catch (final FileNotFoundException e) {
+            throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create(e);
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "I/O error while reading uploaded contact image.");
+        } finally {
+            Streams.close(outputStream);
+            Streams.close(fis);
+        }
+    }
+    
+    private static void checkIsImageFile(UploadFile file) throws OXException {
+        if (null == file) {
+            throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
+        }
+        String contentType = file.getContentType();
+        if (isImageContentType(contentType)) {
+            return;            
+        }
+        String mimeType = null;
+        if (null != file.getPreparedFileName()) {
+            mimeType = new MimetypesFileTypeMap().getContentType(file.getPreparedFileName());
+            if (isImageContentType(mimeType)) {
+                return;
+            }
+        }
+        String readableType = null != contentType ? contentType : null != mimeType ? mimeType : "application/unknown";
+//        int idx = readableType.indexOf('/');
+//        if (-1 < idx && idx < readableType.length()) {
+//            readableType = readableType.substring(idx + 1);
+//        }
+        throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), readableType);
+    }
+    
+
+    private static boolean isImageContentType(String contentType) {
+        return null != contentType && contentType.toLowerCase().startsWith("image");
     }
 
 }
