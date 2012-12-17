@@ -176,8 +176,11 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        final Quota[] ret = new Quota[types.length];
+        for (int i = 0; i < types.length; i++) {
+            ret[i] = types[i].getUnlimited();
+        }
+        return ret;
     }
 
     @Override
@@ -187,8 +190,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public Quota getStorageQuota(final String folderId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return Type.STORAGE.getUnlimited();
     }
 
     @Override
