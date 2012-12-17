@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,68 +47,56 @@
  *
  */
 
-package com.openexchange.messaging.facebook;
+package com.openexchange.file.storage.dropbox;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.MessagingResource;
-import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.dropbox.session.DropboxOAuthAccess;
 import com.openexchange.session.Session;
 
 /**
- * {@link FacebookMessagingResource}
- *
+ * {@link DropboxAccountAccess}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
  */
-public class FacebookMessagingResource implements MessagingResource {
+public final class DropboxAccountAccess implements FileStorageAccountAccess {
 
-    protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookMessagingResource.class));
-
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
-
-    /**
-     * The messaging account.
-     */
-    protected final MessagingAccount messagingAccount;
+    private final FileStorageAccount account;
+    private final Session session;
+    private final FileStorageService service;
+    private final DropboxOAuthAccess dropboxOAuthAccess;
 
     /**
-     * The facebook session.
-     */
-    protected FacebookOAuthAccess facebookOAuthInfo;
-
-    /**
-     * The session.
-     */
-    protected final Session session;
-
-    /**
-     * Initializes a new {@link FacebookMessagingResource}.
-     *
-     * @param messagingAccount The facebook account
+     * Initializes a new {@link DropboxAccountAccess}.
+     * 
      * @throws OXException If initialization fails
      */
-    public FacebookMessagingResource(final MessagingAccount messagingAccount, final Session session) throws OXException {
+    public DropboxAccountAccess(final FileStorageService service, final FileStorageAccount account, final Session session) throws OXException {
         super();
-        this.messagingAccount = messagingAccount;
+        this.service = service;
+        this.account = account;
         this.session = session;
-        facebookOAuthInfo = FacebookOAuthAccess.accessFor(messagingAccount, session);
-    }
-
-    @Override
-    public void close() {
-        // no-op
+        dropboxOAuthAccess = DropboxOAuthAccess.accessFor(account, session);
     }
 
     @Override
     public void connect() throws OXException {
-        // no-op
+        // Nope
     }
 
     @Override
     public boolean isConnected() {
         return true;
+    }
+
+    @Override
+    public void close() {
+        // Nope
     }
 
     @Override
@@ -119,6 +107,35 @@ public class FacebookMessagingResource implements MessagingResource {
     @Override
     public boolean cacheable() {
         return false;
+    }
+
+    @Override
+    public String getAccountId() {
+        return account.getId();
+    }
+
+ 
+    @Override
+    public FileStorageFileAccess getFileAccess() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public FileStorageFolderAccess getFolderAccess() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public FileStorageFolder getRootFolder() throws OXException {
+        connect();
+        return getFolderAccess().getRootFolder();
+    }
+
+    @Override
+    public FileStorageService getService() {
+        return service;
     }
 
 }

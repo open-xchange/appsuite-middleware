@@ -62,6 +62,11 @@ import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.session.AccessTokenPair;
+import com.dropbox.client2.session.AppKeyPair;
+import com.dropbox.client2.session.Session.AccessType;
+import com.dropbox.client2.session.WebAuthSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
@@ -129,6 +134,16 @@ public final class DropboxOAuthAccess {
     private final Token dropboxAccessToken;
 
     /**
+     * The Web-authenticating session.
+     */
+    private WebAuthSession webAuthSession;
+
+    /**
+     * The Dropbox API reference.
+     */
+    private DropboxAPI<WebAuthSession> mDBApi;
+
+    /**
      * Initializes a new {@link FacebookMessagingResource}.
      *
      * @param fsAccount The Dropbox account providing credentials and settings
@@ -175,6 +190,14 @@ public final class DropboxOAuthAccess {
             checkForErrors(object);
             dropboxUserId = ((Long) object.get("uid")).longValue();
             dropboxUserName = (String) object.get("display_name");
+            // Initialize Dropbox access
+            final AppKeyPair appKeys = new AppKeyPair(DropboxConfiguration.getInstance().getApiKey(), DropboxConfiguration.getInstance().getSecretKey());
+            webAuthSession = new WebAuthSession(appKeys, AccessType.APP_FOLDER);
+            mDBApi = new DropboxAPI<WebAuthSession>(webAuthSession);
+            // re-auth specific stuff
+            final AccessTokenPair reAuthTokens = new AccessTokenPair(dropboxAccessToken.getToken(), dropboxAccessToken.getSecret());
+            mDBApi.getSession().setAccessTokenPair(reAuthTokens);
+            // http://aaka.sh/patel/2011/12/20/authenticating-dropbox-java-api/
         } catch (final OXException e) {
             throw new OXException(e);
         } catch (final org.scribe.exceptions.OAuthException e) {
@@ -218,6 +241,22 @@ public final class DropboxOAuthAccess {
     public String toString() {
         return new StringBuilder(32).append("{ oauthAccount=").append(oauthAccount.getDisplayName()).append(", dropboxUserId=").append(
             dropboxUserId).append(", dropboxAccessToken=").append(dropboxAccessToken).append('}').toString();
+    }
+    
+    /**
+     * Gets the DropboxAPI reference
+     *
+     * @return The DropboxAPI reference
+     */
+    public DropboxAPI<WebAuthSession> getDropboxAPI() {
+        return mDBApi;
+    }
+
+    /**
+     * Disposes this Dropbox OAuth access.
+     */
+    public void dispose() {
+        // So far nothing known to me that needs to be disposed
     }
 
     /**
