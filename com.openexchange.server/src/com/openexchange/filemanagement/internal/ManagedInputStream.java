@@ -151,7 +151,7 @@ public final class ManagedInputStream extends InputStream {
                 int len = -1;
                 int nob = 0;
                 // read up to SIZE_LIMIT bytes
-                while (nob < capacity && (len = in.read(buf, 0, buf.length)) != -1) {
+                while (nob < capacity && (len = in.read(buf, 0, buf.length)) > 0) {
                     tmp.write(buf, 0, len);
                     nob += len;
                 }
