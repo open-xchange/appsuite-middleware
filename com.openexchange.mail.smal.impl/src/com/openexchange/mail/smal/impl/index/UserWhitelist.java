@@ -84,7 +84,7 @@ public class UserWhitelist {
             }
             
             whitelist = whitelist.trim();
-            if ('*' == whitelist.charAt(0)) {
+            if (whitelist.length() > 0 && '*' == whitelist.charAt(0)) {
                 allowedUsers = Collections.emptySet();
             } else {
                 allowedUsers = new HashSet<String>();
