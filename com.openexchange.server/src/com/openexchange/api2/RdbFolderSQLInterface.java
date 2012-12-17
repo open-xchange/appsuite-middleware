@@ -233,8 +233,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                     Integer.valueOf(ctx.getContextId()));
             }
             return fo;
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
 
@@ -359,8 +359,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                 }
             }
             return folderobject;
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
 
@@ -444,8 +444,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                 CacheFolderStorage.getInstance().removeSingleFromCache(Integer.toString(folderobject.getParentFolderID()), FolderStorage.REAL_TREE_ID, userId, session, false);
             }
             return folderId;
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
 
@@ -794,8 +794,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             final long lastModified = System.currentTimeMillis();
             OXFolderManager.getInstance(session, oxfolderAccess).clearFolder(folderobject, false, lastModified);
             return objectID;
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
 

@@ -1049,8 +1049,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         gab.setFolderName(StringHelper.valueOf(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
                         list.add(gab);
                     }
-                } catch (final SQLException e) {
-                    throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                } catch (final RuntimeException e) {
+                    throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
                 }
             }
             /*

@@ -56,7 +56,6 @@ import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObje
 import static com.openexchange.importexport.formats.csv.CSVLibrary.transformIntArrayToSet;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.transformSetToIntArray;
 import java.io.ByteArrayInputStream;
-import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -177,8 +176,6 @@ public class CSVContactExporter implements Exporter {
                 sessObj.getUserId(),
                 sessObj.getContext()));
         } catch (final OXException e) {
-            return false;
-        } catch (final SQLException e) {
             return false;
         }
         return perm.canReadAllObjects();

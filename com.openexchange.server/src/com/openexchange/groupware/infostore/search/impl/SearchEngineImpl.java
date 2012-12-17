@@ -61,7 +61,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Queue;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
@@ -78,6 +77,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -128,7 +128,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         boolean keepConnection = false;
         try {
         	con = getReadConnection(ctx);
-	        try {
+	        {
 	        	final int userId = user.getId();
 	            if (folderId == NOT_SET || folderId == NO_FOLDER) {
 	                final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
@@ -138,12 +138,12 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 	                    FolderObject.INFOSTORE,
 	                    ctx, con)).asQueue();
 	                for (final FolderObject folder : queue) {
-	                    final EffectivePermission perm = security.getFolderPermission(folder.getObjectID(), ctx, user, userConfig, con);
-	                    if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
-	                        own.add(Integer.valueOf(folder.getObjectID()));
-	                    } else if (perm.canReadAllObjects()) {
-	                        all.add(Integer.valueOf(folder.getObjectID()));
-	                    }
+                        final EffectivePermission perm = folder.getEffectiveUserPermission(userId, userConfig);
+                        if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
+                            own.add(Integer.valueOf(folder.getObjectID()));
+                        } else if (perm.canReadAllObjects()) {
+                            all.add(Integer.valueOf(folder.getObjectID()));
+                        }
 	                }
 	            } else {
 	                final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userConfig, con);
@@ -157,8 +157,6 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 	            }
 	            all = Collections.unmodifiableList(all);
 	            own = Collections.unmodifiableList(own);
-	        } catch (final OXException e) {
-	            throw new OXException(e);
 	        }
 	
 	        if (all.isEmpty() && own.isEmpty()) {
