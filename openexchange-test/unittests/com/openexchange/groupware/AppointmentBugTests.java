@@ -76,6 +76,7 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
@@ -233,6 +234,51 @@ public class AppointmentBugTests extends TestCase {
         DBPool.push(context, readcon);
         return privatefolder;
     }
+    
+    /**
+     * Test for <a href=
+     * "https://bugs.open-xchange.com/show_bug.cgi?id=20972">bug
+     * #20972</a>:<br>
+     * &quot;<i>Appointment invitations cannot be accepted if ical field content exceeds the DB field size</i>&quot;
+     *
+     * @throws Exception
+     *             If an error occurs
+     */
+    public void testBug20972() throws Exception {
+        final int fid = getPrivateFolder(userid);
+        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "testIdentifierForBug20972");
+        
+        final UserParticipant userParticipant = new UserParticipant(userid);
+        
+        StringBuilder sb = new StringBuilder();
+        int cap = 0;
+        String locString = "0123456789";
+        while(cap < locString.length() * 25) {
+            sb.append(locString);
+            cap += locString.length();
+        }
+        sb.append("TRUNCATE ME");
+        
+        final CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setLocation(sb.toString());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+        cdao.setParentFolderID(fid);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.setIgnoreConflicts(true);
+        cdao.setTitle("Testing bug 20972");
+        cdao.addParticipant(userParticipant);
+        cdao.setExternalOrganizer(true);
+        
+        final CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        
+        final int oid = cdao.getObjectID();
+        final CalendarDataObject expected = csql.getObjectById(oid, fid);
+        
+        assertNotNull("Object not created", expected);
+        assertNotSame("Location truncated: ", expected.getLocation(), cdao.getLocation());
+    }
+    
 
     /*
      1.  Create an appointment
