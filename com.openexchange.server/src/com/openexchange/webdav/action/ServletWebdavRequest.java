@@ -134,7 +134,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 			return null;
 		}
 
-		if (url.length() > 0 && '/' != url.charAt(0)) {
+		if (false == url.startsWith("/")) {
     		try {
     			final URL urlO = new URL(url);
     			url = urlO.getPath();
