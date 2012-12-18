@@ -63,8 +63,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
-import com.hazelcast.config.Config;
-import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Hazelcasts;
@@ -148,13 +146,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
      */
     public HazelcastSessionStorageService(final HazelcastSessionStorageConfiguration config, final HazelcastInstance hazelcast) {
         super();
-        final MapConfig mapConfig = config.getMapConfig();
-        final String name = mapConfig.getName();
-        mapName = name;
-        final Config hzConfig = hazelcast.getConfig();
-        if (null == hzConfig.getMapConfig(name)) {
-            hzConfig.addMapConfig(mapConfig);
-        }
+        this.mapName = config.getMapConfig().getName();
+        hazelcast.getConfig().addMapConfig(config.getMapConfig());
         abortBehavior = AbortBehavior.<IMap<String, HazelcastStoredSession>> getInstance();
         allowFailIfPaused = false;
     }
