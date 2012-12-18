@@ -403,6 +403,13 @@ public class Multiple extends SessionServlet {
                         jsonWriter.value("");
                     }
                     ResponseWriter.writeException(oje, jsonWriter, localeFrom(session));
+                } catch (final RuntimeException rte) {
+                    LOG.error(rte.getMessage(), rte);
+                    final OXException e = AjaxExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
+                    if (jsonWriter.isExpectingValue()) {
+                        jsonWriter.value("");
+                    }
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
                 } finally {
                     multipleHandler.close();
                     jsonWriter.endObject();
@@ -432,6 +439,12 @@ public class Multiple extends SessionServlet {
                     LOG.error(oje.getMessage(), oje);
                     jsonWriter.object();
                     ResponseWriter.writeException(oje, jsonWriter, localeFrom(session));
+                    jsonWriter.endObject();
+                } catch (final RuntimeException rte) {
+                    LOG.error(rte.getMessage(), rte);
+                    final OXException e = AjaxExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
+                    jsonWriter.object();
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
                     jsonWriter.endObject();
                 }
             } else if (MODULE_MAIL.equals(module)) {
