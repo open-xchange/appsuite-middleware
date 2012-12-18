@@ -125,7 +125,8 @@ public class VersionsAction extends AbstractFileAction {
 
                     @Override
                     public boolean accept(final File thing) throws OXException {
-                        return thing.getVersion() != 0;
+                        final String version = thing.getVersion();
+                        return version != null && !version.equals("0");
                     }
 
 

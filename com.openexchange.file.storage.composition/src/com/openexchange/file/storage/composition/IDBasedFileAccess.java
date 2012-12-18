@@ -74,7 +74,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return true when the file exists and is readable, false otherwise.
      * @throws OXException
      */
-    public boolean exists(String id, int version) throws OXException;
+    public boolean exists(String id, String version) throws OXException;
 
     /**
      * Load the metadata about a file
@@ -83,7 +83,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return The File Metadata
      * @throws OXException
      */
-    public File getFileMetadata(String id, int version) throws OXException;
+    public File getFileMetadata(String id, String version) throws OXException;
 
     /**
      * Save the file metadata.
@@ -120,7 +120,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return
      * @throws OXException
      */
-    public InputStream getDocument(String id, int version) throws OXException;
+    public InputStream getDocument(String id, String version) throws OXException;
 
     /**
      * Save the file metadata and binary content
@@ -165,7 +165,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return
      * @throws OXException
      */
-    public int[] removeVersion(String id, int[] versions) throws OXException;
+    public String[] removeVersion(String id, String[] versions) throws OXException;
 
     /**
      * Unlocks a given file.

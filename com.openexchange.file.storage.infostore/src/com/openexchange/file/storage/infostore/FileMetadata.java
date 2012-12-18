@@ -184,7 +184,7 @@ public class FileMetadata implements DocumentMetadata {
 
     @Override
     public int getVersion() {
-        return file.getVersion();
+        return Integer.parseInt(file.getVersion());
     }
 
     @Override
@@ -289,7 +289,7 @@ public class FileMetadata implements DocumentMetadata {
 
     @Override
     public void setVersion(final int version) {
-        file.setVersion(version);
+        file.setVersion(Integer.toString(version));
     }
 
     @Override

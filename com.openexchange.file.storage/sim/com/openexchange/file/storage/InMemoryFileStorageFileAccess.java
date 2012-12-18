@@ -86,17 +86,17 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public boolean exists(String folderId, String id, int version) throws OXException {
+    public boolean exists(String folderId, String id, String version) throws OXException {
         Map<String, VersionContainer> map = storage.get(folderId);
         if (map == null) {
             return false;
         }
         
-        return map.containsKey(id) ? map.get(id).containsVersion(version) : false;
+        return map.containsKey(id) ? map.get(id).containsVersion(Integer.parseInt(version)) : false;
     }
 
     @Override
-    public File getFileMetadata(String folderId, String id, int version) throws OXException {
+    public File getFileMetadata(String folderId, String id, String version) throws OXException {
         Map<String, VersionContainer> map = storage.get(folderId);
         if (map == null) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
@@ -108,10 +108,10 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
         }
         
         if (version == FileStorageFileAccess.CURRENT_VERSION) {
-            version = versionContainer.getCurrentVersionNumber();
+            version = Integer.toString(versionContainer.getCurrentVersionNumber());
         }
-        if (versionContainer.containsVersion(version)) {
-            return versionContainer.getVersion(version).getFile();
+        if (versionContainer.containsVersion(Integer.parseInt(version))) {
+            return versionContainer.getVersion(Integer.parseInt(version)).getFile();
         }
         
         throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
@@ -157,7 +157,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
             }
             VersionContainer versionContainer = new VersionContainer();
             int version = versionContainer.addVersion(holder);
-            file.setVersion(version);
+            file.setVersion(Integer.toString(version));
             map.put(id, versionContainer);
         } else {
             VersionContainer versionContainer = map.get(id);
@@ -172,7 +172,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
                 holder = new FileHolder(file, data);
             }
             int version = versionContainer.addVersion(holder);     
-            file.setVersion(version);
+            file.setVersion(Integer.toString(version));
         }
     }
 
@@ -205,8 +205,8 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public int[] removeVersion(String folderId, String id, int[] versions) throws OXException {
-        List<Integer> notRemovedList = new ArrayList<Integer>();
+    public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
+        List<String> notRemovedList = new ArrayList<String>();
         Map<String, VersionContainer> map = storage.get(folderId);
         if (map == null) {
             return versions;
@@ -217,12 +217,12 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
             return versions;
         }
         
-        for (int version : versions) {
+        for (String version : versions) {
             FileHolder holder;
             if (version == FileStorageFileAccess.CURRENT_VERSION) {
                 holder = versionContainer.removeVersion(versionContainer.getCurrentVersionNumber());
             } else {
-                holder = versionContainer.removeVersion(version);
+                holder = versionContainer.removeVersion(Integer.parseInt(version));
             }
             
             if (holder == null) {
@@ -230,7 +230,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
             }
         }
 
-        int[] notRemoved = new int[notRemovedList.size()];
+        String[] notRemoved = new String[notRemovedList.size()];
         for (int i = 0; i < notRemoved.length; i++) {
             notRemoved[i] = notRemovedList.get(i);
         }
@@ -239,7 +239,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     }    
 
     @Override
-    public InputStream getDocument(String folderId, String id, int version) throws OXException {
+    public InputStream getDocument(String folderId, String id, String version) throws OXException {
         Map<String, VersionContainer> map = storage.get(folderId);
         if (map == null) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
@@ -254,7 +254,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
         if (version == FileStorageFileAccess.CURRENT_VERSION) {
             holder = versionContainer.getCurrentVersion();
         } else {
-            holder = versionContainer.getVersion(version);
+            holder = versionContainer.getVersion(Integer.parseInt(version));
         }
         
         if (holder == null) {

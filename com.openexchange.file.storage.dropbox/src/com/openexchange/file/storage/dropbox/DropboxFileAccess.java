@@ -118,7 +118,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public boolean exists(String folderId, String id, int version) throws OXException {
+    public boolean exists(String folderId, String id, String version) throws OXException {
         try {
             dropboxAPI.metadata(id, 1, null, false, null);
             return true;
@@ -135,13 +135,13 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public File getFileMetadata(String folderId, String id, int version) throws OXException {
+    public File getFileMetadata(String folderId, String id, String version) throws OXException {
         try {
             final Entry entry = dropboxAPI.metadata(id, 1, null, false, null);
             if (entry.isDir) {
                 throw DropboxExceptionCodes.NOT_A_FILE.create(id);
             }
-            return new DropboxFile(entry.parentPath(), entry.path, CURRENT_VERSION);
+            return new DropboxFile(entry.parentPath(), entry.path, session.getUserId());
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
                 throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
@@ -160,26 +160,41 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFileAccess#saveFileMetadata(com.openexchange.file.storage.File, long, java.util.List)
-     */
     @Override
     public void saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        // TODO Auto-generated method stub
-
+        
+        String id = file.getId();
+        if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
+            // Create
+            //dropboxAPI.s
+        } else {
+            // Update
+            
+        }
+        
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFileAccess#copy(com.openexchange.file.storage.FileStorageFileAccess.IDTuple, java.lang.String, com.openexchange.file.storage.File, java.io.InputStream, java.util.List)
-     */
     @Override
     public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFil, List<Field> modifiedFields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        final String id = source.getId();
+        try {
+            final String name = id.substring(id.lastIndexOf('/') + 1);
+            final Entry entry = dropboxAPI.copy(id, destFolder + '/' + name);
+            return new IDTuple(entry.parentPath(), entry.path);
+        } catch (final DropboxServerException e) {
+            if (404 == e.error) {
+                throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
+            }
+            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+        } catch (final DropboxException e) {
+            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
-    public InputStream getDocument(String folderId, String id, int version) throws OXException {
+    public InputStream getDocument(String folderId, String id, String version) throws OXException {
         try {
             return dropboxAPI.getFileStream(id, null);
         } catch (final DropboxServerException e) {
@@ -192,7 +207,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
         } catch (final RuntimeException e) {
             throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        
     }
 
     /* (non-Javadoc)
@@ -259,18 +273,18 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public int[] removeVersion(String folderId, String id, int[] versions) throws OXException {
-        for (final int version : versions) {
+    public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
+        for (final String version : versions) {
             if (version != CURRENT_VERSION) {
                 throw DropboxExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
             }
         }
         try {
             dropboxAPI.delete(id);
-            return new int[0];
+            return new String[0];
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
-                return new int[0];
+                return new String[0];
             }
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final DropboxException e) {
@@ -396,6 +410,18 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     public FileStorageAccountAccess getAccountAccess() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

@@ -145,7 +145,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public boolean exists(final String folderId, final String id, final int version) throws OXException {
+    public boolean exists(final String folderId, final String id, final String version) throws OXException {
         try {
             /*
              * Check
@@ -174,7 +174,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public File getFileMetadata(final String folderId, final String id, final int version) throws OXException {
+    public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         if (version != CURRENT_VERSION) {
             throw CIFSExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
         }
@@ -320,7 +320,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public InputStream getDocument(final String folderId, final String id, final int version) throws OXException {
+    public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUrl);
             final String url = (fid + id);
@@ -493,8 +493,8 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public int[] removeVersion(final String folderId, final String id, final int[] versions) throws OXException {
-        for (final int version : versions) {
+    public String[] removeVersion(final String folderId, final String id, final String[] versions) throws OXException {
+        for (final String version : versions) {
             if (version != CURRENT_VERSION) {
                 throw CIFSExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
             }
@@ -510,7 +510,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 /*
                  * NO-OP for us
                  */
-                return new int[0];
+                return new String[0];
             }
             if (!smbFile.isFile()) {
                 throw CIFSExceptionCodes.NOT_A_FILE.create(url);
@@ -526,7 +526,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             /*
              * Return empty array
              */
-            return new int[0];
+            return new String[0];
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {

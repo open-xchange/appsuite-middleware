@@ -148,7 +148,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public boolean exists(final String folderId, final String id, final int version) throws OXException {
+    public boolean exists(final String folderId, final String id, final String version) throws OXException {
         try {
             /*
              * Check
@@ -194,7 +194,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public File getFileMetadata(final String folderId, final String id, final int version) throws OXException {
+    public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         if (version != CURRENT_VERSION) {
             throw CMISExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
         }
@@ -403,7 +403,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public InputStream getDocument(final String folderId, final String id, final int version) throws OXException {
+    public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
             final ObjectId folderObjectId;
             CmisObject object;
@@ -557,8 +557,8 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public int[] removeVersion(final String folderId, final String id, final int[] versions) throws OXException {
-        for (final int version : versions) {
+    public String[] removeVersion(final String folderId, final String id, final String[] versions) throws OXException {
+        for (final String version : versions) {
             if (version != CURRENT_VERSION) {
                 throw CMISExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
             }
@@ -595,7 +595,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             /*
              * Return empty array
              */
-            return new int[0];
+            return new String[0];
         } catch (final CmisBaseException e) {
             throw handleCmisException(e);
         } catch (final RuntimeException e) {
@@ -605,14 +605,12 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
 
     @Override
     public void unlock(final String folderId, final String id) throws OXException {
-        // TODO Auto-generated method stub
-
+        // Nope
     }
 
     @Override
     public void lock(final String folderId, final String id, final long diff) throws OXException {
-        // TODO Auto-generated method stub
-
+        // Nope
     }
 
     @Override

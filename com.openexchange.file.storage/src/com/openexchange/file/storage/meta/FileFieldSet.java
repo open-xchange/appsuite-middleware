@@ -183,7 +183,7 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object version(final Object... args) {
-        md(args).setVersion(integer(1, args));
+        md(args).setVersion(string(1, args));
         return ret(args);
     }
 

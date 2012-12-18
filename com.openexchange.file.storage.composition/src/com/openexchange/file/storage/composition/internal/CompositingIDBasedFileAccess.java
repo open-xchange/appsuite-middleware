@@ -113,7 +113,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     }
 
     @Override
-    public boolean exists(final String id, final int version) throws OXException {
+    public boolean exists(final String id, final String version) throws OXException {
         final FileID fileID = new FileID(id);
         try {
             return getFileAccess(fileID.getService(), fileID.getAccountId()).exists(fileID.getFolderId(), fileID.getFileId(), version);
@@ -150,7 +150,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     }
 
     @Override
-    public InputStream getDocument(final String id, final int version) throws OXException {
+    public InputStream getDocument(final String id, final String version) throws OXException {
         final FileID fileID = new FileID(id);
 
         return getFileAccess(fileID.getService(), fileID.getAccountId()).getDocument(fileID.getFolderId(), fileID.getFileId(), version);
@@ -201,7 +201,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     }
 
     @Override
-    public File getFileMetadata(final String id, final int version) throws OXException {
+    public File getFileMetadata(final String id, final String version) throws OXException {
         final FileID fileID = new FileID(id);
         final File fileMetadata = getFileAccess(fileID.getService(), fileID.getAccountId()).getFileMetadata(
             fileID.getFolderId(),
@@ -324,20 +324,20 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     }
 
     @Override
-    public int[] removeVersion(final String id, final int[] versions) throws OXException {
+    public String[] removeVersion(final String id, final String[] versions) throws OXException {
         FileID fileID = new FileID(id);
         FileStorageFileAccess access = getFileAccess(fileID.getService(), fileID.getAccountId());
-        int[] notRemoved = access.removeVersion(fileID.getFolderId(), fileID.getFileId(), versions);
+        String[] notRemoved = access.removeVersion(fileID.getFolderId(), fileID.getFileId(), versions);
         
         String serviceId = access.getAccountAccess().getService().getId();
         String accountId = access.getAccountAccess().getAccountId();
-        Set<Integer> removed = new HashSet<Integer>(versions.length);
-        for (int i : versions) {
-            removed.add(Integer.valueOf(i));
+        Set<String> removed = new HashSet<String>(versions.length);
+        for (String i : versions) {
+            removed.add(i);
         }
         
-        for (int i : notRemoved) {
-            removed.remove(Integer.valueOf(i));
+        for (String i : notRemoved) {
+            removed.remove(i);
         }
         
         String objectId = fileID.getFileId();

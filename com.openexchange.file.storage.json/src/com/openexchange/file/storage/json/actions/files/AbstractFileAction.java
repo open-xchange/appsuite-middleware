@@ -162,9 +162,9 @@ public abstract class AbstractFileAction implements AJAXActionService {
     }
 
 
-    public AJAXRequestResult result(final int[] versions, final long sequenceNumber, final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult result(final String[] versions, final long sequenceNumber, final InfostoreRequest request) throws OXException {
         final JSONArray array = new JSONArray();
-        for (final int i : versions) {
+        for (final String i : versions) {
             array.put(i);
         }
 

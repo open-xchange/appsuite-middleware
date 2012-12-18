@@ -74,11 +74,11 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.file.storage.composition.FileID;
-import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 import com.openexchange.sim.Block;
@@ -136,7 +136,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     public void testExists() throws OXException {
         fileAccess.expectCall("exists", fileId.getFolderId(), fileId.getFileId(), 12).andReturn(true);
 
-        assertTrue(exists(fileId.toUniqueID(), 12));
+        assertTrue(exists(fileId.toUniqueID(), "12"));
         verifyAccount();
 
         fileAccess.assertAllWereCalled();
@@ -176,7 +176,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     public void testGetDocument() throws OXException {
         fileAccess.expectCall("getDocument", fileId.getFolderId(), fileId.getFileId(), 12);
 
-        getDocument(fileId.toUniqueID(), 12);
+        getDocument(fileId.toUniqueID(), "12");
 
         verifyAccount();
         fileAccess.assertAllWereCalled();
@@ -252,7 +252,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
         fileAccess.expectCall("getFileMetadata", fileId.getFolderId(), fileId.getFileId(), 12).andReturn(file);
 
-        getFileMetadata(fileId.toUniqueID(), 12);
+        getFileMetadata(fileId.toUniqueID(), "12");
 
         fileAccess.assertAllWereCalled();
     }
@@ -368,7 +368,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testRemoveVersions() throws OXException {
-        final int[] versions = new int[] { 1, 2, 3 };
+        final String[] versions = new String[] { "1", "2", "3" };
 
         fileAccess.expectCall("removeVersion", fileId.getFolderId(), fileId.getFileId(), versions).andReturn(new int[0]);
         fileAccess.expectCall("getAccountAccess").andReturn(this);

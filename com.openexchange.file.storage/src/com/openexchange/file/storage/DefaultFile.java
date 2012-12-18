@@ -99,7 +99,7 @@ public class DefaultFile extends AbstractFile {
 
     private String url;
 
-    private int version;
+    private String version;
 
     private String versionComment;
 
@@ -243,7 +243,7 @@ public class DefaultFile extends AbstractFile {
     }
 
     @Override
-    public int getVersion() {
+    public String getVersion() {
         return version;
     }
 
@@ -348,7 +348,7 @@ public class DefaultFile extends AbstractFile {
     }
 
     @Override
-    public void setVersion(final int version) {
+    public void setVersion(final String version) {
         this.version = version;
     }
 
