@@ -99,8 +99,8 @@ public final class DropboxFile extends DefaultFile {
      * @throws OXException If parsing SMB file fails
      * @return This Dropbox file
      */
-    public DropboxFile parseSmbFile(final Entry entry) throws OXException {
-        return parseSmbFile(entry, null);
+    public DropboxFile parseDropboxFile(final Entry entry) throws OXException {
+        return parseDropboxFile(entry, null);
     }
 
     /**
@@ -111,7 +111,7 @@ public final class DropboxFile extends DefaultFile {
      * @throws OXException If parsing SMB file fails
      * @return This Dropbox file with property set applied
      */
-    public DropboxFile parseSmbFile(final Entry entry, final List<Field> fields) throws OXException {
+    public DropboxFile parseDropboxFile(final Entry entry, final List<Field> fields) throws OXException {
         if (null != entry && !entry.isDir) {
             try {
                 setId(entry.path);
@@ -126,6 +126,7 @@ public final class DropboxFile extends DefaultFile {
                 final String name = entry.fileName();
                 setTitle(name);
                 setFileName(name);
+                setVersion(entry.rev);
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
                 {
                     final Date date = RESTUtility.parseDate(entry.modified);
