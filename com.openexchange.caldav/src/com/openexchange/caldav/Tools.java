@@ -120,7 +120,7 @@ public class Tools {
         String name = filename;
         if (null != fileExtension) {
             String extension = fileExtension.toLowerCase();
-            if ('.' != extension.charAt(0)) {
+            if (false == extension.startsWith(".")) {
                 extension = "." + extension;
             }
             if (null != name && extension.length() < name.length() && name.toLowerCase().endsWith(extension)) {
