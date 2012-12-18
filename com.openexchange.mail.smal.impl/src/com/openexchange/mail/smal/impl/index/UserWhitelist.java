@@ -55,26 +55,23 @@ import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 
-
 /**
  * {@link UserWhitelist}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class UserWhitelist {
-    
+
     private static Set<String> allowedUsers = null;
-    
-    
+
     public static boolean isIndexingAllowed(String loginName) {
         initWhitelist();
         if (allowedUsers.isEmpty() || allowedUsers.contains(loginName)) {
             return true;
         }
-        
         return false;
     }
-    
+
     private synchronized static void initWhitelist() {
         if (allowedUsers == null) {
             ConfigurationService config = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
@@ -82,9 +79,9 @@ public class UserWhitelist {
             if (whitelist == null) {
                 throw new IllegalArgumentException("Missing value for property 'com.openexchange.mail.smal.userWhitelist'. Check smal.properties.");
             }
-            
+
             whitelist = whitelist.trim();
-            if (whitelist.length() > 0 && '*' == whitelist.charAt(0)) {
+            if (whitelist.startsWith("*")) {
                 allowedUsers = Collections.emptySet();
             } else {
                 allowedUsers = new HashSet<String>();
@@ -95,5 +92,4 @@ public class UserWhitelist {
             }
         }
     }
-
 }

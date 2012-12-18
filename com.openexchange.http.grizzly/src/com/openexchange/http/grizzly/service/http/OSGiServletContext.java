@@ -82,7 +82,7 @@ public class OSGiServletContext extends WebappContext {
      * {@inheritDoc}
      */
     @Override public URL getResource(String path) throws MalformedURLException {
-        if (path == null || ('/' != path.charAt(0))) {
+        if (path == null || !path.startsWith("/")) {
             throw new MalformedURLException(path);
         }
 

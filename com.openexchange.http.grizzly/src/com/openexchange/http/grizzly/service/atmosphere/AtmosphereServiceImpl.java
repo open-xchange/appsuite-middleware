@@ -52,6 +52,7 @@ package com.openexchange.http.grizzly.service.atmosphere;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
+import org.atmosphere.container.Grizzly2CometSupport;
 import org.atmosphere.container.Grizzly2WebSocketSupport;
 import org.atmosphere.cpr.AtmosphereFramework;
 import org.atmosphere.cpr.AtmosphereHandler;
@@ -115,7 +116,7 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
         if(mapping == null) {
             throw new IllegalArgumentException();
         }
-        if (!mapping.isEmpty() && ('/' == mapping.charAt(0)) && mapping.endsWith("/*")) {
+        if (!mapping.isEmpty() && mapping.startsWith("/") && mapping.endsWith("/*")) {
             // remove the last two characters iow. "/*" 
             return mapping.substring(0, mapping.length()-2);
         } else {
@@ -136,8 +137,8 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
         if(servletMapping == null || handlerMapping == null) {
             throw new IllegalArgumentException();
         }
-        if('/' != handlerMapping.charAt(0)) {
-            handlerMapping = '/' + handlerMapping;
+        if(!handlerMapping.startsWith("/")) {
+            handlerMapping = "/" + handlerMapping;
         }
         return getServletPathFromMapping(servletMapping) + handlerMapping;
     }
