@@ -120,7 +120,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     @Override
     public boolean exists(String folderId, String id, String version) throws OXException {
         try {
-            dropboxAPI.metadata(id, 1, null, false, null);
+            dropboxAPI.metadata(id, 1, null, false, version);
             return true;
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
@@ -137,7 +137,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     @Override
     public File getFileMetadata(String folderId, String id, String version) throws OXException {
         try {
-            final Entry entry = dropboxAPI.metadata(id, 1, null, false, null);
+            final Entry entry = dropboxAPI.metadata(id, 1, null, false, version);
             if (entry.isDir) {
                 throw DropboxExceptionCodes.NOT_A_FILE.create(id);
             }
@@ -196,7 +196,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     @Override
     public InputStream getDocument(String folderId, String id, String version) throws OXException {
         try {
-            return dropboxAPI.getFileStream(id, null);
+            return dropboxAPI.getFileStream(id, version);
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
                 throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
@@ -274,6 +274,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
 
     @Override
     public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
+        /*
+         * Dropbox API does not support removing revisions of a file
+         */
         for (final String version : versions) {
             if (version != CURRENT_VERSION) {
                 throw DropboxExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
