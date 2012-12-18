@@ -445,7 +445,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
         try {
-            final List<IDTuple> ret = new ArrayList<FileStorageFileAccess.IDTuple>();
+            final List<IDTuple> ret = new ArrayList<IDTuple>();
             for (final IDTuple id : ids) {
                 final String fid = checkFolderId(id.getFolder(), rootUrl);
                 final String url = (fid + id.getId());
