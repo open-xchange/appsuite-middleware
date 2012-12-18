@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -442,6 +442,8 @@ ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 %config(noreplace) /opt/open-xchange/etc/contextSets/index.yml
 
 %changelog
+* Tue Dec 18 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.0.0
 * Mon Dec 17 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.0.0
 * Wed Dec 12 2012 Marcus Klein <marcus.klein@open-xchange.com>
