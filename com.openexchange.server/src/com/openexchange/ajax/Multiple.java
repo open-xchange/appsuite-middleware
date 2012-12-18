@@ -549,9 +549,13 @@ public class Multiple extends SessionServlet {
         }
 
         @Override
-        public Object call() throws Exception {
-            performActionElement(jsonDataResponse, module, session, req);
-            return null;
+        public Object call() throws OXException {
+            try {
+                performActionElement(jsonDataResponse, module, session, req);
+                return null;
+            } catch (final RuntimeException e) {
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
         }
     } // End of class
 
