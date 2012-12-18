@@ -240,8 +240,7 @@ public final class DropboxFileStorageService implements AccountAware {
                 account = compositeAccountManager.getAccountManager(accountId, session).getAccount(accountId, session);
             }
         }
-        //return new CIFSAccountAccess(this, account, session);
-        return null;
+        return new DropboxAccountAccess(this, account, session);
     }
 
 }
