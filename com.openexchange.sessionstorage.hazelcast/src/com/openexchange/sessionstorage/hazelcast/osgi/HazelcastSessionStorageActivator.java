@@ -80,7 +80,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
     /**
      * Name of the distributed sessions map. Should be changed when the serialized session object changes to avoid serialization issues.
      */
-    private static final String MAP_NAME = "sessions-0";
+    private static final String MAP_NAME = "sessions-1";
 
     @Override
     protected Class<?>[] getNeededServices() {

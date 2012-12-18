@@ -497,7 +497,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     public Session getSessionByRandomToken(final String randomToken, final String newIP) throws OXException {
         try {
             if (null != randomToken) {
-                for (HazelcastStoredSession session : filter(new SqlPredicate("randomToken = " + randomToken), true)) {
+                for (HazelcastStoredSession session : filter(new SqlPredicate("randomToken = '" + randomToken + "'"), true)) {
                     if (null != session && randomToken.equals(session.getRandomToken())) {
                         if (false == session.getLocalIp().equals(newIP)) {
                             session.setLocalIp(newIP);
@@ -593,7 +593,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     public void checkAuthId(final String login, final String authId) throws OXException {
         if (null != authId) {
             try {
-                for (HazelcastStoredSession session : filter(new SqlPredicate("authId = " + authId), true)) {
+                for (HazelcastStoredSession session : filter(new SqlPredicate("authId = '" + authId + "'"), true)) {
                     if (null != session && authId.equals(session.getAuthId())) {
                         throw SessionStorageExceptionCodes.DUPLICATE_AUTHID.create(session.getLogin(), login);
                     }
