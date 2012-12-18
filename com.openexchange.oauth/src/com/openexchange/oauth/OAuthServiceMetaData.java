@@ -113,6 +113,17 @@ public interface OAuthServiceMetaData {
     String processAuthorizationURL(String authUrl);
 
     /**
+     * Processes specified authorization URL with respect to call-back.
+     * <p>
+     * Intended to be called after {@link #processAuthorizationURL(String)} method.
+     *
+     * @param authUrl The processed authorization URL
+     * @param callback The call-back string
+     * @return The processed authorization URL
+     */
+    String processAuthorizationURLCallbackAware(String authUrl, String callback);
+
+    /**
      * Processes specified arguments.
      *
      * @param arguments The arguments. You can store additional information here

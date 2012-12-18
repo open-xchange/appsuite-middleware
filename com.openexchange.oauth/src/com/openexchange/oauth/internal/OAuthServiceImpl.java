@@ -70,14 +70,15 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
+import org.scribe.builder.api.DropBoxApi;
 import org.scribe.builder.api.FacebookApi;
+import org.scribe.builder.api.FlickrApi;
 import org.scribe.builder.api.FoursquareApi;
 import org.scribe.builder.api.GoogleApi;
 import org.scribe.builder.api.LinkedInApi;
+import org.scribe.builder.api.TumblrApi;
 import org.scribe.builder.api.TwitterApi;
 import org.scribe.builder.api.YahooApi;
-import org.scribe.builder.api.TumblrApi;
-import org.scribe.builder.api.FlickrApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
@@ -266,7 +267,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Process authorization URL
              */
-            final String authURL = metaData.processAuthorizationURL(authorizationURL.toString());
+            final String authURL = metaData.processAuthorizationURLCallbackAware(metaData.processAuthorizationURL(authorizationURL.toString()), callbackUrl);
             /*
              * Return interaction
              */
@@ -725,6 +726,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             apiClass = TumblrApi.class;
         } else if (serviceId.indexOf("flickr") >= 0) {
             apiClass = FlickrApi.class;
+        } else if (serviceId.indexOf("dropbox") >= 0) {
+            apiClass = DropBoxApi.class;
         } else {
             throw OAuthExceptionCodes.UNSUPPORTED_SERVICE.create(serviceId);
         }

@@ -6,10 +6,10 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
+import org.scribe.builder.api.DropBoxApi;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.builder.api.FlickrApi;
 import org.scribe.builder.api.LinkedInApi;
-import org.scribe.builder.api.LiveApi;
 import org.scribe.builder.api.TumblrApi;
 import org.scribe.builder.api.TwitterApi;
 import org.scribe.builder.api.YahooApi;
@@ -57,6 +57,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 		case YAHOO: return YahooApi.class;
 		case TUMBLR: return TumblrApi.class;
 		case FLICKR: return FlickrApi.class;
+		case DROPBOX: return DropBoxApi.class;
 		}
 		throw new IllegalStateException("Unsupported API type: "+api);
 	}

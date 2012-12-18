@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange File Storage Dropbox Bundle
+Bundle-SymbolicName: com.openexchange.oauth.dropbox
+Bundle-Version: 6.23.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.oauth,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.scribe.builder,
+ org.scribe.builder.api,
+ org.scribe.exceptions,
+ org.scribe.extractors,
+ org.scribe.model,
+ org.scribe.oauth,
+ org.scribe.services,
+ org.scribe.utils
+Bundle-Activator: com.openexchange.oauth.dropbox.osgi.DropboxOAuthActivator

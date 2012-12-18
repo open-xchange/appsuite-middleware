@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 
@@ -161,6 +163,11 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
+    public String processAuthorizationURLCallbackAware(final String authUrl, final String callback) {
+        return authUrl;
+    }
+
+    @Override
     public String modifyCallbackURL(String callbackUrl) {
         return callbackUrl;
     }
@@ -168,5 +175,16 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     @Override
     public boolean registerTokenBasedDeferrer() {
     	return false;
+    }
+
+    /**
+     * URL-encodes specified string.
+     */
+    protected static String urlEncode(final String s) {
+        try {
+            return URLEncoder.encode(s, "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return s;
+        }
     }
 }
