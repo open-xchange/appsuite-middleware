@@ -77,7 +77,7 @@ public final class DropboxFile extends DefaultFile {
      */
     public DropboxFile(final String folderId, final String id, final int userId) {
         super();
-        setFolderId(folderId);
+        setFolderId("/".equals(folderId) ? FileStorageFolder.ROOT_FULLNAME : folderId);
         setCreatedBy(userId);
         setModifiedBy(userId);
         setId(id);

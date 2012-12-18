@@ -86,7 +86,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     /**
      * Initializes a new {@link DropboxFileAccess}.
      */
-    public DropboxFileAccess(DropboxOAuthAccess dropboxOAuthAccess, FileStorageAccount account, Session session, final DropboxAccountAccess accountAccess) {
+    public DropboxFileAccess(final DropboxOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session, final DropboxAccountAccess accountAccess) {
         super(dropboxOAuthAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
@@ -113,25 +113,25 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public void setTransactional(boolean transactional) {
+    public void setTransactional(final boolean transactional) {
         // Nope
     }
 
     @Override
-    public void setRequestTransactional(boolean transactional) {
+    public void setRequestTransactional(final boolean transactional) {
         // Nope
     }
 
     @Override
-    public void setCommitsTransaction(boolean commits) {
+    public void setCommitsTransaction(final boolean commits) {
         // Nope
     }
 
     @Override
-    public boolean exists(String folderId, String id, String version) throws OXException {
+    public boolean exists(final String folderId, final String id, final String version) throws OXException {
         try {
             final Entry entry = dropboxAPI.metadata(id, 1, null, false, version);
-            return !entry.isDeleted;
+            return !entry.isDir && !entry.isDeleted;
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
                 return false;
@@ -145,7 +145,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public File getFileMetadata(String folderId, String id, String version) throws OXException {
+    public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         try {
             final Entry entry = dropboxAPI.metadata(id, 1, null, false, version);
             if (entry.isDir) {
@@ -168,21 +168,23 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public void saveFileMetadata(File file, long sequenceNumber) throws OXException {
+    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
         saveFileMetadata(file, sequenceNumber, null);
     }
 
     @Override
-    public void saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         saveDocument(file, Streams.newByteArrayInputStream(new byte[0]), sequenceNumber, modifiedFields);
     }
 
     @Override
-    public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFil, List<Field> modifiedFields) throws OXException {
+    public IDTuple copy(final IDTuple source, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws OXException {
         final String id = source.getId();
         try {
             final String name = id.substring(id.lastIndexOf('/') + 1);
-            final Entry entry = dropboxAPI.copy(id, new StringAllocator(destFolder).append('/').append(name).toString());
+            final String destPath = toPath(destFolder);
+            final int pos = destPath.lastIndexOf('/');
+            final Entry entry = dropboxAPI.copy(id, pos > 0 ? new StringAllocator(destPath).append('/').append(name).toString() : name);
             return new IDTuple(entry.parentPath(), entry.path);
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
@@ -197,7 +199,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public InputStream getDocument(String folderId, String id, String version) throws OXException {
+    public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
             return dropboxAPI.getFileStream(id, version);
         } catch (final DropboxServerException e) {
@@ -213,12 +215,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
+    public void saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
         saveDocument(file, data, sequenceNumber, null);
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         final String id = file.getId();
         try {
             final long fileSize = file.getFileSize();
@@ -248,9 +250,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public void removeDocument(String folderId, long sequenceNumber) throws OXException {
+    public void removeDocument(final String folderId, final long sequenceNumber) throws OXException {
         try {
-            final Entry directoryEntry = dropboxAPI.metadata(folderId, 0, null, true, null);
+            final Entry directoryEntry = dropboxAPI.metadata(toPath(folderId), 0, null, true, null);
             if (!directoryEntry.isDir) {
                 throw DropboxExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
@@ -272,7 +274,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws OXException {
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
         try {
             final List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
             for (final IDTuple id : ids) {
@@ -295,7 +297,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
+    public String[] removeVersion(final String folderId, final String id, final String[] versions) throws OXException {
         /*
          * Dropbox API does not support removing revisions of a file
          */
@@ -320,24 +322,24 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public void unlock(String folderId, String id) throws OXException {
+    public void unlock(final String folderId, final String id) throws OXException {
         // Nope
     }
 
     @Override
-    public void lock(String folderId, String id, long diff) throws OXException {
+    public void lock(final String folderId, final String id, final long diff) throws OXException {
         // Nope
     }
 
     @Override
-    public void touch(String folderId, String id) throws OXException {
+    public void touch(final String folderId, final String id) throws OXException {
         exists(folderId, id, CURRENT_VERSION);
     }
 
     @Override
-    public TimedResult<File> getDocuments(String folderId) throws OXException {
+    public TimedResult<File> getDocuments(final String folderId) throws OXException {
         try {
-            final Entry directoryEntry = dropboxAPI.metadata(folderId, 0, null, true, null);
+            final Entry directoryEntry = dropboxAPI.metadata(toPath(folderId), 0, null, true, null);
             if (!directoryEntry.isDir) {
                 throw DropboxExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
@@ -362,14 +364,14 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public TimedResult<File> getDocuments(String folderId, List<Field> fields) throws OXException {
+    public TimedResult<File> getDocuments(final String folderId, final List<Field> fields) throws OXException {
         return getDocuments(folderId);
     }
 
     @Override
-    public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order) throws OXException {
+    public TimedResult<File> getDocuments(final String folderId, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
         try {
-            final Entry directoryEntry = dropboxAPI.metadata(folderId, 0, null, true, null);
+            final Entry directoryEntry = dropboxAPI.metadata(toPath(folderId), 0, null, true, null);
             if (!directoryEntry.isDir) {
                 throw DropboxExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
@@ -396,7 +398,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public TimedResult<File> getVersions(String folderId, String id) throws OXException {
+    public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
         try {
             final List<Entry> revisions = dropboxAPI.revisions(id, 0);
             final List<File> files = new ArrayList<File>(revisions.size());
@@ -417,12 +419,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
+    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws OXException {
         return getVersions(folderId, id);
     }
 
     @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
+    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
         try {
             final List<Entry> revisions = dropboxAPI.revisions(id, 0);
             final List<File> files = new ArrayList<File>(revisions.size());
@@ -445,7 +447,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
+    public TimedResult<File> getDocuments(final List<IDTuple> ids, final List<Field> fields) throws OXException {
         try {
             final List<File> files = new ArrayList<File>(ids.size());
             for (final IDTuple id : ids) {
@@ -470,20 +472,20 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     private static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.emptyIterator();
 
     @Override
-    public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, boolean ignoreDeleted) throws OXException {
+    public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
     @Override
-    public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
+    public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final Field sort, final SortDirection order, final boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
     @Override
-    public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws OXException {
+    public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         try {
             // Dropbox API only supports searching by file name
-            final List<Entry> results = dropboxAPI.search(folderId, pattern, 0, false);
+            final List<Entry> results = dropboxAPI.search(toPath(folderId), pattern, 0, false);
             if (results.isEmpty()) {
                 return SearchIteratorAdapter.emptyIterator();
             }

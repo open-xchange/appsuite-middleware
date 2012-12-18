@@ -55,6 +55,7 @@ import org.scribe.model.Token;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.session.WebAuthSession;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.dropbox.session.DropboxOAuthAccess;
 import com.openexchange.session.Session;
 
@@ -92,6 +93,32 @@ public abstract class AbstractDropboxAccess {
 
     public String getDropboxUserName() {
         return dropboxUserName;
+    }
+
+    /**
+     * Gets the path for specified folder identifier.
+     *
+     * @param folderId The folder identifier
+     * @return The associated path
+     */
+    protected static String toPath(final String folderId) {
+        if (null == folderId) {
+            return null;
+        }
+        return FileStorageFolder.ROOT_FULLNAME.equals(folderId) ? "/" : folderId;
+    }
+
+    /**
+     * Gets the identifier for specified path.
+     *
+     * @param path The path
+     * @return The associated identifier
+     */
+    protected static String toId(final String path) {
+        if (null == path) {
+            return null;
+        }
+        return "/".equals(path) ? FileStorageFolder.ROOT_FULLNAME : path;
     }
 
     /**

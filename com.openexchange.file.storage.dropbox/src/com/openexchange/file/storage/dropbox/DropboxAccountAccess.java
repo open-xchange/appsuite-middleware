@@ -114,11 +114,9 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess {
         return account.getId();
     }
 
- 
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return new DropboxFileAccess(dropboxOAuthAccess, account, session, this);
     }
 
     @Override
