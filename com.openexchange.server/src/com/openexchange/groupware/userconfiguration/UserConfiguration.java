@@ -1194,7 +1194,9 @@ public final class UserConfiguration implements Serializable, Cloneable {
     public Set<String> getExtendedPermissions() {
         Set<String> retval = extendedPermissions;
         if (retval == null) {
-            synchronized (UserConfigurationStorage.getInstance().getLock(userId, ctx)) {
+            final UserConfigurationStorage configurationStorage = UserConfigurationStorage.getInstance();
+            final Object lock = null == configurationStorage ? this : configurationStorage.getLock(userId, ctx);
+            synchronized (lock) {
                 retval = extendedPermissions;
                 if (retval == null) {
                     retval = new HashSet<String>();
@@ -1227,8 +1229,10 @@ public final class UserConfiguration implements Serializable, Cloneable {
                         } catch (final OXException x) {
                             LOG.error(x.getMessage(), x);
                         }
-                    } 
-                    UserConfigurationStorage.getInstance().setExtendedPermissions(retval, userId, ctx);
+                    }
+                    if (null != configurationStorage) {
+                        configurationStorage.setExtendedPermissions(retval, userId, ctx);
+                    }
                     this.extendedPermissions = retval;
                 }
             }
