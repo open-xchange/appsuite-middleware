@@ -365,6 +365,11 @@ public class Multiple extends SessionServlet {
                     LOG.error(e.getMessage(), e);
                     ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
                     return state;
+                } catch (final RuntimeException rte) {
+                    LOG.error(rte.getMessage(), rte);
+                    final OXException e = AjaxExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
+                    return state;
                 } finally {
                 	jsonWriter.endObject();
                 }
