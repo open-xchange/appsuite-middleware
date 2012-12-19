@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.httpclient;
+package com.openexchange.file.storage.dropbox.auth;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;

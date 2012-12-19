@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.httpclient;
+package com.openexchange.file.storage.dropbox.auth;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;

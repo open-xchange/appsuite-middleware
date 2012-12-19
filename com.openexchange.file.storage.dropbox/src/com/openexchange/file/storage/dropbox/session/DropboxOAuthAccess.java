@@ -62,7 +62,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxServices;
-import com.openexchange.file.storage.dropbox.httpclient.TrustAllWebAuthSession;
+import com.openexchange.file.storage.dropbox.auth.TrustAllWebAuthSession;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.session.Session;

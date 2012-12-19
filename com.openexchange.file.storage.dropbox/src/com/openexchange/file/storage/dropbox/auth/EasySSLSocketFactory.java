@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.httpclient;
+package com.openexchange.file.storage.dropbox.auth;
 
 import java.io.IOException;
 import java.net.InetAddress;
