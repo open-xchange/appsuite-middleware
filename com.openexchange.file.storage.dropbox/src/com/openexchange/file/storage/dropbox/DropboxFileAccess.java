@@ -157,7 +157,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
             if (entry.isDeleted) {
                 throw DropboxExceptionCodes.NOT_FOUND.create(id);
             }
-            return new DropboxFile(entry.parentPath(), entry.path, userId);
+            return new DropboxFile(entry.parentPath(), entry.path, userId).parseDropboxFile(entry);
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
                 throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
