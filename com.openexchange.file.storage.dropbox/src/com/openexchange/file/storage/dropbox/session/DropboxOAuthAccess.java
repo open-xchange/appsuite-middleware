@@ -157,7 +157,7 @@ public final class DropboxOAuthAccess {
              * See: https://www.dropbox.com/developers/reference/api#account-info
              */
             final AppKeyPair appKeys = new AppKeyPair(DropboxConfiguration.getInstance().getApiKey(), DropboxConfiguration.getInstance().getSecretKey());
-            webAuthSession = new TrustAllWebAuthSession(appKeys, AccessType.APP_FOLDER);
+            webAuthSession = new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX);
             dropboxApi = new DropboxAPI<WebAuthSession>(webAuthSession);
             // Re-auth specific stuff
             final AccessTokenPair reAuthTokens = new AccessTokenPair(oauthAccount.getToken(), oauthAccount.getSecret());

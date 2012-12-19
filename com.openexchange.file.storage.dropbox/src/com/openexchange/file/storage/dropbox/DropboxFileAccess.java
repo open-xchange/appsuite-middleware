@@ -487,6 +487,14 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     @Override
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         try {
+            if (isEmpty(pattern)) {
+                final List<File> files = new LinkedList<File>();
+                gatherAllFiles("/", files);
+                // Sort collection
+                Collections.sort(files, order.comparatorBy(sort));
+                return new SearchIteratorAdapter<File>(files.iterator(), files.size());
+            }
+            // Search by pattern
             final List<Entry> results;
             if (null == folderId) {
                 // All folders...
@@ -541,6 +549,21 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
         }
         for (final String childPath : collectedPaths) {
             gatherAllFolders(childPath, folderPaths);
+        }
+    }
+
+    private void gatherAllFiles(final String path, final List<File> files) throws DropboxException, OXException {
+        final Entry metadata = dropboxAPI.metadata(path, 0, null, true, null);
+        final List<Entry> contents = metadata.contents;
+        for (final Entry childEntry : contents) {
+            final String childPath = childEntry.path;
+            if (!childEntry.isDeleted) {
+                if (childEntry.isDir) {
+                    gatherAllFiles(childPath, files);
+                } else {
+                    files.add(new DropboxFile(toId(path), childPath, userId).parseDropboxFile(childEntry));
+                }
+            }
         }
     }
 

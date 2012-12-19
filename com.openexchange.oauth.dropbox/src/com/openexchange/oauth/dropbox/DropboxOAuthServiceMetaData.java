@@ -102,7 +102,7 @@ public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaD
         try {
             final AppKeyPair appKeys = new AppKeyPair(apiKey, apiSecret);
             final DropboxAPI<WebAuthSession> dropboxAPI =
-                new DropboxAPI<WebAuthSession>(new TrustAllWebAuthSession(appKeys, AccessType.APP_FOLDER));
+                new DropboxAPI<WebAuthSession>(new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX));
             final StringAllocator authUrl = new StringAllocator(dropboxAPI.getSession().getAuthInfo().url);
             if (!isEmpty(callbackUrl)) {
                 authUrl.append('&').append(OAuthConstants.URLPARAM_OAUTH_CALLBACK).append('=').append(urlEncode(callbackUrl)).toString();
