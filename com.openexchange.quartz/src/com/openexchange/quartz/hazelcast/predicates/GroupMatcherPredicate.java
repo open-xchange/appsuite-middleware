@@ -47,43 +47,43 @@
  *
  */
 
-package com.openexchange.service.indexing.hazelcast;
+package com.openexchange.quartz.hazelcast.predicates;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
-import org.quartz.JobPersistenceException;
-import org.quartz.TriggerKey;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
-import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
+import org.quartz.impl.matchers.GroupMatcher;
+import org.quartz.utils.Key;
+import com.hazelcast.core.MapEntry;
+import com.hazelcast.query.Predicate;
 
-public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
+/**
+ * 
+ * {@link GroupMatcherPredicate}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @param <K>
+ * @param <V>
+ */
+public class GroupMatcherPredicate<K extends Key<K>, V> implements Predicate<K, V> {
     
-    private HazelcastInstance hazelcast = null;
+    private static final long serialVersionUID = -7009678330098161960L;
     
+    private GroupMatcher<K> groupMatcher;
+    
+    
+    public GroupMatcherPredicate(GroupMatcher<K> groupMatcher) {
+        super();
+        this.groupMatcher = groupMatcher;
+    }
+
     @Override
-    public void shutdown() {
-        Collection<Instance> instances = hazelcast.getInstances();
-        for (Instance instance : instances) {
-            instance.destroy();
-        }
+    public boolean apply(MapEntry<K, V> mapEntry) {
+        return groupMatcher.isMatch(mapEntry.getKey());
     }
     
-    @Override
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
-        }
-        
-        return hazelcast;
+    public void setGroupMatcher(GroupMatcher<K> groupMatcher) {
+        this.groupMatcher = groupMatcher;
     }
     
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
-        return locallyAcquiredTriggers;
-    }
-    
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
-        return locallyExecutingTriggers;
+    public GroupMatcher<K> getGroupMatcher() {
+        return groupMatcher;
     }
 }

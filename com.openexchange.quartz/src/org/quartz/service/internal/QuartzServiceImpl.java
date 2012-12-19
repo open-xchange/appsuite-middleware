@@ -69,7 +69,7 @@ import com.openexchange.exception.OXException;
  */
 public final class QuartzServiceImpl implements QuartzService {
     
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuartzServiceImpl.class);    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuartzServiceImpl.class);
 
     private final Map<String, Scheduler> clusteredSchedulers = new HashMap<String, Scheduler>();
     
@@ -140,7 +140,7 @@ public final class QuartzServiceImpl implements QuartzService {
                 clusteredProperties.put("org.quartz.threadPool.threadPriority", "5");
                 clusteredProperties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", true);
                 clusteredProperties.put("org.quartz.jobStore.misfireThreshold", "60000");
-                clusteredProperties.put("org.quartz.jobStore.class", "org.quartz.service.internal.HazelcastJobStore");
+                clusteredProperties.put("org.quartz.jobStore.class", "com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore");
                 clusteredProperties.put("org.quartz.scheduler.jmx.export", true);
                 try {
                     SchedulerFactory csf = new StdSchedulerFactory(clusteredProperties);

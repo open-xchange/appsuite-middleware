@@ -103,1532 +103,1532 @@ import com.hazelcast.query.Predicate;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class HazelcastJobStore implements JobStore {
+//public class HazelcastJobStore implements JobStore {
     
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastJobStore.class);
-    
-    private SchedulerSignaler signaler;
-    
-    private long misfireThreshold = 60000l;
-    
-    private ISet<JobKey> jobKeys;
-    
-    private IMap<TriggerKey, TriggerStateWrapper> triggersByKey;
-    
-    private IMap<String, ISet<TriggerKey>> triggersByGroup;
-    
-    private IMap<JobKey, ISet<TriggerKey>> triggersByJobKey;
-    
-    private IMap<String, IMap<JobKey, JobDetail>> jobsByGroup;
-    
-    private ISet<JobKey> blockedJobs;
-    
-    private IMap<String, Calendar> calendarsByName;
-    
-    private ISet<String> pausedTriggerGroups;
-    
-    private ISet<String> pausedJobGroups;
-    
-    private ILock lock;
-
-    private String instanceId;
-
-    private String instanceName;
-    
-    private String nodeIp;
-    
-    protected final ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers = new ConcurrentHashMap<TriggerKey, Boolean>();
-    
-    protected final ConcurrentMap<TriggerKey, Boolean> locallyExecutingTriggers = new ConcurrentHashMap<TriggerKey, Boolean>();
-
-    private Timer consistencyTimer;
-    
-    
-    public HazelcastJobStore() {
-        super();
-    }
-    
-    public long getMisfireThreshold() {
-        return misfireThreshold;
-    }
-
-    public void setMisfireThreshold(long misfireThreshold) {
-        if (misfireThreshold < 1) {
-            throw new IllegalArgumentException("Misfire threshold must be larger than 0");
-        }
-        this.misfireThreshold = misfireThreshold;
-    }
-
-    @Override
-    public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler) throws SchedulerConfigException {
-        HazelcastInstance hazelcast;
-        try {
-            hazelcast = getHazelcast();
-        } catch (JobPersistenceException e) {
-            throw new SchedulerConfigException(e.getMessage());
-        }
-        
-        this.signaler = signaler;
-        jobsByGroup = hazelcast.getMap(instanceName + '/' + "quartzJobsByGroup");
-        triggersByGroup = hazelcast.getMap(instanceName + '/' + "quartzTriggersByGroup");
-        jobKeys = hazelcast.getSet(instanceName + '/' + "quartzJobKeys");
-        triggersByKey = hazelcast.getMap(instanceName + '/' + "quartzTriggersByKey");
-        triggersByJobKey = hazelcast.getMap(instanceName + '/' + "quartzTriggersByJobKey");
-        calendarsByName = hazelcast.getMap(instanceName + '/' + "quartzCalendarsByName");
-        pausedTriggerGroups = hazelcast.getSet(instanceName + '/' + "quartzPausedTriggerGroups");
-        pausedJobGroups = hazelcast.getSet(instanceName + '/' + "quartzPausedJobGroups");
-        lock = hazelcast.getLock(instanceName + '/' + "quartzJobStoreLock");
-        blockedJobs = hazelcast.getSet(instanceName + '/' + "quartzBlockedJobs");
-        nodeIp = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
-        
-        if (triggersByKey.isEmpty()) {
-            triggersByKey.addIndex("trigger.nextFireTime", true);
-            triggersByKey.addIndex("trigger.misfireInstruction", false);
-        }
-        
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Initialized HazelcastJobStore.");
-        }
-    }
-
-    @Override
-    public void schedulerStarted() throws SchedulerException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Scheduler was started. Starting consistency task...");
-        }
-        
-        try {
-            consistencyTimer = new Timer(true);
-            consistencyTimer.schedule(new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers), new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
-        } catch (IllegalStateException e) {
-            LOG.warn("Could not schedule consistency task: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void schedulerPaused() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Scheduler was paused. Cancelling consistency task...");
-        }
-
-        consistencyTimer.cancel();
-        consistencyTimer = null;
-    }
-
-    @Override
-    public void schedulerResumed() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Scheduler was resumed. Starting consistency task...");
-        }
-        
-        try {
-            consistencyTimer = new Timer(true);
-            consistencyTimer.schedule(new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers), new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
-        } catch (IllegalStateException e) {
-            LOG.warn("Could not schedule consistency task: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void shutdown() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Scheduler was stopped. Cancelling consistency task...");
-        }
-        
-        consistencyTimer.cancel();
-        consistencyTimer = null;
-    }
-
-    @Override
-    public boolean supportsPersistence() {
-        return false;
-    }
-
-    @Override
-    public long getEstimatedTimeToReleaseAndAcquireTrigger() {
-        return 200;
-    }
-
-    @Override
-    public boolean isClustered() {
-        return true;
-    }
-    
-    @Override
-    public void storeJob(JobDetail newJob, boolean replaceExisting) throws ObjectAlreadyExistsException, JobPersistenceException {
-        HazelcastInstance hazelcast = getHazelcast();
-        lock.lock();
-        try {
-            JobKey key = newJob.getKey();
-            String group = key.getGroup();
-            IMap<JobKey, JobDetail> jobsByKey = jobsByGroup.get(group);
-            if (jobsByKey == null) {
-                jobsByKey = hazelcast.getMap(instanceName + '/' + "quartzJobsByKey/" + group);
-                jobsByKey.put(key, newJob);
-                jobKeys.add(key);
-                jobsByGroup.put(group, jobsByKey);
-            } else {
-                if (jobsByKey.containsKey(key)) {
-                    if (replaceExisting) {
-                        jobsByKey.put(key, newJob);
-                        jobKeys.add(key);
-                    } else {
-                        throw new ObjectAlreadyExistsException(newJob);
-                    }
-                } else {
-                    jobsByKey.put(key, newJob);
-                    jobKeys.add(key);
-                }
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-    
-    @Override
-    public void storeTrigger(OperableTrigger newTrigger, boolean replaceExisting) throws ObjectAlreadyExistsException, JobPersistenceException {
-        HazelcastInstance hazelcast = getHazelcast();
-        lock.lock();
-        try {
-            TriggerKey key = newTrigger.getKey();
-            String group = key.getGroup();
-            ISet<TriggerKey> triggersByKey = triggersByGroup.get(group);
-            if (triggersByKey == null) {
-                triggersByKey = hazelcast.getSet(instanceName + '/' + "quartzTriggerKeys/" + group);
-                triggersByGroup.put(group, triggersByKey);
-                storeTrigger(triggersByKey, newTrigger);
-            } else {
-                if (triggersByKey.contains(key)) {
-                    if (replaceExisting) {
-                        storeTrigger(triggersByKey, newTrigger);
-                    } else {
-                        throw new ObjectAlreadyExistsException(newTrigger);
-                    }
-                } else {
-                    storeTrigger(triggersByKey, newTrigger);
-                }
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-    
-    private void storeTrigger(ISet<TriggerKey> triggersByKey, OperableTrigger newTrigger) throws JobPersistenceException {
-        TriggerKey triggerKey = newTrigger.getKey();
-        String group = triggerKey.getGroup();
-        JobKey jobKey = newTrigger.getJobKey();
-        triggersByKey.add(triggerKey);
-        TriggerStateWrapper stateWrapper;
-        if (pausedTriggerGroups.contains(group) || pausedJobGroups.contains(jobKey.getGroup())) {
-            if (blockedJobs.contains(jobKey)) {
-                stateWrapper = new TriggerStateWrapper(newTrigger, TriggerStateWrapper.STATE_PAUSED_BLOCKED);
-            } else {
-                stateWrapper = new TriggerStateWrapper(newTrigger, TriggerStateWrapper.STATE_PAUSED);
-            }            
-        } else {
-            if (blockedJobs.contains(jobKey)) {
-                stateWrapper = new TriggerStateWrapper(newTrigger, TriggerStateWrapper.STATE_BLOCKED);
-            } else {
-                stateWrapper = new TriggerStateWrapper(newTrigger);
-            }
-        }
-        
-        this.triggersByKey.put(triggerKey, stateWrapper);
-        ISet<TriggerKey> triggers = triggersByJobKey.get(jobKey);
-        if (triggers == null) {
-            HazelcastInstance hazelcast = getHazelcast();
-            triggers = hazelcast.getSet(instanceName + '/' + "quartzTriggersByJobKey/" + jobKey.toString());
-            triggersByJobKey.put(jobKey, triggers);
-        }
-        
-        triggers.add(triggerKey);
-    }
-    
-    @Override
-    public void storeJobAndTrigger(JobDetail newJob, OperableTrigger newTrigger) throws ObjectAlreadyExistsException, JobPersistenceException {
-        lock.lock();
-        try {
-            storeJob(newJob, false);
-            storeTrigger(newTrigger, false);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public void storeJobsAndTriggers(Map<JobDetail, List<Trigger>> triggersAndJobs, boolean replace) throws ObjectAlreadyExistsException, JobPersistenceException {
-        lock.lock();
-        try {
-            if (!replace) {
-                for (JobDetail jobDetail : triggersAndJobs.keySet()) {
-                    if (jobKeys.contains(jobDetail.getKey())) {
-                        throw new ObjectAlreadyExistsException(jobDetail);
-                    }
-                    
-                    List<Trigger> triggers = triggersAndJobs.get(jobDetail);
-                    for (Trigger trigger : triggers) {
-                        if (triggersByKey.keySet().contains(trigger.getKey())) {
-                            throw new ObjectAlreadyExistsException(trigger);
-                        }
-                    }
-                }
-            }
-            
-            for (JobDetail jobDetail : triggersAndJobs.keySet()) {
-                storeJob(jobDetail, true);
-                List<Trigger> triggers = triggersAndJobs.get(jobDetail);
-                for (Trigger trigger : triggers) {
-                    storeTrigger((OperableTrigger) trigger, true);
-                }
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public boolean removeJob(JobKey jobKey) throws JobPersistenceException {
-        lock.lock();
-        try {
-            String group = jobKey.getGroup();
-            if (!jobKeys.remove(jobKey)) {
-                return false;
-            }
-            
-            IMap<JobKey, JobDetail> jobsByKey = jobsByGroup.get(group);
-            if (jobsByKey == null) {
-                return false;
-            }
-
-            jobsByKey.remove(jobKey);
-            if (jobsByKey.isEmpty()) {
-                jobsByGroup.remove(group);
-                jobsByKey.destroy();
-            }
-            
-            ISet<TriggerKey> triggers = triggersByJobKey.get(jobKey);
-            if (triggers != null) {
-                removeTriggers(new ArrayList<TriggerKey>(triggers));
-            }
-        } finally {
-            lock.unlock();
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean removeJobs(List<JobKey> jobKeys) throws JobPersistenceException {
-        lock.lock();
-        try {
-            boolean removedAll = true;
-            for (JobKey jobKey : jobKeys) {
-                removedAll = removedAll && removeJob(jobKey);
-            }
-    
-            return removedAll;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public JobDetail retrieveJob(JobKey jobKey) throws JobPersistenceException {
-        lock.lock();
-        try {
-            String group = jobKey.getGroup();
-            Map<JobKey, JobDetail> jobsByKey = jobsByGroup.get(group);
-            if (jobsByKey == null) {
-                return null;
-            }            
-            
-            return jobsByKey.get(jobKey);
-        } finally {
-            lock.unlock();
-        }
-    }    
-
-    @Override
-    public boolean removeTrigger(TriggerKey triggerKey) throws JobPersistenceException {
-        lock.lock();
-        try {
-            TriggerStateWrapper removedTrigger = triggersByKey.remove(triggerKey);
-            if (removedTrigger == null) {
-                return false;
-            }
-            
-            String group = triggerKey.getGroup();
-            ISet<TriggerKey> triggers = triggersByGroup.get(group);
-            triggers.remove(triggerKey);
-            if (triggers.isEmpty()) {
-                triggersByGroup.remove(group);
-                triggers.destroy();
-                if (pausedTriggerGroups.contains(group)) {
-                    pausedTriggerGroups.remove(group);
-                }
-            }
-            
-            JobKey jobKey = removedTrigger.getTrigger().getJobKey();
-            ISet<TriggerKey> triggerKeysForJob = triggersByJobKey.get(jobKey);
-            triggerKeysForJob.remove(triggerKey);
-            boolean removeJob = false;
-            if (triggerKeysForJob.isEmpty()) {
-                triggersByJobKey.remove(jobKey);
-                Map<JobKey, JobDetail> jobsByKey = jobsByGroup.get(jobKey.getGroup());
-                if (jobsByKey != null) {
-                    JobDetail jobDetail = jobsByKey.get(jobKey);
-                    if (jobDetail != null && !jobDetail.isDurable()) {
-                        removeJob = true;
-                    }
-                }
-            }
-            
-            if (removeJob && removeJob(jobKey)) {                
-                signaler.notifySchedulerListenersJobDeleted(jobKey);
-            }
-            
-            return true;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public boolean removeTriggers(List<TriggerKey> triggerKeys) throws JobPersistenceException {
-        lock.lock();
-        boolean removedAll = true;
-        try {
-            for (TriggerKey triggerKey : triggerKeys) {
-                removedAll = removedAll && removeTrigger(triggerKey);
-            }            
-        } finally {
-            lock.unlock();
-        }
-
-        return removedAll;
-    }
-
-    @Override
-    public boolean replaceTrigger(TriggerKey triggerKey, OperableTrigger newTrigger) throws JobPersistenceException {
-        lock.lock();
-        try {
-            boolean found = removeTrigger(triggerKey);
-            storeTrigger(newTrigger, true);
-            
-            return found;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public OperableTrigger retrieveTrigger(TriggerKey triggerKey) throws JobPersistenceException {
-        lock.lock();
-        try {            
-            TriggerStateWrapper stateWrapper = triggersByKey.get(triggerKey);
-            if (stateWrapper == null) {
-                return null;
-            }
-            
-            return (OperableTrigger) stateWrapper.getTrigger();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public boolean checkExists(JobKey jobKey) throws JobPersistenceException {
-        lock.lock();
-        try {
-            return jobKeys.contains(jobKey);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public boolean checkExists(TriggerKey triggerKey) throws JobPersistenceException {
-        lock.lock();
-        try {
-            return triggersByKey.keySet().contains(triggerKey);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public void clearAllSchedulingData() throws JobPersistenceException {
-        lock.lock();
-        try {
-            jobKeys.clear();
-            triggersByKey.clear();
-            triggersByJobKey.clear();
-            for (IMap<JobKey, JobDetail> inner : jobsByGroup.values()) {
-                inner.destroy();
-            }
-            
-            for (ISet<TriggerKey> inner : triggersByGroup.values()) {
-                inner.destroy();
-            }
-            jobsByGroup.clear();
-            triggersByGroup.clear();
-            calendarsByName.clear();
-            pausedTriggerGroups.clear();
-            pausedJobGroups.clear();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public void storeCalendar(String name, Calendar calendar, boolean replaceExisting, boolean updateTriggers) throws ObjectAlreadyExistsException, JobPersistenceException {
-        lock.lock();
-        try {
-            boolean exists = calendarsByName.containsKey(name);
-            if (exists && !replaceExisting) {
-                throw new ObjectAlreadyExistsException("Calendar with name '" + name + "' already exists.");
-            }
-            
-            calendarsByName.put(name, calendar);
-            Set<TriggerKey> toUpdate = new HashSet<TriggerKey>();
-            if (exists && updateTriggers) {
-                for (TriggerStateWrapper stateWrapper : triggersByKey.values()) {
-                    if (name.equals(stateWrapper.getTrigger().getCalendarName())) {
-                        toUpdate.add(stateWrapper.getTrigger().getKey());
-                    }
-                }
-                
-                for (TriggerKey triggerKey : toUpdate) {
-                    TriggerStateWrapper stateWrapper = triggersByKey.remove(triggerKey);
-                    if (stateWrapper != null) {
-                        OperableTrigger trigger = (OperableTrigger) stateWrapper.getTrigger();
-                        trigger.updateWithNewCalendar(calendar, getMisfireThreshold());
-                        triggersByKey.put(triggerKey, stateWrapper);
-                    }
-                }
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public boolean removeCalendar(String calName) throws JobPersistenceException {
-        lock.lock();
-        try {
-            for (String group : triggersByGroup.keySet()) {
-                ISet<TriggerKey> triggerKeys = triggersByGroup.get(group);
-                for (TriggerKey key : triggerKeys) {
-                    Trigger trigger = triggersByKey.get(key).getTrigger();
-                    if (trigger.getCalendarName().equals(calName)) {
-                        throw new JobPersistenceException("Calender cannot be removed if it referenced by a Trigger!");
-                    }
-                }
-            }         
-            
-            return calendarsByName.remove(calName) != null;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public Calendar retrieveCalendar(String calName) throws JobPersistenceException {
-        lock.lock();
-        try {
-            return calendarsByName.get(calName);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public int getNumberOfJobs() throws JobPersistenceException {
-        lock.lock();
-        try {
-            return jobKeys.size();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public int getNumberOfTriggers() throws JobPersistenceException {
-        lock.lock();
-        try {
-            return triggersByKey.size();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public int getNumberOfCalendars() throws JobPersistenceException {
-        lock.lock();
-        try {
-            return calendarsByName.size();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public Set<JobKey> getJobKeys(GroupMatcher<JobKey> matcher) throws JobPersistenceException {
-        Set<JobKey> resultKeys = new HashSet<JobKey>();
-        lock.lock();
-        try {
-            for (JobKey jobKey : jobKeys) {
-                if (matcher.isMatch(jobKey)) {
-                    resultKeys.add(jobKey);
-                }
-            }
-            
-            return resultKeys;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public Set<TriggerKey> getTriggerKeys(GroupMatcher<TriggerKey> matcher) throws JobPersistenceException {
-        Set<TriggerKey> resultKeys = new HashSet<TriggerKey>();
-        lock.lock();
-        try {
-            for (TriggerKey triggerKey : triggersByKey.keySet()) {
-                if (matcher.isMatch(triggerKey)) {
-                    resultKeys.add(triggerKey);
-                }
-            }
-            
-            return resultKeys;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public List<String> getJobGroupNames() throws JobPersistenceException {
-        List<String> groupNames = new ArrayList<String>();
-        lock.lock();
-        try {
-            groupNames.addAll(jobsByGroup.keySet());            
-            return groupNames;
-        } finally {
-            lock.unlock();
-        } 
-    }
-
-    @Override
-    public List<String> getTriggerGroupNames() throws JobPersistenceException {
-        List<String> groupNames = new ArrayList<String>();
-        lock.lock();
-        try {
-            groupNames.addAll(triggersByGroup.keySet());            
-            return groupNames;
-        } finally {
-            lock.unlock();
-        } 
-    }
-
-    @Override
-    public List<String> getCalendarNames() throws JobPersistenceException {
-        List<String> calendarNames = new ArrayList<String>();
-        lock.lock();
-        try {
-            calendarNames.addAll(calendarsByName.keySet());            
-            return calendarNames;
-        } finally {
-            lock.unlock();
-        } 
-    }
-
-    @Override
-    public List<OperableTrigger> getTriggersForJob(JobKey jobKey) throws JobPersistenceException {
-        List<OperableTrigger> resultTriggers = new ArrayList<OperableTrigger>();
-        lock.lock();
-        try {
-            ISet<TriggerKey> triggerKeys = triggersByJobKey.get(jobKey);
-            if (triggerKeys != null) {
-                for (TriggerKey triggerKey : triggerKeys) {
-                    OperableTrigger trigger = (OperableTrigger) triggersByKey.get(triggerKey).getTrigger();
-                    if (trigger != null) {
-                        resultTriggers.add(trigger);
-                    }
-                }
-            }
-            
-            return resultTriggers;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public TriggerState getTriggerState(TriggerKey triggerKey) throws JobPersistenceException {
-        lock.lock();
-        TriggerStateWrapper trigger;
-        try {
-            trigger = triggersByKey.get(triggerKey);
-        } finally {
-            lock.unlock();
-        }
-        
-        if (trigger == null) {
-            return TriggerState.NONE;
-        }
-        
-        if (trigger.getState() == TriggerStateWrapper.STATE_COMPLETE) {
-            return TriggerState.COMPLETE;
-        } else if (trigger.getState() == TriggerStateWrapper.STATE_PAUSED) {
-            return TriggerState.PAUSED;
-        } else if (trigger.getState() == TriggerStateWrapper.STATE_PAUSED_BLOCKED) {
-            return TriggerState.PAUSED;
-        } else if (trigger.getState() == TriggerStateWrapper.STATE_ERROR) {
-            return TriggerState.ERROR;
-        } else if (trigger.getState() == TriggerStateWrapper.STATE_BLOCKED) {
-            return TriggerState.BLOCKED;
-        }
-        
-        return TriggerState.NORMAL;
-    }
-
-    @Override
-    public void pauseTrigger(TriggerKey triggerKey) throws JobPersistenceException {
-        lock.lock();
-        try {
-            TriggerStateWrapper trigger = triggersByKey.get(triggerKey);
-            if (trigger == null || trigger.getState() == TriggerStateWrapper.STATE_COMPLETE) {
-                return;
-            }
-                        
-            trigger = triggersByKey.remove(triggerKey);
-            if (trigger.getState() == TriggerStateWrapper.STATE_BLOCKED) {
-                trigger.setState(TriggerStateWrapper.STATE_PAUSED_BLOCKED);
-            } else {
-                trigger.setState(TriggerStateWrapper.STATE_PAUSED);
-            }
-            
-            triggersByKey.put(triggerKey, trigger);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public Collection<String> pauseTriggers(GroupMatcher<TriggerKey> matcher) throws JobPersistenceException {
-        List<String> groupsToPause = new ArrayList<String>();
-        lock.lock();
-        try {
-            for (TriggerKey triggerKey : triggersByKey.keySet()) {
-                if (matcher.isMatch(triggerKey)) {
-                    groupsToPause.add(triggerKey.getGroup());
-                    pausedTriggerGroups.add(triggerKey.getGroup());
-                }
-            }
-            
-            Set<TriggerKey> triggerKeys = getTriggerKeys(matcher);
-            for (TriggerKey triggerKey : triggerKeys) {
-                pauseTrigger(triggerKey);
-            }
-            
-            return groupsToPause;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public void pauseJob(JobKey jobKey) throws JobPersistenceException {
-        lock.lock();
-        try {
-            ISet<TriggerKey> triggerKeys = triggersByJobKey.get(jobKey);
-            if (triggerKeys == null) {
-                return;
-            }
-            
-            for (TriggerKey triggerKey : triggerKeys) {
-                pauseTrigger(triggerKey);
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public Collection<String> pauseJobs(GroupMatcher<JobKey> matcher) throws JobPersistenceException {
-        List<String> groupsToPause = new ArrayList<String>();
-        lock.lock();
-        try {
-            for (JobKey jobKey : jobKeys) {
-                if (matcher.isMatch(jobKey)) {
-                    groupsToPause.add(jobKey.getGroup());
-                    pausedJobGroups.add(jobKey.getGroup());
-                }
-            }
-            
-            Set<JobKey> jobKeys = getJobKeys(matcher);
-            for (JobKey jobKey : jobKeys) {
-                pauseJob(jobKey);
-            }
-            
-            return groupsToPause;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public void resumeTrigger(TriggerKey triggerKey) throws JobPersistenceException {
-        lock.lock();
-        try {
-            TriggerStateWrapper stateWrapper = triggersByKey.get(triggerKey);
-            if (stateWrapper == null || (stateWrapper.getState() != TriggerStateWrapper.STATE_PAUSED && stateWrapper.getState() != TriggerStateWrapper.STATE_PAUSED_BLOCKED)) {
-                return;
-            }
-            
-            stateWrapper = triggersByKey.remove(triggerKey);
-            if (blockedJobs.contains(stateWrapper.getTrigger().getJobKey())) {
-                stateWrapper.setState(TriggerStateWrapper.STATE_BLOCKED);
-            } else {
-                stateWrapper.setState(TriggerStateWrapper.STATE_WAITING);
-            }
-            applyMisfire(stateWrapper);
-            triggersByKey.put(triggerKey, stateWrapper);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public Collection<String> resumeTriggers(GroupMatcher<TriggerKey> matcher) throws JobPersistenceException {
-        List<String> groupsToResume = new ArrayList<String>();
-        lock.lock();
-        try {
-            for (TriggerKey triggerKey : triggersByKey.keySet()) {
-                if (matcher.isMatch(triggerKey)) {
-                    groupsToResume.add(triggerKey.getGroup());
-                    pausedTriggerGroups.remove(triggerKey.getGroup());
-                }
-            }
-            
-            Set<TriggerKey> triggerKeys = getTriggerKeys(matcher);
-            for (TriggerKey triggerKey : triggerKeys) {
-                resumeTrigger(triggerKey);
-            }
-            
-            return groupsToResume;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public Set<String> getPausedTriggerGroups() throws JobPersistenceException {
-        Set<String> toReturn = new HashSet<String>();
-        lock.lock();
-        try {
-            toReturn.addAll(pausedTriggerGroups);
-            return toReturn;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public void resumeJob(JobKey jobKey) throws JobPersistenceException {
-        lock.lock();
-        try {
-            ISet<TriggerKey> triggerKeys = triggersByJobKey.get(jobKey);
-            if (triggerKeys == null) {
-                return;
-            }
-            
-            for (TriggerKey triggerKey : triggerKeys) {
-                resumeTrigger(triggerKey);
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public Collection<String> resumeJobs(GroupMatcher<JobKey> matcher) throws JobPersistenceException {
-        List<String> groupsToResume = new ArrayList<String>();
-        lock.lock();
-        try {
-            for (JobKey jobKey : jobKeys) {
-                if (matcher.isMatch(jobKey)) {
-                    groupsToResume.add(jobKey.getGroup());
-                    pausedJobGroups.remove(jobKey.getGroup());
-                }
-            }
-            
-            Set<JobKey> jobKeys = getJobKeys(matcher);
-            for (JobKey jobKey : jobKeys) {
-                resumeJob(jobKey);
-            }
-            
-            return groupsToResume;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public void pauseAll() throws JobPersistenceException {
-        lock.lock();
-        try {
-            Set<String> groups = triggersByGroup.keySet();
-            for (String group : groups) {
-                pauseTriggers(GroupMatcher.triggerGroupEquals(group));
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public void resumeAll() throws JobPersistenceException {
-        lock.lock();
-        try {
-            Set<String> groups = triggersByGroup.keySet();
-            for (String group : groups) {
-                resumeTriggers(GroupMatcher.triggerGroupEquals(group));
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public List<OperableTrigger> acquireNextTriggers(long noLaterThan, int maxCount, long timeWindow) throws JobPersistenceException {
-        List<OperableTrigger> returnList = new ArrayList<OperableTrigger>();
-        lock.lock();
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Got lock. " + System.nanoTime());
-        }
-        
-        long firstAcquiredTriggerFireTime = 0L;
-        try {
-            Collection<TriggerStateWrapper> filteredTriggers = triggersByKey.values();
-            if (filteredTriggers == null) {
-                return returnList;
-            }
-            
-            ArrayList<TriggerStateWrapper> triggers = new ArrayList<TriggerStateWrapper>(filteredTriggers);
-            Collections.sort(triggers, new TriggerWrapperTimeComparator());
-            Set<JobKey> excluded = new HashSet<JobKey>();
-            for (TriggerStateWrapper stateWrapper : triggers) {
-                if (stateWrapper.trigger.getNextFireTime() == null) {
-                    removeTrigger(stateWrapper.getTrigger().getKey());
-                    continue;
-                }
-                
-                if (cannotAcquire(stateWrapper)) {
-                    if (stateWrapper.getState() == TriggerStateWrapper.STATE_COMPLETE) {
-                        removeTrigger(stateWrapper.getTrigger().getKey());
-                    }
-                    continue;
-                }
-                
-                if (firstAcquiredTriggerFireTime > 0 
-                    && stateWrapper.getTrigger().getNextFireTime().getTime() > (firstAcquiredTriggerFireTime + timeWindow)) {                    
-                    break;
-                }
-                
-                if (applyMisfire(stateWrapper)) {
-                    continue;
-                }
-                
-                if (stateWrapper.getTrigger().getNextFireTime().getTime() > noLaterThan + timeWindow) {
-                    break;
-                }
-                
-                JobKey jobKey = stateWrapper.getTrigger().getJobKey();
-                String group = jobKey.getGroup();
-                Map<JobKey, JobDetail> jobDetails = jobsByGroup.get(group);
-                if (jobDetails == null) {
-                    continue;
-                }
-
-                JobDetail jobDetail = jobDetails.get(jobKey);
-                if (jobDetail == null) {
-                    continue;
-                }
-                
-                if (jobDetail.isConcurrentExectionDisallowed()) {
-                    if (excluded.contains(jobKey)) {
-                        continue;
-                    }
-                    
-                    excluded.add(jobKey);
-                }                                
-                
-                triggersByKey.remove(stateWrapper.getTrigger().getKey());
-                stateWrapper.setState(TriggerStateWrapper.STATE_ACQUIRED);
-                stateWrapper.setOwner(nodeIp);
-                OperableTrigger trigger = (OperableTrigger) stateWrapper.getTrigger();
-                trigger.setFireInstanceId(getFiredTriggerRecordId());
-                triggersByKey.put(stateWrapper.getTrigger().getKey(), stateWrapper);
-                if (firstAcquiredTriggerFireTime == 0) {
-                    firstAcquiredTriggerFireTime = trigger.getNextFireTime().getTime();
-                }
-                
-                locallyAcquiredTriggers.put(trigger.getKey(), true);
-                returnList.add(trigger);
-                if (returnList.size() == maxCount) {
-                    break;
-                }
-            }            
-            
-            return returnList;
-        } finally {
-            lock.unlock();
-            if (LOG.isTraceEnabled()) {
-                StringBuilder sb = new StringBuilder("Releasing lock. ");
-                sb.append(System.nanoTime()).append(". ");
-                for (OperableTrigger trigger : returnList) {
-                    sb.append("\n    Trigger: ").append(trigger.getKey().getName());
-                }
-                LOG.trace(sb.toString());
-            }
-        }
-    }
-    
-    private static final AtomicLong ftrCtr = new AtomicLong(System.currentTimeMillis());
-
-    protected String getFiredTriggerRecordId() {
-        return String.valueOf(ftrCtr.incrementAndGet());
-    }
-    
-    private boolean cannotAcquire(TriggerStateWrapper stateWrapper) {
-        return stateWrapper.getState() == TriggerStateWrapper.STATE_BLOCKED
-                || stateWrapper.getState() == TriggerStateWrapper.STATE_PAUSED_BLOCKED
-                || stateWrapper.getState() == TriggerStateWrapper.STATE_COMPLETE
-                || stateWrapper.getState() == TriggerStateWrapper.STATE_PAUSED
-                || stateWrapper.getState() == TriggerStateWrapper.STATE_ACQUIRED
-                || stateWrapper.getState() == TriggerStateWrapper.STATE_EXECUTING;
-    }
-
-    @Override
-    public void releaseAcquiredTrigger(OperableTrigger trigger) throws JobPersistenceException {
-        lock.lock();
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Got lock. " + System.nanoTime());
-        }
-        
-        try {
-            TriggerStateWrapper stateWrapper = triggersByKey.remove(trigger.getKey());
-            if (stateWrapper == null || stateWrapper.getState() != TriggerStateWrapper.STATE_ACQUIRED) {
-                return;
-            }
-            
-            stateWrapper.setState(TriggerStateWrapper.STATE_WAITING);
-            stateWrapper.resetOwner();
-            triggersByKey.put(trigger.getKey(), stateWrapper);
-            locallyAcquiredTriggers.remove(trigger.getKey());
-        } finally {
-            lock.unlock();
-            
-            if (LOG.isTraceEnabled()) {
-                StringBuilder sb = new StringBuilder("Releasing lock. ");
-                sb.append(System.nanoTime()).append(". ");
-                sb.append("\n    Trigger: ").append(trigger.getKey().getName());
-                
-                LOG.trace(sb.toString());
-            }
-        }
-    }
-
-    @Override
-    public List<TriggerFiredResult> triggersFired(List<OperableTrigger> firedTriggers) throws JobPersistenceException {
-        List<TriggerFiredResult> results = new ArrayList<TriggerFiredResult>();
-        lock.lock();
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Got lock. " + System.nanoTime());
-        }
-        
-        try {
-            for (OperableTrigger trigger : firedTriggers) {
-                TriggerStateWrapper stateWrapper = triggersByKey.get(trigger.getKey());
-                if (stateWrapper == null || stateWrapper.getState() != TriggerStateWrapper.STATE_ACQUIRED) {
-                    continue;
-                }
-                
-                Calendar calendar = null;
-                String calendarName = trigger.getCalendarName();
-                if (calendarName != null) {
-                    calendar = calendarsByName.get(calendarName);
-                    if (calendar == null) {
-                        continue;
-                    }
-                }
-                
-                Date prevFireTime = trigger.getPreviousFireTime();
-                trigger.triggered(calendar);
-                TriggerStateWrapper firedWrapper = new TriggerStateWrapper(trigger, TriggerStateWrapper.STATE_EXECUTING);
-                firedWrapper.setOwner(nodeIp);
-                triggersByKey.replace(trigger.getKey(), firedWrapper);
-                locallyAcquiredTriggers.remove(trigger.getKey());
-                locallyExecutingTriggers.put(trigger.getKey(), true);
-                JobKey jobKey = trigger.getJobKey();
-                JobDetail job = retrieveJob(jobKey);
-                TriggerFiredResult result;
-                if (job == null) {
-                    result = new TriggerFiredResult(new JobPersistenceException("Job could not be found."));
-                } else {
-                    TriggerFiredBundle firedBundle = new TriggerFiredBundle(
-                        job, 
-                        trigger, 
-                        calendar, 
-                        false, new Date(), 
-                        trigger.getPreviousFireTime(), 
-                        prevFireTime,
-                        trigger.getNextFireTime());
-                    
-                    result = new TriggerFiredResult(firedBundle);
-                }
-                
-                if (job.isConcurrentExectionDisallowed()) {
-                    ISet<TriggerKey> otherTriggers = triggersByJobKey.get(jobKey);
-                    for (TriggerKey keyToBlock : otherTriggers) {
-                        if (keyToBlock.equals(trigger.getKey())) {
-                            continue;
-                        }
-                        
-                        TriggerStateWrapper triggerToBlock = triggersByKey.remove(keyToBlock);
-                        if (triggerToBlock.getState() == TriggerStateWrapper.STATE_WAITING) {
-                            triggerToBlock.setState(TriggerStateWrapper.STATE_BLOCKED);
-                        } else if (triggerToBlock.getState() == TriggerStateWrapper.STATE_PAUSED) {
-                            triggerToBlock.setState(TriggerStateWrapper.STATE_PAUSED_BLOCKED);
-                        }
-
-                        triggersByKey.put(keyToBlock, triggerToBlock);
-                    }
-                    
-                    blockedJobs.add(jobKey);
-                }
-                
-                results.add(result);
-            }
-            
-            return results;
-        } finally {
-            lock.unlock();
-            if (LOG.isTraceEnabled()) {
-                StringBuilder sb = new StringBuilder("Releasing lock. ");
-                sb.append(System.nanoTime()).append(". ");
-                for (OperableTrigger trigger : firedTriggers) {
-                    sb.append("\n    Trigger: ").append(trigger.getKey().getName());
-                }                
-                
-                LOG.trace(sb.toString());
-            }
-        }
-    }
-
-    @Override
-    public void triggeredJobComplete(OperableTrigger trigger, JobDetail jobDetail, CompletedExecutionInstruction triggerInstCode) throws JobPersistenceException {
-        lock.lock();
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Got lock. " + System.nanoTime());
-        }
-        
-        try {
-            JobKey jobKey = jobDetail.getKey();
-            String group = jobKey.getGroup();
-            if (jobKeys.contains(jobKey)) {
-                if (jobDetail.isPersistJobDataAfterExecution()) {
-                    Map<JobKey, JobDetail> jobsByKey = jobsByGroup.get(group);
-                    if (jobsByKey != null && jobsByKey.remove(jobKey) != null) {
-                        JobDataMap newData = jobDetail.getJobDataMap();
-                        if (newData != null) {
-                            newData.clearDirtyFlag();
-                        }
-                        
-                        ((JobDetailImpl)jobDetail).setJobDataMap(newData);
-                        jobsByKey.put(jobKey, jobDetail);
-                    }
-                }
-                
-                if (jobDetail.isConcurrentExectionDisallowed()) {
-                    blockedJobs.remove(jobKey);
-                    ISet<TriggerKey> otherTriggers = triggersByJobKey.get(jobKey);
-                    for (TriggerKey keyToUnblock : otherTriggers) {
-                        if (keyToUnblock.equals(trigger.getKey())) {
-                            continue;
-                        }
-                        
-                        TriggerStateWrapper triggerToUnblock = triggersByKey.remove(keyToUnblock);
-                        if (triggerToUnblock.getState() == TriggerStateWrapper.STATE_BLOCKED) {
-                            triggerToUnblock.setState(TriggerStateWrapper.STATE_WAITING);
-                        } else if (triggerToUnblock.getState() == TriggerStateWrapper.STATE_PAUSED_BLOCKED) {
-                            triggerToUnblock.setState(TriggerStateWrapper.STATE_PAUSED);
-                        }
-                        
-                        triggersByKey.put(keyToUnblock, triggerToUnblock);
-                    }
-                    
-                    signaler.signalSchedulingChange(0L);
-                }
-            } else {
-                blockedJobs.remove(jobKey);
-            }
-            
-            locallyExecutingTriggers.remove(trigger.getKey());
-            TriggerStateWrapper stateWrapper = triggersByKey.get(trigger.getKey());
-            if (stateWrapper != null) {
-                stateWrapper.resetOwner();
-                if (triggerInstCode == CompletedExecutionInstruction.DELETE_TRIGGER) {
-                    if (trigger.getNextFireTime() == null) {
-                        if (stateWrapper.getTrigger().getNextFireTime() == null) {
-                            removeTrigger(trigger.getKey());
-                        }
-                    } else {
-                        removeTrigger(trigger.getKey());
-                        signaler.signalSchedulingChange(0L);
-                    }
-                } else if (triggerInstCode == CompletedExecutionInstruction.SET_TRIGGER_COMPLETE) {
-                    triggersByKey.remove(trigger.getKey());
-                    stateWrapper.setState(TriggerStateWrapper.STATE_COMPLETE);
-                    triggersByKey.put(trigger.getKey(), stateWrapper);
-                    signaler.signalSchedulingChange(0L);
-                } else if(triggerInstCode == CompletedExecutionInstruction.SET_TRIGGER_ERROR) {
-                    triggersByKey.remove(trigger.getKey());
-                    stateWrapper.setState(TriggerStateWrapper.STATE_ERROR);
-                    triggersByKey.put(trigger.getKey(), stateWrapper);
-                    signaler.signalSchedulingChange(0L);
-                } else if (triggerInstCode == CompletedExecutionInstruction.SET_ALL_JOB_TRIGGERS_ERROR) {
-                    ISet<TriggerKey> otherTriggers = triggersByJobKey.get(jobKey);
-                    for (TriggerKey triggerKeyToChange : otherTriggers) {
-                        TriggerStateWrapper triggerToChange = triggersByKey.remove(triggerKeyToChange);
-                        triggerToChange.setState(TriggerStateWrapper.STATE_ERROR);
-                        triggersByKey.put(triggerKeyToChange, triggerToChange);
-                    }
-
-                    signaler.signalSchedulingChange(0L);
-                } else if (triggerInstCode == CompletedExecutionInstruction.SET_ALL_JOB_TRIGGERS_COMPLETE) {
-                    ISet<TriggerKey> otherTriggers = triggersByJobKey.get(jobKey);
-                    for (TriggerKey triggerKeyToChange : otherTriggers) {
-                        TriggerStateWrapper triggerToChange = triggersByKey.remove(triggerKeyToChange);
-                        triggerToChange.setState(TriggerStateWrapper.STATE_COMPLETE);
-                        triggersByKey.put(triggerKeyToChange, triggerToChange);
-                    }
-                    
-                    signaler.signalSchedulingChange(0L);
-                } else {
-                    stateWrapper.setState(TriggerStateWrapper.STATE_WAITING);
-                    triggersByKey.replace(trigger.getKey(), stateWrapper);
-                }
-            }
-        } finally {
-            lock.unlock();
-            if (LOG.isTraceEnabled()) {
-                StringBuilder sb = new StringBuilder("Releasing lock. ");
-                sb.append(System.nanoTime()).append(". ");
-                sb.append("\n    Trigger: ").append(trigger.getKey().getName());          
-                
-                LOG.trace(sb.toString());
-            }
-        }
-    }
-
-    @Override
-    public void setInstanceId(String instanceId) {
-        this.instanceId = instanceId;
-    }
-
-    @Override
-    public void setInstanceName(String instanceName) {
-        this.instanceName = instanceName;
-    }
-
-    @Override
-    public void setThreadPoolSize(int poolSize) {
-        //
-    }
-    
-    public IMap<TriggerKey, TriggerStateWrapper> getTriggerMap() {
-        return triggersByKey;
-    }
-    
-    public String getNodeIp() {
-        return nodeIp;
-    }
-    
-    public ILock getClusterLock() {
-        return lock;
-    }
-    
-    private boolean applyMisfire(TriggerStateWrapper stateWrapper) throws JobPersistenceException {
-        long misfireTime = System.currentTimeMillis();
-        if (getMisfireThreshold() > 0) {
-            misfireTime -= getMisfireThreshold();
-        }
-        
-        Date nextFireTime = stateWrapper.getTrigger().getNextFireTime();
-        if (nextFireTime == null 
-            || nextFireTime.getTime() > misfireTime 
-            || stateWrapper.getTrigger().getMisfireInstruction() == Trigger.MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY) { 
-            return false; 
-        }
-
-        Calendar calendar = null;
-        String calendarName = stateWrapper.getTrigger().getCalendarName();
-        if (calendarName != null) {
-            calendar = retrieveCalendar(calendarName);
-        }
-
-        signaler.notifyTriggerListenersMisfired(stateWrapper.getTrigger());
-        ((OperableTrigger) stateWrapper.getTrigger()).updateAfterMisfire(calendar);
-
-        if (stateWrapper.getTrigger().getNextFireTime() == null) {
-            stateWrapper.setState(TriggerStateWrapper.STATE_COMPLETE);
-            triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
-            signaler.notifySchedulerListenersFinalized(stateWrapper.getTrigger());
-        } else if (nextFireTime.equals(stateWrapper.getTrigger().getNextFireTime())) {
-            return false;
-        } else {
-            triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
-        }
-
-        return true;
-    }
-    
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        HazelcastInstance hazelcast = Services.optService(HazelcastInstance.class);
-        if (hazelcast == null) {
-            throw new JobPersistenceException("Hazelcast Service is not available.");
-        }
-        
-        return hazelcast;
-    }
-    
-    public static final class TriggerStateWrapper implements Serializable {
-        
-        private static final long serialVersionUID = -7286840785328204285L;
-        
-        public static final int STATE_WAITING = 0;
-
-        public static final int STATE_ACQUIRED = 1;
-
-        public static final int STATE_EXECUTING = 2;
-
-        public static final int STATE_COMPLETE = 3;
-
-        public static final int STATE_PAUSED = 4;
-
-        public static final int STATE_BLOCKED = 5;
-
-        public static final int STATE_PAUSED_BLOCKED = 6;
-
-        public static final int STATE_ERROR = 7;
-        
-        private final Trigger trigger;
-        
-        private int state;
-        
-        private String owner;
-        
-
-        public TriggerStateWrapper(Trigger trigger) {
-            super();
-            this.trigger = trigger;
-            this.state = STATE_WAITING;
-            this.owner = null;
-        }
-        
-        public TriggerStateWrapper(Trigger trigger, int state) {
-            super();
-            this.trigger = trigger;
-            this.state = state;
-            this.owner = null;
-        }
-
-        public Trigger getTrigger() {
-            return trigger;
-        }
-        
-        public void setState(int state) {
-            this.state = state;
-        }
-        
-        public int getState() {
-            return state;
-        }
-        
-        public void setOwner(String owner) {
-            this.owner = owner;
-        }
-        
-        public void resetOwner() {
-            this.owner = null;
-        }
-        
-        public String getOwner() {
-            return owner;
-        }
-    }
-    
-    /**
-     * A Comparator that compares trigger's next fire times, or in other words,
-     * sorts them according to earliest next fire time.  If the fire times are
-     * the same, then the triggers are sorted according to priority (highest
-     * value first), if the priorities are the same, then they are sorted
-     * by key.
-     */
-    public class TriggerWrapperTimeComparator implements Comparator<TriggerStateWrapper>, Serializable {
-      
-        private static final long serialVersionUID = -3904243490805975570L;
-
-        @Override
-        public int compare(TriggerStateWrapper trig1, TriggerStateWrapper trig2) {
-
-            Date t1 = trig1.getTrigger().getNextFireTime();
-            Date t2 = trig2.getTrigger().getNextFireTime();
-
-            if (t1 != null || t2 != null) {
-                if (t1 == null) {
-                    return 1;
-                }
-
-                if (t2 == null) {
-                    return -1;
-                }
-
-                if(t1.before(t2)) {
-                    return -1;
-                }
-
-                if(t1.after(t2)) {
-                    return 1;
-                }
-            }
-
-            int comp = trig2.getTrigger().getPriority() - trig1.getTrigger().getPriority();
-            if (comp != 0) {
-                return comp;
-            }
-            
-            return trig1.getTrigger().getKey().compareTo(trig2.getTrigger().getKey());
-        }
-    }
-    
-    public static final class ConsistencyTask extends TimerTask {
-
-        private final ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers;
-        
-        private final ConcurrentMap<TriggerKey, Boolean> locallyExecutingTriggers;
-        
-        private final HazelcastJobStore jobStore;
-        
-        public ConsistencyTask(final HazelcastJobStore jobStore, final ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers, final ConcurrentMap<TriggerKey, Boolean> locallyExecutingTriggers) {
-            super();
-            this.jobStore = jobStore;
-            this.locallyAcquiredTriggers = locallyAcquiredTriggers;
-            this.locallyExecutingTriggers = locallyExecutingTriggers;
-        }
-
-        @Override
-        public void run() {
-            long start = System.currentTimeMillis();
-            int restored = 0;
-            try {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Started consistency task run.");
-                }
-                
-                final String nodeIp = jobStore.getNodeIp();
-                ILock lock = jobStore.getClusterLock();
-                IMap<TriggerKey, TriggerStateWrapper> triggersByKey = jobStore.getTriggerMap();
-                Set<TriggerKey> clusterKeys = null;
-                lock.lock();
-                try {
-                    Set<TriggerKey> hazelcastKeys = triggersByKey.keySet(new AcquiredAndExecutingTriggersPredicate(nodeIp));
-                    clusterKeys = new HashSet<TriggerKey>(hazelcastKeys);
-                    clusterKeys.removeAll(locallyAcquiredTriggers.keySet());
-                    clusterKeys.removeAll(locallyExecutingTriggers.keySet());
-                } finally {
-                    lock.unlock();
-                }
-                
-                if (clusterKeys == null || clusterKeys.isEmpty()) {
-                    return;
-                }
-                
-                for (TriggerKey key : clusterKeys) {
-                    TriggerStateWrapper stateWrapper = triggersByKey.get(key);
-                    Calendar calendar = null;
-                    String calendarName = stateWrapper.getTrigger().getCalendarName();
-                    if (calendarName != null) {
-                        calendar = jobStore.retrieveCalendar(calendarName);
-                    }
-
-                    jobStore.signaler.notifyTriggerListenersMisfired(stateWrapper.getTrigger());
-                    ((OperableTrigger) stateWrapper.getTrigger()).updateAfterMisfire(calendar);
-
-                    if (stateWrapper.getTrigger().getNextFireTime() == null) {
-                        stateWrapper.setState(TriggerStateWrapper.STATE_COMPLETE);
-                        stateWrapper.resetOwner();
-                        triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
-                        jobStore.signaler.notifySchedulerListenersFinalized(stateWrapper.getTrigger());
-                    } else {
-                        stateWrapper.setState(TriggerStateWrapper.STATE_WAITING);
-                        stateWrapper.resetOwner();
-                        triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
-                    }
-
-                    ++restored;
-                }
-            } catch (Throwable t) {
-                LOG.warn("Error during consistency task run.", t);
-            } finally {
-                if (LOG.isDebugEnabled()) {
-                    long diff = System.currentTimeMillis() - start;
-                    LOG.debug("Restored " + restored + " triggers from job store in " + diff + "ms.");
-                }
-            }
-        }
-        
-        public static final class AcquiredAndExecutingTriggersPredicate implements Predicate<TriggerKey, TriggerStateWrapper>, DataSerializable {
-
-            private static final long serialVersionUID = -1102361681951763092L;
-            
-            private String nodeIp;
-
-            public AcquiredAndExecutingTriggersPredicate(String nodeIp) {
-                this.nodeIp = nodeIp;
-            }
-            
-            public AcquiredAndExecutingTriggersPredicate() {
-                super();
-            }
-
-            @Override
-            public boolean apply(MapEntry<TriggerKey, TriggerStateWrapper> mapEntry) {
-                TriggerStateWrapper stateWrapper = mapEntry.getValue();
-                int state = stateWrapper.getState();
-                if (state == TriggerStateWrapper.STATE_ACQUIRED || state == TriggerStateWrapper.STATE_EXECUTING) {
-                    String owner = stateWrapper.getOwner();
-                    if (owner != null && owner.equals(nodeIp)) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            @Override
-            public void writeData(DataOutput out) throws IOException {
-                out.writeUTF(nodeIp);
-            }
-
-            @Override
-            public void readData(DataInput in) throws IOException {
-                nodeIp = in.readUTF();
-            }
-        }
-        
-    }
-
-}
+//    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastJobStore.class);
+//    
+//    private SchedulerSignaler signaler;
+//    
+//    private long misfireThreshold = 60000l;
+//    
+//    private ISet<JobKey> jobKeys;
+//    
+//    private IMap<TriggerKey, TriggerStateWrapper> triggersByKey;
+//    
+//    private IMap<String, ISet<TriggerKey>> triggersByGroup;
+//    
+//    private IMap<JobKey, ISet<TriggerKey>> triggersByJobKey;
+//    
+//    private IMap<String, IMap<JobKey, JobDetail>> jobsByGroup;
+//    
+//    private ISet<JobKey> blockedJobs;
+//    
+//    private IMap<String, Calendar> calendarsByName;
+//    
+//    private ISet<String> pausedTriggerGroups;
+//    
+//    private ISet<String> pausedJobGroups;
+//    
+//    private ILock lock;
+//
+//    private String instanceId;
+//
+//    private String instanceName;
+//    
+//    private String nodeIp;
+//    
+//    protected final ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers = new ConcurrentHashMap<TriggerKey, Boolean>();
+//    
+//    protected final ConcurrentMap<TriggerKey, Boolean> locallyExecutingTriggers = new ConcurrentHashMap<TriggerKey, Boolean>();
+//
+//    private Timer consistencyTimer;
+//    
+//    
+//    public HazelcastJobStore() {
+//        super();
+//    }
+//    
+//    public long getMisfireThreshold() {
+//        return misfireThreshold;
+//    }
+//
+//    public void setMisfireThreshold(long misfireThreshold) {
+//        if (misfireThreshold < 1) {
+//            throw new IllegalArgumentException("Misfire threshold must be larger than 0");
+//        }
+//        this.misfireThreshold = misfireThreshold;
+//    }
+//
+//    @Override
+//    public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler) throws SchedulerConfigException {
+//        HazelcastInstance hazelcast;
+//        try {
+//            hazelcast = getHazelcast();
+//        } catch (JobPersistenceException e) {
+//            throw new SchedulerConfigException(e.getMessage());
+//        }
+//        
+//        this.signaler = signaler;
+//        jobsByGroup = hazelcast.getMap(instanceName + '/' + "quartzJobsByGroup");
+//        triggersByGroup = hazelcast.getMap(instanceName + '/' + "quartzTriggersByGroup");
+//        jobKeys = hazelcast.getSet(instanceName + '/' + "quartzJobKeys");
+//        triggersByKey = hazelcast.getMap(instanceName + '/' + "quartzTriggersByKey");
+//        triggersByJobKey = hazelcast.getMap(instanceName + '/' + "quartzTriggersByJobKey");
+//        calendarsByName = hazelcast.getMap(instanceName + '/' + "quartzCalendarsByName");
+//        pausedTriggerGroups = hazelcast.getSet(instanceName + '/' + "quartzPausedTriggerGroups");
+//        pausedJobGroups = hazelcast.getSet(instanceName + '/' + "quartzPausedJobGroups");
+//        lock = hazelcast.getLock(instanceName + '/' + "quartzJobStoreLock");
+//        blockedJobs = hazelcast.getSet(instanceName + '/' + "quartzBlockedJobs");
+//        nodeIp = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
+//        
+//        if (triggersByKey.isEmpty()) {
+//            triggersByKey.addIndex("trigger.nextFireTime", true);
+//            triggersByKey.addIndex("trigger.misfireInstruction", false);
+//        }
+//        
+//        if (LOG.isDebugEnabled()) {
+//            LOG.debug("Initialized HazelcastJobStore.");
+//        }
+//    }
+//
+//    @Override
+//    public void schedulerStarted() throws SchedulerException {
+//        if (LOG.isDebugEnabled()) {
+//            LOG.debug("Scheduler was started. Starting consistency task...");
+//        }
+//        
+//        try {
+//            consistencyTimer = new Timer(true);
+//            consistencyTimer.schedule(new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers), new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
+//        } catch (IllegalStateException e) {
+//            LOG.warn("Could not schedule consistency task: " + e.getMessage(), e);
+//        }
+//    }
+//
+//    @Override
+//    public void schedulerPaused() {
+//        if (LOG.isDebugEnabled()) {
+//            LOG.debug("Scheduler was paused. Cancelling consistency task...");
+//        }
+//
+//        consistencyTimer.cancel();
+//        consistencyTimer = null;
+//    }
+//
+//    @Override
+//    public void schedulerResumed() {
+//        if (LOG.isDebugEnabled()) {
+//            LOG.debug("Scheduler was resumed. Starting consistency task...");
+//        }
+//        
+//        try {
+//            consistencyTimer = new Timer(true);
+//            consistencyTimer.schedule(new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers), new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
+//        } catch (IllegalStateException e) {
+//            LOG.warn("Could not schedule consistency task: " + e.getMessage(), e);
+//        }
+//    }
+//
+//    @Override
+//    public void shutdown() {
+//        if (LOG.isDebugEnabled()) {
+//            LOG.debug("Scheduler was stopped. Cancelling consistency task...");
+//        }
+//        
+//        consistencyTimer.cancel();
+//        consistencyTimer = null;
+//    }
+//
+//    @Override
+//    public boolean supportsPersistence() {
+//        return false;
+//    }
+//
+//    @Override
+//    public long getEstimatedTimeToReleaseAndAcquireTrigger() {
+//        return 200;
+//    }
+//
+//    @Override
+//    public boolean isClustered() {
+//        return true;
+//    }
+//    
+//    @Override
+//    public void storeJob(JobDetail newJob, boolean replaceExisting) throws ObjectAlreadyExistsException, JobPersistenceException {
+//        HazelcastInstance hazelcast = getHazelcast();
+//        lock.lock();
+//        try {
+//            JobKey key = newJob.getKey();
+//            String group = key.getGroup();
+//            IMap<JobKey, JobDetail> jobsByKey = jobsByGroup.get(group);
+//            if (jobsByKey == null) {
+//                jobsByKey = hazelcast.getMap(instanceName + '/' + "quartzJobsByKey/" + group);
+//                jobsByKey.put(key, newJob);
+//                jobKeys.add(key);
+//                jobsByGroup.put(group, jobsByKey);
+//            } else {
+//                if (jobsByKey.containsKey(key)) {
+//                    if (replaceExisting) {
+//                        jobsByKey.put(key, newJob);
+//                        jobKeys.add(key);
+//                    } else {
+//                        throw new ObjectAlreadyExistsException(newJob);
+//                    }
+//                } else {
+//                    jobsByKey.put(key, newJob);
+//                    jobKeys.add(key);
+//                }
+//            }
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//    
+//    @Override
+//    public void storeTrigger(OperableTrigger newTrigger, boolean replaceExisting) throws ObjectAlreadyExistsException, JobPersistenceException {
+//        HazelcastInstance hazelcast = getHazelcast();
+//        lock.lock();
+//        try {
+//            TriggerKey key = newTrigger.getKey();
+//            String group = key.getGroup();
+//            ISet<TriggerKey> triggersByKey = triggersByGroup.get(group);
+//            if (triggersByKey == null) {
+//                triggersByKey = hazelcast.getSet(instanceName + '/' + "quartzTriggerKeys/" + group);
+//                triggersByGroup.put(group, triggersByKey);
+//                storeTrigger(triggersByKey, newTrigger);
+//            } else {
+//                if (triggersByKey.contains(key)) {
+//                    if (replaceExisting) {
+//                        storeTrigger(triggersByKey, newTrigger);
+//                    } else {
+//                        throw new ObjectAlreadyExistsException(newTrigger);
+//                    }
+//                } else {
+//                    storeTrigger(triggersByKey, newTrigger);
+//                }
+//            }
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//    
+//    private void storeTrigger(ISet<TriggerKey> triggersByKey, OperableTrigger newTrigger) throws JobPersistenceException {
+//        TriggerKey triggerKey = newTrigger.getKey();
+//        String group = triggerKey.getGroup();
+//        JobKey jobKey = newTrigger.getJobKey();
+//        triggersByKey.add(triggerKey);
+//        TriggerStateWrapper stateWrapper;
+//        if (pausedTriggerGroups.contains(group) || pausedJobGroups.contains(jobKey.getGroup())) {
+//            if (blockedJobs.contains(jobKey)) {
+//                stateWrapper = new TriggerStateWrapper(newTrigger, TriggerStateWrapper.STATE_PAUSED_BLOCKED);
+//            } else {
+//                stateWrapper = new TriggerStateWrapper(newTrigger, TriggerStateWrapper.STATE_PAUSED);
+//            }            
+//        } else {
+//            if (blockedJobs.contains(jobKey)) {
+//                stateWrapper = new TriggerStateWrapper(newTrigger, TriggerStateWrapper.STATE_BLOCKED);
+//            } else {
+//                stateWrapper = new TriggerStateWrapper(newTrigger);
+//            }
+//        }
+//        
+//        this.triggersByKey.put(triggerKey, stateWrapper);
+//        ISet<TriggerKey> triggers = triggersByJobKey.get(jobKey);
+//        if (triggers == null) {
+//            HazelcastInstance hazelcast = getHazelcast();
+//            triggers = hazelcast.getSet(instanceName + '/' + "quartzTriggersByJobKey/" + jobKey.toString());
+//            triggersByJobKey.put(jobKey, triggers);
+//        }
+//        
+//        triggers.add(triggerKey);
+//    }
+//    
+//    @Override
+//    public void storeJobAndTrigger(JobDetail newJob, OperableTrigger newTrigger) throws ObjectAlreadyExistsException, JobPersistenceException {
+//        lock.lock();
+//        try {
+//            storeJob(newJob, false);
+//            storeTrigger(newTrigger, false);
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public void storeJobsAndTriggers(Map<JobDetail, List<Trigger>> triggersAndJobs, boolean replace) throws ObjectAlreadyExistsException, JobPersistenceException {
+//        lock.lock();
+//        try {
+//            if (!replace) {
+//                for (JobDetail jobDetail : triggersAndJobs.keySet()) {
+//                    if (jobKeys.contains(jobDetail.getKey())) {
+//                        throw new ObjectAlreadyExistsException(jobDetail);
+//                    }
+//                    
+//                    List<Trigger> triggers = triggersAndJobs.get(jobDetail);
+//                    for (Trigger trigger : triggers) {
+//                        if (triggersByKey.keySet().contains(trigger.getKey())) {
+//                            throw new ObjectAlreadyExistsException(trigger);
+//                        }
+//                    }
+//                }
+//            }
+//            
+//            for (JobDetail jobDetail : triggersAndJobs.keySet()) {
+//                storeJob(jobDetail, true);
+//                List<Trigger> triggers = triggersAndJobs.get(jobDetail);
+//                for (Trigger trigger : triggers) {
+//                    storeTrigger((OperableTrigger) trigger, true);
+//                }
+//            }
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public boolean removeJob(JobKey jobKey) throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            String group = jobKey.getGroup();
+//            if (!jobKeys.remove(jobKey)) {
+//                return false;
+//            }
+//            
+//            IMap<JobKey, JobDetail> jobsByKey = jobsByGroup.get(group);
+//            if (jobsByKey == null) {
+//                return false;
+//            }
+//
+//            jobsByKey.remove(jobKey);
+//            if (jobsByKey.isEmpty()) {
+//                jobsByGroup.remove(group);
+//                jobsByKey.destroy();
+//            }
+//            
+//            ISet<TriggerKey> triggers = triggersByJobKey.get(jobKey);
+//            if (triggers != null) {
+//                removeTriggers(new ArrayList<TriggerKey>(triggers));
+//            }
+//        } finally {
+//            lock.unlock();
+//        }
+//
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean removeJobs(List<JobKey> jobKeys) throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            boolean removedAll = true;
+//            for (JobKey jobKey : jobKeys) {
+//                removedAll = removedAll && removeJob(jobKey);
+//            }
+//    
+//            return removedAll;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public JobDetail retrieveJob(JobKey jobKey) throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            String group = jobKey.getGroup();
+//            Map<JobKey, JobDetail> jobsByKey = jobsByGroup.get(group);
+//            if (jobsByKey == null) {
+//                return null;
+//            }            
+//            
+//            return jobsByKey.get(jobKey);
+//        } finally {
+//            lock.unlock();
+//        }
+//    }    
+//
+//    @Override
+//    public boolean removeTrigger(TriggerKey triggerKey) throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            TriggerStateWrapper removedTrigger = triggersByKey.remove(triggerKey);
+//            if (removedTrigger == null) {
+//                return false;
+//            }
+//            
+//            String group = triggerKey.getGroup();
+//            ISet<TriggerKey> triggers = triggersByGroup.get(group);
+//            triggers.remove(triggerKey);
+//            if (triggers.isEmpty()) {
+//                triggersByGroup.remove(group);
+//                triggers.destroy();
+//                if (pausedTriggerGroups.contains(group)) {
+//                    pausedTriggerGroups.remove(group);
+//                }
+//            }
+//            
+//            JobKey jobKey = removedTrigger.getTrigger().getJobKey();
+//            ISet<TriggerKey> triggerKeysForJob = triggersByJobKey.get(jobKey);
+//            triggerKeysForJob.remove(triggerKey);
+//            boolean removeJob = false;
+//            if (triggerKeysForJob.isEmpty()) {
+//                triggersByJobKey.remove(jobKey);
+//                Map<JobKey, JobDetail> jobsByKey = jobsByGroup.get(jobKey.getGroup());
+//                if (jobsByKey != null) {
+//                    JobDetail jobDetail = jobsByKey.get(jobKey);
+//                    if (jobDetail != null && !jobDetail.isDurable()) {
+//                        removeJob = true;
+//                    }
+//                }
+//            }
+//            
+//            if (removeJob && removeJob(jobKey)) {                
+//                signaler.notifySchedulerListenersJobDeleted(jobKey);
+//            }
+//            
+//            return true;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public boolean removeTriggers(List<TriggerKey> triggerKeys) throws JobPersistenceException {
+//        lock.lock();
+//        boolean removedAll = true;
+//        try {
+//            for (TriggerKey triggerKey : triggerKeys) {
+//                removedAll = removedAll && removeTrigger(triggerKey);
+//            }            
+//        } finally {
+//            lock.unlock();
+//        }
+//
+//        return removedAll;
+//    }
+//
+//    @Override
+//    public boolean replaceTrigger(TriggerKey triggerKey, OperableTrigger newTrigger) throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            boolean found = removeTrigger(triggerKey);
+//            storeTrigger(newTrigger, true);
+//            
+//            return found;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public OperableTrigger retrieveTrigger(TriggerKey triggerKey) throws JobPersistenceException {
+//        lock.lock();
+//        try {            
+//            TriggerStateWrapper stateWrapper = triggersByKey.get(triggerKey);
+//            if (stateWrapper == null) {
+//                return null;
+//            }
+//            
+//            return (OperableTrigger) stateWrapper.getTrigger();
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public boolean checkExists(JobKey jobKey) throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            return jobKeys.contains(jobKey);
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public boolean checkExists(TriggerKey triggerKey) throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            return triggersByKey.keySet().contains(triggerKey);
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public void clearAllSchedulingData() throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            jobKeys.clear();
+//            triggersByKey.clear();
+//            triggersByJobKey.clear();
+//            for (IMap<JobKey, JobDetail> inner : jobsByGroup.values()) {
+//                inner.destroy();
+//            }
+//            
+//            for (ISet<TriggerKey> inner : triggersByGroup.values()) {
+//                inner.destroy();
+//            }
+//            jobsByGroup.clear();
+//            triggersByGroup.clear();
+//            calendarsByName.clear();
+//            pausedTriggerGroups.clear();
+//            pausedJobGroups.clear();
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public void storeCalendar(String name, Calendar calendar, boolean replaceExisting, boolean updateTriggers) throws ObjectAlreadyExistsException, JobPersistenceException {
+//        lock.lock();
+//        try {
+//            boolean exists = calendarsByName.containsKey(name);
+//            if (exists && !replaceExisting) {
+//                throw new ObjectAlreadyExistsException("Calendar with name '" + name + "' already exists.");
+//            }
+//            
+//            calendarsByName.put(name, calendar);
+//            Set<TriggerKey> toUpdate = new HashSet<TriggerKey>();
+//            if (exists && updateTriggers) {
+//                for (TriggerStateWrapper stateWrapper : triggersByKey.values()) {
+//                    if (name.equals(stateWrapper.getTrigger().getCalendarName())) {
+//                        toUpdate.add(stateWrapper.getTrigger().getKey());
+//                    }
+//                }
+//                
+//                for (TriggerKey triggerKey : toUpdate) {
+//                    TriggerStateWrapper stateWrapper = triggersByKey.remove(triggerKey);
+//                    if (stateWrapper != null) {
+//                        OperableTrigger trigger = (OperableTrigger) stateWrapper.getTrigger();
+//                        trigger.updateWithNewCalendar(calendar, getMisfireThreshold());
+//                        triggersByKey.put(triggerKey, stateWrapper);
+//                    }
+//                }
+//            }
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public boolean removeCalendar(String calName) throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            for (String group : triggersByGroup.keySet()) {
+//                ISet<TriggerKey> triggerKeys = triggersByGroup.get(group);
+//                for (TriggerKey key : triggerKeys) {
+//                    Trigger trigger = triggersByKey.get(key).getTrigger();
+//                    if (trigger.getCalendarName().equals(calName)) {
+//                        throw new JobPersistenceException("Calender cannot be removed if it referenced by a Trigger!");
+//                    }
+//                }
+//            }         
+//            
+//            return calendarsByName.remove(calName) != null;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public Calendar retrieveCalendar(String calName) throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            return calendarsByName.get(calName);
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public int getNumberOfJobs() throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            return jobKeys.size();
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public int getNumberOfTriggers() throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            return triggersByKey.size();
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public int getNumberOfCalendars() throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            return calendarsByName.size();
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public Set<JobKey> getJobKeys(GroupMatcher<JobKey> matcher) throws JobPersistenceException {
+//        Set<JobKey> resultKeys = new HashSet<JobKey>();
+//        lock.lock();
+//        try {
+//            for (JobKey jobKey : jobKeys) {
+//                if (matcher.isMatch(jobKey)) {
+//                    resultKeys.add(jobKey);
+//                }
+//            }
+//            
+//            return resultKeys;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public Set<TriggerKey> getTriggerKeys(GroupMatcher<TriggerKey> matcher) throws JobPersistenceException {
+//        Set<TriggerKey> resultKeys = new HashSet<TriggerKey>();
+//        lock.lock();
+//        try {
+//            for (TriggerKey triggerKey : triggersByKey.keySet()) {
+//                if (matcher.isMatch(triggerKey)) {
+//                    resultKeys.add(triggerKey);
+//                }
+//            }
+//            
+//            return resultKeys;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public List<String> getJobGroupNames() throws JobPersistenceException {
+//        List<String> groupNames = new ArrayList<String>();
+//        lock.lock();
+//        try {
+//            groupNames.addAll(jobsByGroup.keySet());            
+//            return groupNames;
+//        } finally {
+//            lock.unlock();
+//        } 
+//    }
+//
+//    @Override
+//    public List<String> getTriggerGroupNames() throws JobPersistenceException {
+//        List<String> groupNames = new ArrayList<String>();
+//        lock.lock();
+//        try {
+//            groupNames.addAll(triggersByGroup.keySet());            
+//            return groupNames;
+//        } finally {
+//            lock.unlock();
+//        } 
+//    }
+//
+//    @Override
+//    public List<String> getCalendarNames() throws JobPersistenceException {
+//        List<String> calendarNames = new ArrayList<String>();
+//        lock.lock();
+//        try {
+//            calendarNames.addAll(calendarsByName.keySet());            
+//            return calendarNames;
+//        } finally {
+//            lock.unlock();
+//        } 
+//    }
+//
+//    @Override
+//    public List<OperableTrigger> getTriggersForJob(JobKey jobKey) throws JobPersistenceException {
+//        List<OperableTrigger> resultTriggers = new ArrayList<OperableTrigger>();
+//        lock.lock();
+//        try {
+//            ISet<TriggerKey> triggerKeys = triggersByJobKey.get(jobKey);
+//            if (triggerKeys != null) {
+//                for (TriggerKey triggerKey : triggerKeys) {
+//                    OperableTrigger trigger = (OperableTrigger) triggersByKey.get(triggerKey).getTrigger();
+//                    if (trigger != null) {
+//                        resultTriggers.add(trigger);
+//                    }
+//                }
+//            }
+//            
+//            return resultTriggers;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public TriggerState getTriggerState(TriggerKey triggerKey) throws JobPersistenceException {
+//        lock.lock();
+//        TriggerStateWrapper trigger;
+//        try {
+//            trigger = triggersByKey.get(triggerKey);
+//        } finally {
+//            lock.unlock();
+//        }
+//        
+//        if (trigger == null) {
+//            return TriggerState.NONE;
+//        }
+//        
+//        if (trigger.getState() == TriggerStateWrapper.STATE_COMPLETE) {
+//            return TriggerState.COMPLETE;
+//        } else if (trigger.getState() == TriggerStateWrapper.STATE_PAUSED) {
+//            return TriggerState.PAUSED;
+//        } else if (trigger.getState() == TriggerStateWrapper.STATE_PAUSED_BLOCKED) {
+//            return TriggerState.PAUSED;
+//        } else if (trigger.getState() == TriggerStateWrapper.STATE_ERROR) {
+//            return TriggerState.ERROR;
+//        } else if (trigger.getState() == TriggerStateWrapper.STATE_BLOCKED) {
+//            return TriggerState.BLOCKED;
+//        }
+//        
+//        return TriggerState.NORMAL;
+//    }
+//
+//    @Override
+//    public void pauseTrigger(TriggerKey triggerKey) throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            TriggerStateWrapper trigger = triggersByKey.get(triggerKey);
+//            if (trigger == null || trigger.getState() == TriggerStateWrapper.STATE_COMPLETE) {
+//                return;
+//            }
+//                        
+//            trigger = triggersByKey.remove(triggerKey);
+//            if (trigger.getState() == TriggerStateWrapper.STATE_BLOCKED) {
+//                trigger.setState(TriggerStateWrapper.STATE_PAUSED_BLOCKED);
+//            } else {
+//                trigger.setState(TriggerStateWrapper.STATE_PAUSED);
+//            }
+//            
+//            triggersByKey.put(triggerKey, trigger);
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public Collection<String> pauseTriggers(GroupMatcher<TriggerKey> matcher) throws JobPersistenceException {
+//        List<String> groupsToPause = new ArrayList<String>();
+//        lock.lock();
+//        try {
+//            for (TriggerKey triggerKey : triggersByKey.keySet()) {
+//                if (matcher.isMatch(triggerKey)) {
+//                    groupsToPause.add(triggerKey.getGroup());
+//                    pausedTriggerGroups.add(triggerKey.getGroup());
+//                }
+//            }
+//            
+//            Set<TriggerKey> triggerKeys = getTriggerKeys(matcher);
+//            for (TriggerKey triggerKey : triggerKeys) {
+//                pauseTrigger(triggerKey);
+//            }
+//            
+//            return groupsToPause;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public void pauseJob(JobKey jobKey) throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            ISet<TriggerKey> triggerKeys = triggersByJobKey.get(jobKey);
+//            if (triggerKeys == null) {
+//                return;
+//            }
+//            
+//            for (TriggerKey triggerKey : triggerKeys) {
+//                pauseTrigger(triggerKey);
+//            }
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public Collection<String> pauseJobs(GroupMatcher<JobKey> matcher) throws JobPersistenceException {
+//        List<String> groupsToPause = new ArrayList<String>();
+//        lock.lock();
+//        try {
+//            for (JobKey jobKey : jobKeys) {
+//                if (matcher.isMatch(jobKey)) {
+//                    groupsToPause.add(jobKey.getGroup());
+//                    pausedJobGroups.add(jobKey.getGroup());
+//                }
+//            }
+//            
+//            Set<JobKey> jobKeys = getJobKeys(matcher);
+//            for (JobKey jobKey : jobKeys) {
+//                pauseJob(jobKey);
+//            }
+//            
+//            return groupsToPause;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public void resumeTrigger(TriggerKey triggerKey) throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            TriggerStateWrapper stateWrapper = triggersByKey.get(triggerKey);
+//            if (stateWrapper == null || (stateWrapper.getState() != TriggerStateWrapper.STATE_PAUSED && stateWrapper.getState() != TriggerStateWrapper.STATE_PAUSED_BLOCKED)) {
+//                return;
+//            }
+//            
+//            stateWrapper = triggersByKey.remove(triggerKey);
+//            if (blockedJobs.contains(stateWrapper.getTrigger().getJobKey())) {
+//                stateWrapper.setState(TriggerStateWrapper.STATE_BLOCKED);
+//            } else {
+//                stateWrapper.setState(TriggerStateWrapper.STATE_WAITING);
+//            }
+//            applyMisfire(stateWrapper);
+//            triggersByKey.put(triggerKey, stateWrapper);
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public Collection<String> resumeTriggers(GroupMatcher<TriggerKey> matcher) throws JobPersistenceException {
+//        List<String> groupsToResume = new ArrayList<String>();
+//        lock.lock();
+//        try {
+//            for (TriggerKey triggerKey : triggersByKey.keySet()) {
+//                if (matcher.isMatch(triggerKey)) {
+//                    groupsToResume.add(triggerKey.getGroup());
+//                    pausedTriggerGroups.remove(triggerKey.getGroup());
+//                }
+//            }
+//            
+//            Set<TriggerKey> triggerKeys = getTriggerKeys(matcher);
+//            for (TriggerKey triggerKey : triggerKeys) {
+//                resumeTrigger(triggerKey);
+//            }
+//            
+//            return groupsToResume;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public Set<String> getPausedTriggerGroups() throws JobPersistenceException {
+//        Set<String> toReturn = new HashSet<String>();
+//        lock.lock();
+//        try {
+//            toReturn.addAll(pausedTriggerGroups);
+//            return toReturn;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public void resumeJob(JobKey jobKey) throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            ISet<TriggerKey> triggerKeys = triggersByJobKey.get(jobKey);
+//            if (triggerKeys == null) {
+//                return;
+//            }
+//            
+//            for (TriggerKey triggerKey : triggerKeys) {
+//                resumeTrigger(triggerKey);
+//            }
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public Collection<String> resumeJobs(GroupMatcher<JobKey> matcher) throws JobPersistenceException {
+//        List<String> groupsToResume = new ArrayList<String>();
+//        lock.lock();
+//        try {
+//            for (JobKey jobKey : jobKeys) {
+//                if (matcher.isMatch(jobKey)) {
+//                    groupsToResume.add(jobKey.getGroup());
+//                    pausedJobGroups.remove(jobKey.getGroup());
+//                }
+//            }
+//            
+//            Set<JobKey> jobKeys = getJobKeys(matcher);
+//            for (JobKey jobKey : jobKeys) {
+//                resumeJob(jobKey);
+//            }
+//            
+//            return groupsToResume;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public void pauseAll() throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            Set<String> groups = triggersByGroup.keySet();
+//            for (String group : groups) {
+//                pauseTriggers(GroupMatcher.triggerGroupEquals(group));
+//            }
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public void resumeAll() throws JobPersistenceException {
+//        lock.lock();
+//        try {
+//            Set<String> groups = triggersByGroup.keySet();
+//            for (String group : groups) {
+//                resumeTriggers(GroupMatcher.triggerGroupEquals(group));
+//            }
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public List<OperableTrigger> acquireNextTriggers(long noLaterThan, int maxCount, long timeWindow) throws JobPersistenceException {
+//        List<OperableTrigger> returnList = new ArrayList<OperableTrigger>();
+//        lock.lock();
+//        if (LOG.isTraceEnabled()) {
+//            LOG.trace("Got lock. " + System.nanoTime());
+//        }
+//        
+//        long firstAcquiredTriggerFireTime = 0L;
+//        try {
+//            Collection<TriggerStateWrapper> filteredTriggers = triggersByKey.values();
+//            if (filteredTriggers == null) {
+//                return returnList;
+//            }
+//            
+//            ArrayList<TriggerStateWrapper> triggers = new ArrayList<TriggerStateWrapper>(filteredTriggers);
+//            Collections.sort(triggers, new TriggerWrapperTimeComparator());
+//            Set<JobKey> excluded = new HashSet<JobKey>();
+//            for (TriggerStateWrapper stateWrapper : triggers) {
+//                if (stateWrapper.trigger.getNextFireTime() == null) {
+//                    removeTrigger(stateWrapper.getTrigger().getKey());
+//                    continue;
+//                }
+//                
+//                if (cannotAcquire(stateWrapper)) {
+//                    if (stateWrapper.getState() == TriggerStateWrapper.STATE_COMPLETE) {
+//                        removeTrigger(stateWrapper.getTrigger().getKey());
+//                    }
+//                    continue;
+//                }
+//                
+//                if (firstAcquiredTriggerFireTime > 0 
+//                    && stateWrapper.getTrigger().getNextFireTime().getTime() > (firstAcquiredTriggerFireTime + timeWindow)) {                    
+//                    break;
+//                }
+//                
+//                if (applyMisfire(stateWrapper)) {
+//                    continue;
+//                }
+//                
+//                if (stateWrapper.getTrigger().getNextFireTime().getTime() > noLaterThan + timeWindow) {
+//                    break;
+//                }
+//                
+//                JobKey jobKey = stateWrapper.getTrigger().getJobKey();
+//                String group = jobKey.getGroup();
+//                Map<JobKey, JobDetail> jobDetails = jobsByGroup.get(group);
+//                if (jobDetails == null) {
+//                    continue;
+//                }
+//
+//                JobDetail jobDetail = jobDetails.get(jobKey);
+//                if (jobDetail == null) {
+//                    continue;
+//                }
+//                
+//                if (jobDetail.isConcurrentExectionDisallowed()) {
+//                    if (excluded.contains(jobKey)) {
+//                        continue;
+//                    }
+//                    
+//                    excluded.add(jobKey);
+//                }                                
+//                
+//                triggersByKey.remove(stateWrapper.getTrigger().getKey());
+//                stateWrapper.setState(TriggerStateWrapper.STATE_ACQUIRED);
+//                stateWrapper.setOwner(nodeIp);
+//                OperableTrigger trigger = (OperableTrigger) stateWrapper.getTrigger();
+//                trigger.setFireInstanceId(getFiredTriggerRecordId());
+//                triggersByKey.put(stateWrapper.getTrigger().getKey(), stateWrapper);
+//                if (firstAcquiredTriggerFireTime == 0) {
+//                    firstAcquiredTriggerFireTime = trigger.getNextFireTime().getTime();
+//                }
+//                
+//                locallyAcquiredTriggers.put(trigger.getKey(), true);
+//                returnList.add(trigger);
+//                if (returnList.size() == maxCount) {
+//                    break;
+//                }
+//            }            
+//            
+//            return returnList;
+//        } finally {
+//            lock.unlock();
+//            if (LOG.isTraceEnabled()) {
+//                StringBuilder sb = new StringBuilder("Releasing lock. ");
+//                sb.append(System.nanoTime()).append(". ");
+//                for (OperableTrigger trigger : returnList) {
+//                    sb.append("\n    Trigger: ").append(trigger.getKey().getName());
+//                }
+//                LOG.trace(sb.toString());
+//            }
+//        }
+//    }
+//    
+//    private static final AtomicLong ftrCtr = new AtomicLong(System.currentTimeMillis());
+//
+//    protected String getFiredTriggerRecordId() {
+//        return String.valueOf(ftrCtr.incrementAndGet());
+//    }
+//    
+//    private boolean cannotAcquire(TriggerStateWrapper stateWrapper) {
+//        return stateWrapper.getState() == TriggerStateWrapper.STATE_BLOCKED
+//                || stateWrapper.getState() == TriggerStateWrapper.STATE_PAUSED_BLOCKED
+//                || stateWrapper.getState() == TriggerStateWrapper.STATE_COMPLETE
+//                || stateWrapper.getState() == TriggerStateWrapper.STATE_PAUSED
+//                || stateWrapper.getState() == TriggerStateWrapper.STATE_ACQUIRED
+//                || stateWrapper.getState() == TriggerStateWrapper.STATE_EXECUTING;
+//    }
+//
+//    @Override
+//    public void releaseAcquiredTrigger(OperableTrigger trigger) throws JobPersistenceException {
+//        lock.lock();
+//        if (LOG.isTraceEnabled()) {
+//            LOG.trace("Got lock. " + System.nanoTime());
+//        }
+//        
+//        try {
+//            TriggerStateWrapper stateWrapper = triggersByKey.remove(trigger.getKey());
+//            if (stateWrapper == null || stateWrapper.getState() != TriggerStateWrapper.STATE_ACQUIRED) {
+//                return;
+//            }
+//            
+//            stateWrapper.setState(TriggerStateWrapper.STATE_WAITING);
+//            stateWrapper.resetOwner();
+//            triggersByKey.put(trigger.getKey(), stateWrapper);
+//            locallyAcquiredTriggers.remove(trigger.getKey());
+//        } finally {
+//            lock.unlock();
+//            
+//            if (LOG.isTraceEnabled()) {
+//                StringBuilder sb = new StringBuilder("Releasing lock. ");
+//                sb.append(System.nanoTime()).append(". ");
+//                sb.append("\n    Trigger: ").append(trigger.getKey().getName());
+//                
+//                LOG.trace(sb.toString());
+//            }
+//        }
+//    }
+//
+//    @Override
+//    public List<TriggerFiredResult> triggersFired(List<OperableTrigger> firedTriggers) throws JobPersistenceException {
+//        List<TriggerFiredResult> results = new ArrayList<TriggerFiredResult>();
+//        lock.lock();
+//        if (LOG.isTraceEnabled()) {
+//            LOG.trace("Got lock. " + System.nanoTime());
+//        }
+//        
+//        try {
+//            for (OperableTrigger trigger : firedTriggers) {
+//                TriggerStateWrapper stateWrapper = triggersByKey.get(trigger.getKey());
+//                if (stateWrapper == null || stateWrapper.getState() != TriggerStateWrapper.STATE_ACQUIRED) {
+//                    continue;
+//                }
+//                
+//                Calendar calendar = null;
+//                String calendarName = trigger.getCalendarName();
+//                if (calendarName != null) {
+//                    calendar = calendarsByName.get(calendarName);
+//                    if (calendar == null) {
+//                        continue;
+//                    }
+//                }
+//                
+//                Date prevFireTime = trigger.getPreviousFireTime();
+//                trigger.triggered(calendar);
+//                TriggerStateWrapper firedWrapper = new TriggerStateWrapper(trigger, TriggerStateWrapper.STATE_EXECUTING);
+//                firedWrapper.setOwner(nodeIp);
+//                triggersByKey.replace(trigger.getKey(), firedWrapper);
+//                locallyAcquiredTriggers.remove(trigger.getKey());
+//                locallyExecutingTriggers.put(trigger.getKey(), true);
+//                JobKey jobKey = trigger.getJobKey();
+//                JobDetail job = retrieveJob(jobKey);
+//                TriggerFiredResult result;
+//                if (job == null) {
+//                    result = new TriggerFiredResult(new JobPersistenceException("Job could not be found."));
+//                } else {
+//                    TriggerFiredBundle firedBundle = new TriggerFiredBundle(
+//                        job, 
+//                        trigger, 
+//                        calendar, 
+//                        false, new Date(), 
+//                        trigger.getPreviousFireTime(), 
+//                        prevFireTime,
+//                        trigger.getNextFireTime());
+//                    
+//                    result = new TriggerFiredResult(firedBundle);
+//                }
+//                
+//                if (job.isConcurrentExectionDisallowed()) {
+//                    ISet<TriggerKey> otherTriggers = triggersByJobKey.get(jobKey);
+//                    for (TriggerKey keyToBlock : otherTriggers) {
+//                        if (keyToBlock.equals(trigger.getKey())) {
+//                            continue;
+//                        }
+//                        
+//                        TriggerStateWrapper triggerToBlock = triggersByKey.remove(keyToBlock);
+//                        if (triggerToBlock.getState() == TriggerStateWrapper.STATE_WAITING) {
+//                            triggerToBlock.setState(TriggerStateWrapper.STATE_BLOCKED);
+//                        } else if (triggerToBlock.getState() == TriggerStateWrapper.STATE_PAUSED) {
+//                            triggerToBlock.setState(TriggerStateWrapper.STATE_PAUSED_BLOCKED);
+//                        }
+//
+//                        triggersByKey.put(keyToBlock, triggerToBlock);
+//                    }
+//                    
+//                    blockedJobs.add(jobKey);
+//                }
+//                
+//                results.add(result);
+//            }
+//            
+//            return results;
+//        } finally {
+//            lock.unlock();
+//            if (LOG.isTraceEnabled()) {
+//                StringBuilder sb = new StringBuilder("Releasing lock. ");
+//                sb.append(System.nanoTime()).append(". ");
+//                for (OperableTrigger trigger : firedTriggers) {
+//                    sb.append("\n    Trigger: ").append(trigger.getKey().getName());
+//                }                
+//                
+//                LOG.trace(sb.toString());
+//            }
+//        }
+//    }
+//
+//    @Override
+//    public void triggeredJobComplete(OperableTrigger trigger, JobDetail jobDetail, CompletedExecutionInstruction triggerInstCode) throws JobPersistenceException {
+//        lock.lock();
+//        if (LOG.isTraceEnabled()) {
+//            LOG.trace("Got lock. " + System.nanoTime());
+//        }
+//        
+//        try {
+//            JobKey jobKey = jobDetail.getKey();
+//            String group = jobKey.getGroup();
+//            if (jobKeys.contains(jobKey)) {
+//                if (jobDetail.isPersistJobDataAfterExecution()) {
+//                    Map<JobKey, JobDetail> jobsByKey = jobsByGroup.get(group);
+//                    if (jobsByKey != null && jobsByKey.remove(jobKey) != null) {
+//                        JobDataMap newData = jobDetail.getJobDataMap();
+//                        if (newData != null) {
+//                            newData.clearDirtyFlag();
+//                        }
+//                        
+//                        ((JobDetailImpl)jobDetail).setJobDataMap(newData);
+//                        jobsByKey.put(jobKey, jobDetail);
+//                    }
+//                }
+//                
+//                if (jobDetail.isConcurrentExectionDisallowed()) {
+//                    blockedJobs.remove(jobKey);
+//                    ISet<TriggerKey> otherTriggers = triggersByJobKey.get(jobKey);
+//                    for (TriggerKey keyToUnblock : otherTriggers) {
+//                        if (keyToUnblock.equals(trigger.getKey())) {
+//                            continue;
+//                        }
+//                        
+//                        TriggerStateWrapper triggerToUnblock = triggersByKey.remove(keyToUnblock);
+//                        if (triggerToUnblock.getState() == TriggerStateWrapper.STATE_BLOCKED) {
+//                            triggerToUnblock.setState(TriggerStateWrapper.STATE_WAITING);
+//                        } else if (triggerToUnblock.getState() == TriggerStateWrapper.STATE_PAUSED_BLOCKED) {
+//                            triggerToUnblock.setState(TriggerStateWrapper.STATE_PAUSED);
+//                        }
+//                        
+//                        triggersByKey.put(keyToUnblock, triggerToUnblock);
+//                    }
+//                    
+//                    signaler.signalSchedulingChange(0L);
+//                }
+//            } else {
+//                blockedJobs.remove(jobKey);
+//            }
+//            
+//            locallyExecutingTriggers.remove(trigger.getKey());
+//            TriggerStateWrapper stateWrapper = triggersByKey.get(trigger.getKey());
+//            if (stateWrapper != null) {
+//                stateWrapper.resetOwner();
+//                if (triggerInstCode == CompletedExecutionInstruction.DELETE_TRIGGER) {
+//                    if (trigger.getNextFireTime() == null) {
+//                        if (stateWrapper.getTrigger().getNextFireTime() == null) {
+//                            removeTrigger(trigger.getKey());
+//                        }
+//                    } else {
+//                        removeTrigger(trigger.getKey());
+//                        signaler.signalSchedulingChange(0L);
+//                    }
+//                } else if (triggerInstCode == CompletedExecutionInstruction.SET_TRIGGER_COMPLETE) {
+//                    triggersByKey.remove(trigger.getKey());
+//                    stateWrapper.setState(TriggerStateWrapper.STATE_COMPLETE);
+//                    triggersByKey.put(trigger.getKey(), stateWrapper);
+//                    signaler.signalSchedulingChange(0L);
+//                } else if(triggerInstCode == CompletedExecutionInstruction.SET_TRIGGER_ERROR) {
+//                    triggersByKey.remove(trigger.getKey());
+//                    stateWrapper.setState(TriggerStateWrapper.STATE_ERROR);
+//                    triggersByKey.put(trigger.getKey(), stateWrapper);
+//                    signaler.signalSchedulingChange(0L);
+//                } else if (triggerInstCode == CompletedExecutionInstruction.SET_ALL_JOB_TRIGGERS_ERROR) {
+//                    ISet<TriggerKey> otherTriggers = triggersByJobKey.get(jobKey);
+//                    for (TriggerKey triggerKeyToChange : otherTriggers) {
+//                        TriggerStateWrapper triggerToChange = triggersByKey.remove(triggerKeyToChange);
+//                        triggerToChange.setState(TriggerStateWrapper.STATE_ERROR);
+//                        triggersByKey.put(triggerKeyToChange, triggerToChange);
+//                    }
+//
+//                    signaler.signalSchedulingChange(0L);
+//                } else if (triggerInstCode == CompletedExecutionInstruction.SET_ALL_JOB_TRIGGERS_COMPLETE) {
+//                    ISet<TriggerKey> otherTriggers = triggersByJobKey.get(jobKey);
+//                    for (TriggerKey triggerKeyToChange : otherTriggers) {
+//                        TriggerStateWrapper triggerToChange = triggersByKey.remove(triggerKeyToChange);
+//                        triggerToChange.setState(TriggerStateWrapper.STATE_COMPLETE);
+//                        triggersByKey.put(triggerKeyToChange, triggerToChange);
+//                    }
+//                    
+//                    signaler.signalSchedulingChange(0L);
+//                } else {
+//                    stateWrapper.setState(TriggerStateWrapper.STATE_WAITING);
+//                    triggersByKey.replace(trigger.getKey(), stateWrapper);
+//                }
+//            }
+//        } finally {
+//            lock.unlock();
+//            if (LOG.isTraceEnabled()) {
+//                StringBuilder sb = new StringBuilder("Releasing lock. ");
+//                sb.append(System.nanoTime()).append(". ");
+//                sb.append("\n    Trigger: ").append(trigger.getKey().getName());          
+//                
+//                LOG.trace(sb.toString());
+//            }
+//        }
+//    }
+//
+//    @Override
+//    public void setInstanceId(String instanceId) {
+//        this.instanceId = instanceId;
+//    }
+//
+//    @Override
+//    public void setInstanceName(String instanceName) {
+//        this.instanceName = instanceName;
+//    }
+//
+//    @Override
+//    public void setThreadPoolSize(int poolSize) {
+//        //
+//    }
+//    
+//    public IMap<TriggerKey, TriggerStateWrapper> getTriggerMap() {
+//        return triggersByKey;
+//    }
+//    
+//    public String getNodeIp() {
+//        return nodeIp;
+//    }
+//    
+//    public ILock getClusterLock() {
+//        return lock;
+//    }
+//    
+//    private boolean applyMisfire(TriggerStateWrapper stateWrapper) throws JobPersistenceException {
+//        long misfireTime = System.currentTimeMillis();
+//        if (getMisfireThreshold() > 0) {
+//            misfireTime -= getMisfireThreshold();
+//        }
+//        
+//        Date nextFireTime = stateWrapper.getTrigger().getNextFireTime();
+//        if (nextFireTime == null 
+//            || nextFireTime.getTime() > misfireTime 
+//            || stateWrapper.getTrigger().getMisfireInstruction() == Trigger.MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY) { 
+//            return false; 
+//        }
+//
+//        Calendar calendar = null;
+//        String calendarName = stateWrapper.getTrigger().getCalendarName();
+//        if (calendarName != null) {
+//            calendar = retrieveCalendar(calendarName);
+//        }
+//
+//        signaler.notifyTriggerListenersMisfired(stateWrapper.getTrigger());
+//        ((OperableTrigger) stateWrapper.getTrigger()).updateAfterMisfire(calendar);
+//
+//        if (stateWrapper.getTrigger().getNextFireTime() == null) {
+//            stateWrapper.setState(TriggerStateWrapper.STATE_COMPLETE);
+//            triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
+//            signaler.notifySchedulerListenersFinalized(stateWrapper.getTrigger());
+//        } else if (nextFireTime.equals(stateWrapper.getTrigger().getNextFireTime())) {
+//            return false;
+//        } else {
+//            triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
+//        }
+//
+//        return true;
+//    }
+//    
+//    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
+//        HazelcastInstance hazelcast = Services.optService(HazelcastInstance.class);
+//        if (hazelcast == null) {
+//            throw new JobPersistenceException("Hazelcast Service is not available.");
+//        }
+//        
+//        return hazelcast;
+//    }
+//    
+//    public static final class TriggerStateWrapper implements Serializable {
+//        
+//        private static final long serialVersionUID = -7286840785328204285L;
+//        
+//        public static final int STATE_WAITING = 0;
+//
+//        public static final int STATE_ACQUIRED = 1;
+//
+//        public static final int STATE_EXECUTING = 2;
+//
+//        public static final int STATE_COMPLETE = 3;
+//
+//        public static final int STATE_PAUSED = 4;
+//
+//        public static final int STATE_BLOCKED = 5;
+//
+//        public static final int STATE_PAUSED_BLOCKED = 6;
+//
+//        public static final int STATE_ERROR = 7;
+//        
+//        private final Trigger trigger;
+//        
+//        private int state;
+//        
+//        private String owner;
+//        
+//
+//        public TriggerStateWrapper(Trigger trigger) {
+//            super();
+//            this.trigger = trigger;
+//            this.state = STATE_WAITING;
+//            this.owner = null;
+//        }
+//        
+//        public TriggerStateWrapper(Trigger trigger, int state) {
+//            super();
+//            this.trigger = trigger;
+//            this.state = state;
+//            this.owner = null;
+//        }
+//
+//        public Trigger getTrigger() {
+//            return trigger;
+//        }
+//        
+//        public void setState(int state) {
+//            this.state = state;
+//        }
+//        
+//        public int getState() {
+//            return state;
+//        }
+//        
+//        public void setOwner(String owner) {
+//            this.owner = owner;
+//        }
+//        
+//        public void resetOwner() {
+//            this.owner = null;
+//        }
+//        
+//        public String getOwner() {
+//            return owner;
+//        }
+//    }
+//    
+//    /**
+//     * A Comparator that compares trigger's next fire times, or in other words,
+//     * sorts them according to earliest next fire time.  If the fire times are
+//     * the same, then the triggers are sorted according to priority (highest
+//     * value first), if the priorities are the same, then they are sorted
+//     * by key.
+//     */
+//    public class TriggerWrapperTimeComparator implements Comparator<TriggerStateWrapper>, Serializable {
+//      
+//        private static final long serialVersionUID = -3904243490805975570L;
+//
+//        @Override
+//        public int compare(TriggerStateWrapper trig1, TriggerStateWrapper trig2) {
+//
+//            Date t1 = trig1.getTrigger().getNextFireTime();
+//            Date t2 = trig2.getTrigger().getNextFireTime();
+//
+//            if (t1 != null || t2 != null) {
+//                if (t1 == null) {
+//                    return 1;
+//                }
+//
+//                if (t2 == null) {
+//                    return -1;
+//                }
+//
+//                if(t1.before(t2)) {
+//                    return -1;
+//                }
+//
+//                if(t1.after(t2)) {
+//                    return 1;
+//                }
+//            }
+//
+//            int comp = trig2.getTrigger().getPriority() - trig1.getTrigger().getPriority();
+//            if (comp != 0) {
+//                return comp;
+//            }
+//            
+//            return trig1.getTrigger().getKey().compareTo(trig2.getTrigger().getKey());
+//        }
+//    }
+//    
+//    public static final class ConsistencyTask extends TimerTask {
+//
+//        private final ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers;
+//        
+//        private final ConcurrentMap<TriggerKey, Boolean> locallyExecutingTriggers;
+//        
+//        private final HazelcastJobStore jobStore;
+//        
+//        public ConsistencyTask(final HazelcastJobStore jobStore, final ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers, final ConcurrentMap<TriggerKey, Boolean> locallyExecutingTriggers) {
+//            super();
+//            this.jobStore = jobStore;
+//            this.locallyAcquiredTriggers = locallyAcquiredTriggers;
+//            this.locallyExecutingTriggers = locallyExecutingTriggers;
+//        }
+//
+//        @Override
+//        public void run() {
+//            long start = System.currentTimeMillis();
+//            int restored = 0;
+//            try {
+//                if (LOG.isDebugEnabled()) {
+//                    LOG.debug("Started consistency task run.");
+//                }
+//                
+//                final String nodeIp = jobStore.getNodeIp();
+//                ILock lock = jobStore.getClusterLock();
+//                IMap<TriggerKey, TriggerStateWrapper> triggersByKey = jobStore.getTriggerMap();
+//                Set<TriggerKey> clusterKeys = null;
+//                lock.lock();
+//                try {
+//                    Set<TriggerKey> hazelcastKeys = triggersByKey.keySet(new AcquiredAndExecutingTriggersPredicate(nodeIp));
+//                    clusterKeys = new HashSet<TriggerKey>(hazelcastKeys);
+//                    clusterKeys.removeAll(locallyAcquiredTriggers.keySet());
+//                    clusterKeys.removeAll(locallyExecutingTriggers.keySet());
+//                } finally {
+//                    lock.unlock();
+//                }
+//                
+//                if (clusterKeys == null || clusterKeys.isEmpty()) {
+//                    return;
+//                }
+//                
+//                for (TriggerKey key : clusterKeys) {
+//                    TriggerStateWrapper stateWrapper = triggersByKey.get(key);
+//                    Calendar calendar = null;
+//                    String calendarName = stateWrapper.getTrigger().getCalendarName();
+//                    if (calendarName != null) {
+//                        calendar = jobStore.retrieveCalendar(calendarName);
+//                    }
+//
+//                    jobStore.signaler.notifyTriggerListenersMisfired(stateWrapper.getTrigger());
+//                    ((OperableTrigger) stateWrapper.getTrigger()).updateAfterMisfire(calendar);
+//
+//                    if (stateWrapper.getTrigger().getNextFireTime() == null) {
+//                        stateWrapper.setState(TriggerStateWrapper.STATE_COMPLETE);
+//                        stateWrapper.resetOwner();
+//                        triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
+//                        jobStore.signaler.notifySchedulerListenersFinalized(stateWrapper.getTrigger());
+//                    } else {
+//                        stateWrapper.setState(TriggerStateWrapper.STATE_WAITING);
+//                        stateWrapper.resetOwner();
+//                        triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
+//                    }
+//
+//                    ++restored;
+//                }
+//            } catch (Throwable t) {
+//                LOG.warn("Error during consistency task run.", t);
+//            } finally {
+//                if (LOG.isDebugEnabled()) {
+//                    long diff = System.currentTimeMillis() - start;
+//                    LOG.debug("Restored " + restored + " triggers from job store in " + diff + "ms.");
+//                }
+//            }
+//        }
+//        
+//        public static final class AcquiredAndExecutingTriggersPredicate implements Predicate<TriggerKey, TriggerStateWrapper>, DataSerializable {
+//
+//            private static final long serialVersionUID = -1102361681951763092L;
+//            
+//            private String nodeIp;
+//
+//            public AcquiredAndExecutingTriggersPredicate(String nodeIp) {
+//                this.nodeIp = nodeIp;
+//            }
+//            
+//            public AcquiredAndExecutingTriggersPredicate() {
+//                super();
+//            }
+//
+//            @Override
+//            public boolean apply(MapEntry<TriggerKey, TriggerStateWrapper> mapEntry) {
+//                TriggerStateWrapper stateWrapper = mapEntry.getValue();
+//                int state = stateWrapper.getState();
+//                if (state == TriggerStateWrapper.STATE_ACQUIRED || state == TriggerStateWrapper.STATE_EXECUTING) {
+//                    String owner = stateWrapper.getOwner();
+//                    if (owner != null && owner.equals(nodeIp)) {
+//                        return true;
+//                    }
+//                }
+//
+//                return false;
+//            }
+//
+//            @Override
+//            public void writeData(DataOutput out) throws IOException {
+//                out.writeUTF(nodeIp);
+//            }
+//
+//            @Override
+//            public void readData(DataInput in) throws IOException {
+//                nodeIp = in.readUTF();
+//            }
+//        }
+//        
+//    }
+//
+//}

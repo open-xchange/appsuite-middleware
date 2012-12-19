@@ -43,9 +43,9 @@ import org.quartz.impl.DirectSchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.listeners.JobListenerSupport;
-import org.quartz.service.internal.HazelcastJobStore;
-import org.quartz.service.internal.HazelcastJobStore.ConsistencyTask;
 import org.quartz.simpl.SimpleThreadPool;
+import org.quartz.spi.JobStore;
+import com.openexchange.quartz.hazelcast.ConsistencyTask;
 import com.openexchange.service.indexing.hazelcast.TestJobs.LongRunningJob;
 import com.openexchange.service.indexing.hazelcast.TestJobs.ReschedulingTestJob;
 import com.openexchange.service.indexing.hazelcast.TestJobs.SleepingTestJob;
@@ -110,7 +110,7 @@ public class DisallowConcurrentExecutionJobTest {
         }
         
         @Override
-        public synchronized void jobToBeExecuted(JobExecutionContext context) {            
+        public synchronized void jobToBeExecuted(JobExecutionContext context) {
             try {
                 System.out.println("ToBeExecuted. Scheduler: " + context.getScheduler().getSchedulerName() + ". Job: " + context.getJobDetail().getKey().toString() + ". Trigger: " + context.getTrigger().getKey().toString());
             } catch (SchedulerException e) {
@@ -139,7 +139,7 @@ public class DisallowConcurrentExecutionJobTest {
     
     @Test
     public void testStartingAndStopping() throws Exception {
-        HazelcastJobStore jobStore = new TestableHazelcastJobStore();
+        JobStore jobStore = new TestableHazelcastJobStore();
         DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
         Scheduler scheduler = DirectSchedulerFactory.getInstance().getScheduler("sched1");
         scheduler.start();
@@ -175,16 +175,17 @@ public class DisallowConcurrentExecutionJobTest {
         
         barrier.await();
         barrier.reset();
-        ConsistencyTask consistencyTask = new HazelcastJobStore.ConsistencyTask(jobStore, jobStore.getLocallyAcquiredTriggers(), jobStore.getLocallyExecutingTriggers());
+        ConsistencyTask consistencyTask = new ConsistencyTask(jobStore, jobStore.getLocallyAcquiredTriggers(), jobStore.getLocallyExecutingTriggers());
         consistencyTask.run();
         barrier.await();
         List<JobExecutionContext> currentlyExecutingJobs = scheduler1.getCurrentlyExecutingJobs();
         Assert.assertFalse("Jobs were running concurrently!", currentlyExecutingJobs.size() > 1);
+        scheduler1.shutdown(true);
     }
     
     @Test
     public void testConcurrentRunIFJobIsRemovedAndReaddedDuringRuntime() throws Exception {
-        HazelcastJobStore jobStore = new TestableHazelcastJobStore();
+        JobStore jobStore = new TestableHazelcastJobStore();
         DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
         Scheduler scheduler1 = DirectSchedulerFactory.getInstance().getScheduler("sched1");
         scheduler1.start();
@@ -208,7 +209,7 @@ public class DisallowConcurrentExecutionJobTest {
         scheduler1.scheduleJob(job, trigger);
         
         barrier.await();
-        System.out.println("Job started. We have 120 seconds from now.");
+        System.out.println("Job started. We have 30 seconds from now.");
         Set<JobKey> jobKeys = scheduler1.getJobKeys(GroupMatcher.jobGroupEquals("testJobs/1/2"));
         List<JobExecutionContext> currentlyExecutingJobs = scheduler1.getCurrentlyExecutingJobs();
         Assert.assertTrue("Wrong number of jobs in store", jobKeys.size() == 1);
@@ -241,12 +242,13 @@ public class DisallowConcurrentExecutionJobTest {
         // Now look if both threads are running
         currentlyExecutingJobs = scheduler1.getCurrentlyExecutingJobs();
         Assert.assertFalse("Jobs were running concurrently!", currentlyExecutingJobs.size() > 1);
+        scheduler1.shutdown(true);
     }
     
     
     @Test
     public void testClusterSchedulerConcurrency() throws Exception {
-        HazelcastJobStore jobStore = new TestableHazelcastJobStore();
+        JobStore jobStore = new TestableHazelcastJobStore();
 //        RAMJobStore jobStore = new RAMJobStore();
         DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
         DirectSchedulerFactory.getInstance().createScheduler("sched2", "2", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);    

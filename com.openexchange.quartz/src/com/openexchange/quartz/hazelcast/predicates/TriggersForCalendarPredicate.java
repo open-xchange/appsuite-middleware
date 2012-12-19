@@ -47,43 +47,47 @@
  *
  */
 
-package com.openexchange.service.indexing.hazelcast;
+package com.openexchange.quartz.hazelcast.predicates;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
-import org.quartz.JobPersistenceException;
 import org.quartz.TriggerKey;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
-import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
+import com.hazelcast.core.MapEntry;
+import com.hazelcast.query.Predicate;
+import com.openexchange.quartz.hazelcast.TriggerStateWrapper;
 
-public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
-    
-    private HazelcastInstance hazelcast = null;
-    
+/**
+ * 
+ * {@link TriggersForCalendarPredicate}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class TriggersForCalendarPredicate implements Predicate<TriggerKey, TriggerStateWrapper> {
+
+    private static final long serialVersionUID = 1422863759337405274L;
+
+    private String calendarName;
+
+    public TriggersForCalendarPredicate(final String calendarName) {
+        super();
+        this.calendarName = calendarName;
+    }
+
     @Override
-    public void shutdown() {
-        Collection<Instance> instances = hazelcast.getInstances();
-        for (Instance instance : instances) {
-            instance.destroy();
+    public boolean apply(MapEntry<TriggerKey, TriggerStateWrapper> mapEntry) {
+        TriggerStateWrapper stateWrapper = mapEntry.getValue();
+        String toCompare = stateWrapper.getTrigger().getCalendarName();
+        if (toCompare == null) {
+            return false;
         }
+
+        return toCompare.equals(calendarName);
     }
-    
-    @Override
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
-        }
-        
-        return hazelcast;
+
+    public String getCalendarName() {
+        return calendarName;
     }
-    
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
-        return locallyAcquiredTriggers;
+
+    public void setCalendarName(String calendarName) {
+        this.calendarName = calendarName;
     }
-    
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
-        return locallyExecutingTriggers;
-    }
+
 }

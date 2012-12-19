@@ -137,7 +137,7 @@ public class TestJobs {
                 System.out.println("execute. Scheduler: " + context.getScheduler().getSchedulerName() + ". Job: " + context.getJobDetail().getKey().toString() + ". Trigger: " + context.getTrigger().getKey().toString());
                 CyclicBarrier barrier = (CyclicBarrier) context.getScheduler().getContext().get(DisallowConcurrentExecutionJobTest.BARRIER);
                 barrier.await();
-                Thread.sleep(120000L);
+                Thread.sleep(30000L);
             } catch (SchedulerException e) {
                 throw new JobExecutionException("Error", e);
             } catch (InterruptedException e) {

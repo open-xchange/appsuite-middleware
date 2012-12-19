@@ -47,43 +47,79 @@
  *
  */
 
-package com.openexchange.service.indexing.hazelcast;
+package com.openexchange.quartz.hazelcast;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
-import org.quartz.JobPersistenceException;
-import org.quartz.TriggerKey;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
-import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
+import java.io.Serializable;
+import org.quartz.Trigger;
 
-public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
+/**
+ * 
+ * {@link TriggerStateWrapper}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public final class TriggerStateWrapper implements Serializable {
     
-    private HazelcastInstance hazelcast = null;
+    private static final long serialVersionUID = -7286840785328204285L;
     
-    @Override
-    public void shutdown() {
-        Collection<Instance> instances = hazelcast.getInstances();
-        for (Instance instance : instances) {
-            instance.destroy();
-        }
+    public static final int STATE_WAITING = 0;
+
+    public static final int STATE_ACQUIRED = 1;
+
+    public static final int STATE_EXECUTING = 2;
+
+    public static final int STATE_COMPLETE = 3;
+
+    public static final int STATE_PAUSED = 4;
+
+    public static final int STATE_BLOCKED = 5;
+
+    public static final int STATE_PAUSED_BLOCKED = 6;
+
+    public static final int STATE_ERROR = 7;
+    
+    final Trigger trigger;
+    
+    private int state;
+    
+    private String owner;
+    
+
+    public TriggerStateWrapper(Trigger trigger) {
+        super();
+        this.trigger = trigger;
+        this.state = STATE_WAITING;
+        this.owner = null;
     }
     
-    @Override
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
-        }
-        
-        return hazelcast;
+    public TriggerStateWrapper(Trigger trigger, int state) {
+        super();
+        this.trigger = trigger;
+        this.state = state;
+        this.owner = null;
+    }
+
+    public Trigger getTrigger() {
+        return trigger;
     }
     
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
-        return locallyAcquiredTriggers;
+    public void setState(int state) {
+        this.state = state;
     }
     
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
-        return locallyExecutingTriggers;
+    public int getState() {
+        return state;
+    }
+    
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+    
+    public void resetOwner() {
+        this.owner = null;
+    }
+    
+    public String getOwner() {
+        return owner;
     }
 }

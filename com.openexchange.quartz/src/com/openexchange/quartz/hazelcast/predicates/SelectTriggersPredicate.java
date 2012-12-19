@@ -47,43 +47,70 @@
  *
  */
 
-package com.openexchange.service.indexing.hazelcast;
+package com.openexchange.quartz.hazelcast.predicates;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
-import org.quartz.JobPersistenceException;
 import org.quartz.TriggerKey;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
-import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
+import com.hazelcast.core.MapEntry;
+import com.hazelcast.query.Predicate;
+import com.openexchange.quartz.hazelcast.TriggerStateWrapper;
 
-public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
-    
-    private HazelcastInstance hazelcast = null;
-    
+/**
+ * 
+ * {@link SelectTriggersPredicate}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class SelectTriggersPredicate implements Predicate<TriggerKey, TriggerStateWrapper> {
+
+    private static final long serialVersionUID = -3402412224851595515L;
+
+    private long noLaterThan;
+
+    private long timeWindow;
+
+    public SelectTriggersPredicate(final long noLaterThan, final long timeWindow) {
+        super();
+        this.noLaterThan = noLaterThan;
+        this.timeWindow = timeWindow;
+    }
+
     @Override
-    public void shutdown() {
-        Collection<Instance> instances = hazelcast.getInstances();
-        for (Instance instance : instances) {
-            instance.destroy();
+    public boolean apply(MapEntry<TriggerKey, TriggerStateWrapper> mapEntry) {
+        TriggerStateWrapper stateWrapper = mapEntry.getValue();
+        if (stateWrapper.getTrigger().getNextFireTime() == null
+            || stateWrapper.getState() == TriggerStateWrapper.STATE_COMPLETE) {
+            return true;
         }
-    }
-    
-    @Override
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
+
+        if (stateWrapper.getState() == TriggerStateWrapper.STATE_BLOCKED
+            || stateWrapper.getState() == TriggerStateWrapper.STATE_PAUSED_BLOCKED
+            || stateWrapper.getState() == TriggerStateWrapper.STATE_PAUSED
+            || stateWrapper.getState() == TriggerStateWrapper.STATE_ACQUIRED
+            || stateWrapper.getState() == TriggerStateWrapper.STATE_EXECUTING) {
+
+            return false;
         }
-        
-        return hazelcast;
+
+        if (stateWrapper.getTrigger().getNextFireTime().getTime() > noLaterThan + timeWindow) {
+            return false;
+        }
+
+        return true;
     }
-    
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
-        return locallyAcquiredTriggers;
+
+    public long getNoLaterThan() {
+        return noLaterThan;
     }
-    
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
-        return locallyExecutingTriggers;
+
+    public void setNoLaterThan(long noLaterThan) {
+        this.noLaterThan = noLaterThan;
+    }
+
+    public long getTimeWindow() {
+        return timeWindow;
+    }
+
+    public void setTimeWindow(long timeWindow) {
+        this.timeWindow = timeWindow;
     }
 }

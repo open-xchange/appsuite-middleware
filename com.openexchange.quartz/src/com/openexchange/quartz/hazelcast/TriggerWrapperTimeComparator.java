@@ -47,43 +47,52 @@
  *
  */
 
-package com.openexchange.service.indexing.hazelcast;
+package com.openexchange.quartz.hazelcast;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
-import org.quartz.JobPersistenceException;
-import org.quartz.TriggerKey;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
-import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
+import java.io.Serializable;
+import java.util.Comparator;
+import java.util.Date;
 
-public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
-    
-    private HazelcastInstance hazelcast = null;
-    
+/**
+ * A Comparator that compares trigger's next fire times, or in other words,
+ * sorts them according to earliest next fire time.  If the fire times are
+ * the same, then the triggers are sorted according to priority (highest
+ * value first), if the priorities are the same, then they are sorted
+ * by key.
+ */
+public class TriggerWrapperTimeComparator implements Comparator<TriggerStateWrapper>, Serializable {
+
+    private static final long serialVersionUID = -3904243490805975570L;
+
     @Override
-    public void shutdown() {
-        Collection<Instance> instances = hazelcast.getInstances();
-        for (Instance instance : instances) {
-            instance.destroy();
+    public int compare(TriggerStateWrapper trig1, TriggerStateWrapper trig2) {
+
+        Date t1 = trig1.getTrigger().getNextFireTime();
+        Date t2 = trig2.getTrigger().getNextFireTime();
+
+        if (t1 != null || t2 != null) {
+            if (t1 == null) {
+                return 1;
+            }
+
+            if (t2 == null) {
+                return -1;
+            }
+
+            if(t1.before(t2)) {
+                return -1;
+            }
+
+            if(t1.after(t2)) {
+                return 1;
+            }
         }
-    }
-    
-    @Override
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
+
+        int comp = trig2.getTrigger().getPriority() - trig1.getTrigger().getPriority();
+        if (comp != 0) {
+            return comp;
         }
         
-        return hazelcast;
-    }
-    
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
-        return locallyAcquiredTriggers;
-    }
-    
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
-        return locallyExecutingTriggers;
+        return trig1.getTrigger().getKey().compareTo(trig2.getTrigger().getKey());
     }
 }
