@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Configfiles for AppSuite
-Bundle-SymbolicName: com.openexchange.appsuite.config
-Bundle-Version: 6.23.0
-Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
