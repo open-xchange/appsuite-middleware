@@ -195,7 +195,7 @@ public final class ThreadPoolProperties {
         }
         final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPoolProperties.class));
         if (LOG.isInfoEnabled()) {
-            final StringBuilder sb = new StringBuilder(512);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
             sb.append("Thread Pool Configuration:\n");
             sb.append("\tcorePoolSize=").append(corePoolSize).append('\n');
             sb.append("\tprestartAllCoreThreads=").append(prestartAllCoreThreads).append('\n');

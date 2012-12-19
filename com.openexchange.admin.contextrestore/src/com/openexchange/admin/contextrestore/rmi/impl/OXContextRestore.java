@@ -6,6 +6,7 @@ import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
@@ -53,6 +54,21 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         if (null != toClose) {
             try {
                 toClose.close();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+    }
+
+    /**
+     * Safely flushes specified {@link Flushable} instance.
+     * 
+     * @param toFlush The {@link Flushable} instance
+     */
+    protected static void flush(final Flushable toFlush) {
+        if (null != toFlush) {
+            try {
+                toFlush.flush();
             } catch (final Exception e) {
                 // Ignore
             }
@@ -190,13 +206,14 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                                 }
                                 LOG.info("Database: " + databasename);
                                 if (null != bufferedWriter) {
-                                    bufferedWriter.append("/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;" + '\n');
+                                    bufferedWriter.append("/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;\n");
+                                    bufferedWriter.flush();
                                     bufferedWriter.close();
                                 }
 
                                 final String file = "/tmp/" + databasename + ".txt";
                                 bufferedWriter = new BufferedWriter(new FileWriter(file));
-                                bufferedWriter.append("/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;" + '\n');
+                                bufferedWriter.append("/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;\n");
                                 // Reset values
                                 cidpos = -1;
                                 state = 0;
@@ -295,6 +312,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                     }
                 }
             } finally {
+                flush(bufferedWriter);
                 close(bufferedWriter);
                 close(in);
             }

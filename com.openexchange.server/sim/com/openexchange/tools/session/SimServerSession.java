@@ -181,19 +181,19 @@ public class SimServerSession implements ServerSession {
 
     @Override
     public String getHash() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public void setLocalIp(final String ip) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void setHash(final String hash) {
-        // TODO Auto-generated method stub
+        // Nothing to do
     }
 
     public void setContext(final Context context) {
@@ -214,13 +214,13 @@ public class SimServerSession implements ServerSession {
 
     @Override
     public String getClient() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public void setClient(final String client) {
-        // TODO Auto-generated method stub
+        // Nothing to do
     }
 
 	/* (non-Javadoc)
@@ -228,7 +228,7 @@ public class SimServerSession implements ServerSession {
 	 */
 	@Override
 	public boolean isAnonymous() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return false;
 	}
 

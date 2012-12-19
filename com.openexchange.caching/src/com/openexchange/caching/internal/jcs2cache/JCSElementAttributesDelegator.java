@@ -130,7 +130,7 @@ public final class JCSElementAttributesDelegator extends org.apache.jcs.engine.E
 
     @Override
     public boolean getIsRemote() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return attributes.getIsRemote();
     }
 

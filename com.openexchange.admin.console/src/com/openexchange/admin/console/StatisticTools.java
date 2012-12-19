@@ -304,32 +304,50 @@ public class StatisticTools extends AbstractJMXTools {
         }
     }
     
-    private void showClusterData(MBeanServerConnection mbc) throws MalformedObjectNameException, NullPointerException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
+    private void showClusterData(MBeanServerConnection mbc) throws MalformedObjectNameException, NullPointerException, IOException, 
+        InstanceNotFoundException, IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
+        /*
+         * general info
+         */
         for (String type : new String[] { "Cluster", "Statistics", "Member" }) {
-            for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type +",*"), null)) {
+            for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",*"), null)) {
                 ObjectName objectName = mbean.getObjectName();
                 MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
-                System.out.println(objectName);
                 for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
                     if ("Cluster".equals(type) && "Config".equals(attributeInfo.getName())) {
                         String value = mbc.getAttribute(mbean.getObjectName(), attributeInfo.getName()).toString();
                         for (String keyword : new String[] { "groupConfig=", "properties=", "interfaces=", "tcpIpConfig=" }) {
                             int startIdx = value.indexOf(keyword);
                             if (-1 < startIdx && startIdx + keyword.length() < value.length()) {
-                                System.out.print("  " + keyword.substring(0, keyword.length() - 1) + " : ");
-                                System.out.println(extractTextInBrackets(value, startIdx + keyword.length()));
-                            }                            
+                                System.out.println(objectName + "," + keyword.substring(0, keyword.length() - 1) + " = " +
+                                    extractTextInBrackets(value, startIdx + keyword.length()));
+                            }
                         }
                     } else {
-                        System.out.print("  " + attributeInfo.getName() + " : ");
                         try {
-                            System.out.println(mbc.getAttribute(mbean.getObjectName(), attributeInfo.getName()));
+                            System.out.println(objectName + "," + attributeInfo.getName() + " = " + 
+                                mbc.getAttribute(objectName, attributeInfo.getName()));
                         } catch (Exception e) {
-                            System.out.println("[" + e.getMessage() + "]");
+                            System.out.println(objectName + "," + attributeInfo.getName() + " = [" + e.getMessage() + "]"); 
                         }
                     }
                 }
             }            
+        }
+        /*
+         * maps
+         */
+        for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=Map,Cluster=*,name=*"), null)) {
+            ObjectName objectName = mbean.getObjectName();
+            MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
+            for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
+                try {
+                    System.out.println(objectName + "," + attributeInfo.getName() + " = " + 
+                        mbc.getAttribute(objectName, attributeInfo.getName()));
+                } catch (Exception e) {
+                    System.out.println(objectName + "," + attributeInfo.getName() + " = [" + e.getMessage() + "]"); 
+                }
+            }
         }
     }
 

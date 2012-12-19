@@ -86,6 +86,7 @@ import com.openexchange.ajp13.util.CharsetValidator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -603,7 +604,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
             anchor = path.substring(pound);
             path = path.substring(0, pound);
         }
-        final StringBuilder sb = new StringBuilder(path);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(path);
         if (httpSessionId != null && sb.length() > 0) {
             sb.append("/");
             sb.append(AJPv13RequestHandler.JSESSIONID_URI);

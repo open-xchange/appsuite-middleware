@@ -56,6 +56,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -92,6 +93,17 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
         /*
          * Nothing to stop
          */
+    }
+
+    @Override
+    public Object getLock(int userId, Context ctx) {
+        // Dummy object
+        return new Object();
+    }
+
+    @Override
+    public void setExtendedPermissions(Set<String> extendedPermissions, int userId, Context ctx) {
+        // Nothing to do
     }
 
     @Override

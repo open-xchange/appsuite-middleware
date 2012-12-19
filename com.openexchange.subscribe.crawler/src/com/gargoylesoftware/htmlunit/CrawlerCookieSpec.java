@@ -110,7 +110,7 @@ public class CrawlerCookieSpec extends CookieSpecBase {
         // have DNS names.  Since they have no dots, to domain-match the
         // request-host and domain must be identical for the cookie to sent
         // back to the origin-server.
-        if (host.indexOf(".") >= 0) {
+        if (host.indexOf('.') >= 0) {
             // Not required to have at least two dots.  RFC 2965.
             // A Set-Cookie2 with Domain=ajax.com will be accepted.
 

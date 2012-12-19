@@ -107,23 +107,23 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      * @return the request parameters as String in the form of name=value&name=value
      */
     public String getRequestParameters() {
-        final StringBuilder sb = new StringBuilder();
+        final com.openexchange.java.StringAllocator sa = new com.openexchange.java.StringAllocator();
         @SuppressWarnings("unchecked")
         final Map<String, String[]> parameterMap = request.getParameterMap();
         final String[] parameterNames = parameterMap.keySet().toArray(new String[0]);
         for (int i = 0; i < parameterNames.length; i++) {
             final String[] parameterValues = parameterMap.get(parameterNames[i]);
             for (int j = 0; j < parameterValues.length; j++) {
-                sb.append(parameterNames[i]).append("=").append(parameterValues[j]);
+                sa.append(parameterNames[i]).append("=").append(parameterValues[j]);
                 if (j != parameterValues.length - 1) {
-                    sb.append("&");
+                    sa.append("&");
                 }
             }
             if (i != parameterNames.length - 1) {
-                sb.append("&");
+                sa.append("&");
             }
         }
-        return sb.toString();
+        return sa.toString();
     }
 
     /**
@@ -141,7 +141,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      * @return thread infos in the form of "id=threadId, name=threadName"
      */
     public String getThreadInfo() {
-        return new StringBuilder("id=").append(thread.getId()).append(", name=").append(thread.getName()).toString();
+        return new com.openexchange.java.StringAllocator("id=").append(thread.getId()).append(", name=").append(thread.getName()).toString();
     }
 
     /**

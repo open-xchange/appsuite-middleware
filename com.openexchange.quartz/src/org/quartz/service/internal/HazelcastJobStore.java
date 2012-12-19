@@ -67,7 +67,6 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.apache.commons.logging.Log;
 import org.quartz.Calendar;
 import org.quartz.JobDataMap;
@@ -89,7 +88,6 @@ import org.quartz.spi.OperableTrigger;
 import org.quartz.spi.SchedulerSignaler;
 import org.quartz.spi.TriggerFiredBundle;
 import org.quartz.spi.TriggerFiredResult;
-
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
@@ -196,12 +194,16 @@ public class HazelcastJobStore implements JobStore {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Scheduler was started. Starting consistency task...");
         }
-        
-        try {
-            consistencyTimer = new Timer(true);
-            consistencyTimer.schedule(new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers), new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
-        } catch (IllegalStateException e) {
-            LOG.warn("Could not schedule consistency task: " + e.getMessage(), e);
+
+        Timer consistencyTimer = this.consistencyTimer;
+        if (null == consistencyTimer) {
+            try {
+                consistencyTimer = new Timer(true);
+                this.consistencyTimer = consistencyTimer;
+                consistencyTimer.schedule(new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers), new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
+            } catch (IllegalStateException e) {
+                LOG.warn("Could not schedule consistency task: " + e.getMessage(), e);
+            }
         }
     }
 
@@ -211,8 +213,11 @@ public class HazelcastJobStore implements JobStore {
             LOG.debug("Scheduler was paused. Cancelling consistency task...");
         }
 
-        consistencyTimer.cancel();
-        consistencyTimer = null;
+        final Timer consistencyTimer = this.consistencyTimer;
+        if (null != consistencyTimer) {
+            consistencyTimer.cancel();
+            this.consistencyTimer = null;
+        }
     }
 
     @Override
@@ -220,12 +225,16 @@ public class HazelcastJobStore implements JobStore {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Scheduler was resumed. Starting consistency task...");
         }
-        
-        try {
-            consistencyTimer = new Timer(true);
-            consistencyTimer.schedule(new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers), new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
-        } catch (IllegalStateException e) {
-            LOG.warn("Could not schedule consistency task: " + e.getMessage(), e);
+
+        Timer consistencyTimer = this.consistencyTimer;
+        if (null == consistencyTimer) {
+            try {
+                consistencyTimer = new Timer(true);
+                this.consistencyTimer = consistencyTimer;
+                consistencyTimer.schedule(new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers), new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
+            } catch (IllegalStateException e) {
+                LOG.warn("Could not schedule consistency task: " + e.getMessage(), e);
+            }
         }
     }
 
@@ -234,9 +243,12 @@ public class HazelcastJobStore implements JobStore {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Scheduler was stopped. Cancelling consistency task...");
         }
-        
-        consistencyTimer.cancel();
-        consistencyTimer = null;
+
+        final Timer consistencyTimer = this.consistencyTimer;
+        if (null != consistencyTimer) {
+            consistencyTimer.cancel();
+            this.consistencyTimer = null;
+        }
     }
 
     @Override
@@ -1085,7 +1097,7 @@ public class HazelcastJobStore implements JobStore {
         } finally {
             lock.unlock();
             if (LOG.isTraceEnabled()) {
-                StringBuilder sb = new StringBuilder("Releasing lock. ");
+                com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 for (OperableTrigger trigger : returnList) {
                     sb.append("\n    Trigger: ").append(trigger.getKey().getName());
@@ -1131,7 +1143,7 @@ public class HazelcastJobStore implements JobStore {
             lock.unlock();
             
             if (LOG.isTraceEnabled()) {
-                StringBuilder sb = new StringBuilder("Releasing lock. ");
+                com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 sb.append("\n    Trigger: ").append(trigger.getKey().getName());
                 
@@ -1216,7 +1228,7 @@ public class HazelcastJobStore implements JobStore {
         } finally {
             lock.unlock();
             if (LOG.isTraceEnabled()) {
-                StringBuilder sb = new StringBuilder("Releasing lock. ");
+                com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 for (OperableTrigger trigger : firedTriggers) {
                     sb.append("\n    Trigger: ").append(trigger.getKey().getName());
@@ -1324,7 +1336,7 @@ public class HazelcastJobStore implements JobStore {
         } finally {
             lock.unlock();
             if (LOG.isTraceEnabled()) {
-                StringBuilder sb = new StringBuilder("Releasing lock. ");
+                com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 sb.append("\n    Trigger: ").append(trigger.getKey().getName());          
                 
@@ -1589,7 +1601,7 @@ public class HazelcastJobStore implements JobStore {
                 }
             }
         }
-        
+
         public static final class AcquiredAndExecutingTriggersPredicate implements Predicate<TriggerKey, TriggerStateWrapper>, DataSerializable {
 
             private static final long serialVersionUID = -1102361681951763092L;

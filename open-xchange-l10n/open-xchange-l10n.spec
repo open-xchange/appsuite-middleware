@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -37,6 +37,19 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
+%package en-us
+Group:          Applications/Productivity
+Summary:        Package containing Open-Xchange backend localization for en_US
+
+%description en-us
+Package containing Open-Xchange backend localization for en_US
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
 %package fr-fr
 Group:          Applications/Productivity
 Summary:        Package containing Open-Xchange backend localization for fr_FR
@@ -47,6 +60,8 @@ Package containing Open-Xchange backend localization for fr_FR
 Authors:
 --------
     Open-Xchange
+
+#-------------------------------------------------------------------------------------
 
 %package cs-cz
 Group:		Applications/Productivity
@@ -504,7 +519,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-for LANG in ca_ES cs_CZ da_DK de_DE el_GR es_ES eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO sk_SK sv_SV tr_TR zh_CN zh_TW ru_RU de_CH; do \
+for LANG in ca_ES cs_CZ da_DK de_DE el_GR en_US es_ES eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO sk_SK sv_SV tr_TR zh_CN zh_TW ru_RU de_CH; do \
     PACKAGE_EXTENSION=$(echo ${LANG} | tr '[:upper:]_' '[:lower:]-'); \
     ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -Dlanguage=${LANG} -f build/build.xml clean build; \
 done
@@ -526,11 +541,18 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*de_DE*
+%dir /opt/open-xchange/etc/languages/appsuite/
+/opt/open-xchange/etc/languages/appsuite/de_DE.properties
 
 %files el-gr
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*el_GR*
+
+%files en-us
+%defattr(-,root,root)
+%dir /opt/open-xchange/etc/languages/appsuite/
+/opt/open-xchange/etc/languages/appsuite/en_US.properties
 
 %files eu-es
 %defattr(-,root,root)
@@ -541,6 +563,8 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*fr_FR*
+%dir /opt/open-xchange/etc/languages/appsuite/
+/opt/open-xchange/etc/languages/appsuite/fr_FR.properties
 
 %files cs-cz
 %defattr(-,root,root)
@@ -586,6 +610,8 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*lv_LV*
+%dir /opt/open-xchange/etc/languages/appsuite/
+/opt/open-xchange/etc/languages/appsuite/lv_LV.properties
 
 %files nl-nl
 %defattr(-,root,root)
@@ -648,8 +674,16 @@ done
 /opt/open-xchange/i18n/*de_CH*
 
 %changelog
+* Tue Dec 18 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.0.0
+* Mon Dec 17 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.0.0
 * Wed Dec 12 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2012-12-04
+* Tue Dec 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.0.0
+* Tue Dec 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.0.0 release
 * Mon Nov 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2012-11-28
 * Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>
@@ -665,13 +699,13 @@ Third release candidate for 6.22.1
 * Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.1
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
-First release candidate for 6.22.1
-* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
-prepare for 6.22.1
-* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release build for EDP drop #5
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release build for EDP drop #5
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.1
 * Thu Oct 11 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Release build for EDP drop #5
 * Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>

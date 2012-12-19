@@ -247,7 +247,7 @@ public class RefresherTest extends TestCase {
                 }
                 @Override
                 public boolean isLocal() {
-                    // TODO Auto-generated method stub
+                    // Nothing to do
                     return false;
                 }
                 @Override
@@ -309,12 +309,12 @@ public class RefresherTest extends TestCase {
             }
             @Override
             public boolean isDistributed() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return false;
             }
             @Override
             public boolean isReplicated() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return false;
             }
         });

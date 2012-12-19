@@ -57,17 +57,57 @@ import com.openexchange.exception.OXException;
  * {@link BasicProperty}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface BasicProperty {
+
+    /**
+     * Sets this property's value
+     * 
+     * @param value The value
+     * @throws OXException If setting value fails
+     */
     void set(String value) throws OXException;
 
+    /**
+     * Gets this property's value
+     * 
+     * @return The value
+     * @throws OXException If retrieving value fails
+     */
     String get() throws OXException;
 
+    /**
+     * Sets specified meta data.
+     * 
+     * @param metadataName The meta data's name
+     * @param value The meta data's value
+     * @throws OXException If setting meta data fails
+     */
     void set(String metadataName, String value) throws OXException;
 
+    /**
+     * Gets specified meta data.
+     * 
+     * @param metadataName The meta data's name
+     * @return The meta data's value or <code>null</code> if absent
+     * @throws OXException
+     */
     String get(String metadataName) throws OXException;
 
-    public boolean isDefined() throws OXException;
+    /**
+     * Indicates whether this property is defined.
+     * 
+     * @return <code>true</code> if defined; otherwise <code>false</code>
+     * @throws OXException If checking defined state fails
+     */
+    boolean isDefined() throws OXException;
 
+    /**
+     * Gets the listing of all available meta data names.
+     * 
+     * @return The meta data names
+     * @throws OXException If listing cannot be returned
+     */
     List<String> getMetadataNames() throws OXException;
 }

@@ -465,7 +465,7 @@ public class ContactCopyTask implements CopyUserTaskService {
     }
     
     private String buildSelectContactsSql(final List<ContactField> contactFields, final List<Integer> folderIds) {
-        final StringBuilder sb = new StringBuilder("SELECT ");
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("SELECT ");
         boolean first = true;
         for (final ContactField field : contactFields) {
             if (field.isDBField()) {
@@ -486,7 +486,7 @@ public class ContactCopyTask implements CopyUserTaskService {
     }
     
     private String buildInsertContactsSql(final List<ContactField> contactFields) {
-        final StringBuilder sb = new StringBuilder("INSERT INTO prg_contacts (");
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("INSERT INTO prg_contacts (");
         boolean first = true;
         int count = 0;
         for (final ContactField field : contactFields) {

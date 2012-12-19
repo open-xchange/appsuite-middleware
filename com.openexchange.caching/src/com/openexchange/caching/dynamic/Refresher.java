@@ -129,6 +129,9 @@ public abstract class Refresher<T extends Serializable> {
     }
 
     public static <T extends Serializable> T cache(final T obj, final Cache cache, final OXObjectFactory<T> factory) throws OXException {
+        if (null == cache) {
+            return null;
+        }
         final Serializable key = factory.getKey();
         T retval = null;
         /*

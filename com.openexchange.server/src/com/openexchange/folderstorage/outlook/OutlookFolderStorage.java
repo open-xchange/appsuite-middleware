@@ -96,6 +96,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
@@ -342,7 +343,10 @@ public final class OutlookFolderStorage implements FolderStorage {
         return INSTANCE;
     }
 
-    private static boolean showPersonalBelowInfoStore(final Session session) {
+    private static boolean showPersonalBelowInfoStore(final Session session, final boolean altNames) {
+        if (!altNames) {
+            return false;
+        }
         final String paramName = "com.openexchange.folderstorage.outlook.showPersonalBelowInfoStore";
         final Boolean tmp = (Boolean) session.getParameter(paramName);
         if (null != tmp) {
@@ -988,6 +992,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
+            final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
             for (final Folder realFolder : realFolders) {
                 final OutlookFolder outlookFolder = new OutlookFolder(realFolder);
                 outlookFolder.setTreeID(treeId);
@@ -1000,7 +1005,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 final boolean presentInTable = memoryTable.getTree(tree, user.getId(), contextId).fillFolder(outlookFolder);
                 //
                 if (!presentInTable) {
-                    doModifications(outlookFolder, session);
+                    doModifications(outlookFolder, session, altNames);
                 }
 
                 final int index = map.get(realFolder.getID());
@@ -1195,7 +1200,8 @@ public final class OutlookFolderStorage implements FolderStorage {
         final boolean presentInTable = memoryTable.getTree(tree, user.getId(), contextId).fillFolder(outlookFolder);
         //
         if (!presentInTable) {
-            doModifications(outlookFolder, session);
+            final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+            doModifications(outlookFolder, session, altNames);
         }
         return outlookFolder;
     }
@@ -1621,7 +1627,8 @@ public final class OutlookFolderStorage implements FolderStorage {
         // Load folder data from database
         final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(session);
         final String[] ids = memoryTable.getTree(tree, user.getId(), contextId).getSubfolderIds(locale, parentId, l);
-        if (SYSTEM_INFOSTORES.contains(parentId) && showPersonalBelowInfoStore(session)) {
+        final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+        if (SYSTEM_INFOSTORES.contains(parentId) && showPersonalBelowInfoStore(session, altNames)) {
             if (INFOSTORE.equals(parentId)) {
                 // Get personal InfoStore folder
                 final String defaultFolderId = getDefaultInfoStoreFolderId(session);
@@ -1629,7 +1636,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     // Create return array
                     final List<SortableId> ret = new ArrayList<SortableId>(ids.length + 1);
                     int ordinal = 0;
-                    ret.add(new OutlookId(defaultFolderId, ordinal++, FolderStrings.DEFAULT_INFOSTORE_FOLDER_NAME));
+                    ret.add(new OutlookId(defaultFolderId, ordinal++, FolderStrings.DEFAULT_FILES_FOLDER_NAME));
                     for (int i = 0; i < ids.length; i++) {
                         final String id = ids[i];
                         ret.add(new OutlookId(id, ordinal++, id2name.get(id)));
@@ -2698,7 +2705,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
     }
 
-    private static void doModifications(final OutlookFolder folder, final Session session) {
+    private static void doModifications(final OutlookFolder folder, final Session session, final boolean altNames) {
         final String id = folder.getID();
         if (FolderStorage.PUBLIC_ID.equals(id)) {
             folder.setParentID(FolderStorage.PRIVATE_ID);
@@ -2715,9 +2722,9 @@ public final class OutlookFolderStorage implements FolderStorage {
             folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (isDefaultFileStorageFolder(folder)) {
             folder.setParentID(INFOSTORE);
-        } else if (showPersonalBelowInfoStore(session) && id.equals(getDefaultInfoStoreFolderId(session))) {
+        } else if (showPersonalBelowInfoStore(session, altNames) && id.equals(getDefaultInfoStoreFolderId(session))) {
             folder.setParentID(INFOSTORE);
-            folder.setName(FolderStrings.DEFAULT_INFOSTORE_FOLDER_NAME);
+            folder.setName(FolderStrings.DEFAULT_FILES_FOLDER_NAME);
         }
     }
 

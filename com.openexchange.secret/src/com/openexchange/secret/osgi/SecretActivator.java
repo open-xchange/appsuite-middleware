@@ -163,7 +163,8 @@ public class SecretActivator extends HousekeepingActivator {
         /*
          * Create & open whiteboard service
          */
-        whiteboardSecretService = new WhiteboardSecretService(context);
+        final WhiteboardSecretService whiteboardSecretService = new WhiteboardSecretService(context);
+        this.whiteboardSecretService = whiteboardSecretService;
         whiteboardSecretService.open();
         /*
          * Register CryptoSecretEncryptionFactoryService
@@ -176,7 +177,10 @@ public class SecretActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         TokenBasedSecretService.RANDOM.set("unknown");
-        whiteboardSecretService.close();
+        final WhiteboardSecretService whiteboardSecretService = this.whiteboardSecretService;
+        if (null != whiteboardSecretService) {
+            whiteboardSecretService.close();
+        }
         super.stopBundle();
     }
 

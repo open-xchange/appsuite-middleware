@@ -28,7 +28,7 @@ public class DAVDirectoryActivator extends HousekeepingActivator {
 
             @Override
             public void removed(final ServiceReference<PathRegistration> ref, final PathRegistration thing) {
-                // TODO Auto-generated method stub
+                // Nothing to do
 
             }
 

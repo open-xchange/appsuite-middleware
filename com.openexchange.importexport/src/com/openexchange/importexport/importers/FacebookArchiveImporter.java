@@ -20,7 +20,7 @@ public class FacebookArchiveImporter extends AbstractImporter {
 	@Override
 	protected String getNameForFieldInTruncationError(final int id,
 			final OXException dataTruncation) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 

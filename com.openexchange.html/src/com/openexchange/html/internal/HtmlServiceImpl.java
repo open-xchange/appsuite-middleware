@@ -483,7 +483,7 @@ public final class HtmlServiceImpl implements HtmlService {
             if (dropExternalImages && null != modified) {
                 modified[0] |= handler.isImageURLFound();
             }
-            final String retval = handler.getHTML();
+            final String retval = SaneScriptTags.saneScriptTags(handler.getHTML());
             if (DEBUG) {
                 final long dur = System.currentTimeMillis() - st;
                 LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");

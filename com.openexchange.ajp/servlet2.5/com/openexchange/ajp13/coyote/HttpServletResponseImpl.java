@@ -90,6 +90,7 @@ import com.openexchange.ajp13.util.CharsetValidator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -346,7 +347,8 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
          *        }
          *    }
          */
-        servletOutputStream.flush();
+        Streams.flush(writer);
+        Streams.flush(servletOutputStream);
     }
 
     /**

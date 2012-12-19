@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -46,19 +46,21 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     odir=/opt/open-xchange/etc/groupware/contacts-ldap
     ndir=/opt/open-xchange/etc/contacts-ldap
-    for i in $(find $odir -maxdepth 1 -name "mapping*.properties"); do
-	cp -a $i $ndir/$(basename $i) && rm $i || true
-    done
-    for i in $(find $odir -name "[0-9]*" -type d); do
-	npropdir=$ndir/$(basename $i)
-	if [ ! -d $npropdir ]; then
-	    mkdir $npropdir
-	    ox_update_permissions "$npropdir" root:open-xchange 750
-	fi
-	for prop in $(find $i -name "*.properties"); do
-	    cp -a $prop $npropdir && rm $prop || true
-	done
-    done
+    if [ -d $odir ]; then
+        for i in $(find $odir -maxdepth 1 -name "mapping*.properties"); do
+            cp -a $i $ndir/$(basename $i) && rm $i || true
+        done
+        for i in $(find $odir -name "[0-9]*" -type d); do
+            npropdir=$ndir/$(basename $i)
+            if [ ! -d $npropdir ]; then
+                mkdir $npropdir
+                ox_update_permissions "$npropdir" root:open-xchange 750
+            fi
+            for prop in $(find $i -name "*.properties"); do
+                cp -a $prop $npropdir && rm $prop || true
+            done
+        done
+    fi
 
     # SoftwareChange_Request-1080
     # -----------------------------------------------------------------------
@@ -98,8 +100,16 @@ fi
 %attr(640,root,open-xchange) /opt/open-xchange/etc/contacts-ldap/*/*.example
 
 %changelog
+* Tue Dec 18 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.0.0
+* Mon Dec 17 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.0.0
 * Wed Dec 12 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2012-12-04
+* Tue Dec 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.0.0
+* Tue Dec 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.0.0 release
 * Mon Nov 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2012-11-28
 * Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>
@@ -115,13 +125,13 @@ Third release candidate for 6.22.1
 * Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.1
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
-First release candidate for 6.22.1
-* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
-prepare for 6.22.1
-* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release build for EDP drop #5
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release build for EDP drop #5
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.1
 * Thu Oct 11 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Release build for EDP drop #5
 * Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>

@@ -58,6 +58,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -104,6 +105,9 @@ public class DefaultDispatcher implements Dispatcher {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final AJAXState state, final ServerSession session) throws OXException {
+        if (null == session) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_SESSION);
+        }
         List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
         final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
         /*

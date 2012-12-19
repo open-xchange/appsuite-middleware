@@ -800,7 +800,7 @@ public final class FacebookMessagingUtility {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder(256).append("( charSequence=");
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256).append("( charSequence=");
             if (null == charSequence) {
                 sb.append("<not-available>");
             } else {
@@ -1403,7 +1403,7 @@ public final class FacebookMessagingUtility {
      * @return An appropriate regular expression ready for being used in a {@link java.util.regex.Pattern pattern}
      */
     public static String wildcardToRegex(final String wildcard) {
-        final StringBuilder s = new StringBuilder(wildcard.length());
+        final com.openexchange.java.StringAllocator s = new com.openexchange.java.StringAllocator(wildcard.length());
         s.append('^');
         final int len = wildcard.length();
         for (int i = 0; i < len; i++) {
@@ -1434,7 +1434,7 @@ public final class FacebookMessagingUtility {
         if (arr == null || arr.length <= 0) {
             return null;
         }
-        final StringBuilder sb = new StringBuilder(arr.length * 8);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(arr.length * 8);
         sb.append('(');
         sb.append(arr[0]);
         for (int a = 1; a < arr.length; a++) {

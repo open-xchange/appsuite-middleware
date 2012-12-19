@@ -106,7 +106,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
                 id = Tools.getUnsignedInteger(accountId);
             }
             if (id < 0) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("id", Integer.valueOf(id));
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("id", accountId);
             }
             final OAuthAccount account = AccountParser.parse(data, session.getUserId(), session.getContextId());
             /*

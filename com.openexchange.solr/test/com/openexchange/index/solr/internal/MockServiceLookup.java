@@ -74,7 +74,7 @@ public class MockServiceLookup implements ServiceLookup {
 
     @Override
     public <S> S getOptionalService(final Class<? extends S> clazz) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

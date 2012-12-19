@@ -51,7 +51,6 @@ package org.glassfish.grizzly.http.server;
 
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.Buffer;

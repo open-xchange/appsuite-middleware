@@ -70,6 +70,7 @@ import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderTools;
 
 public class InfostoreSecurityImpl extends DBService implements InfostoreSecurity {
 
@@ -103,16 +104,23 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             throw InfostoreExceptionCodes.COULD_NOT_LOAD.create(e);
         }
     }
-
+    
     @Override
     public EffectivePermission getFolderPermission(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    	return getFolderPermission(folderId, ctx, user, userConfig, null);
+    }
+    
+    @Override
+    public EffectivePermission getFolderPermission(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig, Connection readConArg) throws OXException {
         Connection readCon = null;
         try {
-            readCon = getReadConnection(ctx);
+            readCon = readConArg != null ? readConArg : getReadConnection(ctx);
             return new OXFolderAccess(readCon, ctx).getFolderPermission((int) folderId, user.getId(), userConfig);
             //return OXFolderTools.getEffectiveFolderOCL((int)folderId, user.getId(), user.getGroups(),ctx, userConfig, readCon);
         } finally {
-            releaseReadConnection(ctx, readCon);
+        	if (readConArg == null) {
+                releaseReadConnection(ctx, readCon);        		
+        	}
         }
     }
 

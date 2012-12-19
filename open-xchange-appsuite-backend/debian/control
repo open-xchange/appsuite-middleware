@@ -1,0 +1,17 @@
+Source: open-xchange-appsuite-backend
+Section: web
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-appsuite-backend
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-halo, open-xchange-appsuite-manifest
+Description: Backend extensions to serve App Suite frontend
+ This package installs the OSGi bundles and configuration files that are necessary to use the App Suite frontend. If the Open-Xchange 6
+ frontend is used, this package has no effect at all.
+ The available Apps and the access permissions in the App Suite frontend are configured by this package. Additionally this package contains
+ dependencies to all necessary other extensions of the backend.

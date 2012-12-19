@@ -56,8 +56,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,7 @@ import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
+import com.openexchange.contact.storage.rdb.fields.Fields;
 import com.openexchange.contact.storage.rdb.internal.DistListMember;
 import com.openexchange.contact.storage.rdb.internal.Tools;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
@@ -76,6 +79,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.search.SearchTerm;
@@ -204,35 +208,33 @@ public class Executor {
          * construct query string
          */
     	SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
-//      stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" USE INDEX (cid) WHERE ")
-//      stringBuilder.append("SELECT SQL_NO_CACHE ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
-        stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
+        StringAllocator stringAllocator = new StringAllocator();
+        stringAllocator.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
-        	stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
-        }
-        if (Long.MIN_VALUE != minLastModified) {
-            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append(">?");
+        	stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
         }
         if (null != objectIDs && 0 < objectIDs.length) {
-        	stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
+        	stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
         	if (1 == objectIDs.length) {
-        		stringBuilder.append('=').append(objectIDs[0]);
+        		stringAllocator.append('=').append(objectIDs[0]);
         	} else {
-	        	stringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
+	        	stringAllocator.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
         	}
+        }
+        if (Long.MIN_VALUE != minLastModified) {
+            stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append(">?");
         }
         if (null != adapter) {
-        	stringBuilder.append(" AND ").append(adapter.getClause());	
+        	stringAllocator.append(" AND ").append(adapter.getClause());	
         }
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
-        	stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
+        	stringAllocator.append(' ').append(Tools.getOrderClause(sortOptions));
         	if (0 < sortOptions.getLimit()) {
-            	stringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
+            	stringAllocator.append(' ').append(Tools.getLimitClause(sortOptions));
         	}
         }
-        stringBuilder.append(';');
+        stringAllocator.append(';');
         /*
          * prepare statement
          */
@@ -241,7 +243,7 @@ public class Executor {
         ResultSet resultSet = null;
         List<Contact> contacts = new ArrayList<Contact>();
         try {
-            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt = connection.prepareStatement(stringAllocator.toString());
             stmt.setInt(parameterIndex++, contextID);
             if (Integer.MIN_VALUE != folderID) {
             	stmt.setInt(parameterIndex++, folderID);
@@ -592,6 +594,90 @@ public class Executor {
         }
     }
 
+    /**
+     * Inserts or replaces an existing row in the 'to' table with the values read from the 'from' table, plus updates the supplied fields
+     * to the values read from the contact update. 
+     * 
+     * @param connection A write connection to the database
+     * @param from The table to read the data from
+     * @param to The table to insert the data into
+     * @param contextID The context ID
+     * @param folderID The folder ID, or <code>Integer.MIN_VALUE</code> if not relevant
+     * @param objectIDs The object IDs, or <code>null</code> if not relevant
+     * @param maxLastModified The inclusive maximum modification time to consider, or <code>Long.MIN_VALUE</code> if not used 
+     * @param update The contact to get the updated field values from
+     * @param updatedFields The fields that should not be copied from the other table but updated
+     * @return The number of affected rows
+     * @throws SQLException
+     * @throws OXException
+     */
+    public int insertFromAndUpdate(Connection connection, Table from, Table to, int contextID, int folderID, int[] objectIDs, 
+        long maxLastModified, Contact update, ContactField[] updatedFields) throws SQLException, OXException {
+        if (false == from.isContactTable()) {
+            throw new UnsupportedOperationException("only contact tables");
+        } else if (null == updatedFields || 0 == updatedFields.length) {
+            throw new IllegalArgumentException("need some updated fields");
+        } else if (Integer.MIN_VALUE == folderID && (null == objectIDs || 0 == objectIDs.length)) {
+            throw new UnsupportedOperationException("need either a folder id or object ids");
+        }
+        /*
+         * determine which fields to copy over
+         */
+        EnumSet<ContactField> copiedFieldsSet = EnumSet.copyOf(Fields.CONTACT_DATABASE);
+        copiedFieldsSet.removeAll(Arrays.asList(updatedFields));
+        ContactField[] copiedFields = copiedFieldsSet.toArray(new ContactField[copiedFieldsSet.size()]);
+        /*
+         * build statement
+         */
+        StringAllocator stringAllocator = new StringAllocator();
+        stringAllocator.append("REPLACE INTO ").append(to).append(" (").append(Mappers.CONTACT.getColumns(copiedFields)).append(',')
+            .append(Mappers.CONTACT.getColumns(updatedFields)).append(") SELECT ");
+        for (ContactField copiedField : copiedFields) {
+            stringAllocator.append(from).append('.').append(Mappers.CONTACT.get(copiedField).getColumnLabel()).append(',');
+        }
+        stringAllocator.append(Tools.getParameters(updatedFields.length)).append(" FROM ").append(from).append(" WHERE ");
+        stringAllocator.append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
+        if (Integer.MIN_VALUE != folderID) {
+            stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
+        }
+        if (null != objectIDs && 0 < objectIDs.length) {
+            stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
+            if (1 == objectIDs.length) {
+                stringAllocator.append('=').append(objectIDs[0]);
+            } else {
+                stringAllocator.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
+            }
+        }
+        if (Long.MIN_VALUE != maxLastModified) {
+            stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?");
+        }             
+        stringAllocator.append(';');
+        /*
+         * prepare statement
+         */        
+        PreparedStatement stmt = null;
+        int parameterIndex = 1;
+        try {
+            stmt = connection.prepareStatement(stringAllocator.toString());
+            for (ContactField updatedField : updatedFields) {
+                Mappers.CONTACT.get(updatedField).set(stmt, parameterIndex++, update);
+            }
+            stmt.setInt(parameterIndex++, contextID);
+            if (Integer.MIN_VALUE != folderID) {
+                stmt.setInt(parameterIndex++, folderID);
+            }
+            if (Long.MIN_VALUE != maxLastModified) {
+                stmt.setLong(parameterIndex++, maxLastModified);
+            }
+            /*
+             * execute 
+             */
+            return logExecuteUpdate(stmt);
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     public int insertFrom(final Connection connection, final Table from, final Table to, final int contextID, final int objectID, 
         final long maxLastModified) throws SQLException, OXException {
     final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
@@ -627,6 +713,46 @@ public class Executor {
         return this.insertFrom(connection, from, to, contextID, objectID, Long.MIN_VALUE);
     }
             
+    /**
+     * Inserts or replaces a contact in the supplied table. If an old row in the table has the same value as a new row for a PRIMARY KEY 
+     * or a UNIQUE index, the old row is deleted before the new row is inserted.
+     * 
+     * @param connection A writable connection
+     * @param table The table to use
+     * @param contextID The context ID
+     * @param objectID The object ID
+     * @param maxLastModified The inclusive maximum modification time to consider, or <code>Long.MIN_VALUE</code> if not used 
+     * @param contact The contact to insert or replace
+     * @param fields The affected fields 
+     * @return The number of affected rows
+     * @throws SQLException
+     * @throws OXException
+     */
+    public int replace(Connection connection, Table table, int contextID, int objectID, long maxLastModified, Contact contact, 
+        ContactField[] fields) throws SQLException, OXException {
+        StringAllocator stringAllocator = new StringAllocator();
+        stringAllocator.append("REAPLCE INTO ").append(table).append(" SET ").append(Mappers.CONTACT.getAssignments(fields))
+            .append(" WHERE ").append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel())
+            .append("=? AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
+        if (Long.MIN_VALUE != maxLastModified) {
+            stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?");
+        }
+        stringAllocator.append(';');
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(stringAllocator.toString());
+            Mappers.CONTACT.setParameters(stmt, contact, fields);
+            stmt.setInt(1 + fields.length, contextID);
+            stmt.setInt(2 + fields.length, objectID);
+            if (Long.MIN_VALUE != maxLastModified) {
+                stmt.setLong(3 + fields.length, maxLastModified);
+            }
+            return logExecuteUpdate(stmt);
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+    
     public int update(Connection connection, Table table, int contextID, int objectID, long maxLastModified, Contact contact, ContactField[] fields) throws SQLException, OXException {
         com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.CONTACT.getAssignments(fields)).append(" WHERE ")
@@ -797,8 +923,10 @@ public class Executor {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeQuery();
         } else {
-            LOG.debug("executeQuery: " + stmt.toString());
-            return stmt.executeQuery();
+            long start = System.currentTimeMillis();
+            ResultSet resultSet = stmt.executeQuery();
+            LOG.debug("executeQuery: " + stmt.toString() + " - " + (System.currentTimeMillis() - start) + " ms elapsed.");
+            return resultSet;
         }   
     }
     
@@ -806,8 +934,10 @@ public class Executor {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeUpdate();
         } else {
+            long start = System.currentTimeMillis();
             final int rowCount = stmt.executeUpdate();
-            LOG.debug("executeUpdate: " + stmt.toString() + " - " + rowCount + " rows affected.");
+            LOG.debug("executeUpdate: " + stmt.toString() + " - " + rowCount + " rows affected, " + 
+                (System.currentTimeMillis() - start) + " ms elapsed.");
             return rowCount;
         }   
     }

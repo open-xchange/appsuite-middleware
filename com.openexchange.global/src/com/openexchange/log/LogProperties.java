@@ -58,6 +58,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link LogProperties} - Provides thread-local log properties.
@@ -213,7 +214,7 @@ public final class LogProperties {
     }
     
     /**
-     * Get the thread local LogProperties and prettyprint them into a Sting.
+     * Get the thread local LogProperties and pretty-prints them into a Sting.
      * The String will contain one ore more lines formatted like:
      * <pre>
      * "propertyName1=propertyValue1"
@@ -224,10 +225,10 @@ public final class LogProperties {
      */
     public static String getAndPrettyPrint() {
         String logString = "";
-        Props logProperties = getLogProperties();
+        final Props logProperties = getLogProperties();
         // If we have additional log properties from the ThreadLocal add it to the logBuilder
         if (logProperties != null) {
-            StringBuilder logBuilder = new StringBuilder(128);
+            StringAllocator logBuilder = new StringAllocator(1024);
             Map<String, Object> propertyMap = logProperties.getMap();
             // Sort the properties for readability
             Map<String, String> sorted = new TreeMap<String, String>();
@@ -244,7 +245,6 @@ public final class LogProperties {
             }
             logString=logBuilder.toString();
         }
-        
         return logString;
     }
 

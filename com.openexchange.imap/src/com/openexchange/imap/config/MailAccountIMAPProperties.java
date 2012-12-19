@@ -120,7 +120,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             return imapAuthEncStr;
         }
         final String fallback = IMAPProperties.getInstance().getImapAuthEnc();
-        LOG.error(new StringBuilder(64).append("Authentication Encoding: Unsupported charset \"").append(imapAuthEncStr).append(
+        LOG.error(new com.openexchange.java.StringAllocator(64).append("Authentication Encoding: Unsupported charset \"").append(imapAuthEncStr).append(
             "\". Setting to fallback: ").append(fallback));
         return fallback;
     }

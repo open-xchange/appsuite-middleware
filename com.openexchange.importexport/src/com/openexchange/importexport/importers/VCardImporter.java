@@ -52,7 +52,6 @@ package com.openexchange.importexport.importers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -139,7 +138,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                         .getUserConfigurationSafe(session.getUserId(), session.getContext()));
             } catch (final OXException e) {
                 throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
-            } catch (final SQLException e) {
+            } catch (final RuntimeException e) {
                 throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
 

@@ -85,6 +85,9 @@ public final class JSlobExceptionMessages implements LocalizableStrings {
     // "%1$s" is a reserved identifier. Please choose a different one.
     public static final String RESERVED_IDENTIFIER = "\"%1$s\" is a reserved identifier. Please choose a different one.";
 
+    // The JSlob %1$s is too big.
+    public static final String JSLOB_TOO_BIG = "The JSlob %1$s is too big.";
+
     /**
      * Initializes a new {@link JSlobExceptionMessages}.
      */

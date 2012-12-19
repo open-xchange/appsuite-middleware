@@ -52,8 +52,6 @@ package com.openexchange.tools.oxfolder.memory;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.EmptyTIntSet;
 import gnu.trove.TIntCollection;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntProcedure;
@@ -75,6 +73,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.oxfolder.OXFolderBatchLoader;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.sql.DBUtils;
@@ -446,16 +446,7 @@ public final class ConditionTreeMap {
      * @throws OXException If creating a list fails
      */
     public static List<FolderObject> asList(final TIntSet set, final Context ctx) throws OXException {
-        final DatabaseService service = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection con = null;
-        try {
-            con = service.getReadOnly(ctx);
-            return asList(set, ctx, con);
-        } finally {
-            if (null != con) {
-                service.backReadOnly(ctx, con);
-            }
-        }
+        return asList(set, ctx, null);
     }
 
     /**
@@ -471,55 +462,30 @@ public final class ConditionTreeMap {
         if (null == set || set.isEmpty()) {
             return Collections.emptyList();
         }
-        if (null == con) {
-            return asList(set, ctx);
-        }
         try {
             /*
              * List of folders to return
              */
             final TIntObjectMap<FolderObject> m = new TIntObjectHashMap<FolderObject>(set.size());
             {
-                final TIntList toLoad = new TIntArrayList(set.size());
+                final TIntSet toLoad = new TIntHashSet(set);
                 final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
                 final boolean cacheEnabled = FolderCacheManager.isEnabled();
-                /*
-                 * Iterate set
-                 */
-                final TIntProcedure procedure = new TIntProcedure() {
-    
-                    @Override
-                    public boolean execute(final int folderId) {
-                        try {
-                            if (cacheEnabled) {
-                                final FolderObject fo = cacheManager.getFolderObject(folderId, ctx);
-                                if (null == fo) {
-                                    toLoad.add(folderId);
-                                } else {
-                                    m.put(folderId, fo);
-                                }
-                            } else {
-                                toLoad.add(folderId);
-                            }
-                            return true;
-                        } catch (final Exception e) {
-                            throw new ProcedureFailedException(e);
-                        }
+                if (cacheEnabled) {
+                    for (final FolderObject fo : cacheManager.getTrimedFolderObjects(set.toArray(), ctx)) {
+                        final int objectID = fo.getObjectID();
+                        toLoad.remove(objectID); // Needs not to be loaded; therefore removed from set
+                        m.put(objectID, fo);
                     }
-                };
-                set.forEach(procedure);
+                }
                 /*
                  * Loadees...
                  */
                 if (!toLoad.isEmpty()) {
-                    final List<FolderObject> loaded = OXFolderBatchLoader.loadFolderObjectsFromDB(toLoad.toArray(), ctx, con, true, true);
-                    for (final FolderObject fo : loaded) {
-                        if (null != fo) {
-                            m.put(fo.getObjectID(), fo);
-                            if (cacheEnabled) {
-                                cacheManager.putFolderObject(fo, ctx, false, null);
-                            }
-                        }
+                    if (null == con) {
+                        loadBy(toLoad, m, cacheEnabled, cacheManager, ctx);
+                    } else {
+                        loadBy(toLoad, m, cacheEnabled, cacheManager, ctx, con);
                     }
                 }
             }
@@ -550,6 +516,49 @@ public final class ConditionTreeMap {
                 throw (OXException) cause;
             }
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(cause, cause.getMessage());
+        }
+    }
+
+    private static void loadBy(final TIntSet toLoad, final TIntObjectMap<FolderObject> m, final boolean cacheEnabled, final FolderCacheManager cacheManager, final Context ctx) throws OXException {
+        final DatabaseService service = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        Connection con = null;
+        try {
+            con = service.getReadOnly(ctx);
+            loadBy(toLoad, m, cacheEnabled, cacheManager, ctx, con);
+        } finally {
+            if (null != con) {
+                service.backReadOnly(ctx, con);
+            }
+        }
+    }
+
+    private static void loadBy(final TIntSet toLoad, final TIntObjectMap<FolderObject> m, final boolean cacheEnabled, final FolderCacheManager cacheManager, final Context ctx, final Connection con) throws OXException {
+        if (null == con) {
+            loadBy(toLoad, m, cacheEnabled, cacheManager, ctx);
+            return;
+        }
+        final List<FolderObject> loaded = OXFolderBatchLoader.loadFolderObjectsFromDB(toLoad.toArray(), ctx, con, true, true);
+        // Put to cache asynchronously with a separate list
+        if (cacheEnabled) {
+            final List<FolderObject> tmp = new ArrayList<FolderObject>(loaded);
+            ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
+
+                @Override
+                public Void call() throws Exception {
+                    for (final FolderObject fo : tmp) {
+                        if (null != fo) {
+                            cacheManager.putFolderObject(fo, ctx, false, null);
+                        }
+                    }
+                    return null;
+                }
+            });
+        }
+        // Put to map
+        for (final FolderObject fo : loaded) {
+            if (null != fo) {
+                m.put(fo.getObjectID(), fo);
+            }
         }
     }
 

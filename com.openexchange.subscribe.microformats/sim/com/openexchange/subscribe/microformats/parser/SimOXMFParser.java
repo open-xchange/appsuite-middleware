@@ -104,7 +104,7 @@ public class SimOXMFParser implements OXMFParser {
         char[] buffer = new char[1024];
         int read = -1;
         try {
-            while((read = reader.read(buffer)) != -1) {
+            while((read = reader.read(buffer)) > 0) {
                 builder.append(buffer,0,read);
             }
         } catch (IOException e) {

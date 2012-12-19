@@ -52,21 +52,17 @@ package com.openexchange.importexport.importers;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.transformInputStreamToString;
 import static com.openexchange.java.Autoboxing.I;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -81,6 +77,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
+import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
@@ -91,11 +89,8 @@ import com.openexchange.importexport.formats.csv.FrenchOutlookMapper;
 import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
 import com.openexchange.importexport.formats.csv.OxAjaxnameMapper;
 import com.openexchange.importexport.formats.csv.OxReadableNameMapper;
-import com.openexchange.importexport.formats.csv.PropertyDrivenMapper;
-import com.openexchange.importexport.importers.CSVContactImporter.ImportIntention;
-import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.TimeZoneUtils;
@@ -155,8 +150,6 @@ public class CSVContactImporter extends AbstractImporter {
                 session.getUserId(),
                 UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
         } catch (final OXException e) {
-            return false;
-        } catch (final SQLException e) {
             return false;
         }
         return perm.canCreateObjects();

@@ -116,7 +116,7 @@ public class SimICalParser implements ICalParser{
 
 	@Override
 	public void setLimit(int amount) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		
 	}
 

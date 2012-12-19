@@ -66,9 +66,9 @@ import java.util.Map;
 import java.util.TimeZone;
 import au.com.bytecode.opencsv.CSVReader;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -1080,7 +1080,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 if( ! addguival.contains("=") ) {
                     throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (not key = value)");
                 }
-                final int idx = addguival.indexOf("=");
+                final int idx = addguival.indexOf('=');
                 final String key = addguival.substring(0, idx).trim();
                 final String val = addguival.substring(idx+1, addguival.length()).trim();
                 if(key.length() == 0 || val.length() == 0) {
@@ -2506,7 +2506,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             if( ! addguival.contains("=") ) {
                 throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (not key = value)");
             }
-            final int idx = addguival.indexOf("=");
+            final int idx = addguival.indexOf('=');
             final String key = addguival.substring(0, idx).trim();
             final String val = addguival.substring(idx+1, addguival.length()).trim();
             if(key.length() == 0 || val.length() == 0) {

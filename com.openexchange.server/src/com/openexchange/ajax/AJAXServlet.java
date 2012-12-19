@@ -960,7 +960,17 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             @SuppressWarnings("unchecked") final List<FileItem> tmp = upload.parseRequest(req);
             items = tmp;
         } catch (final FileUploadException e) {
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+            final Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                final String message = cause.getMessage();
+                if (message.startsWith("Max. byte count of ")) {
+                    // E.g. Max. byte count of 10240 exceeded.
+                    final int pos = message.indexOf(" exceeded", 19 + 1);
+                    final String limit = message.substring(19, pos);
+                    throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, limit);
+                }
+            }
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : cause.getMessage());
         }
         /*
          * Create the upload event

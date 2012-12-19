@@ -210,7 +210,7 @@ public final class MessageDataSource implements DataSource {
             final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
             final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
             int len;
-            while ((len = inputStream.read(bbuf, 0, bbuf.length)) != -1) {
+            while ((len = inputStream.read(bbuf, 0, bbuf.length)) > 0) {
                 baos.write(bbuf, 0, len);
             }
             return baos.toByteArray();

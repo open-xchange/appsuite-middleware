@@ -310,7 +310,7 @@ public abstract class ICalDataHandler implements DataHandler {
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
             final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
             int len;
-            while ((len = in.read(bbuf)) != -1) {
+            while ((len = in.read(bbuf)) > 0) {
                 out.write(bbuf, 0, len);
             }
             out.flush();
@@ -329,7 +329,7 @@ public abstract class ICalDataHandler implements DataHandler {
                     out = new BufferedOutputStream(new FileOutputStream(tmpFile), DEFAULT_BUF_SIZE);
                     final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
                     int len;
-                    while ((len = in.read(bbuf)) != -1) {
+                    while ((len = in.read(bbuf)) > 0) {
                         out.write(bbuf, 0, len);
                         totalBytes += len;
                     }

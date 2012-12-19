@@ -104,43 +104,43 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
 
     @Override
     public void startTransaction() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void commit() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void rollback() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void finish() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void setTransactional(final boolean transactional) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void setRequestTransactional(final boolean transactional) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void setCommitsTransaction(final boolean commits) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -372,7 +372,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             try {
                 final byte[] buf = new byte[8192];
                 int read;
-                while ((read = data.read(buf)) != -1) {
+                while ((read = data.read(buf)) > 0) {
                     outputStream.write(buf, 0, read);
                 }
                 outputStream.flush();
@@ -540,13 +540,13 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
 
     @Override
     public void unlock(final String folderId, final String id) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void lock(final String folderId, final String id, final long diff) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 

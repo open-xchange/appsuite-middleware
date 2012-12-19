@@ -111,13 +111,13 @@ public class SimQueueSender implements MQQueueSender {
 
     @Override
     public void commit() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 
     @Override
     public void rollback() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 

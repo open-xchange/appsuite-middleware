@@ -329,7 +329,7 @@ public final class CharsetDetector {
             boolean done = false;
             boolean isAscii = true;
 
-            while ((len = in.read(buf, 0, buf.length)) != -1) {
+            while ((len = in.read(buf, 0, buf.length)) > 0) {
                 /*
                  * Check if the stream is only ascii.
                  */

@@ -50,6 +50,7 @@
 package com.openexchange.report.internal;
 
 import java.util.Date;
+import java.util.List;
 import javax.management.MBeanException;
 
 /**
@@ -82,7 +83,7 @@ public interface LoginCounterMBean {
      *         (the number of milliseconds since January 1, 1970, 00:00:00 GMT)
      * @throws MBeanException If retrieval fails
      */
-    Date getLastLoginTimeStamp(int userId, int contextId, String client) throws MBeanException;
+    List<Object[]> getLastLoginTimeStamp(int userId, int contextId, String client) throws MBeanException;
 
     /**
      * Sets the device wildcard to filter by; e.g. <code>"com.openexchange.*"</code>

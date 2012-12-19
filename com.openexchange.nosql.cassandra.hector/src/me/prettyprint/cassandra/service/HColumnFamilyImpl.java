@@ -134,7 +134,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
 
   @Override
   public HColumn<N, ?> getColumn(N name) {
-    // TODO Auto-generated method stub
+    // Nothing to do
     return null;
   }
 

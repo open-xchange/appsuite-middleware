@@ -73,7 +73,7 @@ public class LoginTest extends AbstractLoginTest {
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    protected void tearDown() {
         // Nothing to do.
     }
 

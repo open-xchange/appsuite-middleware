@@ -49,17 +49,23 @@
 
 package com.openexchange.config.json.actions;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.json.ConfigAJAXRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.impl.AbstractSetting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -76,11 +82,60 @@ import com.openexchange.tools.session.ServerSession;
 }, requestBody = "The new value of the node specified by path.")
 public final class PUTAction extends AbstractConfigAction {
 
+    /** The paths to ignore */
+    private final Set<String> ignorees;
+
     /**
      * Initializes a new {@link PUTAction}.
      */
     public PUTAction(final ServiceLookup services) {
         super(services);
+        // Load paths to ignore
+        this.ignorees = loadIgnorees();
+    }
+
+    private Set<String> loadIgnorees() {
+        try {
+            final ConfigurationService service = services.getService(ConfigurationService.class);
+            final Set<String> ignorees = new HashSet<String>(16);
+            String text = service.getText("appsuite.properties");
+            if (!isEmpty(text)) {
+                for (final String line : SPLIT.split(text, 0)) {
+                    if (!isComment(line)) {
+                        final int pos = line.indexOf('=');
+                        if (pos > 0) {
+                            final String sPath = preparePath(line.substring(0, pos));
+                            final int keyPos = sPath.lastIndexOf('/');
+                            final String path = sPath.substring(0, keyPos);
+                            if (null != path) {
+                                ignorees.add('/' + path);
+                                ignorees.add("/meta/" + path);
+                            }
+                        }
+                    }
+                }
+            }
+            text = service.getText("paths.perfMap");
+            if (!isEmpty(text)) {
+                for (final String line : SPLIT.split(text, 0)) {
+                    if (!isComment(line)) {
+                        final int pos = line.indexOf('>');
+                        if (pos > 0) {
+                            final String sPath = preparePath(line.substring(pos + 1));
+                            final int keyPos = sPath.lastIndexOf('/');
+                            final String path = sPath.substring(0, keyPos);
+                            if (null != path) {
+                                ignorees.add('/' + path);
+                                ignorees.add("/meta/" + path);
+                            }
+                        }
+                    }
+                }
+            }
+            return ignorees;
+        } catch (final Exception e) {
+            return Collections.emptySet();
+        }
     }
 
     @Override
@@ -120,32 +175,41 @@ public final class PUTAction extends AbstractConfigAction {
      */
     private void saveSettingWithSubs(final SettingStorage storage, final Setting setting) throws OXException, JSONException {
         if (setting.isLeaf()) {
-            final String value = (String) setting.getSingleValue();
-            if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
-                final JSONArray array = new JSONArray(value);
-                if (array.length() == 0) {
-                    setting.setEmptyMultiValue();
-                } else {
-                    for (int i = 0; i < array.length(); i++) {
-                        setting.addMultiValue(array.getString(i));
+            if (!ignorees.contains(setting.getPath())) {
+                final String value = (String) setting.getSingleValue();
+                if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
+                    final JSONArray array = new JSONArray(value);
+                    if (array.length() == 0) {
+                        setting.setEmptyMultiValue();
+                    } else {
+                        for (int i = 0; i < array.length(); i++) {
+                            setting.addMultiValue(array.getString(i));
+                        }
                     }
+                    setting.setSingleValue(null);
                 }
-                setting.setSingleValue(null);
+                storage.save(setting);
             }
-            storage.save(setting);
         } else {
             final JSONObject json = new JSONObject(setting.getSingleValue().toString());
             final Iterator<String> iter = json.keys();
+            final StringBuilder sb = new StringBuilder(setting.getPath()).append(AbstractSetting.SEPARATOR);
+            final int reset = sb.length();
             OXException exc = null;
             while (iter.hasNext()) {
                 final String key = iter.next();
-                final Setting sub = ConfigTree.getSettingByPath(setting, new String[] { key });
-                sub.setSingleValue(json.getString(key));
-                try {
-                    // Catch single exceptions if GUI writes not writable fields.
-                    saveSettingWithSubs(storage, sub);
-                } catch (final OXException e) {
-                    exc = e;
+                if (sb.length() > reset) {
+                    sb.setLength(reset);
+                }
+                if (!ignorees.contains(sb.append(key).toString())) {
+                    final Setting sub = ConfigTree.getSettingByPath(setting, new String[] { key });
+                    sub.setSingleValue(json.getString(key));
+                    try {
+                        // Catch single exceptions if GUI writes not writable fields.
+                        saveSettingWithSubs(storage, sub);
+                    } catch (final OXException e) {
+                        exc = e;
+                    }
                 }
             }
             if (null != exc) {
@@ -154,4 +218,23 @@ public final class PUTAction extends AbstractConfigAction {
         }
     }
 
+    // ------------------------------------ HELPER ---------------------------------------
+
+    private static final Pattern SPLIT = Pattern.compile("\r?\n");
+
+    private static final Pattern SLASHES = Pattern.compile(Pattern.quote("//"));
+    private static String preparePath(final String path) {
+        if (null == path) {
+            return path;
+        }
+        return SLASHES.matcher(path.trim()).replaceAll("/");
+    }
+
+    private static final Pattern COMMENT = Pattern.compile("^\\s*[!#]");
+    private static boolean isComment(final String line) {
+        if (isEmpty(line)) {
+            return true;
+        }
+        return COMMENT.matcher(line).find();
+    }
 }

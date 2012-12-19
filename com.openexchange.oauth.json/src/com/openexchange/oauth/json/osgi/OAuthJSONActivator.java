@@ -51,6 +51,7 @@ package com.openexchange.oauth.json.osgi;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.log.LogFactory;
@@ -79,7 +80,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, OAuthService.class, OAuthHTTPClientFactory.class };
+        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, OAuthService.class, OAuthHTTPClientFactory.class, CapabilityService.class };
     }
 
     @Override
@@ -137,6 +138,8 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             secretService = new WhiteboardSecretService(context);
             secretService.open();
             AbstractOAuthAJAXActionService.setSecretService(secretService);
+            
+            getService(CapabilityService.class).declareCapability("oauth");
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

@@ -62,9 +62,13 @@ import com.openexchange.exception.OXException;
  */
 public interface ConfigProviderService {
 
+    /** Constant for no context */
     public static final int NO_CONTEXT = -1;
+
+    /** Constant for no user */
     public static final int NO_USER = -1;
 
+    /** Constant for no property */
     public static final BasicProperty NO_PROPERTY = new BasicProperty() {
 
         @Override
@@ -84,12 +88,12 @@ public interface ConfigProviderService {
 
         @Override
         public void set(final String value) throws OXException {
-
+            // Ignore
         }
 
         @Override
         public void set(final String metadataName, final String value) throws OXException {
-
+            // Ignore
         }
 
         @Override
@@ -99,8 +103,25 @@ public interface ConfigProviderService {
 
     };
 
-    BasicProperty get(String property, int context, int user) throws OXException;
+    /**
+     * Gets the denoted property.
+     * 
+     * @param property The property name
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return The property if found; otherwise {@link #NO_PROPERTY}
+     * @throws OXException If returning property fails for any reason
+     */
+    BasicProperty get(String property, int contextId, int userId) throws OXException;
 
-    Collection<String> getAllPropertyNames(int context, int user) throws OXException;
+    /**
+     * Gets all property names for specified user.
+     * 
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return The property names
+     * @throws OXException If returning property names fails for any reason
+     */
+    Collection<String> getAllPropertyNames(int contextId, int userId) throws OXException;
 
 }

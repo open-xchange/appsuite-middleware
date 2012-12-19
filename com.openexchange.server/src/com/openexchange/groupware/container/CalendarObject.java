@@ -50,12 +50,10 @@
 package com.openexchange.groupware.container;
 
 import static com.openexchange.java.Autoboxing.I;
-
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
@@ -686,9 +684,19 @@ public abstract class CalendarObject extends CommonObject {
 		return b_start_date;
 	}
 
+	/** Checks if start date has been set and current value is not <code>null</code> */
+	public boolean containsStartDateAndIsNotNull() {
+        return b_start_date && null != start_date;
+    }
+
 	public boolean containsEndDate() {
 		return b_end_date;
 	}
+
+	/** Checks if end date has been set and current value is not <code>null</code> */
+	public boolean containsEndDateAndIsNotNull() {
+        return b_end_date && null != end_date;
+    }
 
 	public boolean containsNote() {
 		return b_note;

@@ -4,9 +4,11 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.deferrer"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.facebook"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.flickr"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.linkedin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.msn"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.tumblr"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.twitter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.yahoo"/>
 </provider>

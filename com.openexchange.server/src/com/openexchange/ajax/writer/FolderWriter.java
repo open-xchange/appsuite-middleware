@@ -648,8 +648,8 @@ public final class FolderWriter extends DataWriter {
                                             ja.put(jo);
                                         }
                                     }
-                                } catch (final SQLException e) {
-                                    throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                                } catch (final RuntimeException e) {
+                                    throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
                                 }
                             }
                             /*

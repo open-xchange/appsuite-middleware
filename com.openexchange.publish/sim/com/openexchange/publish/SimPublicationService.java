@@ -94,7 +94,7 @@ public class SimPublicationService implements PublicationService {
      */
     @Override
     public Collection<Publication> getAllPublications(final Context ctx) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -104,7 +104,7 @@ public class SimPublicationService implements PublicationService {
      */
     @Override
     public Collection<Publication> getAllPublications(final Context ctx, final String entityId) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -123,7 +123,7 @@ public class SimPublicationService implements PublicationService {
      */
     @Override
     public boolean knows(final Context ctx, final int publicationId) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -133,7 +133,7 @@ public class SimPublicationService implements PublicationService {
      */
     @Override
     public Publication load(final Context ctx, final int publicationId) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -164,7 +164,7 @@ public class SimPublicationService implements PublicationService {
 
 	@Override
     public Collection<Publication> getAllPublications(final Context ctx, final int userId, final String module) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 

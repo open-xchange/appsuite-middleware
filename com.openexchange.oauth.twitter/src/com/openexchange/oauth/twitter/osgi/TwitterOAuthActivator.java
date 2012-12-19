@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.twitter.osgi;
 
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.twitter.OAuthServiceMetaDataTwitterImpl;
@@ -72,7 +73,7 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, CapabilityService.class };
     }
 
     @Override
@@ -86,6 +87,8 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
              * Register service
              */
             registerService(OAuthServiceMetaData.class, new OAuthServiceMetaDataTwitterImpl());
+            getService(CapabilityService.class).declareCapability("twitter");
+
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterOAuthActivator.class)).error(e.getMessage(), e);
             throw e;
