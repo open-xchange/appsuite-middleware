@@ -106,7 +106,7 @@ public class ClearTest extends AbstractMailTest {
 		final String eml =
             "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
             "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "From: " + getSendAddress() + "\n" +
+            "From: " + "peter.pan@peimel.org" + "\n" +
             "To: " + getSendAddress() + "\n" +
             "Subject: Invitation for launch\n" +
             "Mime-Version: 1.0\n" +
@@ -115,7 +115,7 @@ public class ClearTest extends AbstractMailTest {
             "\n" +
             "Blah blah blah blah blah blah";
 		for (int i = 0; i < numOfMails; i++) {
-	        getClient().execute(new NewMailRequest(getInboxFolder(), eml, -1, true));
+	        getClient().execute(new NewMailRequest(null /*getInboxFolder()*/, eml, -1, true));
 			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
 		}
 
