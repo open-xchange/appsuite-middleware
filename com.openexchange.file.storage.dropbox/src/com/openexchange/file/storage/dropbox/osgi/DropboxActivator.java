@@ -51,10 +51,13 @@ package com.openexchange.file.storage.dropbox.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.mime.MimeTypeMap;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
@@ -75,7 +78,7 @@ public final class DropboxActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class, MimeTypeMap.class, TimerService.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class };
     }
 
     @Override
@@ -86,18 +89,13 @@ public final class DropboxActivator extends HousekeepingActivator {
              * Some initialization stuff
              */
             final BundleContext context = this.context;
+            DropboxConfiguration.getInstance().configure(getService(ConfigurationService.class));
             /*
              * Register tracker
              */
             final DropboxServiceRegisterer registerer = new DropboxServiceRegisterer(context);
             rememberTracker(new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, registerer));
             openTrackers();
-            
-            
-            
-            
-            
-            
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DropboxActivator.class)).error(e.getMessage(), e);
             throw e;

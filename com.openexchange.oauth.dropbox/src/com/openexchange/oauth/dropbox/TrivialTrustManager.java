@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,39 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.oauth.dropbox;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import javax.net.ssl.X509TrustManager;
 
 /**
- * {@link DropboxExceptionMessages} - Exception messages for errors that needs to be translated.
- *
+ * The No-Op trust manager.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropboxExceptionMessages implements LocalizableStrings {
+public final class TrivialTrustManager implements X509TrustManager {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // A Dropbox error occurred: %1$s
-    public static final String DROPBOX_ERROR_MSG = "A Dropbox error occurred: %1$s";
-
-    // Invalid Dropbox URL: %1$s
-    public static final String INVALID_DROPBOX_URL_MSG = "Invalid Dropbox URL: %1$s";
-
-    // Dropbox URL does not denote a directory: %1$s
-    public static final String NOT_A_FOLDER_MSG = "Dropbox URL does not denote a directory: %1$s";
-
-    // The Dropbox resource does not exist: %1$s
-    public static final String NOT_FOUND_MSG = "The Dropbox resource does not exist: %1$s";
-
-    // Update denied for Dropbox resource: %1$s
-    public static final String UPDATE_DENIED_MSG = "Update denied for Dropbox resource: %1$s";
-
-    // Delete denied for Dropbox resource: %1$s
-    public static final String DELETE_DENIED_MSG = "Delete denied for Dropbox resource: %1$s";
-
-    // Dropbox URL does not denote a file: %1$s
-    public static final String NOT_A_FILE_MSG = "Dropbox URL does not denote a file: %1$s";
-
-    // Missing file name.
-    public static final String MISSING_FILE_NAME_MSG = "Missing file name.";
-
-    // Versioning not supported by Dropbox file storage.
-    public static final String VERSIONING_NOT_SUPPORTED_MSG = "Versioning not supported by Dropbox file storage.";
-
-    // Missing configuration for account "%1$s".
-    public static final String MISSING_CONFIG_MSG = "Missing configuration for account \"%1$s\".";
-
-    // Bad or expired access token. Need to re-authenticate user.
-    public static final String UNLINKED_ERROR_MSG = "Bad or expired access token. Need to re-authenticate user.";
-
+    
     /**
-     * Initializes a new {@link DropboxExceptionMessages}.
+     * Initializes a new {@link TrivialTrustManager}.
      */
-    private DropboxExceptionMessages() {
+    public TrivialTrustManager() {
         super();
     }
 
+    @Override
+    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        // No-op
+    }
+
+    @Override
+    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        // No-op
+    }
+
+    @Override
+    public X509Certificate[] getAcceptedIssuers() {
+        return new X509Certificate[0];
+    }
 }

@@ -50,19 +50,10 @@
 package com.openexchange.file.storage.dropbox.session;
 
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.scribe.builder.ServiceBuilder;
-import org.scribe.builder.api.FacebookApi;
-import org.scribe.model.OAuthRequest;
-import org.scribe.model.Response;
-import org.scribe.model.Token;
-import org.scribe.model.Verb;
 import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.DropboxAPI.Account;
+import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
@@ -72,8 +63,8 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxServices;
+import com.openexchange.file.storage.dropbox.auth.TrustAllWebAuthSession;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.session.Session;
 
@@ -83,8 +74,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DropboxOAuthAccess {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DropboxOAuthAccess.class);
 
     /**
      * Gets the Dropbox OAuth access for given Dropbox account.
@@ -109,16 +98,6 @@ public final class DropboxOAuthAccess {
     }
 
     /**
-     * The Dropbox OAuth service.
-     */
-    private final org.scribe.oauth.OAuthService dropboxOAuthService;
-
-    /**
-     * The OAuth account.
-     */
-    private final OAuthAccount oauthAccount;
-
-    /**
      * The Dropbox user identifier.
      */
     private final long dropboxUserId;
@@ -129,11 +108,6 @@ public final class DropboxOAuthAccess {
     private final String dropboxUserName;
 
     /**
-     * The OAuth access token for Dropbox.
-     */
-    private final Token dropboxAccessToken;
-
-    /**
      * The Web-authenticating session.
      */
     private WebAuthSession webAuthSession;
@@ -141,7 +115,7 @@ public final class DropboxOAuthAccess {
     /**
      * The Dropbox API reference.
      */
-    private DropboxAPI<WebAuthSession> mDBApi;
+    private DropboxAPI<WebAuthSession> dropboxApi;
 
     /**
      * Initializes a new {@link FacebookMessagingResource}.
@@ -164,83 +138,45 @@ public final class DropboxOAuthAccess {
             if (null == accountId) {
                 throw DropboxExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
             }
-            oauthAccountId = ((Integer) accountId).intValue();
+            if (accountId instanceof Integer) {
+                oauthAccountId = ((Integer) accountId).intValue();
+            } else {
+                try {
+                    oauthAccountId = Integer.parseInt(accountId.toString());
+                } catch (final NumberFormatException e) {
+                    throw DropboxExceptionCodes.MISSING_CONFIG.create(e, fsAccount.getId());
+                }
+            }
         }
         final OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
         try {
-            oauthAccount = oAuthService.getAccount(oauthAccountId, session, user, contextId);
-            dropboxAccessToken = new Token(checkToken(oauthAccount.getToken()), oauthAccount.getSecret());
-            /*
-             * Generate FB service
-             */
-            {
-                final String apiKey = DropboxConfiguration.getInstance().getApiKey();
-                final String secretKey = DropboxConfiguration.getInstance().getSecretKey();
-                dropboxOAuthService = new ServiceBuilder().provider(FacebookApi.class).apiKey(apiKey).apiSecret(secretKey).build();
-            }
+            final OAuthAccount oauthAccount = oAuthService.getAccount(oauthAccountId, session, user, contextId);
             /*-
              * Retrieve information about the user's Dropbox account.
              * 
              * See: https://www.dropbox.com/developers/reference/api#account-info
              */
-            final OAuthRequest request = new OAuthRequest(Verb.GET, "https://api.dropbox.com/1/account/info");
-            dropboxOAuthService.signRequest(dropboxAccessToken, request);
-            final Response response = request.send();
-            final JSONObject object = (JSONObject) new JSONParser().parse(response.getBody());
-            checkForErrors(object);
-            dropboxUserId = ((Long) object.get("uid")).longValue();
-            dropboxUserName = (String) object.get("display_name");
-            // Initialize Dropbox access
             final AppKeyPair appKeys = new AppKeyPair(DropboxConfiguration.getInstance().getApiKey(), DropboxConfiguration.getInstance().getSecretKey());
-            webAuthSession = new WebAuthSession(appKeys, AccessType.APP_FOLDER);
-            mDBApi = new DropboxAPI<WebAuthSession>(webAuthSession);
-            // re-auth specific stuff
-            final AccessTokenPair reAuthTokens = new AccessTokenPair(dropboxAccessToken.getToken(), dropboxAccessToken.getSecret());
-            mDBApi.getSession().setAccessTokenPair(reAuthTokens);
-            // http://aaka.sh/patel/2011/12/20/authenticating-dropbox-java-api/
+            webAuthSession = new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX);
+            dropboxApi = new DropboxAPI<WebAuthSession>(webAuthSession);
+            // Re-auth specific stuff
+            final AccessTokenPair reAuthTokens = new AccessTokenPair(oauthAccount.getToken(), oauthAccount.getSecret());
+            dropboxApi.getSession().setAccessTokenPair(reAuthTokens);
+            // Get account information
+            final Account accountInfo = dropboxApi.accountInfo();
+            dropboxUserId = accountInfo.uid;
+            dropboxUserName = accountInfo.displayName;
         } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final ParseException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final DropboxUnlinkedException e) {
+            throw DropboxExceptionCodes.UNLINKED_ERROR.create();
+        } catch (final DropboxException e) {
+            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
-
-    private static final Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");
-
-    private static String checkToken(final String accessToken) {
-        if (accessToken.indexOf("&expires") < 0) {
-            return accessToken;
-        }
-        final Matcher m = P_EXPIRES.matcher(accessToken);
-        final StringBuffer sb = new StringBuffer(accessToken.length());
-        if (m.find()) {
-            m.appendReplacement(sb, "");
-        }
-        m.appendTail(sb);
-        return sb.toString();
-    }
-
-    private void checkForErrors(final JSONObject object) throws OXException {
-        if (object.containsKey("error")) {
-            final JSONObject error = (JSONObject) object.get("error");
-            if ("OAuthException".equals(error.get("type"))) {
-                final OXException e = new OXException(OAuthExceptionCodes.TOKEN_EXPIRED.create(oauthAccount.getDisplayName()));
-                LOG.error(e.getErrorCode() + " exceptionId=" + e.getExceptionId() + " JSON error object:\n" + error.toString());
-                throw e;
-            } else {
-                throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(object.get("message"));
-            }
-        }
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder(32).append("{ oauthAccount=").append(oauthAccount.getDisplayName()).append(", dropboxUserId=").append(
-            dropboxUserId).append(", dropboxAccessToken=").append(dropboxAccessToken).append('}').toString();
     }
     
     /**
@@ -249,7 +185,7 @@ public final class DropboxOAuthAccess {
      * @return The DropboxAPI reference
      */
     public DropboxAPI<WebAuthSession> getDropboxAPI() {
-        return mDBApi;
+        return dropboxApi;
     }
 
     /**
@@ -257,15 +193,6 @@ public final class DropboxOAuthAccess {
      */
     public void dispose() {
         // So far nothing known to me that needs to be disposed
-    }
-
-    /**
-     * Gets associated OAuth account.
-     *
-     * @return The OAuth account
-     */
-    public OAuthAccount getOauthAccount() {
-        return oauthAccount;
     }
 
     /**
@@ -284,45 +211,6 @@ public final class DropboxOAuthAccess {
      */
     public String getDropboxUserName() {
         return dropboxUserName;
-    }
-
-    /**
-     * Gets the Dropbox OAuth service needed to sign requests.
-     *
-     * @return The Dropbox OAuth service
-     * @see org.scribe.oauth.OAuthService#signRequest(Token, OAuthRequest)
-     */
-    public org.scribe.oauth.OAuthService getDropboxOAuthService() {
-        return dropboxOAuthService;
-    }
-
-    /**
-     * Gets the Dropbox access token needed to sign requests.
-     *
-     * @return The Dropbox access token
-     * @see org.scribe.oauth.OAuthService#signRequest(Token, OAuthRequest)
-     */
-    public Token getDropboxAccessToken() {
-        return dropboxAccessToken;
-    }
-
-    /**
-     * Executes GET request for specified URL.
-     *
-     * @param url The URL
-     * @return The response
-     * @throws OXException If request fails
-     */
-    public String executeGETRequest(final String url) throws OXException {
-        try {
-            final OAuthRequest request = new OAuthRequest(Verb.GET, url);
-            dropboxOAuthService.signRequest(dropboxAccessToken, request);
-            return request.send().getBody();
-        } catch (final org.scribe.exceptions.OAuthException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
     }
 
 }

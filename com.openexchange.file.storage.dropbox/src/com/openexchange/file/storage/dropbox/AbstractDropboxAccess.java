@@ -51,7 +51,6 @@ package com.openexchange.file.storage.dropbox;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import org.scribe.model.Token;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.session.WebAuthSession;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -71,8 +70,6 @@ public abstract class AbstractDropboxAccess {
     protected final FileStorageAccount account;
     protected final long dropboxUserId;
     protected final String dropboxUserName;
-    protected final org.scribe.oauth.OAuthService dropboxOAuthService;
-    protected final Token dropboxAccessToken;
     protected final DropboxAPI<WebAuthSession> dropboxAPI;
 
     /**
@@ -86,8 +83,6 @@ public abstract class AbstractDropboxAccess {
         // Other fields
         this.dropboxUserId = dropboxOAuthAccess.getDropboxUserId();
         this.dropboxUserName = dropboxOAuthAccess.getDropboxUserName();
-        this.dropboxOAuthService = dropboxOAuthAccess.getDropboxOAuthService();
-        this.dropboxAccessToken = dropboxOAuthAccess.getDropboxAccessToken();
         this.dropboxAPI = dropboxOAuthAccess.getDropboxAPI();
     }
 

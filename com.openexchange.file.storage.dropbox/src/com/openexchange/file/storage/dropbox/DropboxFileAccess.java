@@ -52,7 +52,10 @@ package com.openexchange.file.storage.dropbox;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.exception.DropboxServerException;
@@ -484,14 +487,37 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     @Override
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         try {
-            // Dropbox API only supports searching by file name
-            final List<Entry> results = dropboxAPI.search(toPath(folderId), pattern, 0, false);
-            if (results.isEmpty()) {
-                return SearchIteratorAdapter.emptyIterator();
+            if (isEmpty(pattern)) {
+                final List<File> files = new LinkedList<File>();
+                gatherAllFiles("/", files);
+                // Sort collection
+                Collections.sort(files, order.comparatorBy(sort));
+                return new SearchIteratorAdapter<File>(files.iterator(), files.size());
             }
+            // Search by pattern
+            final List<Entry> results;
+            if (null == folderId) {
+                // All folders...
+                final Set<String> folderPaths = new LinkedHashSet<String>(16);
+                folderPaths.add("/");
+                gatherAllFolders("/", folderPaths);
+                // Search in them
+                results = new LinkedList<Entry>();
+                for (final String folderPath : folderPaths) {
+                    results.addAll(searchBy(pattern, folderPath));
+                }
+            } else {
+                results = searchBy(pattern, toPath(folderId));
+                if (results.isEmpty()) {
+                    return SearchIteratorAdapter.emptyIterator();
+                }
+            }
+            // Convert entries to Files
             final List<File> files = new ArrayList<File>(results.size());
             for (final Entry resultsEntry : results) {
-                files.add(new DropboxFile(folderId, resultsEntry.path, userId).parseDropboxFile(resultsEntry));
+                if (!resultsEntry.isDir) {
+                    files.add(new DropboxFile(folderId, resultsEntry.path, userId).parseDropboxFile(resultsEntry));
+                }
             }
             // Sort collection
             Collections.sort(files, order.comparatorBy(sort));
@@ -502,6 +528,42 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private List<Entry> searchBy(final String pattern, final String folderPath) throws DropboxException {
+        // Dropbox API only supports searching by file name
+        return dropboxAPI.search(folderPath, pattern, 0, false);
+    }
+
+    private void gatherAllFolders(final String path, final Set<String> folderPaths) throws DropboxException {
+        final Entry metadata = dropboxAPI.metadata(path, 0, null, true, null);
+        final List<Entry> contents = metadata.contents;
+        final List<String> collectedPaths = new ArrayList<String>(contents.size());
+        for (final Entry childEntry : contents) {
+            final String childPath = childEntry.path;
+            if (childEntry.isDir && !childEntry.isDeleted && folderPaths.add(childPath)) {
+                // No direct recursive invocation to maintain hierarchical order in linked set
+                collectedPaths.add(childPath);
+            }
+        }
+        for (final String childPath : collectedPaths) {
+            gatherAllFolders(childPath, folderPaths);
+        }
+    }
+
+    private void gatherAllFiles(final String path, final List<File> files) throws DropboxException, OXException {
+        final Entry metadata = dropboxAPI.metadata(path, 0, null, true, null);
+        final List<Entry> contents = metadata.contents;
+        for (final Entry childEntry : contents) {
+            final String childPath = childEntry.path;
+            if (!childEntry.isDeleted) {
+                if (childEntry.isDir) {
+                    gatherAllFiles(childPath, files);
+                } else {
+                    files.add(new DropboxFile(toId(path), childPath, userId).parseDropboxFile(childEntry));
+                }
+            }
         }
     }
 

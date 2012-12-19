@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,45 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.file.storage.dropbox.auth;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import com.dropbox.client2.session.AccessTokenPair;
+import com.dropbox.client2.session.AppKeyPair;
+import com.dropbox.client2.session.WebAuthSession;
+
 
 /**
- * {@link DropboxExceptionMessages} - Exception messages for errors that needs to be translated.
+ * {@link TrustAllWebAuthSession}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropboxExceptionMessages implements LocalizableStrings {
-
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // A Dropbox error occurred: %1$s
-    public static final String DROPBOX_ERROR_MSG = "A Dropbox error occurred: %1$s";
-
-    // Invalid Dropbox URL: %1$s
-    public static final String INVALID_DROPBOX_URL_MSG = "Invalid Dropbox URL: %1$s";
-
-    // Dropbox URL does not denote a directory: %1$s
-    public static final String NOT_A_FOLDER_MSG = "Dropbox URL does not denote a directory: %1$s";
-
-    // The Dropbox resource does not exist: %1$s
-    public static final String NOT_FOUND_MSG = "The Dropbox resource does not exist: %1$s";
-
-    // Update denied for Dropbox resource: %1$s
-    public static final String UPDATE_DENIED_MSG = "Update denied for Dropbox resource: %1$s";
-
-    // Delete denied for Dropbox resource: %1$s
-    public static final String DELETE_DENIED_MSG = "Delete denied for Dropbox resource: %1$s";
-
-    // Dropbox URL does not denote a file: %1$s
-    public static final String NOT_A_FILE_MSG = "Dropbox URL does not denote a file: %1$s";
-
-    // Missing file name.
-    public static final String MISSING_FILE_NAME_MSG = "Missing file name.";
-
-    // Versioning not supported by Dropbox file storage.
-    public static final String VERSIONING_NOT_SUPPORTED_MSG = "Versioning not supported by Dropbox file storage.";
-
-    // Missing configuration for account "%1$s".
-    public static final String MISSING_CONFIG_MSG = "Missing configuration for account \"%1$s\".";
-
-    // Bad or expired access token. Need to re-authenticate user.
-    public static final String UNLINKED_ERROR_MSG = "Bad or expired access token. Need to re-authenticate user.";
+public final class TrustAllWebAuthSession extends WebAuthSession {
 
     /**
-     * Initializes a new {@link DropboxExceptionMessages}.
+     * Initializes a new {@link TrustAllWebAuthSession}.
      */
-    private DropboxExceptionMessages() {
-        super();
+    public TrustAllWebAuthSession(AppKeyPair appKeyPair, AccessType type) {
+        super(appKeyPair, type);
+    }
+
+    /**
+     * Initializes a new {@link TrustAllWebAuthSession}.
+     */
+    public TrustAllWebAuthSession(AppKeyPair appKeyPair, AccessType type, AccessTokenPair accessTokenPair) {
+        super(appKeyPair, type, accessTokenPair);
+    }
+
+    @Override
+    public synchronized HttpClient getHttpClient() {
+        final HttpClient httpClient = super.getHttpClient();
+        final ClientConnectionManager connectionManager = httpClient.getConnectionManager();
+        final SchemeRegistry schemeRegistry = connectionManager.getSchemeRegistry();
+        schemeRegistry.register(new Scheme("https", new EasySSLSocketFactory(), 443));
+        return httpClient;
     }
 
 }

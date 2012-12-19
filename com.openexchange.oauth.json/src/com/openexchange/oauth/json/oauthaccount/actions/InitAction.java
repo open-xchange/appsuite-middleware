@@ -69,6 +69,7 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthToken;
+import com.openexchange.oauth.Parameterizable;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
@@ -162,6 +163,15 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          * Create a container to set some state information: Request token's secret, call-back URL, whatever
          */
         final Map<String, Object> oauthState = new HashMap<String, Object>();
+        if (interaction instanceof Parameterizable) {
+            final Parameterizable params = (Parameterizable) interaction;
+            for (final String name : params.getParamterNames()) {
+                final Object value = params.getParameter(name);
+                if (null != value) {
+                    oauthState.put(name, value);
+                }
+            }
+        }
         oauthState.put(OAuthConstants.ARGUMENT_SECRET, requestToken.getSecret());
         oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrl);
         session.setParameter(uuid, oauthState);

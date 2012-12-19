@@ -1,3 +1,9 @@
+package com.openexchange.oauth;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -28,7 +34,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +53,42 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
-
-import com.openexchange.i18n.LocalizableStrings;
-
 /**
- * {@link DropboxExceptionMessages} - Exception messages for errors that needs to be translated.
- *
+ * {@link AbstractParameterizableOAuthInteraction} - Enhances {@link OAuthInteraction} by carrying parameters.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropboxExceptionMessages implements LocalizableStrings {
+public abstract class AbstractParameterizableOAuthInteraction implements Parameterizable, OAuthInteraction {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // A Dropbox error occurred: %1$s
-    public static final String DROPBOX_ERROR_MSG = "A Dropbox error occurred: %1$s";
-
-    // Invalid Dropbox URL: %1$s
-    public static final String INVALID_DROPBOX_URL_MSG = "Invalid Dropbox URL: %1$s";
-
-    // Dropbox URL does not denote a directory: %1$s
-    public static final String NOT_A_FOLDER_MSG = "Dropbox URL does not denote a directory: %1$s";
-
-    // The Dropbox resource does not exist: %1$s
-    public static final String NOT_FOUND_MSG = "The Dropbox resource does not exist: %1$s";
-
-    // Update denied for Dropbox resource: %1$s
-    public static final String UPDATE_DENIED_MSG = "Update denied for Dropbox resource: %1$s";
-
-    // Delete denied for Dropbox resource: %1$s
-    public static final String DELETE_DENIED_MSG = "Delete denied for Dropbox resource: %1$s";
-
-    // Dropbox URL does not denote a file: %1$s
-    public static final String NOT_A_FILE_MSG = "Dropbox URL does not denote a file: %1$s";
-
-    // Missing file name.
-    public static final String MISSING_FILE_NAME_MSG = "Missing file name.";
-
-    // Versioning not supported by Dropbox file storage.
-    public static final String VERSIONING_NOT_SUPPORTED_MSG = "Versioning not supported by Dropbox file storage.";
-
-    // Missing configuration for account "%1$s".
-    public static final String MISSING_CONFIG_MSG = "Missing configuration for account \"%1$s\".";
-
-    // Bad or expired access token. Need to re-authenticate user.
-    public static final String UNLINKED_ERROR_MSG = "Bad or expired access token. Need to re-authenticate user.";
+    /** The parameters map */
+    protected final ConcurrentMap<String, Object> parameters;
 
     /**
-     * Initializes a new {@link DropboxExceptionMessages}.
+     * Initializes a new {@link AbstractParameterizableOAuthInteraction}.
      */
-    private DropboxExceptionMessages() {
+    protected AbstractParameterizableOAuthInteraction() {
         super();
+        parameters = new ConcurrentHashMap<String, Object>(4);
+    }
+
+    @Override
+    public Set<String> getParamterNames() {
+        return new LinkedHashSet<String>(parameters.keySet());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <V> V getParameter(String name) {
+        return (V) parameters.get(name);
+    }
+
+    @Override
+    public void putParameter(String name, Object value) {
+        if (null == value) {
+            parameters.remove(name);
+        } else {
+            parameters.put(name, value);
+        }
     }
 
 }

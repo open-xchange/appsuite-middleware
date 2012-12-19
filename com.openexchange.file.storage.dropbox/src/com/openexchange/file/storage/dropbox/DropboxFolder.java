@@ -136,9 +136,12 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
                     b_rootFolder = true;
                 }
                 {
-                    final Date date = RESTUtility.parseDate(entry.modified);
-                    creationDate = new Date(date.getTime());
-                    lastModifiedDate = new Date(date.getTime());
+                    final String modified = entry.modified;
+                    if (null != modified) {
+                        final Date date = RESTUtility.parseDate(modified);
+                        creationDate = new Date(date.getTime());
+                        lastModifiedDate = new Date(date.getTime());
+                    }
                 }
                 {
                     final List<com.dropbox.client2.DropboxAPI.Entry> contents = entry.contents;
