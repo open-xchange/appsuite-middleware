@@ -256,7 +256,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             if (0 == length) {
                 returnDefaultValue = true;
             } else {
-                args = isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
+                args = isSequential ? new String[] { new com.openexchange.java.StringAllocator(32).append(seqNums[0]).append(':').append(
                     seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
                     seqNums,
                     keepOrder,
@@ -274,7 +274,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 if (0 == length) {
                     returnDefaultValue = true;
                 } else {
-                    args = isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
+                    args = isSequential ? new String[] { new com.openexchange.java.StringAllocator(32).append(seqNums[0]).append(':').append(
                         seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
                         seqNums,
                         true,
@@ -288,7 +288,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 if (0 == length) {
                     returnDefaultValue = true;
                 } else {
-                    args = isSequential ? new String[] { new StringBuilder(32).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
+                    args = isSequential ? new String[] { new com.openexchange.java.StringAllocator(32).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
                         uids,
                         false,
                         LENGTH_WITH_UID + command.length());
@@ -302,7 +302,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             if (0 == length) {
                 returnDefaultValue = true;
             } else {
-                args = isSequential ? new String[] { new StringBuilder(64).append(msgs[0].getMessageNumber()).append(':').append(
+                args = isSequential ? new String[] { new com.openexchange.java.StringAllocator(64).append(msgs[0].getMessageNumber()).append(':').append(
                     msgs[msgs.length - 1].getMessageNumber()).toString() } : IMAPNumArgSplitter.splitMessageArg(
                     msgs,
                     keepOrder,
@@ -310,7 +310,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 seqNumFetcher = keepOrder ? new MsgSeqNumFetcher(msgs) : null;
             }
         } else {
-            throw new MessagingException(new StringBuilder("Invalid array type! ").append(arr.getClass().getName()).toString());
+            throw new MessagingException(new com.openexchange.java.StringAllocator("Invalid array type! ").append(arr.getClass().getName()).toString());
         }
     }
 
@@ -362,7 +362,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
 
     @Override
     protected String getDebugInfo(final int argsIndex) {
-        final StringBuilder sb = new StringBuilder(command.length() + 64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(command.length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -394,7 +394,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -419,7 +419,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             if (pos >= 0 && ++pos < server.length()) {
                 server = server.substring(pos);
             }
-            final MessagingException e = new MessagingException(new StringBuilder(32).append("Expected ").append(length)
+            final MessagingException e = new MessagingException(new com.openexchange.java.StringAllocator(32).append("Expected ").append(length)
                     .append(" FETCH responses but got ").append(index).append(" from IMAP folder \"").append(imapFolder.getFullName())
                     .append("\" on server \"").append(server).append("\".").toString());
             LOG.warn(e.getMessage(), e);
@@ -491,14 +491,14 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
              * Discard corrupt message
              */
             final OXException imapExc = MimeMailException.handleMessagingException(e);
-            LOG.error(new StringBuilder(128).append("Message #").append(msg.getMessageNumber()).append(" discarded: ").append(
+            LOG.error(new com.openexchange.java.StringAllocator(128).append("Message #").append(msg.getMessageNumber()).append(" discarded: ").append(
                 imapExc.getMessage()).toString(), imapExc);
             error = true;
         } catch (final OXException e) {
             /*
              * Discard corrupt message
              */
-            LOG.error(new StringBuilder(128).append("Message #").append(msg.getMessageNumber()).append(" discarded: ").append(
+            LOG.error(new com.openexchange.java.StringAllocator(128).append("Message #").append(msg.getMessageNumber()).append(" discarded: ").append(
                 e.getMessage()).toString(), e);
             error = true;
         }
@@ -663,7 +663,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 h = new InternetHeaders();
                 if (null == headerStream) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug(new StringBuilder(32).append("Cannot retrieve headers from message #").append(msg.getMessageNumber()).append(
+                        logger.debug(new com.openexchange.java.StringAllocator(32).append("Cannot retrieve headers from message #").append(msg.getMessageNumber()).append(
                             " in folder ").append(msg.getFullname()).toString());
                     }
                 } else {
@@ -745,7 +745,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
         public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws OXException {
             final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
             msg.setBodystructure(bs);
-            final StringBuilder sb = new StringBuilder();
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
             sb.append(bs.type).append('/').append(bs.subtype);
             if (bs.cParams != null) {
                 sb.append(bs.cParams);
@@ -788,7 +788,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             }
             if (null == msgStream) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn(new StringBuilder(32).append("Cannot retrieve body from message #").append(msg.getMessageNumber()).append(
+                    logger.warn(new com.openexchange.java.StringAllocator(32).append("Cannot retrieve body from message #").append(msg.getMessageNumber()).append(
                         " in folder ").append(msg.getFullname()).toString());
                 }
             } else {
@@ -825,76 +825,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      * @return The FETCH items to craft a FETCH command
      */
     private static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
-        final StringBuilder command = new StringBuilder(128);
-        final boolean envelope;
-        if (fp.contains(FetchProfile.Item.ENVELOPE)) {
-            if (loadBody) {
-                command.append("INTERNALDATE");
-                envelope = false;
-            } else {
-                command.append("ENVELOPE INTERNALDATE RFC822.SIZE");
-                envelope = true;
-            }
-        } else {
-            command.append("INTERNALDATE");
-            envelope = false;
-        }
-        if (fp.contains(FetchProfile.Item.FLAGS)) {
-            command.append(" FLAGS");
-        }
-        if (fp.contains(FetchProfile.Item.CONTENT_INFO)) {
-            command.append(" BODYSTRUCTURE");
-        }
-        if (fp.contains(UIDFolder.FetchProfileItem.UID)) {
-            command.append(" UID");
-        }
-        boolean allHeaders = false;
-        if (fp.contains(IMAPFolder.FetchProfileItem.HEADERS) && !loadBody) {
-            allHeaders = true;
-            if (isRev1) {
-                command.append(" BODY.PEEK[HEADER]");
-            } else {
-                command.append(" RFC822.HEADER");
-            }
-        }
-        if (!envelope && fp.contains(IMAPFolder.FetchProfileItem.SIZE)) {
-            command.append(" RFC822.SIZE");
-        }
-        /*
-         * If we're not fetching all headers, fetch individual headers
-         */
-        if (!allHeaders && !loadBody) {
-            final String[] hdrs = fp.getHeaderNames();
-            if (hdrs.length > 0) {
-                command.append(' ');
-                if (isRev1) {
-                    command.append("BODY.PEEK[HEADER.FIELDS (");
-                } else {
-                    command.append("RFC822.HEADER.LINES (");
-                }
-                command.append(hdrs[0]);
-                for (int i = 1; i < hdrs.length; i++) {
-                    command.append(' ');
-                    command.append(hdrs[i]);
-                }
-                if (isRev1) {
-                    command.append(")]");
-                } else {
-                    command.append(')');
-                }
-            }
-        }
-        if (loadBody) {
-            /*
-             * Load full message
-             */
-            if (isRev1) {
-                command.append(" BODY.PEEK[]");
-            } else {
-                command.append(" RFC822");
-            }
-        }
-        return command.toString();
+        return MailMessageFetchIMAPCommand.getFetchCommand(isRev1, fp, loadBody);
     }
 
     /**

@@ -67,13 +67,13 @@ public final class ConversionActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     protected void startBundle() throws Exception {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 }

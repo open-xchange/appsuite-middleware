@@ -175,7 +175,7 @@ public final class IPAddressUtil {
         final byte[] dst = new byte[INADDR16SZ];
 
         int srcb_length = srcb.length;
-        final int pc = src.indexOf("%");
+        final int pc = src.indexOf('%');
         if (pc == srcb_length - 1) {
             return null;
         }

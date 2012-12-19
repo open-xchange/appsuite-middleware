@@ -94,7 +94,7 @@ public class OXTestToolkit {
         final CRC32 crcActual = new CRC32();
         final CRC32 crcExpected = new CRC32();
         try {
-            while(expected.read(buff) != -1){
+            while(expected.read(buff) > 0){
                 try {
                     actual.read(buff2);
                 } catch (final IOException e){
@@ -123,7 +123,7 @@ public class OXTestToolkit {
         int len;
         byte[] buffer = new byte[0xFFFF];
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        while ((len = is.read(buffer)) != -1) {
+        while ((len = is.read(buffer)) > 0) {
             baos.write(buffer, 0, len);
         }
         is.close();

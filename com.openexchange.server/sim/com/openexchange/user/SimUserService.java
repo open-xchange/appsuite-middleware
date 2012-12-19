@@ -65,13 +65,13 @@ public class SimUserService implements UserService {
 
     @Override
     public String getUserAttribute(final String name, final int userId, final Context context) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public void setUserAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -80,7 +80,7 @@ public class SimUserService implements UserService {
      */
     @Override
     public boolean authenticate(final User user, final String password) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -89,13 +89,13 @@ public class SimUserService implements UserService {
      */
     @Override
     public User getUser(final int uid, final Context context) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public User[] getUser(final Context context, final int[] userIds) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -104,7 +104,7 @@ public class SimUserService implements UserService {
      */
     @Override
     public User[] getUser(final Context ctx) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -113,7 +113,7 @@ public class SimUserService implements UserService {
      */
     @Override
     public int getUserId(final String loginInfo, final Context context) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
@@ -122,7 +122,7 @@ public class SimUserService implements UserService {
      */
     @Override
     public void invalidateUser(final Context ctx, final int userId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -131,7 +131,7 @@ public class SimUserService implements UserService {
      */
     @Override
     public int[] listAllUser(final Context context) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -140,7 +140,7 @@ public class SimUserService implements UserService {
      */
     @Override
     public int[] listModifiedUser(final Date modifiedSince, final Context context) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -149,7 +149,7 @@ public class SimUserService implements UserService {
      */
     @Override
     public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -158,7 +158,7 @@ public class SimUserService implements UserService {
      */
     @Override
     public User searchUser(final String email, final Context context) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -167,7 +167,7 @@ public class SimUserService implements UserService {
      */
     @Override
     public void updateUser(final User user, final Context context) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -176,7 +176,7 @@ public class SimUserService implements UserService {
      */
     @Override
     public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -185,25 +185,25 @@ public class SimUserService implements UserService {
      */
     @Override
     public User[] searchUserByName(final String name, final Context context, final int searchType) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public User getUser(Connection con, int uid, Context context) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public int createUser(Connection con, Context context, User user) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
     @Override
     public int createUser(Context context, User user) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 

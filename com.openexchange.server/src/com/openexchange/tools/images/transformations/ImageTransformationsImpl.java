@@ -177,12 +177,15 @@ public class ImageTransformationsImpl implements ImageTransformations {
     }
     
     /**
-     * gets a value indicating whether the denoted format name leads to transformations or not.
+     * Gets a value indicating whether the denoted format name leads to transformations or not.
      * 
      * @param formatName The format name
      * @return <code>true</code>, if there are transformations for the targte image format, <code>false</code>, otherwise
      */
     private boolean needsTransformation(String formatName) {
+        if (false == canRead(formatName)) {
+            return false;
+        }
         for (ImageTransformation transformation : transformations) {
             if (transformation.supports(formatName)) {
                 return true;                                        
@@ -341,6 +344,9 @@ public class ImageTransformationsImpl implements ImageTransformations {
     private BufferedImage read(InputStream inputStream) throws IOException {
         try {
             return ImageIO.read(inputStream);
+        } catch (IllegalArgumentException e) {
+            LOG.debug("error reading image from stream", e);
+            return null;
         } finally {
             Streams.close(inputStream);
         }
@@ -366,6 +372,9 @@ public class ImageTransformationsImpl implements ImageTransformations {
             return ImageIO.read(managedFile.getInputStream());
         } catch (OXException e) {
             throw new IOException("error accessing managed file", e);
+        } catch (IllegalArgumentException e) {
+            LOG.debug("error reading image from stream", e);
+            return null;
         } finally {
             if (managedFile != null) {
                 managedFile.delete();
@@ -435,4 +444,17 @@ public class ImageTransformationsImpl implements ImageTransformations {
         }
     }
 
+    /**
+     * Gets a value indicating whether an image format can be read or not.
+     * 
+     * @param formatName The image format name
+     * @return <code>true</code> if the image format can be read, <code>false</code>, otherwise
+     */
+    private static boolean canRead(String formatName) {
+        if ("vnd.microsoft.icon".equalsIgnoreCase(formatName) || "x-icon".equalsIgnoreCase(formatName)) {
+            // ImageIO has problems reading icons: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6633448
+            return false;
+        }
+        return true;
+    }
 }

@@ -78,6 +78,16 @@ import com.openexchange.tools.TimeZoneUtils;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+/**
+ * {@link MailMessage}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+/**
+ * {@link MailMessage}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public abstract class MailMessage extends MailPart {
 
 
@@ -87,6 +97,7 @@ public abstract class MailMessage extends MailPart {
 
     private static final String HDR_REFERENCES = MessageHeaders.HDR_REFERENCES;
     private static final String HDR_MESSAGE_ID = MessageHeaders.HDR_MESSAGE_ID;
+    private static final String HDR_IN_REPLY_TO = MessageHeaders.HDR_IN_REPLY_TO;
 
     /*-
      * ------------------- Flags ------------------------------
@@ -313,6 +324,13 @@ public abstract class MailMessage extends MailPart {
     private boolean prevSeen;
 
     private boolean b_prevSeen;
+
+    /**
+     * References to other messages.
+     */
+    private String[] references;
+
+    private boolean b_references;
 
     /**
      * From addresses.
@@ -1499,19 +1517,76 @@ public abstract class MailMessage extends MailPart {
         return getFirstHeader(HDR_MESSAGE_ID);
     }
 
+    /**
+     * Gets the <i>In-Reply-To</i> value.
+     * 
+     * @return The <i>In-Reply-To</i> value or <code>null</code>
+     */
+    public String getInReplyTo() {
+        return getFirstHeader(HDR_IN_REPLY_TO);
+    }
+
     private static final Pattern SPLIT = Pattern.compile(" +");
 
     /**
-     * Gets the <i>References</i> values.
+     * Gets the <i>References</i>.
      * 
-     * @return The <i>References</i> values or <code>null</code>
+     * @return The <i>References</i> or <code>null</code>
      */
     public String[] getReferences() {
-        final String references = getFirstHeader(HDR_REFERENCES);
-        if (isEmpty(references)) {
-            return null;
+        if (!b_references) {
+            final String references = getFirstHeader(HDR_REFERENCES);
+            if (references == null) {
+                return null;
+            }
+            setReferences(SPLIT.split(MimeMessageUtility.decodeMultiEncodedHeader(references)));
         }
-        return SPLIT.split(MimeMessageUtility.decodeMultiEncodedHeader(references));
+        return this.references;
+    }
+
+    /**
+     * @return <code>true</code> if <i>References</i> is set; otherwise <code>false</code>
+     */
+    public boolean containsReferences() {
+        return b_references;
+    }
+
+    /**
+     * Removes the <i>References</i>.
+     */
+    public void removeReferences() {
+        references = null;
+        b_references = false;
+    }
+
+    /**
+     * Sets the <i>References</i>.
+     * 
+     * @param sReferences The <i>References</i> header value
+     */
+    public void setReferences(final String sReferences) {
+        if (null == sReferences) {
+            this.references = null;
+            b_references = true;
+        } else {
+            setReferences(SPLIT.split(MimeMessageUtility.decodeMultiEncodedHeader(sReferences)));
+        }
+    }
+
+    /**
+     * Sets the <i>References</i>.
+     * 
+     * @param references The <i>References</i>
+     */
+    public void setReferences(final String[] references) {
+        if (null == references) {
+            this.references = null;
+        } else {
+            final int length = references.length;
+            this.references = new String[length];
+            System.arraycopy(references, 0, this.references, 0, length);
+        }
+        b_references = true;
     }
 
     /**

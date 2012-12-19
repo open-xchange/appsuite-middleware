@@ -93,13 +93,13 @@ public class MockDBService implements DatabaseService {
 
     @Override
     public int[] listContexts(final int poolId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public int getServerId() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
@@ -125,25 +125,25 @@ public class MockDBService implements DatabaseService {
 
     @Override
     public Connection getForUpdateTask(final int contextId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public Connection get(final int poolId, final String schema) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public Connection getNoTimeout(final int poolId, final String schema) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public void backNoTimeoout(final int poolId, final Connection con) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 
@@ -171,43 +171,43 @@ public class MockDBService implements DatabaseService {
 
     @Override
     public void backForUpdateTask(final int contextId, final Connection con) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 
     @Override
     public void back(final int poolId, final Connection con) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 
     @Override
     public int getWritablePool(final int contextId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
     @Override
     public String getSchemaName(final int contextId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public int[] getContextsInSameSchema(final int contextId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public void invalidate(final int contextId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 
     @Override
     public void writeAssignment(Connection con, Assignment assignment) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 }

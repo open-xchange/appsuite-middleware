@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.internal;
 
-import java.sql.SQLException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -258,7 +257,7 @@ public final class Tools {
     public static EffectivePermission getPermission(Session session, FolderObject folder) throws OXException {
         try {
             return folder.getEffectiveUserPermission(session.getUserId(), getUserConfig(session));
-        } catch (SQLException e) {
+        } catch (RuntimeException e) {
             throw ContactExceptionCodes.UNEXPECTED_ERROR.create(e);
         }
     }

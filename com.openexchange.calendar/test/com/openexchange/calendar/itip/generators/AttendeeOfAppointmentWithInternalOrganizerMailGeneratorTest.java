@@ -324,7 +324,7 @@ public class AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest extends
          */
         @Override
         public List<NotificationParticipant> getResources(Appointment appointment, Context ctx) throws OXException {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return null;
         }
 

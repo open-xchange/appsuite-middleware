@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.processing;
 
+import static com.openexchange.mail.mime.filler.MimeMessageFiller.setReplyHeaders;
 import static java.util.regex.Matcher.quoteReplacement;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -359,6 +360,7 @@ public final class MimeForward {
                 forwardMsg.saveChanges();
                 // Remove generated Message-Id header
                 forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
+                setReplyHeaders(originalMsg, forwardMsg);
             }
             final CompositeMailMessage compositeMail = new CompositeMailMessage(MimeMessageConverter.convertMessage(forwardMsg));
             /*
@@ -402,6 +404,7 @@ public final class MimeForward {
             forwardMsg.saveChanges();
             // Remove generated Message-Id header
             forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
+            setReplyHeaders(originalMsg, forwardMsg);
             forwardMail = MimeMessageConverter.convertMessage(forwardMsg);
         } else {
             /*
@@ -426,6 +429,7 @@ public final class MimeForward {
                 forwardMsg.saveChanges();
                 // Remove generated Message-Id header
                 forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
+                setReplyHeaders(originalMsg, forwardMsg);
             }
             final CompositeMailMessage compositeMail = new CompositeMailMessage(MimeMessageConverter.convertMessage(forwardMsg));
             /*

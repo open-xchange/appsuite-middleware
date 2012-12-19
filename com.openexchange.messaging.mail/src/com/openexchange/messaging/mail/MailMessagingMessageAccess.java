@@ -396,7 +396,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
     }
 
     private com.openexchange.mail.search.SearchTerm<?> from(final SearchTerm<?> searchTerm) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

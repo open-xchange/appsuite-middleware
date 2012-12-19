@@ -55,7 +55,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.SortableId;
@@ -74,7 +75,6 @@ import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-// TODO: Auto-generated Javadoc
 /**
  * {@link FolderMap} - An in-memory folder map with LRU eviction policy.
  *
@@ -85,11 +85,8 @@ public final class FolderMap {
     protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(FolderMap.class);
 
     private final ConcurrentMap<Key, Wrapper> map;
-
     private final int maxLifeMillis;
-
     private final int userId;
-
     private final int contextId;
 
     /**
@@ -101,8 +98,7 @@ public final class FolderMap {
      */
     public FolderMap(final int maxCapacity, final int maxLifeUnits, final TimeUnit unit, final int userId, final int contextId) {
         super();
-        final Lock lock = new ReentrantLock();
-        map = new LockBasedConcurrentMap<Key, Wrapper>(lock, lock, new MaxCapacityLinkedHashMap<Key, Wrapper>(maxCapacity));
+        map = new ConcurrentLinkedHashMap.Builder<Key, Wrapper>().maximumWeightedCapacity(maxCapacity).weigher(Weighers.entrySingleton()).build();
         this.maxLifeMillis = (int) unit.toMillis(maxLifeUnits);
         this.contextId = contextId;
         this.userId = userId;
@@ -112,7 +108,7 @@ public final class FolderMap {
      * Initializes a new {@link FolderMap}.
      * 
      * @param maxCapacity the max capacity
-     * @param maxLifeMillis the max life millis
+     * @param maxLifeMillis the max life milliseconds
      */
     public FolderMap(final int maxCapacity, final int maxLifeMillis, final int userId, final int contextId) {
         this(maxCapacity, maxLifeMillis, TimeUnit.MILLISECONDS, userId, contextId);
@@ -174,9 +170,9 @@ public final class FolderMap {
     }
 
     /**
-     * Size.
+     * Gets the size.
      * 
-     * @return The int
+     * @return The size
      */
     public int size() {
         return map.size();
@@ -196,7 +192,7 @@ public final class FolderMap {
      * 
      * @param folderId the folder id
      * @param treeId the tree id
-     * @return <code>true</code> if successful; otherwsie <code>false</code>
+     * @return <code>true</code> if successful; otherwise <code>false</code>
      */
     public boolean contains(final String folderId, final String treeId) {
         return map.containsKey(keyOf(folderId, treeId));

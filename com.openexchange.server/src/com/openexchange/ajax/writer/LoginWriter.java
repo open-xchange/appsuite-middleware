@@ -123,7 +123,17 @@ public final class LoginWriter {
      * @throws JSONException If writing to JSON object fails
      */
     public static void write(final Session session, final JSONObject json) throws JSONException {
-        write(session, json, Collections.<OXException> emptyList(), null);
+        Locale locale = null;
+        if (session instanceof ServerSession) {
+            locale = ((ServerSession) session).getUser().getLocale();
+        } else {
+            try {
+                locale = UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+        write(session, json, Collections.<OXException> emptyList(), locale);
     }
 
     private static final String PARAMETER_USER_ID = AJAXServlet.PARAMETER_USER_ID;

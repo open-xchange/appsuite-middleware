@@ -1,0 +1,17 @@
+open-xchange-appsuite-backend (7.0.0-2) unstable; urgency=low
+
+  * Third release candidate for 7.0.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 18 Dec 2012 14:14:23 +0100
+
+open-xchange-appsuite-backend (7.0.0-1) unstable; urgency=low
+
+  * Second release candidate for 7.0.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 17 Dec 2012 17:35:50 +0100
+
+open-xchange-appsuite-backend (7.0.0-0) unstable; urgency=low
+
+  * Initial packaging
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 17 Dec 2012 09:31:11 +0100

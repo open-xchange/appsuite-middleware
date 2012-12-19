@@ -113,7 +113,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         final Credentials master = ClientAdminThread.cache.getMasterCredentials();
 
         boolean doPluginAuth = false;
-        if (cache.masterAuthenticationDisabled() || (authdata != null && !master.getLogin().equals(authdata.getLogin()))) {
+        if (cache.masterAuthenticationDisabled() || (authdata != null && master != null && !master.getLogin().equals(authdata.getLogin()))) {
             doPluginAuth = true;
         }
         // only let other plugins authenticate, when we have the BundleContext

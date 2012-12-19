@@ -245,7 +245,6 @@ public class DisallowConcurrentExecutionJobTest {
         scheduler1.shutdown(true);
     }
     
-    
     @Test
     public void testClusterSchedulerConcurrency() throws Exception {
         JobStore jobStore = new TestableHazelcastJobStore();

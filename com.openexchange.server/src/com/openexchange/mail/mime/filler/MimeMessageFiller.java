@@ -1379,7 +1379,7 @@ public class MimeMessageFiller {
             final InputStream in = mailPart.getInputStream();
             try {
                 int len;
-                while ((len = in.read(bbuf)) != -1) {
+                while ((len = in.read(bbuf)) > 0) {
                     out.write(bbuf, 0, len);
                 }
             } finally {

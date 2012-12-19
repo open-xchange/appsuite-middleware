@@ -50,7 +50,6 @@
 package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -339,8 +338,8 @@ public class FolderWriter extends FolderChildWriter {
                 } else {
                     deletedQueue.add(fo);
                 }
-            } catch (final SQLException e) {
-                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, e.getMessage());
             }
         }
 
@@ -367,8 +366,8 @@ public class FolderWriter extends FolderChildWriter {
                 } else {
                     deletedQueue.add(fo);
                 }
-            } catch (final SQLException e) {
-                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, e.getMessage());
             }
         }
 
@@ -386,8 +385,8 @@ public class FolderWriter extends FolderChildWriter {
                 if (fo.isVisible(userId, userConf)) {
                     updatedQueue.add(fo);
                 }
-            } catch (final SQLException e) {
-                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, e.getMessage());
             }
         }
 
@@ -408,8 +407,8 @@ public class FolderWriter extends FolderChildWriter {
                      */
                     updatedQueue.add(fo);
                 }
-            } catch (final SQLException e) {
-                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, e.getMessage());
             }
         }
 

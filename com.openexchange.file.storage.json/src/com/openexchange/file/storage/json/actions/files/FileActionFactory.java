@@ -68,6 +68,9 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 @Module(name = "infostore", description = "The infostore module combines the knowledge database, bookmarks and documents.")
 public class FileActionFactory implements AJAXActionServiceFactory {
 
+    /**
+     * The singleton instance of {@link FileActionFactory}
+     */
     public static FileActionFactory INSTANCE = new FileActionFactory();
 
     private final Map<String, AJAXActionService> actions;
@@ -75,7 +78,7 @@ public class FileActionFactory implements AJAXActionServiceFactory {
     /**
      * Initializes a new {@link FileActionFactory}.
      */
-    private FileActionFactory() {
+    protected FileActionFactory() {
         super();
         final Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>(20);
         actions.put("new", new NewAction());

@@ -117,7 +117,7 @@ public final class GetAction extends AbstractFolderAction {
                 treeId,
                 folderId,
                 session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes));
+                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")));
         /*
          * Write subfolders as JSON arrays to JSON array
          */

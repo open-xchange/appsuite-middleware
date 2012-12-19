@@ -141,7 +141,7 @@ public enum DropboxExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "CIFS";
+        return "DROPBOX";
     }
 
     @Override

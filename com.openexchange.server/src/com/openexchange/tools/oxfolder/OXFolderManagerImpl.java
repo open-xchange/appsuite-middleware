@@ -1147,8 +1147,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             } else if (folderId == targetFolderId) {
                 throw OXFolderExceptionCode.NO_EQUAL_MOVE.create(Integer.valueOf(ctx.getContextId()));
             }
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
         /*
          * Check if source folder has subfolders

@@ -90,6 +90,10 @@ public class UploadException extends OXException {
          */
         MAX_UPLOAD_SIZE_EXCEEDED(UploadExceptionMessage.MAX_UPLOAD_SIZE_EXCEEDED_MSG, CATEGORY_USER_INPUT, 5),
         /**
+         * Request rejected because its size exceeds the maximum configured size of %1$s
+         */
+        MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN(UploadExceptionMessage.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN_MSG, CATEGORY_USER_INPUT, 5),
+        /**
          * Missing parameter %1$s
          */
         MISSING_PARAM(UploadExceptionMessage.MISSING_PARAM_MSG, CATEGORY_ERROR, 6),

@@ -233,7 +233,7 @@ public final class BodyTerm extends SearchTerm<String> {
         try {
             if (contentType.startsWith("text/htm")) {
                 final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                return htmlService.html2text(htmlService.getConformHTML(MessageUtility.readMailPart(mailPart, charset), charset), false);
+                return htmlService.html2text(MessageUtility.readMailPart(mailPart, charset), false);
             }
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final IOException e) {
@@ -263,7 +263,7 @@ public final class BodyTerm extends SearchTerm<String> {
             }
             if (ct.startsWith("text/htm")) {
                 final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                return htmlService.html2text(htmlService.getConformHTML(MessageUtility.readMimePart(part, charset), charset), false);
+                return htmlService.html2text(MessageUtility.readMimePart(part, charset), false);
             }
             return MessageUtility.readMimePart(part, charset);
         } catch (final IOException e) {

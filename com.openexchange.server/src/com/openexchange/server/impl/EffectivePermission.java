@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * EffectivePermission
@@ -77,6 +78,8 @@ public class EffectivePermission extends OCLPermission {
     private static final String STR_USER = "User";
 
     private static final String STR_GROUP = "Group";
+
+    private static final int GAB = FolderObject.SYSTEM_LDAP_FOLDER_ID;
 
     private static final long serialVersionUID = -1303754404748836561L;
 
@@ -229,6 +232,9 @@ public class EffectivePermission extends OCLPermission {
 
     @Override
     public int getWritePermission() {
+        if ((GAB == getFuid()) && OXFolderProperties.isEnableInternalUsersEdit()) {
+            return WRITE_OWN_OBJECTS;
+        }
         if (validateUserConfig()) {
             if (!hasModuleAccess(folderModule)) {
                 return NO_PERMISSIONS;

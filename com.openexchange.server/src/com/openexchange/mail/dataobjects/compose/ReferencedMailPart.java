@@ -227,7 +227,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
             int len;
             int totalBytes = 0;
-            while ((len = in.read(bbuf)) != -1) {
+            while ((len = in.read(bbuf)) > 0) {
                 out.write(bbuf, 0, len);
                 totalBytes += len;
             }

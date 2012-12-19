@@ -54,9 +54,9 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import jcifs.smb.SmbFile;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
 
 
 /**
@@ -80,8 +80,7 @@ public final class SmbFileMap {
      */
     public SmbFileMap(final int maxCapacity, final int maxLifeUnits, final TimeUnit unit) {
         super();
-        final Lock lock = new ReentrantLock();
-        map = new LockBasedConcurrentMap<String, Wrapper>(lock, lock, new MaxCapacityLinkedHashMap<String, Wrapper>(maxCapacity));
+        map = new ConcurrentLinkedHashMap.Builder<String, Wrapper>().maximumWeightedCapacity(maxCapacity).weigher(Weighers.entrySingleton()).build();
         this.maxLifeMillis = (int) unit.toMillis(maxLifeUnits);
     }
 

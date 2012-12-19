@@ -262,13 +262,13 @@ public final class LocalCache extends DefaultCacheKeyService implements Cache, S
 
     @Override
     public void setDefaultElementAttributes(final ElementAttributes attr) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public CacheStatistics getStatistics() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

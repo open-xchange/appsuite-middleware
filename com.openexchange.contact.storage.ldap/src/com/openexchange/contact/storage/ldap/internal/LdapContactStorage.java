@@ -194,7 +194,7 @@ public class LdapContactStorage extends DefaultContactStorage {
 
     @Override
     public void updateReferences(Session session, Contact contact) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
     }
 
     @Override
@@ -354,7 +354,9 @@ public class LdapContactStorage extends DefaultContactStorage {
                 }
                 if (null != result) {
                     Contact referencedContact = this.createContact(executor, idResolver, mapper, result, DISTLISTMEMBER_FIELDS);
-                    updateMember(member, referencedContact);
+                    if (null != referencedContact) {
+                        updateMember(member, referencedContact);
+                    }
                 }
             }
             /*
@@ -416,7 +418,10 @@ public class LdapContactStorage extends DefaultContactStorage {
         }
         List<Contact> contacts = new ArrayList<Contact>(results.size());
         for (LdapResult result : results) {
-            contacts.add(createContact(executor, idResolver, mapper, result, fields));
+            Contact contact = createContact(executor, idResolver, mapper, result, fields);
+            if (null != contact) {
+                contacts.add(contact);
+            }
         }
         return contacts;
     }
@@ -442,10 +447,14 @@ public class LdapContactStorage extends DefaultContactStorage {
             contact.setImageLastModified(contact.getLastModified());
         }
         if (contact.getMarkAsDistribtuionlist()) {
-            resolveDistList(executor, idResolver, contact);                        
+            resolveDistList(executor, idResolver, contact);
+            if (config.isExcludeEmptyLists() && null == contact.getDistributionList() || 0 == contact.getDistributionList().length) {
+                LOG.debug("Skipping empty distribution list '" + result + "'.");
+                return null;
+            }            
             if (false == contact.containsSurName() && contact.containsDisplayName()) {
                 contact.setSurName(contact.getDisplayName());
-            }            
+            }
         }
         return contact;
     }

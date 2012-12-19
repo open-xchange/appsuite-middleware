@@ -1659,9 +1659,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return retval;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getFieldId(java.lang.String)
-     */
     @Override
     public int getFieldId(final String fieldName) {
         if (null == fieldName) {
@@ -1789,9 +1786,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getReadPermission(int, int, com.openexchange.session.Session, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public boolean getReadPermission(final int oid, final int fid, final Session so, final Context ctx)
             throws OXException {
@@ -1820,9 +1814,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getWritePermission(int, int, com.openexchange.session.Session, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public boolean getWritePermission(final int oid, final int fid, final Session so, final Context ctx)
             throws OXException {
@@ -1871,9 +1862,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkIfUserIsParticipant(com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant)
-     */
     @Override
     public final boolean checkIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
         final UserParticipant check[] = cdao.getUsers();
@@ -1887,9 +1875,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkAndFillIfUserIsParticipant(com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant)
-     */
     @Override
     public void checkAndFillIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
         if (cdao.getParticipants() != null) {
@@ -1924,9 +1909,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkAndConfirmIfUserUserIsParticipantInPublicFolder(com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant)
-     */
     @Override
     public void checkAndConfirmIfUserUserIsParticipantInPublicFolder(final CalendarDataObject cdao, final UserParticipant up) {
         final Participant[] participants = cdao.getParticipants();
@@ -2002,9 +1984,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkAndModifyAlarm(com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant[], int, com.openexchange.groupware.container.UserParticipant[])
-     */
     @Override
     public UserParticipant[] checkAndModifyAlarm(final CalendarDataObject cdao, UserParticipant check[], final int uid,  final UserParticipant orig[]) {
         if (cdao.containsAlarm()) {
@@ -2061,9 +2040,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return check;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#simpleParticipantCheck(com.openexchange.calendar.CalendarDataObject)
-     */
     @Override
     public void simpleParticipantCheck(final CalendarDataObject cdao) throws OXException {
         // TODO: Maybe we have to enhance this simple check
@@ -2082,9 +2058,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkAndFillIfUserIsUser(com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.Participant)
-     */
     @Override
     public void checkAndFillIfUserIsUser(final CalendarDataObject cdao, final Participant p) throws OXException {
         final Participant check[] = cdao.getParticipants();
@@ -2124,9 +2097,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#removeParticipant(com.openexchange.calendar.CalendarDataObject, int)
-     */
     @Override
     public void removeParticipant(final CalendarDataObject cdao, final int uid) throws OXException {
         final UserParticipant check[] = cdao.getUsers();
@@ -2169,17 +2139,11 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getNextReminderDate(int, int, com.openexchange.session.Session)
-     */
     @Override
     public Date getNextReminderDate(final int oid, final int fid, final Session so) throws OXException, SQLException {
         return getNextReminderDate(oid, fid, so, 0L);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getNextReminderDate(int, int, com.openexchange.session.Session, long)
-     */
     @Override
     public Date getNextReminderDate(final int oid, final int fid, final Session so, final long last) throws OXException, SQLException {
         final CalendarSql csql = new CalendarSql(so);
@@ -2202,9 +2166,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#existsReminder(com.openexchange.groupware.contexts.Context, int, int)
-     */
     @Override
     public boolean existsReminder(final Context c, final int oid, final int uid) {
         final ReminderService rsql = new ReminderHandler(c);
@@ -2216,9 +2177,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#debugActiveDates(long, long, boolean[])
-     */
     @Override
     public void debugActiveDates(final long start, final long end, final boolean activeDates[]) {
         System.out.println("\n\nRange : "+new Date(start)+"  -  "+ new Date(end));
@@ -2239,9 +2197,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         System.out.println("\n\n\n");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#debugRecurringResult(com.openexchange.calendar.RecurringResult)
-     */
     @Override
     public void debugRecurringResult(final RecurringResultInterface rr) {
         if (DEBUG) {
@@ -2259,9 +2214,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return calendar_session_name + unique_session_int.incrementAndGet();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkAndAlterCols(int[])
-     */
     @Override
     public int[] checkAndAlterCols(int cols[]) {
         if (null == cols) {
@@ -2288,9 +2240,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return cols;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#enhanceCols(int[], int[], int)
-     */
     @Override
     public int[] enhanceCols(final int cols[], final int ara[], final int i) {
         final int ncols[] = new int[cols.length + i];
@@ -2299,9 +2248,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return ncols;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#triggerEvent(com.openexchange.session.Session, int, com.openexchange.groupware.container.AppointmentObject)
-     */
     @Override
     public void triggerEvent(final Session session, final int action, final Appointment appointmentobject) throws OXException {
         final EventClient eventclient = new EventClient(session);
@@ -2360,9 +2306,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#triggerModificationEvent(com.openexchange.session.Session, com.openexchange.calendar.CalendarDataObject, com.openexchange.calendar.CalendarDataObject)
-     */
     @Override
     public void triggerModificationEvent(final Session session, final CalendarDataObject oldAppointment,
             final CalendarDataObject newAppointment) throws OXException {
@@ -2388,9 +2331,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return FolderObject.loadFolderObjectFromDB(fid, ctx, null);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getSQLInStringForParticipants(com.openexchange.groupware.container.UserParticipant[])
-     */
     @Override
     public String getSQLInStringForParticipants(final List<UserParticipant> userParticipant) {
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
@@ -2411,9 +2351,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return sb.toString();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getSQLInStringForParticipants(com.openexchange.groupware.container.Participant[])
-     */
     @Override
     public String getSQLInStringForParticipants(final Participant[] participant) {
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
@@ -2434,9 +2371,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return sb.toString();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getSQLInStringForResources(com.openexchange.groupware.container.Participant[])
-     */
     @Override
     public String getSQLInStringForResources(final Participant[] participant) {
         final  com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
@@ -2470,9 +2404,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return sb.toString();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#inBetween(long, long, long, long)
-     */
     @Override
     public boolean inBetween(final long check_start, final long check_end, final long range_start,
             final long range_end) {
@@ -2490,9 +2421,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return false;*/
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#convertString2Dates(java.lang.String)
-     */
     @Override
     public Date[] convertString2Dates(final String s) {
         if (s == null) {
@@ -2508,9 +2436,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return dates;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#convertDates2String(java.util.Date[])
-     */
     @Override
     public String convertDates2String(final Date[] d) {
         if (d == null || d.length == 0) {

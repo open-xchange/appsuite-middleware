@@ -75,13 +75,13 @@ public class MockOAuthService implements OAuthService {
      */
     @Override
     public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -91,7 +91,7 @@ public class MockOAuthService implements OAuthService {
      */
     @Override
     public void deleteAccount(final int accountId, final int user, final int contextId) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -113,7 +113,7 @@ public class MockOAuthService implements OAuthService {
      */
     @Override
     public List<OAuthAccount> getAccounts(final Session session, final int user, final int contextId) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -132,7 +132,7 @@ public class MockOAuthService implements OAuthService {
      */
     @Override
     public OAuthServiceMetaDataRegistry getMetaDataRegistry() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -142,7 +142,7 @@ public class MockOAuthService implements OAuthService {
      */
     @Override
     public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -152,7 +152,7 @@ public class MockOAuthService implements OAuthService {
      */
     @Override
     public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -161,13 +161,13 @@ public class MockOAuthService implements OAuthService {
      */
     @Override
     public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
 	@Override
 	public OAuthAccount getDefaultAccount(API api, Session session) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 

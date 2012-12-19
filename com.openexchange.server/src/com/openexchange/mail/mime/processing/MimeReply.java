@@ -760,7 +760,7 @@ public final class MimeReply {
                     final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream(8192);
                     final byte[] buf = new byte[4096];
                     int read = -1;
-                    while ((read = is.read(buf, 0, buf.length)) != -1) {
+                    while ((read = is.read(buf, 0, buf.length)) > 0) {
                         tmp.write(buf, 0, read);
                     }
                     final MailMessage attachedMsg = MimeMessageConverter.convertMessage(tmp.toByteArray());// MimeMessage(mailSession,

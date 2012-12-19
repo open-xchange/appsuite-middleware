@@ -93,7 +93,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
 
     @Override
     public final void appointmentCreated(final Appointment appointmentObj, final Session sessionObj) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -105,19 +105,19 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
 
     @Override
     public final void taskCreated(final Task taskObj, final Session sessionObj) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public final void taskModified(final Task taskObj, final Session sessionObj) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public final void contactCreated(final Contact contactObj, final Session sessionObj) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 

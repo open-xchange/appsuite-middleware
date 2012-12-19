@@ -52,6 +52,7 @@ package com.openexchange.imap.acl;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link ACLExtensionAutoDetector} - Auto-detects IMAP server's ACL extension.
@@ -100,7 +101,7 @@ final class ACLExtensionAutoDetector {
          */
         if (!capabilities.containsKey("ACL")) {
             if (DEBUG) {
-                LOG.debug(new StringBuilder(256).append("\n\tIMAP server [").append(
+                LOG.debug(new StringAllocator(256).append("\n\tIMAP server [").append(
                     new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort())).append(
                     "] CAPABILITY response indicates no support of ACL extension."));
             }
@@ -120,7 +121,7 @@ final class ACLExtensionAutoDetector {
                     containsRFC4314Character = (upperName.indexOf(RFC4314_CARACTERS_UPPER[i], fromIndex) >= 0);
                 }
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder(256).append("\n\tIMAP server [").append(
+                    LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\tIMAP server [").append(
                         new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort())).append(
                         "] CAPABILITY response indicates support of ACL extension\n\tand specifies \"").append(upperName).append(
                         "\" capability.").append("\n\tACL extension according to ").append(containsRFC4314Character ? "RFC 4314" : "RFC 2086").append(
@@ -130,7 +131,7 @@ final class ACLExtensionAutoDetector {
             }
         }
         if (DEBUG) {
-            LOG.debug(new StringBuilder(256).append("\n\tIMAP server [").append(
+            LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\tIMAP server [").append(
                 new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort())).append(
                 "] CAPABILITY response indicates support of ACL extension\n\tbut does not specify \"RIGHTS=\" capability.").append(
                 "\n\tACL extension according to RFC 2086 is going to be used.\n"));

@@ -165,7 +165,7 @@ public final class CyrusEntity2ACL extends Entity2ACL {
         final int pos = Arrays.binarySearch(ids, sessionUser);
         if (pos >= 0) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder().append("Found multiple users with login \"").append(pattern).append(
+                LOG.warn(new com.openexchange.java.StringAllocator().append("Found multiple users with login \"").append(pattern).append(
                     "\" subscribed to IMAP server \"").append(imapAddr).append("\": ").append(Arrays.toString(ids)).append(
                     "\nThe session user's ID is returned."));
             }
@@ -173,7 +173,7 @@ public final class CyrusEntity2ACL extends Entity2ACL {
         }
         // Just select first user ID
         if (LOG.isWarnEnabled()) {
-            LOG.warn(new StringBuilder().append("Found multiple users with login \"").append(pattern).append(
+            LOG.warn(new com.openexchange.java.StringAllocator().append("Found multiple users with login \"").append(pattern).append(
                 "\" subscribed to IMAP server \"").append(imapAddr).append("\": ").append(Arrays.toString(ids)).append(
                 "\nThe first found user is returned."));
         }

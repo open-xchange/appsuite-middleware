@@ -22,7 +22,7 @@ public class ScribeHTTPMultipartPostRequestBuilder extends
 	@Override
 	public HTTPMultipartPostRequestBuilder part(String fieldName, File file)
 			throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
@@ -30,28 +30,28 @@ public class ScribeHTTPMultipartPostRequestBuilder extends
 	public HTTPMultipartPostRequestBuilder part(String fieldName,
 			InputStream is, String contentType, String filename)
 			throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public HTTPMultipartPostRequestBuilder part(String fieldName,
 			InputStream is, String contentType) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public HTTPMultipartPostRequestBuilder part(String fieldName, String s,
 			String contentType, String filename) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public HTTPMultipartPostRequestBuilder part(String fieldName, String s,
 			String contentType) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 	

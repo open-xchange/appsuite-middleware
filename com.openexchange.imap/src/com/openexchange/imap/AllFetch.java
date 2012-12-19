@@ -49,7 +49,7 @@
 
 package com.openexchange.imap;
 
-import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -166,7 +166,7 @@ public final class AllFetch {
             @Override
             public void handleItem(final Item item, final MailMessage m, final Log logger) throws OXException {
                 final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-                final StringBuilder sb = new StringBuilder();
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
                 sb.append(bs.type).append('/').append(bs.subtype);
                 if (bs.cParams != null) {
                     sb.append(bs.cParams);
@@ -222,7 +222,7 @@ public final class AllFetch {
                 if (null == addrs || addrs.length == 0) {
                     return null;
                 }
-                final StringBuilder sb = new StringBuilder(addrs.length * 16);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(addrs.length * 16);
                 sb.append(addrs[0].toString());
                 for (int i = 1; i < addrs.length; i++) {
                     sb.append(", ").append(addrs[i].toString());
@@ -332,7 +332,7 @@ public final class AllFetch {
                 {
                     final String lowCostItems = getFetchCommand(items);
                     command =
-                        new StringBuilder(12 + lowCostItems.length()).append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (").append(
+                        new com.openexchange.java.StringAllocator(12 + lowCostItems.length()).append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (").append(
                             lowCostItems).append(')').toString();
                 }
                 /*
@@ -341,12 +341,7 @@ public final class AllFetch {
                 final SBOutputStream sbout = DEBUG ? new SBOutputStream() : null;
                 final IMAPTracer.TracerState tracerState = DEBUG ? traceStateFor(protocol, sbout) : null;
                 try {
-                    final Response[] r;
-                    {
-                        final long start = System.currentTimeMillis();
-                        r = protocol.command(command, null);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    }
+                    final Response[] r = performCommand(protocol, command);
                     final int len = r.length - 1;
                     final Response response = r[len];
                     final List<MailMessage> l = new ArrayList<MailMessage>(len);
@@ -372,7 +367,7 @@ public final class AllFetch {
                                     l.add(m);
                                 } catch (final ProtocolException e) {
                                     if (tracerState != null) {
-                                        final StringBuilder sb = sbout.getTrace();
+                                        final com.openexchange.java.StringAllocator sb = sbout.getTrace();
                                         sb.insert(0, "\nIMAP trace:\n");
                                         sb.insert(0, e.getMessage());
                                         sb.insert(0, "Detected invalid FETCH response which will be ignored. Error:\n");
@@ -441,7 +436,7 @@ public final class AllFetch {
                 /*
                  * Trace was enabled before, thus write trace to previous output stream to maintain debug logs properly.
                  */
-                final StringBuilder sb = sbout.getTrace();
+                final com.openexchange.java.StringAllocator sb = sbout.getTrace();
                 try {
                     /*
                      * DON'T CLOSE THE WRITER BECAUSE IT CLOSES UNDERLYING STREAM, TOO!!!
@@ -539,14 +534,14 @@ public final class AllFetch {
      */
     private static final class SBOutputStream extends OutputStream {
 
-        private final StringBuilder sb;
+        private final com.openexchange.java.StringAllocator sb;
 
         /**
          * Initializes a new {@link SBOutputStream}.
          */
         public SBOutputStream() {
             super();
-            sb = new StringBuilder(8192);
+            sb = new com.openexchange.java.StringAllocator(8192);
         }
 
         @Override
@@ -575,7 +570,7 @@ public final class AllFetch {
          *
          * @return The trace
          */
-        public StringBuilder getTrace() {
+        public com.openexchange.java.StringAllocator getTrace() {
             return sb;
         }
 
@@ -631,7 +626,7 @@ public final class AllFetch {
      * @return A new protocol exception with appropriate message.
      */
     static ProtocolException missingFetchItem(final String itemName, final IMAPConfig config, final Session session) {
-        final StringBuilder sb = new StringBuilder(128).append("Missing ").append(itemName).append(" item in FETCH response.");
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("Missing ").append(itemName).append(" item in FETCH response.");
         sb.append(" Login=").append(config.getLogin()).append(", server=").append(config.getServer());
         sb.append(", user=").append(session.getUserId()).append(", context=").append(session.getContextId());
         return new ProtocolException(sb.toString());

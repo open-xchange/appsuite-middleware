@@ -74,7 +74,7 @@ public enum OxHttpClientExceptionCodes implements OXExceptionCode {
     }
 
 	public Category getCategory() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 

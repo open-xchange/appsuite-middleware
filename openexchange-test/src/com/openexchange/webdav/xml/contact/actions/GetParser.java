@@ -64,7 +64,7 @@ public class GetParser extends AbstractWebDAVParser<GetResponse> {
 
     @Override
     protected GetResponse createResponse(Document document, Response[] responses) throws OXException, OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

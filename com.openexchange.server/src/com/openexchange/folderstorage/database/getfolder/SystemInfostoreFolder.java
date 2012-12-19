@@ -89,14 +89,15 @@ public final class SystemInfostoreFolder {
      * Gets the database folder representing system infostore folder.
      *
      * @param fo The folder object fetched from database
+     * @param altNames TODO
      * @return The database folder representing system infostore folder
      */
-    public static DatabaseFolder getSystemInfostoreFolder(final FolderObject fo) {
+    public static DatabaseFolder getSystemInfostoreFolder(final FolderObject fo, boolean altNames) {
         /*
          * The system infostore folder
          */
         final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
-        retval.setName(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME);
+        retval.setName(altNames ? FolderStrings.SYSTEM_FILES_FOLDER_NAME : FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME);
         retval.setContentType(InfostoreContentType.getInstance());
         // Enforce getSubfolders() on storage
         retval.setSubfolderIDs(null);
@@ -176,11 +177,12 @@ public final class SystemInfostoreFolder {
      * @param user The user
      * @param userConfiguration The user configuration
      * @param ctx The context
+     * @param altNames TODO
      * @param con The connection
      * @return The database folder representing system infostore folder
      * @throws OXException If the database folder cannot be returned
      */
-    public static List<String[]> getSystemInfostoreFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static List<String[]> getSystemInfostoreFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, boolean altNames, final Connection con) throws OXException {
         try {
             /*
              * The system infostore folder
@@ -219,9 +221,9 @@ public final class SystemInfostoreFolder {
                 final FolderObject fo = iter.next();
                 final int fuid = fo.getObjectID();
                 if (fuid == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
-                    subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME)));
+                    subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(altNames ? FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME : FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME)));
                 } else if (fuid == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID) {
-                    subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME)));
+                    subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(altNames ? FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME)));
                 } else {
                     subfolderIds.add(toArray(String.valueOf(fuid), fo.getFolderName()));
                 }
@@ -237,7 +239,7 @@ public final class SystemInfostoreFolder {
                 ctx,
                 con);
             if (hasNonTreeVisibleFolders) {
-                subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME)));
+                subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID), sh.getString(altNames ? FolderStrings.VIRTUAL_LIST_FILES_FOLDER_NAME: FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME)));
             }
             return subfolderIds;
         } catch (final SQLException e) {

@@ -49,10 +49,12 @@
 
 package com.openexchange.folder.json.actions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import org.json.JSONArray;
@@ -68,7 +70,6 @@ import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -139,12 +140,12 @@ public final class ListAction extends AbstractFolderAction {
                 parentId,
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes));
+                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")));
         /*
          * Determine max. last-modified time stamp
          */
         long lastModified = 0;
-        final UserizedFolder[] subfolders = subfoldersResponse.getResponse();
+        UserizedFolder[] subfolders = subfoldersResponse.getResponse();
         final int length = subfolders.length;
         if (length <= 0) {
             /*
@@ -158,6 +159,7 @@ public final class ListAction extends AbstractFolderAction {
          */
         if (errorOnDuplicateName) {
             final Set<String> names = new HashSet<String>(length);
+            final List<UserizedFolder> ret = new ArrayList<UserizedFolder>();
             for (int i = 0; i < length; i++) {
                 final UserizedFolder userizedFolder = subfolders[i];
                 Locale locale = userizedFolder.getLocale();
@@ -166,15 +168,19 @@ public final class ListAction extends AbstractFolderAction {
                 }
                 if (!names.add(userizedFolder.getLocalizedName(locale))) {
                     // Duplicate name
-                    final String parentName = folderService.getFolder(treeId, parentId, session, null).getLocalizedName(locale);
-                    throw FolderExceptionErrorMessage.DUPLICATE_NAME.create(userizedFolder.getLocalizedName(locale), parentName);
-                }
-                final Date modified = userizedFolder.getLastModifiedUTC();
-                if (modified != null) {
-                    final long time = modified.getTime();
-                    lastModified = ((lastModified >= time) ? lastModified : time);
+                    //final String parentName = folderService.getFolder(treeId, parentId, session, null).getLocalizedName(locale);
+                    //throw FolderExceptionErrorMessage.DUPLICATE_NAME.create(userizedFolder.getLocalizedName(locale), parentName);
+                } else {
+                    // Name did not occur before
+                    ret.add(userizedFolder);
+                    final Date modified = userizedFolder.getLastModifiedUTC();
+                    if (modified != null) {
+                        final long time = modified.getTime();
+                        lastModified = ((lastModified >= time) ? lastModified : time);
+                    }
                 }
             }
+            subfolders = ret.toArray(new UserizedFolder[0]);
         } else {
             for (int i = length - 1; i >= 0; i--) {
                 final Date modified = subfolders[i].getLastModifiedUTC();

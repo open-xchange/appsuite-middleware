@@ -106,7 +106,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 	            input.available());
 	        final byte[] buf = new byte[512];
 	        int length = -1;
-	        while ((length = input.read(buf)) != -1) {
+	        while ((length = input.read(buf)) > 0) {
 	            baos.write(buf, 0, length);
 	        }
 	        String characterEncoding = req.getCharacterEncoding();

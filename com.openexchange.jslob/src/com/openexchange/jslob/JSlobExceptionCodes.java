@@ -98,6 +98,10 @@ public enum JSlobExceptionCodes implements OXExceptionCode {
      * "%1$s" is a reserved identifier. Please choose a different one.
      */
     RESERVED_IDENTIFIER(JSlobExceptionMessages.RESERVED_IDENTIFIER, EnumCategory.CATEGORY_USER_INPUT, 9),
+    /**
+     * The JSlob %1$s is too big.
+     */
+    JSLOB_TOO_BIG(JSlobExceptionMessages.JSLOB_TOO_BIG, EnumCategory.CATEGORY_USER_INPUT, 10)
     
     ;
     

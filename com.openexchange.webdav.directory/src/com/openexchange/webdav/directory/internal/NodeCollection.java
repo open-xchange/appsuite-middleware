@@ -92,7 +92,7 @@ public class NodeCollection extends AbstractCollection {
 
     @Override
     protected void internalDelete() {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 

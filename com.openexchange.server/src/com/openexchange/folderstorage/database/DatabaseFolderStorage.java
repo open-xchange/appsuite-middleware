@@ -828,7 +828,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                          * A non-virtual database folder
                          */
                         final FolderObject fo = getFolderObject(folderId, ctx, con);
-                        retval = DatabaseFolderConverter.convert(fo, user, userConfiguration, ctx, storageParameters.getSession(), con);
+                        final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+                        retval = DatabaseFolderConverter.convert(fo, user, userConfiguration, ctx, storageParameters.getSession(), altNames, con);
                     }
                 }
             } else {
@@ -926,10 +927,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 if (!map.isEmpty()) {
                     final Session session = storageParameters.getSession();
+                    final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
                     for (final FolderObject folderObject : getFolderObjects(map.keys(), ctx, con)) {
                         if (null != folderObject) {
                             final int index = map.get(folderObject.getObjectID());
-                            ret[index] = DatabaseFolderConverter.convert(folderObject, user, userConfiguration, ctx, session, con);
+                            ret[index] = DatabaseFolderConverter.convert(folderObject, user, userConfiguration, ctx, session, altNames, con);
                         }
                     }
                 }
@@ -1047,8 +1049,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         gab.setFolderName(StringHelper.valueOf(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
                         list.add(gab);
                     }
-                } catch (final SQLException e) {
-                    throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                } catch (final RuntimeException e) {
+                    throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
                 }
             }
             /*
@@ -1263,8 +1265,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
+                final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
                 final List<String[]> subfolderIds =
-                    SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, con);
+                    SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, altNames, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {

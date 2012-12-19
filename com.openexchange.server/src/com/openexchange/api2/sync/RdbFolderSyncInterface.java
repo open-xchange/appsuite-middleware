@@ -52,7 +52,6 @@ package com.openexchange.api2.sync;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
-import java.sql.SQLException;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -145,8 +144,8 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
             final long lastModified = System.currentTimeMillis();
             OXFolderManager.getInstance(session, oxfolderAccess).clearFolder(folder, false, lastModified);
             return folder.getObjectID();
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
 

@@ -304,7 +304,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
          */
         @Override
         public List<NotificationParticipant> getResources(final Appointment appointment, final Context ctx) throws OXException {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return null;
         }
 

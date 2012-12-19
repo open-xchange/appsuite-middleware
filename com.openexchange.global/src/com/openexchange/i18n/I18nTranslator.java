@@ -85,10 +85,10 @@ public class I18nTranslator implements Translator {
                     final String message = new com.openexchange.java.StringAllocator(64).append("I18n service for locale ").append(locale).append(
                         " has no translation for \"").append(toTranslate).append("\".").toString();
                     LOG.warn(message, new Throwable(message));
-                } else if (WARN_ENABLED) {
-                    LOG.warn(new com.openexchange.java.StringAllocator(64).append("I18n service for locale ").append(locale).append(" has no translation for \"").append(
-                        toTranslate).append("\".").toString());
                 }
+            } else if (WARN_ENABLED) {
+                LOG.warn(new com.openexchange.java.StringAllocator(64).append("I18n service for locale ").append(locale).append(" has no translation for \"").append(
+                    toTranslate).append("\".").toString());
             }
             return toTranslate;
         }

@@ -96,7 +96,7 @@ public class MobilityProvisioningServletConfiguration {
 		while (propertyNamesIterator.hasNext()) {
 			final String tmp = propertyNamesIterator.next();
 			if (tmp.startsWith(provisioningEmailMessageSearchString)) {
-				final String locale = tmp.substring(provisioningEmailMessageSearchString.length(), tmp.lastIndexOf("."));
+				final String locale = tmp.substring(provisioningEmailMessageSearchString.length(), tmp.lastIndexOf('.'));
 				if (locale != null && locale.trim().length() > 0 && !provisioningEmailMessages.containsKey(locale)) {
 					final String subject = configservice.getProperty(provisioningEmailMessageSearchString + locale + ".subject", "");
 					final String text = configservice.getProperty(provisioningEmailMessageSearchString + locale + ".text", "").replace("%u", url);
@@ -121,7 +121,7 @@ public class MobilityProvisioningServletConfiguration {
 		while (propertyNamesIterator.hasNext()) {
 			final String tmp = propertyNamesIterator.next();
 			if (tmp.startsWith(provisioningSMSMessageSearchString)) {
-				final String locale = tmp.substring(provisioningSMSMessageSearchString.length(), tmp.lastIndexOf("."));
+				final String locale = tmp.substring(provisioningSMSMessageSearchString.length(), tmp.lastIndexOf('.'));
 				if (locale != null && locale.trim().length() > 0 && !provisioningSMSMessages.containsKey(locale)) {
 					final String text = configservice.getProperty(provisioningSMSMessageSearchString + locale + ".text", "").replace("%u", url);
 

@@ -159,7 +159,7 @@ public class SimSubscribeService implements SubscribeService {
      */
     @Override
     public Collection<Subscription> loadSubscriptions(final Context context, final int userId, final String secret) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -168,7 +168,7 @@ public class SimSubscribeService implements SubscribeService {
      */
     @Override
     public void migrateSecret(final Session session, final String oldSecret, final String newSecret) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 
@@ -177,7 +177,7 @@ public class SimSubscribeService implements SubscribeService {
      */
     @Override
     public boolean hasAccounts(final Context context, final User user) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 

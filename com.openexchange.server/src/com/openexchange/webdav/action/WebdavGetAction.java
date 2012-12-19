@@ -108,7 +108,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 				}
 				int read = 0;
 				int need = (int) Math.min(chunk.length, range.endOffset - offset + 1);
-				while(need > 0 && (read = in.read(chunk, 0, need)) != -1) {
+				while(need > 0 && (read = in.read(chunk, 0, need)) > 0) {
 					out.write(chunk,0,read);
 					offset += read;
 					need = (int) Math.min(chunk.length, range.endOffset - offset + 1);
@@ -116,9 +116,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 			}
 
 		} catch (final IOException e) {
-			final WebdavProtocolException wpe = WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			wpe.initCause(e);
-            throw wpe;
+			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_SERVICE_UNAVAILABLE, e, new Object[0]);
 		} finally {
 			if(out != null) {
 				try {

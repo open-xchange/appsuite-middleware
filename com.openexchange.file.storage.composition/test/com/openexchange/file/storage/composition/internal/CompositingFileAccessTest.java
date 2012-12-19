@@ -728,7 +728,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public String getDisplayName() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -738,7 +738,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public DynamicFormDescription getFormDescription() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -757,7 +757,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public Set<String> getSecretProperties() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -788,7 +788,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -798,7 +798,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -808,7 +808,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public boolean cacheable() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -818,7 +818,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public void close() {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -828,7 +828,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public void connect() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -838,7 +838,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public boolean isConnected() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -848,7 +848,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public boolean ping() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -858,7 +858,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public FileStorageService getService() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return this;
     }
 
@@ -874,7 +874,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public String addAccount(final FileStorageAccount account, final Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -883,7 +883,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public boolean hasEncryptedItems(final Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -894,7 +894,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public void deleteAccount(final FileStorageAccount account, final Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -904,7 +904,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -918,19 +918,19 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
                     @Override
                     public Map<String, Object> getConfiguration() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return null;
             }
 
                     @Override
                     public String getDisplayName() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return null;
             }
 
                     @Override
                     public FileStorageService getFileStorageService() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return null;
             }
 
@@ -949,7 +949,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -960,7 +960,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public void updateAccount(final FileStorageAccount account, final Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -995,7 +995,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     public FileStorageAccountManagerProvider getProvider() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -1005,13 +1005,13 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
             
             @Override
             public void sendEvent(Event arg0) {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 
             }
             
             @Override
             public void postEvent(Event arg0) {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 
             }
         };
