@@ -580,7 +580,7 @@ public class OXException extends Exception implements OXExceptionConstants, Seri
         /*
          * Log details
          */
-        final StringBuilder sb = new StringBuilder(256).append(getErrorCode());
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256).append(getErrorCode());
         /*
          * Iterate categories
          */
@@ -634,7 +634,7 @@ public class OXException extends Exception implements OXExceptionConstants, Seri
         /*
          * Log details
          */
-        final StringBuilder sb = new StringBuilder(256);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
         /*
          * Append message
          */
@@ -780,7 +780,7 @@ public class OXException extends Exception implements OXExceptionConstants, Seri
      */
     public String getExceptionId() {
         if (exceptionId == null) {
-            exceptionId = new StringBuilder(16).append(SERVER_ID).append('-').append(count).toString();
+            exceptionId = new com.openexchange.java.StringAllocator(16).append(SERVER_ID).append('-').append(count).toString();
         }
         return exceptionId;
     }
@@ -836,7 +836,7 @@ public class OXException extends Exception implements OXExceptionConstants, Seri
      * @return The compound error code
      */
     public final String getErrorCode() {
-        return new StringBuilder(getPrefix()).append('-').append(String.format("%04d", Integer.valueOf(code))).toString();
+        return new com.openexchange.java.StringAllocator(getPrefix()).append('-').append(String.format("%04d", Integer.valueOf(code))).toString();
     }
 
     /**

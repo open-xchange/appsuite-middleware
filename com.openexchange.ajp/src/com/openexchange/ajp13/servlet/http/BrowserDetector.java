@@ -296,7 +296,7 @@ public final class BrowserDetector {
              * Ex: Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)
              */
             versionStartIndex = (index + MSIE.length() + 1);
-            versionEndIndex = userAgent.indexOf(";", versionStartIndex);
+            versionEndIndex = userAgent.indexOf(';', versionStartIndex);
 
             browserName = MSIE;
             try {
@@ -415,7 +415,7 @@ public final class BrowserDetector {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(128).append("User agent=").append(userAgent);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("User agent=").append(userAgent);
         sb.append("\nBrowser name=").append(browserName).append(", browser version=").append(browserVersion);
         sb.append(", browser platform=").append(browserPlatform);
         return sb.toString();

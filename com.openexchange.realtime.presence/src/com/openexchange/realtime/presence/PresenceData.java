@@ -49,154 +49,123 @@
 
 package com.openexchange.realtime.presence;
 
-import com.openexchange.exception.OXException;
+import java.io.Serializable;
+import java.util.Date;
+import com.openexchange.realtime.packet.PresenceState;
 
 /**
- * {@link PresenceData} - Presence specific data that combined with the general Stanza fields forms a Presence Stanza.
+ * {@link PresenceData} - PresenceState with optional message and timestamp of the creation form the PresenceData that allow us to track a
+ * clients status and the last time it was changed.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceData {
+public class PresenceData implements Serializable {
 
-    //names of the corresponding keys in the JSONObject
-    public static final String ERROR="error";
-    public static final String MESSAGE="message";
-    public static final String PRIORITY="priority";
-    public static final String STATE="state";
-    
-    /* TODO:
-     * handle extensions to the payload auf the default namespace
-     * ExtensionType needs an elementPath to identify it and get proper parser
-     * <xs:any     namespace='##other'
-                       minOccurs='0'
-                       maxOccurs='unbounded'/>
-     */
-//    private List<ExtensionType> extensions;
+    private PresenceState state;
+
+    private String message;
+
+    private final Date timeStamp;
+
+    public static PresenceData OFFLINE = new PresenceData(PresenceState.OFFLINE, "", null);
 
     /**
-     * The server should deliver messages to the highest-priority available resource or decide on metrics like most recent connect,
-     * activity, PresenceState if several resources with the same priority are connected.
-     */
-    private byte priority = 0;
-
-    /**
-     * Signal Availability by choosing ONLINE as default. Clients may set different states.
-     */
-    private PresenceState state = PresenceState.ONLINE;
-
-    /**
-     * Empty message as default. Clients may set a different message.
-     */
-    private String message = "";
-
-    /**
-     * The error object for Presence Stanza of type error 
-     */
-    private OXException error = null;
-
-    /**
-     * Initializes a new {@link PresenceData} with a default priority of 0, PresenceState set to ONLINE and an empty message.
-     */
-    public PresenceData() {
-    }
-
-    /**
-     * Initializes a new {@link PresenceData}.
+     * Initializes a new {@link PresenceData} with the current time as creationTime
      * 
      * @param state One of the avilable states to choose from
      * @param message The optional user provided message to associate with the current state. May be null.
      * @throws IllegalArgumentException when the state is missing
      */
     public PresenceData(PresenceState state, String message) {
-        this((byte) 0, state, message);
+        if (state == null) {
+            throw new IllegalArgumentException("Missing obligatory state parameter");
+        }
+        this.state = state;
+        if (message == null) {
+            this.message = "";
+        } else {
+            this.message = message;
+        }
+        this.timeStamp = new Date();
     }
-
+    
     /**
      * Initializes a new {@link PresenceData}.
      * 
-     * @param priority The priority used by the server for message dispatching to resources.
-     * @param state One of the avilable states to choose from
-     * @param message The optional user provided message to associate with the current state. May be null.
+     * @param state         One of the avilable states to choose from
+     * @param message       The optional user provided message to associate with the current state. May be null.
+     * @param creationTime  The date a user set this PresenceData or null when the user didn't publish any PresenceData yet.
+     * @throws IllegalArgumentException when the state is missing
      */
-    public PresenceData(byte priority, PresenceState state, String message) {
+    public PresenceData(PresenceState state, String message, Date creationTime) {
         if (state == null) {
-            throw new IllegalArgumentException("Missing obligatory parameter: state");
+            throw new IllegalArgumentException("Missing obligatory state parameter");
         }
-        this.priority = priority;
         this.state = state;
-        this.message = message;
+        if (message == null) {
+            this.message = "";
+        } else {
+            this.message = message;
+        }
+        this.timeStamp = creationTime;
     }
 
-    /**
-     * Get the error element describing the error-type Stanza in more detail. 
-     *
-     * @return The OXException representing the error
-     */
-    public OXException getError() {
-        return error;
-    }
-    
-    /**
-     * Set the error element describing the error-type Stanza in more detail.
-     *
-     * @param error The OXException representing the error
-     */
-    public void setError(OXException error) {
-        this.error = error;
-    }
-    
-    /**
-     * Gets the message.
-     * 
-     * @return The message
-     */
-    public String getMessage() {
-        return message;
-    }
-
-    /**
-     * Sets the priority.
-     * 
-     * @return The message
-     */
-    public void setMessage(String message) {
-        this.message = message;
-    }
-    
-    /**
-     * Gets the priority.
-     * 
-     * @return The priority
-     */
-    public byte getPriority() {
-        return priority;
-    }
-
-    /**
-     * Sets the priority.
-     * 
-     * @param priority The priority to set
-     */
-    public void setPriority(byte priority) {
-        this.priority = priority;
-    }
-    
-    /**
-     * Gets the state e.g. online or away
-     * 
-     * @return The state
-     */
     public PresenceState getState() {
         return state;
     }
 
-    /**
-     * Sets the state e.g. online or away
-     * @param state The state
-     */
     public void setState(PresenceState state) {
         this.state = state;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    /**
+     * Get the time when a user set this PresenceData or null when the user didn't publish any PresenceData yet (OFFLINE).
+     * @return nunll or the creation time
+     */
+    public Date getCreationTime() {
+        return timeStamp;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((message == null) ? 0 : message.hashCode());
+        result = prime * result + ((state == null) ? 0 : state.hashCode());
+        result = prime * result + ((timeStamp == null) ? 0 : timeStamp.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof PresenceData))
+            return false;
+        PresenceData other = (PresenceData) obj;
+        if (message == null) {
+            if (other.message != null)
+                return false;
+        } else if (!message.equals(other.message))
+            return false;
+        if (state != other.state)
+            return false;
+        if (timeStamp == null) {
+            if (other.timeStamp != null)
+                return false;
+        } else if (!timeStamp.equals(other.timeStamp))
+            return false;
+        return true;
     }
 
 }

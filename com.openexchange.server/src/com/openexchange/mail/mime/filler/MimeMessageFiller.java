@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -78,7 +77,6 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
@@ -86,6 +84,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
+import javax.mail.internet.idn.IDNA;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
@@ -96,13 +95,11 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageDataSource;
@@ -139,7 +136,6 @@ import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -667,7 +663,7 @@ public class MimeMessageFiller {
          */
         final String pReferences = referencedMail.getFirstHeader(MessageHeaders.HDR_REFERENCES);
         final String pInReplyTo = referencedMail.getFirstHeader(MessageHeaders.HDR_IN_REPLY_TO);
-        final StringBuilder refBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator refBuilder = new com.openexchange.java.StringAllocator();
         if (pReferences != null) {
             /*
              * The "References:" field will contain the contents of the parent's "References:" field (if any) followed by the contents of
@@ -931,7 +927,7 @@ public class MimeMessageFiller {
             AppendVCard: if (mail.isAppendVCard()) {
                 final String fileName =
                     MimeUtility.encodeText(
-                        new StringBuilder(UserStorage.getStorageUser(session.getUserId(), ctx).getDisplayName().replaceAll("\\s+", "")).append(
+                        new com.openexchange.java.StringAllocator(UserStorage.getStorageUser(session.getUserId(), ctx).getDisplayName().replaceAll("\\s+", "")).append(
                             ".vcf").toString(),
                         charset,
                         "Q");
@@ -1383,7 +1379,7 @@ public class MimeMessageFiller {
             final InputStream in = mailPart.getInputStream();
             try {
                 int len;
-                while ((len = in.read(bbuf)) != -1) {
+                while ((len = in.read(bbuf)) > 0) {
                     out.write(bbuf, 0, len);
                 }
             } finally {
@@ -1504,7 +1500,7 @@ public class MimeMessageFiller {
         // htmlContent), false, usm.getAutoLinebreak()),
         // MailConfig.getDefaultMimeCharset());
         text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, charset));
+        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, Matcher.quoteReplacement(charset)));
         return text;
     }
 
@@ -1519,7 +1515,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If a messaging error occurs
      */
     protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException {
-        final String contentType = PAT_HTML_CT.replaceFirst(REPLACE_CS, charset);
+        final String contentType = PAT_HTML_CT.replaceFirst(REPLACE_CS, Matcher.quoteReplacement(charset));
         final MimeBodyPart html = new MimeBodyPart();
         if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
             html.setContent(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType);
@@ -1712,7 +1708,7 @@ public class MimeMessageFiller {
                     /*
                      * Replace "src" attribute
                      */
-                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", "src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\"");
+                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", Matcher.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\""));
                     iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + VERSION_NAME + "\"", "");
                     m.appendLiteralReplacement(sb, iTag);
                 } else {
@@ -1772,7 +1768,7 @@ public class MimeMessageFiller {
              * Generate dummy file name
              */
             final List<String> exts = MimeType2ExtMap.getFileExtensions(imageProvider.getContentType().toLowerCase(Locale.ENGLISH));
-            final StringBuilder sb = new StringBuilder("image.");
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("image.");
             if (exts == null) {
                 sb.append("dat");
             } else {

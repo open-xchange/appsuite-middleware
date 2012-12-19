@@ -55,7 +55,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
-import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
@@ -117,9 +117,20 @@ public final class AllTest extends AbstractMailTest {
          */
         final int numOfMails = 25;
         LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+        final String eml =
+            "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
+            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
+            "From: " + getSendAddress() + "\n" +
+            "To: " + getSendAddress() + "\n" +
+            "Subject: Invitation for launch\n" +
+            "Mime-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=\"US-ASCII\"\n" +
+            "Content-Transfer-Encoding: 7bit\n" +
+            "\n" +
+            "Blah blah blah blah blah blah";
         for (int i = 0; i < numOfMails; i++) {
-            getClient().execute(new SendRequest(mailObject_25kb));
-            LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
+            getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+            LOG.info("Appended " + (i + 1) + ". mail of " + numOfMails);
         }
         /*
          * Perform all request
@@ -145,9 +156,20 @@ public final class AllTest extends AbstractMailTest {
          */
         final int numOfMails = 25;
         LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+        final String eml =
+            "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
+            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
+            "From: " + getSendAddress() + "\n" +
+            "To: " + getSendAddress() + "\n" +
+            "Subject: Invitation for launch\n" +
+            "Mime-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=\"US-ASCII\"\n" +
+            "Content-Transfer-Encoding: 7bit\n" +
+            "\n" +
+            "Blah blah blah blah blah blah";
         for (int i = 0; i < numOfMails; i++) {
-            getClient().execute(new SendRequest(mailObject_25kb));
-            LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
+            getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+            LOG.info("Appended " + (i + 1) + ". mail of " + numOfMails);
         }
         /*
          * Perform all request
@@ -174,9 +196,20 @@ public final class AllTest extends AbstractMailTest {
          */
         final int numOfMails = 5;
         LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+        final String eml =
+            "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
+            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
+            "From: " + getSendAddress() + "\n" +
+            "To: " + getSendAddress() + "\n" +
+            "Subject: Invitation for launch\n" +
+            "Mime-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=\"US-ASCII\"\n" +
+            "Content-Transfer-Encoding: 7bit\n" +
+            "\n" +
+            "Blah blah blah blah blah blah";
         for (int i = 0; i < numOfMails; i++) {
-            getClient().execute(new SendRequest(mailObject_25kb));
-            LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
+            getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+            LOG.info("Appended " + (i + 1) + ". mail of " + numOfMails);
         }
 
         final AllResponse allR = Executor.execute(getSession(), new AllRequest(getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
@@ -186,7 +219,7 @@ public final class AllTest extends AbstractMailTest {
         final MailMessage[] mailMessages = allR.getMailMessages(COLUMNS_DEFAULT_LIST);
         for (final MailMessage mailMessage : mailMessages) {
             assertEquals("From is not equal", new InternetAddress(getSendAddress()), mailMessage.getFrom()[0]);
-            assertEquals("Subject is not equal", MAIL_SUBJECT, mailMessage.getSubject());
+            assertEquals("Subject is not equal", "Invitation for launch", mailMessage.getSubject());
             assertEquals("Folder is not equal", getInboxFolder(), mailMessage.getFolder());
             assertEquals("hasAttachment is not equal", false, mailMessage.hasAttachment());
             assertEquals("To is not equal", new InternetAddress(getSendAddress()), mailMessage.getTo()[0]);

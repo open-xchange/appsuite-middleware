@@ -121,10 +121,7 @@ import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
-import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryInitialization;
-import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
@@ -360,18 +357,18 @@ public final class Init {
         startAndInjectGroupService();
         startAndInjectFolderService();
         startAndInjectResourceService();
-        startAndInjectContactCollector();
         startAndInjectMailAccountStorageService();
         startAndInjectMailBundle();
         startAndInjectSpamHandler();
         startAndInjectICalServices();
         startAndInjectConverterService();
         startAndInjectXMLServices();
-        startAndInjectImportExportServices();
         startAndInjectSubscribeServices();
         startAndInjectContactStorageServices();
-        startAndInjectContactServices();
-        
+        startAndInjectContactServices();        
+        startAndInjectContactCollector();
+        startAndInjectImportExportServices();
+
     }
 
     public static void startAndInjectConfigBundle() {
@@ -426,13 +423,7 @@ public final class Init {
                 throw getWrappingOXException(e);
             }
             services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
-            new ContactInterfaceDiscoveryInitialization().start();
-            services.put(ContactInterfaceDiscoveryService.class, ContactInterfaceDiscoveryServiceImpl.getInstance());
-
             TestServiceRegistry.getInstance().addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
-            TestServiceRegistry.getInstance().addService(
-                ContactInterfaceDiscoveryService.class,
-                services.get(ContactInterfaceDiscoveryService.class));
         }
     }
 
@@ -536,7 +527,7 @@ public final class Init {
                 }
             });
             SubscriptionServiceRegistry.getInstance().addService(
-                ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
+                ContactService.class, services.get(ContactService.class));
         }
     }
     
@@ -586,6 +577,7 @@ public final class Init {
                 }
             });
             TestServiceRegistry.getInstance().addService(ContactService.class, contactService);
+            services.put(ContactService.class, contactService);
         }
     }
 
@@ -699,7 +691,8 @@ public final class Init {
             reg.addService(ContextService.class, services.get(ContextService.class));
             reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
             reg.addService(UserService.class, services.get(UserService.class));
-            reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
+//            reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
+            reg.addService(ContactService.class, services.get(ContactService.class));
         }
     }
 

@@ -60,6 +60,7 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.SendFailedException;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
@@ -256,19 +257,23 @@ public class MimeMailException extends OXException {
                         return MimeMailExceptionCode.SEND_FAILED_MSG_EXT.create(exc, exc.getMessage(), '(' + smtpExc.getMessage() + ')');
                     }
                 }
-                String serverInfo = null;
-                if (nextException instanceof com.sun.mail.smtp.SMTPAddressFailedException) {
-                    serverInfo = nextException.getMessage();
-                }
+                com.sun.mail.smtp.SMTPAddressFailedException afe = lookupNested(exc, com.sun.mail.smtp.SMTPAddressFailedException.class);
                 final Address[] addrs = exc.getInvalidAddresses();
                 if (null == addrs || addrs.length == 0) {
-                    // No invalid addresses available
-                    return MimeMailExceptionCode.SEND_FAILED_MSG.create(exc, exc.getMessage());
+                    if (null == afe) {
+                        // No invalid addresses available
+                        return MimeMailExceptionCode.SEND_FAILED_MSG.create(exc, e.getMessage());
+                    }
+                    final InternetAddress failedAddr = afe.getAddress();
+                    if (null == failedAddr) {
+                        return MimeMailExceptionCode.SEND_FAILED_MSG.create(exc, afe.getMessage());
+                    }
+                    return MimeMailExceptionCode.SEND_FAILED_EXT.create(exc, failedAddr.toUnicodeString(), afe.getMessage());
                 }
                 return MimeMailExceptionCode.SEND_FAILED_EXT.create(
                     exc,
                     Arrays.toString(addrs),
-                    null == serverInfo ? "" : '(' + serverInfo + ')');
+                    null == afe ? "" : '(' + afe.getMessage() + ')');
             } else if (e instanceof javax.mail.StoreClosedException) {
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.STORE_CLOSED_EXT.create(
@@ -427,6 +432,17 @@ public class MimeMailException extends OXException {
             return m.group(1);
         }
         return serverResponse;
+    }
+
+    private static <E extends MessagingException> E lookupNested(final MessagingException e, final Class<E> clazz) {
+        if (null == e) {
+            return null;
+        }
+        final Exception exception = e.getNextException();
+        if (clazz.isInstance(exception)) {
+            return clazz.cast(exception);
+        }
+        return exception instanceof MessagingException ? lookupNested((MessagingException) exception, clazz) : null;
     }
 
 }

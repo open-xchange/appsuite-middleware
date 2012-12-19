@@ -73,7 +73,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 @Action(method = RequestMethod.GET, name = "all", description = "Get all contacts.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
+    @Parameter(name = "folder", optional=true, description = "Object ID of the folder whose contents are queried. If not set, all visible folders are used."),
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for contacts are defined in Common object data and Detailed contact data. The alias \"all\" uses the predefined columnset [20, 1, 5, 2, 602]."),
     @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
     @Parameter(name = "order", optional=true, description= "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
@@ -97,9 +97,15 @@ public class AllAction extends ContactAction {
         SearchIterator<Contact> searchIterator = null;
         boolean excludeAdmin = request.isExcludeAdmin();
         int adminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
+        ContactField[] fields = excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields();
+//        List<String> folderIDs = null != request.optFolderID() ? Arrays.asList(new String[] { request.optFolderID() }) : null; 
         try {
-            searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), 
-            		excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields(), request.getSortOptions());
+            if (null == request.optFolderID()) {
+                searchIterator = getContactService().getAllContacts(request.getSession(), fields, request.getSortOptions());
+            } else {
+                searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), fields, 
+                    request.getSortOptions());
+            }
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
                 if (excludeAdmin && contact.getInternalUserId() == adminID) {

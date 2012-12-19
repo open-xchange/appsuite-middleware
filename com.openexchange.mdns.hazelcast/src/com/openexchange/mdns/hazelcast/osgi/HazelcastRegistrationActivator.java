@@ -53,6 +53,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleException;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceInfo;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -85,7 +87,7 @@ public final class HazelcastRegistrationActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MDNSService.class, ThreadPoolService.class };
+        return new Class<?>[] { MDNSService.class, ThreadPoolService.class, ConfigurationService.class };
     }
 
     @Override
@@ -94,12 +96,20 @@ public final class HazelcastRegistrationActivator extends HousekeepingActivator 
         final MDNSService service = getService(MDNSService.class);
         if (mdnsServiceRef.compareAndSet(null, service)) {
             final ThreadPoolService poolService = getService(ThreadPoolService.class);
+            final String serviceID = getService(ConfigurationService.class).getProperty("com.openexchange.cluster.name");
+            if (null == serviceID || 0 == serviceID.trim().length()) {
+                throw new IllegalStateException(new BundleException(
+                    "Cluster name is mandatory. Please set a valid identifier through property \"com.openexchange.cluster.name\".", 
+                    BundleException.ACTIVATOR_ERROR));
+            } else if ("ox".equalsIgnoreCase(serviceID)) {
+                LOG.warn("\n\tThe configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default value "
+                    + "\"ox\". Please do so to make this warning disappear.\n");
+            }
             final Task<Void> task = new AbstractTask<Void>() {
 
                 @Override
                 public Void call() throws Exception {
-                    serviceInfo =
-                        service.registerService("openexchange.service.hazelcast", 7001, new StringBuilder(
+                    serviceInfo = service.registerService(serviceID, 7001, new StringBuilder(
                             "open-xchange hazelcast service @").append(getHostName()).toString());
                     return null;
                 }

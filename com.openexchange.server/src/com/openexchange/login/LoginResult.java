@@ -120,7 +120,6 @@ public interface LoginResult {
      */
     User getUser();
 
-
     /**
      * Checks if this result has warnings.
      *

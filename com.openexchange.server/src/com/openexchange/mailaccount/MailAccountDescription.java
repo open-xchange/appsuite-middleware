@@ -55,7 +55,7 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -423,7 +423,7 @@ public final class MailAccountDescription implements Serializable {
         try {
             return mailServerUrl = URITools.generateURI(mailSecure ? mailProtocol + 's' : mailProtocol, IDNA.toASCII(mailServer), mailPort).toString();
         } catch (final URISyntaxException e) {
-            final StringBuilder sb = new StringBuilder(32);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
             sb.append(mailProtocol);
             if (mailSecure) {
                 sb.append('s');
@@ -559,7 +559,7 @@ public final class MailAccountDescription implements Serializable {
         try {
             return transportUrl = URITools.generateURI(protocol, IDNA.toASCII(transportServer), transportPort).toString();
         } catch (final URISyntaxException e) {
-            final StringBuilder sb = new StringBuilder(32);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
             sb.append(transportProtocol);
             if (transportSecure) {
                 sb.append('s');

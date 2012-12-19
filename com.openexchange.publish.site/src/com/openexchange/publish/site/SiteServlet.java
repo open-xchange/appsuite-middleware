@@ -85,7 +85,7 @@ import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
 
 /**
  * {@link SiteServlet}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SiteServlet extends HttpServlet {
@@ -210,7 +210,7 @@ public class SiteServlet extends HttpServlet {
             r = new BufferedReader(new InputStreamReader(inputStream));
             final StringBuilder b = new StringBuilder();
             String l = null;
-            while((l = r.readLine()) != null) {
+            while ((l = r.readLine()) != null) {
                 b.append(l).append('\n');
             }
             f.setDescription(b.toString());

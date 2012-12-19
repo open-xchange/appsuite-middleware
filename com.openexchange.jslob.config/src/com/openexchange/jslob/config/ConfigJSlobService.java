@@ -57,6 +57,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -65,15 +66,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.json.JSONValue;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableBiMap;
 import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -96,6 +95,7 @@ import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ConfigJSlobService}
@@ -111,27 +111,26 @@ public final class ConfigJSlobService implements JSlobService {
      */
     private static final String PREFERENCE_PATH = "preferencePath".intern();
 
-    /**
-     * <code>"core"</code>
-     */
-    private static final String CORE = "core".intern();
-
-    /**
-     * <code>"meta"</code>
-     */
-    private static final String METADATA_PREFIX = "meta".intern();
-    private static final String DATA_PREFIX = "data".intern();
-
     private static final String SERVICE_ID = "com.openexchange.jslob.config";
-
+    
+    private static final String CORE = "io.ox/core";
+    
+    
     /*-
      * ------------------------- Member stuff -----------------------------
      */
 
     private final ServiceLookup services;
+
     private final Map<String, Map<String, AttributedProperty>> preferenceItems;
-    private final Map<String, String> core2AttributeMap;
-    private final Map<String, String> attribute2CoreMap;
+    
+    
+    
+    private final Map<String, Map<String, String>[]> configTreeEquivalents;
+    private final int CONFIG2LOB = 0;
+    private final int LOB2CONFIG = 1;
+    
+    private final Map<String, JSlob> sharedJSlobs;
 
     /**
      * Initializes a new {@link ConfigJSlobService}.
@@ -145,18 +144,27 @@ public final class ConfigJSlobService implements JSlobService {
         // Initialize core name mapping
         final ConfigurationService service = services.getService(ConfigurationService.class);
         final File file = service.getFileByName("paths.perfMap");
-        final BiMap<String, String> biMap;
         if (null == file) {
-            biMap = ImmutableBiMap.of();
+        	configTreeEquivalents = Collections.emptyMap();
         } else {
-            biMap = HashBiMap.create(128);
-            readPerfMap(file, biMap);
+        	configTreeEquivalents = new HashMap<String, Map<String,String>[]>();
+            readPerfMap(file, configTreeEquivalents);
         }
-        core2AttributeMap = biMap;
-        attribute2CoreMap = biMap.inverse();
+       
+        sharedJSlobs = new ConcurrentHashMap<String, JSlob>();
     }
 
-    private void readPerfMap(final File file, final BiMap<String, String> biMap) throws OXException {
+    /**
+     * Gets the service look-up.
+     * 
+     * @return The service look-up
+     */
+    public ServiceLookup getServices() {
+        return services;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void readPerfMap(final File file, final Map<String, Map<String, String>[]> map) throws OXException {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.ISO_8859_1));
@@ -165,7 +173,28 @@ public final class ConfigJSlobService implements JSlobService {
                 if (!isEmpty(line) && '#' != line.charAt(0)) {
                     final int pos = line.indexOf('>');
                     if (pos > 0) {
-                        biMap.put(line.substring(0, pos), line.substring(pos + 1));
+                        final String configTreePath = line.substring(0, pos).trim();
+                        String jslobPath = line.substring(pos + 1).trim();
+
+                        String jslobName;
+                        {
+                            final int pathSep = jslobPath.indexOf("//");
+                            if (pathSep < 0) {
+                                jslobName = CORE;
+                            } else {
+                                jslobName = jslobPath.substring(0, pathSep);
+                                jslobPath = jslobPath.substring(pathSep + 2);
+                            }
+                        }
+
+                        Map<String, String>[] maps = map.get(jslobName);
+                        if (maps == null) {
+                            maps = new Map[] { new HashMap<String, String>(), new HashMap<String, String>() };
+                            map.put(jslobName, maps);
+                        }
+
+                        maps[CONFIG2LOB].put(configTreePath, jslobPath);
+                        maps[LOB2CONFIG].put(jslobPath, configTreePath);
                     }
                 }
             }
@@ -184,14 +213,14 @@ public final class ConfigJSlobService implements JSlobService {
         final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigJSlobService.class));
         // Initialize resulting map
         final int initialCapacity = all.size() >> 1;
-        final Map<String, Map<String, AttributedProperty>> preferenceItems =
-            new HashMap<String, Map<String, AttributedProperty>>(initialCapacity);
+        final Map<String, Map<String, AttributedProperty>> preferenceItems = new HashMap<String, Map<String, AttributedProperty>>(
+            initialCapacity);
         for (final Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
             // Check for existence of "preferencePath"
             final ComposedConfigProperty<String> property = entry.getValue();
             String preferencePath = property.get(PREFERENCE_PATH);
             if (null != preferencePath) {
-                // e.g. ui/halo/configuration/property01
+                // e.g. ui//halo/configuration/property01
                 final int separatorPos = preferencePath.indexOf("//");
                 if (separatorPos != -1) {
                     final String key = preferencePath.substring(0, separatorPos);
@@ -214,7 +243,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     /**
      * Gets the <code>SessiondService</code>.
-     *
+     * 
      * @return The <code>SessiondService</code>
      */
     private SessiondService getSessiondService() {
@@ -222,11 +251,19 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public Collection<JSlob> get(final int userId, final int contextId) throws OXException {
+    public Collection<JSlob> get(ServerSession session) throws OXException {
+    	final int userId = session.getUserId();
+    	final int contextId = session.getContextId();
+    	
         final Collection<JSlob> list = getStorage().list(new JSlobId(SERVICE_ID, null, userId, contextId));
         final List<JSlob> ret = new ArrayList<JSlob>(list.size() << 1);
+        boolean coreIncluded = false;
         for (final JSlob jSlob : list) {
-            ret.add(get(jSlob.getId().getId(), userId, contextId));
+        	addConfigTreeToJslob(session, jSlob);
+            ret.add(get(jSlob.getId().getId(), session));
+            if (jSlob.getId().equals(CORE)) {
+            	coreIncluded = true;
+            }
         }
         final ConfigView view = getConfigViewFactory().getView(userId, contextId);
         for (final Entry<String, Map<String, AttributedProperty>> entry : preferenceItems.entrySet()) {
@@ -235,17 +272,30 @@ public final class ConfigJSlobService implements JSlobService {
             for (final Entry<String, AttributedProperty> entry2 : entry.getValue().entrySet()) {
                 add2JSlob(entry2.getValue(), jSlob, view);
             }
+            addConfigTreeToJslob(session, jSlob);
+            if (jSlob.getId().equals(CORE)) {
+            	coreIncluded = true;
+            }
             ret.add(jSlob);
         }
-        ret.add(getCoreJslob(userId, contextId));
+        if (!coreIncluded) {
+        	JSlob jSlob = new JSlob(new JSONObject());
+        	jSlob.setId(new JSlobId(SERVICE_ID, CORE, userId, contextId));
+        	addConfigTreeToJslob(session, jSlob);
+        }
         return ret;
     }
 
     @Override
-    public JSlob get(final String id, final int userId, final int contextId) throws OXException {
-        if (CORE.equals(id)) {
-            return getCoreJslob(userId, contextId);
-        }
+    public Collection<JSlob> getShared() {
+        // return sharedJSlobs;
+        return null;
+    }
+
+    @Override
+    public JSlob get(final String id, final ServerSession session) throws OXException {
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
         /*
          * Get from storage
          */
@@ -264,32 +314,52 @@ public final class ConfigJSlobService implements JSlobService {
                 add2JSlob(attributedProperty, jsonJSlob, view);
             }
         }
+        
+        addConfigTreeToJslob(session, jsonJSlob);
+        
         return jsonJSlob;
     }
 
+    @Override
+    public JSlob getShared(String id) {
+        Set<String> keySet = sharedJSlobs.keySet();
+        JSlob retval = sharedJSlobs.get(id);
+        return retval;
+    }
+
     /**
-     * Gets the special <code>"core"</code> {@link JSlob} instance.
-     *
+     * Adds data from config-tree to jslob mappings.
+     * 
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return The special <code>"core"</code> {@link JSlob} instance.
+     * @return The {@link JSlob} instance.
      * @throws OXException If operation fails
      */
-    private JSlob getCoreJslob(final int userId, final int contextId) throws OXException {
+    private void addConfigTreeToJslob(ServerSession session, JSlob jsLob) throws OXException {
         try {
-            // Special handling then
-            final SettingStorage stor = SettingStorage.getInstance(getSessiondService().getAnyActiveSessionForUser(userId, contextId));
+        	Map<String, String>[] maps = configTreeEquivalents.get(jsLob.getId().getId());
+        	if (maps == null) {
+        		return;
+        	}
+            final SettingStorage stor = SettingStorage.getInstance(session);
             final ConfigTree configTree = ConfigTree.getInstance();
             final JSONObject jObject = new JSONObject();
-            for (final Setting setting : configTree.getSettings()) {
-                String attributeName = core2AttributeMap.get(setting.getPath());
-                if (null == attributeName) {
-                    attributeName = setting.getPath();
-                }
-                stor.readValues(setting);
-                jObject.put(attributeName, convert2JS(setting));
+
+            for(Map.Entry<String, String> mapping: maps[CONFIG2LOB].entrySet()) {
+            	String configTreePath = mapping.getKey();
+            	String lobPath = mapping.getValue();
+            	
+            	Setting setting = configTree.getSettingByPath(configTreePath);
+            	stor.readValues(setting);
+            	
+            	jObject.put(lobPath, convert2JS(setting));
+            	
             }
-            return new JSlob(jObject);
+
+            JSONObject objectData = jsLob.getJsonObject();
+            
+            jsLob.setJsonObject(JSONUtil.merge(objectData, jObject));
+            
         } catch (final JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
@@ -335,8 +405,8 @@ public final class ConfigJSlobService implements JSlobService {
         }
         return retval;
     }
-    
-	@Override
+
+    @Override
     public String getIdentifier() {
         return SERVICE_ID;
     }
@@ -347,40 +417,11 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public void set(final String id, final JSlob jsonJSlob, final int userId, final int contextId) throws OXException {
-        if (CORE.equals(id)) {
-            // Special handling then
-            if (null == jsonJSlob) {
-                throw JSlobExceptionCodes.SET_NOT_SUPPORTED.create(id, SERVICE_ID);
-            }
-            final JSONObject jObject = jsonJSlob.getJsonObject();
-            if (null == jObject) {
-                throw JSlobExceptionCodes.SET_NOT_SUPPORTED.create(id, SERVICE_ID);
-            }
-            // Iterate JSON object
-            final SettingStorage stor = SettingStorage.getInstance(getSessiondService().getAnyActiveSessionForUser(userId, contextId));
-            final ConfigTree configTree = ConfigTree.getInstance();
-            for (final Entry<String, Object> entry : jObject.entrySet()) {
-                String path = attribute2CoreMap.get(entry.getKey());
-                if (null == path) {
-                    path = entry.getKey();
-                }
-                if (path.length() > 0 && path.charAt(0) == '/') {
-                    path = path.substring(1);
-                }
-                if (path.endsWith("/")) {
-                    path = path.substring(0, path.length() - 1);
-                }
-                final Setting setting = configTree.getSettingByPath(path);
-                setting.setSingleValue(entry.getValue());
-                saveSettingWithSubs(stor, setting);
-            }
-            return;
-        }
-        /*
-         * Set in storage (other than "core")
-         */
-        if (null == jsonJSlob) {
+    public void set(final String id, final JSlob jsonJSlob, ServerSession session) throws OXException {
+    	final int userId = session.getUserId();
+    	final int contextId = session.getContextId();
+    	
+    	if (null == jsonJSlob) {
             getStorage().remove(new JSlobId(SERVICE_ID, id, userId, contextId));
         } else {
             final JSONObject jObject = jsonJSlob.getJsonObject();
@@ -390,6 +431,32 @@ public final class ConfigJSlobService implements JSlobService {
             }
             // Remember the paths to purge
             final List<List<JSONPathElement>> pathsToPurge = new LinkedList<List<JSONPathElement>>();
+            // Config Tree Values first
+            
+            Map<String, String>[] configTreeEquivMaps = configTreeEquivalents.get(id);
+            if (configTreeEquivMaps != null) {
+				final SettingStorage stor = SettingStorage
+						.getInstance(session);
+				final ConfigTree configTree = ConfigTree.getInstance();
+				Map<String, String> attribute2ConfigTreeMap = configTreeEquivMaps[LOB2CONFIG];
+				
+				for (final Entry<String, Object> entry : jObject.entrySet()) {
+					String path = attribute2ConfigTreeMap.get(entry.getKey());
+					if (path != null) {
+						pathsToPurge.add(Arrays.asList(new JSONPathElement(entry.getKey())));
+						if (path.length() > 0 && path.charAt(0) == '/') {
+							path = path.substring(1);
+						}
+						if (path.endsWith("/")) {
+							path = path.substring(0, path.length() - 1);
+						}
+						final Setting setting = configTree.getSettingByPath(path);
+						setting.setSingleValue(entry.getValue());
+						saveSettingWithSubs(stor, setting);
+					}
+				}
+            }
+            
             // Set (or replace) JSlob
             final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
             if (null == attributes) {
@@ -401,23 +468,37 @@ public final class ConfigJSlobService implements JSlobService {
                 for (final AttributedProperty attributedProperty : attributes.values()) {
                     final Object value = JSONPathElement.getPathFrom(attributedProperty.path, jObject);
                     if (null != value) {
-                    	if (view.property(attributedProperty.propertyName, String.class).isDefined()) {
+                        if (view.property(attributedProperty.propertyName, String.class).isDefined()) {
                             pathsToPurge.add(attributedProperty.path);
-                    		final Object oldValue = asJSObject(view.get(attributedProperty.propertyName, String.class));
+                            final Object oldValue = asJSObject(view.get(attributedProperty.propertyName, String.class));
                             // Clients have a habit of dumping the config back at us, so we only save differing values.
                             if (!value.equals(oldValue)) {
                                 view.set("user", attributedProperty.propertyName, value);
                             }
-                    	}
+                        }
                     }
                 }
             }
-            for (final List<JSONPathElement> path: pathsToPurge) {
-            	JSONPathElement.remove(path, jObject);
+            for (final List<JSONPathElement> path : pathsToPurge) {
+                JSONPathElement.remove(path, jObject);
             }
             jsonJSlob.setJsonObject(jObject);
             // Finally store JSlob
             getStorage().store(new JSlobId(SERVICE_ID, id, userId, contextId), jsonJSlob);
+        }
+    }
+
+    @Override
+    public void setShared(final String id, final JSlob jsonJSlob) {
+        if (null == jsonJSlob) {
+            sharedJSlobs.remove(id);
+        } else {
+            final JSONObject jObject = jsonJSlob.getJsonObject();
+            if (null == jObject) {
+                sharedJSlobs.remove(id);
+                return;
+            }
+            sharedJSlobs.put(id, jsonJSlob);
         }
     }
 
@@ -434,7 +515,7 @@ public final class ConfigJSlobService implements JSlobService {
                 final String value = (String) setting.getSingleValue();
                 if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
                     final JSONArray array = new JSONArray(value);
-                    if(array.length() == 0) {
+                    if (array.length() == 0) {
                         setting.setEmptyMultiValue();
                     } else {
                         for (int i = 0; i < array.length(); i++) {
@@ -445,7 +526,15 @@ public final class ConfigJSlobService implements JSlobService {
                 }
                 storage.save(setting);
             } else {
-                final JSONObject json = new JSONObject(setting.getSingleValue().toString());
+                final JSONObject json;
+                {
+                    final Object singleValue = setting.getSingleValue();
+                    if (singleValue instanceof JSONObject) {
+                        json = new JSONObject((JSONObject) singleValue);
+                    } else {
+                        json = new JSONObject(singleValue.toString());
+                    }
+                }
                 final Iterator<String> iter = json.keys();
                 OXException exc = null;
                 while (iter.hasNext()) {
@@ -469,40 +558,13 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public void update(final String id, final JSONUpdate jsonUpdate, final int userId, final int contextId) throws OXException {
-        try {
-            if (CORE.equals(id)) {
-                // Special handling then
-                final List<JSONPathElement> path = jsonUpdate.getPath();
-                if (path.isEmpty()) {
-                    /*
-                     * Merge whole object
-                     */
-                    final JSONObject merged = JSONUtil.merge(getCoreJslob(userId, contextId).getJsonObject(), (JSONObject) jsonUpdate.getValue());
-                    set(id, new JSlob(merged), userId, contextId);
-                    return;
-                }
-                /*
-                 * Update by path
-                 */
-                final StringBuilder pathBuilder = new StringBuilder(16);
-                pathBuilder.append(path.get(0).toString());
-                for (int i = 1, size = path.size(); i < size; i++) {
-                    pathBuilder.append('/').append(path.get(i).toString());
-                }
-                final Object value = jsonUpdate.getValue();
-                if (null != value) {
-                    final SettingStorage stor = SettingStorage.getInstance(getSessiondService().getAnyActiveSessionForUser(userId, contextId));
-                    final ConfigTree configTree = ConfigTree.getInstance();
-                    final Setting setting = configTree.getSettingByPath(pathBuilder.toString());
-                    setting.setSingleValue(value);
-                    saveSettingWithSubs(stor, setting);
-                }
-                return;
-            }
-            /*
+    public void update(final String id, final JSONUpdate jsonUpdate, ServerSession session) throws OXException {
+    	try {
+    		/*
              * Look-up appropriate storage
              */
+    		final int userId = session.getUserId();
+    		final int contextId = session.getContextId();
             final JSlobStorage storage = getStorage();
             final JSlobId jslobId = new JSlobId(SERVICE_ID, id, userId, contextId);
             /*
@@ -525,11 +587,37 @@ public final class ConfigJSlobService implements JSlobService {
                  * Merge whole object
                  */
                 final JSONObject merged = JSONUtil.merge(storageObject, (JSONObject) jsonUpdate.getValue());
-                set(id, jsonJSlob.setJsonObject(merged), userId, contextId);
+                set(id, jsonJSlob.setJsonObject(merged), session);
                 return;
             }
+            
             /*
-             * Update in config cascade
+             * Let's try the config mappings
+             */
+            
+            if (path.size() == 1) {
+            	// Only first level elements can be config tree equivalents
+                Map<String, String>[] configTreeEquivMaps = configTreeEquivalents.get(id);
+                if (configTreeEquivMaps != null) {
+                	
+                	String configTreePath = configTreeEquivMaps[LOB2CONFIG].get(path.get(0).getName());
+                	final Object value = jsonUpdate.getValue();
+					if (null != value) {
+						final SettingStorage stor = SettingStorage
+								.getInstance(session);
+						final ConfigTree configTree = ConfigTree.getInstance();
+						final Setting setting = configTree
+								.getSettingByPath(configTreePath);
+						setting.setSingleValue(value);
+						saveSettingWithSubs(stor, setting);
+					}
+                	
+                }
+            }
+            
+            
+            /*
+             * Update in config cascade or basic storage
              */
             final int size = path.size();
             final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
@@ -673,9 +761,9 @@ public final class ConfigJSlobService implements JSlobService {
     private ConfigViewFactory getConfigViewFactory() {
         return services.getService(ConfigViewFactory.class);
     }
-    
+
     private static final Set<String> SKIP_META = new HashSet<String>(Arrays.asList("final", "protected", "preferencePath"));
-    
+
     private static void add2JSlob(final AttributedProperty attributedProperty, final JSlob jsonJSlob, final ConfigView view) throws OXException {
         if (null == attributedProperty) {
             return;
@@ -686,7 +774,7 @@ public final class ConfigJSlobService implements JSlobService {
             Object value = asJSObject(view.get(attributedProperty.propertyName, String.class));
 
             addValueByPath(path, value, jsonJSlob.getJsonObject());
-            
+
             // Add the metadata as well as a separate JSON object
             final JSONObject jMetaData = new JSONObject();
             final ComposedConfigProperty<String> preferenceItem = attributedProperty.property;
@@ -694,9 +782,9 @@ public final class ConfigJSlobService implements JSlobService {
             if (null != metadataNames && !metadataNames.isEmpty()) {
                 for (final String metadataName : metadataNames) {
                     if (SKIP_META.contains(metadataName)) {
-                    	continue;
+                        continue;
                     }
-                	// Metadata value
+                    // Metadata value
                     final ComposedConfigProperty<String> prop = view.property(attributedProperty.propertyName, String.class);
                     value = asJSObject(prop.get(metadataName));
                     jMetaData.put(metadataName, value);
@@ -705,14 +793,14 @@ public final class ConfigJSlobService implements JSlobService {
             // Lastly, let's add configurability.
             final String finalScope = preferenceItem.get("final");
             final String isProtected = preferenceItem.get("protected");
-            final boolean writable =
-                (finalScope == null || finalScope.equals("user")) && (isProtected == null || !preferenceItem.get("protected", boolean.class).booleanValue());
+            final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || !preferenceItem.get(
+                "protected",
+                boolean.class).booleanValue());
             value = Boolean.valueOf(writable);
-            if (!(Boolean)value) {
+            if (!(Boolean) value) {
                 jMetaData.put("configurable", value);
             }
-            
-            
+
             if (jMetaData.length() > 0) {
                 addValueByPath(path, jMetaData, jsonJSlob.getMetaObject());
             }
@@ -784,7 +872,7 @@ public final class ConfigJSlobService implements JSlobService {
      * Converts given String to a regular JSON-supported value.
      * <p>
      * The value can be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
-     *
+     * 
      * @param propertyValue The value to convert
      * @return The resulting value; either Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object
      */

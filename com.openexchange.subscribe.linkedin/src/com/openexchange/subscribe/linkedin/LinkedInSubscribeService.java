@@ -50,17 +50,21 @@
 package com.openexchange.subscribe.linkedin;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
+import com.openexchange.oauth.linkedin.LinkedInService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.linkedin.osgi.Activator;
 
@@ -76,11 +80,13 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInSubscribeService.class));
 
-    private final SubscriptionSource source = new SubscriptionSource();
+    private final SubscriptionSource source;
 
     public LinkedInSubscribeService(final Activator activator){
+        super();
         this.activator = activator;
 
+        source = new SubscriptionSource();
         source.setDisplayName("LinkedIn");
         source.setFolderModule(FolderObject.CONTACT);
         source.setId("com.openexchange.subscribe.socialplugin.linkedin");
@@ -97,7 +103,20 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
 
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
-        return activator.getLinkedInService().getContacts(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
+        if (null == subscription) {
+            return Collections.emptyList();
+        }
+        try {
+            final LinkedInService linkedInService = activator.getLinkedInService();
+            if (null == linkedInService) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(LinkedInService.class.getName());
+            }
+            final int contextId = subscription.getContext().getContextId();
+            final int accountId = ((Integer)subscription.getConfiguration().get("account")).intValue();
+            return linkedInService.getContacts(subscription.getSession(), subscription.getUserId(), contextId, accountId);
+        } catch (final RuntimeException e) {
+            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override

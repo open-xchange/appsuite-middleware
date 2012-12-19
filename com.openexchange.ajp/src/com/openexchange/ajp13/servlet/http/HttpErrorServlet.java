@@ -58,7 +58,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * HttpErrorServlet
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -75,12 +75,19 @@ public class HttpErrorServlet extends HttpServlet {
     }
 
     @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
+        super.service(req, resp);
+    }
+
+    @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
         try {
             resp.setContentType("text/html; charset=UTF-8");
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             final PrintWriter writer = resp.getWriter();
-            writer.write(new StringBuilder().append("<html>").append(message).append("</html>").toString());
+            writer.write(new com.openexchange.java.StringAllocator().append("<html>").append(message).append("</html>").toString());
         } catch (final IOException exc) {
             LOG.error(exc.getMessage(), exc);
         }

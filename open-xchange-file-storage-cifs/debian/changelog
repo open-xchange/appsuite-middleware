@@ -1,11 +1,23 @@
+open-xchange-file-storage-cifs (7.0.0-0) unstable; urgency=low
+
+  * prepare for 7.0.0 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 04 Dec 2012 09:29:20 +0100
+
+open-xchange-file-storage-cifs (6.23.0-2) unstable; urgency=low
+
+  * First release candidate for EDP drop #6
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 13 Nov 2012 11:22:44 +0100
+
+open-xchange-file-storage-cifs (6.23.0-1) unstable; urgency=low
+
+  * prepare for 6.23.0
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 17 Oct 2012 12:21:28 +0200
+
 open-xchange-file-storage-cifs (6.22.1-0) unstable; urgency=low
 
   * prepare for 6.22.1
 
  -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 26 Oct 2012 10:03:27 +0200
-
-open-xchange-file-storage-cifs (6.23.0-1) unstable; urgency=low
-
-  * Initial release
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 17 Oct 2012 12:21:28 +0200

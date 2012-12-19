@@ -1,11 +1,24 @@
+
 package com.openexchange.solr.osgi;
 
 import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.SimpleTrigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.service.QuartzService;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openexchange.config.ConfigurationService;
@@ -21,17 +34,22 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreConfigService;
+import com.openexchange.solr.SolrIndexEventProperties;
 import com.openexchange.solr.SolrMBean;
 import com.openexchange.solr.SolrProperties;
 import com.openexchange.solr.groupware.SolrCoreLoginHandler;
 import com.openexchange.solr.groupware.SolrCoresCreateTableService;
 import com.openexchange.solr.groupware.SolrCoresCreateTableTask;
+import com.openexchange.solr.groupware.SolrIndexEventHandler;
 import com.openexchange.solr.internal.DelegationSolrAccessImpl;
 import com.openexchange.solr.internal.EmbeddedSolrAccessImpl;
 import com.openexchange.solr.internal.RMISolrAccessImpl;
 import com.openexchange.solr.internal.Services;
+import com.openexchange.solr.internal.SolrConsistencyJob;
 import com.openexchange.solr.internal.SolrCoreConfigServiceImpl;
+import com.openexchange.solr.internal.SolrCoreTools;
 import com.openexchange.solr.internal.SolrMBeanImpl;
+import com.openexchange.solr.internal.SolrNodeListener;
 import com.openexchange.solr.rmi.RMISolrAccessService;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -42,78 +60,122 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class SolrActivator extends HousekeepingActivator {
 
-    public static final String SOLR_NODE_MAP = "solrNodeMap";
-
     static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
-	
-	private volatile DelegationSolrAccessImpl delegationAccess;
 
-	private static RMISolrAccessService solrRMI;
+    private volatile DelegationSolrAccessImpl delegationAccess;
+
+    private static RMISolrAccessService solrRMI;
 
     private SolrMBean solrMBean;
 
     private ObjectName solrMBeanName;
-    
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class<?>[] { ConfigurationService.class, DatabaseService.class, ThreadPoolService.class, HazelcastInstance.class };
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, ThreadPoolService.class, HazelcastInstance.class };
+    }
 
-	@Override
-	protected void startBundle() throws OXException {
-		Services.setServiceLookup(this);
-		new CheckConfigDBTables(getService(DatabaseService.class)).checkTables();
-		EmbeddedSolrAccessImpl embeddedAccess = new EmbeddedSolrAccessImpl();
-		embeddedAccess.startUp();
-		DelegationSolrAccessImpl accessService = this.delegationAccess = new DelegationSolrAccessImpl(embeddedAccess);
-		registerService(SolrAccessService.class, accessService);
-		addService(SolrAccessService.class, accessService);
-		SolrCoreConfigServiceImpl coreService = new SolrCoreConfigServiceImpl();
-		registerService(SolrCoreConfigService.class, coreService);
-		addService(SolrCoreConfigService.class, coreService);
-		solrRMI = new RMISolrAccessImpl(embeddedAccess);
-		registerService(Remote.class, solrRMI);
+    @Override
+    protected void startBundle() throws OXException {
+        Services.setServiceLookup(this);
+        new CheckConfigDBTables(getService(DatabaseService.class)).checkTables();
+        EmbeddedSolrAccessImpl embeddedAccess = new EmbeddedSolrAccessImpl();
+        embeddedAccess.startUp();
+        DelegationSolrAccessImpl accessService = this.delegationAccess = new DelegationSolrAccessImpl(embeddedAccess);
+        registerService(SolrAccessService.class, accessService);
+        addService(SolrAccessService.class, accessService);
+        SolrCoreConfigServiceImpl coreService = new SolrCoreConfigServiceImpl();
+        registerService(SolrCoreConfigService.class, coreService);
+        addService(SolrCoreConfigService.class, coreService);
+        solrRMI = new RMISolrAccessImpl(accessService);
+        registerService(Remote.class, solrRMI);
+        Dictionary<String, String> eventProperties = new Hashtable<String, String>(1);
+        eventProperties.put(EventConstants.EVENT_TOPIC, SolrIndexEventProperties.TOPIC_LOCK_INDEX);
+        registerService(EventHandler.class, new SolrIndexEventHandler(accessService), eventProperties);
 
-		SolrCoresCreateTableService createTableService = new SolrCoresCreateTableService();
-		registerService(CreateTableService.class, createTableService);
-		registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SolrCoresCreateTableTask(createTableService)));
-		// new SolrCoreStoresCreateTableTask()
-		registerService(LoginHandlerService.class, new SolrCoreLoginHandler(embeddedAccess));
-		registerMBean(coreService);		
-		HazelcastInstance hazelcast = getService(HazelcastInstance.class);
-		
-		ConfigurationService config = getService(ConfigurationService.class);
+        SolrCoresCreateTableService createTableService = new SolrCoresCreateTableService();
+        registerService(CreateTableService.class, createTableService);
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SolrCoresCreateTableTask(
+            createTableService)));
+        registerService(LoginHandlerService.class, new SolrCoreLoginHandler(embeddedAccess));
+        registerMBean(coreService);
+        
+        /*
+         * Consistency stuff
+         */
+        HazelcastInstance hazelcast = getService(HazelcastInstance.class);
+        ConfigurationService config = getService(ConfigurationService.class);
         boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         if (isSolrNode) {
-            IMap<String, Integer> solrNodes = hazelcast.getMap(SOLR_NODE_MAP);
+            IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
             String memberAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
             solrNodes.put(memberAddress, new Integer(0));
+            
+            track(QuartzService.class, new SimpleRegistryListener<QuartzService>() {
+                @Override
+                public void added(ServiceReference<QuartzService> ref, QuartzService service) {
+                    try {
+                        Scheduler scheduler = service.getLocalScheduler();
+                        if (scheduler.isStarted()) {
+                            JobDetail jobDetail = JobBuilder
+                                .newJob(SolrConsistencyJob.class)
+                                .withIdentity("com.openexchange.solr", "consistencyJob")
+                                .build();
+                            
+                            SimpleScheduleBuilder scheduleBuilder = SimpleScheduleBuilder
+                                .simpleSchedule()
+                                .withIntervalInMinutes(15)
+                                .repeatForever()
+                                .withMisfireHandlingInstructionFireNow();
+                            
+                            SimpleTrigger trigger = TriggerBuilder
+                                .newTrigger()
+                                .withIdentity("com.openexchange.solr", "consistencyJobTrigger")
+                                .forJob(jobDetail)
+                                .withSchedule(scheduleBuilder)
+                                .build();
+                            
+                            scheduler.scheduleJob(jobDetail, trigger);
+                        }
+                    } catch (OXException e) {
+                        LOG.error(e.getMessage(), e);
+                    } catch (SchedulerException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+
+                @Override
+                public void removed(ServiceReference<QuartzService> ref, QuartzService service) {
+                    // nothing to do
+                }
+            });
         }
-		openTrackers();
-	}
+        
+        hazelcast.getCluster().addMembershipListener(new SolrNodeListener(hazelcast));
+        openTrackers();
+    }
 
-	@Override
-	protected void stopBundle() throws Exception {
-		super.stopBundle();
-		
-		solrRMI = null;
-		ManagementService managementService = Services.optService(ManagementService.class);
-		if (managementService != null && solrMBeanName != null) {
-		    managementService.unregisterMBean(solrMBeanName);
-		    solrMBean = null;
-		}
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
 
-		DelegationSolrAccessImpl delegationAccess = this.delegationAccess;
-		if (delegationAccess != null) {
-		    delegationAccess.shutDown();
-			this.delegationAccess = null;
-		}
-	}
-	
-	private void registerMBean(SolrCoreConfigServiceImpl coreService) {
-	    try {
-            solrMBeanName = new ObjectName(SolrMBean.DOMAIN, "name", "Solr Control");
+        solrRMI = null;
+        ManagementService managementService = Services.optService(ManagementService.class);
+        if (managementService != null && solrMBeanName != null) {
+            managementService.unregisterMBean(solrMBeanName);
+            solrMBean = null;
+        }
+
+        DelegationSolrAccessImpl delegationAccess = this.delegationAccess;
+        if (delegationAccess != null) {
+            delegationAccess.shutDown();
+            this.delegationAccess = null;
+        }
+    }
+
+    private void registerMBean(SolrCoreConfigServiceImpl coreService) {
+        try {
+            solrMBeanName = new ObjectName(SolrMBean.DOMAIN, SolrMBean.KEY, SolrMBean.VALUE);
             DelegationSolrAccessImpl delegationAccess = this.delegationAccess;
             solrMBean = new SolrMBeanImpl(delegationAccess, coreService);
             track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
@@ -141,6 +203,6 @@ public class SolrActivator extends HousekeepingActivator {
         } catch (NotCompliantMBeanException e) {
             LOG.error(e.getMessage(), e);
         }
-	}
+    }
 
 }

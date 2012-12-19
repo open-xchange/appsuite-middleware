@@ -242,7 +242,15 @@ public class ConfigMenu extends SessionServlet {
             }
             storage.save(setting);
         } else {
-            final JSONObject json = new JSONObject(setting.getSingleValue().toString());
+            final JSONObject json;
+            {
+                final Object singleValue = setting.getSingleValue();
+                if (singleValue instanceof JSONObject) {
+                    json = new JSONObject((JSONObject) singleValue);
+                } else {
+                    json = new JSONObject(singleValue.toString());
+                }
+            }
             final Iterator<String> iter = json.keys();
             OXException exc = null;
             while (iter.hasNext()) {

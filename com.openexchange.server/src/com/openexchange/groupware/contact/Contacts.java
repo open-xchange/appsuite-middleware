@@ -109,7 +109,6 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
@@ -2155,11 +2154,11 @@ public final class Contacts {
     }
 
     public static boolean performContactReadCheckByID(final int folderId, final int objectId, final int user, final Context ctx, final UserConfiguration uc) throws OXException {
-        if (ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).hasSpecificContactInterface(
-            folderId,
-            ctx.getContextId())) {
-            return true;
-        }
+//        if (ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).hasSpecificContactInterface(
+//            folderId,
+//            ctx.getContextId())) {
+//            return true;
+//        }
 
         Connection readCon = null;
         ResultSet rs = null;

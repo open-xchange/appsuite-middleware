@@ -1,3 +1,63 @@
+open-xchange-admin-soap-reseller (7.0.0-3) unstable; urgency=low
+
+  * Third release candidate for 7.0.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 18 Dec 2012 14:14:19 +0100
+
+open-xchange-admin-soap-reseller (7.0.0-2) unstable; urgency=low
+
+  * Second release candidate for 7.0.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 17 Dec 2012 17:35:46 +0100
+
+open-xchange-admin-soap-reseller (7.0.0-1) unstable; urgency=low
+
+  * First release candidate for 7.0.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 04 Dec 2012 13:48:03 +0100
+
+open-xchange-admin-soap-reseller (7.0.0-0) unstable; urgency=low
+
+  * prepare for 7.0.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 04 Dec 2012 09:28:42 +0100
+
+open-xchange-admin-soap-reseller (6.23.0-5) unstable; urgency=low
+
+  * First release candidate for EDP drop #6
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 13 Nov 2012 11:22:17 +0100
+
+open-xchange-admin-soap-reseller (6.23.0-4) unstable; urgency=low
+
+  * Third release build for EDP drop #5
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 15:58:59 +0200
+
+open-xchange-admin-soap-reseller (6.23.0-3) unstable; urgency=low
+
+  * Second release build for EDP drop #5
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 11:58:41 +0200
+
+open-xchange-admin-soap-reseller (6.23.0-2) unstable; urgency=low
+
+  * Release build for EDP drop #5
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 11 Oct 2012 21:56:04 +0200
+
+open-xchange-admin-soap-reseller (6.23.0-1) unstable; urgency=low
+
+  * First release candidate for 6.23.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 04 Sep 2012 12:21:36 +0200
+
+open-xchange-admin-soap-reseller (6.23.0-0) unstable; urgency=low
+
+  * prepare for next EDP drop
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 03 Sep 2012 13:46:29 +0200
+
 open-xchange-admin-soap-reseller (6.22.1-8) unstable; urgency=low
 
   * Build for public patch 2012-12-04
@@ -51,18 +111,6 @@ open-xchange-admin-soap-reseller (6.22.1-0) unstable; urgency=low
   * prepare for 6.22.1
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 10:03:52 +0200
-
-open-xchange-admin-soap-reseller (6.23.0-1) unstable; urgency=low
-
-  * First release candidate for 6.23.0
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 04 Sep 2012 12:21:36 +0200
-
-open-xchange-admin-soap-reseller (6.23.0-0) unstable; urgency=low
-
-  * prepare for next EDP drop
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 03 Sep 2012 13:46:29 +0200
 
 open-xchange-admin-soap-reseller (6.22.0-5) unstable; urgency=low
 

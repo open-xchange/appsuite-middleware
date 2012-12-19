@@ -1,3 +1,4 @@
+
 package com.openexchange.mobile.configuration.generator;
 
 import java.io.BufferedOutputStream;
@@ -6,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
@@ -23,9 +23,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mobile.configuration.generator.configuration.ConfigurationException;
 import com.openexchange.mobile.configuration.generator.configuration.MobileConfigProperties;
 import com.openexchange.mobile.configuration.generator.configuration.Property;
@@ -35,17 +36,14 @@ import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.http.Tools;
 
-
 public class MobileConfigServlet extends HttpServlet {
-
 
     private static final String PARAMETER_MAIL = "m";
 
     private static final String PARAMETER_LOGIN = "l";
 
     private enum Device {
-        iPhone,
-        winMob;
+        iPhone, winMob;
     }
 
     private static enum ErrorMessage {
@@ -66,11 +64,9 @@ public class MobileConfigServlet extends HttpServlet {
             this.english = english;
         }
 
-
         public String getEnglish() {
             return english;
         }
-
 
         public String getGerman() {
             return german;
@@ -96,15 +92,16 @@ public class MobileConfigServlet extends HttpServlet {
     private static final long serialVersionUID = 7913468326542861986L;
 
     public static String write(final String email, final String host, final String username, final String domain) throws OXException {
-            final TemplateService service = MobileConfigServiceRegistry.getServiceRegistry().getService(TemplateService.class);
-            final OXTemplate loadTemplate = service.loadTemplate("winMobileTemplate.tmpl");
-            final StringWriter writer = new StringWriter();
-            loadTemplate.process(generateHashMap(email, host, username, domain), writer);
-            return writer.toString();
+        final TemplateService service = MobileConfigServiceRegistry.getServiceRegistry().getService(TemplateService.class);
+        final OXTemplate loadTemplate = service.loadTemplate("winMobileTemplate.tmpl");
+        final AllocatingStringWriter writer = new AllocatingStringWriter();
+        loadTemplate.process(generateHashMap(email, host, username, domain), writer);
+        return writer.toString();
     }
 
     /**
      * Splits the given login into a username and a domain part
+     * 
      * @param username
      * @return An array. Index 0 is the username. Index 1 is the domain
      * @throws ConfigurationException
@@ -118,13 +115,13 @@ public class MobileConfigServlet extends HttpServlet {
         }
 
         if (split.length == 1) {
-            return new String[]{split[0], "defaultcontext"};
+            return new String[] { split[0], "defaultcontext" };
         } else {
             if (domain_user.indexOf("$USER") < domain_user.indexOf("$DOMAIN")) {
                 return split;
             } else {
                 // change position in array...
-                return new String[]{split[1], split[0]};
+                return new String[] { split[1], split[0] };
             }
         }
     }
@@ -140,6 +137,13 @@ public class MobileConfigServlet extends HttpServlet {
 
     private static void writeMobileConfigWinMob(final OutputStream out, final String email, final String host, final String username, final String domain) throws IOException, OXException {
         CabUtil.writeCabFile(new DataOutputStream(new BufferedOutputStream(out)), write(email, host, username, domain));
+    }
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
+        super.service(req, resp);
     }
 
     @Override
@@ -194,11 +198,11 @@ public class MobileConfigServlet extends HttpServlet {
             if (null != header) {
                 if (header.matches(iphoneRegEx)) {
                     // iPhone part
-                    resp.sendRedirect(Activator.ALIAS + "/eas.mobileconfig?l=" + URLEncoder.encode(login,"UTF-8") + mailpart);
+                    resp.sendRedirect(Activator.ALIAS + "/eas.mobileconfig?l=" + URLEncoder.encode(login, "UTF-8") + mailpart);
                     return;
                 } else if (header.matches(winMobRegEx)) {
                     // WinMob part
-                    resp.sendRedirect(Activator.ALIAS + "/ms.cab?l=" + URLEncoder.encode(login,"UTF-8") + mailpart);
+                    resp.sendRedirect(Activator.ALIAS + "/ms.cab?l=" + URLEncoder.encode(login, "UTF-8") + mailpart);
                     return;
                 } else {
                     printError(req, resp, ErrorMessage.MSG_NO_SUPPORTED_DEVICE_FOUND);
@@ -234,6 +238,7 @@ public class MobileConfigServlet extends HttpServlet {
 
     /**
      * Reads the language from the header, returns either ENGLISH or GERMAN. No other value can be returned
+     * 
      * @param req
      * @return
      */
@@ -285,7 +290,7 @@ public class MobileConfigServlet extends HttpServlet {
             } else if (Locale.GERMAN.equals(locale)) {
                 writer.println("<h1>" + "Geben Sie f\u00fcr die automatische Konfiguration Ihres Ger\u00e4tes Ihren Benutzernamen ein." + "</h1>");
             }
-            writer.println("<input name=\"" + PARAMETER_LOGIN +"\" type=\"text\" size=\"30\" maxlength=\"100\">");
+            writer.println("<input name=\"" + PARAMETER_LOGIN + "\" type=\"text\" size=\"30\" maxlength=\"100\">");
             writer.println("<input type=\"submit\" value=\" Absenden \">");
             writer.println("</td>");
             writer.println("</tr>");
@@ -362,14 +367,16 @@ public class MobileConfigServlet extends HttpServlet {
     }
 
     private void printError(final HttpServletRequest req, final HttpServletResponse resp, final ErrorMessage string) throws IOException {
-        resp.sendRedirect(Activator.ALIAS + "?error=" + URLEncoder.encode(String.valueOf(string.ordinal()),"UTF-8"));
+        resp.sendRedirect(Activator.ALIAS + "?error=" + URLEncoder.encode(String.valueOf(string.ordinal()), "UTF-8"));
     }
 
     private void writeMobileConfig(final PrintWriter printWriter, final OutputStream outStream, final String email, final String host, final String username, final String domain) throws IOException, OXException {
         try {
             final TemplateService service = MobileConfigServiceRegistry.getServiceRegistry().getService(TemplateService.class);
             final OXTemplate loadTemplate = service.loadTemplate("iPhoneTemplate.tmpl");
-            final Boolean property = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), Property.SignConfig);
+            final Boolean property = MobileConfigProperties.getProperty(
+                MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class),
+                Property.SignConfig);
             if (property) {
                 final MobileConfigSigner writer = new MobileConfigSigner(outStream);
                 try {

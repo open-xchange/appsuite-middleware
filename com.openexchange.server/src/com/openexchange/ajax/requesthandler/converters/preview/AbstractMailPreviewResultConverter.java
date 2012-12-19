@@ -51,13 +51,13 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 
 import java.io.ByteArrayOutputStream;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.tools.session.ServerSession;
@@ -119,7 +119,7 @@ abstract class AbstractMailPreviewResultConverter implements ResultConverter {
          */
         final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
         fileHolder.setContentType("application/octet-stream");
-        fileHolder.setName(new StringBuilder(mail.getSubject()).append(".eml").toString());
+        fileHolder.setName(new com.openexchange.java.StringAllocator(mail.getSubject()).append(".eml").toString());
         result.setResultObject(fileHolder, "file");
         result.setParameter("__mail", mail);
         /*

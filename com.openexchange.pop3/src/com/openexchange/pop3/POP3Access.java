@@ -60,7 +60,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
@@ -392,7 +392,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
          */
         final ConfigurationService service = POP3ServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         if (null == service || !service.getBoolProperty("com.openexchange.pop3.allowPing", false)) {
-            warnings.add(POP3ExceptionCode.VALIDATE_DENIED.create());
+            if (null == service || service.getBoolProperty("com.openexchange.pop3.logDeniedPing", true)) {
+                warnings.add(POP3ExceptionCode.VALIDATE_DENIED.create());
+            }
             return true;
         }
         /*

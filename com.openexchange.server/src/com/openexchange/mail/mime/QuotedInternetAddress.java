@@ -55,9 +55,9 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
@@ -1056,7 +1056,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
             if (quoted(personal)) {
                 if (checkQuotedPersonal(personal)) {
-                    return new StringBuilder(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
+                    return new com.openexchange.java.StringAllocator(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
                 }
                 personal = personal.substring(1, personal.length() - 1);
                 try {
@@ -1066,14 +1066,20 @@ public final class QuotedInternetAddress extends InternetAddress {
                 }
             }
 
-            if (needQuoting(personal)) {
+            if (needQuoting(personal, true)) {
                 try {
-                    encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, false), jcharset, null);
+                    encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
+                } catch (final UnsupportedEncodingException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            } else if (!isAscii(personal)) {
+                try {
+                    encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
                 } catch (final UnsupportedEncodingException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
-            return new StringBuilder(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
+            return new com.openexchange.java.StringAllocator(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
 
             /*-
              *
@@ -1085,7 +1091,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         } else if (isGroup() || isSimple()) {
             return address;
         } else {
-            return new StringBuilder().append('<').append(address).append('>').toString();
+            return new com.openexchange.java.StringAllocator().append('<').append(address).append('>').toString();
         }
     }
 
@@ -1099,13 +1105,13 @@ public final class QuotedInternetAddress extends InternetAddress {
         final String p = getPersonal();
         if (p != null && p.length() > 0) {
             if (quoted(p)) {
-                return new StringBuilder(32).append(p).append(" <").append(toIDN(address)).append('>').toString();
+                return new com.openexchange.java.StringAllocator(32).append(p).append(" <").append(toIDN(address)).append('>').toString();
             }
-            return new StringBuilder(32).append(quotePhrase(p, true)).append(" <").append(toIDN(address)).append('>').toString();
+            return new com.openexchange.java.StringAllocator(32).append(quotePhrase(p, true)).append(" <").append(toIDN(address)).append('>').toString();
         } else if (isGroup() || isSimple()) {
             return toIDN(address);
         } else {
-            return new StringBuilder(32).append('<').append(toIDN(address)).append('>').toString();
+            return new com.openexchange.java.StringAllocator(32).append('<').append(toIDN(address)).append('>').toString();
         }
     }
 
@@ -1170,7 +1176,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             final char c = phrase.charAt(i);
             if (c == '"' || c == '\\') {
                 // need to escape them and then quote the whole string
-                final StringBuilder sb = new StringBuilder(len + 3);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(len + 3);
                 sb.append('"');
                 for (int j = 0; j < len; j++) {
                     final char cc = phrase.charAt(j);
@@ -1189,14 +1195,14 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
 
         if (needQuoting) {
-            final StringBuilder sb = new StringBuilder(len + 2);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(len + 2);
             sb.append('"').append(phrase).append('"');
             return sb.toString();
         }
         return phrase;
     }
 
-    private static boolean needQuoting(final String phrase) {
+    private static boolean needQuoting(final String phrase, final boolean allowNonAscii) {
         final int len = phrase.length();
         boolean needQuoting = false;
 
@@ -1205,7 +1211,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             if (c == '"' || c == '\\') {
                 // need to escape them and then quote the whole string
                 needQuoting = true;
-            } else if ((c < 32 && c != '\r' && c != '\n' && c != '\t') || c >= 127 || RFC822.indexOf(c) >= 0) {
+            } else if ((c < 32 && c != '\r' && c != '\n' && c != '\t') || (!allowNonAscii && c >= 127) || RFC822.indexOf(c) >= 0) {
                 // These characters cause the string to be quoted
                 needQuoting = true;
             }
@@ -1260,7 +1266,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             // check for any escaped characters
             if (s.indexOf('\\') >= 0) {
                 length = length - 2;
-                final StringBuilder sb = new StringBuilder(length); // approx
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length); // approx
                 for (int i = 0; i < length; i++) {
                     char c = s.charAt(i);
                     if (c == '\\' && i < length - 1) {
@@ -1282,6 +1288,22 @@ public final class QuotedInternetAddress extends InternetAddress {
         boolean ret = true;
         for (int i = 0; ret && i < len; i++) {
             ret = Character.isWhitespace(str.charAt(i));
+        }
+        return ret;
+    }
+
+    /**
+     * Determines whether a String is purely ASCII, meaning its characters' code points are all less than 128.
+     */
+    private static boolean isAscii(final String str) {
+        if (null == str || 0 == str.length()) {
+            return true;
+        }
+        final int len = str.length();
+        boolean ret = true;
+        for (int i = 0; ret && i < len; i++) {
+            final char c = str.charAt(i);
+            ret = (c > 32 && c <= 127);
         }
         return ret;
     }

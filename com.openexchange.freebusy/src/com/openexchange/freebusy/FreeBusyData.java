@@ -72,7 +72,6 @@ import com.openexchange.exception.OXException;
 public class FreeBusyData {
     
     protected String participant;
-    protected String uid;
     protected Date from;
     protected Date until;
     protected List<OXException> warnings;    
@@ -94,17 +93,16 @@ public class FreeBusyData {
      */
     public FreeBusyData(String participant, Date from, Date until) {
         super();
-        this.intervals = new ArrayList<FreeBusyInterval>();
         this.participant = participant;
         this.from = from;
         this.until = until;
     }
 
     /**
-     * Removes all free/busy intervals.
+     * Resets all free/busy intervals.
      */
     public void clear() {
-        this.intervals.clear();
+        this.intervals = null;
     }
     
     /**
@@ -113,6 +111,9 @@ public class FreeBusyData {
      * @param interval The interval
      */
     public void add(FreeBusyInterval interval) {
+        if (null == this.intervals) {
+            this.intervals = new ArrayList<FreeBusyInterval>();
+        }
         this.intervals.add(interval);
     }
     
@@ -122,6 +123,9 @@ public class FreeBusyData {
      * @param intervals The intervals to add
      */
     public void addAll(Collection<? extends FreeBusyInterval> intervals) {
+        if (null == this.intervals) {
+            this.intervals = new ArrayList<FreeBusyInterval>();
+        }
         if (null != intervals) {
             this.intervals.addAll(intervals);
         }
@@ -151,7 +155,7 @@ public class FreeBusyData {
      * @return The intervals.
      */
     public List<FreeBusyInterval> getIntervals() {
-        return Collections.unmodifiableList(this.intervals);
+        return null != this.intervals ? Collections.unmodifiableList(this.intervals) : null;
     }
     
     /**
@@ -182,30 +186,12 @@ public class FreeBusyData {
     }
 
     /**
-     * Gets the UID used to identify the data.
-     *
-     * @return The UID.
-     */
-    public String getUid() {
-        return uid;
-    }
-
-    /**
-     * Sets the UID to identify the data.
-     *
-     * @param uid The UID to set
-     */
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
-    /**
      * Gets a list of warnings in case data could not be retrieved.
      * 
      * @return The warnings, if present, or <code>null</code>, otherwise 
      */
     public List<OXException> getWarnings() {
-        return null != warnings && 0 < warnings.size() ? warnings : null;
+        return null != warnings && 0 < warnings.size() ? Collections.unmodifiableList(warnings) : null;
     }
 
     /**
@@ -218,12 +204,12 @@ public class FreeBusyData {
     }
 
     /**
-     * Gets a value indicating whether there is at least one free busy interval or not.
+     * Gets a value indicating whether data is available, i.e. the intervals have been initialized. 
      * 
-     * @return <code>true</code> in case of existing interval, <code>false</code>, otherwise
+     * @return <code>true</code> in case of existing data, <code>false</code>, otherwise
      */
     public boolean hasData() {
-        return null != this.intervals && 0 < intervals.size();
+        return null != this.intervals;
     }
 
     /**
@@ -258,6 +244,9 @@ public class FreeBusyData {
      * </ul>  
      */
     public void normalize() {
+        if (false == hasData()) {
+            return; // nothing to do
+        }
         /*
          * normalize to interval boundaries
          */

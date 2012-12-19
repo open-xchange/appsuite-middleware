@@ -95,7 +95,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
         }
     }
 
-    protected static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+    protected static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb) {
         if (null == trace) {
             sb.append("<missing stack trace>\n");
             return;
@@ -151,9 +151,11 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                             if (stores.isEmpty()) {
                                 return;
                             }
-                            final StringBuilder sb = new StringBuilder(512);
+                            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
                             for (final Entry<Thread, CountedIMAPStore> entry : stores.entrySet()) {
-                                sb.setLength(0);
+                                if (sb.length() > 0) {
+                                    sb.reinitTo(0);
+                                }
                                 final Thread t = entry.getKey();
                                 sb.append(t.getName()).append(" occupies IMAPStore \"");
                                 sb.append(server).append("\" instance for login ").append(login).append('\n');
@@ -192,7 +194,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
             // Acquire a new IMAPStore instance
             if (!semaphore.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS)) {
                 // Timed out...
-                final StringBuilder sb = new StringBuilder(512);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
                 sb.append(semaphore.getQueueLength()).append(" threads waiting. ");
                 sb.append(semaphore.availablePermits()).append(" permits available for \"").append(server);
                 sb.append("\" for login ").append(login);
@@ -289,7 +291,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                     mutex.wait(timeoutMillis);
                     if (count >= maxCount) {
                         // Timed out...
-                        final StringBuilder sb = new StringBuilder(512);
+                        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
                         sb.append(maxCount - count).append(" permits available for \"").append(server);
                         sb.append("\" for login ").append(login);
                         for (final Entry<Thread, CountedIMAPStore> entry : stores.entrySet()) {

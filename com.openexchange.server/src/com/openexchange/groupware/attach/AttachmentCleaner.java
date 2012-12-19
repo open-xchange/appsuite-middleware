@@ -93,7 +93,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
 
     @Override
     public final void appointmentCreated(final Appointment appointmentObj, final Session sessionObj) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -105,19 +105,19 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
 
     @Override
     public final void taskCreated(final Task taskObj, final Session sessionObj) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public final void taskModified(final Task taskObj, final Session sessionObj) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public final void contactCreated(final Contact contactObj, final Session sessionObj) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -127,13 +127,13 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
     }
 
     private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final Session session) {
-        SearchIterator iter = null;
+        SearchIterator<AttachmentMetadata> iter = null;
         try {
             final ServerSession sessionObj = ServerSessionAdapter.valueOf(session);
             ATTACHMENT_BASE.startTransaction();
-            final TimedResult rs =
+            final TimedResult<AttachmentMetadata> rs =
                 ATTACHMENT_BASE.getAttachments(
-                    parentFolderID,
+                    session, parentFolderID,
                     objectID,
                     type,
                     new AttachmentField[] { AttachmentField.ID_LITERAL },
@@ -148,7 +148,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
                 return; // Shortcut
             }
             while (iter.hasNext()) {
-                ids.add(((AttachmentMetadata) iter.next()).getId());
+                ids.add(iter.next().getId());
             }
 
             ATTACHMENT_BASE.detachFromObject(

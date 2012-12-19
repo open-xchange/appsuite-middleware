@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.processing;
 
+import static com.openexchange.mail.mime.filler.MimeMessageFiller.setReplyHeaders;
 import static java.util.regex.Matcher.quoteReplacement;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -233,7 +234,7 @@ public final class MimeForward {
                             0,
                             subjectPrefix,
                             0,
-                            subjectPrefix.length()) ? origSubject : new StringBuilder(subjectPrefix.length() + origSubject.length()).append(
+                            subjectPrefix.length()) ? origSubject : new com.openexchange.java.StringAllocator(subjectPrefix.length() + origSubject.length()).append(
                             subjectPrefix).append(origSubject).toString());
                     forwardMsg.setSubject(subject, MailProperties.getInstance().getDefaultMimeCharset());
                 }
@@ -359,6 +360,7 @@ public final class MimeForward {
                 forwardMsg.saveChanges();
                 // Remove generated Message-Id header
                 forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
+                setReplyHeaders(originalMsg, forwardMsg);
             }
             final CompositeMailMessage compositeMail = new CompositeMailMessage(MimeMessageConverter.convertMessage(forwardMsg));
             /*
@@ -402,6 +404,7 @@ public final class MimeForward {
             forwardMsg.saveChanges();
             // Remove generated Message-Id header
             forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
+            setReplyHeaders(originalMsg, forwardMsg);
             forwardMail = MimeMessageConverter.convertMessage(forwardMsg);
         } else {
             /*
@@ -426,6 +429,7 @@ public final class MimeForward {
                 forwardMsg.saveChanges();
                 // Remove generated Message-Id header
                 forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
+                setReplyHeaders(originalMsg, forwardMsg);
             }
             final CompositeMailMessage compositeMail = new CompositeMailMessage(MimeMessageConverter.convertMessage(forwardMsg));
             /*
@@ -622,7 +626,7 @@ public final class MimeForward {
             final InternetAddress[] cc = msg.getCc();
             forwardPrefix =
                 PATTERN_CCLINE.matcher(forwardPrefix).replaceFirst(
-                    cc == null || cc.length == 0 ? "" : quoteReplacement(new StringBuilder(64).append("\nCc: ").append(
+                    cc == null || cc.length == 0 ? "" : quoteReplacement(new com.openexchange.java.StringAllocator(64).append("\nCc: ").append(
                         MimeProcessingUtility.addrs2String(cc)).toString()));
         }
         {
@@ -699,7 +703,7 @@ public final class MimeForward {
                 replaceBuffer.append("</div>");
                 return replaceBuffer.toString();
             }
-            return new StringBuilder(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(firstSeenText).toString();
+            return new com.openexchange.java.StringAllocator(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(firstSeenText).toString();
         }
         /*
          * Surround with quotes
@@ -711,7 +715,7 @@ public final class MimeForward {
             if (m.find()) {
                 mr.appendLiteralReplacement(
                     replaceBuffer,
-                    new StringBuilder(forwardPrefix.length() + 16).append(m.group()).append(forwardPrefix).append(linebreak).append(
+                    new com.openexchange.java.StringAllocator(forwardPrefix.length() + 16).append(m.group()).append(forwardPrefix).append(linebreak).append(
                         linebreak).toString());
             } else {
                 replaceBuffer.append(forwardPrefix).append(linebreak).append(linebreak);

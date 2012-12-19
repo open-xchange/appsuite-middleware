@@ -59,7 +59,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -291,10 +291,10 @@ public abstract class MailConfig {
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
                 throw MailConfigException.create(
-                    new StringBuilder(64).append("Property \"").append("com.openexchange.mail.mailServer").append(
+                    new com.openexchange.java.StringAllocator(64).append("Property \"").append("com.openexchange.mail.mailServer").append(
                         "\" not set in mail properties").toString());
             }
-            throw MailConfigException.create(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(userId).append(
+            throw MailConfigException.create(new com.openexchange.java.StringAllocator(64).append("Cannot determine mail server URL for user ").append(userId).append(
                 " in context ").append(contextId).toString());
         }
         {
@@ -576,7 +576,7 @@ public abstract class MailConfig {
             if (PasswordSource.GLOBAL.equals(cur)) {
                 final String masterPw = MailProperties.getInstance().getMasterPassword();
                 if (masterPw == null) {
-                    throw MailConfigException.create(new StringBuilder().append("Property \"masterPassword\" not set").toString());
+                    throw MailConfigException.create(new com.openexchange.java.StringAllocator().append("Property \"masterPassword\" not set").toString());
                 }
                 mailConfig.password = masterPw;
             } else {
@@ -778,7 +778,7 @@ public abstract class MailConfig {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
+        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator();
         builder.append("{ MailConfig [accountId=").append(accountId).append(", ");
         if (login != null) {
             builder.append("login=").append(login).append(", ");

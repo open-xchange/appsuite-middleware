@@ -52,7 +52,6 @@ package com.openexchange.importexport.importers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -60,7 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionConstants;
@@ -87,7 +86,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * This importer translates VCards into contacts for the OX.
  *
  * @see OXContainerConverter - if you have a problem with the content of the parsed ICAL file
- * @see ContactSQLInterface - if you cannot enter the parsed content as contact into the database
+ * @see ContactService - if you cannot enter the parsed content as contact into the database
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
@@ -139,7 +138,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                         .getUserConfigurationSafe(session.getUserId(), session.getContext()));
             } catch (final OXException e) {
                 throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
-            } catch (final SQLException e) {
+            } catch (final RuntimeException e) {
                 throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
 

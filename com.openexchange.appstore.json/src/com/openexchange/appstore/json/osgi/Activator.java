@@ -17,7 +17,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 

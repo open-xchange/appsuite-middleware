@@ -60,12 +60,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthToken;
 
@@ -173,14 +173,14 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
             /*
              * Initialize a reader on URL connection...
              */
-            reader = new InputStreamReader(connection.getInputStream(), "UTF-8");
+            reader = new InputStreamReader(connection.getInputStream(), com.openexchange.java.Charsets.UTF_8);
             /*
              * ... and read response using direct buffering
              */
             builder.setLength(0);
             final char[] buf = new char[BUFSIZE];
             int read;
-            while ((read = reader.read(buf, 0, BUFSIZE)) >= 0) {
+            while ((read = reader.read(buf, 0, BUFSIZE)) > 0) {
                 builder.append(buf, 0, read);
             }
             return parseResponse(builder.toString());

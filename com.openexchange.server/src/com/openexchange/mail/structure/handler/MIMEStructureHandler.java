@@ -73,11 +73,11 @@ import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
+import javax.mail.internet.idn.IDNA;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -381,7 +381,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         /*
          * Dummy headers
          */
-        final StringBuilder sb = new StringBuilder(64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
         final Map<String, String> headers = new HashMap<String, String>(4);
         final String encodeFN;
         try {
@@ -390,8 +390,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
         headers.put(CONTENT_TYPE, sb.append(contentType).append("; name=").append(encodeFN).toString());
-        sb.setLength(0);
-        headers.put(CONTENT_DISPOSITION, new StringBuilder(Part.ATTACHMENT).append("; filename=").append(encodeFN).toString());
+        headers.put(CONTENT_DISPOSITION, new com.openexchange.java.StringAllocator(Part.ATTACHMENT).append("; filename=").append(encodeFN).toString());
         headers.put(CONTENT_TRANSFER_ENCODING, "base64");
         /*
          * Add body part
@@ -494,7 +493,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                     throw MimeMailException.handleMessagingException(e);
                 }
             } else {
-                final StringBuilder sb = new StringBuilder(128);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
                 sb.append("Ignoring nested message.").append(
                     "Cannot handle part's content which should be a RFC822 message according to its content type: ");
                 sb.append((null == content ? "null" : content.getClass().getSimpleName()));
@@ -719,7 +718,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                         final byte[] buf = new byte[BUFLEN];
                         final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUFLEN << 2);
                         int read;
-                        while ((read = inputStream.read(buf, 0, BUFLEN)) >= 0) {
+                        while ((read = inputStream.read(buf, 0, BUFLEN)) > 0) {
                             out.write(buf, 0, read);
                         }
                         bytes = out.toByteArray();
@@ -766,6 +765,8 @@ public final class MIMEStructureHandler implements StructureHandler {
             HeaderName.valueOf("Resent-Sender"),
             HeaderName.valueOf("Disposition-Notification-To")));
 
+    private static final Pattern P_DOUBLE_BACKSLASH = Pattern.compile(Pattern.quote("\\\\\\\""));
+
     private JSONObject generateHeadersObject(final Iterator<Entry<String, String>> iter, final JSONObject parent) throws OXException {
         try {
             final JSONObject hdrObject = new JSONObject();
@@ -788,7 +789,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                             final JSONObject addressJsonObject = new JSONObject();
                             final String personal = internetAddress.getPersonal();
                             if (null != personal) {
-                                addressJsonObject.put("personal", personal);
+                                addressJsonObject.put("personal", P_DOUBLE_BACKSLASH.matcher(personal).replaceAll("\\\""));
                             }
                             addressJsonObject.put("address", address);
                             ja.put(addressJsonObject);
@@ -920,7 +921,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         } catch (final AddressException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(
-                    new StringBuilder(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
+                    new com.openexchange.java.StringAllocator(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
                         "\". Using plain addresses' string representation instead.").toString(),
                     e);
             }
@@ -940,7 +941,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
+                LOG.warn(new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
                     "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
             }
             return MessageUtility.readMailPart(mailPart, fallback);
@@ -952,9 +953,9 @@ public final class MIMEStructureHandler implements StructureHandler {
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
-                StringBuilder sb = null;
+                com.openexchange.java.StringAllocator sb = null;
                 if (null != cs) {
-                    sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
+                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                 }
                 if (contentType.startsWith(PRIMARY_TEXT)) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());
@@ -989,7 +990,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
+                LOG.warn(new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
                     "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
             }
             return MessageUtility.readStream(isp.getInputStream(), fallback);

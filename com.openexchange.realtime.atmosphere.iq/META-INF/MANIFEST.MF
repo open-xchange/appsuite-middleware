@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Realtime Atmosphere IQ Bundle
+Bundle-SymbolicName: com.openexchange.realtime.atmosphere.iq
+Bundle-Version: 6.22.0.0
+Bundle-Activator: com.openexchange.realtime.atmosphere.iq.osgi.IQActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.realtime,
+ com.openexchange.realtime.atmosphere.impl.stanza.builder,
+ com.openexchange.realtime.atmosphere.stanza,
+ com.openexchange.realtime.packet,
+ com.openexchange.tools.session,
+ org.apache.commons.logging,
+ org.json,
+ org.osgi.framework

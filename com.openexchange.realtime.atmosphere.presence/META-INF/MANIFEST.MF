@@ -1,4 +1,4 @@
-Manifest-Version: 1.0
+tManifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Realtime Atmosphere Presence Bundle
 Bundle-SymbolicName: com.openexchange.realtime.atmosphere.presence
@@ -16,7 +16,14 @@ Import-Package: com.openexchange.ajax.writer,
  com.openexchange.osgi,
  com.openexchange.realtime,
  com.openexchange.realtime.atmosphere,
+ com.openexchange.realtime.atmosphere.impl,
+ com.openexchange.realtime.atmosphere.impl.stanza.builder,
+ com.openexchange.realtime.atmosphere.payload.converter,
+ com.openexchange.realtime.atmosphere.payload.converter.primitive,
+ com.openexchange.realtime.atmosphere.payload.transformer,
+ com.openexchange.realtime.atmosphere.stanza,
  com.openexchange.realtime.packet,
+ com.openexchange.realtime.payload,
  com.openexchange.realtime.presence,
  com.openexchange.realtime.presence.subscribe,
  com.openexchange.realtime.util,

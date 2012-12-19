@@ -60,7 +60,7 @@ public class UI7Servlet extends FileServlet {
 
     private static final long serialVersionUID = -87595969177959884L;
 
-    private File zoneinfo;
+    private final File zoneinfo;
 
     private static String ZONEINFO = "apps/io.ox/core/date/tz/zoneinfo/";
 

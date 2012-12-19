@@ -89,7 +89,7 @@ public class MailUUID {
         this.accountId = accountId;
         this.fullName = fullName;
         this.mailId = mailId;
-        StringBuilder tmp = new StringBuilder(64);
+        final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(64);
         tmp.append("mail/").append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
         tmp.append(MailPath.getMailPath(accountId, fullName, mailId));
         mailUUID = tmp.toString();
@@ -138,18 +138,23 @@ public class MailUUID {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         MailUUID other = (MailUUID) obj;
         if (mailUUID == null) {
-            if (other.mailUUID != null)
+            if (other.mailUUID != null) {
                 return false;
-        } else if (!mailUUID.equals(other.mailUUID))
+            }
+        } else if (!mailUUID.equals(other.mailUUID)) {
             return false;
+        }
         return true;
     }
 

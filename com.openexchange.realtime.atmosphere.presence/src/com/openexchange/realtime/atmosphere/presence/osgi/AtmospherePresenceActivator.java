@@ -50,64 +50,112 @@
 package com.openexchange.realtime.atmosphere.presence.osgi;
 
 import org.apache.commons.logging.Log;
+import org.osgi.framework.ServiceReference;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
-import com.openexchange.realtime.atmosphere.OXRTHandler;
-import com.openexchange.realtime.atmosphere.presence.JSONToPresenceDataConverter;
-import com.openexchange.realtime.atmosphere.presence.OXRTPresenceHandler;
-import com.openexchange.realtime.atmosphere.presence.PresenceDataToJSONConverter;
+import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.atmosphere.payload.converter.primitive.ByteToJSONConverter;
+import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToByteConverter;
+import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToStringConverter;
+import com.openexchange.realtime.atmosphere.payload.converter.primitive.StringToJSONConverter;
+import com.openexchange.realtime.atmosphere.payload.transformer.AtmospherePayloadElementTransformer;
+import com.openexchange.realtime.atmosphere.presence.converter.JSONToPresenceStateConverter;
+import com.openexchange.realtime.atmosphere.presence.converter.PresenceStateToJSONConverter;
+import com.openexchange.realtime.atmosphere.presence.handler.OXRTPresenceHandler;
+import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
 import com.openexchange.realtime.packet.Presence;
-import com.openexchange.realtime.presence.PresenceService;
+import com.openexchange.realtime.packet.PresenceState;
+import com.openexchange.realtime.presence.PresenceStatusService;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 
 /**
- * {@link AtmospherePresenceActivator} - Register the presence specific payload converters as SimplePayloadConverters and add a new
- * OXRTHandler service that can handle incoming and outgoing Stanzas.
- * <ol>
- * <li>The <code>SimpleConverterActivator</code> listens for registrations of new <code>SimplePayloadConverters</code>.</li>
- * <li>When we register our presence specific <code>SimplePayloadConverters</code> the <code>SimpleconverterActivator</code> wraps them in a
- * <code>PayloadConverterAdapter</code> and registers them as <code>ResultConverter</code> services</li>
- * <li>The <code>DispatcherActivator</code> is listening for new <code>ResultConverter</code> services and adds them to the
- * <code>DefaultConverter</code></li>
- * <li>The presence <code>Payload</code> can then convert itself via the conversion service offered by the <code>DefaultConverter</code></li>
- * </ol>
+ * {@link AtmospherePresenceActivator} - Register the presence specific PayloadTransformers and Mappings from ElementPath to Class<?> and
+ * add a new OXRTHandler that can handle incoming and outgoing Presence Stanzas.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AtmospherePresenceActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AtmospherePresenceActivator.class);
+    private final OXRTPresenceHandler presenceHandler;
+
+    /**
+     * Initializes a new {@link AtmospherePresenceActivator}.
+     */
+    public AtmospherePresenceActivator() {
+        presenceHandler = new OXRTPresenceHandler();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-         return new Class[] { PresenceSubscriptionService.class, PresenceService.class };
+        return new Class[] { PresenceSubscriptionService.class, PresenceStatusService.class, MessageDispatcher.class };
     }
 
     @Override
     protected void handleAvailability(Class<?> clazz) {
-        Object service = getService(clazz);
-        AtmospherePresenceServiceRegistry.getInstance().addService(clazz, service);
+        //make sure the PresenceChangeListeners always have the proper service reference
+        if(PresenceStatusService.class.equals(clazz)) {
+            
+        }
     }
 
     @Override
     protected void handleUnavailability(Class<?> clazz) {
-        AtmospherePresenceServiceRegistry.getInstance().removeService(clazz);
+      //make sure the PresenceChangeListeners always have the proper service reference
+        if(PresenceStatusService.class.equals(clazz)) {
+            
+        }
     }
 
     @Override
     protected void startBundle() throws Exception {
-        AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
-        serviceRegistry.initialize(this, getNeededServices());
+        AtmospherePresenceServiceRegistry.SERVICES.set(this);
+        
+        track(PresenceStatusService.class, new SimpleRegistryListener<PresenceStatusService>() {
+
+            @Override
+            public void added(final ServiceReference<PresenceStatusService> ref, final PresenceStatusService presenceStatusService) {
+//                extensions.addPayloadElementTransFormer(transformer);
+//                register PresenceChangeListener with new presenceStatusService
+            }
+
+            @Override
+            public void removed(final ServiceReference<PresenceStatusService> ref, final PresenceStatusService presenceStatusService) {
+//                extensions.removePayloadElementTransformer(transformer);
+//                remove PresenceChangeListener from old presenceStatusService
+            }
+        });
 
         /*
-         * After adding the new SimplePayloadConverters that are able to convert from and to PresenceStatus we can register a new
-         * OXRTConversionHandler for the PresenceStatus. All this ConversionHandler does is to tell the payload to convert itself into the
-         * desired format.
+         * Register the package specific payload converters. The SimpleConverterActivator listens for registrations of new
+         * SimplePayloadConverters. When new SimplePayloadConverters are added they are wrapped in a PayloadConverterAdapter and registered
+         * as ResultConverter service so they can be added to the DefaultConverter (as the DispatcherActivator is listening for new
+         * ResultConverter services) which then can be used by the {@link PayloadElementTransformer} to convert them via the conversion
+         * service offered by the {@link DefaultConverter}
          */
-        registerService(SimplePayloadConverter.class, new PresenceDataToJSONConverter());
-        registerService(SimplePayloadConverter.class, new JSONToPresenceDataConverter());
-        registerService(OXRTHandler.class, new OXRTPresenceHandler());
+        registerService(SimplePayloadConverter.class, new ByteToJSONConverter());
+        registerService(SimplePayloadConverter.class, new JSONToByteConverter());
+        registerService(SimplePayloadConverter.class, new StringToJSONConverter());
+        registerService(SimplePayloadConverter.class, new JSONToStringConverter());
+        registerService(SimplePayloadConverter.class, new JSONToPresenceStateConverter());
+        registerService(SimplePayloadConverter.class, new PresenceStateToJSONConverter());
+
+        // Add Transformers using Converters
+        registerService(
+            AtmospherePayloadElementTransformer.class,
+            new AtmospherePayloadElementTransformer(PresenceState.class.getSimpleName(), Presence.STATUS_PATH));
+        registerService(AtmospherePayloadElementTransformer.class, new AtmospherePayloadElementTransformer(
+            String.class.getSimpleName(),
+            Presence.MESSAGE_PATH));
+        registerService(AtmospherePayloadElementTransformer.class, new AtmospherePayloadElementTransformer(
+            Byte.class.getSimpleName(),
+            Presence.PRIORITY_PATH));
+        // registerService(AtmospherePayloadElementTransformer.class,
+        // new AtmospherePayloadElementTransformer(Byte.class.getSimpleName(), Presence.ERROR_PATH));
+
+        // Add Presence specific handler
+        registerService(StanzaHandler.class, new OXRTPresenceHandler());
     }
 
     @Override

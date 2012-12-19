@@ -1,14 +1,179 @@
+* 2012-12-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24230: Using proper class
+
+* 2012-12-17 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23892: Added package open-xchange-appsuite-backend which has a dependency on package open-xchange-appsuite-manifest.
+ - Fix for bug 24206: Added App Suite language properties files to open-xchange-l10n packages.
+
+* 2012-12-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23791: Proper URL-decoding of RSS feed's URL
+ - Fix for bug 23803: Logging appropriate to error's category
+
+* 2012-12-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24208: Ignore JSlob core properties on config save-back operation
+ - Fix for bug 24051: Retry loading with a read-write connection
+
+* 2012-12-15 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24215: Move an (no longer private) appointment to a public folder.
+
+* 2012-12-15 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24213: Reworked delete- and move-logic  
+
+* 2012-12-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24052: Sanitize script tags
+ - Fix for bug 23857: Keep background color when replacing <body> tag with <div> tag
+
+* 2012-12-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23750: Extended the fragments of the formLogin action redirect URL with values needed by the App Suite frontend.
+ - Fix for bug 23957: Checking if old configuration directory exists before trying to find files there.
+
+* 2012-12-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24193: Mix-up of ids.
+
+* 2012-12-13 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24168: Added special handling for user contact updates  
+ - Fix for bug 24196: Fixed delete multiple 
+
+* 2012-12-13 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23733: Possible fix for slow sql queries..
+
 * 2012-12-11 - thorben.betten@open-xchange.com
 
+ - Fix for bug 24148: Added needed import
+ - Fix for bug 24150: Null guard
+ - Fix for bug 24147: Added null guard
  - Fix for bug 23881: Backport to previous JCS library
+
+* 2012-12-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24135: Read with respect to input buffer's end barrier
+
+* 2012-12-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24043: Perform additional folder checks within database transaction 
+
+* 2012-12-10 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23313: Adding open-xchange-halo to the released packages list.
+
+* 2012-12-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24078: Mandate a display name when creating an OAuth account
+
+* 2012-12-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24114: Added null guard & added logging information to track missing session
+ - Fix for bug 24106: Changed directory lookup to prefer first-level sub-directories prior to performing a recursive look-up
+
+* 2012-12-07 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24102: Fixed NPE.
+
+* 2012-12-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24068: Throw proper error if upload quota exceeded
+ - Fix for bug 24095: Fixed logincounter CLI
+ - Fix for bug 24088: Deal with possibly duplicate folders
 
 * 2012-12-04 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24035: Corrected wrong contact references of distribution list members
 
+* 2012-12-03 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 23962: Adjusted server response handling
+
+* 2012-12-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24045: Fixed parsing JSON
+ - Fix for bug 24023: Increased XX:MaxPermSize value from 128MB to 256MB
+
+* 2012-11-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23736: Added conflict to old open-xchange-core package to prevent file conflict during upgrade
+
+* 2012-11-30 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 23963: Adjusted error messages parsing
+
+* 2012-11-29 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24005: Fixed typos.
+
 * 2012-11-28 - karsten.will@open-xchange.com
 
  - Fix for bug 23994: Always returning correct result code
+
+* 2012-11-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23978: Added null guard
+ - Fix for bug 23971: Generate default file name if missing
+
+* 2012-11-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23955: Added null guard when checking permission bit
+
+* 2012-11-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23898: Quoting replacement string
+ - Fix for bug 23698: Added some imports to preview/Tika bundle
+
+* 2012-11-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23781: Fall-back for failed batch operation; retry with one-by-one operation
+
+* 2012-11-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23906: Fixed possible NPE
+ - Fix for bug 23894: Deal with possible delegating mail provider
+ - Fix for bug 23696: Dealing with content outside of <html> tag when quotinq
+ - Fix for bug 23939: Fixed attachment token for nested messages
+ - Fix for bug 23943: Dealing with possibly wrapping mail folder storage implementation
+ - Fix for bug 23838: Manually delete subscriptions on folder deletion
+
+* 2012-11-22 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23891: Return non-existing images as-is and don't apply implicit rotation and compression transformations on 
+                      "download"-type delivery  
+
+* 2012-11-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23887: Fixed possible StackOverflowError
+
+* 2012-11-21 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23743: Removed aaditonal delete notification mail from old Notification Framework.
+
+* 2012-11-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23585: Check for possible thumbnail version by URL string
+
+* 2012-11-21 - jan.bauerdick@open-xchange.com
+
+ - New SharedJSlobService for adding shared jslobs
+ - Extended JSlobService to handle shared jslobs
+
+* 2012-11-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23812: Added necessary import to MANIFEST.MF
+ - Fix for bug 23828: Added entry to suppress logging of SOAP requests/responses
+ - Fix for bug 23839: Made max. mailbox name length configurable
+ - Fix for bug 23562: Try to extract failed address from thrown SMPT error
+
+* 2012-11-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23726: Added null guard to deal with possible non-existing image part
 
 * 2012-11-14 - thorben.betten@open-xchange.com
 
@@ -98,6 +263,10 @@
  - Fix for bug 23533: Changed that error code's category thus a more meaningful message is shown
  - Fix for bug 23666: Use default driver if missing
 
+* 2012-11-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23181: Allow update of existing foreign appointment under special circumstances
+
 * 2012-11-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 23563: Improved exception messages for too long used database connections.
@@ -108,6 +277,12 @@
  - Fix for bug 23574: Changed behavior of IMAPDefaultFolderChecker class, no retry attempts anymore
  - Fix for bug 23645: Dropped unnecessary password encryption/decryption from in-memory Hazelcast storage
  - Fix for bug 23625: fixed prefix
+
+* 2012-11-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23167: Always include all recurring appointment exceptions 
+ - Fix for bug 23610: Preserve iCal transparency on participant confirmation  
+ - Fix for bug 23612: Assume no changes to 'absent' and 'temporary' shown-as values for opaque iCal transparency  
 
 * 2012-11-06 - marcus.klein@open-xchange.com
 
@@ -156,6 +331,10 @@
 
  - Fix for bug 23196: Properly opening associated service trackers on bundle start-up
 
+* 2012-10-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23525: Skip wildcard-only comparisons in search object
+
 * 2012-10-30 - marcus.klein@open-xchange.com
 
  - Fix for bug 21511: Added possibility to delete users birthday value.
@@ -178,6 +357,10 @@
 * 2012-10-29 - marcus.klein@open-xchange.com
 
  - Fix for bug 23510: Re-added packages mdns and static implementing open-xchange-cluster-discovery.
+
+* 2012-10-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 19615: Handle IndexOutOfBoundsException on access to an IMAP message
 
 * 2012-10-25 - marcus.klein@open-xchange.com
 

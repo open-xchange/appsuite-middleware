@@ -67,20 +67,24 @@ import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.ParticipantTools;
 import com.openexchange.caldav.Patches;
 import com.openexchange.caldav.Tools;
+import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
  * {@link AppointmentResource}
@@ -100,7 +104,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         Appointment.PRIVATE_FLAG, // CLASS
         Appointment.TITLE, // SUMMARY
         Appointment.START_DATE, // DTSTART
-        Appointment.PARTICIPANTS, // ATTENDEE
+        Appointment.PARTICIPANTS, Appointment.USERS, // ATTENDEE
         Appointment.FULL_TIME, // DTSTART/DTEND
         Appointment.ALARM, // VALARM
         Appointment.RECURRENCE_TYPE, // RRULE;FREQ
@@ -130,6 +134,15 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         this.parent = parent;
     }
 
+    @Override
+    public void create() throws WebdavProtocolException {
+        try {
+            super.create();           
+        } catch (WebdavProtocolException e) {
+            handleOnCreate(e);
+        }
+    }
+    
     private AppointmentSQLInterface getAppointmentInterface() {
         if (null == this.appointmentInterface) {
             this.appointmentInterface = factory.getAppointmentInterface();
@@ -149,12 +162,16 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
 
     @Override
     protected void saveObject() throws OXException {
+        saveObject(true);        
+    }
+    
+    protected void saveObject(boolean checkPermissions) throws OXException {
         try {
             /*
              * get original data
              */
-            final Appointment originalAppointment = parent.load(this.object, false);
-            final List<Appointment> originalExceptions = parent.loadChangeExceptions(this.object.getObjectID());
+            Appointment originalAppointment = parent.load(this.object, false);
+            CalendarDataObject[] originalExceptions = parent.loadChangeExceptions(this.object.getObjectID());
             Date clientLastModified = this.object.getLastModified();
             if (clientLastModified.before(originalAppointment.getLastModified())) {
                 throw super.protocolException(HttpServletResponse.SC_CONFLICT);
@@ -166,7 +183,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 Patches.Incoming.patchResources(originalAppointment, appointmentToSave);
                 Patches.Incoming.patchParticipantListRemovingAliases(factory, appointmentToSave);
                 Patches.Incoming.patchParticipantListRemovingDoubleUsers(appointmentToSave);
-                if (PublicType.getInstance().equals(parent.getFolder().getType())) {
+                if (PublicType.getInstance().equals(parent.getFolder().getType()) || 
+                    PrivateType.getInstance().equals(parent.getFolder().getType())) {
                     Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), appointmentToSave);
                 }
             }
@@ -174,14 +192,14 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             if (false == containsChanges(originalAppointment, appointmentToSave)) {
                 LOG.debug("No changes detected in " + appointmentToSave + ", skipping update.");
             } else {
-                getAppointmentInterface().updateAppointmentObject(appointmentToSave, parentFolderID, clientLastModified);
+                getAppointmentInterface().updateAppointmentObject(appointmentToSave, parentFolderID, clientLastModified, checkPermissions);
                 clientLastModified = appointmentToSave.getLastModified();
             }
             /*
              * update change exceptions
              */
-            for (final CalendarDataObject exceptionToSave : exceptionsToSave) {
-                final Appointment originalException = getMatchingException(originalExceptions, exceptionToSave.getRecurrenceDatePosition());
+            for (CalendarDataObject exceptionToSave : exceptionsToSave) {
+                Appointment originalException = getMatchingException(originalExceptions, exceptionToSave.getRecurrenceDatePosition());
                 if (null != originalException) {
                     /*
                      * prepare exception update
@@ -191,7 +209,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     if (false == Patches.Incoming.tryRestoreParticipants(originalException, exceptionToSave)) {
                         Patches.Incoming.patchParticipantListRemovingAliases(factory, exceptionToSave);
                         Patches.Incoming.patchParticipantListRemovingDoubleUsers(exceptionToSave);
-                        if (PublicType.getInstance().equals(parent.getFolder().getType())) {
+                        if (PublicType.getInstance().equals(parent.getFolder().getType()) || 
+                            PrivateType.getInstance().equals(parent.getFolder().getType())) {
                             Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), exceptionToSave);
                         }
                     }
@@ -203,7 +222,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     if (false == Patches.Incoming.tryRestoreParticipants(originalAppointment, exceptionToSave)) {
                         Patches.Incoming.patchParticipantListRemovingAliases(factory, exceptionToSave);
                         Patches.Incoming.patchParticipantListRemovingDoubleUsers(exceptionToSave);
-                        if (PublicType.getInstance().equals(parent.getFolder().getType())) {
+                        if (PublicType.getInstance().equals(parent.getFolder().getType()) || 
+                            PrivateType.getInstance().equals(parent.getFolder().getType())) {
                             Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), exceptionToSave);
                         }
                     }
@@ -211,14 +231,20 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 /*
                  * update exception
                  */
-                getAppointmentInterface().updateAppointmentObject(exceptionToSave, parentFolderID, clientLastModified);
-                clientLastModified = exceptionToSave.getLastModified();
+                if (null != originalException && false == containsChanges(originalException, exceptionToSave)) {
+                    LOG.debug("No changes detected in " + exceptionToSave + ", skipping update.");
+                } else {
+                    getAppointmentInterface().updateAppointmentObject(exceptionToSave, parentFolderID, clientLastModified, checkPermissions);
+                    clientLastModified = exceptionToSave.getLastModified();
+                }                
+//                getAppointmentInterface().updateAppointmentObject(exceptionToSave, parentFolderID, clientLastModified, checkPermissions);
+//                clientLastModified = exceptionToSave.getLastModified();
             }
             /*
              * update delete exceptions
              */
-            for (final CalendarDataObject deleteExceptionToSave : deleteExceptionsToSave) {
-                final Appointment originalException = getMatchingException(originalExceptions, deleteExceptionToSave.getRecurrenceDatePosition());
+            for (CalendarDataObject deleteExceptionToSave : deleteExceptionsToSave) {
+                Appointment originalException = getMatchingException(originalExceptions, deleteExceptionToSave.getRecurrenceDatePosition());
                 if (null != originalException) {
                     /*
                      * prepare delete of existing exception
@@ -230,12 +256,12 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                      */
                     deleteExceptionToSave.setObjectID(object.getObjectID());
                 }
-                getAppointmentInterface().deleteAppointmentObject(deleteExceptionToSave, parentFolderID, clientLastModified);
+                getAppointmentInterface().deleteAppointmentObject(deleteExceptionToSave, parentFolderID, clientLastModified, checkPermissions);
                 if (null != deleteExceptionToSave.getLastModified()) {
                     clientLastModified = deleteExceptionToSave.getLastModified();    
                 }                
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw protocolException(e);
         }
     }
@@ -297,18 +323,18 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             icalEmitter.writeAppointment(session, parent.load(object, true), 
                 factory.getContext(), conversionErrors, conversionWarnings);
             if (0 < object.getRecurrenceID()) {
-                final List<Appointment> changeExceptions = parent.getChangeExceptions(object.getObjectID());
-                if (null != changeExceptions && 0 < changeExceptions.size()) {
+                CalendarDataObject[] changeExceptions = parent.getChangeExceptions(object.getObjectID());
+                if (null != changeExceptions && 0 < changeExceptions.length) {
                     /*
                      * write exceptions
                      */
-                    for (final Appointment changeException : changeExceptions) {
+                    for (Appointment changeException : changeExceptions) {
                         icalEmitter.writeAppointment(session, parent.load(changeException, true), 
                             factory.getContext(), conversionErrors, conversionWarnings);
                     }
                 }
             }
-            final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             icalEmitter.writeSession(session, bytes);
             /*
              * apply patches
@@ -416,6 +442,14 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     }
     
     private static boolean containsChanges(Appointment oldAppointment, CalendarDataObject cdo) {
+        boolean useDiff = true;
+        if (useDiff) {
+            AppointmentDiff diff = AppointmentDiff.compare(oldAppointment, cdo);
+            return diff.anyFieldChangedOf(CALDAV_FIELDS) || 
+                CalendarObject.NO_RECURRENCE != oldAppointment.getRecurrenceType() && 
+                CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType() &&
+                diff.anyFieldChangedOf(RECURRENCE_FIELDS);            
+        }        
         try {
             /*
              * check appointment fields
@@ -440,17 +474,17 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         return false;
     }
 
-    private void checkForExplicitRemoves(final Appointment oldAppointment, final CalendarDataObject cdo) {
+    private void checkForExplicitRemoves(Appointment oldAppointment, CalendarDataObject updatedAppointment) {
         /*
          * reset previously set appointment fields
          */
-        for (final int field : CALDAV_FIELDS) {
-            if (oldAppointment.contains(field) && false == cdo.contains(field)) {
+        for (int field : CALDAV_FIELDS) {
+            if (oldAppointment.contains(field) && false == updatedAppointment.contains(field)) {
                 if (CalendarObject.ALARM == field) {
                     // -1 resets alarm
-                    cdo.setAlarm(-1);                                                            
+                    updatedAppointment.setAlarm(-1);                                                            
                 } else {
-                    cdo.set(field, cdo.get(field)); 
+                    updatedAppointment.set(field, updatedAppointment.get(field)); 
                 }
             }
         }
@@ -458,13 +492,54 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
          * reset previously set recurrence specific fields
          */
         if (CalendarObject.NO_RECURRENCE != oldAppointment.getRecurrenceType() && 
-                CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType()) {
-            for (final int field : RECURRENCE_FIELDS) {
-                if (oldAppointment.contains(field) && false == cdo.contains(field)) {
-                    cdo.set(field, CalendarObject.UNTIL == field ? null : cdo.get(field)); // getUntil returns 'max until date' if not set 
+                CalendarObject.NO_RECURRENCE != updatedAppointment.getRecurrenceType()) {
+            for (int field : RECURRENCE_FIELDS) {
+                if (oldAppointment.contains(field) && false == updatedAppointment.contains(field)) {
+                    if (CalendarObject.UNTIL == field) {
+                        // getUntil returns 'max until date' if not set
+                        updatedAppointment.set(field, null);
+                    } else {
+                        updatedAppointment.set(field, updatedAppointment.get(field));
+                    }
                 }
             }
-        } 
+        }
+        /*
+         * special handling for "shown as" 
+         */
+        if (updatedAppointment.containsShownAs() && oldAppointment.containsShownAs() && 
+            updatedAppointment.getShownAs() != oldAppointment.getShownAs()) {
+            if (Appointment.RESERVED == updatedAppointment.getShownAs() &&
+                (Appointment.ABSENT == oldAppointment.getShownAs() || Appointment.TEMPORARY == oldAppointment.getShownAs())) {
+                // don't change "shown as", since iCal maps absent/temporary to reserved
+                updatedAppointment.removeShownAs();           
+            } else if (factory.getSession().getUserId() != updatedAppointment.getOrganizerId() && 
+                isConfirmationChange(oldAppointment, updatedAppointment)) {
+                // don't change "shown as", since iCal clients tend to change the transparency on accept/decline actions of participants
+                updatedAppointment.removeShownAs();            
+            }
+        }
+    }
+    
+    private boolean isConfirmationChange(Appointment oldAppointment, CalendarDataObject updatedAppointment) {
+        UserParticipant oldParticipant = getCurrentUserParticipant(oldAppointment);
+        UserParticipant updatedParticipant = getCurrentUserParticipant(updatedAppointment);
+        return null != oldParticipant && null != updatedParticipant && oldParticipant.getConfirm() != updatedParticipant.getConfirm();
+    }
+    
+    private UserParticipant getCurrentUserParticipant(Appointment appointment) {
+        if (null != appointment && null != appointment.getParticipants() && 0 < appointment.getParticipants().length) {
+            int userID = factory.getUser().getId();
+            for (Participant participant : appointment.getParticipants()) {
+                if (UserParticipant.class.isInstance(participant)) {
+                    UserParticipant userParticipant = (UserParticipant)participant;
+                    if (userID == userParticipant.getIdentifier()) {
+                        return userParticipant; 
+                    }
+                }
+            }                        
+        }
+        return null;
     }
     
     private void createNewDeleteExceptions(final Appointment oldAppointment, final CalendarDataObject cdo) throws OXException {
@@ -508,6 +583,73 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         return hasTrimmed;
     }
     
+    /**
+     * Tries to handle a {@link WebdavProtocolException} that occured during resource creation automatically. 
+     * 
+     * @param e The exception
+     * @throws WebdavProtocolException If not handled
+     */
+    private void handleOnCreate(WebdavProtocolException e) throws WebdavProtocolException {
+        if (null != e && null != e.getCause() && OXException.class.isInstance(e.getCause()) &&
+            "APP-0100".equals(((OXException)e.getCause()).getErrorCode())) {
+            /*
+             * Cannot insert appointment (...). An appointment with the unique identifier (...) already exists.
+             */
+            try {
+                int objectID = getAppointmentInterface().resolveUid(appointmentToSave.getUid());
+                if (0 < objectID) {
+                    CalendarDataObject existingAppointment = getAppointmentInterface().getObjectById(objectID);
+                    if (isUpdate(appointmentToSave, existingAppointment) && 
+                        PrivateType.getInstance().equals(parent.getFolder().getType())) {
+                        LOG.debug("Considering appointment with UID '" + appointmentToSave.getUid() + "', sequence " + 
+                            appointmentToSave.getSequence() + " as update for appointment with object ID " + objectID + ", sequence " + 
+                            existingAppointment.getSequence() + ".");
+                        this.object = existingAppointment;                        
+                        appointmentToSave.setObjectID(objectID);
+                        appointmentToSave.removeParentFolderID();
+                        this.saveObject(false); // update instead of create
+                        return; // handled
+                    }
+                }
+            } catch (OXException x) {
+                LOG.warn("Error during automatic exception handling", x);
+            } catch (SQLException x) {
+                LOG.warn("Error during automatic exception handling", x);
+            }
+        }
+        /*
+         * re-throw if not handled
+         */
+        throw e;
+    }
+    
+    private static boolean isUpdate(CalendarDataObject newAppointment, CalendarDataObject existingAppointment) {
+        /*
+         * check uid
+         */
+        if (null == newAppointment.getUid() && false == newAppointment.getUid().equals(existingAppointment.getUid())) {
+            return false;
+        }        
+        /*
+         * check sequence numbers
+         */
+        if (newAppointment.getSequence() <= existingAppointment.getSequence()) {
+            return false;            
+        }
+        /*
+         * check organizer
+         */
+        if (null == newAppointment.getOrganizer() && null != existingAppointment.getOrganizer() ||
+            newAppointment.containsOrganizerId() && newAppointment.getOrganizerId() != existingAppointment.getOrganizerId() ||
+            null != newAppointment.getOrganizer() && false == newAppointment.getOrganizer().equals(existingAppointment.getOrganizer())) {
+            return false;
+        }
+        /*
+         * all checks passed, consider as update
+         */
+        return true;
+    }
+
     private static boolean trimTruncatedAttribute(final Truncated truncated, final CalendarDataObject calendarObject) {
         final Object value = calendarObject.get(truncated.getId());
         if (null != value && String.class.isInstance(value)) {
@@ -524,9 +666,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         return cdo.containsRecurrenceType() && CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType();
     }
 
-    private static Appointment getMatchingException(final List<Appointment> changeExceptions, final Date recurrenceDatePosition) {
+    private static CalendarDataObject getMatchingException(CalendarDataObject[] changeExceptions, Date recurrenceDatePosition) {
         if (null != changeExceptions) {
-            for (final Appointment existingException : changeExceptions) {
+            for (CalendarDataObject existingException : changeExceptions) {
                 if (existingException.getRecurrenceDatePosition().equals(recurrenceDatePosition)) {
                     return existingException;
                 }

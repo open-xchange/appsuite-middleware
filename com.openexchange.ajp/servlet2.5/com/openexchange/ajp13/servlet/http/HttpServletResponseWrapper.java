@@ -72,6 +72,7 @@ import com.openexchange.ajp13.servlet.ServletResponseWrapper;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 
@@ -242,7 +243,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         if (url == null) {
             return null;
         } else if (groupwareSessionId == null && httpSessionId == null) {
-            return url.indexOf('?') == -1 ? new StringBuilder(url).append("?jvm=").append(AJPv13Config.getJvmRoute()).toString() : url;
+            return url.indexOf('?') == -1 ? new com.openexchange.java.StringAllocator(url).append("?jvm=").append(AJPv13Config.getJvmRoute()).toString() : url;
         }
         String path = url;
         String query = "";
@@ -257,7 +258,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
             anchor = path.substring(pound);
             path = path.substring(0, pound);
         }
-        final StringBuilder sb = new StringBuilder(path);
+        final StringAllocator sb = new StringAllocator(path);
         if (httpSessionId != null && sb.length() > 0) {
             sb.append('/');
             sb.append(AJPv13RequestHandler.JSESSIONID_URI);
@@ -510,7 +511,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
             errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
         }
         errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getVersionString());
-        setContentType(new StringBuilder("text/html; charset=").append(getCharacterEncoding()).toString());
+        setContentType(new com.openexchange.java.StringAllocator("text/html; charset=").append(getCharacterEncoding()).toString());
         final byte[] errormessage = errorMsgStr.getBytes(Charsets.forName(getCharacterEncoding()));
         setContentLength(errormessage.length);
         return errormessage;
@@ -545,7 +546,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         if (null == encoding) {
             encoding = "UTF-8";
         }
-        setContentType(new StringBuilder("text/html; charset=").append(encoding).toString());
+        setContentType(new com.openexchange.java.StringAllocator("text/html; charset=").append(encoding).toString());
         final byte[] errormessage = errorMsgStr.getBytes(Charsets.forName(encoding));
         setContentLength(errormessage.length);
         return errormessage;

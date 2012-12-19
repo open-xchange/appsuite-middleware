@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import javax.mail.MessagingException;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
@@ -527,7 +527,7 @@ public final class IMAPFolderConverter {
                 }
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug(new StringBuilder("IMAP folder \"").append(imapFullName).append("\" converted in ").append(dur).append(
+                    LOG.debug(new com.openexchange.java.StringAllocator("IMAP folder \"").append(imapFullName).append("\" converted in ").append(dur).append(
                         "msec.").toString());
                 }
                 return mailFolder;
@@ -591,7 +591,7 @@ public final class IMAPFolderConverter {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                final String pattern = mailFolder.isRootFolder() ? "%" : new StringBuilder().append(fullname).append(separator).append('%').toString();
+                final String pattern = mailFolder.isRootFolder() ? "%" : new com.openexchange.java.StringAllocator().append(fullname).append(separator).append('%').toString();
                 if (checkSubscribed) {
                     return protocol.lsub("", pattern);
                 }
@@ -710,7 +710,7 @@ public final class IMAPFolderConverter {
             if (!ownRights.contains(Rights.Right.ADMINISTER)) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(
-                        new StringBuilder(256).append("ACLs could not be requested for folder ").append(imapFolder.getFullName()).append(
+                        new com.openexchange.java.StringAllocator(256).append("ACLs could not be requested for folder ").append(imapFolder.getFullName()).append(
                             ". A newer ACL extension (RFC 4314) seems to be supported by IMAP server ").append(imapConfig.getServer()).append(
                             ", which denies GETACL command if no ADMINISTER right is granted."),
                         e);
@@ -723,7 +723,7 @@ public final class IMAPFolderConverter {
         final Entity2ACLArgs args = new Entity2ACLArgsImpl(imapConfig.getAccountId(), new InetSocketAddress(
             imapConfig.getServer(),
             imapConfig.getPort()), session.getUserId(), imapFolder.getFullName(), listEntry.getSeparator());
-        final StringBuilder debugBuilder = DEBUG ? new StringBuilder(128) : null;
+        final com.openexchange.java.StringAllocator debugBuilder = DEBUG ? new com.openexchange.java.StringAllocator(128) : null;
         boolean userPermAdded = false;
         for (int j = 0; j < acls.length; j++) {
             final ACLPermission aclPerm = new ACLPermission();
@@ -735,7 +735,7 @@ public final class IMAPFolderConverter {
                     final Rights aclRights = acl.getRights();
                     if (!ownRights.equals(aclRights)) {
                         if (DEBUG) {
-                            final StringBuilder tmp = new StringBuilder(64);
+                            final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(64);
                             tmp.append("Detected different rights for MYRIGHTS (");
                             tmp.append(ownRights);
                             tmp.append(") and GETACL (");
@@ -766,7 +766,7 @@ public final class IMAPFolderConverter {
                     throw e;
                 }
                 if (DEBUG) {
-                    debugBuilder.setLength(0);
+                    debugBuilder.reinitTo(0);
                     LOG.debug(debugBuilder.append("Cannot map ACL entity named \"").append(acl.getName()).append("\" to a system user").toString());
                 }
             }

@@ -505,7 +505,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 
         @Override
         public Object filestoreLocation() {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return null;
         }
 
@@ -630,7 +630,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 
         @Override
         public Object filestoreLocation() {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return null;
         }
 

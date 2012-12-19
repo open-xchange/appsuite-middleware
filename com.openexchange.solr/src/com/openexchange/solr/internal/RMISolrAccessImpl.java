@@ -51,14 +51,16 @@ package com.openexchange.solr.internal;
 
 import java.rmi.RemoteException;
 import java.util.Collection;
+import java.util.Locale;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import com.openexchange.exception.OXException;
-import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
+import com.openexchange.solr.SolrExceptionCodes;
 import com.openexchange.solr.rmi.RMISolrAccessService;
+import com.openexchange.solr.rmi.RMISolrException;
 
 /**
  * {@link RMISolrAccessImpl}
@@ -67,71 +69,126 @@ import com.openexchange.solr.rmi.RMISolrAccessService;
  */
 public class RMISolrAccessImpl implements RMISolrAccessService {
 
-    private final SolrAccessService solrService;
+    private final EmbeddedSolrAccessImpl solrService;
     
+    private final DelegationSolrAccessImpl delegate;
 
-    public RMISolrAccessImpl(final SolrAccessService solrService) {
+    public RMISolrAccessImpl(final DelegationSolrAccessImpl delegate) {
         super();
-        this.solrService = solrService;
+        this.solrService = delegate.getEmbeddedServerAccess();
+        this.delegate = delegate;
     }
 
     @Override
-    public UpdateResponse addRmi(final SolrCoreIdentifier identifier, final Collection<SolrInputDocument> documents, final boolean commit) throws RemoteException, OXException {
-        return solrService.add(identifier, documents, commit);
+    public UpdateResponse addRmi(final SolrCoreIdentifier identifier, final Collection<SolrInputDocument> documents, final boolean commit) throws RemoteException, RMISolrException {
+        try {
+            return solrService.add(identifier, documents, commit);
+        } catch (OXException e) {
+            throw new RMISolrException(e.getCode(), e.getDisplayMessage(Locale.US));
+        }
     }
 
     @Override
-    public UpdateResponse addRmi(final SolrCoreIdentifier identifier, final SolrInputDocument document, final boolean commit) throws RemoteException, OXException {
-        return solrService.add(identifier, document, commit);
+    public UpdateResponse addRmi(final SolrCoreIdentifier identifier, final SolrInputDocument document, final boolean commit) throws RemoteException, RMISolrException {
+        try {
+            return solrService.add(identifier, document, commit);
+        } catch (OXException e) {
+            throw new RMISolrException(e.getCode(), e.getDisplayMessage(Locale.US));
+        }
     }
 
     @Override
-    public UpdateResponse deleteByIdRmi(final SolrCoreIdentifier identifier, final String id, final boolean commit) throws RemoteException, OXException {
-        return solrService.deleteById(identifier, id, commit);
+    public UpdateResponse deleteByIdRmi(final SolrCoreIdentifier identifier, final String id, final boolean commit) throws RemoteException, RMISolrException {
+        try {
+            return solrService.deleteById(identifier, id, commit);
+        } catch (OXException e) {
+            throw new RMISolrException(e.getCode(), e.getDisplayMessage(Locale.US));
+        }
     }
 
     @Override
-    public UpdateResponse deleteByQueryRmi(final SolrCoreIdentifier identifier, final String query, final boolean commit) throws RemoteException, OXException {
-        return solrService.deleteByQuery(identifier, query, commit);
+    public UpdateResponse deleteByQueryRmi(final SolrCoreIdentifier identifier, final String query, final boolean commit) throws RemoteException, RMISolrException {
+        try {
+            return solrService.deleteByQuery(identifier, query, commit);
+        } catch (OXException e) {
+            throw new RMISolrException(e.getCode(), e.getDisplayMessage(Locale.US));
+        }
     }
 
     @Override
-    public UpdateResponse commitRmi(final SolrCoreIdentifier identifier) throws RemoteException, OXException {
-        return solrService.commit(identifier);
+    public UpdateResponse commitRmi(final SolrCoreIdentifier identifier) throws RemoteException, RMISolrException {
+        try {
+            return solrService.commit(identifier);
+        } catch (OXException e) {
+            throw new RMISolrException(e.getCode(), e.getDisplayMessage(Locale.US));
+        }
     }
 
     @Override
-    public UpdateResponse commitRmi(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws RemoteException, OXException {
-        return solrService.commit(identifier, waitFlush, waitSearcher);
+    public UpdateResponse commitRmi(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws RemoteException, RMISolrException {
+        try {
+            return solrService.commit(identifier, waitFlush, waitSearcher);
+        } catch (OXException e) {
+            throw new RMISolrException(e.getCode(), e.getDisplayMessage(Locale.US));
+        }
     }
 
     @Override
-    public UpdateResponse rollbackRmi(final SolrCoreIdentifier identifier) throws RemoteException, OXException {
-        return solrService.rollback(identifier);
+    public UpdateResponse rollbackRmi(final SolrCoreIdentifier identifier) throws RemoteException, RMISolrException {
+        try {
+            return solrService.rollback(identifier);
+        } catch (OXException e) {
+            throw new RMISolrException(e.getCode(), e.getDisplayMessage(Locale.US));
+        }
     }
 
     @Override
-    public UpdateResponse optimizeRmi(final SolrCoreIdentifier identifier) throws RemoteException, OXException {
-        return solrService.optimize(identifier);
+    public UpdateResponse optimizeRmi(final SolrCoreIdentifier identifier) throws RemoteException, RMISolrException {
+        try {
+            return solrService.optimize(identifier);
+        } catch (OXException e) {
+            throw new RMISolrException(e.getCode(), e.getDisplayMessage(Locale.US));
+        }
     }
 
     @Override
-    public UpdateResponse optimizeRmi(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws RemoteException, OXException {
-        return solrService.optimize(identifier, waitFlush, waitSearcher);
+    public UpdateResponse optimizeRmi(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws RemoteException, RMISolrException {
+        try {
+            return solrService.optimize(identifier, waitFlush, waitSearcher);
+        } catch (OXException e) {
+            throw new RMISolrException(e.getCode(), e.getDisplayMessage(Locale.US));
+        }
     }
 
     @Override
-    public UpdateResponse optimizeRmi(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher, final int maxSegments) throws RemoteException, OXException {
-        return solrService.optimize(identifier, waitFlush, waitSearcher, maxSegments);
+    public UpdateResponse optimizeRmi(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher, final int maxSegments) throws RemoteException, RMISolrException {
+        try {
+            return solrService.optimize(identifier, waitFlush, waitSearcher, maxSegments);
+        } catch (OXException e) {
+            throw new RMISolrException(e.getCode(), e.getDisplayMessage(Locale.US));
+        }
     }
 
     @Override
-    public QueryResponse queryRmi(final SolrCoreIdentifier identifier, final SolrParams params) throws RemoteException, OXException {
-        return solrService.query(identifier, params);
+    public QueryResponse queryRmi(final SolrCoreIdentifier identifier, final SolrParams params) throws RemoteException, RMISolrException {
+        try {
+            return solrService.query(identifier, params);
+        } catch (OXException e) {
+            throw new RMISolrException(e.getCode(), e.getDisplayMessage(Locale.US));
+        }
     }
 
-	@Override
-	public void pingRmi() throws RemoteException {
-		return;		
-	}
+    @Override
+    public void pingRmi(SolrCoreIdentifier identifier) throws RemoteException, RMISolrException {
+        if (!solrService.hasActiveCore(identifier)) {
+            OXException e = SolrExceptionCodes.CORE_NOT_STARTED.create(identifier.toString());
+            throw new RMISolrException(e.getCode(), e.getDisplayMessage(Locale.US));
+        }
+        return;
+    }
+
+    @Override
+    public void freeResources(SolrCoreIdentifier identifier) throws RemoteException {
+        delegate.freeResources(identifier);
+    }
 }

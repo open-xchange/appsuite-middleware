@@ -96,7 +96,7 @@ public class GetResponse extends AbstractAJAXResponse {
      */
     public int getInteger() {
         fetchValue();
-        return null == value ? -1 : ((Integer) value).intValue();
+        return null == value ? -1 : ((Number) value).intValue();
     }
 
     /**

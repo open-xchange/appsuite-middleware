@@ -55,7 +55,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.session.Session;
 
@@ -64,7 +63,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class LdapContactInterfaceProvider implements ContactInterfaceProvider {
+public final class LdapContactInterfaceProvider {
 
     private final int adminId;
 
@@ -99,7 +98,6 @@ public final class LdapContactInterfaceProvider implements ContactInterfaceProvi
         this.folderId = folderId;
     }
 
-    @Override
     public ContactInterface newContactInterface(final Session session) throws OXException {
         final LdapContactInterface ldapContactInterface = new LdapContactInterface(contextId, adminId, folderProperties, folderId, this);
         ldapContactInterface.setSession(session);

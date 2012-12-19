@@ -79,7 +79,7 @@ import java.util.Vector;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceException;
@@ -1028,7 +1028,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 dbId = ctx.getWriteDatabase().getId();
             }
             final Database db;
-            if( null == dbId ) {
+            if( (null == dbId) || (dbId.intValue() <= 0) ) {
                 db = getNextDBHandleByWeight(configCon);
             } else {
                 db = OXToolStorageInterface.getInstance().loadDatabaseById(dbId);
@@ -1037,6 +1037,17 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     LOG.error(e);
                     throw e;
                 }
+            }
+            // Check Database instance
+            if (isEmpty(db.getUrl())) {
+                StorageException e = new StorageException("Database with id " + db.getId() + " has no URL specified"); 
+                LOG.error(e);
+                throw e;
+            }
+            if (isEmpty(db.getDriver())) {
+                StorageException e = new StorageException("Database with id " + db.getId() + " has no Driver specified"); 
+                LOG.error(e);
+                throw e;
             }
             startTransaction(configCon);
             findOrCreateSchema(configCon, db);
@@ -2406,4 +2417,17 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         }
     }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }

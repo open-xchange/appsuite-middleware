@@ -191,34 +191,34 @@ public final class Tools  {
         if(ldapfilter == null) {
             return "";
         }
-        final StringBuilder sb = new StringBuilder();
+        final com.openexchange.java.StringAllocator sa = new com.openexchange.java.StringAllocator();
         for (int i = 0; i < ldapfilter.length(); i++) {
             final char curChar = ldapfilter.charAt(i);
             switch (curChar) {
                 case '\\':
-                    sb.append("\\5c");
+                    sa.append("\\5c");
                     break;
 // We always treat "*" as wildcard
 //                case '*':
 //                    sb.append("\\2a");
 //                    break;
                 case '(':
-                    sb.append("\\28");
+                    sa.append("\\28");
                     break;
                 case ')':
-                    sb.append("\\29");
+                    sa.append("\\29");
                     break;
                 case '\u0000':
-                    sb.append("\\00");
+                    sa.append("\\00");
                     break;
                 case '?':
-                    sb.append('*');
+                    sa.append('*');
                     break;
                 default:
-                    sb.append(curChar);
+                    sa.append(curChar);
             }
         }
-        return sb.toString();
+        return sa.toString();
     }
 
     /**

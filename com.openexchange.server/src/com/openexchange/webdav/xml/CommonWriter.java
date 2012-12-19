@@ -86,10 +86,10 @@ public abstract class CommonWriter extends FolderChildWriter {
 
     protected void writeElementAttachments(final CommonObject commonobject, final Element e_prop) throws OXException, SearchIteratorException, UnsupportedEncodingException {
         final Element e_attachments = new Element("attachments", XmlServlet.NS);
-        SearchIterator it = null;
+        SearchIterator<AttachmentMetadata> it = null;
         try {
             XmlServlet.attachmentBase.startTransaction();
-            final TimedResult tResult = XmlServlet.attachmentBase.getAttachments(commonobject.getParentFolderID(),
+            final TimedResult<AttachmentMetadata> tResult = XmlServlet.attachmentBase.getAttachments(sessionObj, commonobject.getParentFolderID(),
                     commonobject.getObjectID(), getModule(), ctx, userObj,
                     UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
                             ctx));
@@ -97,7 +97,7 @@ public abstract class CommonWriter extends FolderChildWriter {
             it = tResult.results();
 
             while (it.hasNext()) {
-                final AttachmentMetadata attachmentMeta = (AttachmentMetadata)it.next();
+                final AttachmentMetadata attachmentMeta = it.next();
 
                 final Element e = new Element("attachment", XmlServlet.NS);
 

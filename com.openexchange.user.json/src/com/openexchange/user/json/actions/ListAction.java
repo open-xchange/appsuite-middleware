@@ -52,20 +52,14 @@ package com.openexchange.user.json.actions;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
@@ -73,7 +67,6 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
@@ -83,10 +76,8 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
-import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.UserContact;
 import com.openexchange.user.json.services.ServiceRegistry;
-import com.openexchange.user.json.writer.UserWriter;
 
 /**
  * {@link ListAction} - Maps the action to a <tt>list</tt> action.
@@ -112,13 +103,6 @@ public final class ListAction extends AbstractUserAction {
     public ListAction() {
         super();
     }
-
-    private static final Set<String> EXPECTED_NAMES =
-        Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-            AJAXServlet.PARAMETER_COLUMNS,
-            AJAXServlet.PARAMETER_TIMEZONE,
-            AJAXServlet.PARAMETER_SESSION,
-            AJAXServlet.PARAMETER_ACTION)));
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
@@ -172,7 +156,7 @@ public final class ListAction extends AbstractUserAction {
         for (final User user : users) {
             final Contact contact = contacts.get(user.getId());
             if (null != contact) {
-                userContacts.add(new UserContact(contact, user));
+                userContacts.add(new UserContact(contact, censor(session, user)));
                 final Date contactLastModified = contact.getLastModified();
                 if (null != contactLastModified && ((null == lastModified) || (contactLastModified.after(lastModified)))) {
                     lastModified = contactLastModified;
@@ -261,133 +245,6 @@ public final class ListAction extends AbstractUserAction {
 		    return list.toArray(new User[list.size()]);
 		}
 	}
-
-    public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
-        try {
-            /*
-             * Parse parameters
-             */
-            final int[] userIdArray;
-            {
-                final JSONArray jsonArray = getJsonArrayFromData(request.getData());
-                if (null == jsonArray) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
-                }
-                final int len = jsonArray.length();
-                userIdArray = new int[len];
-                for (int a = 0; a < len; a++) {
-                    if (jsonArray.isNull(a)) {
-                        userIdArray[a] = session.getUserId();
-                    } else {
-                        userIdArray[a] = jsonArray.getInt(a);
-                    }
-                }
-            }
-            final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
-            final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            /*
-             * Get remaining parameters
-             */
-            final Map<String, List<String>> attributeParameters = getAttributeParameters(EXPECTED_NAMES, request);
-            /*
-             * Get services
-             */
-            final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
-            final ContactInterface contactInterface =
-                ServiceRegistry.getInstance().getService(ContactInterfaceFactory.class, true).create(
-                    Constants.USER_ADDRESS_BOOK_FOLDER_ID,
-                    session);
-            /*
-             * Get users/contacts
-             */
-            User[] users;
-            try {
-                users = userService.getUser(session.getContext(), userIdArray);
-            } catch (final OXException e) {
-                if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
-                    throw e;
-                }
-                final Context context = session.getContext();
-                {
-                    final Object[] excArgs = e.getLogArgs();
-                    if (excArgs != null && excArgs.length >= 2) {
-                        try {
-                            userService.invalidateUser(context, ((Integer) excArgs[0]).intValue());
-                        } catch (final Exception ignore) {
-                            // Ignore
-                        }
-                    } else {
-                        for (final int userId : userIdArray) {
-                            try {
-                                userService.invalidateUser(context, userId);
-                            } catch (final Exception ignore) {
-                                // Ignore
-                            }
-                        }
-                    }
-                }
-                // Load one-by-one
-                final int length = userIdArray.length;
-                final List<User> list = new ArrayList<User>(length);
-                for (int i = 0; i < length; i++) {
-                    try {
-                        list.add(userService.getUser(userIdArray[i], context));
-                    } catch (final OXException ue) {
-                        if (!UserExceptionCode.USER_NOT_FOUND.equals(ue)) {
-                            throw ue;
-                        }
-                    }
-                }
-                users = list.toArray(new User[list.size()]);
-            }
-            final Contact[] contacts = contactInterface.getUsersById(userIdArray, false);
-            /*
-             * Determine max. last-modified time stamp
-             */
-            Date lastModified = contacts[0].getLastModified();
-            for (int i = 1; i < contacts.length; i++) {
-                final Date lm = contacts[i].getLastModified();
-                if (lastModified.before(lm)) {
-                    lastModified = lm;
-                }
-            }
-            /*
-             * Write users as JSON arrays to JSON array
-             */
-            censor(session, contacts);
-            censor(session, users);
-            final JSONArray jsonArray = UserWriter.writeMultiple2Array(columns, attributeParameters, users, contacts, timeZoneId);
-            /*
-             * Return appropriate result
-             */
-            return new AJAXRequestResult(jsonArray, lastModified);
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
-        }
-    }
-
-    private JSONArray getJsonArrayFromData(final Object data) {
-        if (null == data) {
-            return new JSONArray();
-        }
-        if (data instanceof JSONArray) {
-            return (JSONArray) data;
-        }
-        final String sData = data.toString().trim();
-        if (isEmpty(sData)) {
-            return new JSONArray();
-        }
-        if ('[' == sData.charAt(0)) {
-            try {
-                return new JSONArray(sData);
-            } catch (final JSONException e) {
-                // Ignore
-            }
-        }
-        final JSONArray ret = new JSONArray();
-        ret.put(sData);
-        return ret;
-    }
 
     private boolean isEmpty(final String string) {
         if (null == string) {

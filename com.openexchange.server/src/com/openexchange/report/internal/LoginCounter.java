@@ -54,7 +54,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -62,6 +65,7 @@ import javax.management.MBeanException;
 import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
@@ -88,7 +92,7 @@ public class LoginCounter implements LoginCounterMBean {
     }
 
     @Override
-    public Date getLastLoginTimeStamp(final int userId, final int contextId, final String client) throws MBeanException {
+    public List<Object[]> getLastLoginTimeStamp(final int userId, final int contextId, final String client) throws MBeanException {
         final DatabaseService service = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         if (null == service) {
             throw new MBeanException(null, "DatabaseService not available at the moment. Try again later.");
@@ -98,6 +102,24 @@ public class LoginCounter implements LoginCounterMBean {
         ResultSet rs = null;
         try {
             con = service.getReadOnly(contextId);
+            if ("*".equals(client.trim())) {
+                stmt = con.prepareStatement("SELECT value, name FROM user_attribute WHERE cid=? AND id=? AND name LIKE 'client:%'");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                rs = stmt.executeQuery();
+                final List<Object[]> ret = new LinkedList<Object[]>();
+                while (rs.next()) {
+                    final String name = rs.getString(2);
+                    ret.add(new Object[] { new Date(Long.parseLong(rs.getString(1))), name.substring(7) });
+                }
+            } else {
+                stmt = con.prepareStatement("SELECT value FROM user_attribute WHERE cid=? AND id=? AND name=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setString(3, "client:" + client);
+                rs = stmt.executeQuery();
+            }
+            
             stmt = con.prepareStatement("SELECT value FROM user_attribute WHERE cid=? AND id=? AND name=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
@@ -106,7 +128,7 @@ public class LoginCounter implements LoginCounterMBean {
             if (!rs.next()) {
                 throw new MBeanException(null, "No such entry found (user="+userId+", context="+contextId+", client=\""+client+"\").");
             }
-            return new Date(Long.parseLong(rs.getString(1)));
+            return Collections.singletonList(new Object[] { new Date(Long.parseLong(rs.getString(1))), client });
         } catch (final MBeanException e) {
             throw e;
         } catch (final Exception e) {
@@ -214,7 +236,7 @@ public class LoginCounter implements LoginCounterMBean {
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */
     private static String wildcardToRegex(final String wildcard) {
-        final StringBuilder s = new StringBuilder(wildcard.length());
+        final StringAllocator s = new StringAllocator(wildcard.length());
         s.append('^');
         final int len = wildcard.length();
         for (int i = 0; i < len; i++) {

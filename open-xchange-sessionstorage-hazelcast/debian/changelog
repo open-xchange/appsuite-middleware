@@ -1,8 +1,44 @@
+open-xchange-sessionstorage-hazelcast (7.0.0-3) unstable; urgency=low
+
+  * Third release candidate for 7.0.0
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Tue, 18 Dec 2012 14:15:04 +0100
+
+open-xchange-sessionstorage-hazelcast (7.0.0-2) unstable; urgency=low
+
+  * Second release candidate for 7.0.0
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Mon, 17 Dec 2012 17:36:26 +0100
+
+open-xchange-sessionstorage-hazelcast (7.0.0-1) unstable; urgency=low
+
+  * First release candidate for 7.0.0
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Tue, 04 Dec 2012 13:48:31 +0100
+
+open-xchange-sessionstorage-hazelcast (7.0.0-0) unstable; urgency=low
+
+  * prepare for 7.0.0 release
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Tue, 04 Dec 2012 09:29:30 +0100
+
+open-xchange-sessionstorage-hazelcast (6.23.0-0) unstable; urgency=low
+
+  * prepare for next EDP drop
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Tue, 20 Nov 2012 14:50:48 +0100
+
 open-xchange-sessionstorage-hazelcast (6.22.1-1) unstable; urgency=low
 
   * Fourth release candidate for 6.22.1
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 06 Nov 2012 12:23:13 +0100
+
+open-xchange-sessionstorage-hazelcast (6.22.1-1) unstable; urgency=low
+
+  * First release candidate for EDP drop #6
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 13 Nov 2012 11:22:51 +0100
 
 open-xchange-sessionstorage-hazelcast (6.22.1-0) unstable; urgency=low
 

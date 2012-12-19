@@ -277,7 +277,7 @@ public final class GetAction extends AbstractMailAction {
                     req.getRequest().setFormat("file");
                     final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
                     fileHolder.setContentType("application/octet-stream");
-                    fileHolder.setName(new StringBuilder(mail.getSubject()).append(".eml").toString());
+                    fileHolder.setName(new com.openexchange.java.StringAllocator(mail.getSubject()).append(".eml").toString());
                     return new AJAXRequestResult(fileHolder, "file");
                 }
                 final ContentType ct = mail.getContentType();
@@ -376,7 +376,7 @@ public final class GetAction extends AbstractMailAction {
         } catch (final OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                 LOG.warn(
-                    new StringBuilder("Requested mail could not be found. ").append(
+                    new com.openexchange.java.StringAllocator("Requested mail could not be found. ").append(
                         "Most likely this is caused by concurrent access of multiple clients ").append(
                         "while one performed a delete on affected mail.").toString(),
                     e);
@@ -399,7 +399,7 @@ public final class GetAction extends AbstractMailAction {
     }
 
     private static final String formatMessageHeaders(final Iterator<Map.Entry<String, String>> iter) {
-        final StringBuilder sb = new StringBuilder(1024);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
         final String delim = ": ";
         final String crlf = "\r\n";
         while (iter.hasNext()) {

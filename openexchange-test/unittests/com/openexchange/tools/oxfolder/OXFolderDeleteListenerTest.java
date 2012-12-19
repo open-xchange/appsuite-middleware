@@ -108,7 +108,7 @@ public class OXFolderDeleteListenerTest extends TestCase {
 
 		folder.setPermissionsAsArray(newPerms);
 
-		return oxma.updateFolder(folder, true, System.currentTimeMillis());
+		return oxma.updateFolder(folder, true, false, System.currentTimeMillis());
 	}
 
 	public FolderObject createPublicInfostoreSubfolderWithAdmin(final int parentFolder, final int folderAdmin) throws OXException {

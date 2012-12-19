@@ -94,7 +94,7 @@ public final class AllAction extends JSlobAction {
         }
         final JSlobService jslobService = getJSlobService(serviceId);
 
-        final Collection<JSlob> jslobs = jslobService.get(jslobRequest.getUserId(), jslobRequest.getContextId());
+        final Collection<JSlob> jslobs = jslobService.get(jslobRequest.getSession());
         return new AJAXRequestResult(jslobs, "jslob");
     }
 

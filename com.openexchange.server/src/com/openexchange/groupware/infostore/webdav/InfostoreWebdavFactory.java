@@ -350,7 +350,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
 
     @Override
     public void load(final List<LoadingHints> hints) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 

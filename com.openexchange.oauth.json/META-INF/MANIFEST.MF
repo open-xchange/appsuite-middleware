@@ -2,12 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange OAuth JSON Bundle
 Bundle-SymbolicName: com.openexchange.oauth.json
-Bundle-Version: 6.22.1
+Bundle-Version: 7.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.dispatcher,
  com.openexchange.documentation,
@@ -16,6 +17,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.groupware,
  com.openexchange.http.client,
  com.openexchange.http.client.builder,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.multiple,
  com.openexchange.oauth,

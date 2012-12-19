@@ -741,7 +741,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return the trace of the thread that lastly obtained this access
      */
     public final String getTrace() {
-        final StringBuilder sBuilder = new StringBuilder(512);
+        final com.openexchange.java.StringAllocator sBuilder = new com.openexchange.java.StringAllocator(512);
         sBuilder.append(toString());
         sBuilder.append("\nMail connection established (or fetched from cache) at: ").append('\n');
         /*
@@ -767,7 +767,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder(256);
+        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(256);
         builder.append("{ MailAccess [accountId=").append(accountId).append(", cached=").append(cached).append(", ");
         if (provider != null) {
             builder.append("provider=").append(provider).append(", ");

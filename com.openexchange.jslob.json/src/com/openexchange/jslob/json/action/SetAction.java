@@ -111,7 +111,7 @@ public final class SetAction extends JSlobAction {
          * A null value is considered as a remove operation
          */
         final JSlob jslob = null == data || JSONObject.NULL.equals(data) ? JSlob.EMPTY_JSLOB : new JSlob((JSONObject) data);
-        jslobService.set(id, jslob, jslobRequest.getUserId(), jslobRequest.getContextId());
+        jslobService.set(id, jslob, jslobRequest.getSession());
         return new AJAXRequestResult();
     }
 

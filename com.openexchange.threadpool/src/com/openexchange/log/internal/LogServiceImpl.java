@@ -49,10 +49,10 @@
 
 package com.openexchange.log.internal;
 
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.apache.commons.logging.Log;
@@ -84,7 +84,7 @@ public final class LogServiceImpl implements LogService {
      */
     public LogServiceImpl(final ThreadPoolService threadPool) {
         super();
-        queue = new ArrayBlockingQueue<Loggable>(CAPACITY);
+        queue = new LinkedBlockingQueue<Loggable>(CAPACITY);
         loggerTask = new LoggerTask(queue);
         future = threadPool.submit(loggerTask, AbortBehavior.getInstance());
     }

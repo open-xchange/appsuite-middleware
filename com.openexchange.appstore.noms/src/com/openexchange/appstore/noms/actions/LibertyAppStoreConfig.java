@@ -61,7 +61,11 @@ import org.apache.commons.codec.binary.Base64;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class LibertyAppStoreConfig {
-	private String url, storefront, gateway, gatewayQuery, userName, password;
+	private String url, storefront;
+    private final String gateway;
+    private final String gatewayQuery;
+    private String userName;
+    private String password;
 	
 	public LibertyAppStoreConfig(String url, String storefront, String gateway, String gatewayQuery, String userName, String password) {
 		super();

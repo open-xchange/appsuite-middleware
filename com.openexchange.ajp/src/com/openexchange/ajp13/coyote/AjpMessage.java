@@ -424,7 +424,7 @@ public final class AjpMessage {
         if (!log.isDebugEnabled()) {
             return;
         }
-        final StringBuilder temp = new StringBuilder(8192).append(msg).append('\n');
+        final com.openexchange.java.StringAllocator temp = new com.openexchange.java.StringAllocator(8192).append(msg).append('\n');
         int max = pos;
         if (len + 4 > pos) {
             max = len + 4;
@@ -442,7 +442,7 @@ public final class AjpMessage {
 
     // ------------------------------------------------------ Protected Methods
 
-    protected static void hexLine(final byte buf[], final int start, final int len, final StringBuilder sb) {
+    protected static void hexLine(final byte buf[], final int start, final int len, final com.openexchange.java.StringAllocator sb) {
         for (int i = start; i < start + 16; i++) {
             if (i < len + 4) {
                 sb.append(hex(buf[i]) + " ");

@@ -50,7 +50,6 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -62,7 +61,7 @@ import com.openexchange.ajax.request.LinkRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.tools.UnsynchronizedStringWriter;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -90,7 +89,7 @@ public class Link extends DataServlet {
 			throws ServletException, IOException {
 	    final ServerSession session = getSessionObject(httpServletRequest);
         final Response response = new Response(session);
-		final UnsynchronizedStringWriter sw = new UnsynchronizedStringWriter();
+		final AllocatingStringWriter sw = new AllocatingStringWriter();
 
 		try {
 			final String action = getAction(httpServletRequest);
@@ -136,7 +135,7 @@ public class Link extends DataServlet {
 		 */
 		Tools.disableCaching(httpServletResponse);
 		try {
-			final StringWriter sw = new StringWriter();
+			final AllocatingStringWriter sw = new AllocatingStringWriter();
 
 			final String action = getAction(httpServletRequest);
 

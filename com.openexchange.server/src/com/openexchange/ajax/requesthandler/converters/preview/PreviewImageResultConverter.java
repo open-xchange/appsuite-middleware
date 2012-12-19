@@ -50,6 +50,9 @@
 package com.openexchange.ajax.requesthandler.converters.preview;
 
 import java.io.InputStream;
+
+import javax.activation.FileTypeMap;
+
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -99,7 +102,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
 
         final DataProperties dataProperties = new DataProperties(4);
-        dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
+        dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder));
         dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
         dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
         dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
@@ -113,5 +116,13 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         final FileHolder responseFileHolder = new FileHolder(thumbnail, -1, "image/jpeg", fileName); // TODO: file length
         result.setResultObject(responseFileHolder, "file");
     }
+
+	private String getContentType(IFileHolder fileHolder) {
+		String contentType = fileHolder.getContentType();
+		if (contentType == null || contentType.equals("application/octet-stream")) {
+			contentType = FileTypeMap.getDefaultFileTypeMap().getContentType(fileHolder.getName());
+		}
+		return contentType != null ? contentType : "application/octet-stream";
+	}
 
 }

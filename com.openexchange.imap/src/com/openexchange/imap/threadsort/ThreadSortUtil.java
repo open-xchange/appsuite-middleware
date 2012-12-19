@@ -63,6 +63,7 @@ import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
@@ -229,7 +230,7 @@ public final class ThreadSortUtil {
     public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname, final char separator, final String threadResponse) {
         final char[] chars = threadResponse.toCharArray();
         final List<ExtendedMimeMessage> tmp = new ArrayList<ExtendedMimeMessage>();
-        final StringBuilder sb = new StringBuilder(8);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(8);
         int i = 0;
         while (i < chars.length) {
             char c = chars[i++];
@@ -239,7 +240,7 @@ public final class ThreadSortUtil {
             }
             if (sb.length() > 0) {
                 tmp.add(new ExtendedMimeMessage(folderFullname, separator, Integer.parseInt(sb.toString())));
-                sb.setLength(0);
+                sb.reinitTo(0);
             }
         }
         return tmp.toArray(new ExtendedMimeMessage[tmp.size()]);
@@ -269,13 +270,14 @@ public final class ThreadSortUtil {
         /*
          * Now parse the odd THREAD response string.
          */
-        List<ThreadSortNode> pulledUp = null;
-        if ((threadResponse.indexOf('(') != -1) && (threadResponse.indexOf(')') != -1)) {
-            final ThreadSortParser tp = new ThreadSortParser();
-            tp.parse(threadResponse.substring(threadResponse.indexOf('('), threadResponse.lastIndexOf(')') + 1));
-            pulledUp = ThreadSortParser.pullUpFirst(tp.getParsedList());
+        final int openPos = threadResponse.indexOf('(');
+        final int endPos = threadResponse.lastIndexOf(')');
+        if ((openPos < 0) || (endPos < 0)) {
+            return null;
         }
-        return pulledUp;
+        final ThreadSortParser tp = new ThreadSortParser();
+        tp.parse(threadResponse.substring(openPos, endPos + 1));
+        return ThreadSortParser.pullUpFirst(tp.getParsedList());
     }
 
     /**
@@ -295,9 +297,7 @@ public final class ThreadSortUtil {
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Response[] r;
                 {
-                    final String commandStart = "THREAD REFERENCES UTF-8 ";
-                    final String command =
-                        new StringBuilder(commandStart.length() + sortRange.length()).append(commandStart).append(sortRange).toString();
+                    final String command = new StringAllocator("THREAD REFERENCES UTF-8 ").append(sortRange).toString();
                     final long start = System.currentTimeMillis();
                     r = p.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
@@ -317,15 +317,15 @@ public final class ThreadSortUtil {
                         final IMAPResponse ir = (IMAPResponse) r[i];
                         if (ir.keyEquals(threadStr)) {
                             retval = ir.toString();
+                            r[i] = null;
                         }
-                        r[i] = null;
                     }
                     p.notifyResponseHandlers(r);
                 } else if (response.isBAD()) {
-                    throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(
+                    throw new ProtocolException(new StringAllocator("IMAP server does not support THREAD command: ").append(
                         response.toString()).toString());
                 } else if (response.isNO()) {
-                    throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(
+                    throw new ProtocolException(new StringAllocator("IMAP server does not support THREAD command: ").append(
                         response.toString()).toString());
                 } else {
                     p.handleResult(response);
@@ -341,9 +341,11 @@ public final class ThreadSortUtil {
     static String toUnifiedThreadResponse(final String resp) {
         final Matcher matcher = PATTERN_NUM.matcher(resp);
         final StringBuffer sb = new StringBuffer(resp.length() << 1);
-        final StringBuilder tmp = new StringBuilder(8);
+        final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(8);
         while (matcher.find()) {
-            tmp.setLength(0);
+            if (tmp.length() > 0) {
+                tmp.reinitTo(0);
+            }
             matcher.appendReplacement(sb, tmp.append('{').append(matcher.group()).append('}').toString());
         }
         matcher.appendTail(sb);

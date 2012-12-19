@@ -85,9 +85,9 @@ import com.openexchange.mail.json.parser.IAttachmentHandler;
 import com.openexchange.mail.json.parser.PublishAttachmentHandler;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -456,7 +456,7 @@ public final class MIMEStructure2ComposedMailParser {
                     } else if ("disposition-notification-to".equals(name)) {
                         composedMail.setDispositionNotification(list.get(0));
                     } else {
-                        final StringBuilder builder = new StringBuilder(list.size() * 16);
+                        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(list.size() * 16);
                         final String delim = ", ";
                         for (final InternetAddress addr : list) {
                             builder.insert(0, addr.toString()).insert(0, delim);

@@ -249,7 +249,7 @@ public class MessagingMessageParser {
                             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192 << 1);
                             final byte[] buf = new byte[8192];
                             int read;
-                            while ((read = in.read(buf, 0, buf.length)) != -1) {
+                            while ((read = in.read(buf, 0, buf.length)) > 0) {
                                 out.write(buf, 0, read);
                             }
                             final MessagingContent attachmentContent = new ByteArrayContent(out.toByteArray());
@@ -493,7 +493,7 @@ public class MessagingMessageParser {
                     final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192 << 1);
                     final byte[] buf = new byte[8192];
                     int read;
-                    while ((read = in.read(buf, 0, buf.length)) != -1) {
+                    while ((read = in.read(buf, 0, buf.length)) > 0) {
                         out.write(buf, 0, read);
                     }
                     return new ByteArrayContent(out.toByteArray());
@@ -509,7 +509,7 @@ public class MessagingMessageParser {
             } else if (byte[].class.isInstance(content)) {
                 return new ByteArrayContent((byte[]) content);
             } else {
-                throw MessagingExceptionCodes.UNEXPECTED_ERROR.create("Unexpected content type: " + null == content ? "null" : content.getClass().getName());
+                throw MessagingExceptionCodes.UNEXPECTED_ERROR.create("Unexpected content type: " + (null == content ? "null" : content.getClass().getName()));
             }
         }
 

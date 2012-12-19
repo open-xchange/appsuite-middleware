@@ -58,11 +58,15 @@ import com.openexchange.ajax.container.Response;
  */
 public class NewPublicationResponse extends AbstractPublicationResponse {
 
-    public NewPublicationResponse(Response response) {
+    public NewPublicationResponse(final Response response) {
         super(response);
     }
 
     public int getId() {
-        return ((Integer) getData()).intValue();
+        final Object data = getData();
+        if (null == data) {
+            return -1;
+        }
+        return ((Integer) data).intValue();
     }
 }

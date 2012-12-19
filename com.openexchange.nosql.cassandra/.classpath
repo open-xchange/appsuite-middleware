@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/apache-cassandra-1.1.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/apache-cassandra-clientutil-1.1.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/apache-cassandra-thrift-1.1.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/apache-cassandra-1.1.7.jar" sourcepath="source/apache-cassandra-1.1.7-src.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/apache-cassandra-clientutil-1.1.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/apache-cassandra-thrift-1.1.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/concurrentlinkedhashmap-lru-1.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/antlr-3.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/avro-1.4.0-fixes.jar"/>
@@ -15,7 +15,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/json-simple-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/libthrift-0.7.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/metrics-core-2.0.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/mx4j-tools.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-nop-1.6.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/snakeyaml-1.6.jar"/>

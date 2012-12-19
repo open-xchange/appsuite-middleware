@@ -66,8 +66,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
-import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -175,16 +176,16 @@ public class APIResponseRenderer implements ResponseRenderer {
                 if (callback == null) {
                     callback = action;
                 }
-                final Writer w = new UnsynchronizedStringWriter();
+                final Writer w = new AllocatingStringWriter();
                 ResponseWriter.write(response, w, localeFrom(session));
                 resp.getWriter().print(substituteJS(w.toString(), callback));
             } else if (req.getParameter(JSONP) != null) {
                 final String call = req.getParameter(JSONP);
 
-                final Writer w = new UnsynchronizedStringWriter();
+                final Writer w = new AllocatingStringWriter();
                 ResponseWriter.write(response, w, localeFrom(session));
 
-                final StringBuilder sb = new StringBuilder(call);
+                final StringAllocator sb = new StringAllocator(call);
                 sb.append('(').append(w.toString()).append(");");
                 resp.setContentType("text/javascript");
                 resp.getWriter().write(sb.toString());

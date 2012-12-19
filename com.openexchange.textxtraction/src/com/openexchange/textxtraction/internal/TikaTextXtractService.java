@@ -197,7 +197,7 @@ public class TikaTextXtractService extends AbstractTextXtractService {
                 tikaInputStream = new BufferedInputStream(new FileInputStream(tempFile));
             }
             
-            return tika.parseToString(tikaInputStream);       
+            return tika.parseToString(tikaInputStream);
         } catch (IOException e) {
             throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (TikaException e) {
@@ -217,8 +217,8 @@ public class TikaTextXtractService extends AbstractTextXtractService {
                 try {
                     Source source = new Source(content);
                     return new Renderer(new Segment(source, 0, source.getEnd())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
-                } catch (final StackOverflowError parserOverflow) {
-                    // Ignore
+                } catch (StackOverflowError e) {
+                    LOG.warn("StackOverflowError while rendering html content. Returning null.");
                 }
             }
         }

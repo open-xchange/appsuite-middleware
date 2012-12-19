@@ -51,18 +51,16 @@ package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import net.fortuna.ical4j.model.component.VFreeBusy;
-
 import com.openexchange.data.conversion.ical.FreeBusyInformation;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedAndDTStamp;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.End;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Start;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Uid;
-import com.openexchange.data.conversion.ical.ical4j.internal.freebusy.FreeBusySlots;
 import com.openexchange.data.conversion.ical.ical4j.internal.freebusy.FreeBusyAttendee;
+import com.openexchange.data.conversion.ical.ical4j.internal.freebusy.FreeBusyAttendees;
+import com.openexchange.data.conversion.ical.ical4j.internal.freebusy.FreeBusySlots;
 
 /**
  * {@link FreeBusyConverters}
@@ -78,9 +76,9 @@ public final class FreeBusyConverters {
     private static AttributeConverter<VFreeBusy, FreeBusyInformation> createdAndDTStamp = new CreatedAndDTStamp<VFreeBusy, FreeBusyInformation>();
     private static AttributeConverter<VFreeBusy, FreeBusyInformation> start = new Start<VFreeBusy, FreeBusyInformation>();
     private static AttributeConverter<VFreeBusy, FreeBusyInformation> end = new End<VFreeBusy, FreeBusyInformation>();
-    private static AttributeConverter<VFreeBusy, FreeBusyInformation> participants = new Participants<VFreeBusy, FreeBusyInformation>();
-    private static AttributeConverter<VFreeBusy, FreeBusyInformation> freeBusyAttendee = new FreeBusyAttendee<VFreeBusy, FreeBusyInformation>();
-    private static AttributeConverter<VFreeBusy, FreeBusyInformation> freeBusySlots = new FreeBusySlots<VFreeBusy, FreeBusyInformation>();
+    private static AttributeConverter<VFreeBusy, FreeBusyInformation> freeBusyAttendee = new FreeBusyAttendee();
+    private static AttributeConverter<VFreeBusy, FreeBusyInformation> freeBusyAttendees = new FreeBusyAttendees();
+    private static AttributeConverter<VFreeBusy, FreeBusyInformation> freeBusySlots = new FreeBusySlots();
     private static AttributeConverter<VFreeBusy, FreeBusyInformation> createdBy = new CreatedBy<VFreeBusy, FreeBusyInformation>();
     
     /**
@@ -102,7 +100,7 @@ public final class FreeBusyConverters {
         tmp.add(uid);
         tmp.add(createdBy);
         tmp.add(createdAndDTStamp);
-        tmp.add(participants);
+        tmp.add(freeBusyAttendees);
         return tmp;
     }
 

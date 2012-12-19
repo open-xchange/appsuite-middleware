@@ -40,6 +40,7 @@ public class Activator extends HousekeepingActivator {
         return context;
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         for (ServiceRegistration sr: regs)
             sr.unregister();

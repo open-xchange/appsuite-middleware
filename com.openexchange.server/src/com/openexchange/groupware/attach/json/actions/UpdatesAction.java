@@ -173,9 +173,9 @@ public final class UpdatesAction extends AbstractAttachmentAction {
             Delta<AttachmentMetadata> delta;
             if (sort != null) {
                 delta =
-                    ATTACHMENT_BASE.getDelta(folderId, attachedId, moduleId, ts, ignoreDeleted, fields, sort, order, ctx, user, userConfig);
+                    ATTACHMENT_BASE.getDelta(session, folderId, attachedId, moduleId, ts, ignoreDeleted, fields, sort, order, ctx, user, userConfig);
             } else {
-                delta = ATTACHMENT_BASE.getDelta(folderId, attachedId, moduleId, ts, ignoreDeleted, ctx, user, userConfig);
+                delta = ATTACHMENT_BASE.getDelta(session, folderId, attachedId, moduleId, ts, ignoreDeleted, ctx, user, userConfig);
             }
             iter = delta.results();
             iter2 = delta.getDeleted();

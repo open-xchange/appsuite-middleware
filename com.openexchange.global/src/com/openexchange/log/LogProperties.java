@@ -51,10 +51,14 @@ package com.openexchange.log;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link LogProperties} - Provides thread-local log properties.
@@ -207,6 +211,41 @@ public final class LogProperties {
         } else {
             getLogProperties().put(name, value);
         }
+    }
+    
+    /**
+     * Get the thread local LogProperties and pretty-prints them into a Sting.
+     * The String will contain one ore more lines formatted like:
+     * <pre>
+     * "propertyName1=propertyValue1"
+     * "propertyName2=propertyValue2"
+     * "propertyName3=propertyValue3"
+     * </pre> 
+     * where the properties are sorted alphabetically.
+     */
+    public static String getAndPrettyPrint() {
+        String logString = "";
+        final Props logProperties = getLogProperties();
+        // If we have additional log properties from the ThreadLocal add it to the logBuilder
+        if (logProperties != null) {
+            StringAllocator logBuilder = new StringAllocator(1024);
+            Map<String, Object> propertyMap = logProperties.getMap();
+            // Sort the properties for readability
+            Map<String, String> sorted = new TreeMap<String, String>();
+            for (Entry<String, Object> propertyEntry : propertyMap.entrySet()) {
+                String propertyName = propertyEntry.getKey();
+                Object value = propertyEntry.getValue();
+                if (null != value) {
+                    sorted.put(propertyName, value.toString());
+                }
+            }
+            // And add them to the logBuilder
+            for (Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
+                logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append('\n');
+            }
+            logString=logBuilder.toString();
+        }
+        return logString;
     }
 
 }

@@ -180,7 +180,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
     private static int getCorePoolSize(final int desiredCorePoolSize) {
         final int minCorePoolSize = Runtime.getRuntime().availableProcessors() + 1;
         if (desiredCorePoolSize < minCorePoolSize) {
-            LOG.warn(new StringBuilder(128).append("\n\n\tConfigured pool size of ").append(desiredCorePoolSize).append(
+            LOG.warn(new com.openexchange.java.StringAllocator(128).append("\n\n\tConfigured pool size of ").append(desiredCorePoolSize).append(
                 " through property \"com.openexchange.threadpool.corePoolSize\" does not obey the rule\n\tfor minimum core pool size: ").append(
                 Runtime.getRuntime().availableProcessors()).append(" (number of CPUs) + 1 = ").append(minCorePoolSize).append(". Using ").append(
                 minCorePoolSize).append(" as core pool size.\n"));

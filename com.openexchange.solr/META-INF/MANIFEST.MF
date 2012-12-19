@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Solr
 Bundle-SymbolicName: com.openexchange.solr
-Bundle-Version: 6.22.1
+Bundle-Version: 7.0.0
 Bundle-Activator: com.openexchange.solr.osgi.SolrActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -131,8 +131,11 @@ Import-Package: com.hazelcast.cluster,
  org.apache.tika.sax,
  org.apache.tika.sax.xpath,
  org.apache.tika.utils,
+ org.eclipse.osgi.event;version="1.0.0",
  org.osgi.framework,
  org.osgi.service.event,
+ org.quartz,
+ org.quartz.service,
  org.w3c.dom,
  org.xml.sax,
  org.xml.sax.ext,
@@ -141,7 +144,6 @@ Bundle-ClassPath: .,
  lib/slf4j-api-1.6.1.jar,
  lib/slf4j-jcl-1.6.1.jar,
  lib/velocity-1.7.jar,
- cfg/,
  lib/jsonic-1.2.7.jar,
  lib/langdetect-1.1-20120112.jar,
  lib/apache-solr-core-3.6.1.jar,

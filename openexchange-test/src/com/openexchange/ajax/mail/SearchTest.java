@@ -49,14 +49,16 @@
 
 package com.openexchange.ajax.mail;
 
+import java.util.Date;
+import javax.mail.internet.MailDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.ajax.mail.actions.SearchRequest;
 import com.openexchange.ajax.mail.actions.SearchResponse;
-import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.mail.MailSortField;
 
@@ -119,9 +121,22 @@ public final class SearchTest extends AbstractMailTest {
          */
         final int numOfMails = 25;
         LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+        final String eml =
+            "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
+            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
+            "From: " + getSendAddress() + "\n" +
+            "To: " + getSendAddress() + "\n" +
+            "Subject: Invitation for launch\n" +
+            "Mime-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
+            "Content-Transfer-Encoding: 8bit\n" +
+            "\n" +
+            "This is a MIME message. If you are reading this text, you may want to \n" +
+            "consider changing to a mail reader or gateway that understands how to \n" +
+            "properly handle MIME multipart messages.";
         for (int i = 0; i < numOfMails; i++) {
-            getClient().execute(new SendRequest(mailObject_25kb));
-            LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
+            getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+            LOG.info("Appended " + (i + 1) + ". mail of " + numOfMails);
         }
         /*
          * Perform search request
@@ -162,9 +177,22 @@ public final class SearchTest extends AbstractMailTest {
          */
         final int numOfMails = 25;
         LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+        final String eml =
+            "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
+            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
+            "From: " + getSendAddress() + "\n" +
+            "To: " + getSendAddress() + "\n" +
+            "Subject: Invitation for launch\n" +
+            "Mime-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
+            "Content-Transfer-Encoding: 8bit\n" +
+            "\n" +
+            "This is a MIME message. If you are reading this text, you may want to \n" +
+            "consider changing to a mail reader or gateway that understands how to \n" +
+            "properly handle MIME multipart messages.";
         for (int i = 0; i < numOfMails; i++) {
-            getClient().execute(new SendRequest(mailObject_25kb));
-            LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
+            getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+            LOG.info("Appended " + (i + 1) + ". mail of " + numOfMails);
         }
         /*
          * Perform search request
@@ -172,7 +200,7 @@ public final class SearchTest extends AbstractMailTest {
         final JSONArray searchExpression1 =
             new JSONArray("['=', {'field':'from'}, '" + getSendAddress() + "']");
         final JSONArray searchExpression2 =
-            new JSONArray("['>', {'field':'size'}, '16']");
+            new JSONArray("['>', {'field':'size'}, '1']");
         final JSONArray searchExpression =
         	new JSONArray("['or', "+searchExpression1+","+searchExpression2+"]");
 
@@ -205,14 +233,31 @@ public final class SearchTest extends AbstractMailTest {
          */
         final int numOfMails = 25;
         LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+
+        MailDateFormat mdf = new MailDateFormat();
+        final long now = System.currentTimeMillis();
+        final Date dnow = new Date(now);
+        final String eml =
+            "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
+            "Date: " + mdf.format(dnow) + "\n" +
+            "From: " + getSendAddress() + "\n" +
+            "To: " + getSendAddress() + "\n" +
+            "Subject: Invitation for launch\n" +
+            "Mime-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
+            "Content-Transfer-Encoding: 8bit\n" +
+            "\n" +
+            "This is a MIME message. If you are reading this text, you may want to \n" +
+            "consider changing to a mail reader or gateway that understands how to \n" +
+            "properly handle MIME multipart messages.";
         for (int i = 0; i < numOfMails; i++) {
-            getClient().execute(new SendRequest(mailObject_25kb));
-            LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
+            getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+            LOG.info("Appended " + (i + 1) + ". mail of " + numOfMails);
         }
         /*
          * Perform search request
          */
-        final long recDate = System.currentTimeMillis() - 86400000L; // minus 1 day
+        final long recDate = now - 86400000L; // minus 1 day
         final JSONArray searchExpression = new JSONArray(
         	//"{\"operation\":\"and\",\"operands\":[{\"operation\":\"gt\",\"operands\":[{\"type\":\"column\",\"value\":\"received_date\"},\""+recDate+"\"]},{\"operation\":\"not\",\"operands\":[{\"operation\":\"equals\",\"operands\":[{\"type\":\"column\",\"value\":\"flags\"},\"32\"]}]}]}}");
         		"['and', ['>',{'field':'received_date'}, '"+recDate+"'], ['not', ['=', {'field':'flags'},'32']]]");

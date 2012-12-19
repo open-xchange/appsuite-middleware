@@ -60,6 +60,7 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.Quota.Type;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -74,7 +75,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmalFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced {
+public final class SmalFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced, IMailFolderStorageDelegator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalFolderStorage.class);
     
@@ -93,39 +94,26 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
     }
 
     @Override
+    public IMailFolderStorage getDelegateFolderStorage() throws OXException {
+        return folderStorage;
+    }
+
+    @Override
     public boolean exists(final String fullName) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             return true;
         }
-        final boolean exists = folderStorage.exists(fullName);
-        if (exists) {
-            try {
-                processFolder(fullName);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-        return exists;
+        return folderStorage.exists(fullName);
     }
 
     @Override
     public MailFolder getFolder(final String fullName) throws OXException {
         final MailFolder folder = folderStorage.getFolder(fullName);
-        try {
-            processFolder(folder);
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
         return folder;
     }
 
     @Override
     public MailFolder[] getSubfolders(final String parentFullName, final boolean all) throws OXException {
-        try {
-            processFolder(parentFullName);
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
         return folderStorage.getSubfolders(parentFullName, all);
     }
 

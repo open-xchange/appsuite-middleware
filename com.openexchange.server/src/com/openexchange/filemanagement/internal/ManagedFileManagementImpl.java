@@ -326,7 +326,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                     try {
                         final byte[] buf = new byte[8192];
                         int len = -1;
-                        while ((len = inputStream.read(buf, 0, buf.length)) != -1) {
+                        while ((len = inputStream.read(buf, 0, buf.length)) > 0) {
                             out.write(buf, 0, len);
                         }
                         out.flush();

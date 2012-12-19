@@ -478,6 +478,11 @@ public final class InternalList {
 
         // +++++++++++++++++++++++++++++++++ Version 6.22.1 starts here. +++++++++++++++++++++++++++++++++
         new com.openexchange.groupware.update.tasks.ContactFixUserDistListReferencesTask(),
-        
+
+        // +++++++++++++++++++++++++++++++++ Version 7.0.0 starts here. +++++++++++++++++++++++++++++++++
+
+        // Extends the resources' description field
+        new com.openexchange.groupware.update.tasks.EnlargeResourceDescription(),
+
     };
 }

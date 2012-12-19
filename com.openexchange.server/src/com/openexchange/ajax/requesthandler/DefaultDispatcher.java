@@ -58,6 +58,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -105,6 +106,9 @@ public class DefaultDispatcher implements Dispatcher {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final AJAXState state, final ServerSession session) throws OXException {
+        if (null == session) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_SESSION);
+        }
         List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
         final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
         /*
@@ -252,7 +256,7 @@ public class DefaultDispatcher implements Dispatcher {
                         current = actionFactories.get(module);
                         final Module moduleAnnotation = current.getClass().getAnnotation(Module.class);
                         if (null == moduleAnnotation) {
-                            final StringBuilder sb = new StringBuilder(512).append("There is already a factory associated with module \"");
+                            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512).append("There is already a factory associated with module \"");
                             sb.append(module).append("\": ").append(current.getClass().getName());
                             sb.append(". Therefore registration is denied for factory \"").append(factory.getClass().getName());
                             sb.append("\". Unless these two factories provide the \"").append(Module.class.getName()).append(

@@ -53,22 +53,15 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- *
+ * Test suite collecting the tests for the login servlet.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class SessionTestSuite {
 
-    /**
-     * Prevent instantiation.
-     */
     private SessionTestSuite() {
         super();
     }
 
-    /**
-     * Generates the session tests suite.
-     * @return the session tests suite.
-     */
     public static Test suite() {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(LoginTest.class);
@@ -79,6 +72,7 @@ public final class SessionTestSuite {
         tests.addTestSuite(RedeemTest.class);
         tests.addTestSuite(HttpAuthTest.class);
         tests.addTestSuite(ChangeIPTest.class);
+        tests.addTestSuite(FormLoginTest.class);
         return tests;
     }
 }

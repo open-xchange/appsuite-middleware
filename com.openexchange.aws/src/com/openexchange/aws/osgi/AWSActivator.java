@@ -53,7 +53,6 @@ import java.security.MessageDigest;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.autoscaling.AmazonAutoScaling;
@@ -79,32 +78,6 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class AWSActivator extends HousekeepingActivator {
 
-    private static final Log LOG = LogFactory.getLog(AWSActivator.class);
-
-    private ConfigurationService configService;
-
-    private String accessKey;
-
-    private String secretKey;
-
-    private String ec2Region;
-
-    private String lbRegion;
-
-    private String autoscalingRegion;
-
-    private String cloudwatchRegion;
-
-    private String amazonS3Region;
-
-    private boolean s3encryption;
-
-    private String aesKey;
-
-    private String aesSalt;
-
-    private String aesIV;
-
     /**
      * Initializes a new {@link AWSActivator}.
      */
@@ -119,16 +92,17 @@ public class AWSActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: com.openexchange.aws");
-        configService = getService(ConfigurationService.class);
-        accessKey = configService.getProperty("com.openexchange.aws.accessKey");
-        secretKey = configService.getProperty("com.openexchange.aws.secretKey");
-        ec2Region = configService.getProperty("com.openexchange.aws.ec2region");
-        lbRegion = configService.getProperty("com.openexchange.aws.lbregion");
-        autoscalingRegion = configService.getProperty("com.openexchange.aws.autoscalingregion");
-        cloudwatchRegion = configService.getProperty("com.openexchange.aws.cloudwatchregion");
-        amazonS3Region = configService.getProperty("com.openexchange.aws.s3region");
-        s3encryption = configService.getBoolProperty("com.openexchange.aws.s3encryption", false);
+        final Log log = com.openexchange.log.Log.loggerFor(AWSActivator.class);
+        log.info("Starting bundle: com.openexchange.aws");
+        final ConfigurationService configService = getService(ConfigurationService.class);
+        final String accessKey = configService.getProperty("com.openexchange.aws.accessKey");
+        final String secretKey = configService.getProperty("com.openexchange.aws.secretKey");
+        final String ec2Region = configService.getProperty("com.openexchange.aws.ec2region");
+        final String lbRegion = configService.getProperty("com.openexchange.aws.lbregion");
+        final String autoscalingRegion = configService.getProperty("com.openexchange.aws.autoscalingregion");
+        final String cloudwatchRegion = configService.getProperty("com.openexchange.aws.cloudwatchregion");
+        final String amazonS3Region = configService.getProperty("com.openexchange.aws.s3region");
+        final boolean s3encryption = configService.getBoolProperty("com.openexchange.aws.s3encryption", false);
         if (accessKey == null) {
             throw OXAWSExceptionCodes.AWS_NO_ACCESSKEY.create();
         }
@@ -144,30 +118,30 @@ public class AWSActivator extends HousekeepingActivator {
         if (amazonS3Region == null) {
             throw OXAWSExceptionCodes.AWS_NO_S3_REGION.create();
         }
-        AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-        AmazonEC2 amazonEC2 = new AmazonEC2Client(credentials);
+        final AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+        final AmazonEC2 amazonEC2 = new AmazonEC2Client(credentials);
         amazonEC2.setEndpoint(ec2Region);
-        AmazonElasticLoadBalancing amazonLoadBalancing = new AmazonElasticLoadBalancingClient(credentials);
+        final AmazonElasticLoadBalancing amazonLoadBalancing = new AmazonElasticLoadBalancingClient(credentials);
         amazonLoadBalancing.setEndpoint(lbRegion);
-        AmazonAutoScaling amazonAutoScaling = new AmazonAutoScalingClient(credentials);
+        final AmazonAutoScaling amazonAutoScaling = new AmazonAutoScalingClient(credentials);
         amazonAutoScaling.setEndpoint(autoscalingRegion);
-        AmazonCloudWatch amazonCloudWatch = new AmazonCloudWatchClient(credentials);
+        final AmazonCloudWatch amazonCloudWatch = new AmazonCloudWatchClient(credentials);
         amazonCloudWatch.setEndpoint(cloudwatchRegion);
         AmazonS3 amazonS3 = null;
         if (s3encryption) {
             SecretKey sKey = null;
             try {
-                aesKey = configService.getProperty("com.openexchange.aws.aeskey");
-                aesSalt = configService.getProperty("com.openexchange.aws.aessalt");
-                aesIV = configService.getProperty("com.openexchange.aws.aesiv");
+                final String aesKey = configService.getProperty("com.openexchange.aws.aeskey");
+                final String aesSalt = configService.getProperty("com.openexchange.aws.aessalt");
+                final String aesIV = configService.getProperty("com.openexchange.aws.aesiv");
                 byte[] key = (aesIV + aesKey + aesSalt).getBytes("UTF-8");
-                MessageDigest sha = MessageDigest.getInstance("SHA-256");
+                final MessageDigest sha = MessageDigest.getInstance("SHA-256");
                 key = sha.digest();
                 sKey = new SecretKeySpec(key, "AES");
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw OXAWSExceptionCodes.AWS_S3_ENCRYPTION_ERROR.create(e.getMessage());
             }
-            EncryptionMaterials encryptionMaterials = new EncryptionMaterials(sKey);
+            final EncryptionMaterials encryptionMaterials = new EncryptionMaterials(sKey);
             amazonS3 = new AmazonS3EncryptionClient(credentials, encryptionMaterials);
         } else {
             amazonS3 = new AmazonS3Client(credentials);
@@ -182,7 +156,8 @@ public class AWSActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: com.openexchange.aws");
+        final Log log = com.openexchange.log.Log.loggerFor(AWSActivator.class);
+        log.info("Stopping bundle: com.openexchange.aws");
         unregisterServices();
         cleanUp();
     }

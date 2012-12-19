@@ -102,7 +102,7 @@ public class SaveAsAction extends AbstractWriteAction {
         final ServerSession session = request.getSession();
 
         final AttachmentMetadata att = attachments.getAttachment(
-            folderId,
+            session, folderId,
             attachedId,
             moduleId,
             attachment,
@@ -139,7 +139,7 @@ public class SaveAsAction extends AbstractWriteAction {
 
         file.setId(FileStorageFileAccess.NEW);
         final InputStream fileData = attachments.getAttachedFile(
-            folderId,
+            session, folderId,
             attachedId,
             moduleId,
             attachment,

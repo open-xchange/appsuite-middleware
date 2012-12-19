@@ -66,8 +66,8 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
@@ -229,7 +229,7 @@ public final class MimeProcessingUtility {
             }
             contentType.setBaseType("text/plain");
             final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-            return htmlService.html2text(htmlService.getConformHTML(readContent(textPart, charset), contentType.getCharsetParameter()), false);
+            return htmlService.html2text(readContent(textPart, charset), false);
             // return new Html2TextConverter().convertWithQuotes(MessageUtility.readMimePart(textPart, contentType));
         } else if (contentType.isMimeType(MimeTypes.MIME_TEXT_PLAIN)) {
             final String content = readContent(textPart, charset);
@@ -294,7 +294,7 @@ public final class MimeProcessingUtility {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
+                LOG.warn(new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
                     "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
             }
             return MessageUtility.readMailPart(mailPart, fallback);
@@ -336,7 +336,7 @@ public final class MimeProcessingUtility {
      * @return A comma-separated list of addresses as a {@link String}
      */
     static String addrs2String(final InternetAddress[] addrs) {
-        final StringBuilder tmp = new StringBuilder(addrs.length << 4);
+        final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(addrs.length << 4);
         tmp.append(addrs[0].toUnicodeString());
         for (int i = 1; i < addrs.length; i++) {
             tmp.append(", ").append(addrs[i].toUnicodeString());
@@ -360,9 +360,7 @@ public final class MimeProcessingUtility {
         } else if (rootType.startsWith(CT_TEXT_HTM)) {
             textBuilder.append(htmlFormat(text));
         } else {
-            final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-            final String plainText = htmlService.html2text(htmlService.getConformHTML(text, contentType.getCharsetParameter()), false);
-            textBuilder.append(plainText);
+            textBuilder.append(ServerServiceRegistry.getInstance().getService(HtmlService.class).html2text(text, false));
             // textBuilder.append(new Html2TextConverter().convertWithQuotes(text));
         }
     }

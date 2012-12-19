@@ -65,10 +65,10 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
@@ -377,7 +377,7 @@ public final class MemorizerWorker {
     private static final ContactField[] FIELDS = { 
     	ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.USE_COUNT };
 
-	private static final ContactField[] SEARCH_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL1, ContactField.EMAIL3 }; 
+	private static final ContactField[] SEARCH_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 }; 
 
     private static int memorizeContact(final InternetAddress address, final Session session, final Context ctx, final UserConfiguration userConfig) throws OXException {
         /*
@@ -511,15 +511,15 @@ public final class MemorizerWorker {
         final String val = MimeUtility.unfold(value);
         final Matcher m = ENC_PATTERN.matcher(val);
         if (m.find()) {
-            final StringBuilder sb = new StringBuilder(val.length());
+            final com.openexchange.java.StringAllocator sa = new com.openexchange.java.StringAllocator(val.length());
             int lastMatch = 0;
             do {
-                sb.append(val.substring(lastMatch, m.start()));
-                sb.append(Matcher.quoteReplacement(MimeUtility.decodeWord(m.group())));
+                sa.append(val.substring(lastMatch, m.start()));
+                sa.append(Matcher.quoteReplacement(MimeUtility.decodeWord(m.group())));
                 lastMatch = m.end();
             } while (m.find());
-            sb.append(val.substring(lastMatch));
-            return sb.toString();
+            sa.append(val.substring(lastMatch));
+            return sa.toString();
         }
         return val;
     }

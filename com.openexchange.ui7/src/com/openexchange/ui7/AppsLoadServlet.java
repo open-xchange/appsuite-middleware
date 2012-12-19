@@ -73,11 +73,11 @@ public class AppsLoadServlet extends HttpServlet {
 
     private static org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AppsLoadServlet.class));
 
-    private Map<String, byte[]> cache = new ConcurrentHashMap<String, byte[]>();
+    private final Map<String, byte[]> cache = new ConcurrentHashMap<String, byte[]>();
 
     private String version;
 
-    private File root, zoneinfo;
+    private final File root, zoneinfo;
 
     private static String ZONEINFO = "io.ox/core/date/tz/zoneinfo/";
 
@@ -128,6 +128,13 @@ public class AppsLoadServlet extends HttpServlet {
         StringBuffer sb = new StringBuffer();
         escape(name, sb);
         return sb.toString();
+    }
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
+        super.service(req, resp);
     }
 
     @Override

@@ -74,9 +74,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
     private static final String TABLE_NAME = "pop3_storage_ids";
 
     private final int cid;
-
     private final int user;
-
     private final int accountId;
 
     /**
@@ -123,12 +121,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     @Override
     public void addMappings(final String[] uidls, final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, true);
-        } catch (final OXException e) {
-            throw e;
-        }
+        final Connection con = Database.get(cid, true);
         PreparedStatement stmt = null;
         try {
             // Delete possibly existing mappings for specified UIDLs
@@ -140,7 +133,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                     stmt.setInt(pos++, cid);
                     stmt.setInt(pos++, user);
                     stmt.setInt(pos++, accountId);
-                    stmt.setString(pos++, uidl);
+                    stmt.setString(pos, uidl);
                     stmt.addBatch();
                 }
             }
@@ -161,17 +154,88 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                         stmt.setInt(pos++, accountId);
                         stmt.setString(pos++, uidl);
                         stmt.setString(pos++, fullname);
-                        stmt.setString(pos++, mailId);
+                        stmt.setString(pos, mailId);
                         stmt.addBatch();
                     }
                 }
             }
             stmt.executeBatch();
+        } catch (final java.sql.BatchUpdateException e) {
+            closeSQLStuff(null, stmt);
+            stmt = null;
+            // One-by-one
+            for (int i = 0; i < uidls.length; i++) {
+                final String uidl = uidls[i];
+                if (uidl != null) {
+                    if (exists(uidl, con)) {
+                        update(uidl, fullnameUIDPairs[i], con);
+                    } else {
+                        insert(uidl, fullnameUIDPairs[i], con);
+                    }
+                }
+            }
         } catch (final SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             Database.back(cid, true, con);
+        }
+    }
+
+    private void update(final String uidl, final FullnameUIDPair pair, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE " + TABLE_NAME + " SET fullname=?, uid=? WHERE cid = ? AND user = ? AND id = ? AND uidl = ?");
+            int pos = 1;
+            stmt.setString(pos++, pair.getFullname());
+            stmt.setString(pos++, pair.getMailId());
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos++, accountId);
+            stmt.setString(pos, uidl);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
+
+    private void insert(final String uidl, final FullnameUIDPair pair, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL_INSERT_UIDLS);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos++, accountId);
+            stmt.setString(pos++, uidl);
+            stmt.setString(pos++, pair.getFullname());
+            stmt.setString(pos, pair.getMailId());
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
+
+    private boolean exists(final String uidl, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT 1 FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND uidl = ?");
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos++, accountId);
+            stmt.setString(pos, uidl);
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (final SQLException e) {
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
         }
     }
 
@@ -193,7 +257,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
             stmt.setInt(pos++, accountId);
-            stmt.setString(pos++, uidl);
+            stmt.setString(pos, uidl);
             rs = stmt.executeQuery();
             if (rs.next()) {
                 return new FullnameUIDPair(rs.getString(1), rs.getString(2));
@@ -226,7 +290,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             stmt.setInt(pos++, user);
             stmt.setInt(pos++, accountId);
             stmt.setString(pos++, fullnameUIDPair.getFullname());
-            stmt.setString(pos++, fullnameUIDPair.getMailId());
+            stmt.setString(pos, fullnameUIDPair.getMailId());
             rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getString(1);

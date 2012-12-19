@@ -64,6 +64,7 @@ import com.openexchange.caldav.mixins.DefaultAlarmVeventDatetime;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.search.Order;
@@ -80,13 +81,14 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
     
     private static final int[] BASIC_COLUMNS = { 
         Appointment.UID, Appointment.FILENAME, Appointment.FOLDER_ID, Appointment.OBJECT_ID, Appointment.LAST_MODIFIED, 
-        Appointment.RECURRENCE_ID, Appointment.CREATION_DATE
+        Appointment.RECURRENCE_ID, Appointment.CREATION_DATE, Appointment.CHANGE_EXCEPTIONS
     };
     
     private final GroupwareCaldavFactory factory;
     private AppointmentSQLInterface appointmentInterface = null;
+    private CalendarCollectionService calendarCollection;
     private List<Appointment> knownAppointments = null;
-    private Map<Integer, ArrayList<Appointment>> knownExceptions = null;
+    private Map<Integer, CalendarDataObject[]> knownExceptions = null;
 
     public AppointmentCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder) throws OXException {
         this(factory, url, folder, NO_ORDER);
@@ -99,41 +101,6 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             new DefaultAlarmVeventDate(), new DefaultAlarmVeventDatetime());
     }
     
-    private AppointmentSQLInterface getAppointmentInterface() {
-        if (null == this.appointmentInterface) {
-            this.appointmentInterface = factory.getAppointmentInterface();
-        }
-        return this.appointmentInterface;
-    }
-    
-    private void updateCache() throws OXException {
-        this.knownAppointments = new ArrayList<Appointment>();
-        this.knownExceptions = new HashMap<Integer, ArrayList<Appointment>>();
-        SearchIterator<Appointment> searchIterator = null;
-        try {
-            searchIterator = getAppointmentInterface().getAppointmentsBetweenInFolder(this.folderID, BASIC_COLUMNS, 
-                getIntervalStart(), getIntervalEnd(), -1, Order.NO_ORDER);
-            while (searchIterator.hasNext()) {
-                Appointment appointment = searchIterator.next();
-                if (appointment.containsRecurrenceID() && appointment.getObjectID() != appointment.getRecurrenceID()) {
-                    int recurrenceID = appointment.getRecurrenceID();
-                    ArrayList<Appointment> changeExceptions = knownExceptions.get(recurrenceID);
-                    if (null == changeExceptions) {
-                        changeExceptions = new ArrayList<Appointment>(); 
-                        knownExceptions.put(Integer.valueOf(recurrenceID), changeExceptions);
-                    }
-                    changeExceptions.add(appointment);
-                } else {
-                    knownAppointments.add(appointment);
-                }
-            }
-        } catch (SQLException e) {
-            throw protocolException(e);
-        } finally {
-            searchIterator.close();
-        }
-    }
-    
     public List<Appointment> getAppointments() throws OXException {
         if (null == this.knownAppointments) {
             this.updateCache();
@@ -141,20 +108,20 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
         return knownAppointments;
     }
 
-    public ArrayList<Appointment> getChangeExceptions(int recurrenceID) throws OXException {
+    public CalendarDataObject[] getChangeExceptions(int recurrenceID) throws OXException {
         if (null == this.knownExceptions) {
             this.updateCache();
         }
         return this.knownExceptions.get(Integer.valueOf(recurrenceID));
     }
     
-    public ArrayList<Appointment> loadChangeExceptions(int recurrenceID) throws OXException {
-        ArrayList<Appointment> changeExceptions = getChangeExceptions(recurrenceID);
-        if (null != changeExceptions && 0 < changeExceptions.size()) {
-            for (int i = 0; i < changeExceptions.size(); i++) {
-                Appointment changeException = changeExceptions.get(i);
+    public CalendarDataObject[] loadChangeExceptions(int recurrenceID) throws OXException {
+        CalendarDataObject[] changeExceptions = getChangeExceptions(recurrenceID);
+        if (null != changeExceptions && 0 < changeExceptions.length) {
+            for (int i = 0; i < changeExceptions.length; i++) {
+                Appointment changeException = changeExceptions[i];
                 if (false == changeException.containsRecurrenceDatePosition()) {
-                    changeExceptions.set(i, this.load(changeException, false));
+                    changeExceptions[i] = this.load(changeException, false);
                 }
             }
         }
@@ -217,16 +184,112 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
         return appointments;
     }
 
-    protected Appointment load(Appointment appointment, boolean applyPatches) throws OXException {
+    @Override
+    protected Appointment getObject(String resourceName) throws OXException {
+        Appointment object = super.getObject(resourceName);
+        if (null == object) {
+            /*
+             * try to resolve object by UID / filename directly if not found
+             */
+            int objectID = getAppointmentInterface().resolveUid(resourceName);
+            if (1 > objectID) {
+                objectID = getAppointmentInterface().resolveFilename(resourceName);
+            }            
+            if (0 < objectID) {
+                try {
+                    object = getAppointmentInterface().getObjectById(objectID, folderID);
+                    this.remember(object);
+                } catch (OXException e) {
+                    if ("APP-0059".equals(e.getErrorCode())) {
+                        // Got the wrong folder identification. You do not have the appropriate permissions to modify this object
+                        // ignore
+                    } else {
+                        throw e;
+                    }
+                } catch (SQLException e) {
+                    throw protocolException(e);
+                }
+            }
+        }
+        return object;
+    }
+
+    protected CalendarDataObject load(Appointment appointment, boolean applyPatches) throws OXException {
         try {
-            CalendarDataObject cdo = getAppointmentInterface().getObjectById(appointment.getObjectID(), appointment.getParentFolderID());
+            CalendarDataObject cdo = 0 < appointment.getParentFolderID() ? 
+                getAppointmentInterface().getObjectById(appointment.getObjectID(), appointment.getParentFolderID()) :
+                getAppointmentInterface().getObjectById(appointment.getObjectID());
+            this.remember(appointment);
             return applyPatches ? patch(cdo) : cdo;
         } catch (SQLException e) {
             throw super.protocolException(e);
         }
     }
     
-    private Appointment patch(CalendarDataObject appointment) throws OXException {
+    private AppointmentSQLInterface getAppointmentInterface() {
+        if (null == this.appointmentInterface) {
+            this.appointmentInterface = factory.getAppointmentInterface();
+        }
+        return this.appointmentInterface;
+    }
+    
+    private CalendarCollectionService getCalendarCollection() {
+        if (null == this.calendarCollection) {
+            this.calendarCollection = factory.getCalendarUtilities();
+        }
+        return this.calendarCollection;
+    }
+    
+    private void updateCache() throws OXException {
+        this.knownAppointments = new ArrayList<Appointment>();
+        this.knownExceptions = new HashMap<Integer, CalendarDataObject[]>();
+        SearchIterator<Appointment> searchIterator = null;
+        try {
+            searchIterator = getAppointmentInterface().getAppointmentsBetweenInFolder(this.folderID, BASIC_COLUMNS, 
+                getIntervalStart(), getIntervalEnd(), -1, Order.NO_ORDER);
+            while (searchIterator.hasNext()) {
+                this.remember(searchIterator.next());
+            }
+        } catch (SQLException e) {
+            throw protocolException(e);
+        } finally {
+            if (null != searchIterator) {
+                searchIterator.close();
+            }
+        }
+    }
+    
+    /**
+     * Adds the supplied appointment to the list of known appointments, implicitly loading recurring appointment exceptions as well if 
+     * needed.
+     * 
+     * @param appointment The appointment to remember
+     * @return <code>true</code>, if it was added to the cache, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    private boolean remember(Appointment appointment) throws OXException {
+        if (null == this.knownAppointments || null == this.knownExceptions) {
+            LOG.warn("Appointment cache not initialized, unable to remember appointment.");
+            return false;
+        } else if (appointment.containsRecurrenceID()) {
+            if (appointment.getObjectID() == appointment.getRecurrenceID()) {
+                knownAppointments.add(appointment);
+                if (null != appointment.getChangeException() && 0 < appointment.getChangeException().length) {
+                    CalendarDataObject[] changeExceptions = getCalendarCollection().getChangeExceptionsByRecurrence(
+                        appointment.getRecurrenceID(), BASIC_COLUMNS, factory.getSession());
+                    if (null != changeExceptions && 0 < changeExceptions.length) {
+                        knownExceptions.put(Integer.valueOf(appointment.getRecurrenceID()), changeExceptions); 
+                    }
+                }
+                return true;
+            }
+        } else {
+            return knownAppointments.add(appointment);
+        }
+        return false;
+    }
+    
+    private CalendarDataObject patch(CalendarDataObject appointment) throws OXException {
         if (null != appointment) {
             Patches.Outgoing.removeAlarmInSharedFolder(getFolder(), appointment);
             Patches.Outgoing.resolveGroupParticipants(appointment);

@@ -72,6 +72,7 @@ public final class ImageLocation {
         protected String accountId;
         protected String folder;
         protected String id;
+        protected String timestamp;
 
         public Builder() {
             super();
@@ -90,6 +91,9 @@ public final class ImageLocation {
         public Builder id(final String id) {
             this.id = id; return this;
         }
+        public Builder timestamp(final String timestamp) {
+            this.timestamp = timestamp; return this;
+        }
         public ImageLocation build() {
             return new ImageLocation(this);
         }
@@ -102,6 +106,8 @@ public final class ImageLocation {
     private final String id;
 
     private final String imageId;
+
+    private final String timestamp;
 
     private final ConcurrentMap<String, Object> properties;
 
@@ -117,6 +123,7 @@ public final class ImageLocation {
         this.folder = builder.folder;
         this.id = builder.id;
         this.imageId = builder.imageId;
+        this.timestamp = builder.timestamp;
     }
 
     /**
@@ -213,6 +220,15 @@ public final class ImageLocation {
     }
 
     /**
+     * Gets the timestamp
+     *
+     * @return The timestamp
+     */
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    /**
      * Gets the image identifier
      *
      * @return The image identifier
@@ -254,6 +270,9 @@ public final class ImageLocation {
         }
         if (imageId != null) {
             builder.append("imageId=").append(imageId).append(", ");
+        }
+        if (timestamp != null) {
+            builder.append("timestamp=").append(timestamp).append(", ");
         }
         if (properties != null && !properties.isEmpty()) {
             builder.append("properties=").append(properties);

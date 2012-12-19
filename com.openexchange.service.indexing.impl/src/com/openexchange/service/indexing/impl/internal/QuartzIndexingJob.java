@@ -64,12 +64,19 @@ import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.IndexManagementService;
+import com.openexchange.index.IndexProperties;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
+import com.openexchange.index.solr.ModuleSet;
 import com.openexchange.service.indexing.IndexingJob;
+import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
 import com.openexchange.solr.SolrCoreIdentifier;
 
@@ -84,39 +91,86 @@ public class QuartzIndexingJob implements Job {
     
     private static final Log LOG = com.openexchange.log.Log.loggerFor(QuartzIndexingJob.class);
     
+    private static final String FAIL_COUNT = "failCount";
+    
     
     public QuartzIndexingJob() {
         super();
     }    
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {        
-        JobDataMap jobData = context.getMergedJobDataMap();        
-        Object infoObject = jobData.get(JobConstants.JOB_INFO);
+    public void execute(JobExecutionContext context) throws JobExecutionException {
+        JobDataMap jobData = context.getJobDetail().getJobDataMap();
+        JobDataMap mergedData = context.getMergedJobDataMap();
+        Object infoObject = mergedData.get(JobConstants.JOB_INFO);
         if (infoObject == null || !(infoObject instanceof JobInfo)) {
             String msg = "JobDataMap did not contain valid JobInfo instance.";
             LOG.error(msg);
             throw new JobExecutionException(msg, false);
         } 
         
-        JobInfo jobInfo = (JobInfo) infoObject;  
+        JobInfo jobInfo = (JobInfo) infoObject;
         if (LOG.isDebugEnabled()) {
             LOG.debug("Started execution of job " + jobInfo.toString() + ". Trigger: " + context.getTrigger().getKey());
         }
         
+        boolean error = false;
         try {
+            if (jobData.containsKey(FAIL_COUNT)) {
+                int failCount = jobData.getInt(FAIL_COUNT);
+                if (failCount > 3) {
+                    IndexingService indexingService = Services.getService(IndexingService.class);
+                    indexingService.unscheduleJob(false, jobInfo);
+                    LOG.error("Job " + jobInfo.toString() + " failed more than three times in sequence. It will be removed from the scheduler.");
+                }
+            } else {
+                jobData.put(FAIL_COUNT, 0);
+            }
+            
             submitCallable(jobInfo);
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            error = true;
             LOG.error(e.getMessage(), e);
             throw new JobExecutionException(e);
+        } finally {
+            int failCount = jobData.getInt(FAIL_COUNT);
+            if (error) {
+                jobData.put(FAIL_COUNT, ++failCount);
+            } else {
+                if (failCount > 0) {
+                    jobData.put(FAIL_COUNT, --failCount);
+                }
+            }
         }
     }
     
     protected void submitCallable(JobInfo jobInfo) throws Exception {
+        ConfigViewFactory config = Services.getService(ConfigViewFactory.class);
+        ConfigView view = config.getView(jobInfo.userId, jobInfo.contextId);
+        String moduleStr = view.get(IndexProperties.ALLOWED_MODULES, String.class);
+        ModuleSet modules = new ModuleSet(moduleStr);
+        if (!modules.containsModule(jobInfo.getModule())) {
+            if (LOG.isDebugEnabled()) {
+                OXException e = IndexExceptionCodes.INDEXING_NOT_ENABLED.create(jobInfo.getModule(), jobInfo.userId, jobInfo.contextId);
+                LOG.debug("Skipping job execution because: " + e.getMessage());
+            }
+            
+            return;
+        }
+        
+        IndexManagementService managementService = Services.getService(IndexManagementService.class);
+        if (managementService.isLocked(jobInfo.contextId, jobInfo.userId, jobInfo.getModule())) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Skipping job execution because corresponding index is locked. " + jobInfo.toString());
+            }
+            
+            return;
+        }
+        
         SolrCoreIdentifier identifier = new SolrCoreIdentifier(jobInfo.contextId, jobInfo.userId, jobInfo.getModule());
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         // FIXME: This core handling stuff has to be centralized and hidden by a transparent layer.
-        IMap<String, String> solrCores = hazelcast.getMap("solrCoreMap");            
+        IMap<String, String> solrCores = hazelcast.getMap("solrCoreMap");
         String owner = solrCores.get(identifier.toString());
         if (owner == null) {
             startUpIndex(jobInfo);
@@ -129,7 +183,7 @@ public class QuartzIndexingJob implements Job {
             return;
         }
         
-        Member executor = null;            
+        Member executor = null;
         for (Member member : hazelcast.getCluster().getMembers()) {
             if (owner.equals(resolveSocketAddress(member.getInetSocketAddress()))) {
                 executor = member;
@@ -148,7 +202,7 @@ public class QuartzIndexingJob implements Job {
                 ExecutorService executorService = hazelcast.getExecutorService();
                 executorService.submit(task);
                 task.get();
-            }           
+            }
         }
     }
 

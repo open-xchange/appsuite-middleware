@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.StoredSession;
-import com.openexchange.sessionstorage.impl.exceptions.OXSessionStorageExceptionCodes;
+import com.openexchange.sessionstorage.exceptions.OXSessionStorageExceptionCodes;
 
 /**
  * {@link SessionStorageServiceImpl}
@@ -250,7 +250,7 @@ public class SessionStorageServiceImpl implements SessionStorageService {
 
     @Override
     public Session getCachedSession(String sessionId) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -274,7 +274,7 @@ public class SessionStorageServiceImpl implements SessionStorageService {
 
     @Override
     public void checkAuthId(String login, String authId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 

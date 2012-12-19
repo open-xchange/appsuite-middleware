@@ -333,7 +333,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
 
             @Override
             public Protocol getProtocol() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return null;
             }
 
@@ -541,7 +541,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
 
             @Override
             public Protocol getProtocol() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return null;
             }
 

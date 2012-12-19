@@ -150,13 +150,13 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 
 		@Override
         public void beforeUpdate(final CalendarDataObject cdao) {
-			// TODO Auto-generated method stub
+			// Nothing to do
 
 		}
 
 		@Override
         public void afterUpdate(final CalendarDataObject cdao) {
-			// TODO Auto-generated method stub
+			// Nothing to do
 
 		}
 
@@ -510,10 +510,10 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 	}
 
 	@Override
-    public long attachmentAction(final int objectId, final int uid, final int folderId,
+    public long attachmentAction(final int folderId, final int objectId, final int userId,
 			final Session session, final Context c, final int numberOfAttachments)
 			throws OXException {
-		return delegate.attachmentAction(objectId, uid, folderId, session, c,
+		return delegate.attachmentAction(folderId, objectId, userId, session, c,
 				numberOfAttachments);
 	}
 
@@ -542,10 +542,15 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
         return delegate.getAppointmentsBetween(start, end, cols, orderBy, order);
     }
 
-	@Override
+    @Override
     public int resolveUid(final String uid) throws OXException {
-		return delegate.resolveUid(uid);
-	}
+        return delegate.resolveUid(uid);
+    }
+
+    @Override
+    public int resolveFilename(final String filename) throws OXException {
+        return delegate.resolveFilename(filename);
+    }
 
 	@Override
     public int getFolder(final int objectId) throws OXException {

@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.osgi.framework.BundleContext;
 import junit.framework.TestCase;
+import org.osgi.framework.BundleContext;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.Interface;
@@ -14,7 +14,6 @@ import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
@@ -87,22 +86,22 @@ public class IntegrationTest extends TestCase {
     private static final String password2 = "netline";
 
     public static PresenceSubscriptionService subscriptionService;
-    
-    
+
     @Override
     protected void setUp() throws Exception {
         BundleContext context = Activator.getDefault().getContext();
 
         assertNotNull(context);
-        
+
         subscriptionService = (PresenceSubscriptionService) context.getService(context.getServiceReference(PresenceSubscriptionService.class.getName()));
-        
+
         assertNotNull(subscriptionService);
-        
+
         super.setUp();
     }
 
-    public void testWas() throws Exception {
+    public void testSubscribe() throws Exception {
+        // marcus subscribes to martin
         Presence subscription = new Presence();
         ID from = new ID(null, "marcus", "1337", null);
         subscription.setFrom(from);
@@ -110,37 +109,40 @@ public class IntegrationTest extends TestCase {
         subscription.setTo(to);
         subscription.setType(Presence.Type.UNSUBSCRIBED);
         
+        // martin approves subscription request
         Presence approval = new Presence();
         approval.setTo(from);
         approval.setFrom(to);
-        approval.setPayload(new Payload("Sicher doch.", "presenceReplyMessage"));
+        approval.setMessage("Sicher doch.");
         approval.setType(Type.SUBSCRIBED);
         try {
-            
+            //subscribe
             subscriptionService.subscribe(subscription, "bitte bitte", getSessionOne());
             List<Presence> pendingRequests = subscriptionService.getPendingRequests(getSessionOne());
             assertEquals("Wrong amount of pending requests.", 1, pendingRequests.size());
-            assertEquals("Wrong or missing message.", "bitte bitte", pendingRequests.get(0).getPayload().getData());
+            assertEquals("Wrong or missing message.", "bitte bitte", pendingRequests.get(0).getMessage());
             List<ID> subscribers = subscriptionService.getSubscribers(getSessionOne());
             assertEquals("No subscribers expected.", 0, subscribers.size());
-            
+
             List<ID> subscriptions = subscriptionService.getSubscriptions(getSessionTwo());
             assertEquals("No subscriptions expected.", 0, subscriptions.size());
-            
+
+            //approve 
             subscriptionService.approve(approval, getSessionOne());
             subscribers = subscriptionService.getSubscribers(getSessionOne());
             assertEquals("One subscriber expected.", 1, subscribers.size());
             ID id = subscribers.get(0);
             assertEquals(from.getUser(), id.getUser());
             assertEquals(from.getContext(), id.getContext());
-            
+
             subscriptions = subscriptionService.getSubscriptions(getSessionTwo());
             assertEquals("One subscription expected.", 1, subscriptions.size());
             id = subscriptions.get(0);
-            assertEquals("asdasd", to.getUser(), id.getUser());
+            assertEquals("Subscribed user doesn't match initial subscription", to.getUser(), id.getUser());
             assertEquals(to.getContext(), id.getContext());
-            
-            approval.setPayload(new Payload("Hau ab!", "presenceReplyMessage"));
+
+            //revoke subscription again
+            approval.setMessage("Hau ab!");
             approval.setType(Type.UNSUBSCRIBED);
             subscriptionService.approve(approval, getSessionOne());
             subscribers = subscriptionService.getSubscribers(getSessionOne());
@@ -151,11 +153,11 @@ public class IntegrationTest extends TestCase {
             e.printStackTrace();
         }
     }
-    
+
     private ServerSession getSessionOne() throws Exception {
         return getSession(user1, password1);
     }
-    
+
     private ServerSession getSessionTwo() throws Exception {
         return getSession(user2, password2);
     }
@@ -167,7 +169,7 @@ public class IntegrationTest extends TestCase {
             public String getVersion() {
                 return "";
             }
-            
+
             @Override
             public boolean isVolatile() {
                 return false;

@@ -53,7 +53,7 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.ListRequest;
-import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.mail.MailListField;
 
 /**
@@ -87,17 +87,29 @@ public final class ListTest extends AbstractMailTest {
         clearFolder(getSentFolder());
         clearFolder(getTrashFolder());
         /*
-         * Create JSON mail object
+         * Create mail
          */
-        final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
+        final String eml =
+            ("Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
+            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
+            "From: #ADDR#\n" +
+            "To: #ADDR#\n" +
+            "Subject: Invitation for launch\n" +
+            "Mime-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
+            "Content-Transfer-Encoding: 8bit\n" +
+            "\n" +
+            "This is a MIME message. If you are reading this text, you may want to \n" +
+            "consider changing to a mail reader or gateway that understands how to \n" +
+            "properly handle MIME multipart messages.").replaceAll("#ADDR#", getSendAddress());
         /*
-         * Insert 100 mails through a send request
+         * Insert mails
          */
         final int numOfMails = 25;
         LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
         for (int i = 0; i < numOfMails; i++) {
-            Executor.execute(getSession(), new SendRequest(mailObject_25kb));
-            LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
+            getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+            LOG.info("Appended " + (i + 1) + ". mail of " + numOfMails);
         }
         /*
          * Get their folder and IDs

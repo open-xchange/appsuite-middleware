@@ -154,12 +154,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
 
     @Override
     public void addProperty(final String propertyName, final String propertyValue) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, true);
-        } catch (final OXException e) {
-            throw e;
-        }
+        final Connection con = Database.get(cid, true);
         PreparedStatement stmt = null;
         try {
             // Delete possibly existing mapping
@@ -190,12 +185,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
 
     @Override
     public String getProperty(final String propertyName) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, false);
-        } catch (final OXException e) {
-            throw e;
-        }
+        final Connection con = Database.get(cid, false);
         try {
             return getProperty(accountId, user, cid, propertyName, con);
         } finally {
@@ -205,12 +195,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
 
     @Override
     public void removeProperty(final String propertyName) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, true);
-        } catch (final OXException e) {
-            throw e;
-        }
+        final Connection con = Database.get(cid, true);
         PreparedStatement stmt = null;
         try {
             // Delete possibly existing mapping

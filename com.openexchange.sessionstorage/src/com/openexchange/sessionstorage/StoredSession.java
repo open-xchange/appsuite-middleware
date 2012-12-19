@@ -71,26 +71,35 @@ public class StoredSession implements PutIfAbsent, Serializable {
      */
     //public static final String PARAM_SST_FUTURE = "__sst-future";
 
-    private String loginName;
-    private String password;
-    private int contextId;
-    private int userId;
-    private String sessionId;
-    private String secret;
-    private String login;
-    private String randomToken;
-    private String localIp;
-    private String authId;
-    private String hash;
-    private String client;
-    private String userLogin;
-    private final ConcurrentMap<String, Object> parameters;
+    protected String loginName;
+    protected String password;
+    protected int contextId;
+    protected int userId;
+    protected String sessionId;
+    protected String secret;
+    protected String login;
+    protected String randomToken;
+    protected String localIp;
+    protected String authId;
+    protected String hash;
+    protected String client;
+    protected String userLogin;
+    protected final ConcurrentMap<String, Object> parameters;
+
+    /**
+     * Initializes a new, empty {@link StoredSession}.
+     */
+    public StoredSession() {
+        super();
+        this.parameters = new ConcurrentHashMap<String, Object>(2);
+    }
 
     /**
      * Initializes a new {@link StoredSession}.
      */
-    public StoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters) {
-        super();
+    public StoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, 
+        String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters) {
+        this();
         this.sessionId = sessionId;
         this.loginName = loginName;
         this.password = password;
@@ -104,7 +113,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.hash = hash;
         this.client = client;
         this.userLogin = "";
-        this.parameters = new ConcurrentHashMap<String, Object>();
         // Assign parameters (if not null)
         if (parameters != null) {
             Object parameter = parameters.get(Session.PARAM_LOCK);
@@ -127,12 +135,12 @@ public class StoredSession implements PutIfAbsent, Serializable {
             }
         }
     }
-
+    
     /**
      * Initializes a new {@link StoredSession}.
      */
     public StoredSession(final Session session) {
-        super();
+        this();
         this.authId = session.getAuthId();
         this.client = session.getClient();
         this.contextId = session.getContextId();
@@ -140,7 +148,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.localIp = session.getLocalIp();
         this.login = session.getLogin();
         this.loginName = session.getLoginName();
-        this.parameters = new ConcurrentHashMap<String, Object>();
         // Assign parameters (if not null)
         {
             Object parameter = session.getParameter(Session.PARAM_LOCK);
@@ -169,7 +176,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.userId = session.getUserId();
         this.userLogin = session.getUserlogin();
     }
-
+    
     @Override
     public String getLoginName() {
         return loginName;

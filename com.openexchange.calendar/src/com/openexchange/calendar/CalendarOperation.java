@@ -50,7 +50,6 @@
 package com.openexchange.calendar;
 
 import static com.openexchange.java.Autoboxing.I;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,9 +62,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.database.provider.SimpleDBProvider;
@@ -476,6 +473,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                             I(action_folder), ":", inFolder }));
                     }
                     throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(I(oid));
+                } else if (!check_permissions && 0 < inFolder && inFolder == action_folder) {
+                    /*
+                     * Assign parent folder ID when not checking permissions - necessary for bug #23181 so that the parent folder is not
+                     * considered as 'shared' to the current user.
+                     */
+                    cdao.setParentFolderID(inFolder);
                 }
                 cdao.setStartDate(setDate(i++, load_resultset));
                 cdao.setEndDate(setDate(i++, load_resultset));
@@ -1194,7 +1197,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
                 if (!recColl.checkPermissions(cdao, so, c, readcon, CalendarOperation.READ, check_folder_id)) {
                     if (DEBUG) {
-                        final StringBuilder colss = new StringBuilder(cols.length << 3);
+                        final com.openexchange.java.StringAllocator colss = new com.openexchange.java.StringAllocator(cols.length << 3);
                         for (int a = 0; a < cols.length; a++) {
                             String fn = recColl.getFieldName(cols[a]);
                             if (fn == null) {
@@ -1547,14 +1550,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     private final void simpleDataCheck(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid) throws OXException {
         // Both, start and end date are set
-        if (cdao.containsStartDate() && cdao.containsEndDate() && cdao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
+        if (cdao.getStartDate() != null && cdao.getEndDate() != null && cdao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
             throw OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create();
         }
         // Only start date is set
-        if (cdao.containsStartDate() && !cdao.containsEndDate() && edao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
+        if (cdao.getStartDate() != null && cdao.getEndDate() == null && edao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
             throw OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create();
         }// Only end date is set
-        if (!cdao.containsStartDate() && cdao.containsEndDate() && cdao.getEndDate().getTime() < edao.getStartDate().getTime()) {
+        if (cdao.getStartDate() == null && cdao.getEndDate() != null && cdao.getEndDate().getTime() < edao.getStartDate().getTime()) {
             throw OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create();
         }
         if (cdao.containsUntil() && cdao.getUntil() != null) {

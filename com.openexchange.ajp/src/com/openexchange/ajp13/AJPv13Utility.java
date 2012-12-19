@@ -111,7 +111,7 @@ public final class AJPv13Utility {
             return "";
         }
         final String space = "    ";
-        final StringBuilder sb = new StringBuilder(1024);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
         int c = 0;
         int l = 0;
         for (final byte b : bytes) {
@@ -151,7 +151,7 @@ public final class AJPv13Utility {
             return "";
         }
         final String space = "    ";
-        final StringBuilder sb = new StringBuilder(1024);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
         sb.append("0000").append(space).append(Integer.toHexString(magic1).toUpperCase()).append(' ').append(
             Integer.toHexString(magic2).toUpperCase());
         int c = 2;
@@ -188,7 +188,7 @@ public final class AJPv13Utility {
      */
     public static String dumpByte(final byte b) {
         final String s = Integer.toHexString(b & 0xff).toUpperCase();
-        final StringBuilder sb = new StringBuilder(4).append("0x");
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(4).append("0x");
         if (s.length() == 1) {
             sb.append('0');
         }

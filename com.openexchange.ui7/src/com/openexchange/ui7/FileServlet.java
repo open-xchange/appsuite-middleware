@@ -70,7 +70,7 @@ public class FileServlet extends HttpServlet {
 
     protected File root;
 
-    private FileCache cache;
+    private final FileCache cache;
 
     public FileServlet(FileCache cache, File root) {
         super();

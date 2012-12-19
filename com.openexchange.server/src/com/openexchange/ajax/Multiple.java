@@ -49,10 +49,16 @@
 
 package com.openexchange.ajax;
 
+import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,6 +66,7 @@ import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.request.AttachmentRequest;
@@ -74,6 +81,7 @@ import com.openexchange.ajax.requesthandler.MultipleAdapter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailServletInterface;
@@ -82,6 +90,8 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -93,7 +103,7 @@ public class Multiple extends SessionServlet {
 
     protected static final String MODULE = "module";
 
-    protected static final String MODULE_INFOSTORE = "infostore";
+    // protected static final String MODULE_INFOSTORE = "infostore";
 
     protected static final String MODULE_FOLDER = "folder";
 
@@ -107,89 +117,169 @@ public class Multiple extends SessionServlet {
 
     private static volatile Dispatcher dispatcher;
 
+    /**
+     * Sets the dispatcher instance.
+     * 
+     * @param dispatcher The dispatcher to set
+     */
     public static void setDispatcher(final Dispatcher dispatcher) {
         Multiple.dispatcher = dispatcher;
     }
 
+    /**
+     * Gets the dispatcher instance
+     * 
+     * @return The dispatcher instance or <code>null</code>
+     */
     private static Dispatcher getDispatcher() {
         return dispatcher;
     }
-
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         JSONArray dataArray;
         {
-            final String data = getBody(req);
+            final Reader reader = AJAXServlet.getReaderFor(req);
             try {
-                dataArray = new JSONArray(data);
+                dataArray = new JSONArray(reader);
             } catch (final JSONException e) {
-                final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, data);
+                final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
                 LOG.warn(exc.getMessage() + Tools.logHeaderForError(req), exc);
                 dataArray = new JSONArray();
+            } finally {
+                Streams.close(reader);
             }
         }
-        final JSONArray respArr = new JSONArray();
-        final int length = dataArray.length();
+        JSONArray respArr = new JSONArray();
+
+        try {
+            final ServerSession session = getSessionObject(req);
+            if (session == null) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+            }
+            respArr = perform(dataArray, req, session);
+        } catch (final JSONException e) {
+            log(RESPONSE_ERROR, e);
+            sendError(resp);
+        } catch (final OXException e) {
+            log(RESPONSE_ERROR, e);
+            sendError(resp);
+        } catch (final RuntimeException e) {
+            log(RESPONSE_ERROR, e);
+            sendError(resp);
+        }
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        final Writer writer = resp.getWriter();
+        writeTo(respArr, writer);
+        writer.flush();
+    }
+    
+    public static JSONArray perform(JSONArray dataArray, HttpServletRequest req, ServerSession session) throws OXException, JSONException {
+    	final int length = dataArray.length();
+        final JSONArray respArr = new JSONArray(length);
         if (length > 0) {
             AJAXState state = null;
             try {
-                final ServerSession session = getSessionObject(req);
-                for (int a = 0; a < length; a++) {
-                    state = parseActionElement(respArr, dataArray, a, session, req, state);
-                }
-                /*
-                 * Don't forget to write mail request
-                 */
-                writeMailRequest(req);
-            } catch (final JSONException e) {
-                log(RESPONSE_ERROR, e);
-                sendError(resp);
-            } catch (final OXException e) {
-                log(RESPONSE_ERROR, e);
-                sendError(resp);
-            } catch (final RuntimeException e) {
-                log(RESPONSE_ERROR, e);
-                sendError(resp);
-            } finally {
-                final MailServletInterface mi = (MailServletInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
-                if (mi != null) {
-                    try {
-                        mi.close(true);
-                    } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                // Distinguish between serially and concurrently executable requests
+                List<JsonInOut> serialTasks = null;
+                ThreadPoolCompletionService<Object> concurrentTasks = null;
+                int concurrentTasksCount = 0;
+                // Build-up mapping & schedule for serial or concurrent execution
+                final ConcurrentTIntObjectHashMap<JsonInOut> mapping = new ConcurrentTIntObjectHashMap<JsonInOut>(length);
+                for (int pos = 0; pos < length; pos++) {
+                    final JSONObject dataObject = dataArray.getJSONObject(pos);
+                    final JsonInOut jsonInOut = new JsonInOut(pos, dataObject);
+                    mapping.put(pos, jsonInOut);
+                    if (!dataObject.hasAndNotNull(MODULE)) {
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(MODULE);
+                    }
+                    // Check if module indicates serial or concurrent execution
+                    final String module = dataObject.getString(MODULE);
+                    if (MODULE_MAIL.equals(module)) {
+                        if (null == serialTasks) {
+                            serialTasks = new ArrayList<JsonInOut>(length);
+                        }
+                        serialTasks.add(jsonInOut);
+                    } else {
+                        if (null == concurrentTasks) {
+                            concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
+                        }
+                        concurrentTasks.submit(new CallableImpl(jsonInOut, session, module, req));
+                        concurrentTasksCount++;
                     }
                 }
+                if (null != serialTasks) {
+                    final int size = serialTasks.size();
+                    final JSONArray serialResponses = new JSONArray(size);
+                    // Execute serial tasks with current thread
+                    for (final JsonInOut jsonInOut : serialTasks) {
+                        state = parseActionElement(jsonInOut.getInputObject(), serialResponses, session, req, state);
+                    }
+                    // Don't forget to write mail request
+                    writeMailRequest(req);
+                    // Fill responses
+                    for (int i = 0; i < size; i++) {
+                        serialTasks.get(i).setOutputObject((JSONValue) serialResponses.get(i));
+                    }
+                }
+                if (null != concurrentTasks) {
+                    // Await completion service
+                    for (int i = 0; i < concurrentTasksCount; i++) {
+                        try {
+                            concurrentTasks.take().get();
+                        } catch (final InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                        } catch (final ExecutionException e) {
+                            final Throwable cause = e.getCause();
+                            if (cause instanceof JSONException) {
+                                throw (JSONException) cause;
+                            }
+                            if (cause instanceof OXException) {
+                                throw (OXException) cause;
+                            }
+                            ThreadPools.launderThrowable(e, RuntimeException.class);
+                        }
+                    }
+                }
+                // Add single responses to JSON array
+                for (int pos = 0; pos < length; pos++) {
+                    final JsonInOut jsonInOut = mapping.get(pos);
+                    if (null != jsonInOut) {
+                        respArr.put(jsonInOut.getOutputObject());                        
+                    }
+                }
+            } finally {
+                close((MailServletInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE));
                 if (state != null) {
                     getDispatcher().end(state);
                 }
             }
         }
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-        final Writer writer = resp.getWriter();
-        writer.write(respArr.toString());
-        writer.flush();
+        return respArr;
     }
 
-
-    protected static final AJAXState parseActionElement(final JSONArray respArr, final JSONArray dataArray, final int pos, final ServerSession session, final HttpServletRequest req, final AJAXState state) throws JSONException, OXException {
-        final JSONObject jsonObj = dataArray.getJSONObject(pos);
-
-        final String module;
-        final String action;
-
-        if (jsonObj.has(MODULE)) {
-            module = DataParser.checkString(jsonObj, MODULE);
-        } else {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MODULE);
+    protected static final void performActionElement(final JsonInOut jsonInOut, final String module, final ServerSession session, final HttpServletRequest req) {
+        AJAXState ajaxState = null;
+        try {
+            final OXJSONWriter jWriter = new OXJSONWriter();
+            final JSONObject inObject = jsonInOut.getInputObject();
+            ajaxState = doAction(module, inObject.optString(PARAMETER_ACTION), inObject, session, req, jWriter, null);
+            jsonInOut.setOutputObject(jWriter.getObject());
+        } finally {
+            if (null != ajaxState) {
+                ajaxState.close();
+            }
         }
+    }
 
-        action = jsonObj.optString(PARAMETER_ACTION);
-
-        final OXJSONWriter jWriter = new OXJSONWriter(respArr);
-
-        return doAction(module, action, jsonObj, session, req, jWriter, state);
+    protected static final AJAXState parseActionElement(final JSONObject inObject, final JSONArray serialResponses, final ServerSession session, final HttpServletRequest req, final AJAXState state) throws OXException {
+        try {
+            return doAction(DataParser.checkString(inObject, MODULE), inObject.optString(PARAMETER_ACTION), inObject, session, req, new OXJSONWriter(serialResponses), state);
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
     private static final void writeMailRequest(final HttpServletRequest req) throws JSONException {
@@ -275,6 +365,11 @@ public class Multiple extends SessionServlet {
                     LOG.error(e.getMessage(), e);
                     ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
                     return state;
+                } catch (final RuntimeException rte) {
+                    LOG.error(rte.getMessage(), rte);
+                    final OXException e = AjaxExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
+                    return state;
                 } finally {
                 	jsonWriter.endObject();
                 }
@@ -308,6 +403,13 @@ public class Multiple extends SessionServlet {
                         jsonWriter.value("");
                     }
                     ResponseWriter.writeException(oje, jsonWriter, localeFrom(session));
+                } catch (final RuntimeException rte) {
+                    LOG.error(rte.getMessage(), rte);
+                    final OXException e = AjaxExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
+                    if (jsonWriter.isExpectingValue()) {
+                        jsonWriter.value("");
+                    }
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
                 } finally {
                     multipleHandler.close();
                     jsonWriter.endObject();
@@ -337,6 +439,12 @@ public class Multiple extends SessionServlet {
                     LOG.error(oje.getMessage(), oje);
                     jsonWriter.object();
                     ResponseWriter.writeException(oje, jsonWriter, localeFrom(session));
+                    jsonWriter.endObject();
+                } catch (final RuntimeException rte) {
+                    LOG.error(rte.getMessage(), rte);
+                    final OXException e = AjaxExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
+                    jsonWriter.object();
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
                     jsonWriter.endObject();
                 }
             } else if (MODULE_MAIL.equals(module)) {
@@ -422,5 +530,101 @@ public class Multiple extends SessionServlet {
         }
         return null;
     }
+
+    /** Writes JSON array to given writer. */
+    private static void writeTo(final JSONArray respArr, final Writer writer) throws IOException {
+        try {
+            respArr.write(writer);
+        } catch (final JSONException e) {
+            throw new IOException(e.getMessage(), e);
+        }
+    }
+
+    /** Close passed {@link MailServletInterface} instance. */
+    private static void close(final MailServletInterface mi) {
+        if (mi != null) {
+            try {
+                mi.close(true);
+            } catch (final Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    private static final class CallableImpl implements Callable<Object> {
+
+        private final JsonInOut jsonDataResponse;
+        private final ServerSession session;
+        private final String module;
+        private final HttpServletRequest req;
+
+        protected CallableImpl(final JsonInOut jsonDataResponse, final ServerSession session, final String module, final HttpServletRequest req) {
+            super();
+            this.jsonDataResponse = jsonDataResponse;
+            this.session = session;
+            this.module = module;
+            this.req = req;
+        }
+
+        @Override
+        public Object call() throws OXException {
+            try {
+                performActionElement(jsonDataResponse, module, session, req);
+                return null;
+            } catch (final RuntimeException e) {
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+    } // End of class
+
+    private static final class JsonInOut {
+
+        private final int pos;
+        private final JSONObject inObject;
+        private volatile JSONValue outObject;
+
+        protected JsonInOut(final int pos, final JSONObject inObject) {
+            super();
+            this.pos = pos;
+            this.inObject = inObject;
+        }
+        
+        /**
+         * Gets the (zero-based) position.
+         *
+         * @return The (zero-based) position
+         */
+        public int getPos() {
+            return pos;
+        }
+        
+        /**
+         * Gets the input object
+         *
+         * @return The input object
+         */
+        public JSONObject getInputObject() {
+            return inObject;
+        }
+        
+        /**
+         * Gets the output object
+         *
+         * @return The output object
+         */
+        public JSONValue getOutputObject() {
+            return outObject;
+        }
+
+        /**
+         * Sets the output object
+         * 
+         * @param outObject The output object to set
+         */
+        public void setOutputObject(final JSONValue outObject) {
+            this.outObject = outObject;
+        }
+
+    } // End of class JsonDataResponse
 
 }

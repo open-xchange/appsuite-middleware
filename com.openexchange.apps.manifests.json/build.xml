@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.apps.manifests.json" basedir=".">
+
+    <description>
+        This build file overrides the installConf target to put the path to the UI into the configuration file.
+    </description>
+
+    <import file="build-project.xml" />
+
+    <target name="installConf">
+        <copy todir="${destDir}/${confInstallDir}" overwrite="true">
+            <fileset dir="${confDir}" excludes="*.in" />
+        </copy>
+        <copy todir="${destDir}/${confInstallDir}" overwrite="true">
+            <fileset dir="${confDir}" includes="*.in" />
+            <globmapper from="*.in" to="*" />
+            <filterset>
+                <filter token="prefix" value="${prefix}" />
+            </filterset>
+        </copy>
+    </target>
+
+</project>

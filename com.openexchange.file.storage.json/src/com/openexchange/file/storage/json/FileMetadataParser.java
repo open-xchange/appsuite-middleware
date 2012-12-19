@@ -92,20 +92,18 @@ public class FileMetadataParser implements FileMetadataParserService{
     @Override
     public File parse(final JSONObject object) throws OXException {
         final DefaultFile file = new DefaultFile();
-        
+
         try {
-        	JSONObject purged = new JSONObject(object.toString());
+        	JSONObject purged = new JSONObject(object);
         	if (purged.has("last_modified")) {
         		purged.remove("last_modified");
         	}
-        	File.Field.inject(jsonHandler, file, object);
+        	File.Field.inject(jsonHandler, file, purged);
         } catch (final RuntimeException x) {
             if(x.getCause() != null && JSONException.class.isInstance(x.getCause())) {
                 throw AjaxExceptionCodes.JSON_ERROR.create( x.getCause().getMessage());
             }
             throw x;
-        } catch (JSONException x) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( x.getCause().getMessage());
         }
 
         return file;
@@ -162,11 +160,11 @@ public class FileMetadataParser implements FileMetadataParserService{
             if(value.length() == 0) {
                 return "";
             }
-            final StringBuilder b = new StringBuilder();
+            final com.openexchange.java.StringAllocator b = new com.openexchange.java.StringAllocator();
             for(int i = 0, size = value.length(); i < size; i++) {
                 b.append(value.getString(i)).append(", ");
             }
-            b.setLength(b.length()-2);
+            b.setNewLength(b.length()-2);
             return b.toString();
         }
     }

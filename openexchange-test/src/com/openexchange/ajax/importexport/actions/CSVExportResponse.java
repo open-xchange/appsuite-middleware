@@ -19,6 +19,7 @@ public class CSVExportResponse extends AbstractAJAXResponse {
 		this.csv = body;
 	}
 
+    @Override
     public Object getData() {
     	return csv;
     }

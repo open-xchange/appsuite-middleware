@@ -220,7 +220,7 @@ public final class Select {
                     final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Select.class));
                     if (LOG.isDebugEnabled()) {
                         final String sql = getSQLString(stmt);
-                        LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                        LOG.debug(new com.openexchange.java.StringAllocator(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
                     }
                 }
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
@@ -267,7 +267,7 @@ public final class Select {
                     final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Select.class));
                     if (LOG.isDebugEnabled()) {
                         final String sql = getSQLString(stmt);
-                        LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                        LOG.debug(new com.openexchange.java.StringAllocator(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
                     }
                 }
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
@@ -295,7 +295,7 @@ public final class Select {
                     final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Select.class));
                     if (LOG.isDebugEnabled()) {
                         final String sql = getSQLString(stmt);
-                        LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                        LOG.debug(new com.openexchange.java.StringAllocator(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
                     }
                 }
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());

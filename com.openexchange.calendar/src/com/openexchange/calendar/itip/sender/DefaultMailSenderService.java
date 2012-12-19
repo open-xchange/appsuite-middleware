@@ -299,7 +299,7 @@ public class DefaultMailSenderService implements MailSenderService {
 				 * Set content through a DataHandler
 				 */
 				bodyPart.setDataHandler(new DataHandler(new MessageDataSource(
-						attachments.getAttachedFile(folderId, attachedId,
+						attachments.getAttachedFile(session, folderId, attachedId,
 								Types.APPOINTMENT, metadata.getId(), context, user,
 								config), ct)));
 				final String fileName = metadata.getFilename();

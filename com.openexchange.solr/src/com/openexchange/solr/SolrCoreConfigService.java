@@ -59,6 +59,15 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SolrCoreConfigService { 
+    
+    /**
+     * Gets a core store by its id.
+     * 
+     * @param id The core store id.
+     * @return The core store.
+     * @throws OXException
+     */
+    SolrCoreStore getCoreStore(int id) throws OXException;
 
     /**
      * Gets a list of all available core stores.

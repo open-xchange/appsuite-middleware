@@ -57,8 +57,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.idn.IDNA;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
@@ -150,8 +150,13 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         	mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
         }
         if (mailInterface == null) {
-            mailInterface = MailServletInterface.getInstance(mailRequest.getSession());
-            state.putProperty(PROPERTY_MAIL_IFACE, mailInterface);
+            final MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
+            mailInterface = state.putProperty(PROPERTY_MAIL_IFACE, newMailInterface);
+            if (null == mailInterface) {
+                mailInterface = newMailInterface;
+            } else {
+                newMailInterface.close(true);
+            }
         }
         return mailInterface;
     }
@@ -305,7 +310,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 usm.setAllowHTMLImages(false);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else {
-                LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(Mail.PARAMETER_VIEW).append(": ").append(view).append(
+                LOG.warn(new com.openexchange.java.StringAllocator(64).append("Unknown value in parameter ").append(Mail.PARAMETER_VIEW).append(": ").append(view).append(
                     ". Using user's mail settings as fallback."));
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             }

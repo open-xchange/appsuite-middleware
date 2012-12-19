@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Index Bundle
 Bundle-SymbolicName: com.openexchange.index.solr
-Bundle-Version: 6.22.1
+Bundle-Version: 7.0.0
 Bundle-Activator: com.openexchange.index.solr.osgi.SolrIndexActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.database,
  com.openexchange.database.provider,
  com.openexchange.exception,
@@ -22,6 +23,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.groupware.update,
  com.openexchange.i18n,
  com.openexchange.index,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.mail,
  com.openexchange.mail.api,
@@ -54,8 +56,18 @@ Import-Package: com.openexchange.config,
  javax.mail,
  javax.mail.event,
  javax.mail.internet,
+ javax.mail.internet.idn,
  javax.mail.search,
  javax.mail.util,
+ javax.management,
+ javax.management.loading,
+ javax.management.modelmbean,
+ javax.management.monitor,
+ javax.management.openmbean,
+ javax.management.relation,
+ javax.management.remote,
+ javax.management.remote.rmi,
+ javax.management.timer,
  javax.net,
  javax.net.ssl,
  org.apache.commons.httpclient,

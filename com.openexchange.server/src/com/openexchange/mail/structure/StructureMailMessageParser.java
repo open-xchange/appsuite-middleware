@@ -807,7 +807,7 @@ public final class StructureMailMessageParser {
         String filename = rawFileName;
         if ((filename == null) || isEmptyString(filename)) {
             final List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
-            final StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(16).append(PREFIX).append(sequenceId).append('.');
             if (exts == null) {
                 sb.append("dat");
             } else {
@@ -846,7 +846,7 @@ public final class StructureMailMessageParser {
         if (prefix == null) {
             return String.valueOf(partCount);
         }
-        return new StringBuilder(prefix).append('.').append(partCount).toString();
+        return new com.openexchange.java.StringAllocator(prefix).append('.').append(partCount).toString();
     }
 
     /**
@@ -872,7 +872,7 @@ public final class StructureMailMessageParser {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
             if (WARN_ENABLED) {
-                LOG.warn(new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
+                LOG.warn(new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
                     "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
             }
             return MessageUtility.readMailPart(mailPart, fallback);
@@ -884,9 +884,9 @@ public final class StructureMailMessageParser {
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
-                StringBuilder sb = null;
+                com.openexchange.java.StringAllocator sb = null;
                 if (null != cs) {
-                    sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
+                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                     mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
                 }
                 if (contentType.startsWith(PRIMARY_TEXT)) {

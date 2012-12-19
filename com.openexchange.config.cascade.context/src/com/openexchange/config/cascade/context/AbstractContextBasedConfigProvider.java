@@ -71,19 +71,19 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
     }
 
     @Override
-    public BasicProperty get(final String property, final int context, final int user) throws OXException {
-        if (context == NO_CONTEXT) {
+    public BasicProperty get(final String property, final int contextId, final int userId) throws OXException {
+        if (contextId == NO_CONTEXT) {
             return NO_PROPERTY;
         }
-        return get(property, contexts.getContext(context), user);
+        return get(property, contexts.getContext(contextId), userId);
     }
 
     @Override
-    public Collection<String> getAllPropertyNames(final int context, final int user) throws OXException {
-        if (context == NO_CONTEXT) {
+    public Collection<String> getAllPropertyNames(final int contextId, final int userId) throws OXException {
+        if (contextId == NO_CONTEXT) {
             return Collections.emptyList();
         }
-        return getAllPropertyNames(contexts.getContext(context));
+        return getAllPropertyNames(contexts.getContext(contextId));
     }
 
     protected abstract Collection<String> getAllPropertyNames(Context context);

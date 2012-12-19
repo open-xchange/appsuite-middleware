@@ -117,17 +117,21 @@ public class MicroformatAppointmentSAXHandler extends AbstractMicroformatSAXHand
             currentObject.setLocation( stringArray(ch, start, start+length) );
         }
         else if( currentlyReading.equals("startDate")){
-            try {
-                currentObject.setStartDate( dateFormat.parse( stringArray(ch, start, start+length) ) );
-            } catch (ParseException e) {
-                exceptions.add(e);
+            synchronized (dateFormat) {
+                try {
+                    currentObject.setStartDate(dateFormat.parse(stringArray(ch, start, start + length)));
+                } catch (ParseException e) {
+                    exceptions.add(e);
+                }
             }
         }
         else if( currentlyReading.equals("endDate")){
-            try {
-                currentObject.setEndDate( dateFormat.parse( stringArray(ch, start, start+length) ) );
-            } catch (ParseException e) {
-                exceptions.add(e);
+            synchronized (dateFormat) {
+                try {
+                    currentObject.setEndDate(dateFormat.parse(stringArray(ch, start, start + length)));
+                } catch (ParseException e) {
+                    exceptions.add(e);
+                }
             }
         }
     }

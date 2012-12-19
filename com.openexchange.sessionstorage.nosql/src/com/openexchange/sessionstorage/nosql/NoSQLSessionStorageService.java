@@ -80,7 +80,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.StoredSession;
-import com.openexchange.sessionstorage.nosql.exceptions.OXNoSQLSessionStorageExceptionCodes;
+import com.openexchange.sessionstorage.exceptions.OXSessionStorageExceptionCodes;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -258,7 +258,7 @@ public class NoSQLSessionStorageService implements SessionStorageService {
             mutator.addInsertion(session.getAuthId(), CF_NAME, HFactory.createStringColumn(time, session.getSessionID()));
             mutator.execute();
         } catch (Exception e) {
-            OXException ox = OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_SAVE_FAILED.create(session.getSessionID());
+            OXException ox = OXSessionStorageExceptionCodes.SESSIONSTORAGE_SAVE_FAILED.create(session.getSessionID());
             log.error(ox.getMessage(), ox);
             throw ox;
         }
@@ -303,7 +303,7 @@ public class NoSQLSessionStorageService implements SessionStorageService {
                 removeContextSessions(Integer.parseInt(ctxId));
             }
         } catch (Exception e) {
-            OXException ox = OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_REMOVE_FAILED.create(sessionId);
+            OXException ox = OXSessionStorageExceptionCodes.SESSIONSTORAGE_REMOVE_FAILED.create(sessionId);
             log.error(ox.getMessage(), ox);
             throw ox;
         }
@@ -377,7 +377,7 @@ public class NoSQLSessionStorageService implements SessionStorageService {
             retval.add(session);
         }
         if (retval.size() == 0) {
-            OXException e = OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_NO_USERSESSIONS.create(userId, contextId);
+            OXException e = OXSessionStorageExceptionCodes.SESSIONSTORAGE_NO_USERSESSIONS.create(userId, contextId);
             log.error(e.getMessage(), e);
             throw e;
         }
@@ -506,7 +506,7 @@ public class NoSQLSessionStorageService implements SessionStorageService {
                 return s;
             }
         }
-        OXException e = OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_ALTID_NOT_FOUND.create(altId);
+        OXException e = OXSessionStorageExceptionCodes.SESSIONSTORAGE_ALTID_NOT_FOUND.create(altId);
         log.error(e.getMessage(), e);
         throw e;
     }
@@ -555,7 +555,7 @@ public class NoSQLSessionStorageService implements SessionStorageService {
         if (null != authId) {
             for (final Session session : getSessions()) {
                 if (authId.equals(session.getAuthId())) {
-                    throw OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_DUPLICATE_AUTHID.create(session.getLogin(), login);
+                    throw OXSessionStorageExceptionCodes.SESSIONSTORAGE_DUPLICATE_AUTHID.create(session.getLogin(), login);
                 }
             }
         }

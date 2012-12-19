@@ -979,7 +979,7 @@ public class InfostoreRequest extends CommonRequest {
             infostore.startTransaction();
             searchEngine.startTransaction();
 
-            final AttachmentMetadata att = attachmentBase.getAttachment(folderId, attachedId, moduleId, attachment,
+            final AttachmentMetadata att = attachmentBase.getAttachment(session, folderId, attachedId, moduleId, attachment,
                     ctx, user, userConfiguration);
             final com.openexchange.groupware.attach.util.GetSwitch get = new com.openexchange.groupware.attach.util.GetSwitch(
                     att);
@@ -998,7 +998,7 @@ public class InfostoreRequest extends CommonRequest {
                 attachmentCompatible.doSwitch(set);
             }
             newDocument.setId(InfostoreFacade.NEW);
-            in = attachmentBase.getAttachedFile(folderId, attachedId, moduleId, attachment, ctx,
+            in = attachmentBase.getAttachedFile(session, folderId, attachedId, moduleId, attachment, ctx,
                     user, userConfiguration);
             infostore.saveDocument(newDocument, in, System.currentTimeMillis(), session); // FIXME
                                                                                                 // violates

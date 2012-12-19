@@ -69,9 +69,8 @@ public class InfostoreUUID {
         fileUUID = tmp.toString();
     }
     
-    public static InfostoreUUID newUUID(int contextId, int userId, IndexDocument<DocumentMetadata> document) {
-        DocumentMetadata file = document.getObject();        
-        return newUUID(contextId, userId, file.getFolderId(), file.getId());
+    public static InfostoreUUID newUUID(int contextId, int userId, DocumentMetadata document) {
+        return newUUID(contextId, userId, document.getFolderId(), document.getId());
     }
     
     public static InfostoreUUID newUUID(int contextId, int userId, long folderId, int fileId) {

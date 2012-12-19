@@ -135,7 +135,7 @@ public final class HazelcastCache extends DefaultCacheKeyService implements Cach
     }
 
     private String getGroupKey(final String groupName) {
-        return new StringBuilder(hazelcastName).append('.').append(groupName).toString();
+        return new com.openexchange.java.StringAllocator(hazelcastName).append('.').append(groupName).toString();
     }
 
     private MapConfig getMapConfig() {

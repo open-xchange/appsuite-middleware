@@ -66,11 +66,19 @@ public enum IndexExceptionCodes implements OXExceptionCode {
     /**
      * An unexpected error occurred: %1$s
      */
-    UNEXPECTED_ERROR(IndexExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),    
+    UNEXPECTED_ERROR(IndexExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
     /**
      * An index entry does not exist for folder %1$s in account %2$s.
      */
     MISSING_FOLDER_ENTRY(IndexExceptionMessages.MISSING_FOLDER_ENTRY_MSG, Category.CATEGORY_ERROR, 2),
+    /**
+     * Index search for module %1$d is not enabled for user %2$d in context %3$d.
+     */
+    INDEXING_NOT_ENABLED(IndexExceptionMessages.INDEXING_NOT_ENABLED, Category.CATEGORY_PERMISSION_DENIED, 3),
+    /**
+     * The index for module %1$d for user %2$d in context %3$d is currently locked.
+     */
+    INDEX_LOCKED(IndexExceptionMessages.INDEX_LOCKED, Category.CATEGORY_ERROR, 4),
     
     ;
 

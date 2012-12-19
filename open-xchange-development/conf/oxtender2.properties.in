@@ -1,8 +1,5 @@
 # The basic file name of the OLOX20 binaries for 32 bit architectures. Without locale information.
-com.openexchange.outlook.updater.oxtender2.baseName32=OXtender_2_for_Microsoft_Outlook.exe
-
-# The basic file name of the OLOX20 binaries for 64 bit architectures. Without locale information.
-com.openexchange.outlook.updater.oxtender2.baseName64=OXtender_2_for_Microsoft_Outlook_x64.exe
+com.openexchange.outlook.updater.oxtender2.baseName=OXtender_2_for_Microsoft_Outlook
 
 # Product name of the oxtender.
 # This defines the name of the installable or updatable OLOX20 that will be shown within the updater.

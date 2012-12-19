@@ -98,4 +98,14 @@ public class FolderStrings implements LocalizableStrings {
     public static final String DEFAULT_CONTACT_COLLECT_FOLDER_NAME = "Collected addresses";
 
     public static final String DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME = "E-Mail attachments";
+
+    public static final String DEFAULT_FILES_FOLDER_NAME = "My files";
+
+    public static final String SYSTEM_FILES_FOLDER_NAME = "Files";
+
+    public static final String SYSTEM_USER_FILES_FOLDER_NAME = "Shared files";
+
+    public static final String SYSTEM_PUBLIC_FILES_FOLDER_NAME = "Public files";
+
+    public static final String VIRTUAL_LIST_FILES_FOLDER_NAME = "Other files";
 }

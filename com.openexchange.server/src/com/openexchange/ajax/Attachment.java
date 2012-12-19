@@ -90,10 +90,10 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
-import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.OXAborted;
 import com.openexchange.tools.servlet.UploadServletException;
@@ -178,7 +178,7 @@ public class Attachment extends PermissionServlet {
             }
 
             document(
-                res,
+                session, res,
                 req.getHeader("user-agent"),
                 isIE(req),
                 folderId,
@@ -188,8 +188,7 @@ public class Attachment extends PermissionServlet {
                 contentType,
                 ctx,
                 user,
-                userConfig,
-                session);
+                userConfig);
         } else {
             final OXJSONWriter writer = new OXJSONWriter();
             final AttachmentRequest attRequest = new AttachmentRequest(session, writer);
@@ -365,17 +364,17 @@ public class Attachment extends PermissionServlet {
 
     }
 
-    private void document(final HttpServletResponse res, final String userAgent, final boolean ie, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig, final Session session) {
+    private void document(Session session, final HttpServletResponse res, final String userAgent, final boolean ie, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
         InputStream documentData = null;
         OutputStream os = null;
 
         try {
             ATTACHMENT_BASE.startTransaction();
-            final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(folderId, attachedId, moduleId, id, ctx, user, userConfig);
+            final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
 
             res.setContentLength((int) attachment.getFilesize());
 
-            documentData = ATTACHMENT_BASE.getAttachedFile(folderId, attachedId, moduleId, id, ctx, user, userConfig);
+            documentData = ATTACHMENT_BASE.getAttachedFile(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
 
             if (SAVE_AS_TYPE.equals(contentType)) {
                 res.setContentType(contentType);
@@ -405,7 +404,7 @@ public class Attachment extends PermissionServlet {
             final byte[] buffer = new byte[0xFFFF];
             int bytesRead = 0;
 
-            while ((bytesRead = documentData.read(buffer)) != -1) {
+            while ((bytesRead = documentData.read(buffer)) > 0) {
                 os.write(buffer, 0, bytesRead);
             }
             os.flush();
@@ -567,7 +566,7 @@ public class Attachment extends PermissionServlet {
         Writer writer = null;
 
         try {
-            writer = new UnsynchronizedStringWriter();
+            writer = new AllocatingStringWriter();
             ResponseWriter.write(resp, writer, localeFrom(session));
             res.getWriter().write(substituteJS(writer.toString(), action));
         } catch (final JSONException e) {

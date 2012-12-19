@@ -187,6 +187,20 @@ public final class CacheFolderStorage implements FolderStorage {
         FolderMapManagement.getInstance().clear();
     }
 
+    /**
+     * Removes denoted folder from global cache.
+     * 
+     * @param folderId The folder identifier
+     * @param treeId The tree identifier
+     * @param contextId The context identifier
+     */
+    public void removeFromGlobalCache(final String folderId, final String treeId, final int contextId) {
+        final Cache cache = globalCache;
+        if (null != cache) {
+            cache.removeFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
+        }
+    }
+
     @Override
     public void clearCache(final int userId, final int contextId) {
         if (contextId <= 0) {
@@ -194,7 +208,7 @@ public final class CacheFolderStorage implements FolderStorage {
         }
         final Cache cache = globalCache;
         if (null != cache) {
-            cache.invalidateGroup(String.valueOf(contextId));
+            cache.invalidateGroup(Integer.toString(contextId));
         }
         if (userId > 0) {
             dropUserEntries(userId, contextId);
@@ -537,7 +551,7 @@ public final class CacheFolderStorage implements FolderStorage {
              * Remove parent from cache(s)
              */
             final Cache cache = globalCache;
-            final String sContextId = String.valueOf(contextId);
+            final String sContextId = Integer.toString(contextId);
             final String[] trees = new String[] { treeId, realTreeId };
             for (final String tid : trees) {
                 final CacheKey cacheKey = newCacheKey(folder.getParentID(), tid);
@@ -588,7 +602,7 @@ public final class CacheFolderStorage implements FolderStorage {
          * Put to cache
          */
         if (folder.isGlobalID()) {
-            globalCache.putInGroup(newCacheKey(folder.getID(), treeId), String.valueOf(storageParameters.getContextId()), folder);
+            globalCache.putInGroup(newCacheKey(folder.getID(), treeId), Integer.toString(storageParameters.getContextId()), folder);
         } else {
             getFolderMapFor(storageParameters.getSession()).put(treeId, folder, storageParameters.getSession());
         }
@@ -654,19 +668,19 @@ public final class CacheFolderStorage implements FolderStorage {
             final Cache cache = globalCache;
             if (realTreeId.equals(treeId)) {
                 for (final String folderId : ids) {
-                    cache.removeFromGroup(newCacheKey(folderId, treeId), String.valueOf(contextId));
+                    cache.removeFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
                     if (null != folderMap) {
                         folderMap.remove(folderId, treeId, session);
                     }
                 }
             } else {
                 for (final String folderId : ids) {
-                    cache.removeFromGroup(newCacheKey(folderId, treeId), String.valueOf(contextId));
+                    cache.removeFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
                     if (null != folderMap) {
                         folderMap.remove(folderId, treeId, session);
                     }
                     // Now for real tree, too
-                    cache.removeFromGroup(newCacheKey(folderId, realTreeId), String.valueOf(contextId));
+                    cache.removeFromGroup(newCacheKey(folderId, realTreeId), Integer.toString(contextId));
                     if (null != folderMap) {
                         folderMap.remove(folderId, realTreeId, session);
                     }
@@ -703,7 +717,7 @@ public final class CacheFolderStorage implements FolderStorage {
         }
         try {
             final Cache cache = globalCache;
-            final String sContextId = String.valueOf(contextId);
+            final String sContextId = Integer.toString(contextId);
             CacheKey cacheKey = newCacheKey(id, treeId);
             Folder cachedFolder;
             if (deleted) {
@@ -812,7 +826,7 @@ public final class CacheFolderStorage implements FolderStorage {
             final int contextId = storageParameters.getContextId();
             final int userId = storageParameters.getUserId();
             final Session session = storageParameters.getSession();
-            final String sContextId = String.valueOf(contextId);
+            final String sContextId = Integer.toString(contextId);
             final String[] subfolderIDs;
             {
                 final Folder deleteMe;
@@ -1192,7 +1206,7 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Try global cache key
          */
-        Folder folder = (Folder) globalCache.getFromGroup(newCacheKey(folderId, treeId), String.valueOf(contextId));
+        Folder folder = (Folder) globalCache.getFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
         if (null != folder) {
             /*
              * Return a cloned version from global cache
@@ -1468,11 +1482,11 @@ public final class CacheFolderStorage implements FolderStorage {
             final boolean isMove = null != folder.getParentID();
             final String oldParentId = isMove ? getFolder(treeId, oldFolderId, storageParameters).getParentID() : null;
             if (null == session) {
-                final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry);
+                final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator(), registry);
                 updatePerformer.setCheck4Duplicates(false);
                 updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
             } else {
-                final UpdatePerformer updatePerformer = new UpdatePerformer(ServerSessionAdapter.valueOf(session), registry);
+                final UpdatePerformer updatePerformer = new UpdatePerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry);
                 updatePerformer.setCheck4Duplicates(false);
                 updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
             }

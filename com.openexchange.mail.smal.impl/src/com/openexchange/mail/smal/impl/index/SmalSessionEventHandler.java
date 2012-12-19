@@ -54,13 +54,21 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.index.IndexExceptionCodes;
+import com.openexchange.index.IndexProperties;
+import com.openexchange.index.solr.ModuleSet;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -90,26 +98,37 @@ public class SmalSessionEventHandler implements EventHandler {
     
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalSessionEventHandler.class);
     
-    private static final long FOLDER_INTERVAL = 60000L * 60;
-
-    private static final boolean ONLY_PRIMARY = true;
+//    private static final String FOLDER_INTERVAL = "com.openexchange.mail.smal.folderJobInterval";
     
 
     @Override
     public void handleEvent(Event event) {
-        try {            
+        try {
             IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
             if (indexingService == null) {
                 OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IndexingService.class.getName());
                 LOG.warn("Could not handle session event.", e);
                 return;
-            }  
+            }
             
-            String topic = event.getTopic();            
-            if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {                
+            String topic = event.getTopic();
+            if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {
                 Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                 int contextId = session.getContextId();
-                int userId = session.getUserId();                
+                int userId = session.getUserId();
+                ConfigViewFactory config = SmalServiceLookup.getServiceStatic(ConfigViewFactory.class);
+                ConfigView view = config.getView(userId, contextId);
+                String moduleStr = view.get(IndexProperties.ALLOWED_MODULES, String.class);
+                ModuleSet modules = new ModuleSet(moduleStr);
+                if (!modules.containsModule(Types.EMAIL)) {
+                    if (LOG.isDebugEnabled()) {
+                        OXException e = IndexExceptionCodes.INDEXING_NOT_ENABLED.create(Types.EMAIL, userId, contextId);
+                        LOG.debug("Skipping event handling execution because: " + e.getMessage());
+                    }
+                    return;
+                }
+                
+                
                 UserContextKey userContextKey = new UserContextKey(contextId, userId);
                 MailAccountStorageService storageService = SmalServiceLookup.getServiceStatic(MailAccountStorageService.class);
                 if (storageService == null) {
@@ -177,17 +196,17 @@ public class SmalSessionEventHandler implements EventHandler {
         if (goOn) {
             int userId = session.getUserId();
             int contextId = session.getContextId();
-            indexingService.unscheduleAllForUser(contextId, userId);
+            indexingService.unscheduleAllForUser(false, contextId, userId);
         }
     }
     
     private void scheduleFolderJobs(Session session, Map<Integer, Set<MailFolder>> allFolders, MailAccountStorageService storageService, IndexingService indexingService) throws OXException {
-        if (!UserWhitelist.isIndexingAllowed(session.getLogin())) {
-            return;
-        }
-        
         int contextId = session.getContextId();
-        int userId = session.getUserId();        
+        int userId = session.getUserId();
+//        ConfigurationService configurationService = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
+//        int intervalMinutes = configurationService.getIntProperty(FOLDER_INTERVAL, 60);
+//        long interval = 60000L * intervalMinutes;
+        long interval = 60000L * 60;
         for (Integer accountId : allFolders.keySet()) {
             MailAccount account = storageService.getMailAccount(accountId.intValue(), userId, contextId);
             Set<MailFolder> folders = allFolders.get(accountId);
@@ -199,7 +218,7 @@ public class SmalSessionEventHandler implements EventHandler {
                 account.getMailServer());
             
             Set<String> fullNames = new HashSet<String>();
-            for (MailFolder folder : folders) {         
+            for (MailFolder folder : folders) {
                 fullNames.add(folder.getFullname());
                 int priority;
                 if (account.isDefaultAccount() && folder.isInbox()) {
@@ -220,8 +239,8 @@ public class SmalSessionEventHandler implements EventHandler {
                     .primaryPassword(session.getPassword())
                     .password(decryptedPW)
                     .folder(folder.getFullname())
-                    .build();                                
-                indexingService.scheduleJob(jobInfo, IndexingService.NOW, FOLDER_INTERVAL, priority);
+                    .build();
+                indexingService.scheduleJob(false, jobInfo, IndexingService.NOW, interval, priority);
             }
             
             JobInfo checkDeletedJobInfo = MailJobInfo.newBuilder(CheckForDeletedFoldersJob.class)
@@ -230,58 +249,21 @@ public class SmalSessionEventHandler implements EventHandler {
                 .userId(userId)
                 .addProperty(CheckForDeletedFoldersJob.ALL_FOLDERS, fullNames)
                 .build();                                
-            indexingService.scheduleJob(checkDeletedJobInfo, IndexingService.NOW, FOLDER_INTERVAL, IndexingService.DEFAULT_PRIORITY); 
+            indexingService.scheduleJob(false, checkDeletedJobInfo, IndexingService.NOW, interval, IndexingService.DEFAULT_PRIORITY); 
         }
     }
-
-//    private void scheduleFolderJobs(Session session, IndexingService indexingService, MailAccountStorageService storageService) throws OXException {
-//        // TODO: Check if accounts are allowed to be indexed
-//        int userId = session.getUserId();
-//        int contextId = session.getContextId();
-//        for (MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
-//            int accountId = account.getId();
-//            String decryptedPW = account.getPassword() == null ? session.getPassword() : MailPasswordUtil.decrypt(
-//                account.getPassword(),
-//                session,
-//                accountId,
-//                account.getLogin(),
-//                account.getMailServer());
-//
-//            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = SmalMailAccess.getUnwrappedInstance(
-//                session,
-//                accountId);
-//            try {
-//                mailAccess.connect();
-//                IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-//                MailFolder rootFolder = folderStorage.getRootFolder();
-//                MailFolder[] subfolders = folderStorage.getSubfolders(rootFolder.getFullname(), true);
-//                scheduleFolderJobsRecursive(
-//                    indexingService,
-//                    account,
-//                    folderStorage,
-//                    contextId,
-//                    userId,
-//                    session.getPassword(),
-//                    decryptedPW,
-//                    subfolders);
-//            } finally {
-//                SmalMailAccess.closeUnwrappedInstance(mailAccess);
-//            }
-//        }
-//    }
     
     private Map<Integer, Set<MailFolder>> calculateMailFolders(Session session, MailAccountStorageService storageService) throws OXException {
         int userId = session.getUserId();
         int contextId = session.getContextId();
-        MailAccount[] mailAccounts;
-        if (ONLY_PRIMARY) {
-            mailAccounts = new MailAccount[] { storageService.getDefaultMailAccount(userId, contextId) };
-        } else {
-            mailAccounts = storageService.getUserMailAccounts(userId, contextId);
-        }
-        
+        MailAccount[] mailAccounts = storageService.getUserMailAccounts(userId, contextId);        
         Map<Integer, Set<MailFolder>> folderMap = new HashMap<Integer, Set<MailFolder>>();
         for (MailAccount account : mailAccounts) {
+            String mailServer = account.getMailServer();
+            if (!account.isDefaultAccount() && AccountBlacklist.isServerBlacklisted(mailServer)) {
+                continue;
+            }
+            
             Set<MailFolder> allFolders = new HashSet<MailFolder>();
             int accountId = account.getId();
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = SmalMailAccess.getUnwrappedInstance(
@@ -326,58 +308,6 @@ public class SmalSessionEventHandler implements EventHandler {
             }
         }
     }
-    
-//    private void scheduleFolderJobsRecursive(IndexingService indexingService, MailAccount account, IMailFolderStorage folderStorage, int contextId, int userId, String primaryPassword, String password, MailFolder[] subfolders) throws OXException {        
-//        for (MailFolder folder : subfolders) {
-//            if (!folder.exists() || folder.isSpam() || folder.isConfirmedSpam()) {                
-//                continue;
-//            }
-//            
-//            boolean index = true;
-//            if ((folder.containsShared() && folder.isShared()) || (folder.containsPublic() && folder.isPublic())) {
-//                index = false;
-//            }
-//            
-//            MailPermission ownPermission = folder.getOwnPermission();            
-//            if (index && ownPermission.isFolderVisible() && ownPermission.canReadAllObjects() && folder.isHoldsMessages()) {
-//                int priority;
-//                if (account.isDefaultAccount() && folder.isInbox()) {
-//                    priority = 15;
-//                } else if (folder.isInbox()) {
-//                    priority = 10;
-//                } else if (folder.isTrash()) {
-//                    priority = 1;
-//                } else {
-//                    priority = 5;
-//                }
-//
-//                JobInfo jobInfo = MailJobInfo.newBuilder(MailFolderJob.class)
-//                    .login(account.getLogin())
-//                    .accountId(account.getId())
-//                    .contextId(contextId)
-//                    .userId(userId)
-//                    .primaryPassword(primaryPassword)
-//                    .password(password)
-//                    .folder(folder.getFullname())
-//                    .build();                                
-//                indexingService.scheduleJob(jobInfo, null, FOLDER_INTERVAL, priority);
-//            }
-//            
-//            if (folder.isHoldsFolders()) {
-//                MailFolder[] subsubfolders = folderStorage.getSubfolders(folder.getFullname(), true);
-//                if (subsubfolders != null && subsubfolders.length > 0 && subsubfolders != IMailFolderStorage.EMPTY_PATH) {
-//                    scheduleFolderJobsRecursive(indexingService, 
-//                        account, 
-//                        folderStorage, 
-//                        contextId, 
-//                        userId, 
-//                        primaryPassword,
-//                        password,
-//                        subsubfolders);
-//                } 
-//            }                           
-//        }
-//    }
     
     private IMap<UserContextKey, Integer> getSessionMap() throws OXException {
         HazelcastInstance hazelcast = SmalServiceLookup.getServiceStatic(HazelcastInstance.class);
@@ -450,6 +380,11 @@ public class SmalSessionEventHandler implements EventHandler {
             if (userId != other.userId)
                 return false;
             return true;
+        }
+        
+        @Override
+        public String toString() {
+            return "{ context: " + contextId + ", user: " + userId + " }";
         }
     }
     

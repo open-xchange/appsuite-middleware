@@ -634,8 +634,13 @@ public final class MailConverter implements ResultConverter, MailActionConstants
          */
         MailServletInterface mailInterface = request.getState().optProperty(PROPERTY_MAIL_IFACE);
         if (mailInterface == null) {
-            mailInterface = MailServletInterface.getInstance(session);
-            request.getState().putProperty(PROPERTY_MAIL_IFACE, mailInterface);
+            final MailServletInterface newMailInterface = MailServletInterface.getInstance(session);
+            mailInterface = request.getState().putProperty(PROPERTY_MAIL_IFACE, newMailInterface);
+            if (null == mailInterface) {
+                mailInterface = newMailInterface;
+            } else {
+                newMailInterface.close(true);
+            }
         }
         return mailInterface;
     }

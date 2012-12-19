@@ -50,21 +50,24 @@
 package com.openexchange.mail.smal.impl;
 
 import java.util.Collections;
-import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.IndexProperties;
+import com.openexchange.index.solr.ModuleSet;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.smal.impl.index.UserWhitelist;
+import com.openexchange.mail.smal.impl.index.AccountBlacklist;
 import com.openexchange.mail.smal.impl.processor.DefaultProcessorStrategy;
 import com.openexchange.mail.smal.impl.processor.DoNothingProcessor;
 import com.openexchange.mail.smal.impl.processor.MailFolderInfo;
@@ -73,6 +76,7 @@ import com.openexchange.mail.smal.impl.processor.ProcessorStrategy;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.service.indexing.impl.internal.FakeSession;
 import com.openexchange.service.indexing.impl.mail.MailFolderJob;
 import com.openexchange.service.indexing.impl.mail.MailJobInfo;
 import com.openexchange.service.indexing.impl.mail.MailJobInfo.Builder;
@@ -88,6 +92,8 @@ import com.openexchange.threadpool.ThreadPools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractSMALStorage {
+    
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSMALStorage.class));
     /**
      * The fields containing only the mail identifier.
      */
@@ -168,53 +174,54 @@ public abstract class AbstractSMALStorage {
      * @throws OXException If an error occurs
      */
     protected boolean isBlacklisted() throws OXException {
-        if (null == blacklisted) {
-            final MailSessionCache sessionCache = MailSessionCache.getInstance(session);
-            final Object param = sessionCache.getParameter(accountId, "com.openexchange.mail.smal.isBlacklisted");
-            if (null == param) {
-                final ConfigView view = getConfigViewFactory().getView(userId, contextId);
-                final String blacklist = view.get("com.openexchange.mail.smal.blacklist", String.class);
-                blacklisted = Boolean.valueOf(contains(delegateMailAccess.getMailConfig().getServer(), blacklist));
-                sessionCache.putParameterIfAbsent(accountId, "com.openexchange.mail.smal.isBlacklisted", blacklisted);
-            } else {
-                try {
-                    blacklisted = (Boolean) param;
-                } catch (final ClassCastException e) {
-                    final ConfigView view = getConfigViewFactory().getView(userId, contextId);
-                    final String blacklist = view.get("com.openexchange.mail.smal.blacklist", String.class);
-                    blacklisted = Boolean.valueOf(contains(delegateMailAccess.getMailConfig().getServer(), blacklist));
-                    sessionCache.putParameterIfAbsent(accountId, "com.openexchange.mail.smal.isBlacklisted", blacklisted);
-                }
-            }
-        }
-        return blacklisted.booleanValue();
+        return accountId != 0 && AccountBlacklist.isServerBlacklisted(delegateMailAccess.getMailConfig().getServer());
+//        if (null == blacklisted) {
+//            final MailSessionCache sessionCache = MailSessionCache.getInstance(session);
+//            final Object param = sessionCache.getParameter(accountId, "com.openexchange.mail.smal.isBlacklisted");
+//            if (null == param) {
+//                final ConfigView view = getConfigViewFactory().getView(userId, contextId);
+//                final String blacklist = view.get("com.openexchange.mail.smal.blacklist", String.class);
+//                blacklisted = Boolean.valueOf(contains(delegateMailAccess.getMailConfig().getServer(), blacklist));
+//                sessionCache.putParameterIfAbsent(accountId, "com.openexchange.mail.smal.isBlacklisted", blacklisted);
+//            } else {
+//                try {
+//                    blacklisted = (Boolean) param;
+//                } catch (final ClassCastException e) {
+//                    final ConfigView view = getConfigViewFactory().getView(userId, contextId);
+//                    final String blacklist = view.get("com.openexchange.mail.smal.blacklist", String.class);
+//                    blacklisted = Boolean.valueOf(contains(delegateMailAccess.getMailConfig().getServer(), blacklist));
+//                    sessionCache.putParameterIfAbsent(accountId, "com.openexchange.mail.smal.isBlacklisted", blacklisted);
+//                }
+//            }
+//        }
+//        return blacklisted.booleanValue();
     }
-
-    private static final Pattern SPLIT_CSV = Pattern.compile("\\s*,\\s*");
-
-    private static boolean contains(final String host, final String blacklist) {
-        if (isEmpty(host) || isEmpty(blacklist)) {
-            return false;
-        }
-        for (final String blacklistedHost : SPLIT_CSV.split(blacklist, 0)) {
-            if (host.equals(blacklistedHost)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
+//
+//    private static final Pattern SPLIT_CSV = Pattern.compile("\\s*,\\s*");
+//
+//    private static boolean contains(final String host, final String blacklist) {
+//        if (isEmpty(host) || isEmpty(blacklist)) {
+//            return false;
+//        }
+//        for (final String blacklistedHost : SPLIT_CSV.split(blacklist, 0)) {
+//            if (host.equals(blacklistedHost)) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+//
+//    private static boolean isEmpty(final String string) {
+//        if (null == string) {
+//            return true;
+//        }
+//        final int len = string.length();
+//        boolean isWhitespace = true;
+//        for (int i = 0; isWhitespace && i < len; i++) {
+//            isWhitespace = Character.isWhitespace(string.charAt(i));
+//        }
+//        return isWhitespace;
+//    }
 
     /**
      * Gets the <tt>IndexFacadeService</tt> service.
@@ -282,6 +289,14 @@ public abstract class AbstractSMALStorage {
     protected void processFolder(final MailFolderInfo mailFolderInfo) throws OXException, InterruptedException {
         processor.processFolderAsync(mailFolderInfo, accountId, session, Collections.<String, Object> emptyMap());
     }
+    
+    protected boolean isIndexingAllowed() throws OXException {
+        ConfigViewFactory config = SmalServiceLookup.getServiceStatic(ConfigViewFactory.class);
+        ConfigView view = config.getView(userId, contextId);
+        String moduleStr = view.get(IndexProperties.ALLOWED_MODULES, String.class);
+        ModuleSet modules = new ModuleSet(moduleStr);
+        return modules.containsModule(Types.EMAIL);
+    }
 
     /**
      * Submits a folder job for the given full name.
@@ -290,23 +305,31 @@ public abstract class AbstractSMALStorage {
      * @throws OXException
      */
     protected void submitFolderJob(String folder) throws OXException {
-        if (!UserWhitelist.isIndexingAllowed(session.getLogin())) {
+        if (session instanceof FakeSession) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Session is a fake session. Job will not be submitted...");
+            }
+            // FIXME: This is done to prevent loops here and needs a much better solution!
             return;
         }
         
-        MailConfig config = delegateMailAccess.getMailConfig();                
+        if (!isIndexingAllowed() || isBlacklisted()) {
+            return;
+        }
+        
+        MailConfig mailConfig = delegateMailAccess.getMailConfig();                
         Builder builder = MailJobInfo.newBuilder(MailFolderJob.class)
-            .login(config.getLogin())
+            .login(mailConfig.getLogin())
             .accountId(accountId)
             .contextId(contextId)
             .userId(userId)
             .primaryPassword(session.getPassword())
-            .password(config.getPassword())
+            .password(mailConfig.getPassword())
             .folder(folder);
 
         JobInfo jobInfo = builder.build();
         IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
-        indexingService.scheduleJob(jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
+        indexingService.scheduleJob(true, jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
     }
 
     /**

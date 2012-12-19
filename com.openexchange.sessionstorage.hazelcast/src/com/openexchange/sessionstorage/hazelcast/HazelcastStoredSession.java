@@ -49,7 +49,13 @@
 
 package com.openexchange.sessionstorage.hazelcast;
 
-import java.io.Serializable;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import com.hazelcast.nio.DataSerializable;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.StoredSession;
 
@@ -58,11 +64,16 @@ import com.openexchange.sessionstorage.StoredSession;
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class HazelcastStoredSession extends StoredSession implements Serializable {
+public class HazelcastStoredSession extends StoredSession implements DataSerializable {
 
     private static final long serialVersionUID = -2346327568417617677L;
 
-    private long lastAccess;
+    /**
+     * Initializes a new {@link HazelcastStoredSession}.
+     */
+    public HazelcastStoredSession() {
+        super();
+    }
 
     /**
      * Initializes a new {@link HazelcastStoredSession}.
@@ -71,25 +82,89 @@ public class HazelcastStoredSession extends StoredSession implements Serializabl
      */
     public HazelcastStoredSession(final Session session) {
         super(session);
-        this.lastAccess = System.currentTimeMillis();
+    }
+    
+    @Override
+    public void writeData(DataOutput out) throws IOException {
+        /*
+         * basic properties
+         */
+        writeString(out, loginName);
+        writeString(out, password);
+        out.writeInt(contextId);
+        out.writeInt(userId);
+        writeString(out, sessionId);
+        writeString(out, secret);
+        writeString(out, login);
+        writeString(out, randomToken);
+        writeString(out, localIp);
+        writeString(out, authId);
+        writeString(out, hash);
+        writeString(out, client);
+        writeString(out, userLogin);
+        /*
+         * special handling for parameters map
+         */
+        Object alternativeID = parameters.get(PARAM_ALTERNATIVE_ID);
+        writeString(out, null != alternativeID && String.class.isInstance(alternativeID) ? (String)alternativeID : null); 
+        Object capabilitiesValue = parameters.get(PARAM_CAPABILITIES);
+        if (null != capabilitiesValue && java.util.Collection.class.isInstance(capabilitiesValue)) {
+            Collection<?> capabilities = (Collection<?>)capabilitiesValue;
+            out.writeInt(capabilities.size());
+            for (Object capability : capabilities) {
+                writeString(out, null != capability && String.class.isInstance(capability) ? (String)capability : null);
+            }                
+        } else {
+            out.writeInt(0);
+        }
+    }
+    
+    @Override
+    public void readData(DataInput in) throws IOException {
+        /*
+         * basic properties
+         */
+        loginName = readString(in);
+        password = readString(in);
+        contextId = in.readInt();
+        userId = in.readInt();
+        sessionId = readString(in);
+        secret = readString(in);
+        login = readString(in);
+        randomToken = readString(in);
+        localIp = readString(in);
+        authId = readString(in);
+        hash = readString(in);
+        client = readString(in);
+        userLogin = readString(in);
+        /*
+         * special handling for parameters map
+         */
+        String alternativeID = readString(in);
+        if (null != alternativeID) {
+            parameters.put(PARAM_ALTERNATIVE_ID, alternativeID);
+        }
+        int capabilitiesSize = in.readInt();
+        if (0 < capabilitiesSize) {
+            List<String> capabilities = new ArrayList<String>();
+            for (int i = 0; i < capabilitiesSize; i++) {
+                capabilities.add(readString(in));
+            }
+            parameters.put(PARAM_CAPABILITIES, capabilities);
+        }
+    }
+    
+    private static void writeString(final DataOutput out, final String str) throws IOException {
+        if (null == str) {
+            out.writeBoolean(true);
+        } else {
+            out.writeBoolean(false);
+            out.writeUTF(str);
+        }
     }
 
-    /**
-     * Gets the last-accessed time stamp.
-     * 
-     * @return The last-accessed time stamp
-     */
-    public long getLastAccess() {
-        return lastAccess;
-    }
-
-    /**
-     * Sets the last-accessed time stamp.
-     * 
-     * @param lastAccess The last-accessed time stamp
-     */
-    public void setLastAccess(final long lastAccess) {
-        this.lastAccess = lastAccess;
+    private static String readString(final DataInput in) throws IOException {
+        return in.readBoolean() ? null : in.readUTF();
     }
 
 }

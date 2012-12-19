@@ -52,7 +52,6 @@ package com.openexchange.contact.storage.rdb.search;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.contact.storage.rdb.internal.Tools;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;
@@ -78,7 +77,7 @@ import com.openexchange.tools.StringCollection;
  */
 public class SearchTermAdapter extends DefaultSearchAdapter {
 	
-	private final StringBuilder stringBuilder;
+	private final com.openexchange.java.StringAllocator stringBuilder;
 	
 	/**
 	 * Initializes a new {@link SearchAdapter}.
@@ -89,7 +88,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 	 */
 	public SearchTermAdapter(SearchTerm<?> term, String charset) throws OXException {
 		super(charset);
-		this.stringBuilder = new StringBuilder();
+		this.stringBuilder = new com.openexchange.java.StringAllocator();
 		this.append(term);
 	}
     
@@ -268,7 +267,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 		if (String.class.isInstance(value)) {
 			if (Types.INTEGER == sqlType) {
 				// fallback for numeric folder IDs in rdb storage
-				parameters.add(Tools.parse((String)value));
+				parameters.add(Integer.valueOf(Tools.parse((String) value)));
 			} else {
 				String preparedPattern = StringCollection.prepareForSearch((String)value, false, true);
 				if (containsWildcards(preparedPattern)) {

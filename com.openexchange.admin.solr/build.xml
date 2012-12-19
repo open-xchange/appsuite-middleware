@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.admin.solr overrides">
+
+	<description>
+        Installs the solr CLTs.
+    </description>
+
+	<import file="build-clt.xml" />
+
+	<!-- Constants -->
+	<property name="sbinDir" value="sbin" />
+
+	<target name="postInstall">
+	    <symlink resource="${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/unregistercorestore" overwrite="true" />
+	    <symlink resource="${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/listcorestore" overwrite="true" />
+	    <symlink resource="${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/changecorestore" overwrite="true" />
+	    <chmod perm="755" file="${sbinInstallDir}/unregistercorestore" />
+	    <chmod perm="755" file="${sbinInstallDir}/listcorestore" />
+        <chmod perm="755" file="${sbinInstallDir}/changecorestore" />
+	</target>
+
+</project>

@@ -94,7 +94,7 @@ public final class MDNSCommandProvider implements CommandProvider {
          * Iterate service identifiers
          */
         for (final String serviceId : serviceIds) {
-            final StringBuilder sb = new StringBuilder(256);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
             final List<MDNSServiceEntry> services;
             try {
                 services = mdnsService.listByService(serviceId);
@@ -102,14 +102,18 @@ public final class MDNSCommandProvider implements CommandProvider {
                 intp.print(sb.append("Error: ").append(e.getMessage()).toString());
                 return null;
             }
-            sb.setLength(0);
+            if (sb.length() > 0) {
+                sb.reinitTo(0);
+            }
             intp.print(sb.append("\n---Tracked services of \"").append(serviceId).append("\" ---\n").toString());
             if (services.isEmpty()) {
                 intp.print("\n\t<no tracked services>");
             } else {
                 final String delim = "\n\t";
                 for (final MDNSServiceEntry mdnsServiceEntry : services) {
-                    sb.setLength(0);
+                    if (sb.length() > 0) {
+                        sb.reinitTo(0);
+                    }
                     sb.append(delim).append("UUID: ").append(mdnsServiceEntry.getId());
                     sb.append(delim).append("Address: ").append(Arrays.toString(mdnsServiceEntry.getAddresses()));
                     sb.append(delim).append("Port: ").append(mdnsServiceEntry.getPort());
@@ -126,7 +130,7 @@ public final class MDNSCommandProvider implements CommandProvider {
 
     @Override
     public String getHelp() {
-        final StringBuilder builder = new StringBuilder(256).append("---Output tracked hosts of specified service---\n\t");
+        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(256).append("---Output tracked hosts of specified service---\n\t");
         builder.append("mdnsServices <service-id> - Output tracked hosts. Specify the service identifier; by default \"openexchange.service.messaging\".\n");
         return builder.toString();
     }

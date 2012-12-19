@@ -62,7 +62,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.configuration.ConfigurationException;
@@ -86,6 +85,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
@@ -155,7 +155,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         } catch(final RuntimeException e) {
-            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e);
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, e.getMessage());
         } finally {
             if (readcon != null) {
                 DBPool.push(ctx, readcon);
@@ -1011,7 +1011,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 //                cols = recColl.enhanceCols(cols, ara, 1);
             }
 
-            final StringBuilder columnBuilder = new StringBuilder();
+            final com.openexchange.java.StringAllocator columnBuilder = new com.openexchange.java.StringAllocator(cols.length << 4);
             boolean first = true;
             for (int i = 0; i < cols.length; i++) {
                 final String temp = recColl.getFieldName(cols[i]);
@@ -1241,7 +1241,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXException oxc) {
             throw oxc;
         } catch(final RuntimeException e) {
-            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(36));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, e.getMessage());
         } finally {
             if (close_connection) {
                 recColl.closeResultSet(rs);
@@ -1350,12 +1350,17 @@ public class CalendarSql implements AppointmentSQLInterface {
      */
     private static final String wrapParenthesis(final int i) {
         final String str = String.valueOf(i);
-        return new StringBuilder(str.length() + 2).append('(').append(str).append(')').toString();
+        return new com.openexchange.java.StringAllocator(str.length() + 2).append('(').append(str).append(')').toString();
     }
 
     @Override
     public int resolveUid(final String uid) throws OXException {
         return cimp.resolveUid(session, uid);
+    }
+
+    @Override
+    public int resolveFilename(final String filename) throws OXException {
+        return cimp.resolveFilename(session, filename);
     }
 
     @Override

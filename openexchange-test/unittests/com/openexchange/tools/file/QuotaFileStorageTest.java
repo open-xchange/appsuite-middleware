@@ -308,7 +308,7 @@ public class QuotaFileStorageTest extends TestCase {
          */
         @Override
         public void writeAssignment(final Connection con, final Assignment assignment) throws OXException {
-            // TODO Auto-generated method stub
+            // Nothing to do
             
         }
     }

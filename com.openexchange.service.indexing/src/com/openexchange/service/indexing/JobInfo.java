@@ -69,7 +69,7 @@ public abstract class JobInfo implements Serializable {
 
     public final Class<? extends IndexingJob> jobClass;
 
-    private Map<String, Object> properties;
+    private final Map<String, Object> properties;
     
     
     protected JobInfo(JobInfoBuilder<?> builder) {

@@ -54,30 +54,20 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexField;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.solr.SolrExceptionCodes;
 
 public class AddressComparator implements Comparator<IndexDocument<MailMessage>> {
     
-    private SolrMailField sortField;
+    private final SolrMailField sortField;
     
     private final Order order;
     
-    public AddressComparator(IndexField indexField, Order order) throws OXException {
+    public AddressComparator(SolrMailField sortField, Order order) throws OXException {
         super();
         this.order = order;
-        sortField = null;
-        if (indexField != null && indexField instanceof MailIndexField) {
-            sortField = SolrMailField.solrMailFieldFor((MailIndexField) indexField);
-        }
-        
-        if (sortField == null) {
-            throw SolrExceptionCodes.INVALID_SORT_FIELD.create(indexField);
-        }
+        this.sortField = sortField;
     }
     
     @Override

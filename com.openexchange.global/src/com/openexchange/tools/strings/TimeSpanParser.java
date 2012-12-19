@@ -95,8 +95,8 @@ public class TimeSpanParser  implements StringParser {
         if (span == null) {
             return Long.valueOf(-1);
         }
-        final StringBuilder numberBuilder = new StringBuilder();
-        final StringBuilder unitBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator numberBuilder = new com.openexchange.java.StringAllocator();
+        final com.openexchange.java.StringAllocator unitBuilder = new com.openexchange.java.StringAllocator();
         int mode = 0;
         long tally = 0;
 
@@ -112,8 +112,8 @@ public class TimeSpanParser  implements StringParser {
                         throw new IllegalArgumentException("I don't know unit " + unit);
                     }
                     tally += Long.parseLong(numberBuilder.toString()) * factor.longValue();
-                    numberBuilder.setLength(0);
-                    unitBuilder.setLength(0);
+                    numberBuilder.reinitTo(0);
+                    unitBuilder.reinitTo(0);
                     mode = 0;
                     numberBuilder.append(c);
                 }

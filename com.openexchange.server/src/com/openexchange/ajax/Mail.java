@@ -82,9 +82,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.idn.IDNA;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -804,7 +804,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         jsonWriter.endArray();
         if (DEBUG) {
             final long d = System.currentTimeMillis() - start;
-            LOG.debug(new StringBuilder(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append("mail?action=all performed in ").append(d).append("msec"));
+            LOG.debug(new com.openexchange.java.StringAllocator(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append("mail?action=all performed in ").append(d).append("msec"));
         }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(null);
@@ -1908,7 +1908,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final InputStream zipInputStream = mf.getInputStream();
                 try {
                     final byte[] buffer = new byte[0xFFFF];
-                    for (int len; (len = zipInputStream.read(buffer, 0, buffer.length)) != -1;) {
+                    for (int len; (len = zipInputStream.read(buffer, 0, buffer.length)) > 0;) {
                         out.write(buffer, 0, len);
                     }
                     out.flush();
@@ -1985,7 +1985,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final InputStream zipInputStream = mf.getInputStream();
                 try {
                     final byte[] buffer = new byte[0xFFFF];
-                    for (int len; (len = zipInputStream.read(buffer, 0, buffer.length)) != -1;) {
+                    for (int len; (len = zipInputStream.read(buffer, 0, buffer.length)) > 0;) {
                         out.write(buffer, 0, len);
                     }
                     out.flush();
@@ -2238,7 +2238,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 try {
                     final int buflen = 0xFFFF;
                     final byte[] buffer = new byte[buflen];
-                    for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) != -1;) {
+                    for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) > 0;) {
                         out.write(buffer, 0, len);
                     }
                     out.flush();
@@ -2330,9 +2330,9 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         }
         if ((null != baseCT) && (null == getFileExtension(fileName))) {
-            if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
+            if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length()) && !fileName.toLowerCase(Locale.US).endsWith(".txt")) {
                 tmp.append(".txt");
-            } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length())) {
+            } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length()) && !fileName.toLowerCase(Locale.US).endsWith(".html")) {
                 tmp.append(".html");
             }
         }
@@ -2349,9 +2349,9 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
         String fn = fileName;
         if ((null != baseCT) && (null == getFileExtension(fn))) {
-            if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
+            if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length()) && !fileName.toLowerCase(Locale.US).endsWith(".txt")) {
                 fn += ".txt";
-            } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length())) {
+            } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length()) && !fileName.toLowerCase(Locale.US).endsWith(".html")) {
                 fn += ".html";
             }
         }

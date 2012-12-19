@@ -507,7 +507,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
      */
     @Override
     public String getBaseUrl() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

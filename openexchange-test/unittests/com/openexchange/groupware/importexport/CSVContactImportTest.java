@@ -133,6 +133,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         assertTrue("One result?" , results.size() == 1);
         final ImportResult res = results.get(0);
         if(res.hasError()){
+        	fail("Should run flawlessly, but: " + res.getException().getMessage());
             res.getException().printStackTrace();
         }
         assertTrue( res.isCorrect() );

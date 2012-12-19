@@ -127,178 +127,9 @@ public final class NewAction extends AbstractMailAction {
         final List<OXException> warnings = new ArrayList<OXException>();
         try {
             if (request.hasUploads() || request.getParameter(AJAXServlet.UPLOAD_FORMFIELD_MAIL) != null) {
-                final ServerSession session = req.getSession();
-                final UploadEvent uploadEvent = request.getUploadEvent();
-                String msgIdentifier = null;
-                {
-                    final JSONObject jsonMailObj;
-                    {
-                        final String json0 = uploadEvent.getFormField(AJAXServlet.UPLOAD_FORMFIELD_MAIL);
-                        if (json0 == null || json0.trim().length() == 0) {
-                            throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(AJAXServlet.UPLOAD_FORMFIELD_MAIL), new Object[0]);
-                        }
-                        jsonMailObj = new JSONObject(json0);
-                    }
-                    /*-
-                     * Parse
-                     *
-                     * Resolve "From" to proper mail account to select right transport server
-                     */
-                    final InternetAddress from;
-                    try {
-                        String value = jsonMailObj.getString(MailJSONField.FROM.getKey());
-                        final int endPos;
-                        if ('[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
-                            value = new StringBuilder(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
-                        }
-                        from = parseAddressList(value, true, true)[0];
-                    } catch (final AddressException e) {
-                        throw MimeMailException.handleMessagingException(e);
-                    }
-                    int accountId;
-                    try {
-                        accountId = resolveFrom2Account(session, from, true, true);
-                    } catch (final OXException e) {
-                        if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e)) {
-                            // Re-throw
-                            throw e;
-                        }
-                        LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
-                        // Send with default account's transport provider
-                        accountId = MailAccount.DEFAULT_ID;
-                    }
-                    final MailServletInterface mailInterface = getMailInterface(req);
-                    if (jsonMailObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jsonMailObj.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
-                        /*
-                         * ... and save draft
-                         */
-                        final ComposedMailMessage composedMail =
-                            MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, accountId, warnings);
-                        msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId);
-                        if (msgIdentifier == null) {
-                            throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
-                        }
-                    } else {
-                        /*
-                         * ... and send message
-                         */
-                        final ComposedMailMessage[] composedMails =
-                            MessageParser.parse4Transport(jsonMailObj, uploadEvent, session, accountId, request.isSecure() ? "https://" : "http://", request.getHostname(), warnings);
-                        final ComposeType sendType =
-                            jsonMailObj.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jsonMailObj.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
-                        for (final ComposedMailMessage cm : composedMails) {
-                            if (null != cm) {
-                                cm.setSendType(sendType);
-                            }
-                        }
-                        msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId);
-                        for (int i = 1; i < composedMails.length; i++) {
-                            mailInterface.sendMessage(composedMails[i], sendType, accountId);
-                        }
-                        /*
-                         * Trigger contact collector
-                         */
-                        try {
-                            final ServerUserSetting setting = ServerUserSetting.getInstance();
-                            final int contextId = session.getContextId();
-                            final int userId = session.getUserId();
-                            if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailTransport(
-                                contextId,
-                                userId).booleanValue()) {
-                                triggerContactCollector(session, composedMails[0]);
-                            }
-                        } catch (final OXException e) {
-                            LOG.warn("Contact collector could not be triggered.", e);
-                        }
-                    }
-                }
-                if (msgIdentifier == null) {
-                    throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
-                }
-                /*
-                 * Create JSON response object
-                 */
-                final AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
-                result.addWarnings(warnings);
-                return result;
+                return performWithUploads(req, request, warnings);
             }
-            /*
-             * Non-POST
-             */
-            final ServerSession session = req.getSession();
-            /*
-             * Read in parameters
-             */
-            final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
-            final int flags;
-            {
-                final int i = req.optInt(Mail.PARAMETER_FLAGS);
-                flags = MailRequest.NOT_FOUND == i ? 0 : i;
-            }
-            final boolean force;
-            {
-                String tmp = req.getParameter("force");
-                if (null == tmp) {
-                    force = false;
-                } else {
-                    tmp = tmp.trim();
-                    force = "1".equals(tmp) || Boolean.parseBoolean(tmp);
-                }
-            }
-            // Get rfc822 bytes and create corresponding mail message
-            final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
-            final PutNewMailData data;
-            {
-                final MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(((String) req.getRequest().getData()).getBytes(com.openexchange.java.Charsets.US_ASCII)));
-                message.removeHeader("x-original-headers");
-                final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
-                final InternetAddress fromAddress;
-                final MailMessage mail;
-                if (isEmpty(fromAddr)) {
-                    // Add from address
-                    fromAddress = defaultSendAddr;
-                    message.setFrom(fromAddress);
-                    mail = MimeMessageConverter.convertMessage(message);
-                } else {
-                    fromAddress = new QuotedInternetAddress(fromAddr, true);
-                    mail = MimeMessageConverter.convertMessage(message);
-                }
-                data = new PutNewMailData() {
-
-                    @Override
-                    public MailMessage getMail() {
-                        return mail;
-                    }
-
-                    @Override
-                    public InternetAddress getFromAddress() {
-                        return fromAddress;
-                    }
-                };
-            }
-            // Check if "folder" element is present which indicates to save given message as a draft or append to denoted folder
-            final JSONValue responseData;
-            if (folder == null) {
-                responseData = appendDraft(session, flags, force, data.getFromAddress(), data.getMail());
-            } else {
-                final String[] ids;
-                final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
-                try {
-                    ids = mailInterface.appendMessages(folder, new MailMessage[] { data.getMail() }, force);
-                    if (flags > 0) {
-                        mailInterface.updateMessageFlags(folder, ids, flags, true);
-                    }
-                } finally {
-                    mailInterface.close(true);
-                }
-                final JSONObject responseObj = new JSONObject();
-                responseObj.put(FolderChildFields.FOLDER_ID, folder);
-                responseObj.put(DataFields.ID, ids[0]);
-                responseData = responseObj;
-            }
-            final AJAXRequestResult result = new AJAXRequestResult(responseData, "json");
-            result.addWarnings(warnings);
-            return result;
+            return performWithoutUploads(req, warnings);
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
@@ -306,6 +137,183 @@ public final class NewAction extends AbstractMailAction {
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private AJAXRequestResult performWithUploads(final MailRequest req, final AJAXRequestData request, final List<OXException> warnings) throws OXException, JSONException {
+        final ServerSession session = req.getSession();
+        final UploadEvent uploadEvent = request.getUploadEvent();
+        String msgIdentifier = null;
+        {
+            final JSONObject jsonMailObj;
+            {
+                final String json0 = uploadEvent.getFormField(AJAXServlet.UPLOAD_FORMFIELD_MAIL);
+                if (json0 == null || json0.trim().length() == 0) {
+                    throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(AJAXServlet.UPLOAD_FORMFIELD_MAIL), new Object[0]);
+                }
+                jsonMailObj = new JSONObject(json0);
+            }
+            /*-
+             * Parse
+             *
+             * Resolve "From" to proper mail account to select right transport server
+             */
+            final InternetAddress from;
+            try {
+                String value = jsonMailObj.getString(MailJSONField.FROM.getKey());
+                final int endPos;
+                if ('[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
+                    value = new com.openexchange.java.StringAllocator(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
+                }
+                from = parseAddressList(value, true, true)[0];
+            } catch (final AddressException e) {
+                throw MimeMailException.handleMessagingException(e);
+            }
+            int accountId;
+            try {
+                accountId = resolveFrom2Account(session, from, true, true);
+            } catch (final OXException e) {
+                if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e)) {
+                    // Re-throw
+                    throw e;
+                }
+                LOG.warn(new com.openexchange.java.StringAllocator(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                // Send with default account's transport provider
+                accountId = MailAccount.DEFAULT_ID;
+            }
+            final MailServletInterface mailInterface = getMailInterface(req);
+            if (jsonMailObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jsonMailObj.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
+                /*
+                 * ... and save draft
+                 */
+                final ComposedMailMessage composedMail =
+                    MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, accountId, warnings);
+                msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId);
+                if (msgIdentifier == null) {
+                    throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
+                }
+            } else {
+                /*
+                 * ... and send message
+                 */
+                final ComposedMailMessage[] composedMails =
+                    MessageParser.parse4Transport(jsonMailObj, uploadEvent, session, accountId, request.isSecure() ? "https://" : "http://", request.getHostname(), warnings);
+                final ComposeType sendType =
+                    jsonMailObj.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jsonMailObj.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
+                for (final ComposedMailMessage cm : composedMails) {
+                    if (null != cm) {
+                        cm.setSendType(sendType);
+                    }
+                }
+                msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId);
+                for (int i = 1; i < composedMails.length; i++) {
+                    mailInterface.sendMessage(composedMails[i], sendType, accountId);
+                }
+                /*
+                 * Trigger contact collector
+                 */
+                try {
+                    final ServerUserSetting setting = ServerUserSetting.getInstance();
+                    final int contextId = session.getContextId();
+                    final int userId = session.getUserId();
+                    if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailTransport(
+                        contextId,
+                        userId).booleanValue()) {
+                        triggerContactCollector(session, composedMails[0]);
+                    }
+                } catch (final OXException e) {
+                    LOG.warn("Contact collector could not be triggered.", e);
+                }
+            }
+        }
+        if (msgIdentifier == null) {
+            throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
+        }
+        /*
+         * Create JSON response object
+         */
+        final AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
+        result.addWarnings(warnings);
+        return result;
+    }
+
+    private AJAXRequestResult performWithoutUploads(final MailRequest req, final List<OXException> warnings) throws OXException, AddressException, MessagingException, JSONException {
+        /*
+         * Non-POST
+         */
+        final ServerSession session = req.getSession();
+        /*
+         * Read in parameters
+         */
+        final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+        final int flags;
+        {
+            final int i = req.optInt(Mail.PARAMETER_FLAGS);
+            flags = MailRequest.NOT_FOUND == i ? 0 : i;
+        }
+        final boolean force;
+        {
+            String tmp = req.getParameter("force");
+            if (null == tmp) {
+                force = false;
+            } else {
+                tmp = tmp.trim();
+                force = "1".equals(tmp) || Boolean.parseBoolean(tmp);
+            }
+        }
+        // Get rfc822 bytes and create corresponding mail message
+        final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
+        final PutNewMailData data;
+        {
+            final MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(((String) req.getRequest().getData()).getBytes(com.openexchange.java.Charsets.US_ASCII)));
+            message.removeHeader("x-original-headers");
+            final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
+            final InternetAddress fromAddress;
+            final MailMessage mail;
+            if (isEmpty(fromAddr)) {
+                // Add from address
+                fromAddress = defaultSendAddr;
+                message.setFrom(fromAddress);
+                mail = MimeMessageConverter.convertMessage(message);
+            } else {
+                fromAddress = new QuotedInternetAddress(fromAddr, true);
+                mail = MimeMessageConverter.convertMessage(message);
+            }
+            data = new PutNewMailData() {
+
+                @Override
+                public MailMessage getMail() {
+                    return mail;
+                }
+
+                @Override
+                public InternetAddress getFromAddress() {
+                    return fromAddress;
+                }
+            };
+        }
+        // Check if "folder" element is present which indicates to save given message as a draft or append to denoted folder
+        final JSONValue responseData;
+        if (folder == null) {
+            responseData = appendDraft(session, flags, force, data.getFromAddress(), data.getMail());
+        } else {
+            final String[] ids;
+            final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
+            try {
+                ids = mailInterface.appendMessages(folder, new MailMessage[] { data.getMail() }, force);
+                if (flags > 0) {
+                    mailInterface.updateMessageFlags(folder, ids, flags, true);
+                }
+            } finally {
+                mailInterface.close(true);
+            }
+            final JSONObject responseObj = new JSONObject();
+            responseObj.put(FolderChildFields.FOLDER_ID, folder);
+            responseObj.put(DataFields.ID, ids[0]);
+            responseData = responseObj;
+        }
+        final AJAXRequestResult result = new AJAXRequestResult(responseData, "json");
+        result.addWarnings(warnings);
+        return result;
     }
 
     private interface PutNewMailData {
@@ -329,7 +337,7 @@ public final class NewAction extends AbstractMailAction {
                     // Re-throw
                     throw e;
                 }
-                LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                LOG.warn(new com.openexchange.java.StringAllocator(128).append(e.getMessage()).append(". Using default account's transport.").toString());
                 // Send with default account's transport provider
                 accId = MailAccount.DEFAULT_ID;
             }

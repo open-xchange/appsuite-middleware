@@ -605,13 +605,13 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
 
     @Override
     public void unlock(final String folderId, final String id) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void lock(final String folderId, final String id, final long diff) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 

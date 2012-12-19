@@ -1,14 +1,38 @@
-open-xchange-indexing (6.22.1-0) unstable; urgency=low
+open-xchange-indexing (7.0.0-1) unstable; urgency=low
 
-  * prepare for 6.22.1
+  * First release candidate for 7.0.0
 
- -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 26 Oct 2012 10:04:39 +0200
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 04 Dec 2012 13:48:30 +0100
 
-open-xchange-indexing (6.22.1-0) unstable; urgency=low
+open-xchange-indexing (7.0.0-0) unstable; urgency=low
 
-  * prepare for 6.22.1
+  * prepare for 7.0.0 release
 
- -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 26 Oct 2012 10:04:28 +0200
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 04 Dec 2012 09:29:28 +0100
+
+open-xchange-indexing (6.23.0-5) unstable; urgency=low
+
+  * First release candidate for EDP drop #6
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 13 Nov 2012 11:22:49 +0100
+
+open-xchange-indexing (6.23.0-4) unstable; urgency=low
+
+  * Third release build for EDP drop #5
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 26 Oct 2012 15:59:29 +0200
+
+open-xchange-indexing (6.23.0-3) unstable; urgency=low
+
+  * Second release build for EDP drop #5
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 26 Oct 2012 11:59:09 +0200
+
+open-xchange-indexing (6.23.0-2) unstable; urgency=low
+
+  * Release build for EDP drop #5
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 11 Oct 2012 21:56:33 +0200
 
 open-xchange-indexing (6.23.0-1) unstable; urgency=low
 
@@ -21,6 +45,18 @@ open-xchange-indexing (6.23.0-0) unstable; urgency=low
   * prepare for next EDP drop
 
  -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 03 Sep 2012 13:47:09 +0200
+
+open-xchange-indexing (6.22.1-0) unstable; urgency=low
+
+  * prepare for 6.22.1
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 26 Oct 2012 10:04:39 +0200
+
+open-xchange-indexing (6.22.1-0) unstable; urgency=low
+
+  * prepare for 6.22.1
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 26 Oct 2012 10:04:28 +0200
 
 open-xchange-indexing (6.21.0-6) unstable; urgency=low
 

@@ -82,9 +82,9 @@ public interface AttachmentBase extends TransactionAware {
      */
     public abstract long detachFromObject(int folderId, int objectId, int moduleId, int[] ids, Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
-    public abstract AttachmentMetadata getAttachment(int folderId, int objectId, int moduleId, int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public abstract AttachmentMetadata getAttachment(Session session, int folderId, int objectId, int moduleId, int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
-    public abstract InputStream getAttachedFile(int folderId, int attachedId, int moduleId, int id, Context context, User user, UserConfiguration userConfig)  throws OXException;
+    public abstract InputStream getAttachedFile(Session session, int folderId, int attachedId, int moduleId, int id, Context context, User user, UserConfiguration userConfig)  throws OXException;
 
     /**
      * This method is used to get alle file_ids which are refered to by attachments. This is used by the consistency tool at the moment
@@ -93,15 +93,15 @@ public interface AttachmentBase extends TransactionAware {
      */
     public abstract SortedSet<String> getAttachmentFileStoreLocationsperContext(Context ctx) throws OXException;
 
-    public abstract TimedResult<AttachmentMetadata> getAttachments(int folderId, int attachedId, int moduleId, Context context, User user, UserConfiguration userConfig) throws OXException;
+    public abstract TimedResult<AttachmentMetadata> getAttachments(Session session, int folderId, int attachedId, int moduleId, Context context, User user, UserConfiguration userConfig) throws OXException;
 
-    public abstract TimedResult<AttachmentMetadata> getAttachments(int folderId, int attachedId, int moduleId, AttachmentField[] columns, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig)  throws OXException;
+    public abstract TimedResult<AttachmentMetadata> getAttachments(Session session, int folderId, int attachedId, int moduleId, AttachmentField[] columns, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig)  throws OXException;
 
-    public abstract TimedResult<AttachmentMetadata> getAttachments(int folderId, int attachedId, int moduleId, int[] idsToFetch, AttachmentField[] fields, Context context, User user, UserConfiguration userConfig) throws OXException;
+    public abstract TimedResult<AttachmentMetadata> getAttachments(Session session, int folderId, int attachedId, int moduleId, int[] idsToFetch, AttachmentField[] fields, Context context, User user, UserConfiguration userConfig) throws OXException;
 
-    public abstract Delta<AttachmentMetadata> getDelta(int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, Context context, User user, UserConfiguration userConfig) throws OXException;
+    public abstract Delta<AttachmentMetadata> getDelta(Session session, int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, Context context, User user, UserConfiguration userConfig) throws OXException;
 
-    public abstract Delta<AttachmentMetadata> getDelta(int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, AttachmentField[] fields, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig) throws OXException;
+    public abstract Delta<AttachmentMetadata> getDelta(Session session, int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, AttachmentField[] fields, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig) throws OXException;
 
     public abstract void registerAttachmentListener(AttachmentListener listener, int moduleId);
 

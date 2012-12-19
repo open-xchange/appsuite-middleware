@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.java.StringAllocator;
 
 /**
  * This class represents a single setting.
@@ -226,7 +227,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
     public int hashCode() {
         int retval = id ^ name.hashCode();
         if (isShared()) {
-            retval ^= Boolean.valueOf(isShared()).hashCode();
+            retval ^= Boolean.TRUE.hashCode();
         }
         return retval;
     }
@@ -243,13 +244,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
      */
     @Override
     public String getPath() {
-        final String retval;
-        if (null == parent) {
-            retval = name;
-        } else {
-            retval = parent.getPath() + SEPARATOR + name;
-        }
-        return retval;
+        return null == parent ? name : new StringAllocator(parent.getPath()).append(SEPARATOR).append(name).toString();
     }
 
     /**

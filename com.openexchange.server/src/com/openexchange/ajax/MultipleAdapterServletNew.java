@@ -51,7 +51,6 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -59,7 +58,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
@@ -70,6 +68,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.java.Streams;
+import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -199,7 +200,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 if(callback == null) {
                     callback = action;
                 }
-                final StringWriter w = new StringWriter();
+                final AllocatingStringWriter w = new AllocatingStringWriter();
                 ResponseWriter.write(response, w, localeFrom(session));
 
                 resp.getWriter().print(substituteJS(w.toString(), callback));
@@ -279,42 +280,37 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             /*
              * Guess an appropriate body object
              */
-            final String body = AJAXServlet.getBody(req);
-            if (startsWith('{', body, true)) {
-                /*
-                 * Expect the body to be a JSON object
-                 */
-                try {
-                    retval.setData(new JSONObject(body));
-                } catch (final JSONException e) {
-                    retval.setData(body);
+            UnsynchronizedPushbackReader reader = null;
+            try {
+                reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
+                final int read = reader.read();
+                if (read < 0) {
+                    retval.setData(null);
+                } else {
+                    final char c = (char) read;
+                    reader.unread(c);
+                    if ('[' == c || '{' == c) {
+                        retval.setData(JSONObject.parse(reader));
+                    } else {
+                        retval.setData(AJAXServlet.readFrom(reader));
+                    }
                 }
-            } else if (startsWith('[', body, true)) {
-                /*
-                 * Expect the body to be a JSON array
-                 */
-                try {
-                    retval.setData(new JSONArray(body));
-                } catch (final JSONException e) {
-                    retval.setData(body);
-                }
-            } else {
-                retval.setData(0 == body.length() ? null : body);
+            } catch (final JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            } finally {
+                Streams.close(reader);
             }
         }
         return retval;
     }
 
-    private static boolean startsWith(final char startingChar, final String toCheck, final boolean ignoreHeadingWhitespaces) {
+    private static boolean startsWith(final char startingChar, final String toCheck) {
         if (null == toCheck) {
             return false;
         }
         final int len = toCheck.length();
         if (len <= 0) {
             return false;
-        }
-        if (!ignoreHeadingWhitespaces) {
-            return startingChar == toCheck.charAt(0);
         }
         int i = 0;
         if (Character.isWhitespace(toCheck.charAt(i))) {

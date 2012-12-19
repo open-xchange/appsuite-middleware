@@ -1,7 +1,6 @@
 package com.openexchange.groupware.attach.actions;
 
 import java.util.Arrays;
-
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.attach.impl.CreateAttachmentAction;
@@ -50,13 +49,13 @@ public class UpdateAttachmentsActionTest  extends AbstractAttachmentActionTest{
 
 	@Override
 	protected void verifyPerformed() throws Exception {
-		final AttachmentMetadata loaded = getAttachmentBase().getAttachment(update.getFolderId(), update.getAttachedId(), update.getModuleId(), update.getId(), getContext(), getUser(), null);
+		final AttachmentMetadata loaded = getAttachmentBase().getAttachment(getSession(), update.getFolderId(), update.getAttachedId(), update.getModuleId(), update.getId(), getContext(), getUser(), null);
 		assertEquals(update,loaded);
 	}
 
 	@Override
 	protected void verifyUndone() throws Exception {
-		final AttachmentMetadata loaded = getAttachmentBase().getAttachment(update.getFolderId(), update.getAttachedId(), update.getModuleId(), update.getId(), getContext(), getUser(), null);
+		final AttachmentMetadata loaded = getAttachmentBase().getAttachment(getSession(), update.getFolderId(), update.getAttachedId(), update.getModuleId(), update.getId(), getContext(), getUser(), null);
 		assertEquals(original,loaded);
 	}
 

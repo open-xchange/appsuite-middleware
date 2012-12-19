@@ -58,13 +58,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.Streams;
+import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -74,6 +76,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXRequestDataTools {
+
+    private static final String PARAMETER_ACTION = AJAXServlet.PARAMETER_ACTION;
 
     private static final AJAXRequestDataTools INSTANCE = new AJAXRequestDataTools();
 
@@ -114,7 +118,6 @@ public class AJAXRequestDataTools {
      * @throws IOException If an I/O error occurs
      * @throws OXException If an OX error occurs
      */
-    @SuppressWarnings("unused")
     public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
         parseHostName(retval, req, session);
@@ -178,27 +181,25 @@ public class AJAXRequestDataTools {
             /*
              * Guess an appropriate body object
              */
-            final String body = AJAXServlet.getBody(req);
-            if (startsWith('{', body)) {
-                /*
-                 * Expect the body to be a JSON object
-                 */
-                try {
-                    retval.setData(new JSONObject(body));
-                } catch (final JSONException e) {
-                    retval.setData(body);
+            UnsynchronizedPushbackReader reader = null;
+            try {
+                reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
+                final int read = reader.read();
+                if (read < 0) {
+                    retval.setData(null);
+                } else {
+                    final char c = (char) read;
+                    reader.unread(c);
+                    if ('[' == c || '{' == c) {
+                        retval.setData(JSONObject.parse(reader));
+                    } else {
+                        retval.setData(AJAXServlet.readFrom(reader));
+                    }
                 }
-            } else if (startsWith('[', body)) {
-                /*
-                 * Expect the body to be a JSON array
-                 */
-                try {
-                    retval.setData(new JSONArray(body));
-                } catch (final JSONException e) {
-                    retval.setData(body);
-                }
-            } else {
-                retval.setData(0 == body.length() ? null : body);
+            } catch (final JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            } finally {
+                Streams.close(reader);
             }
         }
         return retval;
@@ -312,7 +313,7 @@ public class AJAXRequestDataTools {
      * @return The determined action
      */
     public String getAction(final HttpServletRequest req) {
-        final String action = req.getParameter("action");
+        final String action = req.getParameter(PARAMETER_ACTION);
         if (null == action) {
             return req.getMethod().toUpperCase(Locale.US);
         }

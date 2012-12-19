@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.cache;
 
+import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,6 +71,7 @@ import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
@@ -215,7 +217,7 @@ final class ListLsubCollection {
         deprecated.set(true);
         stamp = 0;
         if (DEBUG) {
-            final StringBuilder builder = new StringBuilder("Cleared LIST/LSUB cache.\n");
+            final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator("Cleared LIST/LSUB cache.\n");
             appendStackTrace(new Throwable().getStackTrace(), builder);
             LOG.debug(builder.toString());
         }
@@ -354,7 +356,7 @@ final class ListLsubCollection {
          * Debug logs
          */
         if (DEBUG) {
-            final StringBuilder sb = new StringBuilder(1024);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
             {
                 final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(listMap);
                 sb.append("LIST cache contains after (re-)initialization:\n");
@@ -365,7 +367,7 @@ final class ListLsubCollection {
             }
             {
                 final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(lsubMap);
-                sb.setLength(0);
+                sb.reinitTo(0);
                 sb.append("LSUB cache contains after (re-)initialization:\n");
                 for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
                     sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
@@ -423,7 +425,7 @@ final class ListLsubCollection {
         }
         if (DEBUG) {
             final long dur = System.currentTimeMillis() - st;
-            final StringBuilder sb = new StringBuilder(128);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
             sb.append("LIST/LSUB cache");
             if (doStatus || doGetAcl) {
                 sb.append(" (");
@@ -489,7 +491,7 @@ final class ListLsubCollection {
         }
         if (DEBUG) {
             final long dur = System.currentTimeMillis() - st;
-            final StringBuilder sb = new StringBuilder(64);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
             sb.append("LIST/LSUB cache built GETACL entries in ").append(dur).append("msec.");
             LOG.debug(sb.toString());
         }
@@ -627,7 +629,7 @@ final class ListLsubCollection {
      * @param protocol The IMAP protocol
      */
     protected void doDummyLsub(final IMAPProtocol protocol) {
-        final Response[] r = protocol.command("LSUB \"\" \"\"", null);
+        final Response[] r = performCommand(protocol, "LSUB \"\" \"\"");
         final Response response = r[r.length - 1];
         if (response.isOK()) {
             /*
@@ -673,11 +675,11 @@ final class ListLsubCollection {
         final String command = "LIST";
         final Response[] r;
         if (DEBUG) {
-            final String sCmd = new StringBuilder(command).append(" (SPECIAL-USE) \"\" \"*\"").toString();
-            r = protocol.command(sCmd, null);
+            final String sCmd = new StringAllocator(command).append(" (SPECIAL-USE) \"\" \"*\"").toString();
+            r = performCommand(protocol, sCmd);
             LOG.debug((command) + " cache filled with >>" + sCmd + "<< which returned " + r.length + " response line(s).");
         } else {
-            r = protocol.command(new StringBuilder(command).append(" (SPECIAL-USE) \"\" \"*\"").toString(), null);
+            r = performCommand(protocol, new StringAllocator(command).append(" (SPECIAL-USE) \"\" \"*\"").toString());
         }
         final Response response = r[r.length - 1];
         if (response.isOK()) {
@@ -727,11 +729,11 @@ final class ListLsubCollection {
         final String command = lsub ? "LSUB" : "LIST";
         final Response[] r;
         if (DEBUG) {
-            final String sCmd = new StringBuilder(command).append(" \"\" \"*\"").toString();
-            r = protocol.command(sCmd, null);
+            final String sCmd = new StringAllocator(command).append(" \"\" \"*\"").toString();
+            r = performCommand(protocol, sCmd);
             LOG.debug((command) + " cache filled with >>" + sCmd + "<< which returned " + r.length + " response line(s).");
         } else {
-            r = protocol.command(new StringBuilder(command).append(" \"\" \"*\"").toString(), null);
+            r = performCommand(protocol, new StringAllocator(command).append(" \"\" \"*\"").toString(), null);
         }
         final Response response = r[r.length - 1];
         if (response.isOK()) {
@@ -977,7 +979,7 @@ final class ListLsubCollection {
         /*
          * Perform command: LIST "" ""
          */
-        final Response[] r = protocol.command("LIST \"\" \"\"", null);
+        final Response[] r = performCommand(protocol, "LIST \"\" \"\"");
         final Response response = r[r.length - 1];
         if (response.isOK()) {
             final String cmd = "LIST";
@@ -1029,7 +1031,7 @@ final class ListLsubCollection {
         final String mbox = BASE64MailboxEncoder.encode(fullName);
         final Argument args = new Argument();   
         args.writeString(mbox);
-        final Response[] r = protocol.command("LIST \"\"", args);
+        final Response[] r = performCommand(protocol, "LIST \"\"", args);
         final Response response = r[r.length - 1];
         if (response.isOK()) {
             ListLsubEntryImpl listLsubEntry = null;
@@ -1077,7 +1079,7 @@ final class ListLsubCollection {
          */
         final Argument args = new Argument();   
         args.writeString(mbox);
-        final Response[] r = protocol.command("LSUB \"\"", args);
+        final Response[] r = performCommand(protocol, "LSUB \"\"", args);
         final Response response = r[r.length - 1];
         if (response.isOK()) {
             boolean ret = false;
@@ -1177,7 +1179,7 @@ final class ListLsubCollection {
         String mbox = BASE64MailboxEncoder.encode(fullName);
         Argument args = new Argument();
         args.writeString(mbox);
-        final Response[] r = protocol.command(new StringBuilder(command).append(" \"\"").toString(), args);
+        final Response[] r = performCommand(protocol, new StringAllocator(command).append(" \"\"").toString(), args);
         args = null;
         mbox = null;
         final Response response = r[r.length - 1];
@@ -1230,7 +1232,7 @@ final class ListLsubCollection {
             if (DEBUG) {
                 final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>();
                 tm.putAll(map);
-                final StringBuilder sb = new StringBuilder(1024);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
                 sb.append((lsub ? "LSUB" : "LIST") + " cache contains after adding single entry \"");
                 sb.append(fullName).append("\":\n");
                 for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
@@ -1397,6 +1399,9 @@ final class ListLsubCollection {
      * @return The LIST entry for specified full name or <code>null</code>
      */
     public ListLsubEntry getList(final String fullName) {
+        if (null == fullName) {
+            return null;
+        }
         checkDeprecated();
         return listMap.get(fullName);
     }
@@ -1408,6 +1413,9 @@ final class ListLsubCollection {
      * @return The LSUB entry for specified full name or <code>null</code>
      */
     public ListLsubEntry getLsub(final String fullName) {
+        if (null == fullName) {
+            return null;
+        }
         checkDeprecated();
         return lsubMap.get(fullName);
     }
@@ -1989,7 +1997,7 @@ final class ListLsubCollection {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder(128).append("{ ").append(lsubMap == null ? "LSUB" : "LIST");
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("{ ").append(lsubMap == null ? "LSUB" : "LIST");
             sb.append(" fullName=\"").append(fullName).append('"');
             sb.append(", parent=");
             if (null == parent) {
@@ -2047,7 +2055,7 @@ final class ListLsubCollection {
 
     } // End of class ListLsubEntryImpl
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb) {
         if (null == trace) {
             sb.append("<missing stack trace>\n");
             return;

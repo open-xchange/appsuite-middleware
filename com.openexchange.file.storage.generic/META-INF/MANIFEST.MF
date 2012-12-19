@@ -2,10 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage Generic Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.generic
-Bundle-Version: 6.22.1
+Bundle-Version: 7.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.file.storage,
+ com.openexchange.java,
  com.openexchange.log
 Export-Package: com.openexchange.file.storage.generic

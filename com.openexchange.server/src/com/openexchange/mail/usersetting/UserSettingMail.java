@@ -50,7 +50,7 @@
 package com.openexchange.mail.usersetting;
 
 import java.io.Serializable;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -740,7 +740,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
                 LOG.error(e.getMessage(), e);
             }
         }
-        return (spamHandlerFound.booleanValue() && spamEnabled);
+        return ((null != spamHandlerFound && spamHandlerFound.booleanValue()) && spamEnabled);
     }
 
     /**

@@ -4,7 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Verb;
@@ -40,8 +40,8 @@ public class ScribeHTTPPutRequestBuilder extends
 	public HTTPPutRequestBuilder body(InputStream body) throws OXException {
 		InputStreamReader isr;
 		try {
-			isr = new InputStreamReader(new BufferedInputStream(body), "UTF-8");
-		} catch (UnsupportedEncodingException e1) {
+			isr = new InputStreamReader(new BufferedInputStream(body), com.openexchange.java.Charsets.UTF_8);
+		} catch (UnsupportedCharsetException e1) {
 			return null;
 		}
 		StringBuilder b = new StringBuilder();

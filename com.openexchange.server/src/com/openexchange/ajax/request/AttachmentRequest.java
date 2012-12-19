@@ -406,7 +406,7 @@ public class AttachmentRequest extends CommonRequest {
         try {
             ATTACHMENT_BASE.startTransaction();
 
-            final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(folderId, attachedId, moduleId, id, ctx, user, userConfig);
+            final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
 
             final AttachmentWriter aWriter = new AttachmentWriter(w);
             aWriter.timedResult(attachment.getCreationDate().getTime());
@@ -440,7 +440,7 @@ public class AttachmentRequest extends CommonRequest {
             Delta<AttachmentMetadata> delta;
             if (sort != null) {
                 delta = ATTACHMENT_BASE.getDelta(
-                    folderId,
+                    session, folderId,
                     attachedId,
                     moduleId,
                     ts,
@@ -452,7 +452,7 @@ public class AttachmentRequest extends CommonRequest {
                     user,
                     userConfig);
             } else {
-                delta = ATTACHMENT_BASE.getDelta(folderId, attachedId, moduleId, ts, ignoreDeleted, ctx, user, userConfig);
+                delta = ATTACHMENT_BASE.getDelta(session, folderId, attachedId, moduleId, ts, ignoreDeleted, ctx, user, userConfig);
             }
             iter = delta.results();
             iter2 = delta.getDeleted();
@@ -506,9 +506,9 @@ public class AttachmentRequest extends CommonRequest {
             ATTACHMENT_BASE.startTransaction();
             TimedResult<AttachmentMetadata> result;
             if (sort != null) {
-                result = ATTACHMENT_BASE.getAttachments(folderId, attachedId, moduleId, fields, sort, order, ctx, user, userConfig);
+                result = ATTACHMENT_BASE.getAttachments(session, folderId, attachedId, moduleId, fields, sort, order, ctx, user, userConfig);
             } else {
-                result = ATTACHMENT_BASE.getAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
+                result = ATTACHMENT_BASE.getAttachments(session, folderId, attachedId, moduleId, ctx, user, userConfig);
             }
             iter = result.results();
             final AttachmentWriter aWriter = new AttachmentWriter(w);
@@ -586,7 +586,7 @@ public class AttachmentRequest extends CommonRequest {
         try {
             ATTACHMENT_BASE.startTransaction();
 
-            final TimedResult<AttachmentMetadata> result = ATTACHMENT_BASE.getAttachments(folderId, attachedId, moduleId, ids, fields, ctx, user, userConfig);
+            final TimedResult<AttachmentMetadata> result = ATTACHMENT_BASE.getAttachments(session, folderId, attachedId, moduleId, ids, fields, ctx, user, userConfig);
 
             iter = result.results();
 

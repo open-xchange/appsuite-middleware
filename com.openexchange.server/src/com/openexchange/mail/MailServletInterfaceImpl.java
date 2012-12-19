@@ -78,8 +78,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.idn.IDNA;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -733,7 +733,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     max, MailSortField.getField(sortCol), OrderDirection.getOrderDirection(order), mailFields.toArray());
             } catch (final OXException e) {
                 // Check for missing "THREAD=REFERENCES" capability
-                if (2046 != e.getCode() || (!"MSG".equals(e.getPrefix()) && !"IMAP".equals(e.getPrefix()))) {
+                if ((2046 != e.getCode() || (!"MSG".equals(e.getPrefix()) && !"IMAP".equals(e.getPrefix()))) && !MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
                     throw e;
                 }
             }
@@ -1304,7 +1304,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             return fileName;
         }
         final int len = fileName.length();
-        final StringBuilder sb = new StringBuilder(len);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(len);
         char prev = '\0';
         for (int i = 0; i < len; i++) {
             final char c = fileName.charAt(i);
@@ -2308,7 +2308,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 final int parentAccountID = mailFolder.getParentAccountId();
                 if (accountId == parentAccountID) {
                     final String newParent = mailFolder.getParentFullname();
-                    final StringBuilder newFullname = new StringBuilder(newParent).append(mailFolder.getSeparator());
+                    final com.openexchange.java.StringAllocator newFullname = new com.openexchange.java.StringAllocator(newParent).append(mailFolder.getSeparator());
                     if (mailFolder.containsName()) {
                         newFullname.append(mailFolder.getName());
                     } else {
@@ -2708,7 +2708,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         final MailPath retval = new MailPath(mailAccess.getAccountId(), sentFullname, uidArr[0]);
         if (DEBUG_ENABLED) {
-            LOG.debug(new StringBuilder(128).append("Mail copy (").append(retval.toString()).append(") appended in ").append(
+            LOG.debug(new com.openexchange.java.StringAllocator(128).append("Mail copy (").append(retval.toString()).append(") appended in ").append(
                 System.currentTimeMillis() - start).append("msec").toString());
         }
         return retval;

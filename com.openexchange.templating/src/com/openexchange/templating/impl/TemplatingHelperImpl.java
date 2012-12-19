@@ -49,12 +49,11 @@
 
 package com.openexchange.templating.impl;
 
-import java.io.StringWriter;
-
 import com.openexchange.exception.OXException;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.session.Session;
-import com.openexchange.templating.TemplateServiceImpl;
 import com.openexchange.templating.OXTemplate;
+import com.openexchange.templating.TemplateServiceImpl;
 import com.openexchange.templating.TemplatingHelper;
 
 
@@ -87,7 +86,7 @@ public class TemplatingHelperImpl implements TemplatingHelper {
             template = templateService.loadTemplate(templateName);
         }
         
-        StringWriter writer = new StringWriter();
+        AllocatingStringWriter writer = new AllocatingStringWriter();
         template.process(rootObject, writer);
         
         return writer.toString();

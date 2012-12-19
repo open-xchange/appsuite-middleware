@@ -444,6 +444,7 @@ public final class FacebookFQLStreamParser {
                  * "media" node
                  */
                 final Node media = getNodeByName("media", attachNodes, len);
+                // System.out.println(FacebookMessagingUtility.toString(media));
                 if (null != media) {
                     final Node streamMedia = getNodeByName("stream_media", media);
                     if (null != streamMedia) {
@@ -470,6 +471,10 @@ public final class FacebookFQLStreamParser {
                                 final int pos = sourceUrl.lastIndexOf('.');
                                 if (pos >= 0) {
                                     final String extension = sourceUrl.substring(pos + 1);
+                                    final String prefix = sourceUrl.substring(0, pos);
+                                    if (prefix.toLowerCase(Locale.US).endsWith("_s")) {
+                                        sourceUrl = prefix.substring(0, prefix.length() - 2) + "_b." + extension;
+                                    }
                                     if (!"application/octet-stream".equals(Utility.getContentTypeByExtension(extension))) {
                                         /*
                                          * A known extension
@@ -765,7 +770,7 @@ public final class FacebookFQLStreamParser {
                 /*
                  * Start replacing with href
                  */
-                final StringBuilder sb = new StringBuilder(content.length());
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(content.length());
                 int lastMatch = 0;
                 do {
                     sb.append(content.substring(lastMatch, imgMatcher.start()));
@@ -787,7 +792,7 @@ public final class FacebookFQLStreamParser {
         "(?:src=\"([^\"]*)\")|(?:src='([^']*)')|(?:src=[^\"']([^\\s>]*))",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static void replaceWithSrcAttribute(final String imgTag, final StringBuilder sb) {
+    private static void replaceWithSrcAttribute(final String imgTag, final com.openexchange.java.StringAllocator sb) {
         final Matcher srcMatcher = SRC_PATTERN.matcher(imgTag);
         if (srcMatcher.find()) {
             /*

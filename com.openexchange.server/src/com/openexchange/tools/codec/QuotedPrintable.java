@@ -115,7 +115,7 @@ public final class QuotedPrintable {
         final UnsynchronizedByteArrayOutputStream decodedBytes = new UnsynchronizedByteArrayOutputStream();
         int k = -1;
         final byte[] buffer = new byte[512];
-        while ((k = inStream.read(buffer)) != -1) {
+        while ((k = inStream.read(buffer)) > 0) {
             decodedBytes.write(buffer, 0, k);
         }
         return new String(decodedBytes.toByteArray(), Charsets.forName(charset));

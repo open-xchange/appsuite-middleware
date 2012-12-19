@@ -51,16 +51,16 @@ package com.openexchange.mail.smal.impl;
 
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -71,6 +71,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
+import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -78,9 +79,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.index.MailUtility;
 import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
 import com.openexchange.mail.smal.impl.index.IndexDocumentHelper;
-import com.openexchange.mail.smal.impl.index.UserWhitelist;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -88,6 +87,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.service.indexing.impl.internal.FakeSession;
 import com.openexchange.service.indexing.impl.mail.AddByIdsJob;
 import com.openexchange.service.indexing.impl.mail.ChangeByIdsJob;
 import com.openexchange.service.indexing.impl.mail.MailJobInfo;
@@ -101,12 +101,9 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
+public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SmalMessageStorage.class));
-    
     private final IMailMessageStorage messageStorage;
-
 
     /**
      * Initializes a new {@link SmalMessageStorage}.
@@ -119,15 +116,30 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     }
 
     @Override
+    public void clearCache() throws OXException {
+        if (messageStorage instanceof IMailMessageStorageExt) {
+            ((IMailMessageStorageExt) messageStorage).clearCache();
+        }
+    }
+
+    @Override
+    public List<List<MailMessage>> getThreadSortedMessages(String folder, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] fields) throws OXException {
+        if (messageStorage instanceof ISimplifiedThreadStructure) {
+            return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(folder, includeSent, cache, indexRange, max, sortField, order, fields);
+        }
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+    }
+
+    @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
-        final String[] newIds = messageStorage.appendMessages(destFolder, msgs);        
+        final String[] newIds = messageStorage.appendMessages(destFolder, msgs);
         /*
          * Enqueue adder job
          */
         try {
             Builder builder = prepareJobBuilder(AddByIdsJob.class);
             builder.folder(destFolder);
-            builder.addProperty(AddByIdsJob.IDS, newIds);        
+            builder.addProperty(AddByIdsJob.IDS, newIds);
             submitJob(builder.build());
         } catch (Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
@@ -135,8 +147,6 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
         return newIds;
     }
-
-    
 
     @Override
     public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
@@ -147,7 +157,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         try {
             Builder builder = prepareJobBuilder(AddByIdsJob.class);
             builder.folder(destFolder);
-            builder.addProperty(AddByIdsJob.IDS, newIds);        
+            builder.addProperty(AddByIdsJob.IDS, newIds);
             submitJob(builder.build());
         } catch (Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
@@ -164,7 +174,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         try {
             Builder builder = prepareJobBuilder(RemoveByIdsJob.class);
             builder.folder(folder);
-            builder.addProperty(RemoveByIdsJob.IDS, mailIds);        
+            builder.addProperty(RemoveByIdsJob.IDS, mailIds);
             submitJob(builder.build());
         } catch (Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
@@ -174,91 +184,90 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
         return messageStorage.getMessages(folder, mailIds, fields);
-    }    
+    }
     
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
-    	if (getIndexFacadeService() == null) {
+        IndexFacadeService indexFacade = getIndexFacadeService();
+        if (indexFacade == null || isBlacklisted() || !isIndexingAllowed()) {
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
-    	
-        final MailFields mfs = new MailFields(fields);
+        
         IndexAccess<MailMessage> indexAccess = null;
         try {
-            indexAccess = IndexAccessAdapter.getInstance().getIndexAccess(session);
+            MailFields mfs = new MailFields(fields);
+            indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
             boolean isIndexed = indexAccess.isIndexed(String.valueOf(accountId), folder);
-            if (!isIndexed) {
-                try {
-                    submitFolderJob(folder);
-                } catch (OXException e) {
-                    LOG.error("Could not schedule folder job.", e);
+            if (isIndexed && searchTerm != null && MailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
+                AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
+                QueryParameters.Builder builder = new QueryParameters
+                    .Builder()
+                    .setAccountFolders(Collections.singleton(accountFolders));
+                
+                if (sortField != null) {
+                    MailField field = MailField.getField(sortField.getField());
+                    MailIndexField indexSortField = MailIndexField.getFor(field);
+                    if (indexSortField != null) {
+                        builder.setSortField(indexSortField);
+                    }
+                    
+                    if (order != null) {
+                        builder.setOrder(order == OrderDirection.ASC ? Order.ASC : Order.DESC);
+                    }
+                }
+
+                QueryParameters parameters = builder.setHandler(SearchHandler.CUSTOM).setSearchTerm(searchTerm).build();
+                long start = System.currentTimeMillis();
+                IndexResult<MailMessage> result = indexAccess.query(parameters, MailIndexField.getFor(fields));
+                if (LOG.isDebugEnabled()) {
+                    long diff = System.currentTimeMillis() - start;
+                    LOG.debug("Index Query lasted " + diff + "ms.");
                 }
                 
-                return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
-            } else if (searchTerm == null || !MailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
-                return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
-            }
-            
-            final AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
-            final QueryParameters.Builder builder = new QueryParameters.Builder()
-                                                    .setAccountFolders(Collections.singleton(accountFolders));
-            
-            
-            if (null != sortField) {
-                final MailField field = MailField.getField(sortField.getField());
-                final MailIndexField indexSortField = MailIndexField.getFor(field);
-                if (indexSortField != null) {
-                    builder.setSortField(indexSortField);
-                    builder.setOrder(OrderDirection.DESC.equals(order) ? Order.DESC : Order.ASC);
-                }
-            }
-            
-            final QueryParameters parameters;
-            final SimpleSearchTermVisitor visitor = new SimpleSearchTermVisitor();
-            searchTerm.accept(visitor);
-            if (visitor.simple) {
-                parameters = builder.setHandler(SearchHandler.SIMPLE).setSearchTerm(searchTerm.getPattern().toString()).build();
-            } else {
-                parameters = builder.setHandler(SearchHandler.CUSTOM).setSearchTerm(searchTerm).build();
-            }
-
-            long start = System.currentTimeMillis();
-            final IndexResult<MailMessage> result = indexAccess.query(parameters, MailIndexField.getFor(fields));
-            if (LOG.isDebugEnabled()) {
-                long diff = System.currentTimeMillis() - start;
-                LOG.debug("Index Query lasted " + diff + "ms.");
-            }
-            
-            List<IndexDocument<MailMessage>> documents = result.getResults();
-            List<MailMessage> mails;
-            if (indexRange != null) {
-                final int fromIndex = indexRange.start;
-                int toIndex = indexRange.end;
-                if ((documents == null) || documents.isEmpty()) {
-                    mails = Collections.emptyList();
-                }
-                if ((fromIndex) > documents.size()) {
+                List<IndexDocument<MailMessage>> documents = result.getResults();
+                List<MailMessage> mails;
+                if (indexRange != null) {
+                    int fromIndex = indexRange.start;
+                    int toIndex = indexRange.end;
+                    if ((documents == null) || documents.isEmpty()) {
+                        mails = Collections.emptyList();
+                    }
+                    if ((fromIndex) > documents.size()) {
+                        /*
+                         * Return empty iterator if start is out of range
+                         */
+                        mails = Collections.emptyList();
+                    }
                     /*
-                     * Return empty iterator if start is out of range
+                     * Reset end index if out of range
                      */
-                    mails = Collections.emptyList();
+                    if (toIndex >= documents.size()) {
+                        toIndex = documents.size();
+                    }
+                    documents = documents.subList(fromIndex, toIndex);
                 }
-                /*
-                 * Reset end index if out of range
-                 */
-                if (toIndex >= documents.size()) {
-                    toIndex = documents.size();
-                }
-                documents = documents.subList(fromIndex, toIndex);                
+                
+                mails = IndexDocumentHelper.messagesFrom(documents);
+                return mails.toArray(new MailMessage[mails.size()]);
+            }
+        } catch (Throwable t) {
+            LOG.warn("Index search failed. Falling back to message storage.", t);
+        } finally {
+            if (indexAccess != null) {
+                indexFacade.releaseIndexAccess(indexAccess);
             }
             
-            mails = IndexDocumentHelper.messagesFrom(documents);
-            return mails.toArray(new MailMessage[mails.size()]);
-        } catch (final RuntimeException e) {
-            throw handleRuntimeException(e);
-        } finally {
-            IndexAccessAdapter.getInstance().releaseIndexAccess(indexAccess);
+            try {
+                submitFolderJob(folder);
+            } catch (OXException e) {
+                LOG.warn("Could not schedule folder job for folder " + folder + '.', e);
+            }
         }
+        
+        /*
+         * Fallback to message storage
+         */
+        return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
     }
 
     @Override
@@ -317,7 +326,14 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
-        return messageStorage.getThreadSortedMessages(folder, indexRange, sortField, order, searchTerm, fields);
+        MailMessage[] messages = messageStorage.getThreadSortedMessages(folder, indexRange, sortField, order, searchTerm, fields);
+        try {
+            submitFolderJob(folder);
+        } catch (OXException e) {
+            LOG.warn("Could not schedule folder job for folder " + folder + '.', e);
+        }
+        
+        return messages;
     }
 
     @Override
@@ -338,12 +354,12 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         try {
             Builder deleteBuilder = prepareJobBuilder(RemoveByIdsJob.class);
             deleteBuilder.folder(sourceFolder);
-            deleteBuilder.addProperty(RemoveByIdsJob.IDS, mailIds);        
+            deleteBuilder.addProperty(RemoveByIdsJob.IDS, mailIds);
             submitJob(deleteBuilder.build());
             
             Builder createBuilder = prepareJobBuilder(AddByIdsJob.class);
             createBuilder.folder(destFolder);
-            createBuilder.addProperty(AddByIdsJob.IDS, mailIds);        
+            createBuilder.addProperty(AddByIdsJob.IDS, mailIds);
             submitJob(createBuilder.build());
         } catch (Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
@@ -366,7 +382,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         try {
             Builder builder = prepareJobBuilder(ChangeByIdsJob.class);
             builder.folder(folder);
-            builder.addProperty(ChangeByIdsJob.IDS, mailIds);        
+            builder.addProperty(ChangeByIdsJob.IDS, mailIds);
             submitJob(builder.build());
         } catch (Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
@@ -462,8 +478,16 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         return messageStorage.getPrimaryContents(folder, mailIds);
     }
     
-    private void submitJob(JobInfo jobInfo) throws OXException {    
-        if (!UserWhitelist.isIndexingAllowed(session.getLogin())) {
+    private void submitJob(JobInfo jobInfo) throws OXException {
+        if (session instanceof FakeSession) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Session is a fake session. Job will not be submitted...");
+            }
+            // FIXME: This is done to prevent loops here and needs a much better solution!
+            return;
+        }
+        
+        if (!isIndexingAllowed() || isBlacklisted()) {
             return;
         }
         
@@ -472,7 +496,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IndexingService.class);
         }
 
-        indexingService.scheduleJob(jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);    
+        indexingService.scheduleJob(true, jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
     }
     
     private Builder prepareJobBuilder(Class<? extends IndexingJob> clazz) throws OXException {
@@ -496,7 +520,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             .primaryPassword(session.getPassword())
             .password(decryptedPW);
         
-        return builder;        
+        return builder;
     }
 
 }

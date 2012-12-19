@@ -248,7 +248,7 @@ final class LoggerTask extends AbstractTask<Object> {
     private static final Pattern CRLF = Pattern.compile("\r?\n");
 
     private static String prependLocation(final String message, final Loggable loggable, final LogPropertyName.LogLevel logLevel) {
-        final StringBuilder sb = new StringBuilder(64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
         final StackTraceElement[] trace = loggable.getCallerTrace();
         String logClass = null;
         if (null != trace) {

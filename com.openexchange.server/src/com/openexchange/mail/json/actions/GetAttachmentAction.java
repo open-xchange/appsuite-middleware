@@ -167,7 +167,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              */
             final MailServletInterface mailInterface = getMailInterface(req);
             if (sequenceId == null && imageContentId == null) {
-                throw MailExceptionCode.MISSING_PARAM.create(new StringBuilder().append(Mail.PARAMETER_MAILATTCHMENT).append(" | ").append(
+                throw MailExceptionCode.MISSING_PARAM.create(new com.openexchange.java.StringAllocator().append(Mail.PARAMETER_MAILATTCHMENT).append(" | ").append(
                     Mail.PARAMETER_MAILCID).toString());
             }
             final MailPart mailPart;
@@ -210,7 +210,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             try {
                 final int buflen = 0xFFFF;
                 final byte[] buffer = new byte[buflen];
-                for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) != -1;) {
+                for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) > 0;) {
                     out.write(buffer, 0, len);
                 }
                 out.flush();
@@ -275,8 +275,12 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 final File file = parser.parse(jsonFileObject);
                 final List<Field> fields = parser.getFields(jsonFileObject);
                 final Set<Field> set = EnumSet.copyOf(fields);
-                if (!set.contains(Field.FILENAME)) {
-                    file.setFileName(mailPart.getFileName());
+                String fileName = mailPart.getFileName();
+                if (isEmpty(fileName)) {
+                    fileName = "part_" + sequenceId + ".dat";
+                }
+                if (!set.contains(Field.FILENAME) || isEmpty(file.getFileName())) {
+                    file.setFileName(fileName);
                 }
                 file.setFileMIMEType(mailPart.getContentType().toString());
                 /*
@@ -285,8 +289,8 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                  * measure the size.
                  */
                 file.setFileSize(0);
-                if (!set.contains(Field.TITLE)) {
-                    file.setTitle(mailPart.getFileName());
+                if (!set.contains(Field.TITLE) || isEmpty(file.getTitle())) {
+                    file.setTitle(fileName);
                 }
                 file.setFolderId(destFolderID);
                 /*

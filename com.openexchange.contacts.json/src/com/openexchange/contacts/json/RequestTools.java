@@ -53,6 +53,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.TimeZone;
 import javax.activation.MimetypesFileTypeMap;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,6 +64,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contacts.json.actions.ContactAction;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
@@ -198,4 +203,58 @@ public class RequestTools {
         return null != contentType && contentType.toLowerCase().startsWith("image");
     }
 
+    /**
+     * Gets a comparator to sort contacts by an upcoming annual date, relative to the supplied reference date. Only available for
+     * {@link ContactField#BIRTHDAY} and {@link ContactField#ANNIVERSARY}.
+     *  
+     * @param dateField The annual date field to compare
+     * @param reference The reference date
+     * @return
+     */
+    public static Comparator<Contact> getAnnualDateComparator(final ContactField dateField, final Date reference) {
+        return new Comparator<Contact>() {
+            
+            @Override
+            public int compare(Contact o1, Contact o2) {
+                Date date1, date2;
+                if (ContactField.BIRTHDAY.equals(dateField)) {
+                    date1 = o1.getBirthday();
+                    date2 = o2.getBirthday();
+                } else if (ContactField.ANNIVERSARY.equals(dateField)) {
+                    date1 = o1.getAnniversary();
+                    date2 = o2.getAnniversary();
+                } else {
+                    throw new UnsupportedOperationException("Unsupported field: " + dateField);
+                }
+                if (null == date1) {
+                    return null == date2 ? 0 : 1;
+                } else if (null == date2) {
+                    return null == date1 ? 0 : -1;
+                } else {
+                    Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    calendar.setTime(date1);
+                    int dayOfYear1 = calendar.get(Calendar.DAY_OF_YEAR);
+                    calendar.setTime(date2);
+                    int dayOfYear2 = calendar.get(Calendar.DAY_OF_YEAR);
+                    calendar.setTime(reference);
+                    int dayOfYearReference = calendar.get(Calendar.DAY_OF_YEAR);
+                    if (dayOfYear1 == dayOfYear2) {
+                        return 0;
+                    } else if (dayOfYear1 >= dayOfYearReference && dayOfYear2 >= dayOfYearReference) {
+                        // both after reference date, use default comparison
+                        return Integer.valueOf(dayOfYear1).compareTo(Integer.valueOf(dayOfYear2));
+                    } else if (dayOfYear1 < dayOfYearReference && dayOfYear2 < dayOfYearReference) {
+                        // both before reference date, use default comparison
+                        return Integer.valueOf(dayOfYear1).compareTo(Integer.valueOf(dayOfYear2));
+                    } else if (dayOfYear1 >= dayOfYearReference && dayOfYear2 < dayOfYearReference) {
+                        // first is next
+                        return -1;
+                    } else {
+                     // second is next
+                        return 1;
+                    }                
+                }
+            }        
+        };
+    }
 }

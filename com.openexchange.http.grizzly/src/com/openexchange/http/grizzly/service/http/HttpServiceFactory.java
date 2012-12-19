@@ -37,9 +37,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  * 
- * Portions Copyright 2012 OPEN-XCHANGE
- * OPEN-XCHANGE elects to include this software in this distribution under the
- * GPL Version 2 license.
+ * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;
@@ -54,7 +52,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * Grizzly OSGi {@link HttpService} {@link ServiceFactory}.
- *
+ * 
  * @author Hubert Iwaniuk
  * @since Jan 20, 2009
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -72,16 +70,20 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
 
     @Override
     public HttpService getService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration) {
-        LOG.info(new StringBuilder().append("Bundle: ").append(bundle).append(", is getting HttpService with serviceRegistration: ").append(
-            serviceRegistration).toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(new StringBuilder().append("Bundle: ").append(bundle).append(", is getting HttpService with serviceRegistration: ").append(
+                serviceRegistration).toString());
+        }
 
         return new HttpServiceImpl(bundle);
     }
 
     @Override
     public void ungetService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration, final HttpService httpServiceObj) {
-        LOG.info(new StringBuilder().append("Bundle: ").append(bundle).append(", is ungetting HttpService with serviceRegistration: ").append(
-            serviceRegistration).toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(new StringBuilder().append("Bundle: ").append(bundle).append(", is ungetting HttpService with serviceRegistration: ").append(
+                serviceRegistration).toString());
+        }
         mainHttpHandler.uregisterAllLocal();
     }
 
@@ -92,5 +94,5 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
         LOG.info("Stoping main handler");
         mainHttpHandler.unregisterAll();
     }
-    
+
 }

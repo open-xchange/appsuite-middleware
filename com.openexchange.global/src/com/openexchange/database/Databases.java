@@ -219,7 +219,7 @@ public final class Databases {
      * @return the ready to use SQL statement.
      */
     public static String getIN(final String sql, final int length) {
-        final StringBuilder retval = new StringBuilder(sql);
+        final com.openexchange.java.StringAllocator retval = new com.openexchange.java.StringAllocator(sql);
         for (int i = 0; i < length; i++) {
             retval.append("?,");
         }

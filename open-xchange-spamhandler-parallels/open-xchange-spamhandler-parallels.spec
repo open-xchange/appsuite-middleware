@@ -5,9 +5,10 @@ BuildArch:      noarch
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-spamhandler-spamassassin >= @OXVERSION@
+BuildRequires:  open-xchange-parallels >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 8
+%define         ox_release 3
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -48,14 +49,24 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/bundles/*
 
 %changelog
+* Tue Dec 18 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.0.0
+* Mon Dec 17 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.0.0
 * Wed Dec 12 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2012-12-04
+* Tue Dec 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.0.0
+* Tue Dec 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.0.0 release
 * Mon Nov 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2012-11-28
 * Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth release candidate for 6.22.1
 * Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 6.22.1
+* Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for EDP drop #6
 * Tue Nov 06 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth release candidate for 6.22.1
 * Fri Nov 02 2012 Marcus Klein <marcus.klein@open-xchange.com>
@@ -67,4 +78,4 @@ First release candidate for 6.22.1
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 6.22.1
 * Tue Oct 23 2012 Marcus Klein <marcus.klein@open-xchange.com>
-Initial release
+prepare for 6.23.0

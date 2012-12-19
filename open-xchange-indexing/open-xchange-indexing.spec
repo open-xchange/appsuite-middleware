@@ -45,12 +45,32 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/solr.properties
 %config(noreplace) /opt/open-xchange/etc/indexing-service.properties
 %config(noreplace) /opt/open-xchange/etc/smal.properties
+%dir /opt/open-xchange/lib/
+/opt/open-xchange/lib/*
+%dir /opt/open-xchange/sbin/
+/opt/open-xchange/sbin/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/solr/
 /opt/open-xchange/solr/*
 
 %changelog
+* Tue Dec 04 2012 Steffen Templin <steffen.templin@open-xchange.com>
+First release candidate for 7.0.0
+* Tue Dec 04 2012 Steffen Templin <steffen.templin@open-xchange.com>
+prepare for 7.0.0 release
+* Tue Nov 13 2012 Steffen Templin <steffen.templin@open-xchange.com>
+First release candidate for EDP drop #6
+* Fri Oct 26 2012 Steffen Templin <steffen.templin@open-xchange.com>
+Third release build for EDP drop #5
+* Fri Oct 26 2012 Steffen Templin <steffen.templin@open-xchange.com>
+Second release build for EDP drop #5
+* Fri Oct 26 2012 Steffen Templin <steffen.templin@open-xchange.com>
+prepare for 6.22.1
+* Fri Oct 26 2012 Steffen Templin <steffen.templin@open-xchange.com>
+prepare for 6.22.1
+* Thu Oct 11 2012 Steffen Templin <steffen.templin@open-xchange.com>
+Release build for EDP drop #5
 * Tue Sep 04 2012 Steffen Templin <steffen.templin@open-xchange.com>
 First release candidate for 6.23.0
 * Mon Sep 03 2012 Steffen Templin <steffen.templin@open-xchange.com>

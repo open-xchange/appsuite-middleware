@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Linkedin Plug-in
 Bundle-SymbolicName: com.openexchange.subscribe.linkedin
-Bundle-Version: 6.22.1
+Bundle-Version: 7.0.0
 Bundle-Activator: com.openexchange.subscribe.linkedin.osgi.Activator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -20,6 +20,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.oauth,
  com.openexchange.oauth.linkedin,
  com.openexchange.osgi,
+ com.openexchange.server,
  com.openexchange.session,
  com.openexchange.subscribe,
  org.apache.commons.logging,

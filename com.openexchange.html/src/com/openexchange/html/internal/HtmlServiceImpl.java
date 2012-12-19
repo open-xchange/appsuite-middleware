@@ -85,6 +85,7 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
@@ -482,7 +483,7 @@ public final class HtmlServiceImpl implements HtmlService {
             if (dropExternalImages && null != modified) {
                 modified[0] |= handler.isImageURLFound();
             }
-            final String retval = handler.getHTML();
+            final String retval = SaneScriptTags.saneScriptTags(handler.getHTML());
             if (DEBUG) {
                 final long dur = System.currentTimeMillis() - st;
                 LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");
@@ -905,7 +906,7 @@ public final class HtmlServiceImpl implements HtmlService {
             /*
              * Serialize
              */
-            final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
+            final AllocatingStringWriter writer = new AllocatingStringWriter(htmlContent.length());
             SERIALIZER.write(htmlNode, writer, "UTF-8");
             return writer.toString();
         } catch (final UnsupportedEncodingException e) {
@@ -1461,9 +1462,9 @@ public final class HtmlServiceImpl implements HtmlService {
             /*
              * Serialize
              */
-            final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
+            final AllocatingStringWriter writer = new AllocatingStringWriter(htmlContent.length());
             SERIALIZER.write(htmlNode, writer, "UTF-8");
-            final StringBuilder builder = writer.getBuffer();
+            final com.openexchange.java.StringAllocator builder = writer.getAllocator();
             /*
              * Insert DOCTYPE if absent
              */

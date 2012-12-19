@@ -58,7 +58,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.database.SubscriptionsSQL;
@@ -73,7 +72,7 @@ import com.openexchange.user.UserService;
  */
 public class SubscriptionServiceImpl implements PresenceSubscriptionService {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public SubscriptionServiceImpl(ServiceLookup services) {
         this.services = services;
@@ -153,7 +152,7 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
             presence.setFrom(createID(pending.getFrom()));
             presence.setTo(createID(pending.getTo()));
             presence.setType(Presence.Type.SUBSCRIBE);
-            presence.setPayload(new Payload(pending.getRequest(), "presenceRequestMessage"));
+            presence.setMessage(pending.getRequest());
             presences.add(presence);
         }
         return presences;

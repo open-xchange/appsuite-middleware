@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Quartz Enterprise Job Scheduler
 Bundle-SymbolicName: com.openexchange.quartz
-Bundle-Version: 6.22.1
+Bundle-Version: 7.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: com.openexchange.hazelcast
@@ -13,9 +13,12 @@ Bundle-ClassPath: lib/quartz-2.1.5.jar,
  lib/slf4j-nop-1.6.4.jar,
  .
 Import-Package: com.hazelcast.core,
+ com.hazelcast.nio,
  com.hazelcast.query,
  com.openexchange.config,
+ com.openexchange.database,
  com.openexchange.exception,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
@@ -23,6 +26,7 @@ Import-Package: com.hazelcast.core,
  javax.mail,
  javax.mail.event,
  javax.mail.internet,
+ javax.mail.internet.idn,
  javax.mail.search,
  javax.mail.util,
  javax.management,

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -81,6 +82,7 @@ import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
@@ -98,6 +100,8 @@ import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -421,6 +425,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         super();
     }
 
+    private static final AtomicLong REQUEST_NUMBER = new AtomicLong(0L);
+    private static final String PROP_REQUEST_NUMBER = "com.openexchange.ajax.requestNumber";
+
     /**
      * Gets the locale for given server session
      * 
@@ -450,9 +457,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
     }
 
-    private static final AtomicLong REQUEST_NUMBER = new AtomicLong(0L);
-    private static final String PROP_REQUEST_NUMBER = "com.openexchange.ajax.requestNumber";
-
     /**
      * The service method of HttpServlet is extended to catch bad exceptions and keep the AJP socket alive. Otherwise Apache thinks in a
      * balancer environment this AJP container is temporarily dead and redirects requests to other AJP containers. This will kill the users
@@ -466,7 +470,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         try {
             // create a new HttpSession if missing
             req.getSession(true);
-
             /*
              * Set 200 OK status code and JSON content by default
              */
@@ -525,9 +528,52 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     private static final int SB_SIZE = 0x2000;
 
     /**
+     * Gets the reader for HTTP Servlet request's input stream.
+     * 
+     * @param req The HTTP Servlet request
+     * @return The reader
+     * @throws IOException If an I/O error occurs
+     */
+    public static Reader getReaderFor(final HttpServletRequest req) throws IOException {
+        String charEnc = req.getCharacterEncoding();
+        if (charEnc == null) {
+            charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
+        }
+        return new BufferedReader(new InputStreamReader(req.getInputStream(), Charsets.forName(charEnc)), BUF_SIZE);
+    }
+
+    /**
+     * Parses specified HTTP Servlet request's input stream content to a JSON value.
+     * 
+     * @param req The HTTP Servlet request to read from 
+     * @return The parsed JSON value
+     * @throws IOException If an I/O error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    public static JSONValue getBodyAsJsonValue(final HttpServletRequest req) throws IOException, JSONException {
+        String charEnc = req.getCharacterEncoding();
+        if (charEnc == null) {
+            charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
+        }
+        Reader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(req.getInputStream(), Charsets.forName(charEnc)), BUF_SIZE);
+            return JSONObject.parse(reader);
+        } catch (final UnsupportedCharsetException e) {
+            /*
+             * Should never occur
+             */
+            LOG.error("Unsupported encoding in request", e);
+            return new JSONObject();
+        } finally {
+            Streams.close(reader);
+        }
+    }
+
+    /**
      * Returns the complete body as a string. Be careful when getting big request bodies.
      *
-     * @param req The HTTP servlet request to read from
+     * @param req The HTTP Servlet request to read from
      * @return A string with the complete body.
      * @throws IOException If an error occurs while reading the body or body size exceeded configured max. size (see "MAX_BODY_SIZE" property)
      */
@@ -535,16 +581,51 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return BYTE_BASED_READING ? byteBasedBodyReading(req) : decoderBasedBodyReading(req);
     }
 
+    /**
+     * Reads the content from given reader.
+     * 
+     * @param reader The reader
+     * @return The reader's content
+     * @throws IOException If an I/O error occurs
+     */
+    public static String readFrom(final Reader reader) throws IOException {
+        if (null == reader) {
+            return null;
+        }
+        final int buflen = BUF_SIZE;
+        final char[] cbuf = new char[buflen];
+        final StringAllocator builder = new StringAllocator(SB_SIZE);
+        final int maxBodySize = getMaxBodySize();
+        if (maxBodySize > 0) {
+            int count = 0;
+            for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
+                count += read;
+                if (count > maxBodySize) {
+                    throw new IOException("Max. body size (" + UploadUtility.getSize(maxBodySize, 2, false, true) + ") exceeded.");
+                }
+                builder.append(cbuf, 0, read);
+            }
+        } else {
+            for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
+                builder.append(cbuf, 0, read);
+            }
+        }
+        if (0 == builder.length()) {
+            return null;
+        }
+        return builder.toString();
+    }
+
     private static String decoderBasedBodyReading(final HttpServletRequest req) throws IOException {
         String charEnc = req.getCharacterEncoding();
         if (charEnc == null) {
             charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
         }
-        final Reader reader = new InputStreamReader(req.getInputStream(), charEnc);
+        final Reader reader = new InputStreamReader(req.getInputStream(), Charsets.forName(charEnc));
         try {
             final int buflen = BUF_SIZE;
             final char[] cbuf = new char[buflen];
-            final StringBuilder builder = new StringBuilder(SB_SIZE);
+            final StringAllocator builder = new StringAllocator(SB_SIZE);
             final int maxBodySize = getMaxBodySize();
             if (maxBodySize > 0) {
                 int count = 0;
@@ -561,18 +642,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 }
             }
             return builder.toString();
-        } catch (final UnsupportedEncodingException e) {
+        } catch (final UnsupportedCharsetException e) {
             /*
              * Should never occur
              */
             LOG.error("Unsupported encoding in request", e);
             return STR_EMPTY;
         } finally {
-            try {
-                reader.close();
-            } catch (final IOException e) {
-                LOG.debug(e.getMessage(), e);
-            }
+            Streams.close(reader);
         }
     }
 
@@ -637,7 +714,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             LOG.error("Unsupported encoding", e);
             uri = req.getRequestURI();
         }
-        final String path = new StringBuilder(req.getContextPath()).append(req.getServletPath()).toString();
+        final String path = new com.openexchange.java.StringAllocator(req.getContextPath()).append(req.getServletPath()).toString();
         final int pos = uri.indexOf(path);
         if (pos >= 0) {
             uri = uri.substring(pos + path.length());
@@ -883,7 +960,17 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             @SuppressWarnings("unchecked") final List<FileItem> tmp = upload.parseRequest(req);
             items = tmp;
         } catch (final FileUploadException e) {
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+            final Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                final String message = cause.getMessage();
+                if (message.startsWith("Max. byte count of ")) {
+                    // E.g. Max. byte count of 10240 exceeded.
+                    final int pos = message.indexOf(" exceeded", 19 + 1);
+                    final String limit = message.substring(19, pos);
+                    throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, limit);
+                }
+            }
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : cause.getMessage());
         }
         /*
          * Create the upload event
@@ -965,7 +1052,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 try {
                     uploadListener.action(uploadEvent);
                 } catch (final OXException e) {
-                    LOG.error(new StringBuilder(64).append("Failed upload listener: ").append(uploadListener.getClass()), e);
+                    LOG.error(new com.openexchange.java.StringAllocator(64).append("Failed upload listener: ").append(uploadListener.getClass()), e);
                 }
             }
         } finally {
@@ -1009,7 +1096,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     protected static void close(final Writer w) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace(new StringBuilder("Called close() with writer").append(w.toString()));
+            LOG.trace(new com.openexchange.java.StringAllocator("Called close() with writer").append(w.toString()));
         }
         // return;
         /*
@@ -1018,24 +1105,51 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
          */
     }
 
-    protected void writeResponse(final Response response, final HttpServletResponse servletResponse, Session session) throws IOException {
+    /**
+     * Writes specified response.
+     *
+     * @param response The response to write
+     * @param servletResponse The HTTP Servlet response to write to
+     * @param optSession The optional session; pass <code>null</code> if not appropriate
+     * @throws IOException If an I/O error occurs
+     */
+    protected void writeResponse(final Response response, final HttpServletResponse servletResponse, Session optSession) throws IOException {
         servletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
-            ResponseWriter.write(response, servletResponse.getWriter(), localeFrom(session));
+            ResponseWriter.write(response, servletResponse.getWriter(), localeFrom(optSession));
         } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(servletResponse);
         }
     }
 
+    /**
+     * Checks if specified HTTP Servlet request indicates Internet Explorer as <code>User-Agent</code>.
+     *
+     * @param req The HTTP Servlet request
+     * @return <code>true</code> if Internet Explorer; otherwise <code>false</code>
+     */
     protected final boolean isIE(final HttpServletRequest req) {
         return req.getHeader("User-Agent").contains("MSIE");
     }
 
+    /**
+     * Checks if specified HTTP Servlet request indicates Internet Explorer 7 as <code>User-Agent</code>.
+     *
+     * @param req The HTTP Servlet request
+     * @return <code>true</code> if Internet Explorer 7; otherwise <code>false</code>
+     */
     protected final boolean isIE7(final HttpServletRequest req) {
         return req.getHeader("User-Agent").contains("MSIE 7");
     }
 
+    /**
+     * Gets specified module's string representation.
+     *
+     * @param module The module
+     * @param objectId The identifier of associated object
+     * @return The module's string representation
+     */
     public static final String getModuleString(final int module, final int objectId) {
         String moduleStr = null;
         switch (module) {
@@ -1079,6 +1193,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return moduleStr;
     }
 
+    /**
+     * Gets specified module's <code>int</code> representation.
+     *
+     * @param moduleStr The module's string representation
+     * @return The module's <code>int</code> representation
+     */
     public static final int getModuleInteger(final String moduleStr) {
         final int module;
         if (MODULE_TASK.equalsIgnoreCase(moduleStr)) {

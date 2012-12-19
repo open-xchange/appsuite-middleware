@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Autoconfig Bundle
 Bundle-SymbolicName: com.openexchange.mail.autoconfig
-Bundle-Version: 6.22.1
+Bundle-Version: 7.0.0
 Bundle-Activator: com.openexchange.mail.autoconfig.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -21,6 +21,7 @@ Import-Package: com.openexchange.config.cascade,
  com.openexchange.tools.ssl,
  javax.mail,
  javax.mail.internet,
+ javax.mail.internet.idn,
  javax.net,
  javax.net.ssl,
  org.apache.commons.httpclient,

@@ -49,18 +49,28 @@
 
 package com.openexchange.solr;
 
+import java.net.URI;
 import java.util.List;
 import javax.management.MBeanException;
+import javax.management.ObjectName;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link SolrMBean}
+ * {@link SolrMBean} - A MBean containing some administrative functions as well as some functions to debug solr.<br>
+ * The {@link ObjectName} under that the instance of this MBean is registered is created like this:<br>
+ * <code>new ObjectName(SolrMBean.DOMAIN, SolrMBean.KEY, SolrMBean.VALUE);</code>. Any JMX client should instantiate it in
+ * the same way to prevent naming errors.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface SolrMBean {
     
     public static final String DOMAIN = "com.openexchange.solr";
+    
+    public static final String KEY = "type";
+    
+    public static final String VALUE = "solrControl";
     
     /**
      * Lists all solr cores that are active on this server.
@@ -111,5 +121,50 @@ public interface SolrMBean {
      * @param queryString The query String.
      * @throws MBeanException
      */
-    public long count(int contextId, int userId, int module, String queryString) throws MBeanException;    
+    public long count(int contextId, int userId, int module, String queryString) throws MBeanException;
+    
+    /**
+     * Gets a core store by its id.
+     * 
+     * @param id The core store id.
+     * @return The core store.
+     * @throws MBeanException
+     */
+    public SolrCoreStore getCoreStore(int id) throws MBeanException;
+    
+    /**
+     * Gets a list of all available core stores.
+     * 
+     * @return The store list.
+     * @throws OXException
+     */
+    public List<SolrCoreStore> getAllStores() throws MBeanException;
+    
+    /**
+     * Registers a new solr core store.
+     * 
+     * @param uri The uri that points to the stores mount point.
+     * @param maxCores The maximal number of cores handled by this core store.
+     * @return The stores id.
+     * @throws OXException
+     */
+    public int registerCoreStore(URI uri, int maxCores) throws MBeanException;
+    
+    /**
+     * Modifies an existing core.
+     * 
+     * @param id The core stores id.
+     * @param uri The uri that points to the stores mount point.
+     * @param maxCores The maximal number of cores handled by this core store.
+     * @throws OXException
+     */
+    public void modifyCoreStore(int id, URI uri, int maxCores) throws MBeanException;
+    
+    /**
+     * Unregisters a core store.
+     * 
+     * @param id The id of the store to unregister.
+     * @throws OXException
+     */
+    public void unregisterCoreStore(int id) throws MBeanException;
 }

@@ -166,16 +166,8 @@ public abstract class DefaultContactStorage implements ContactStorage {
      */
     @Override
     public void delete(Session session, String folderId, String[] ids, Date lastRead) throws OXException {
-        SearchIterator<Contact> searchIterator = null;
-        try {
-            searchIterator = this.all(session, folderId, new ContactField[] { ContactField.OBJECT_ID });
-            if (null != searchIterator) {
-                while (searchIterator.hasNext()) {
-                    delete(session, folderId, String.valueOf(searchIterator.next().getObjectID()), lastRead);
-                }
-            }
-        } finally {
-            close(searchIterator);
+        for (String id : ids) {
+            delete(session, folderId, id, lastRead);
         }
     }
     
@@ -374,6 +366,9 @@ public abstract class DefaultContactStorage implements ContactStorage {
      * @throws OXException
      */
     protected static int[] parse(String[] ids) throws OXException {
+        if (null == ids) {
+            return new int[0];
+        }
         try {
             int[] intIDs = new int[ids.length];
             for (int i = 0; i < intIDs.length; i++) {
@@ -381,7 +376,7 @@ public abstract class DefaultContactStorage implements ContactStorage {
             }
             return intIDs;
         } catch (NumberFormatException e) {
-            throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, null != ids ? ids.toString() : null); 
+            throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, Arrays.toString(ids)); 
         }
     }
     

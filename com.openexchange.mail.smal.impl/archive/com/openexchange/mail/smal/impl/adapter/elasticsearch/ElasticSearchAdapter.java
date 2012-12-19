@@ -486,7 +486,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     @Override
     public List<MailMessage> search(final String query, final MailField[] fields, final Session session) throws OXException, InterruptedException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -1497,13 +1497,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      */
     @Override
     public void addContent(final MailMessage mail, final Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
 	@Override
 	public void addContents() throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 
 	}
 

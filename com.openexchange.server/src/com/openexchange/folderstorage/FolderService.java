@@ -390,9 +390,10 @@ public interface FolderService {
      * @param timeStamp The requestor's last-modified time stamp
      * @param user The user
      * @param context The context
+     * @param decorator The folder service decorator or <code>null</code>
      * @throws OXException If update fails
      */
-    void updateFolder(Folder folder, Date timeStamp, User user, Context context) throws OXException;
+    void updateFolder(Folder folder, Date timeStamp, User user, Context context, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Updates a folder identified through given folder object.
@@ -400,9 +401,10 @@ public interface FolderService {
      * @param folder The folder object containing tree identifier, folder identifier and modified data.
      * @param timeStamp The requestor's last-modified time stamp
      * @param session The session
+     * @param decorator The folder service decorator or <code>null</code>
      * @throws OXException If update fails
      */
-    void updateFolder(Folder folder, Date timeStamp, Session session) throws OXException;
+    void updateFolder(Folder folder, Date timeStamp, Session session, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Creates a new folder described by given folder object.

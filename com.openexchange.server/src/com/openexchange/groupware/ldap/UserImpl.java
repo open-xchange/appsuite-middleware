@@ -52,7 +52,7 @@ package com.openexchange.groupware.ldap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.i18n.LocaleTools;
 
 /**

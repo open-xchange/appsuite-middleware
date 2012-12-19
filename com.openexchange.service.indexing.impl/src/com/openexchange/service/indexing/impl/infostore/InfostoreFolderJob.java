@@ -117,14 +117,14 @@ public class InfostoreFolderJob implements IndexingJob {
             info.userId,
             Types.INFOSTORE,
             info.account,
-            String.valueOf(info.folder))) {            
+            String.valueOf(info.folder))) {
 
             ContextService contextService = Services.getService(ContextService.class);
             UserService userService = Services.getService(UserService.class);
             UserConfigurationService userConfigurationService = Services.getService(UserConfigurationService.class);
             Context context = contextService.getContext(info.contextId);
             User user = userService.getUser(info.userId, context);
-            UserConfiguration userConfig = userConfigurationService.getUserConfiguration(info.userId, context);            
+            UserConfiguration userConfig = userConfigurationService.getUserConfiguration(info.userId, context);
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
             final IndexAccess<DocumentMetadata> infostoreIndex = indexFacade.acquireIndexAccess(
                 Types.INFOSTORE,
@@ -133,7 +133,7 @@ public class InfostoreFolderJob implements IndexingJob {
             final IndexAccess<Attachment> attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, info.userId, info.contextId);
             try {
                 if (info.deleteFolder) {
-                    deleteFromIndex(info, infostoreIndex, attachmentIndex);                    
+                    deleteFromIndex(info, infostoreIndex, attachmentIndex);
                 } else {
                     indexFolder(info, context, user, userConfig, infostoreIndex, attachmentIndex);
                 }
@@ -215,7 +215,7 @@ public class InfostoreFolderJob implements IndexingJob {
                 }
 
                 List<IndexDocument<DocumentMetadata>> subList = indexDocuments.subList(off, len);
-                infostoreIndex.addContent(subList, true);
+                infostoreIndex.addDocuments(subList);
 
                 return subList.size();
             }
@@ -245,7 +245,7 @@ public class InfostoreFolderJob implements IndexingJob {
                 }
 
                 List<IndexDocument<Attachment>> subList = attachments.subList(off, len);
-                attachmentIndex.addContent(subList, true);
+                attachmentIndex.addDocuments(subList);
 
                 return subList.size();
             }
@@ -277,7 +277,7 @@ public class InfostoreFolderJob implements IndexingJob {
     }
 
     private void checkJobInfo() {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 

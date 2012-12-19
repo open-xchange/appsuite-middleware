@@ -11,7 +11,7 @@
 
     <import file="build-project.xml"/>
 
-	<!-- Constants -->
+    <!-- Constants -->
     <property name="osgiDir" value="osgi"/>
     <property name="importCSVDir" value="importCSV"/>
     <property name="patchConfDir" value="${tmpDir}/${confDir}"/>
@@ -78,8 +78,8 @@
         <replaceregexp file="META-INF/MANIFEST.MF" match="Bundle-Version: .*" replace="Bundle-Version: ${version}" byline="true"/>
     </target>
 
-	<target name="postClean" description="Removes artifacts created by this build script.">
-		<delete dir="${tmpDir}"/>
-	</target>
+    <target name="postClean" description="Removes artifacts created by this build script.">
+        <delete dir="${tmpDir}"/>
+    </target>
 
 </project>

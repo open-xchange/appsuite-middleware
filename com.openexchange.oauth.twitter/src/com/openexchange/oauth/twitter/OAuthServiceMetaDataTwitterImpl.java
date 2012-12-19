@@ -63,12 +63,12 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaDat
     /**
      * The default API key.
      */
-    private static final String KEY_API = "kZX3V4AmAWwC53yA5RjHbQ";
+    private static final String KEY_API = "";
 
     /**
      * The default secret key.
      */
-    private static final String KEY_SECRET = "HvY7pVFFQSGPVu9LCoBMUhvMpS00qdtqBob99jucc";
+    private static final String KEY_SECRET = "";
 
     public OAuthServiceMetaDataTwitterImpl() {
         super();

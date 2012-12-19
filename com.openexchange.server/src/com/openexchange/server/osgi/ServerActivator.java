@@ -59,7 +59,9 @@ import javax.servlet.ServletException;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 import org.apache.commons.logging.Log;
+import org.json.CharArrayPool;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -78,8 +80,6 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.Dispatcher;
-import com.openexchange.api2.ContactInterfaceFactory;
-import com.openexchange.api2.RdbContactInterfaceFactory;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
 import com.openexchange.charset.CustomCharsetProvider;
@@ -123,12 +123,9 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datahandler.ContactJSONDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
-import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -142,6 +139,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.log.CommonsLoggingLogger;
 import com.openexchange.log.LogFactory;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
@@ -335,10 +333,55 @@ public final class ServerActivator extends HousekeepingActivator {
         }
     }
 
+    private static int parseInt(final int index, final String[] sa, final int defaultValue) {
+        if (null == sa) {
+            return defaultValue;
+        }
+        if (index >= sa.length) {
+            return defaultValue;
+        }
+        final String toParse = sa[index];
+        if (null == toParse) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(toParse.trim());
+        } catch (NumberFormatException e) {
+            LOG.error("Not an integer: " + toParse, e);
+            return defaultValue;
+        }
+    }
+
     @Override
     protected void startBundle() throws Exception {
         CONTEXT = context;
-        JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 2500));
+        {
+            // Set logger
+            JSONObject.setLogger(new CommonsLoggingLogger(JSONValue.class));
+            // JSON configuration
+            final ConfigurationService service = getService(ConfigurationService.class);
+            JSONObject.setMaxSize(service.getIntProperty("com.openexchange.json.maxSize", 2500));
+            // Configure character array pool
+            if (service.getBoolProperty("com.openexchange.json.poolEnabled", false)) {
+                {
+                    final String s = service.getProperty("com.openexchange.json.poolSize", "10000, 1000, 10");
+                    final String[] sa = s.split(" *, *");
+                    final int smallPoolSize = parseInt(0, sa, 10000);
+                    final int mediumPoolSize = parseInt(1, sa, 1000);
+                    final int largePoolSize = parseInt(2, sa, 10);
+                    CharArrayPool.setCapacities(smallPoolSize, mediumPoolSize, largePoolSize);
+                }
+                {
+                    final String s = service.getProperty("com.openexchange.json.poolCharArrayLength", "1024, 10240, 102400");
+                    final String[] sa = s.split(" *, *");
+                    final int smallLength = parseInt(0, sa, 1024);
+                    final int mediumLength = parseInt(1, sa, 10240);
+                    final int largeLength = parseInt(2, sa, 102400);
+                    CharArrayPool.setLengths(smallLength, mediumLength, largeLength);                
+                }
+                JSONObject.initCharPool();
+            }
+        }
         Config.LoggerProvider = LoggerProvider.DISABLED;
         // get version information from MANIFEST file
         final Dictionary<?, ?> headers = context.getBundle().getHeaders();
@@ -387,8 +430,6 @@ public final class ServerActivator extends HousekeepingActivator {
         // AJAX request handler
         track(AJAXRequestHandler.class, new AJAXRequestHandlerCustomizer(context));
 
-        // contacts
-        track(ContactInterfaceProvider.class, new ContactServiceListener(context));
         // ICal Parser
         track(ICalParser.class, new RegistryCustomizer<ICalParser>(context, ICalParser.class) {
 
@@ -618,9 +659,6 @@ public final class ServerActivator extends HousekeepingActivator {
         // Register AttachmentBase
         registerService(AttachmentBase.class, Attachment.ATTACHMENT_BASE);
 
-        // Register ContactSQL
-        registerService(ContactInterfaceFactory.class, new RdbContactInterfaceFactory());
-
         // Register event factory service
         registerService(EventFactoryService.class, new EventFactoryServiceImpl());
 
@@ -628,11 +666,6 @@ public final class ServerActivator extends HousekeepingActivator {
         final FolderService folderService = new FolderServiceImpl();
         registerService(FolderService.class, folderService);
         ServerServiceRegistry.getInstance().addService(FolderService.class, folderService);
-
-        // Register contact interface discovery service
-        final ContactInterfaceDiscoveryService cids = ContactInterfaceDiscoveryServiceImpl.getInstance();
-        registerService(ContactInterfaceDiscoveryService.class, cids);
-        ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, cids);
 
         // Register SessionHolder
         registerService(SessionHolder.class, ThreadLocalSessionHolder.getInstance());
@@ -703,6 +736,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
     private void registerServlets(final HttpService http) throws ServletException, NamespaceException {
         http.registerServlet("/infostore", new com.openexchange.webdav.Infostore(), null, null);
+        http.registerServlet("/files", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.ical", new com.openexchange.webdav.ical(), null, null);
         http.registerServlet("/servlet/webdav.vcard", new com.openexchange.webdav.vcard(), null, null);
         http.registerServlet("/servlet/webdav.version", new com.openexchange.webdav.version(), null, null);

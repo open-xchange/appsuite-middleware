@@ -98,6 +98,11 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
         atmosphereRegistration.addMapping(atmosphereServletMapping);
         atmosphereRegistration.setLoadOnStartup(0);
         
+        //Deliver js lib matching the serverside lib
+//        ServletRegistration atmosphereJSRegistration = realtimeContext.addServlet("AtmosphereJSServlet", new AtmosphereJSServlet(bundle));
+//        atmosphereJSRegistration.addMapping("/atmosphere/jquery.atmosphere.js");
+//        atmosphereJSRegistration.setLoadOnStartup(0);
+        
         realtimeContext.deploy(grizzly);
     }
     

@@ -171,7 +171,7 @@ public final class GetStructureAction extends AbstractMailAction {
         } catch (final OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                 LOG.warn(
-                    new StringBuilder("Requested mail could not be found. ").append(
+                    new com.openexchange.java.StringAllocator("Requested mail could not be found. ").append(
                         "Most likely this is caused by concurrent access of multiple clients ").append(
                         "while one performed a delete on affected mail.").toString(),
                     e);

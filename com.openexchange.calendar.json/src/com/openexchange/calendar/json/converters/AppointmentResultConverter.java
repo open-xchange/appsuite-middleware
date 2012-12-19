@@ -233,7 +233,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
                 true);
             if (recuResults.size() == 0) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(new StringBuilder(32).append("No occurrence at position ").append(recurrencePosition));
+                    LOG.warn(new com.openexchange.java.StringAllocator(32).append("No occurrence at position ").append(recurrencePosition));
                 }
                 throw OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
             }

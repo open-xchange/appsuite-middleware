@@ -85,8 +85,8 @@ public class ManifestResultConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         List<Application> apps = (List<Application>) result.getResultObject();
-        StringBuilder sb = new StringBuilder();
-        StringBuilder installed = new StringBuilder();
+        com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
+        com.openexchange.java.StringAllocator installed = new com.openexchange.java.StringAllocator();
         Iterator<Application> iter = apps.iterator();
         while (iter.hasNext()) {
             Application application = iter.next();

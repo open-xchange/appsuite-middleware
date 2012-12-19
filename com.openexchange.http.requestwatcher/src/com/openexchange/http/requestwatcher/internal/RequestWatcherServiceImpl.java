@@ -51,17 +51,21 @@ package com.openexchange.http.requestwatcher.internal;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.requestwatcher.RequestWatcherExceptionMessage;
 import com.openexchange.http.requestwatcher.osgi.RequestWatcherServiceRegistry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -77,7 +81,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
      */
     protected static final Log LOG = com.openexchange.log.Log.loggerFor(RequestWatcherServiceImpl.class);
 
-     //Navigable set, entries ordered by age(youngest first), weakly consistent iterator
+    // Navigable set, entries ordered by age(youngest first), weakly consistent iterator
     private final ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry;
 
     private final RequestWatcherServiceRegistry serviceRegistry;
@@ -110,10 +114,10 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                 public void run() {
                     final boolean debugEnabled = LOG.isDebugEnabled();
                     final Iterator<RequestRegistryEntry> descendingEntryIterator = requestRegistry.descendingIterator();
-                    final StringBuilder sb = new StringBuilder(256);
+                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
                     boolean stillOldRequestsLeft = true;
                     while (stillOldRequestsLeft && descendingEntryIterator.hasNext()) {
-                        sb.setLength(0);
+                        sb.reinitTo(0);
                         if (debugEnabled) {
                             for (final RequestRegistryEntry entry : requestRegistry) {
                                 sb.append("RegisteredThreads:\n\tage: ").append(entry.getAge()).append(" ms").append(", thread: ").append(
@@ -126,13 +130,13 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                         }
                         final RequestRegistryEntry requestRegistryEntry = descendingEntryIterator.next();
                         if (requestRegistryEntry.getAge() > requestMaxAge) {
-                            sb.setLength(0);
+                            sb.reinitTo(0);
                             logRequestRegistryEntry(requestRegistryEntry, sb);
                             try {
                                 requestRegistry.remove(requestRegistryEntry);
                                 requestRegistryEntry.stopProcessing();
                             } catch (final IOException e) {
-                                LOG.error(RequestWatcherExceptionMessage.ERROR_WHILE_INTERRUPTING_REQUEST_PROCESSING_MSG, e.getCause());
+                                LOG.error(RequestWatcherExceptionMessage.ERROR_WHILE_SENDING_SERVLET_STATUS_CODE_MSG, e.getCause());
                             }
                         } else {
                             stillOldRequestsLeft = false;
@@ -140,16 +144,45 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     }
                 }
 
-                private void logRequestRegistryEntry(final RequestRegistryEntry entry, final StringBuilder sb) {
+                private void logRequestRegistryEntry(final RequestRegistryEntry entry, final com.openexchange.java.StringAllocator logBuilder) {
                     final Throwable trace = new Throwable();
                     trace.setStackTrace(entry.getStackTrace());
+                    Props logProperties = LogProperties.optLogProperties(entry.getThread());
+                    logBuilder.append("Request\n");
+                    
+                    // If we have additional log properties from the ThreadLocal add it to the logBuilder
+                    if (logProperties != null) {
+                        Map<String, Object> propertyMap = logProperties.getMap();
+                        // Sort the properties for readability
+                        Map<String, String> sorted = new TreeMap<String, String>();
+                        for (Entry<String, Object> propertyEntry : propertyMap.entrySet()) {
+                            String propertyName = propertyEntry.getKey();
+                            Object value = propertyEntry.getValue();
+                            if (null != value) {
+                                sorted.put(propertyName, value.toString());
+                            }
+                        }
+                        logBuilder.append("with properties:\n");
+                        // And add them to the logBuilder
+                        for (Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
+                            logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append('\n');
+                        }
+                    }
+
+                    String requestParameters = entry.getRequestParameters();
+                    if(!requestParameters.isEmpty()) {
+                        logBuilder
+                        .append("with parameters:\n")
+                        .append(requestParameters).append("\n");
+                    }
+                    
                     RequestWatcherServiceImpl.LOG.info(
-                        sb.append("Request for url: ").append(entry.getRequestUrl()).append("\nwith parameters: ").append(
-                            entry.getRequestParameters()).append("\nwith thread: ").append(entry.getThreadInfo()).append("\nwith age: ").append(
-                            entry.getAge()).append(" ms").append("\nexceeds max. age of: ").append(requestMaxAge).append(" ms.").toString(),
+                        logBuilder
+                        .append("with age: ").append(entry.getAge()).append(" ms").append("\n")
+                        .append("exceeds max. age of: ").append(requestMaxAge).append(" ms.")
+                        .toString(),
                         trace);
                 }
-
             },
                 1000,
                 watcherFrequency,

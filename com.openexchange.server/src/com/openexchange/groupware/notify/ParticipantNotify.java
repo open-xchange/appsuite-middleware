@@ -347,24 +347,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     @Override
     public void appointmentDeleted(final Appointment appointmentObj, final Session session) {
-        /*
-         * Clear calendar object from notification pool
-         */
-        NotificationPool.getInstance().removeByObject(appointmentObj.getObjectID(), session.getContextId());
-        /*
-         * Send delete notification
-         */
-        sendNotification(
-            null,
-            appointmentObj,
-            session,
-            new AppointmentState(
-                new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DELETED),
-                Notifications.APPOINTMENT_DELETE_MAIL,
-                State.Type.DELETED),
-            NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false),
-            true,
-            false);
     }
 
     @Override
@@ -1082,7 +1064,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 final Context context = session.getContext();
                 final User user = session.getUser();
                 final UserConfiguration config = session.getUserConfiguration();
-                final SearchIterator<?> iterator = attachmentBase.getAttachments(folderId, objectId, Types.APPOINTMENT, context, user, config).results();
+                final SearchIterator<?> iterator = attachmentBase.getAttachments(session, folderId, objectId, Types.APPOINTMENT, context, user, config).results();
                 if (iterator.hasNext()) {
                     try {
                         attachmentBase.startTransaction();
@@ -1104,7 +1086,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                             /*
                              * Set content through a DataHandler
                              */
-                            bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachmentBase.getAttachedFile(folderId, objectId, Types.APPOINTMENT, metadata.getId(), context, user, config), ct)));
+                            bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachmentBase.getAttachedFile(session, folderId, objectId, Types.APPOINTMENT, metadata.getId(), context, user, config), ct)));
                             final String fileName = metadata.getFilename();
                             if (fileName != null && !ct.containsNameParameter()) {
                                 ct.setNameParameter(fileName);

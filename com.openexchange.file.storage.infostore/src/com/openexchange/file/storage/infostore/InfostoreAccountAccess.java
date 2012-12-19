@@ -104,7 +104,7 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

@@ -6,6 +6,7 @@ import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
@@ -60,6 +61,21 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
     }
 
     /**
+     * Safely flushes specified {@link Flushable} instance.
+     * 
+     * @param toFlush The {@link Flushable} instance
+     */
+    protected static void flush(final Flushable toFlush) {
+        if (null != toFlush) {
+            try {
+                toFlush.flush();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+    }
+
+    /**
      * Parser for MySQL dump files.
      */
     public static class Parser {
@@ -69,16 +85,22 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             private final int poolId;
             private final int contextId;
             private final String schema;
+            private final String fileName;
             private VersionInformation versionInformation;
             private UpdateTaskInformation updateTaskInformation;
 
-            protected PoolIdSchemaAndVersionInfo(final int contextId, int poolId, String schema, VersionInformation versionInformation, UpdateTaskInformation updateTaskInformation) {
+            protected PoolIdSchemaAndVersionInfo(final String fileName, final int contextId, int poolId, String schema, VersionInformation versionInformation, UpdateTaskInformation updateTaskInformation) {
                 super();
+                this.fileName = fileName;
                 this.contextId = contextId;
                 this.poolId = poolId;
                 this.schema = schema;
                 this.versionInformation = versionInformation;
                 this.updateTaskInformation = updateTaskInformation;
+            }
+
+            public String getFileName() {
+                return fileName;
             }
 
             public int getContextId() {
@@ -184,13 +206,14 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                                 }
                                 LOG.info("Database: " + databasename);
                                 if (null != bufferedWriter) {
-                                    bufferedWriter.append("/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;" + '\n');
+                                    bufferedWriter.append("/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;\n");
+                                    bufferedWriter.flush();
                                     bufferedWriter.close();
                                 }
 
                                 final String file = "/tmp/" + databasename + ".txt";
                                 bufferedWriter = new BufferedWriter(new FileWriter(file));
-                                bufferedWriter.append("/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;" + '\n');
+                                bufferedWriter.append("/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;\n");
                                 // Reset values
                                 cidpos = -1;
                                 state = 0;
@@ -289,13 +312,14 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                     }
                 }
             } finally {
+                flush(bufferedWriter);
                 close(bufferedWriter);
                 close(in);
             }
             if (null == updateTaskInformation) {
                 throw new OXContextRestoreException(Code.NO_UPDATE_TASK_INFORMATION_FOUND);
             }
-            return new PoolIdSchemaAndVersionInfo(cid, poolId, schema, versionInformation, updateTaskInformation);
+            return new PoolIdSchemaAndVersionInfo(fileName, cid, poolId, schema, versionInformation, updateTaskInformation);
         }
 
         /**
@@ -670,13 +694,13 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             throw e;
         } catch (final FileNotFoundException e) {
             LOG.error(e.getMessage(), e);
-            throw new OXContextRestoreException(Code.FILE_NOT_FOUND);
+            throw new OXContextRestoreException(Code.FILE_NOT_FOUND, e);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
-            throw new OXContextRestoreException(Code.IO_EXCEPTION);
+            throw new OXContextRestoreException(Code.IO_EXCEPTION, e);
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new OXContextRestoreException(Code.DATABASE_OPERATION_ERROR, e.getMessage());
+            throw new OXContextRestoreException(Code.DATABASE_OPERATION_ERROR, e, e.getMessage());
         } catch (final OXContextRestoreException e) {
             LOG.error(e.getMessage(), e);
             throw e;

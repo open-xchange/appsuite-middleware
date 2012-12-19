@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link UserLockManagement} - The folder tree lock management.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserLockManagement {
@@ -70,21 +70,21 @@ public final class UserLockManagement {
 
     /**
      * Gets the {@link UserLockManagement management} instance.
-     *
+     * 
      * @return The management instance
      */
     public static UserLockManagement getInstance() {
         return INSTANCE;
     }
 
-    private final ConcurrentMap<Key, ReadWriteLock> map;
+    private final ConcurrentMap<Integer, ConcurrentMap<Integer, ReadWriteLock>> map;
 
     /**
      * Initializes a new {@link UserLockManagement}.
      */
     private UserLockManagement() {
         super();
-        map = new ConcurrentHashMap<Key, ReadWriteLock>();
+        map = new ConcurrentHashMap<Integer, ConcurrentMap<Integer, ReadWriteLock>>(32);
     }
 
     /**
@@ -96,20 +96,35 @@ public final class UserLockManagement {
 
     /**
      * Drops locks for given session's user.
-     *
+     * 
      * @param session The session
      */
     public void dropFor(final Session session) {
-        map.remove(keyFor(session));
+        final ConcurrentMap<Integer, ReadWriteLock> userMap = map.remove(Integer.valueOf(session.getContextId()));
+        if (null != userMap) {
+            userMap.remove(Integer.valueOf(session.getUserId()));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(new com.openexchange.java.StringAllocator("Cleaned folder locks for user ").append(session.getUserId()).append(
+                    " in context ").append(session.getContextId()).toString());
+            }
+        }
+    }
+
+    /**
+     * Drops locks for given context.
+     * 
+     * @param contextId The context identifier
+     */
+    public void dropFor(final int contextId) {
+        map.remove(Integer.valueOf(contextId));
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder("Cleaned folder locks for user ").append(session.getUserId()).append(" in context ").append(
-                session.getContextId()).toString());
+            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned folder locks for context ").append(contextId).toString());
         }
     }
 
     /**
      * Gets the lock for specified tree and session.
-     *
+     * 
      * @param session The session
      * @return The read-write lock
      */
@@ -119,17 +134,24 @@ public final class UserLockManagement {
 
     /**
      * Gets the lock for specified tree and session.
-     *
+     * 
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The read-write lock
      */
     public ReadWriteLock getFor(final int userId, final int contextId) {
-        final Key key = keyFor(userId, contextId);
-        ReadWriteLock readWriteLock = map.get(key);
+        ConcurrentMap<Integer, ReadWriteLock> userMap = map.remove(Integer.valueOf(contextId));
+        if (null == userMap) {
+            final ConcurrentMap<Integer, ReadWriteLock> newUserMap = new ConcurrentHashMap<Integer, ReadWriteLock>(32);
+            userMap = map.putIfAbsent(Integer.valueOf(contextId), newUserMap);
+            if (null == userMap) {
+                userMap = newUserMap;
+            }
+        }
+        ReadWriteLock readWriteLock = userMap.get(Integer.valueOf(userId));
         if (null == readWriteLock) {
             final ReadWriteLock nrwl = new ReentrantReadWriteLock();
-            readWriteLock = map.putIfAbsent(key, nrwl);
+            readWriteLock = userMap.putIfAbsent(Integer.valueOf(userId), nrwl);
             if (null == readWriteLock) {
                 readWriteLock = nrwl;
             }
@@ -139,64 +161,16 @@ public final class UserLockManagement {
 
     /**
      * Optionally gets the lock for specified tree and session.
-     *
+     * 
      * @param session The session
      * @return The lock or <code>null</code> if absent
      */
     public ReadWriteLock optFor(final Session session) {
-        return map.get(keyFor(session));
-    }
-
-    private static Key keyFor(final Session session) {
-        return new Key(session.getUserId(), session.getContextId());
-    }
-
-    private static Key keyFor(final int userId, final int contextId) {
-        return new Key(userId, contextId);
-    }
-
-    private static final class Key {
-
-        private final int cid;
-
-        private final int user;
-
-        private final int hash;
-
-        protected Key(final int user, final int cid) {
-            super();
-            this.user = user;
-            this.cid = cid;
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + cid;
-            result = prime * result + user;
-            hash = result;
+        final ConcurrentMap<Integer, ReadWriteLock> userMap = map.remove(Integer.valueOf(session.getContextId()));
+        if (null == userMap) {
+            return null;
         }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            if (cid != other.cid) {
-                return false;
-            }
-            if (user != other.user) {
-                return false;
-            }
-            return true;
-        }
-
+        return userMap.get(Integer.valueOf(session.getUserId()));
     }
 
 }

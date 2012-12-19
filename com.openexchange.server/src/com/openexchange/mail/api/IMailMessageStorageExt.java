@@ -61,6 +61,13 @@ import com.openexchange.mail.dataobjects.MailMessage;
 public interface IMailMessageStorageExt extends IMailMessageStorage {
 
     /**
+     * Clears message-related cache.
+     *
+     * @throws OXException If operation fails
+     */
+    public void clearCache() throws OXException;
+
+    /**
      * Gets the mails located in given folder whose mail ID matches specified ID. The constant {@link #EMPTY_RETVAL} may be returned, if
      * folder contains no messages.
      * <p>

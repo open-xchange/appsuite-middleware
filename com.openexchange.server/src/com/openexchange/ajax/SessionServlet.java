@@ -88,6 +88,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
@@ -155,8 +156,8 @@ public abstract class SessionServlet extends AJAXServlet {
             checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
             hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
             clientWhitelist = new ClientWhitelist().add(config.getInitParameter(Property.IP_CHECK_WHITELIST.getPropertyName()));
-            String ipMaskV4 = config.getInitParameter(ServerConfig.Property.IP_MASK_V4.getPropertyName());
-            String ipMaskV6 = config.getInitParameter(ServerConfig.Property.IP_MASK_V6.getPropertyName());
+            final String ipMaskV4 = config.getInitParameter(ServerConfig.Property.IP_MASK_V4.getPropertyName());
+            final String ipMaskV6 = config.getInitParameter(ServerConfig.Property.IP_MASK_V6.getPropertyName());
             allowedSubnet = new SubnetMask(ipMaskV4, ipMaskV6);
         }
         initRanges(config);
@@ -213,7 +214,7 @@ public abstract class SessionServlet extends AJAXServlet {
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        if (req.getParameter("session") != null) {
+        if (req.getParameter("session") != null && !req.getParameter("session").equals("")) {
             final String sessionId = getSessionId(req);
             final ServerSession session = getSession(req, sessionId, sessiondService);
             verifySession(req, sessiondService, sessionId, session);
@@ -655,17 +656,11 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return The appropriate hash
      */
     public static String getHash(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client) {
-        final String retval;
-        switch (cookieHash) {
-        default:
-        case CALCULATE:
-            retval = HashCalculator.getHash(req, client);
-            break;
-        case REMEMBER:
-            retval = hash;
-            break;
+        if (CookieHashSource.REMEMBER == cookieHash) {
+            return hash;
         }
-        return retval;
+        // Default is calculate
+        return HashCalculator.getHash(req, client);
     }
 
     /**
@@ -778,7 +773,20 @@ public abstract class SessionServlet extends AJAXServlet {
         if (mayUseFallbackSession) {
             return (ServerSession) req.getAttribute(PUBLIC_SESSION_KEY);
         }
-
+        // No session found
+        final Props props = LogProperties.optLogProperties();
+        if (null != props) {
+            final HttpServletRequest httpRequest = (HttpServletRequest) req;
+            props.put("javax.servlet.servletPath", ForceLog.valueOf(httpRequest.getServletPath()));
+            final String pathInfo = httpRequest.getPathInfo();
+            if (null != pathInfo) {
+                props.put("javax.servlet.pathInfo", ForceLog.valueOf(pathInfo));
+            }
+            final String queryString = httpRequest.getQueryString();
+            if (null != queryString) {
+                props.put("javax.servlet.queryString", ForceLog.valueOf(queryString));
+            }
+        }
         return null;
     }
 

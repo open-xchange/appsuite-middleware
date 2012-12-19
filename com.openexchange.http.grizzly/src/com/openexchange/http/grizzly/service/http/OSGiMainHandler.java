@@ -1,6 +1,5 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-
  *
  * Copyright (c) 2009-2011 Oracle and/or its affiliates. All rights reserved.
  *
@@ -38,9 +37,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  * 
- * Portions Copyright 2012 OPEN-XCHANGE
- * OPEN-XCHANGE elects to include this software in this distribution under the
- * GPL Version 2 license.
+ * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;
@@ -72,7 +69,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionMessage;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
-import com.openexchange.http.grizzly.servletfilter.ResponseWrappingFilter;
+import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * OSGi Main HttpHandler.
@@ -156,6 +157,16 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     updateMappingInfo(request, alias, originalAlias);
 
                     httpHandler.service(request, response);
+                } catch (Throwable t) {
+                    ExceptionUtils.handleThrowable(t);
+                    StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
+                    if (LogProperties.isEnabled()) {
+                        logBuilder.append(LogProperties.getAndPrettyPrint());
+                    }
+                    appendRequestInfo(logBuilder, request);
+                    LOG.error(logBuilder.toString(), t);
+                    // 500 - Internal Server Error
+                    response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
                 } finally {
                     ((OSGiHandler) httpHandler).getProcessingLock().unlock();
                 }
@@ -182,6 +193,19 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     }
 
     /**
+     * Appends request information.
+     * 
+     * @param builder The builder to append to
+     */
+    private void appendRequestInfo(final StringBuilder builder, Request request) {
+        builder.append("request-URI=''");
+        builder.append(request.getRequestURI());
+        builder.append("'', query-string=''");
+        builder.append(request.getQueryString());
+        builder.append("''");
+    }
+
+    /**
      * Registers {@link services.http.OSGiServletHandler} in OSGi Http Service.
      * <p/>
      * Keeps track of all registrations, takes care of thread safety.
@@ -203,7 +227,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         try {
             // TODO: clean up OX servlet structure so we can apply alias and servlet validation
 
-            // validateAlias4RegOk(alias);
+            validateAlias4RegOk(alias);
 
             /*
              * Currently only checks if servlet is already registered. This prevents the same servlet with different aliases. Disabled until
@@ -221,16 +245,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             }
             OSGiServletHandler servletHandler = findOrCreateOSGiServletHandler(servlet, context, initparams);
             servletHandler.setServletPath(alias);
-
-            // Do we have to watch long running requests?
-            if (isRequestWatcherEnabled) {
-                servletHandler.addFilter(
-                    new RequestReportingFilter(GrizzlyServiceRegistry.getInstance()),
-                    RequestReportingFilter.class.getName(),
-                    null);
-            }
-            
-            servletHandler.addFilter(new ResponseWrappingFilter(), ResponseWrappingFilter.class.getName(), null);
+            addServletFilters(servletHandler);
 
             /*
              * Servlet would be started several times if registered with multiple aliases. Starting means: 1. Set ContextPath 2. Instantiate
@@ -243,6 +258,25 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * Add our default set of Filters to the ServletHandler.
+     * 
+     * @param servletHandler The ServletHandler with the FilterChain
+     */
+    private void addServletFilters(OSGiServletHandler servletHandler) {
+        // wrap it
+        servletHandler.addFilter(new WrappingFilter(), WrappingFilter.class.getName(), null);
+
+        // watch it
+        if (isRequestWatcherEnabled) {
+            servletHandler.addFilter(
+                new RequestReportingFilter(GrizzlyServiceRegistry.getInstance()),
+                RequestReportingFilter.class.getName(),
+                null);
+        }
+
     }
 
     /**
@@ -375,6 +409,13 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         if (alias.length() > 1 && alias.endsWith("/")) {
             // if longer than "/", should not end with "/"
             String msg = new StringBuilder(64).append("Alias '").append(alias).append("' can't end with '/' with exception to alias '/'.").toString();
+            LOG.warn(msg);
+            throw new NamespaceException(msg);
+        }
+        if (alias.length() > 1 && alias.endsWith("*")) {
+            // if longer than "/", wildcards/mappings aren't supported
+            String msg = new StringBuilder(64).append("Alias '").append(alias).append(
+                "' can't end with '*'. Wildcards/mappings aren't supported.").toString();
             LOG.warn(msg);
             throw new NamespaceException(msg);
         }

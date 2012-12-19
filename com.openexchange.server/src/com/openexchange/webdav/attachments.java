@@ -56,7 +56,6 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -73,6 +72,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.login.Interface;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
@@ -315,7 +315,7 @@ public final class attachments extends OXServlet {
             final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
             final User u = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
             final AttachmentMetadata attachmentMeta = ATTACHMENT_BASE.getAttachment(
-                folder_id,
+                sessionObj, folder_id,
                 target_id,
                 module,
                 object_id,
@@ -323,7 +323,7 @@ public final class attachments extends OXServlet {
                 u,
                 UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
             final InputStream is = ATTACHMENT_BASE.getAttachedFile(
-                folder_id,
+                sessionObj, folder_id,
                 target_id,
                 module,
                 object_id,
@@ -335,7 +335,7 @@ public final class attachments extends OXServlet {
 
             final byte b[] = new byte[8192];
             int i = is.read(b);
-            while (i != -1) {
+            while (i > 0) {
                 os.write(b, 0, i);
                 i = is.read(b);
             }

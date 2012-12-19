@@ -60,35 +60,45 @@ import java.util.Properties;
  */
 public class SimConfigurationService implements ConfigurationService {
 
-    public Map<String, String> stringProperties = new HashMap<String, String>();
+    public final Map<String, String> stringProperties = new HashMap<String, String>();
+    public final File configurationDirectory;
+
+    public SimConfigurationService() {
+        this("");
+    }
+
+    public SimConfigurationService(String dirName) {
+        super();
+        configurationDirectory = new File(dirName);
+    }
 
     @Override
     public Filter getFilterFromProperty(String name) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public boolean getBoolProperty(final String name, final boolean defaultValue) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
     @Override
     public Properties getFile(final String fileName) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public int getIntProperty(final String name, final int defaultValue) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
     @Override
     public Properties getPropertiesInFolder(final String folderName) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -104,62 +114,60 @@ public class SimConfigurationService implements ConfigurationService {
 
     @Override
     public String getProperty(final String name, final PropertyListener listener) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public Iterator<String> propertyNames() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public void removePropertyListener(final String name, final PropertyListener listener) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public int size() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
     @Override
     public File getFileByName(String fileName) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public File getDirectory(String directoryName) {
-        // TODO Auto-generated method stub
-        return null;
+        return new File(configurationDirectory, directoryName);
     }
 
     @Override
     public String getText(final String fileName) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public Object getYaml(String filename) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public Map<String, Object> getYamlInFolder(String dirName) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
-
 }

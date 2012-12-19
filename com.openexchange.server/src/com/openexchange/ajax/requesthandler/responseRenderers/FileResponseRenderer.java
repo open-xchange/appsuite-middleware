@@ -143,7 +143,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
         InputStream documentData = null;
         try {
-            file = transformIfImage(request, file);
+            file = transformIfImage(request, file, delivery);
             InputStream stream = file.getStream();
             if (null == stream) {
                 // React with 404
@@ -154,11 +154,11 @@ public class FileResponseRenderer implements ResponseRenderer {
             final String userAgent = req.getHeader("user-agent");
             if (SAVE_AS_TYPE.equals(contentType) || (delivery != null && delivery.equalsIgnoreCase(DOWNLOAD))) {
                 if (null == contentDisposition) {
-                    final StringBuilder sb = new StringBuilder(32).append("attachment");
+                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32).append("attachment");
                     DownloadUtility.appendFilenameParameter(fileName, SAVE_AS_TYPE, userAgent, sb);
                     resp.setHeader("Content-Disposition", sb.toString());
                 } else {
-                    final StringBuilder sb = new StringBuilder(32).append(contentDisposition.trim());
+                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32).append(contentDisposition.trim());
                     DownloadUtility.appendFilenameParameter(file.getName(), SAVE_AS_TYPE, userAgent, sb);
                     resp.setHeader("Content-Disposition", sb.toString());
                     //Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);
@@ -232,7 +232,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
-    private IFileHolder transformIfImage(AJAXRequestData request, IFileHolder file) throws IOException, OXException {
+    private IFileHolder transformIfImage(AJAXRequestData request, IFileHolder file, String delivery) throws IOException, OXException {
         /*
          * check input
          */
@@ -243,10 +243,11 @@ public class FileResponseRenderer implements ResponseRenderer {
          * build transformations
          */
         ImageTransformations transformations = scaler.transfom(file.getStream());
-        // rotate by default
-        if (false == request.isSet("rotate") || request.getParameter("rotate", boolean.class)) {
+        // rotate by default when not delivering as download
+        Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
+        if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
             transformations.rotate();
-        }
+        }        
         if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
             int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
             int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
@@ -260,10 +261,11 @@ public class FileResponseRenderer implements ResponseRenderer {
             ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
             transformations.scale(maxWidth, maxHeight, scaleType);
         }
-        // compress by default
-        if (false == request.isSet("compress") || request.getParameter("compress", boolean.class)) {
+        // compress by default when not delivering as download
+        Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
+        if (null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != compress && compress.booleanValue()) {
             transformations.compress();
-        }
+        }        
         /*
          * transform
          */
@@ -274,7 +276,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         return new FileHolder(transformed, -1, file.getContentType(), file.getName());
     }
-    
+
     private boolean isImage(final IFileHolder file) {
         String contentType = file.getContentType();
         if (null == contentType || !contentType.startsWith("image/")) {

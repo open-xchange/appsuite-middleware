@@ -53,7 +53,7 @@ import java.net.InetAddress;
 import java.util.Collections;
 import org.apache.commons.logging.Log;
 import com.openexchange.cluster.discovery.ClusterListener;
-import com.openexchange.hazelcast.osgi.HazelcastActivator.InitMode;
+import com.openexchange.hazelcast.init.HazelcastInitializer;
 
 /**
  * {@link HazelcastClusterListener}
@@ -62,24 +62,24 @@ import com.openexchange.hazelcast.osgi.HazelcastActivator.InitMode;
  */
 final class HazelcastClusterListener implements ClusterListener {
 
-    private final HazelcastActivator activator;
+    private final HazelcastInitializer initializer;
     private final long stamp;
     private final Log logger;
 
     /**
      * Initializes a new {@link HazelcastClusterListener}.
      */
-    protected HazelcastClusterListener(final HazelcastActivator activator, final long stamp, Log logger) {
+    protected HazelcastClusterListener(final HazelcastInitializer initializer, final long stamp, Log logger) {
         super();
-        this.activator = activator;
+        this.initializer = initializer;
         this.stamp = stamp;
         this.logger = logger;
     }
 
     @Override
     public void removed(final InetAddress address) {
-        final InitMode initMode = activator.remove(Collections.<InetAddress> singletonList(address), logger);
-        if (InitMode.RE_INITIALIZED.equals(initMode)) {
+        final HazelcastInitializer.InitMode initMode = initializer.remove(Collections.<InetAddress> singletonList(address), false, logger);
+        if (HazelcastInitializer.InitMode.RE_INITIALIZED == initMode) {
             if (logger.isInfoEnabled()) {
                 logger.info("\nHazelcast:\n\tRe-Initialized Hazelcast instance via cluster listener notification about a disappeared Open-Xchange node: "+address+"\n");
             }
@@ -88,12 +88,12 @@ final class HazelcastClusterListener implements ClusterListener {
 
     @Override
     public void added(final InetAddress address) {
-        final InitMode initMode = activator.init(Collections.<InetAddress> singletonList(address), true, stamp, logger);
-        if (InitMode.INITIALIZED.equals(initMode)) {
+        final HazelcastInitializer.InitMode initMode = initializer.init(Collections.<InetAddress> singletonList(address), false, stamp, logger);
+        if (HazelcastInitializer.InitMode.INITIALIZED == initMode) {
             if (logger.isInfoEnabled()) {
                 logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: "+address+"\n");
             }
-        } else if (InitMode.RE_INITIALIZED.equals(initMode)) {
+        } else if (HazelcastInitializer.InitMode.RE_INITIALIZED == initMode) {
             if (logger.isInfoEnabled()) {
                 logger.info("\nHazelcast:\n\tRe-Initialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: "+address+"\n");
             }

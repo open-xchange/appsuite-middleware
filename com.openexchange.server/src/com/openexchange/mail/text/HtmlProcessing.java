@@ -52,7 +52,6 @@ package com.openexchange.mail.text;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.regex.Matcher;
@@ -72,6 +71,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
@@ -280,12 +280,12 @@ public final class HtmlProcessing {
         if (!bodyMatcher.find()) {
             return replaceBodyPlain(htmlContent, cssPrefix);
         }
-        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(htmlContent.length() + 256);
         sb.append("<div id=\"").append(cssPrefix).append('"');
         {
             final String rest = bodyMatcher.group(1);
             if (!isEmpty(rest)) {
-                sb.append(' ').append(rest);
+                sb.append(' ').append(cleanUpRest(rest));
             }
         }
         sb.append('>');
@@ -298,10 +298,34 @@ public final class HtmlProcessing {
         return sb.toString();
     }
 
+    private static final Pattern PAT_ATTR_BGCOLOR = Pattern.compile("bgcolor=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAT_ATTR_STYLE = Pattern.compile("style=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
+
+    private static String cleanUpRest(final String rest) {
+        Matcher m = PAT_ATTR_BGCOLOR.matcher(rest);
+        if (!m.find()) {
+            return rest;
+        }
+        final String color = m.group(1);
+        String ret = rest;
+        final StringBuffer sbuf = new StringBuffer(ret.length());
+        m.appendReplacement(sbuf, "");
+        m.appendTail(sbuf);
+        // Check for script attribute
+        m = PAT_ATTR_STYLE.matcher(sbuf.toString());
+        if (!m.find()) {
+            return sbuf.append(" style=\"background-color: ").append(color).append(";\"").toString();
+        }
+        sbuf.setLength(0);
+        m.appendReplacement(sbuf, "style=\"" + Matcher.quoteReplacement(m.group(1)) + " background-color: " + color + ";\"");
+        m.appendTail(sbuf);
+        return sbuf.toString();
+    }
+
     private static String replaceBodyPlain(final String htmlContent, final String cssPrefix) {
         final Matcher m = PATTERN_BODY.matcher(htmlContent);
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
-        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(htmlContent.length() + 256);
         if (m.find()) {
             mr.appendLiteralReplacement(sb, "<div id=\"" + cssPrefix + "\" " + m.group(1) + '>' + m.group(2) + "</div>");
         }
@@ -526,7 +550,7 @@ public final class HtmlProcessing {
              */
             serializer.setOutputProperty(OutputKeys.INDENT, "yes");
             serializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", String.valueOf(INDENT));
-            final StringWriter sw = new StringWriter();
+            final AllocatingStringWriter sw = new AllocatingStringWriter();
             serializer.transform(new DOMSource(node), new StreamResult(sw));
             return sw.toString();
         } catch (final TransformerException e) {
@@ -626,7 +650,7 @@ public final class HtmlProcessing {
      * @return The HTML text with simple quotes replaced with block quotes
      */
     private static String replaceHTMLSimpleQuotesForDisplay(final String htmlText) {
-        final StringBuilder sb = new StringBuilder(htmlText.length());
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(htmlText.length());
         final String[] lines = htmlText.split(STR_SPLIT_BR);
         int levelBefore = 0;
         final int llen = lines.length - 1;
@@ -730,7 +754,7 @@ public final class HtmlProcessing {
         try {
             final Matcher imgMatcher = BACKGROUND_PATTERN.matcher(reval);
             final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, reval);
-            final StringBuilder sb = new StringBuilder(reval.length());
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(reval.length());
             if (imgMatcher.find()) {
                 final StringBuilder linkBuilder = new StringBuilder(256);
                 /*
@@ -785,7 +809,7 @@ public final class HtmlProcessing {
         try {
             final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
             final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, reval);
-            final StringBuilder sb = new StringBuilder(reval.length());
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(reval.length());
             if (imgMatcher.find()) {
                 final StringBuilder strBuffer = new StringBuilder(256);
                 final MatcherReplacer mr = new MatcherReplacer();

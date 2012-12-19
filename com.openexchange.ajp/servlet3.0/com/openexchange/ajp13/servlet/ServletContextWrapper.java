@@ -316,13 +316,13 @@ public class ServletContextWrapper implements ServletContext {
 
     @Override
     public int getEffectiveMinorVersion() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
     @Override
     public boolean setInitParameter(final String name, final String value) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 

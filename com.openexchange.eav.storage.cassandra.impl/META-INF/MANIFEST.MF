@@ -13,6 +13,7 @@ Import-Package: com.openexchange.ajax.tools,
  com.openexchange.log,
  com.openexchange.nosql.cassandra,
  com.openexchange.osgi,
+ com.openexchange.server,
  me.prettyprint.cassandra.model,
  me.prettyprint.cassandra.serializers,
  me.prettyprint.cassandra.service,
@@ -27,7 +28,8 @@ Import-Package: com.openexchange.ajax.tools,
  me.prettyprint.hector.testutils,
  org.apache.cassandra.db,
  org.apache.cassandra.utils,
+ org.apache.commons.codec.binary,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework
-Bundle-Activator: com.openexchange.eav.storage.cassandra.osgi.CassandraStorageActivator
+Bundle-Activator: com.openexchange.eav.storage.cassandra.osgi.CassandraEAVStorageActivator

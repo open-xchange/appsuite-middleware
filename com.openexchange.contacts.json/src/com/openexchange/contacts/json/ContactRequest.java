@@ -166,16 +166,37 @@ public class ContactRequest {
      * @throws OXException
      */
     public void sortInternalIfNeeded(final List<Contact> contacts) throws OXException {
-    	if (this.isInternalSort() && null != contacts && 1 < contacts.size()) {
-    		final int sort = this.getSort();
+        if (this.isInternalSort() && null != contacts && 1 < contacts.size()) {
+            final int sort = this.getSort();
             if (0 == sort || Contact.SPECIAL_SORTING == sort) {
                 Collections.sort(contacts, new SpecialAlphanumSortContactComparator(session.getUser().getLocale()));
             } else if (Contact.USE_COUNT_GLOBAL_FIRST == sort) {
                 Collections.sort(contacts, new UseCountComparator(true, session.getUser().getLocale())); 
             }
-    	}
+        }
     }
     
+    /**
+     * Sort the supplied contacts internally according to the requested 'sort' field, falling back to a special comparison by annual date
+     * with a reference date if not set otherwise.   
+     * 
+     * @param contacts The contacts to sort
+     * @param reference the reference date
+     * @throws OXException
+     */
+    public void sortInternalIfNeeded(List<Contact> contacts, ContactField dateField, Date reference) throws OXException {
+        if (null != contacts && 1 < contacts.size()) {
+            int sort = this.getSort();
+            if (Contact.SPECIAL_SORTING == sort) {
+                Collections.sort(contacts, new SpecialAlphanumSortContactComparator(session.getUser().getLocale()));
+            } else if (Contact.USE_COUNT_GLOBAL_FIRST == sort) {
+                Collections.sort(contacts, new UseCountComparator(true, session.getUser().getLocale())); 
+            } else if (0 == sort) {
+                Collections.sort(contacts, RequestTools.getAnnualDateComparator(dateField, reference));
+            }
+        }
+    }
+  
     /**
      * Gets the requested contact fields.
      * 

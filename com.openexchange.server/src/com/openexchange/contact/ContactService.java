@@ -143,6 +143,29 @@ public interface ContactService {
     SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
+     * Gets all contacts from multiple folders.
+     * 
+     * @param session the session
+     * @param folderIDs the IDs of the parent folders
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getAllContacts(Session session, List<String> folderIDs, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
+     * Gets all contacts from all visible folders.
+     * 
+     * @param session the session
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getAllContacts(Session session, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
      * Gets a list of contacts with all fields.
      * 
      * @param session the session
@@ -425,6 +448,20 @@ public interface ContactService {
      * @throws OXException
      */
     void updateContact(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException;
+
+    /**
+     * Updates a user's contact data, ignoring the folder permissions of the 
+     * global address book folder. Required to update user data in environments
+     * where access to the global address book is restricted.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param id the object ID
+     * @param contact the contact to update
+     * @param lastRead the time the object was last read from the storage
+     * @throws OXException
+     */
+    void updateUser(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException;
 
     /**
      * Deletes a contact.

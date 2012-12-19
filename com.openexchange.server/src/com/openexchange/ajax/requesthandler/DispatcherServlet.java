@@ -56,6 +56,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -67,10 +68,13 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
+import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
+import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -218,19 +222,21 @@ public class DispatcherServlet extends SessionServlet {
         httpResponse.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         Tools.disableCaching(httpResponse);
 
-        final String action = httpRequest.getParameter(PARAMETER_ACTION);
         AJAXState state = null;
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
             final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-            final String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
-			final String action2 = requestDataTools.getAction(httpRequest);
-			ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action2));
-            if (session == null && dispatcher.mayOmitSession(module, action2)) {
-            	session = fakeSession();
-            }
-            if (null == session) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+            ServerSession session;
+            {
+                final String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
+    			final String action = requestDataTools.getAction(httpRequest);
+    			session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
+                if (session == null && dispatcher.mayOmitSession(module, action)) {
+                	session = fakeSession();
+                }
+                if (null == session) {
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+                }
             }
             /*
              * Parse AJAXRequestData
@@ -269,12 +275,29 @@ public class DispatcherServlet extends SessionServlet {
                 httpResponse.sendError(((Integer) logArgs[0]).intValue(), null == statusMsg ? null : statusMsg.toString());
                 return;
             }
-            LOG.error(e.getMessage(), e);
-            APIResponseRenderer.writeResponse(new Response().setException(e), action, httpRequest, httpResponse);
+            // Handle other OXExceptions
+            if (e.isLoggable(LogLevel.ERROR)) {
+                if (LogProperties.isEnabled()) {
+                    StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
+                    logBuilder.append(LogProperties.getAndPrettyPrint());
+                    LOG.error(logBuilder.toString(), e);
+                } else {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+            final String action = httpRequest.getParameter(PARAMETER_ACTION);
+            APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? httpRequest.getMethod().toUpperCase(Locale.US) : action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            if(LogProperties.isEnabled()) {
+                StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
+                logBuilder.append(LogProperties.getAndPrettyPrint());
+                LOG.error(logBuilder.toString(),e);
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
             final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            APIResponseRenderer.writeResponse(new Response().setException(exception), action, httpRequest, httpResponse);
+            final String action = httpRequest.getParameter(PARAMETER_ACTION);
+            APIResponseRenderer.writeResponse(new Response().setException(exception), null == action ? httpRequest.getMethod().toUpperCase(Locale.US) : action, httpRequest, httpResponse);
         } finally {
             if (null != state) {
                 dispatcher.end(state);

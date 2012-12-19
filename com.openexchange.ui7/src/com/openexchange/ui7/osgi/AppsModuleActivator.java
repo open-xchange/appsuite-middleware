@@ -61,9 +61,9 @@ import com.openexchange.ui7.FileCache;
  */
 public class AppsModuleActivator extends AJAXModuleActivator {
 
-    private FileCache cache;
+    private final FileCache cache;
 
-    private File root;
+    private final File root;
 
     public AppsModuleActivator(FileCache cache, File root) {
         super();

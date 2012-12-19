@@ -57,7 +57,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;

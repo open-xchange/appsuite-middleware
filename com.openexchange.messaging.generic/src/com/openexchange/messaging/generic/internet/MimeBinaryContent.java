@@ -92,7 +92,7 @@ public class MimeBinaryContent implements BinaryContent {
             final ByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(8192 << 1);
             final byte[] buf = new byte[8192];
             int read;
-            while ((read = inputStream.read(buf, 0, buf.length)) != -1) {
+            while ((read = inputStream.read(buf, 0, buf.length)) > 0) {
                 buffer.write(buf, 0, read);
             }
             cachedContent = buffer.toByteArray();

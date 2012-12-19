@@ -52,31 +52,54 @@ package com.openexchange.mail.smal.impl.index;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 
-
 /**
  * {@link AccountBlacklist}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class AccountBlacklist {
-    
+
     private static boolean allExternalAllowed = false;
     
+    private static boolean allExternalForbidden = false;
+
     private static Set<String> blacklistedServers = null;
     
-    
-    public static boolean isServerBlacklisted(String server) {
+
+    /**
+     * Returns if the given mail account server is blacklisted.<br>
+     * <b>Important: You have to check first if this is the users primary mail account. If
+     * com.openexchange.mail.smal.blacklist is set to '*' this method will return <code>true</code> even for the primary account!</b>
+     * @param server
+     * @return
+     */
+    public static boolean isServerBlacklisted(final String server) {
         initBlacklist();
-        if (allExternalAllowed || blacklistedServers.isEmpty()) {
+        if (allExternalAllowed) {
             return false;
         }
         
-        return blacklistedServers.contains(server);
+        if (allExternalForbidden) {
+            return true;
+        }
+
+        return Iterables.any(blacklistedServers, new Predicate<String>() {
+            @Override
+            public boolean apply(String input) {
+                if (server.endsWith(input)) {
+                    return true;
+                }
+
+                return false;
+            }
+        });
     }
-    
+
     private synchronized static void initBlacklist() {
         if (blacklistedServers == null) {
             ConfigurationService config = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
@@ -84,18 +107,21 @@ public class AccountBlacklist {
             if (blacklist == null) {
                 throw new IllegalArgumentException("Missing value for property 'com.openexchange.mail.smal.blacklist'. Check smal.properties.");
             }
-            
+
             blacklist = blacklist.trim();
             if (blacklist.isEmpty()) {
                 allExternalAllowed = true;
-                blacklistedServers = Collections.EMPTY_SET;                
+                allExternalForbidden = false;
+                blacklistedServers = Collections.EMPTY_SET;
             } else if (blacklist.startsWith("*")) {
                 allExternalAllowed = false;
-                blacklistedServers = Collections.EMPTY_SET;                
+                allExternalForbidden = true;
+                blacklistedServers = Collections.EMPTY_SET;
             } else {
                 allExternalAllowed = false;
+                allExternalForbidden = false;
                 blacklistedServers = new HashSet<String>();
-                String[] servers = blacklist.split(",");
+                String[] servers = blacklist.split("\\s*,\\s*");
                 for (String server : servers) {
                     blacklistedServers.add(server.trim());
                 }
