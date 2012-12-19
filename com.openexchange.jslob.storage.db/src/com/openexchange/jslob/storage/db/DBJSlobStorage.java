@@ -473,6 +473,27 @@ public final class DBJSlobStorage implements JSlobStorage {
         }
     }
 
+    private boolean check(final JSlobId id, final int contextId, final Connection con) throws OXException {
+        if (false && checkLocked(id, false, con)) {
+            throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT 1 FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, id.getUser());
+            stmt.setString(3, id.getServiceId());
+            stmt.setString(4, id.getId());
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (final SQLException e) {
+            throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
     private static final String SQL_INSERT = "INSERT INTO jsonStorage (cid, user, serviceId, id, data) VALUES (?, ?, ?, ?, ?)";
 
     private static final String SQL_UPDATE = "UPDATE jsonStorage SET data = ? WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?";
@@ -492,7 +513,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                  */
                 con.setAutoCommit(false);
                 committed = false;
-                final JSlob present = load(id, contextId, con);
+                final JSlob present = check(id, contextId, con);
                 if (null == present) {
                     /*
                      * Insert
