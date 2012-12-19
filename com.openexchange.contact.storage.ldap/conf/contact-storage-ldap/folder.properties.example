@@ -27,13 +27,12 @@ com.openexchange.contact.storage.ldap.storagePriority=17
 # == LDAP Attribute mapping ==================================================
 
 # Controls the way object identifiers are mapped between OX and LDAP. Possible
-# values are 'static', 'dynamic' and 'persistent'. A 'static' mapping requires
-# numerical unique identifiers in LDAP, i.e. all mapped ID properties defined 
-# in the mapping file point to an integer-parsable LDAP attribute. If the LDAP
-# server does not provide unique numerical properties, either 'dynamic' or 
-# 'persistent' ID mapping must be configured, whereas the first one stores the 
-# mappings in memory per session, and the latter one stores the mapping table 
-# in the database. Required.
+# values are 'static' and 'persistent'. A 'static' mapping requires numerical 
+# unique identifiers in LDAP, i.e. all mapped ID properties defined in the 
+# mapping file point to an integer-parsable LDAP attribute. If the LDAP server
+# does not provide unique numerical properties, a 'persistent' ID mapping must
+# be configured that stores the mappings inside a mapping table in the 
+# database. Required.
 com.openexchange.contact.storage.ldap.idMapping=persistent
 
 # The filename containing the OX <-> LDAP attribute mappings for contacts. 
@@ -174,3 +173,8 @@ com.openexchange.contact.storage.ldap.sorting=groupware
 # no results are available for this folder for the 'deleted' API call. 
 # Therefore, any synchronization-based usage will not be available.
 com.openexchange.contact.storage.ldap.ADS_deletion_support=false
+
+# Defines whether empty distribution lists, i.e. lists that do not contain any
+# member, are excluded or not. Possible values are 'true' and 'false'; 
+# defaults to 'true'.  
+com.openexchange.contact.storage.ldap.excludeEmptyLists=true

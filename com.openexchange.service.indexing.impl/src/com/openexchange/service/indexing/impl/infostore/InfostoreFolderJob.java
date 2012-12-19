@@ -277,7 +277,7 @@ public class InfostoreFolderJob implements IndexingJob {
     }
 
     private void checkJobInfo() {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 

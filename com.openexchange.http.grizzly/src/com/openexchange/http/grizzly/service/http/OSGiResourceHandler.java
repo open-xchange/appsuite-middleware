@@ -135,7 +135,7 @@ public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
 
             byte buff[] = new byte[1024*8];
             int read, total = 0;
-            while ((read = is.read(buff)) != -1) {
+            while ((read = is.read(buff)) > 0) {
                 total += read;
                 os.write(buff, 0, read);
             }

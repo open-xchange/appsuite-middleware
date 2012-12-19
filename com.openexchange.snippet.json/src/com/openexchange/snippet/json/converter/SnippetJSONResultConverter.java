@@ -55,6 +55,8 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.json.JSONValue;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -144,7 +146,12 @@ public class SnippetJSONResultConverter implements ResultConverter {
         }
         final Object misc = snippet.getMisc();
         if (null != misc) {
-            json.put(Property.MISC.getPropName(), misc);
+            if (misc instanceof JSONValue) {
+                json.put(Property.MISC.getPropName(), misc);
+            } else {
+                final String sMisc = misc.toString();
+                json.put(Property.MISC.getPropName(), "null".equals(sMisc) ? JSONObject.NULL : new JSONTokener(sMisc).nextValue());
+            }
         }
         tmp = snippet.getModule();
         if (null != tmp) {

@@ -583,24 +583,26 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
     
     @Override
-	public OAuthAccount getDefaultAccount(final API api, final Session session) throws OXException {
-    	final List<OAuthServiceMetaData> allServices = registry.getAllServices(session.getUserId(), session.getContextId());
-    	for (final OAuthServiceMetaData metaData : allServices) {
-			if (metaData.getAPI() == api) {
-				final List<OAuthAccount> accounts = getAccounts(metaData.getId(), session, session.getUserId(), session.getContextId());
-				OAuthAccount likely = null;
-				for(final OAuthAccount acc: accounts){
-					if(likely == null || acc.getId() < likely.getId()){
-						likely = acc;
-					}
-				}
-				if(likely != null){
-					return likely;
-				}
-			}
-		}
-    	throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create("default:"+api.toString(), session.getUserId(), session.getContextId());
-	}
+    public OAuthAccount getDefaultAccount(final API api, final Session session) throws OXException {
+        final int contextId = session.getContextId();
+        final int userId = session.getUserId();
+        final List<OAuthServiceMetaData> allServices = registry.getAllServices(userId, contextId);
+        for (final OAuthServiceMetaData metaData : allServices) {
+            if (metaData.getAPI() == api) {
+                final List<OAuthAccount> accounts = getAccounts(metaData.getId(), session, userId, contextId);
+                OAuthAccount likely = null;
+                for (final OAuthAccount acc : accounts) {
+                    if (likely == null || acc.getId() < likely.getId()) {
+                        likely = acc;
+                    }
+                }
+                if (likely != null) {
+                    return likely;
+                }
+            }
+        }
+        throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create("default:" + api.toString(), Integer.valueOf(userId), Integer.valueOf(contextId));
+    }
 
     @Override
     public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {

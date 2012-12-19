@@ -144,7 +144,10 @@ public class DefaultConverter implements Converter {
 
     @Override
     public void convert(final String fromFormat, final String toFormat, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
-        Step path = getShortestPath(fromFormat, toFormat);
+        if (result == AJAXRequestResult.EMPTY_REQUEST_RESULT) {
+        	return;
+        }
+    	Step path = getShortestPath(fromFormat, toFormat);
         while (path != null) {
             path.converter.convert(requestData, result, session, this);
             result.setFormat(path.converter.getOutputFormat());

@@ -702,7 +702,7 @@ public class InfostoreQueryCatalog {
 
         @Override
         public Object filestoreLocation() {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return null;
         }
 

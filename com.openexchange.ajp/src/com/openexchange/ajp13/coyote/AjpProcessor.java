@@ -838,7 +838,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 } catch (final Throwable t) {
                     // 400 - Bad Request
                     {
-                        final StringBuilder sb = new StringBuilder(512);
+                        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
                         sb.append("400 - Bad Request: Error preparing forward-request: ").append(t.getClass().getName());
                         sb.append(" message=").append(t.getMessage());
                         if (debug) {
@@ -2359,7 +2359,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     } // End of class
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb) {
         if (null == trace) {
             return;
         }

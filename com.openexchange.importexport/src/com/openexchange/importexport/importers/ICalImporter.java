@@ -53,9 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TObjectProcedure;
-
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -67,10 +65,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -96,6 +91,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
@@ -183,7 +179,7 @@ public class ICalImporter extends AbstractImporter {
 			} catch (final OXException e) {
 				throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION
 						.create(e);
-			} catch (final SQLException e) {
+			} catch (final RuntimeException e) {
 				throw ImportExportExceptionCodes.SQL_PROBLEM.create(e,
 						e.getMessage());
 			}

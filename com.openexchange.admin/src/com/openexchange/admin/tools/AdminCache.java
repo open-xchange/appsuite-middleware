@@ -670,7 +670,8 @@ public class AdminCache {
             }
         }
         if (masterCredentials == null) {
-            throw new OXGenericException("No master credentials defined!");
+            final OXGenericException genericException = new OXGenericException("No master credentials defined!");
+            log.warn(genericException.getMessage());
         }
     }
 
@@ -719,7 +720,7 @@ public class AdminCache {
     }
 
     public boolean isMasterAdmin(final Credentials auth) {
-        return masterAuthenticationDisabled || getMasterCredentials().getLogin().equals(auth.getLogin());
+        return masterAuthenticationDisabled || (getMasterCredentials() != null && getMasterCredentials().getLogin().equals(auth.getLogin()));
     }
 
 }

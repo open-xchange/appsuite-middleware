@@ -1,3 +1,27 @@
+open-xchange-blackwhitelist (7.0.0-3) unstable; urgency=low
+
+  * Third release candidate for 7.0.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 18 Dec 2012 14:14:30 +0100
+
+open-xchange-blackwhitelist (7.0.0-2) unstable; urgency=low
+
+  * Second release candidate for 7.0.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 17 Dec 2012 17:35:57 +0100
+
+open-xchange-blackwhitelist (7.0.0-1) unstable; urgency=low
+
+  * First release candidate for 7.0.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 04 Dec 2012 13:48:11 +0100
+
+open-xchange-blackwhitelist (7.0.0-0) unstable; urgency=low
+
+  * prepare for 7.0.0 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 04 Dec 2012 09:28:53 +0100
+
 open-xchange-blackwhitelist (6.23.0-5) unstable; urgency=low
 
   * First release candidate for EDP drop #6

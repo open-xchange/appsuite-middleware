@@ -452,7 +452,7 @@ public class IMAPDefaultFolderChecker {
                 setDefaultMailFolder(index, checkDefaultFolder(index, "", fullName, sep, type, subscribe, true, modified), cache);
             }
         } catch (final OXException e) {
-            final StringBuilder sb = new StringBuilder(1024);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
             sb.append("Couldn't check default folder: ");
             sb.append((null == fullName ? (prefix + name) : fullName)).append("\n\n");
             appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()));
@@ -475,7 +475,7 @@ public class IMAPDefaultFolderChecker {
                 /*
                  * Special handling for over-quota error
                  */
-                final StringBuilder sb = new StringBuilder(1024);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
                 sb.append("Couldn't check default folder due to exceeded quota restrictions: ");
                 sb.append((null == fullName ? (prefix + name) : fullName)).append("\n\n");
                 appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()));
@@ -484,7 +484,7 @@ public class IMAPDefaultFolderChecker {
                 final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
                 imapStore.getImapAccess().addWarnings(Collections.singleton(warning));
             } else {
-                final StringBuilder sb = new StringBuilder(1024);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
                 sb.append("Couldn't check default folder: ");
                 sb.append((null == fullName ? (prefix + name) : fullName)).append("\n\n");
                 appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()));
@@ -862,7 +862,7 @@ public class IMAPDefaultFolderChecker {
      * @param sb The builder
      * @param num The max. number of elements to append
      */
-    protected static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final StackTraceElementMatcher matcher) {
+    protected static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb, final StackTraceElementMatcher matcher) {
         if (null == trace) {
             return;
         }

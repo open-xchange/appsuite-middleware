@@ -58,6 +58,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -74,6 +75,11 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
 
     AbstractRedirectParser() {
         super(true);
+    }
+
+    @Override
+    protected Response getResponse(String body) throws JSONException {
+        throw new JSONException("Method not supported when parsing redirect responses.");
     }
 
     @Override
@@ -103,7 +109,7 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
     }
 
     @Override
-    public final T parse(String body) {
+    public final T parse(String body) throws JSONException {
         return createResponse(location);
     }
 
@@ -112,5 +118,5 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
         return null;
     }
 
-    protected abstract T createResponse(String myLocation);
+    protected abstract T createResponse(String myLocation) throws JSONException;
 }

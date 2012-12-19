@@ -70,9 +70,9 @@ public interface ConfigProperty<T> {
 
     String get(String metadataName) throws OXException;
 
-    public List<String> getMetadataNames() throws OXException;
+    List<String> getMetadataNames() throws OXException;
 
-    public <M> ConfigProperty<M> to(Class<M> otherType) throws OXException;
+    <M> ConfigProperty<M> to(Class<M> otherType) throws OXException;
 
-    public boolean isDefined() throws OXException;
+    boolean isDefined() throws OXException;
 }

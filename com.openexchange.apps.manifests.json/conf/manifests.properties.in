@@ -1,2 +1,2 @@
 # Where to look for UI manifest files
-com.openexchange.apps.manifestPath=@prefix@/ui7/manifests
+com.openexchange.apps.manifestPath=@prefix@/appsuite/manifests

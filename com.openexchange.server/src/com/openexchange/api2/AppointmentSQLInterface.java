@@ -342,10 +342,10 @@ public interface AppointmentSQLInterface {
 
     /**
      * Method to attach or detach attachments
-     * @param objectId
-     * The object ID
      * @param folderId
      * The folder Id
+     * @param objectId
+     * The object ID
      * @param userId
      * The user ID
      * @param session
@@ -356,7 +356,7 @@ public interface AppointmentSQLInterface {
      * Amount of attached attachments.
      * @throws OXException
      */
-    long attachmentAction(int objectId, int uid, int folderId, Session session, Context c, int numberOfAttachments) throws OXException;
+    long attachmentAction(int folderId, int objectId, int userId, Session session, Context c, int numberOfAttachments) throws OXException;
 
 
     /**

@@ -70,6 +70,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link Check} - Static utility functions for the contact service.
@@ -197,6 +198,12 @@ public final class Check {
 	 */
 	public static void canWriteInGAB(ContactStorage storage, Session session, String folderID, Contact update) throws OXException {
 		if (FolderObject.SYSTEM_LDAP_FOLDER_ID == parse(folderID)) {
+		    /*
+		     * check legacy edit flag 
+		     */
+	        if (false == OXFolderProperties.isEnableInternalUsersEdit()) {
+	            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(update.getObjectID(), session.getContextId());
+	        }
 			/*
 			 * check display name
 			 */

@@ -91,7 +91,7 @@ public class Bug14625Test extends CalendarSqlTest {
 
     @Override
     public void tearDown() throws Exception {
-        // TODO Auto-generated method stub
+        // Nothing to do
         super.tearDown();
     }
 }

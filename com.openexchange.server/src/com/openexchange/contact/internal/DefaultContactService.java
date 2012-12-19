@@ -56,6 +56,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -281,20 +282,35 @@ public abstract class DefaultContactService implements ContactService {
 		this.doCreateContact(session, folderId, contact);
 	}
 
-	@Override
-	public void updateContact(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead) 
-			throws OXException {
-		Check.argNotNull(session, "session");
-		Check.argNotNull(folderId, "folderId");
-		Check.argNotNull(id, "id");
-		Check.argNotNull(lastRead, "lastRead");
-		Check.argNotNull(contact, "contact");
-		if (contact.containsParentFolderID() && contact.getParentFolderID() != parse(folderId)) {
-			this.doUpdateAndMoveContact(session, folderId, Integer.toString(contact.getParentFolderID()), id, contact, lastRead);			
-		} else {
-			this.doUpdateContact(session, folderId, id, contact, lastRead);
-		}
-	}
+    @Override
+    public void updateContact(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead) 
+            throws OXException {
+        Check.argNotNull(session, "session");
+        Check.argNotNull(folderId, "folderId");
+        Check.argNotNull(id, "id");
+        Check.argNotNull(lastRead, "lastRead");
+        Check.argNotNull(contact, "contact");
+        if (contact.containsParentFolderID() && contact.getParentFolderID() != parse(folderId)) {
+            this.doUpdateAndMoveContact(session, folderId, Integer.toString(contact.getParentFolderID()), id, contact, lastRead);           
+        } else {
+            this.doUpdateContact(session, folderId, id, contact, lastRead);
+        }
+    }
+
+    @Override
+    public void updateUser(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead) 
+            throws OXException {
+        Check.argNotNull(session, "session");
+        Check.argNotNull(folderId, "folderId");
+        Check.argNotNull(id, "id");
+        Check.argNotNull(lastRead, "lastRead");
+        Check.argNotNull(contact, "contact");
+        if (contact.containsParentFolderID() && contact.getParentFolderID() != parse(folderId)) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(id), session.getContextId());
+        } else {
+            this.doUpdateUser(session, folderId, id, contact, lastRead);
+        }
+    }
 
     @Override
     public void deleteContact(Session session, String folderId, String id, Date lastRead) throws OXException {
@@ -399,9 +415,12 @@ public abstract class DefaultContactService implements ContactService {
 	protected abstract void doUpdateAndMoveContact(Session session, String sourceFolderId, String targetFolderId, String objectID, 
 			Contact contact, Date lastRead) throws OXException;
 	
-	protected abstract void doUpdateContact(Session session, String folderID, String objectID, Contact contact, Date lastRead) 
-			throws OXException;
-	
+    protected abstract void doUpdateContact(Session session, String folderID, String objectID, Contact contact, Date lastRead) 
+        throws OXException;
+
+    protected abstract void doUpdateUser(Session session, String folderID, String objectID, Contact contact, Date lastRead) 
+        throws OXException;
+
     protected abstract void doDeleteContact(Session session, String folderID, String objectID, Date lastRead) throws OXException;
     
     protected abstract void doDeleteContacts(Session session, String folderID, String[] objectIDs, Date lastRead) throws OXException;

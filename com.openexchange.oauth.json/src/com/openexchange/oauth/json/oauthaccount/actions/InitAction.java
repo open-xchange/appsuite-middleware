@@ -62,8 +62,10 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthToken;
@@ -123,6 +125,11 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         if (serviceId == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( AccountField.SERVICE_ID.getName());
         }
+        final String name = AccountField.DISPLAY_NAME.getName();
+        final String displayName = request.getParameter(name);
+        if (isEmpty(displayName)) {
+            throw OAuthExceptionCodes.MISSING_DISPLAY_NAME.create();
+        }
         /*
          * Generate UUID
          */
@@ -130,28 +137,27 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         /*
          * Compose call-back URL
          */
-        final StringBuilder callbackUrlBuilder = new StringBuilder(256);
-        callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
-        callbackUrlBuilder.append(request.getHostname());
-        callbackUrlBuilder.append(PREFIX.get().getPrefix()).append("oauth/accounts");
-        callbackUrlBuilder.append("?action=create");
-        callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());
+        final String callbackUrl;
         {
-            final String name = AccountField.DISPLAY_NAME.getName();
-            final String displayName = request.getParameter(name);
-            if (displayName != null) {
-                callbackUrlBuilder.append('&').append(name).append('=').append(urlEncode(displayName));
+            final StringAllocator callbackUrlBuilder = new StringAllocator(512);
+            callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
+            callbackUrlBuilder.append(request.getHostname());
+            callbackUrlBuilder.append(PREFIX.get().getPrefix()).append("oauth/accounts");
+            callbackUrlBuilder.append("?action=create");
+            callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());
+            callbackUrlBuilder.append('&').append(name).append('=').append(urlEncode(displayName));
+            callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
+            callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
+            final String cb = request.getParameter("cb");
+            if (!isEmpty(cb)) {
+            	callbackUrlBuilder.append("&callback=").append(cb);
             }
-        }
-        callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
-        callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
-        if (request.getParameter("cb") != null) {
-        	callbackUrlBuilder.append("&").append("callback=").append(request.getParameter("cb"));
+            callbackUrl = callbackUrlBuilder.toString();
         }
         /*
          * Invoke
          */
-        final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrlBuilder.toString());
+        final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrl);
         final OAuthToken requestToken = interaction.getRequestToken();
         /*
          * Create a container to set some state information: Request token's secret, call-back URL, whatever
@@ -167,7 +173,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
             }
         }
         oauthState.put(OAuthConstants.ARGUMENT_SECRET, requestToken.getSecret());
-        oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrlBuilder.toString());
+        oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrl);
         session.setParameter(uuid, oauthState);
         /*
          * Write as JSON
@@ -239,6 +245,19 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         } catch (final UnsupportedEncodingException e) {
             return s;
         }
+    }
+
+    /** Checks for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

@@ -114,12 +114,12 @@ public final class TaskTestSuite {
         tests.addTestSuite(Bug12364Test.class);
         tests.addTestSuite(Bug12727Test.class);
         tests.addTestSuite(Bug12926Test.class);
+        tests.addTestSuite(Bug13173Test.class);
         tests.addTestSuite(Bug14002Test.class);
         tests.addTestSuite(Bug15580Test.class);
         tests.addTestSuite(Bug15897Test.class);
         tests.addTestSuite(Bug15937Test.class);
         tests.addTestSuite(Bug16006Test.class);
-        tests.addTestSuite(Bug13173Test.class);
         tests.addTestSuite(Bug18204Test.class);
         tests.addTestSuite(Bug20008Test.class);
         tests.addTestSuite(Bug21026Test.class);

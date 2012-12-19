@@ -76,7 +76,7 @@ public class OSGiSupport {
 				@Override
 				public void modifiedService(ServiceReference reference,
 						Object service) {
-					// TODO Auto-generated method stub
+					// Nothing to do
 
 				}
 

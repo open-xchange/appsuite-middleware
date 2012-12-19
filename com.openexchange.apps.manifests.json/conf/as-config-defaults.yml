@@ -1,0 +1,18 @@
+# If you want to override values here
+# Use the as-config.yml. This file will be overwritten
+default:
+    pageTitle: 'App Suite. '
+
+    pageHeaderPrefix: 'OX'
+    pageHeader: 'App Suite'
+
+    productName: 'OX App Suite'
+    productNameMail: 'OX Mail'
+
+    contact: 'Open-Xchange AG, Rollnerstr. 14, D-90408 Nürnberg, E-Mail: info@open-xchange.com'
+
+    forgotPassword: false
+
+    copyright: '(C) 2012 Open-Xchange.'
+    version: '7.0.0'
+    buildDate: '2012-12-17'

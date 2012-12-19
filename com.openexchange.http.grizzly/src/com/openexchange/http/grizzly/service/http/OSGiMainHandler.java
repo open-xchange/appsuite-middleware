@@ -157,10 +157,10 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     updateMappingInfo(request, alias, originalAlias);
 
                     httpHandler.service(request, response);
-                } catch(Throwable t) {
+                } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
                     StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
-                    if(LogProperties.isEnabled()) {
+                    if (LogProperties.isEnabled()) {
                         logBuilder.append(LogProperties.getAndPrettyPrint());
                     }
                     appendRequestInfo(logBuilder, request);
@@ -191,7 +191,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             }
         }
     }
-    
+
     /**
      * Appends request information.
      * 
@@ -245,12 +245,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             }
             OSGiServletHandler servletHandler = findOrCreateOSGiServletHandler(servlet, context, initparams);
             servletHandler.setServletPath(alias);
-
-            try {
-                addServletFilters(servletHandler);
-            } catch (OXException e) {
-                throw new ServletException(e);
-            }
+            addServletFilters(servletHandler);
 
             /*
              * Servlet would be started several times if registered with multiple aliases. Starting means: 1. Set ContextPath 2. Instantiate
@@ -266,10 +261,11 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     }
 
     /**
-     * @param servletHandler
-     * @throws OXException
+     * Add our default set of Filters to the ServletHandler.
+     * 
+     * @param servletHandler The ServletHandler with the FilterChain
      */
-    private void addServletFilters(OSGiServletHandler servletHandler) throws OXException {
+    private void addServletFilters(OSGiServletHandler servletHandler) {
         // wrap it
         servletHandler.addFilter(new WrappingFilter(), WrappingFilter.class.getName(), null);
 

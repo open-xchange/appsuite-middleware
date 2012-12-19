@@ -243,7 +243,6 @@ public class DisallowConcurrentExecutionJobTest {
         Assert.assertFalse("Jobs were running concurrently!", currentlyExecutingJobs.size() > 1);
     }
     
-    
     @Test
     public void testClusterSchedulerConcurrency() throws Exception {
         HazelcastJobStore jobStore = new TestableHazelcastJobStore();

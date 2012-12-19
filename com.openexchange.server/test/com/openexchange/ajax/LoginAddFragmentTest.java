@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import com.openexchange.ajax.login.LoginTools;
 import junit.framework.TestCase;
 
 
@@ -81,9 +82,7 @@ public class LoginAddFragmentTest extends TestCase {
 
     private static final class TestLogin extends Login {
         public String addFragmentParam(String url, String param, String value) {
-            return addFragmentParameter(url, param, value);
+            return LoginTools.addFragmentParameter(url, param, value);
         }
     }
-
-
 }

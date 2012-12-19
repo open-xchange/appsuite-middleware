@@ -56,7 +56,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.ho.yaml.Yaml;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -66,6 +65,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
@@ -145,7 +145,7 @@ public class Activator implements BundleActivator {
             LOG.warn("Could not find crawler descriptions in " + directory + ". Skipping crawler initialisation.");
             return crawlers;
         }
-        LOG.info("Loading crawler descriptions from directory : " + directory);
+        LOG.info("Loading crawler descriptions from directory : " + directory.getName());
         for (final File file : files) {
             try {
                 if (file.isFile() && file.getPath().endsWith(".yml")) {

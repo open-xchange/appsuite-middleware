@@ -1145,7 +1145,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     /**
      * @return <code>true</code> if given user has READ access to this folder, <code>false</code> otherwise
      */
-    public final boolean isVisible(final int userId, final UserConfiguration userConfig) throws OXException, SQLException {
+    public final boolean isVisible(final int userId, final UserConfiguration userConfig) throws OXException {
         return (getEffectiveUserPermission(userId, userConfig).isFolderVisible());
     }
 
@@ -1153,8 +1153,15 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * This methods yields the effective OCL permission for the currently logged in user by determining the max. OCL permission which the
      * user has on folder and applying the user configuration profile.
      */
-    public final EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig) throws SQLException, OXException {
-        return getEffectiveUserPermission(userId, userConfig, null);
+    public final EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig) throws OXException {
+        if (!containsPermissions()) {
+            try {
+                setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), userConfig.getContext(), null));
+            } catch (final SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            }
+        }
+        return calcEffectiveUserPermission(userId, userConfig);
     }
 
     /**
@@ -1162,6 +1169,13 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * user has on folder and applying the user configuration profile.
      */
     public final EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig, final Connection readConArg) throws SQLException, OXException {
+        if (!containsPermissions()) {
+            setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), userConfig.getContext(), readConArg));
+        }
+        return calcEffectiveUserPermission(userId, userConfig);
+    }
+
+    private final EffectivePermission calcEffectiveUserPermission(final int userId, final UserConfiguration userConfig) {
         final EffectivePermission maxPerm = new EffectivePermission(userId, getObjectID(), getType(userId), getModule(), getCreatedBy(), userConfig);
         final int[] idArr;
         {
@@ -1170,9 +1184,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             idArr[0] = userId;
             System.arraycopy(groups, 0, idArr, 1, groups.length);
             Arrays.sort(idArr);
-        }
-        if (!containsPermissions()) {
-            setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), userConfig.getContext(), readConArg));
         }
         int fp = 0;
         int orp = 0;

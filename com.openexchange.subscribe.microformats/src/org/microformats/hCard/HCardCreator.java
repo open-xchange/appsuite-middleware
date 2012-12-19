@@ -179,8 +179,9 @@ class HCardCreator {
 
 		if ( result.uri != null && "mailto".equals(result.uri.getScheme()) ) {
 			value = result.uri.getSchemeSpecificPart();
-			if ( value.indexOf("?") > -1 ) {
-                value = value.substring(0, value.indexOf("?"));
+			final int pos = value.indexOf('?');
+            if (pos > -1 ) {
+                value = value.substring(0, pos);
             }
 		} else {
             value = result.value;

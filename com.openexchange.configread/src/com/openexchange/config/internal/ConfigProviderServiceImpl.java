@@ -93,7 +93,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
     }
 
     @Override
-    public ServerProperty get(final String property, final int context, final int user) throws OXException {
+    public ServerProperty get(final String property, final int contextId, final int userId) throws OXException {
         if (null == property) {
             return null;
         }
@@ -114,7 +114,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
     }
 
     @Override
-    public Collection<String> getAllPropertyNames(final int context, final int user) throws OXException {
+    public Collection<String> getAllPropertyNames(final int contextId, final int userId) throws OXException {
         final Iterator<String> propertyNames = configService.propertyNames();
         final Set<String> retval = new HashSet<String>();
         while (propertyNames.hasNext()) {

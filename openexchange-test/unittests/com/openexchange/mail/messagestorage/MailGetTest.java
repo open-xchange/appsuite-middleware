@@ -76,49 +76,49 @@ public final class MailGetTest extends MessageStorageTest {
 
         @Override
         public String getMailId() {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return null;
         }
 
         @Override
         public int getUnreadMessages() {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return 0;
         }
 
         @Override
         public void setMailId(final String id) {
-            // TODO Auto-generated method stub
+            // Nothing to do
 
         }
 
         @Override
         public void setUnreadMessages(final int unreadMessages) {
-            // TODO Auto-generated method stub
+            // Nothing to do
 
         }
 
         @Override
         public Object getContent() throws OXException {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return null;
         }
 
         @Override
         public DataHandler getDataHandler() throws OXException {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return null;
         }
 
         @Override
         public int getEnclosedCount() throws OXException {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return 0;
         }
 
         @Override
         public MailPart getEnclosedMailPart(final int index) throws OXException {
-            // TODO Auto-generated method stub
+            // Nothing to do
             return null;
         }
 
@@ -129,13 +129,13 @@ public final class MailGetTest extends MessageStorageTest {
 
         @Override
         public void loadContent() throws OXException {
-            // TODO Auto-generated method stub
+            // Nothing to do
 
         }
 
         @Override
         public void prepareForCaching() {
-            // TODO Auto-generated method stub
+            // Nothing to do
 
         }
 

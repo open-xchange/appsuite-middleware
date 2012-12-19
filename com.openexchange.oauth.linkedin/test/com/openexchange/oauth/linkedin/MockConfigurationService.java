@@ -83,86 +83,86 @@ public class MockConfigurationService implements ConfigurationService {
 
 	@Override
 	public String getProperty(String name, PropertyListener listener) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public String getProperty(String name, String defaultValue,
 			PropertyListener listener) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public void removePropertyListener(String name, PropertyListener listener) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 
 	}
 
 	@Override
     public File getDirectory(String directoryName) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public File getFileByName(String fileName) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
 	@Override
 	public Properties getFile(String fileName) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public String getText(String fileName) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public Properties getPropertiesInFolder(String folderName) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public boolean getBoolProperty(String name, boolean defaultValue) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return false;
 	}
 
 	@Override
 	public int getIntProperty(String name, int defaultValue) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return 0;
 	}
 
 	@Override
 	public Iterator<String> propertyNames() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return 0;
 	}
 
 	@Override
 	public Object getYaml(String filename) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public Map<String, Object> getYamlInFolder(String dirName) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
@@ -171,7 +171,7 @@ public class MockConfigurationService implements ConfigurationService {
      */
     @Override
     public Filter getFilterFromProperty(String name) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

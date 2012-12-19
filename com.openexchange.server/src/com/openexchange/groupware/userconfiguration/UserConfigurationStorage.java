@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.userconfiguration;
 
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -168,8 +169,7 @@ public abstract class UserConfigurationStorage {
      *             determined
      * @see #getUserConfiguration(int, int[], Context)
      */
-    public final UserConfiguration getUserConfiguration(final int userId, final Context ctx)
-            throws OXException {
+    public final UserConfiguration getUserConfiguration(final int userId, final Context ctx) throws OXException {
         return getUserConfiguration(userId, null, ctx);
     }
 
@@ -186,6 +186,24 @@ public abstract class UserConfigurationStorage {
      * @throws OXException
      */
     protected abstract void stopInternal() throws OXException;
+
+    /**
+     * Sets the extended permission on the cached instance.
+     * 
+     * @param extendedPermissions The extended permissions to set
+     * @param userId The user identifier
+     * @param ctx The context
+     */
+    public abstract void setExtendedPermissions(Set<String> extendedPermissions, int userId, Context ctx);
+
+    /**
+     * Gets the lock object.
+     * 
+     * @param userId The user identifier
+     * @param ctx The context
+     * @return The lock object
+     */
+    public abstract Object getLock(int userId, Context ctx);
 
     /**
      * Determines the instance of <code>UserConfiguration</code> that

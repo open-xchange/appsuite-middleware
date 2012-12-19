@@ -69,7 +69,7 @@ public class BinaryContentDumperTest extends TestCase {
 
             @Override
             public InputStream getData() throws OXException {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return null;
             }
 

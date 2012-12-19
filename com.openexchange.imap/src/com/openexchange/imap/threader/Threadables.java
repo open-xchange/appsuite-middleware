@@ -335,14 +335,14 @@ public final class Threadables {
                 final String command;
                 final Response[] r;
                 {
-                    StringBuilder sb = new StringBuilder(128).append("FETCH ");
+                    com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("FETCH ");
                     if (1 == messageCount) {
                         sb.append("1");
                     } else {
                         if (limit < 0 || limit >= messageCount) {
                             sb.append("1:*");
                         } else {
-                            sb.append(messageCount - limit + 1).append(':').append(messageCount);
+                            sb.append(messageCount - limit + 1).append(':').append('*');
                         }
                     }
                     sb.append(" (").append(getFetchCommand(protocol.isREV1(), fetchProfile, false)).append(')');
@@ -351,8 +351,8 @@ public final class Threadables {
                     final long start = System.currentTimeMillis();
                     r = protocol.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
-                    if (log.isInfoEnabled()) {
-                        log.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
+                    if (log.isDebugEnabled()) {
+                        log.debug('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
                     }
                     mailInterfaceMonitor.addUseTime(dur);
                 }
@@ -364,9 +364,19 @@ public final class Threadables {
                         final String fullName = imapFolder.getFullName();
                         final char sep = imapFolder.getSeparator();
                         final String sFetch = "FETCH";
+                        final String sInReplyTo = "In-Reply-To";
+                        final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
                             if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
-                                mails.add(handleFetchRespone((FetchResponse) r[j], fullName, sep));
+                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, sep);
+                                final String references = message.getFirstHeader(sReferences);
+                                if (null == references) {
+                                    final String inReplyTo = message.getFirstHeader(sInReplyTo);
+                                    if (null != inReplyTo) {
+                                        message.setHeader(sReferences, inReplyTo);
+                                    }
+                                }
+                                mails.add(message);
                                 r[j] = null;
                             }
                         }
@@ -447,7 +457,7 @@ public final class Threadables {
                 final String command;
                 final Response[] r;
                 {
-                    StringBuilder sb = new StringBuilder(128).append("FETCH ");
+                    com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("FETCH ");
                     if (1 == messageCount) {
                         sb.append("1");
                     } else {
@@ -481,8 +491,8 @@ public final class Threadables {
                     final long start = System.currentTimeMillis();
                     r = protocol.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
-                    if (log.isInfoEnabled()) {
-                        log.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
+                    if (log.isDebugEnabled()) {
+                        log.debug('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
                     }
                     mailInterfaceMonitor.addUseTime(dur);
                 }
@@ -682,12 +692,12 @@ public final class Threadables {
      * @return The resulting THREAD=REFERENCES string
      */
     public static String toThreadReferences(final Threadable threadable, final TIntSet filter) {
-        final StringBuilder sb = new StringBuilder(256);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
         toThreadReferences0(threadable, filter, sb);
         return sb.toString();
     }
 
-    private static void toThreadReferences0(final Threadable threadable, final TIntSet filter, final StringBuilder sb) {
+    private static void toThreadReferences0(final Threadable threadable, final TIntSet filter, final com.openexchange.java.StringAllocator sb) {
         Threadable t = threadable;
         if (null == filter) {
             while (null != t) {

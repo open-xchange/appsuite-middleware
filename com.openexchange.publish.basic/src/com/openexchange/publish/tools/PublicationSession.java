@@ -153,7 +153,7 @@ public class PublicationSession implements Session {
 
     @Override
     public String getHash() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -164,7 +164,7 @@ public class PublicationSession implements Session {
 
     @Override
     public void setHash(final String hash) {
-        // TODO Auto-generated method stub
+        // Nothing to do
     }
 
     @Override

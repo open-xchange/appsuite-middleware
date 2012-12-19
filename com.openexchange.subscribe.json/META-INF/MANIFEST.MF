@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: HTTP-API for subscribe Plug-in
 Bundle-SymbolicName: com.openexchange.subscribe.json
-Bundle-Version: 6.23.0
+Bundle-Version: 7.0.0
 Bundle-Activator: com.openexchange.subscribe.json.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -27,6 +27,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.groupware.settings,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.i18n,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.multiple,
  com.openexchange.osgi,

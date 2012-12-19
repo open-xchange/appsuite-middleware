@@ -834,7 +834,7 @@ public abstract class MailPart implements Serializable, Cloneable {
         try {
             final byte[] buf = new byte[8192];
             int count = -1;
-            while ((count = in.read(buf, 0, buf.length)) != -1) {
+            while ((count = in.read(buf, 0, buf.length)) > 0) {
                 out.write(buf, 0, count);
             }
         } catch (final IOException e) {

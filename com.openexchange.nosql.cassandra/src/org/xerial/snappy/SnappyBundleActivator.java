@@ -90,7 +90,7 @@ public class SnappyBundleActivator implements BundleActivator {
     }
 	@Override
 	public void stop(BundleContext context) throws Exception {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		
 	}
 

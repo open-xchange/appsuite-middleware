@@ -287,79 +287,79 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
 
     @Override
     public void unlock(String folderId, String id) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void lock(String folderId, String id, long diff) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void touch(String folderId, String id) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public TimedResult<File> getDocuments(String folderId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public TimedResult<File> getDocuments(String folderId, List<Field> fields) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public TimedResult<File> getVersions(String folderId, String id) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, boolean ignoreDeleted) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

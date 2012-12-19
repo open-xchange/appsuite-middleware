@@ -102,7 +102,7 @@ public class MobileConfigSigner extends Writer {
         }
         final byte[] buf = new byte[1024];
         int read;
-        while (-1 != (read = this.input.read(buf))) {
+        while ((read = this.input.read(buf)) > 0) {
             this.writer.write(buf, 0, read);
         }
         this.writer.close();

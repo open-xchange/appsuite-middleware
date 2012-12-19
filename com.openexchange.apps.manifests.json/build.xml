@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="com.openexchange.ui7" basedir=".">
+<project name="com.openexchange.apps.manifests.json" basedir=".">
 
     <description>
         This build file overrides the installConf target to put the path to the UI into the configuration file.

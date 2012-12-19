@@ -11,9 +11,6 @@
 # This file is distributed under the same license as the PACKAGE package.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 #
-# Antje Faber, 2007.
-# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009, 2010, 2011.
-# Antje Faber, 2006, 2012.
 #. *
 #. * Mail(s) could not be found in folder
 #. * <p>
@@ -28,12 +25,15 @@
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:88
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:90
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:92
+# Antje Faber, 2007.
+# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009, 2010, 2011.
+# Antje Faber, 2006, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2012-11-29 16:00+0100\n"
+"PO-Revision-Date: 2012-12-06 10:57+0100\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -132,9 +132,8 @@ msgid "Get file %1$s failed: %2$s"
 msgstr "Das Abrufen der Datei %1$s ist fehlgeschlagen: %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/exceptions/OXAWSS3ExceptionMessages.java:67
-#, fuzzy
 msgid "Get file listing failed: %1$s"
-msgstr "Hochladen der Datei fehlgeschlagen: %1$s"
+msgstr "Datei-Liste konnte nicht abgerufen werden: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/exceptions/OXAWSS3ExceptionMessages.java:69
 msgid "Get size of file %1$s failed: %2$s"
@@ -2482,6 +2481,9 @@ msgid ""
 "there was a previous message about this object not having been returned to "
 "the pool, the object was just in use too long."
 msgstr ""
+"Das Objekt %1$s gehört nicht in diesen Pool. Das Objekt wird entfernt. "
+"Falls Sie bereits eine Nachricht erhalten haben, dass das Objekt nicht in "
+"den Pool zurückgelegt wurde, war das Objekt zu lange in Gebrauch. "
 
 #. A property defining the server name was not found in the configuration properties files.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:93
@@ -4833,13 +4835,12 @@ msgstr "Folgendes obligatorisches Element fehlt: \"%1$s\""
 #. * Malformed Presence Data
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere.presence/src/com/openexchange/realtime/atmosphere/presence/AtmospherePresenceExceptionMessage.java:64
 msgid "Malformed Presence Data"
-msgstr ""
+msgstr "Presence-Daten sind nicht wohlgeformt"
 
 #. * Malformed Presence Element: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere.presence/src/com/openexchange/realtime/atmosphere/presence/AtmospherePresenceExceptionMessage.java:66
-#, fuzzy
 msgid "Malformed Presence Element: \"%1$s\""
-msgstr "Der Objektname ist nicht wohlgeformt: %1$s"
+msgstr "Presence-Element ist nicht wohlgeformt: \"%1$s\""
 
 #. * The mandatory session information is missing.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:62
@@ -4853,9 +4854,8 @@ msgstr "Fehlender Key \"%1$s\" in: \"%2$s\""
 
 #. * Could not find a builder for the specified element: . \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:66
-#, fuzzy
 msgid "Could not find a builder for the given element: . \"%1$s\""
-msgstr "Kein Parser für eine Nachricht dieser Art gefunden:  . \"%1$s\""
+msgstr "Kein Builder für das angegebene Element gefunden:  . \"%1$s\""
 
 #. * Error while building Stanza: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:68
@@ -4864,26 +4864,23 @@ msgstr "Fehler beim Bauen von 'Stanza': \"%1$s\""
 
 #. * Could not find a transformer for the PayloadElement: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:70
-#, fuzzy
 msgid "Could not find a transformer for the PayloadElement: \"%1$s\""
-msgstr "Kein Parser für eine Nachricht dieser Art gefunden:  . \"%1$s\""
+msgstr "Kein Umwandler für das PayloadElement gefunden:  . \"%1$s\""
 
 #. * Could not find a handler for the specified stanza
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:72
-#, fuzzy
 msgid "Could not find a handler for the given stanza: . \"%1$s\""
-msgstr "Kein Parser für eine Nachricht dieser Art gefunden:  . \"%1$s\""
+msgstr "Kein Handler für angegebenes Stanza gefunden:  . \"%1$s\""
 
 #. * Could not find an initializer for the specified stanza
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:74
-#, fuzzy
 msgid "Could not find an initializer for the given stanza: . \"%1$s\""
-msgstr "Kein Parser für eine Nachricht dieser Art gefunden:  . \"%1$s\""
+msgstr "Kein Initialisierer für angegebenes Stanza gefunden:  . \"%1$s\""
 
 #. * Error while transforming a PayloadElement: \"%1$s. %2$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:76
 msgid "Error while transforming a PayloadElement: \"%1$s, %2$s\""
-msgstr ""
+msgstr "Fehler beim Transformieren eines PayloadElement: \"%1$s, %2$s\""
 
 #. * Error while converting a PayloadElement: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:78
@@ -6491,7 +6488,7 @@ msgstr "E-Mail-Anhänge"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:102
 msgid "My files"
-msgstr "Meine Datei"
+msgstr "Meine Dateien"
 
 #. Display name of group with identifier 0. This group always contains all existing users of a context.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:68
@@ -11616,18 +11613,16 @@ msgid "No sessions found for context %1$s."
 msgstr "Kein Sitzung für Kontext %1$s gefunden"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:83
-#, fuzzy
 msgid "No sessions found by random token %1$s."
-msgstr "Kein Sitzung für Kontext %1$s gefunden"
+msgstr "Kein Sitzung von Zufalls-Token %1$s gefunden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:69
 msgid "No session with sessionId %1$s found."
 msgstr "Keine Sitzung mit der ID %1$s gefunden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:81
-#, fuzzy
 msgid "No sessions found by random token %1$s"
-msgstr "Kein Sitzung für Kontext %1$s gefunden"
+msgstr "Kein Sitzung vom Zufalls-Token %1$s gefunden"
 
 #. *
 #. * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s

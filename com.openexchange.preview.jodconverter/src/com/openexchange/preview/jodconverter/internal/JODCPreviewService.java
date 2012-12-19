@@ -226,7 +226,7 @@ public class JODCPreviewService implements InternalPreviewService {
      */
     @Override
     public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session, final int pages) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -235,7 +235,7 @@ public class JODCPreviewService implements InternalPreviewService {
      */
     @Override
     public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session, final int pages) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

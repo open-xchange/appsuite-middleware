@@ -102,17 +102,17 @@ public class ModuleSpecificServiceTracker<T> extends ServiceTracker {
     }
 
     public void removedService(int module, T tracked, ServiceReference reference) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     public void addingService(int module, T tracked, ServiceReference reference) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     public void modifiedService(int module, T tracked, ServiceReference reference) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 

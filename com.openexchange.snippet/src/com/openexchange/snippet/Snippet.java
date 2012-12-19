@@ -172,7 +172,7 @@ public interface Snippet {
      *
      * <pre>
      * String sJson = &quot;...&quot;; // Any JSON representation
-     * new org.json.JSONTokener(sJson).next();
+     * new org.json.JSONTokener(sJson).nextValue();
      * </pre>
      *
      * @return The JSON data or <code>null</code> if absent
