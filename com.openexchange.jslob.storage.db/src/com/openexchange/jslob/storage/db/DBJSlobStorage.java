@@ -473,7 +473,7 @@ public final class DBJSlobStorage implements JSlobStorage {
         }
     }
 
-    private boolean check(final JSlobId id, final int contextId, final Connection con) throws OXException {
+    private boolean exists(final JSlobId id, final int contextId, final Connection con) throws OXException {
         if (false && checkLocked(id, false, con)) {
             throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
         }
@@ -513,19 +513,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                  */
                 con.setAutoCommit(false);
                 committed = false;
-                final JSlob present = check(id, contextId, con);
-                if (null == present) {
-                    /*
-                     * Insert
-                     */
-                    stmt = con.prepareStatement(SQL_INSERT);
-                    stmt.setLong(1, contextId);
-                    stmt.setLong(2, id.getUser());
-                    stmt.setString(3, id.getServiceId());
-                    stmt.setString(4, id.getId());
-                    stmt.setString(5, toAscii(jslob.getJsonObject().toString()));
-                    stmt.executeUpdate();
-                } else {
+                if (exists(id, contextId, con)) {
                     /*
                      * Update
                      */
@@ -538,6 +526,17 @@ public final class DBJSlobStorage implements JSlobStorage {
                     stmt.setLong(3, id.getUser());
                     stmt.setString(4, id.getServiceId());
                     stmt.setString(5, id.getId());
+                    stmt.executeUpdate();
+                } else {
+                    /*
+                     * Insert
+                     */
+                    stmt = con.prepareStatement(SQL_INSERT);
+                    stmt.setLong(1, contextId);
+                    stmt.setLong(2, id.getUser());
+                    stmt.setString(3, id.getServiceId());
+                    stmt.setString(4, id.getId());
+                    stmt.setString(5, toAscii(jslob.getJsonObject().toString()));
                     stmt.executeUpdate();
                 }
                 con.commit();
