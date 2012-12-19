@@ -105,7 +105,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
     @Override
     public FileStorageFolder getFolder(final String folderId) throws OXException {
         try {
-            final Entry entry = dropboxAPI.metadata(toPath(folderId), 1, null, true, null);
+            final Entry entry = dropboxAPI.metadata(toPath(folderId), 0, null, true, null);
             if (!entry.isDir || entry.isDeleted) {
                 throw DropboxExceptionCodes.NOT_FOUND.create(folderId);
             }
