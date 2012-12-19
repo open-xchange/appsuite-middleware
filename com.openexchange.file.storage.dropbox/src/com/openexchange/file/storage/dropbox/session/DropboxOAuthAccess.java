@@ -62,6 +62,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxServices;
+import com.openexchange.file.storage.dropbox.httpclient.TrustAllWebAuthSession;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.session.Session;
@@ -155,12 +156,12 @@ public final class DropboxOAuthAccess {
              * See: https://www.dropbox.com/developers/reference/api#account-info
              */
             final AppKeyPair appKeys = new AppKeyPair(DropboxConfiguration.getInstance().getApiKey(), DropboxConfiguration.getInstance().getSecretKey());
-            webAuthSession = new WebAuthSession(appKeys, AccessType.APP_FOLDER);
+            webAuthSession = new TrustAllWebAuthSession(appKeys, AccessType.APP_FOLDER);
             dropboxApi = new DropboxAPI<WebAuthSession>(webAuthSession);
             // Re-auth specific stuff
             final AccessTokenPair reAuthTokens = new AccessTokenPair(oauthAccount.getToken(), oauthAccount.getSecret());
             dropboxApi.getSession().setAccessTokenPair(reAuthTokens);
-            // 
+            // Get account information
             final Account accountInfo = dropboxApi.accountInfo();
             dropboxUserId = accountInfo.uid;
             dropboxUserName = accountInfo.displayName;
