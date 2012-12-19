@@ -56,14 +56,17 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxFileStorageService;
 import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.mime.MimeTypeMap;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -86,7 +89,7 @@ public final class DropboxActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class, MimeTypeMap.class, TimerService.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class };
     }
 
     @Override
@@ -97,6 +100,7 @@ public final class DropboxActivator extends HousekeepingActivator {
              * Some initialization stuff
              */
             final BundleContext context = this.context;
+            DropboxConfiguration.getInstance().configure(getService(ConfigurationService.class));
             /*
              * Register tracker
              */
@@ -105,7 +109,7 @@ public final class DropboxActivator extends HousekeepingActivator {
             openTrackers();
 
             
-            if (false) {
+            if (false){
                 final EventHandler eventHandler = new EventHandler() {
 
                     @Override
@@ -115,7 +119,7 @@ public final class DropboxActivator extends HousekeepingActivator {
                              try {
                                 final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                                  DropboxFileStorageService storageService = registerer.getService();
-                                 FileStorageAccountAccess accountAccess = storageService.getAccountAccess("166", session);
+                                 FileStorageAccountAccess accountAccess = storageService.getAccountAccess("1", session);
                                  
                                  FileStorageFolder[] subfolders = accountAccess.getFolderAccess().getSubfolders(FileStorageFolder.ROOT_FULLNAME, true);
                                  

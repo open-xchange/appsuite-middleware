@@ -76,12 +76,12 @@ public final class DropboxConstants implements FileStorageConstants {
     /**
      * The default API key.
      */
-    public static final String KEY_API = "d36ebc9e274a89e3bd0c239cea4acb48";
+    public static final String KEY_API = "no-default-available";
 
     /**
      * The default secret key.
      */
-    public static final String KEY_SECRET = "903e8006dbad9204bb74c26eb3ca2310";
+    public static final String KEY_SECRET = "no-default-available";
 
     /**
      * Initializes a new {@link DropboxConstants}.
