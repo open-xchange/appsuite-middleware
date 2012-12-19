@@ -50,21 +50,36 @@
 package com.openexchange.oauth.dropbox;
 
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.DropboxAPI.Account;
+import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.session.AccessTokenPair;
+import com.dropbox.client2.session.AppKeyPair;
+import com.dropbox.client2.session.RequestTokenPair;
+import com.dropbox.client2.session.Session.AccessType;
+import com.dropbox.client2.session.WebAuthSession;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
+import com.openexchange.oauth.AbstractParameterizableOAuthInteraction;
+import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
+import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthInteraction;
+import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthToken;
-
 
 /**
  * {@link DropboxOAuthServiceMetaData}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaData {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DropboxOAuthServiceMetaData.class);
 
     /**
      * Initializes a new {@link DropboxOAuthServiceMetaData}.
@@ -83,11 +98,76 @@ public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaD
     }
 
     @Override
-    public String processAuthorizationURLCallbackAware(String authUrl, String callback) {
-        if (isEmpty(callback)) {
-            return authUrl;
+    public OAuthInteraction initOAuth(final String callbackUrl) throws OXException {
+        try {
+            final AppKeyPair appKeys = new AppKeyPair(apiKey, apiSecret);
+            final DropboxAPI<WebAuthSession> dropboxAPI =
+                new DropboxAPI<WebAuthSession>(new TrustAllWebAuthSession(appKeys, AccessType.APP_FOLDER));
+            final StringAllocator authUrl = new StringAllocator(dropboxAPI.getSession().getAuthInfo().url);
+            if (!isEmpty(callbackUrl)) {
+                authUrl.append('&').append(OAuthConstants.URLPARAM_OAUTH_CALLBACK).append('=').append(urlEncode(callbackUrl)).toString();
+            }
+            final String sAuthUrl = authUrl.toString();
+            final AbstractParameterizableOAuthInteraction oAuthInteraction = new AbstractParameterizableOAuthInteraction() {
+
+                @Override
+                public String getAuthorizationURL() {
+                    return sAuthUrl;
+                }
+
+                @Override
+                public OAuthInteractionType getInteractionType() {
+                    return OAuthInteractionType.CALLBACK;
+                }
+
+                @Override
+                public OAuthToken getRequestToken() {
+                    return OAuthToken.EMPTY_TOKEN;
+                }
+
+            };
+            oAuthInteraction.putParameter(DropboxAPI.class.getName(), dropboxAPI);
+            return oAuthInteraction;
+        } catch (final DropboxException e) {
+            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        return new StringAllocator(authUrl).append("&oauth_callback=").append(urlEncode(callback)).toString();
+    }
+
+    @Override
+    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) throws OXException {
+        try {
+            @SuppressWarnings("unchecked")
+            final DropboxAPI<WebAuthSession> dropboxAPI = (DropboxAPI<WebAuthSession>) state.get(DropboxAPI.class.getName());
+            final AccessTokenPair tokenPair = dropboxAPI.getSession().getAccessTokenPair();
+            final RequestTokenPair tokens = new RequestTokenPair(tokenPair.key, tokenPair.secret);
+            dropboxAPI.getSession().retrieveWebAccessToken(tokens); // completes initial auth
+            // Retrieve access tokens for future use
+            final String tokenKey = dropboxAPI.getSession().getAccessTokenPair().key; // store String returned by this call somewhere
+            final String tokenSecret = dropboxAPI.getSession().getAccessTokenPair().secret; // same for this line
+            final DefaultOAuthToken token = new DefaultOAuthToken();
+            token.setSecret(tokenSecret);
+            token.setToken(tokenKey);
+            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, token);
+            // Check
+            {
+                final AppKeyPair appKeys = new AppKeyPair(apiKey, apiSecret);
+                final WebAuthSession session = new TrustAllWebAuthSession(appKeys, AccessType.APP_FOLDER);
+                final DropboxAPI<WebAuthSession> mDBApi = new DropboxAPI<WebAuthSession>(session);
+                // Re-auth specific stuff
+                final AccessTokenPair reAuthTokens = new AccessTokenPair(tokenKey, tokenSecret);
+                mDBApi.getSession().setAccessTokenPair(reAuthTokens);
+                
+                final Account accountInfo = mDBApi.accountInfo();
+                LOG.info("Dropbox OAuth account successfully created for " + accountInfo.displayName);
+            }
+        } catch (final DropboxException e) {
+            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
+        return (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
     }
 
     private static boolean isEmpty(final String string) {
@@ -100,24 +180,6 @@ public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaD
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
-    }
-
-    @Override
-    public void processArguments(Map<String, Object> arguments, Map<String, String> parameter, Map<String, Object> state) {
-        // Remeber uid in arguments
-        final String uid = parameter.get("uid");
-        if (!isEmpty(uid)) {
-            arguments.put("uid", uid);
-        }
-    }
-
-    @Override
-    public OAuthToken getOAuthToken(Map<String, Object> arguments) throws OXException {
-        final String uid = (String) arguments.get("uid");
-        
-        
-        
-        return (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
     }
 
 }

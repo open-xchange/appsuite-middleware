@@ -134,7 +134,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
     }
 
     @Override
-    public void processArguments(Map<String, Object> arguments, Map<String, String> parameter, Map<String, Object> state) {
+    public void processArguments(Map<String, Object> arguments, Map<String, String> parameter, Map<String, Object> state) throws OXException {
         String verifier = parameter.get("code");
         if (null == verifier) {
             LOG.error("No wrap_verification_code present.");

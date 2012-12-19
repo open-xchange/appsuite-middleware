@@ -127,10 +127,11 @@ public interface OAuthServiceMetaData {
      * Processes specified arguments.
      *
      * @param arguments The arguments. You can store additional information here
-     * @param parameter The parameters. The request parameters sent to the callback url. You may want to extract items from these and store them in arguments for later processing
+     * @param parameter The parameters. The request parameters sent to the callback URL. You may want to extract items from these and store them in arguments for later processing
      * @param state The state
+     * @throws OXException If an error occurs
      */
-    void processArguments(Map<String, Object> arguments, Map<String, String> parameter, Map<String, Object> state);
+    void processArguments(Map<String, Object> arguments, Map<String, String> parameter, Map<String, Object> state) throws OXException;
 
     /**
      * Gets the optional OAuth token.

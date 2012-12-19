@@ -133,7 +133,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, Map<String, Object> state) {
+    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, Map<String, Object> state) throws OXException {
         // no-op
     }
 

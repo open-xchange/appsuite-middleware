@@ -104,7 +104,11 @@ public enum DropboxExceptionCodes implements OXExceptionCode {
     /**
      * Missing configuration for account "%1$s".
      */
-    MISSING_CONFIG(DropboxExceptionMessages.MISSING_CONFIG_MSG, Category.CATEGORY_CONFIGURATION, 14)
+    MISSING_CONFIG(DropboxExceptionMessages.MISSING_CONFIG_MSG, Category.CATEGORY_CONFIGURATION, 14),
+    /**
+     * Bad or expired access token. Need to re-authenticate user.
+     */
+    UNLINKED_ERROR(DropboxExceptionMessages.UNLINKED_ERROR_MSG, Category.CATEGORY_CONFIGURATION, 15),
 
     ;
 

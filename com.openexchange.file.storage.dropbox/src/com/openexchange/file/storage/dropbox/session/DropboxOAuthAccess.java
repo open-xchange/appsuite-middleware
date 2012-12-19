@@ -53,6 +53,7 @@ import java.util.Map;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.DropboxAPI.Account;
 import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
@@ -169,6 +170,8 @@ public final class DropboxOAuthAccess {
             throw e;
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final DropboxUnlinkedException e) {
+            throw DropboxExceptionCodes.UNLINKED_ERROR.create();
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
