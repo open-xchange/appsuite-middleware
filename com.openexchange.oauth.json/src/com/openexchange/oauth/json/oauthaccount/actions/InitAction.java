@@ -165,10 +165,10 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         final Map<String, Object> oauthState = new HashMap<String, Object>();
         if (interaction instanceof Parameterizable) {
             final Parameterizable params = (Parameterizable) interaction;
-            for (final String name : params.getParamterNames()) {
-                final Object value = params.getParameter(name);
+            for (final String key : params.getParamterNames()) {
+                final Object value = params.getParameter(key);
                 if (null != value) {
-                    oauthState.put(name, value);
+                    oauthState.put(key, value);
                 }
             }
         }
