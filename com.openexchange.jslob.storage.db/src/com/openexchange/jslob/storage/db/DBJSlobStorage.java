@@ -67,6 +67,7 @@ import org.json.JSONObject;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.JSlobId;
@@ -501,7 +502,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                     stmt.setLong(2, id.getUser());
                     stmt.setString(3, id.getServiceId());
                     stmt.setString(4, id.getId());
-                    stmt.setString(5, jslob.getJsonObject().toString());
+                    stmt.setString(5, toAscii(jslob.getJsonObject().toString()));
                     stmt.executeUpdate();
                 } else {
                     /*
@@ -511,7 +512,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                         throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
                     }
                     stmt = con.prepareStatement(SQL_UPDATE);
-                    stmt.setString(1, jslob.getJsonObject().toString());
+                    stmt.setString(1, toAscii(jslob.getJsonObject().toString()));
                     stmt.setLong(2, contextId);
                     stmt.setLong(3, id.getUser());
                     stmt.setString(4, id.getServiceId());
@@ -537,8 +538,53 @@ public final class DBJSlobStorage implements JSlobStorage {
         }
     }
 
-    private DatabaseService getDatabaseService() throws OXException {
+    private DatabaseService getDatabaseService() {
         return services.getService(DatabaseService.class);
+    }
+
+    private static String toAscii(final String str) {
+        if (null == str) {
+            return str;
+        }
+        final int length = str.length();
+        if (0 == length || isAscii(str)) {
+            return str;
+        }
+        final StringAllocator sa = new StringAllocator((length * 3)/2 + 1);
+        for (int i = 0; i < length; i++) {
+            final char c = str.charAt(i);
+            if (c > 127) {
+                appendAsJsonUnicode(c, sa);
+            } else {
+                sa.append(c);
+            }
+        }
+        return sa.toString();
+    }
+
+    private static void appendAsJsonUnicode(final int ch, final StringAllocator sa) {
+        sa.append("\\u").append(String.format("%04x", Integer.valueOf(ch)));
+    }
+
+    /**
+     * Checks whether the specified string's characters are ASCII 7 bit
+     *
+     * @param s The string to check
+     * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
+     */
+    public static boolean isAscii(final String s) {
+        if (null == s) {
+            return true;
+        }
+        final int length = s.length();
+        if (0 == length) {
+            return true;
+        }
+        boolean isAscci = true;
+        for (int i = 0; (i < length) && isAscci; i++) {
+            isAscci &= (s.charAt(i) < 128);
+        }
+        return isAscci;
     }
 
 }

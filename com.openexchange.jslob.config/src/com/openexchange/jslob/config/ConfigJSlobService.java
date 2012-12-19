@@ -104,6 +104,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ConfigJSlobService implements JSlobService {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigJSlobService.class);
+
     private static final List<String> ALIASES = Arrays.asList("config");
 
     /**
@@ -349,10 +351,14 @@ public final class ConfigJSlobService implements JSlobService {
             	String configTreePath = mapping.getKey();
             	String lobPath = mapping.getValue();
             	
-            	Setting setting = configTree.getSettingByPath(configTreePath);
-            	stor.readValues(setting);
-            	
-            	jObject.put(lobPath, convert2JS(setting));
+            	try {
+                    Setting setting = configTree.getSettingByPath(configTreePath);
+                    stor.readValues(setting);
+                    
+                    jObject.put(lobPath, convert2JS(setting));
+                } catch (OXException e) {
+                    LOG.warn("Illegal path: " + configTreePath + ". Please check paths.perfMap file.", e);
+                }
             	
             }
 
