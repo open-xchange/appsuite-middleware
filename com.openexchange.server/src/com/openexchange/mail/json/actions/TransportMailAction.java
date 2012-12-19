@@ -123,7 +123,7 @@ public final class TransportMailAction extends AbstractMailAction {
                 final InternetAddress[] fromAddrs = composedMail.getFrom();
                 accountId = resolveFrom2Account(session, fromAddrs != null && fromAddrs.length > 0 ? fromAddrs[0] : null, true, true);
             } catch (final OXException e) {
-                if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e)) {
+                if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e) || MailExceptionCode.INVALID_SENDER.equals(e)) {
                     // Re-throw
                     throw e;
                 }

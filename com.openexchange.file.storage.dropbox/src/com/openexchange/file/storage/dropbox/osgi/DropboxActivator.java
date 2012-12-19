@@ -49,13 +49,24 @@
 
 package com.openexchange.file.storage.dropbox.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.dropbox.DropboxFileStorageService;
 import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
 
@@ -92,12 +103,37 @@ public final class DropboxActivator extends HousekeepingActivator {
             final DropboxServiceRegisterer registerer = new DropboxServiceRegisterer(context);
             rememberTracker(new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, registerer));
             openTrackers();
+
             
-            
-            
-            
-            
-            
+            if (false) {
+                final EventHandler eventHandler = new EventHandler() {
+
+                    @Override
+                    public void handleEvent(final Event event) {
+                        final String topic = event.getTopic();
+                        if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
+                             try {
+                                final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                                 DropboxFileStorageService storageService = registerer.getService();
+                                 FileStorageAccountAccess accountAccess = storageService.getAccountAccess("166", session);
+                                 
+                                 FileStorageFolder[] subfolders = accountAccess.getFolderAccess().getSubfolders(FileStorageFolder.ROOT_FULLNAME, true);
+                                 
+                                 for (FileStorageFolder fileStorageFolder : subfolders) {
+                                    System.out.println(fileStorageFolder.getId());
+                                }
+                            } catch (OXException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                };
+                final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+                registerService(EventHandler.class, eventHandler, dict);
+            }
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DropboxActivator.class)).error(e.getMessage(), e);
             throw e;

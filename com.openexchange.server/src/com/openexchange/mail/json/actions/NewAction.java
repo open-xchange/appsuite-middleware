@@ -172,7 +172,7 @@ public final class NewAction extends AbstractMailAction {
             try {
                 accountId = resolveFrom2Account(session, from, true, true);
             } catch (final OXException e) {
-                if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e)) {
+                if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e) || MailExceptionCode.INVALID_SENDER.equals(e)) {
                     // Re-throw
                     throw e;
                 }
