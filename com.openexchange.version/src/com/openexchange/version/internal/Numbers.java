@@ -47,50 +47,29 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
-import com.openexchange.version.Version;
+package com.openexchange.version.internal;
 
 /**
- * Adds the configuration setting tree entry for the server version.
+ * Data object storing the version and build number from the manifest of this bundle.
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ServerVersion implements PreferencesItemService {
+public final class Numbers {
 
-    public static final String NAME = "serverVersion";
+    private final String version;
+    private final String buildNumber;
 
-    public ServerVersion() {
+    public Numbers(String version, String buildNumber) {
         super();
+        this.version = version;
+        this.buildNumber = buildNumber;
     }
 
-    @Override
-    public String[] getPath() {
-        return new String[] { NAME };
+    public String getVersion() {
+        return version;
     }
 
-    @Override
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-
-            @Override
-            public boolean isAvailable(UserConfiguration userConfig) {
-                return true;
-            }
-
-            @Override
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                setting.setSingleValue(Version.getInstance().getVersionString());
-            }
-        };
+    public String getBuildNumber() {
+        return buildNumber;
     }
 }

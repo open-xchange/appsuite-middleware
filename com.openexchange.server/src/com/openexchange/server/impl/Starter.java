@@ -56,6 +56,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.Initialization;
+import com.openexchange.version.Version;
 
 /**
  * {@link Starter} - Starter for <a href="www.open-xchange.com">Open-Xchange</a> server.
@@ -314,11 +315,6 @@ public class Starter implements Initialization {
      * Dump server information.
      */
     private static final void dumpServerInfos() {
-        if (LOG.isInfoEnabled()) {
-            LOG.info(Version.NAME + ' ' + Version.getVersionString());
-            LOG.info("(c) Open-Xchange Inc. , Open-Xchange GmbH");
-        }
-
         try {
             final Properties p = System.getProperties();
             if (LOG.isInfoEnabled()) {
@@ -342,9 +338,8 @@ public class Starter implements Initialization {
         } catch (final Exception gee) {
             LOG.error(gee.getMessage(), gee);
         }
-
         if (LOG.isInfoEnabled()) {
-            LOG.info("System version : " + Version.NAME + " Server [" + Version.getVersionString() + "] initializing ...");
+            LOG.info("System version : " + Version.NAME + " Server [" + Version.getInstance().getVersionString() + "] initializing ...");
             LOG.info("Server Footprint : " + OXException.getServerId());
         }
     }

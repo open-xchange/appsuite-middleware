@@ -55,7 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.impl.Version;
+import com.openexchange.version.Version;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -70,7 +70,7 @@ public class ServerVersion implements ComputedServerConfigValueService {
 			ServerSession session) throws OXException, JSONException {
 		
 		if (!serverConfig.has("serverVersion")) {
-			serverConfig.put("serverVersion", Version.getVersionString());
+			serverConfig.put("serverVersion", Version.getInstance().getVersionString());
 		}
 		
 	}

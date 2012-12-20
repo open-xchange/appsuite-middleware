@@ -78,7 +78,7 @@ import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.Version;
+import com.openexchange.version.Version;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.DataWriter;
 import com.openexchange.webdav.xml.GroupUserWriter;
@@ -178,7 +178,7 @@ public final class groupuser extends PermissionServlet {
             }
 
             os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
-            os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\"" + Version.NAME + "\">").getBytes());
+            os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getInstance().getVersionString() + "\" buildname=\"" + Version.NAME + "\">").getBytes());
 
             os.write(("<D:response xmlns:ox=\"http://www.open-xchange.org\">").getBytes());
             os.write(("<D:propstat><D:prop>").getBytes());

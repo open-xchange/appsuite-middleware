@@ -124,7 +124,7 @@ public class ICal4JEmitter implements ICalEmitter {
     @Override
     public String writeFreeBusyReply(FreeBusyInformation freeBusyInfo, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         Calendar calendar = new Calendar();
-        calendar.getProperties().add(new ProdId(com.openexchange.server.impl.Version.NAME));
+        calendar.getProperties().add(new ProdId(com.openexchange.version.Version.NAME));
         calendar.getProperties().add(net.fortuna.ical4j.model.property.Version.VERSION_2_0);
         calendar.getProperties().add(Method.REPLY);
         VFreeBusy vFreeBusy = new VFreeBusy();
@@ -326,7 +326,7 @@ public class ICal4JEmitter implements ICalEmitter {
     protected void initCalendar(final Calendar calendar) {
         final PropertyList properties = calendar.getProperties();
         final ProdId prodId = new ProdId();
-        prodId.setValue(com.openexchange.server.impl.Version.NAME);
+        prodId.setValue(com.openexchange.version.Version.NAME);
         properties.add(prodId);
         properties.add(net.fortuna.ical4j.model.property.Version.VERSION_2_0);
         properties.add(CalScale.GREGORIAN);

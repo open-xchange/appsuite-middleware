@@ -47,50 +47,49 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree;
+package com.openexchange.version.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
+import java.util.Dictionary;
+import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 import com.openexchange.version.Version;
+import com.openexchange.version.internal.Numbers;
 
 /**
- * Adds the configuration setting tree entry for the server version.
+ * Reads version and build number from the bundle manifest.
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ServerVersion implements PreferencesItemService {
+public class VersionActivator implements BundleActivator {
 
-    public static final String NAME = "serverVersion";
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(VersionActivator.class);
 
-    public ServerVersion() {
+    public VersionActivator() {
         super();
     }
 
     @Override
-    public String[] getPath() {
-        return new String[] { NAME };
+    public void start(BundleContext context) throws Exception {
+        LOG.info("Starting bundle com.openexchange.version");
+        Dictionary<String, String> headers = context.getBundle().getHeaders();
+        String version = headers.get("OXVersion");
+        if (null == version) {
+            throw new Exception("Can not read version from bundle manifest " + context.getBundle().getSymbolicName());
+        }
+        String buildNumber = headers.get("OXRevision");
+        if (null == buildNumber) {
+            throw new Exception("Can not read buildNumber from bundle manifest.");
+        }
+        Version instance = Version.getInstance();
+        instance.setNumbers(new Numbers(version, buildNumber));
+        LOG.info(Version.NAME + ' ' + instance.getVersionString());
+        LOG.info("(c) Open-Xchange Inc. , Open-Xchange GmbH");
     }
 
     @Override
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-
-            @Override
-            public boolean isAvailable(UserConfiguration userConfig) {
-                return true;
-            }
-
-            @Override
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                setting.setSingleValue(Version.getInstance().getVersionString());
-            }
-        };
+    public void stop(BundleContext context) {
+        LOG.info("Stopping bundle com.openexchange.version");
+        Version.getInstance().setNumbers(null);
     }
 }

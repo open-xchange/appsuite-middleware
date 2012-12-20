@@ -47,50 +47,46 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree;
+package com.openexchange.version;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
-import com.openexchange.version.Version;
+import com.openexchange.version.internal.Numbers;
 
 /**
- * Adds the configuration setting tree entry for the server version.
+ * Stores the version of the backend
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ServerVersion implements PreferencesItemService {
+public class Version {
 
-    public static final String NAME = "serverVersion";
+    public static final String CODENAME = "Hyperion";
+    public static final String NAME = "Open-Xchange";
 
-    public ServerVersion() {
+    public static final Version SINGLETON = new Version();
+
+    private Numbers numbers = null;
+    private String versionString = null;
+
+    public String getVersionString() {
+        synchronized (this) {
+            if (null == versionString) {
+                if (null == numbers) {
+                    throw new IllegalStateException("Central backend version not initialized yet.");
+                }
+                versionString = numbers.getVersion() + '-' + numbers.getBuildNumber();
+            }
+        }
+        return versionString;
+    }
+
+    private Version() {
         super();
     }
 
-    @Override
-    public String[] getPath() {
-        return new String[] { NAME };
+    public static final Version getInstance() {
+        return SINGLETON;
     }
 
-    @Override
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-
-            @Override
-            public boolean isAvailable(UserConfiguration userConfig) {
-                return true;
-            }
-
-            @Override
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                setting.setSingleValue(Version.getInstance().getVersionString());
-            }
-        };
+    public void setNumbers(Numbers numbers) {
+        this.numbers = numbers;
     }
 }
