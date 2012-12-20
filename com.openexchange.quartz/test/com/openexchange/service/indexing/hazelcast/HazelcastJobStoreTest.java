@@ -55,6 +55,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -203,6 +204,48 @@ public class HazelcastJobStoreTest {
 //        
 //        
 //    }
+    
+    @Test
+    public void testPausingTriggerGroups() throws Exception {
+        Date baseFireTimeDate = DateBuilder.evenMinuteDateAfterNow();
+        long baseFireTime = baseFireTimeDate.getTime();
+        OperableTrigger trigger1 = 
+            new SimpleTriggerImpl("trigger1", "triggerGroup1", jobDetail.getKey().getName(), 
+                    jobDetail.getKey().getGroup(), new Date(baseFireTime + 200000), 
+                    new Date(baseFireTime + 200000), 2, 2000);
+        OperableTrigger trigger2 = 
+            new SimpleTriggerImpl("trigger2", "triggerGroup1", jobDetail.getKey().getName(), 
+                    jobDetail.getKey().getGroup(), new Date(baseFireTime +  50000),
+                    new Date(baseFireTime + 200000), 2, 2000);
+        OperableTrigger trigger3 = 
+            new SimpleTriggerImpl("trigger1", "triggerGroup2", jobDetail.getKey().getName(), 
+                    jobDetail.getKey().getGroup(), new Date(baseFireTime + 100000), 
+                    new Date(baseFireTime + 200000), 2, 2000);
+        
+        trigger1.computeFirstFireTime(null);
+        trigger2.computeFirstFireTime(null);
+        trigger3.computeFirstFireTime(null);
+        jobStore.storeTrigger(trigger1, false);
+        jobStore.storeTrigger(trigger2, false);
+        jobStore.storeTrigger(trigger3, false);
+        
+        jobStore.pauseTriggers(GroupMatcher.triggerGroupEquals("triggerGroup1"));
+        Set<String> pausedTriggerGroups = jobStore.getPausedTriggerGroups();
+        assertTrue("Wrong size", pausedTriggerGroups.size() == 1);
+        assertTrue("Wrong group", pausedTriggerGroups.contains("triggerGroup1"));
+        
+        assertEquals("Wrong state", TriggerState.PAUSED, jobStore.getTriggerState(trigger1.getKey()));
+        assertEquals("Wrong state", TriggerState.PAUSED, jobStore.getTriggerState(trigger2.getKey()));
+        assertTrue("Wrong state", TriggerState.PAUSED != jobStore.getTriggerState(trigger3.getKey()));
+        
+        jobStore.resumeAll();
+        pausedTriggerGroups = jobStore.getPausedTriggerGroups();
+        assertTrue("Wrong size", pausedTriggerGroups.size() == 0);
+        
+        assertTrue("Wrong state", TriggerState.PAUSED != jobStore.getTriggerState(trigger1.getKey()));
+        assertTrue("Wrong state", TriggerState.PAUSED != jobStore.getTriggerState(trigger2.getKey()));
+        assertTrue("Wrong state", TriggerState.PAUSED != jobStore.getTriggerState(trigger3.getKey()));
+    }
 
     /*
      * Tests from quartz sources
