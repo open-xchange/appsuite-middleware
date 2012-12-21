@@ -47,51 +47,49 @@
  *
  */
 
-package com.openexchange.groupware.infostore.database.impl;
+package com.openexchange.version.osgi;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
-import com.openexchange.database.tx.AbstractDBAction;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.utils.GetSwitch;
-import com.openexchange.groupware.infostore.utils.Metadata;
+import java.util.Dictionary;
+import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import com.openexchange.version.Version;
+import com.openexchange.version.internal.Numbers;
 
-public abstract class AbstractInfostoreAction extends AbstractDBAction {
+/**
+ * Reads version and build number from the bundle manifest.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class VersionActivator implements BundleActivator {
 
-	private InfostoreQueryCatalog queries = null;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(VersionActivator.class);
 
-	protected final void fillStmt(final PreparedStatement stmt, final Metadata[] fields, final DocumentMetadata doc, final Object...additional) throws SQLException {
-		final GetSwitch get = new GetSwitch(doc);
-		int i = 1;
-		for(final Metadata m : fields) {
-			stmt.setObject(i++, process(m, m.doSwitch(get)));
-		}
+    public VersionActivator() {
+        super();
+    }
 
-		for(final Object o : additional) {
-			stmt.setObject(i++, o);
-		}
-	}
+    @Override
+    public void start(BundleContext context) throws Exception {
+        LOG.info("Starting bundle com.openexchange.version");
+        Dictionary<String, String> headers = context.getBundle().getHeaders();
+        String version = headers.get("OXVersion");
+        if (null == version) {
+            throw new Exception("Can not read version from bundle manifest " + context.getBundle().getSymbolicName());
+        }
+        String buildNumber = headers.get("OXRevision");
+        if (null == buildNumber) {
+            throw new Exception("Can not read buildNumber from bundle manifest.");
+        }
+        Version instance = Version.getInstance();
+        instance.setNumbers(new Numbers(version, buildNumber));
+        LOG.info(Version.NAME + ' ' + instance.getVersionString());
+        LOG.info("(c) Open-Xchange Inc. , Open-Xchange GmbH");
+    }
 
-	private final Object process(final Metadata field, final Object value) {
-		switch(field.getId()) {
-		default : return value;
-		    case Metadata.CREATION_DATE: 
-		    case Metadata.LOCKED_UNTIL :
-		    case Metadata.LAST_MODIFIED_UTC:
-		    	return Long.valueOf(((Date)value).getTime());
-		    case Metadata.LAST_MODIFIED:
-		    	return (value != null) ?  Long.valueOf(((Date)value).getTime()) : Long.valueOf(System.currentTimeMillis());
-		        
-		}
-	}
-
-	public void setQueryCatalog(final InfostoreQueryCatalog queries){
-		this.queries = queries;
-	}
-
-	public InfostoreQueryCatalog getQueryCatalog(){
-		return this.queries;
-	}
-
+    @Override
+    public void stop(BundleContext context) {
+        LOG.info("Stopping bundle com.openexchange.version");
+        Version.getInstance().setNumbers(null);
+    }
 }

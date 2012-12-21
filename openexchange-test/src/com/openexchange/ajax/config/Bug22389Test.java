@@ -47,40 +47,35 @@
  *
  */
 
-package com.openexchange.server.impl;
+package com.openexchange.ajax.config;
+
+import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.GetResponse;
+import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
- * Version
- * @author <a href="mailto:sebastian.kauss@open-xchange.de">Sebastian Kauss</a>
+ * Tests is the server reports always the correct version.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Version {
+public class Bug22389Test extends AbstractAJAXSession {
 
-    /**
-     * This should be only accessed by the bundle activator.
-     */
-    public static String version = "";
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug22389Test.class);
+    private static final String EXPRESSION = "[67]\\.[0-9]+\\.[0-9]-Rev[0-9]+";
+    private static final Pattern PATTERN = Pattern.compile(EXPRESSION);
 
-    public static final String CODENAME = "Hyperion";
-    public static final String NAME = "Open-Xchange";
-
-    /**
-     * This should be only accessed by the bundle activator.
-     */
-    public static String buildnumber = "";
-
-    private static String versionString = null;
-
-    public static String getVersionString() {
-        if (null == versionString) {
-            versionString = version + '-' + buildnumber;
-        }
-        return versionString;
+    public Bug22389Test(String name) {
+        super(name);
     }
 
-    /**
-     * Prevent instantiation.
-     */
-    private Version() {
-        super();
+    public void testVersion() throws Exception {
+        GetRequest request = new GetRequest(Tree.ServerVersion);
+        GetResponse response = client.execute(request);
+        String version = response.getString();
+        LOG.trace("Server reported version: \"" + version + "\".");
+        assertTrue("Server version does not match required pattern: \"" + version + "\"", PATTERN.matcher(version).matches());
     }
 }

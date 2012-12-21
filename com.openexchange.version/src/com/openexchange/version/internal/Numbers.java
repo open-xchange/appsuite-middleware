@@ -47,51 +47,29 @@
  *
  */
 
-package com.openexchange.groupware.infostore.database.impl;
+package com.openexchange.version.internal;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
-import com.openexchange.database.tx.AbstractDBAction;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.utils.GetSwitch;
-import com.openexchange.groupware.infostore.utils.Metadata;
+/**
+ * Data object storing the version and build number from the manifest of this bundle.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public final class Numbers {
 
-public abstract class AbstractInfostoreAction extends AbstractDBAction {
+    private final String version;
+    private final String buildNumber;
 
-	private InfostoreQueryCatalog queries = null;
+    public Numbers(String version, String buildNumber) {
+        super();
+        this.version = version;
+        this.buildNumber = buildNumber;
+    }
 
-	protected final void fillStmt(final PreparedStatement stmt, final Metadata[] fields, final DocumentMetadata doc, final Object...additional) throws SQLException {
-		final GetSwitch get = new GetSwitch(doc);
-		int i = 1;
-		for(final Metadata m : fields) {
-			stmt.setObject(i++, process(m, m.doSwitch(get)));
-		}
+    public String getVersion() {
+        return version;
+    }
 
-		for(final Object o : additional) {
-			stmt.setObject(i++, o);
-		}
-	}
-
-	private final Object process(final Metadata field, final Object value) {
-		switch(field.getId()) {
-		default : return value;
-		    case Metadata.CREATION_DATE: 
-		    case Metadata.LOCKED_UNTIL :
-		    case Metadata.LAST_MODIFIED_UTC:
-		    	return Long.valueOf(((Date)value).getTime());
-		    case Metadata.LAST_MODIFIED:
-		    	return (value != null) ?  Long.valueOf(((Date)value).getTime()) : Long.valueOf(System.currentTimeMillis());
-		        
-		}
-	}
-
-	public void setQueryCatalog(final InfostoreQueryCatalog queries){
-		this.queries = queries;
-	}
-
-	public InfostoreQueryCatalog getQueryCatalog(){
-		return this.queries;
-	}
-
+    public String getBuildNumber() {
+        return buildNumber;
+    }
 }

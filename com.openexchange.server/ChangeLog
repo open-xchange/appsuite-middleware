@@ -1,7 +1,16 @@
+* 2012-12-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24334: Check for an empty String prior to parseInt attempt
+
+* 2012-12-20 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22389: Using more dedicated mechanism to apply version from bundle manifest into Java code. Added explicit exception path if
+   that mechanism fails somehow.
+
 * 2012-12-20 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24333: Reverted wrong "charat(0)" replacement
-   
+
 * 2012-12-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 24230: Using proper class
