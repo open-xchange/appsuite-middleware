@@ -231,8 +231,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
     }
 
     @Override
-    public void updateTaskObject(final Task task, final int folderId,
-        final Date lastRead) throws OXException {
+    public void updateTaskObject(Task task, int folderId, Date lastRead) throws OXException {
         final Context ctx;
         final int userId = session.getUserId();
         final User user;
@@ -260,35 +259,26 @@ public class TasksSQLImpl implements TasksSQLInterface {
     }
 
     @Override
-    public void deleteTaskObject(final int taskId, final int folderId,
-        final Date lastModified) throws OXException {
-        final FolderStorage foldStor = FolderStorage.getInstance();
+    public void deleteTaskObject(int taskId, int folderId, Date lastModified) throws OXException {
         final FolderObject folder;
         final Context ctx;
         final int userId = session.getUserId();
         final User user;
         final UserConfiguration userConfig;
-        final Task task;
         try {
             ctx = Tools.getContext(session.getContextId());
             user = Tools.getUser(ctx, userId);
             userConfig = Tools.getUserConfiguration(ctx, userId);
-            // Check if folder exists
             folder = Tools.getFolder(ctx, folderId);
-            // Check if folder is correct.
-            foldStor.selectFolderById(ctx, taskId, folderId, StorageType
-                .ACTIVE);
-            // Load task with participants.
-            task = GetTask.load(ctx, folderId, taskId, StorageType.ACTIVE);
-            // TODO Switch to only delete the participant from task
-            // Check delete permission
-            Permission.checkDelete(ctx, user, userConfig, folder, task);
         } catch (final OXException e) {
             throw e;
         }
+        final DeleteData delete = new DeleteData(ctx, user, userConfig, folder, taskId, lastModified);
         try {
-            // TODO create delete class
-            TaskLogic.deleteTask(session, ctx, userId, task, lastModified);
+            delete.prepare();
+            delete.doDelete();
+            delete.deleteReminder();
+            delete.sentEvent(session);
         } catch (final OXException e) {
             throw e;
         }

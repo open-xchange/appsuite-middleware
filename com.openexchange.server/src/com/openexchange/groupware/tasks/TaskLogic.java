@@ -828,7 +828,7 @@ public final class TaskLogic {
 
     private static final int[] ALL_COLUMNS = Task.ALL_COLUMNS;
 
-    private static Task clone(final Task task) {
+    static Task clone(final Task task) {
         final Task ret = new Task();
         for (final int field : ALL_COLUMNS) {
             if (task.contains(field)) {
@@ -855,9 +855,7 @@ public final class TaskLogic {
     private static void deleteFolder(final Context ctx, final Connection con, final int taskId, final Set<Folder> removed) throws OXException {
         final Set<Folder> folders = foldStor.selectFolder(ctx, con, taskId, ACTIVE);
         foldStor.deleteFolder(ctx, con, taskId, folders, ACTIVE);
-        final Iterator<Folder> iter = removed.iterator();
-        while (iter.hasNext()) {
-            final Folder folder = iter.next();
+        for (Folder folder : removed) {
             if (folder.getIdentifier() > 0) {
                 folders.add(folder);
             }
@@ -875,7 +873,7 @@ public final class TaskLogic {
      * @throws OXException if an exception occurs.
      */
     static void informDelete(final Session session, final Context ctx, final Connection con, final Task task) throws OXException {
-        Reminder.deleteReminder(ctx, con, task);
+        Reminder.deleteReminder(ctx, task);
         try {
             new EventClient(session).delete(task);
         } catch (final OXException e) {
