@@ -1553,7 +1553,7 @@ public class HazelcastJobStore implements JobStore {
                 final String nodeIp = jobStore.getNodeIp();
                 ILock lock = jobStore.getClusterLock();
                 IMap<TriggerKey, TriggerStateWrapper> triggersByKey = jobStore.getTriggerMap();
-                Set<TriggerKey> clusterKeys = null;
+                final Set<TriggerKey> clusterKeys;
                 lock.lock();
                 try {
                     Set<TriggerKey> hazelcastKeys = triggersByKey.keySet(new AcquiredAndExecutingTriggersPredicate(nodeIp));
@@ -1564,7 +1564,7 @@ public class HazelcastJobStore implements JobStore {
                     lock.unlock();
                 }
                 
-                if (clusterKeys == null || clusterKeys.isEmpty()) {
+                if (clusterKeys.isEmpty()) {
                     return;
                 }
                 
