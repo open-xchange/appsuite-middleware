@@ -62,7 +62,7 @@ public class OAuthProxyRequest {
 		}
 		
 		String methodName = proxyRequest.optString("type");
-		if (methodName == null || methodName.equals("")) {
+		if (methodName == null || 0 == methodName.length()) {
 			methodName = "GET";
 		} else {
 			methodName = methodName.toUpperCase();
