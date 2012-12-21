@@ -273,11 +273,11 @@ public final class RFC2231Tools {
             retval.append(charset.toLowerCase(Locale.ENGLISH)).append('\'').append(
                 (language == null) || (language.length() == 0) ? "" : language).append('\'');
         }
-        final char[] chars = toEncode.toCharArray();
         try {
             final Charset cs = Charsets.forName(charset);
-            for (int i = 0; i < chars.length; i++) {
-                final char c = chars[i];
+            final int length = toEncode.length();
+            for (int i = 0; i < length; i++) {
+                final char c = toEncode.charAt(i);
                 if (!isAscii(c) || (c == ' ')) {
                     final byte[] bytes = String.valueOf(c).getBytes(cs);
                     for (int j = 0; j < bytes.length; j++) {
