@@ -128,7 +128,7 @@ public final class SmbFileMap {
      * @return The SMB file
      */
     public SmbFile putIfAbsent(final String path, final SmbFile smbFile) {
-        final Wrapper wrapper = wrapperOf(smbFile);
+        final Wrapper wrapper = wrapperFor(smbFile);
         Wrapper prev = map.putIfAbsent(path, wrapper);
         if (null == prev) {
             // Successfully put into map
@@ -212,7 +212,7 @@ public final class SmbFileMap {
      * @return The SMB file
      */
     public SmbFile put(final String path, final SmbFile smbFile) {
-        final Wrapper wrapper = map.put(path, wrapperOf(smbFile));
+        final Wrapper wrapper = map.put(path, wrapperFor(smbFile));
         if (null == wrapper) {
             return null;
         }
@@ -250,7 +250,7 @@ public final class SmbFileMap {
         return map.toString();
     }
 
-    private Wrapper wrapperOf(final SmbFile smbFile) {
+    private Wrapper wrapperFor(final SmbFile smbFile) {
         return new Wrapper(smbFile);
     }
 
