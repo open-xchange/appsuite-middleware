@@ -232,10 +232,7 @@ public final class SmbFileMap {
      */
     public SmbFile remove(final String path) {
         final Wrapper wrapper = map.remove(path);
-        if (null == wrapper) {
-            return null;
-        }
-        return wrapper.getIfNotElapsed(maxLifeMillis);
+        return null == wrapper ? null : wrapper.getIfNotElapsed(maxLifeMillis);
     }
 
     /**
