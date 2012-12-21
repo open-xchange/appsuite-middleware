@@ -140,6 +140,10 @@ public final class SmbFileMap {
                 return null == prev ? null : prev.value;
             }
             prev = map.get(path);
+            if (null == prev) {
+                prev = map.putIfAbsent(path, wrapper);
+                return null == prev ? null : prev.value;
+            }
             return prev.value;
         }
         return prev.getValue();

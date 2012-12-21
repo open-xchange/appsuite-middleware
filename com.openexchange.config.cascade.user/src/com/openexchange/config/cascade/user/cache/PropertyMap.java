@@ -123,14 +123,16 @@ public final class PropertyMap {
             return null;
         }
         if (prev.elapsed(maxLifeMillis)) {
-            synchronized (map) {
-                prev = map.get(propertyName);
-                if (prev.elapsed(maxLifeMillis)) {
-                    ThreadPools.getThreadPool().submit(new Shrinker(this));
-                    map.put(propertyName, wrapper);
-                    return null;
-                }
+            if (map.remove(propertyName, prev)) {
+                prev = map.putIfAbsent(propertyName, wrapper);
+                return null == prev ? null : prev.value;
             }
+            prev = map.get(propertyName);
+            if (null == prev) {
+                prev = map.putIfAbsent(propertyName, wrapper);
+                return null == prev ? null : prev.value;
+            }
+            return prev.value;
         }
         return prev.getValue();
     }
@@ -239,7 +241,7 @@ public final class PropertyMap {
 
     private static final class Wrapper {
 
-        private final BasicProperty value;
+        final BasicProperty value;
         private final long stamp;
 
         public Wrapper(final BasicProperty value) {
