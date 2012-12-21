@@ -1,6 +1,7 @@
 * 2012-12-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 24334: Check for an empty String prior to parseInt attempt
+ - Fix for bug 24323: Fixed typo in help output
 
 * 2012-12-20 - marcus.klein@open-xchange.com
 
