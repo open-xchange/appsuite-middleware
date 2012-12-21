@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.composition.internal;
 
 import static com.openexchange.file.storage.composition.internal.IDManglingFileCustomizer.fixIDs;
+import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,6 +61,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
@@ -82,6 +84,9 @@ import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.AbstractTrackableTask;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.MergingSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -543,26 +548,79 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     }
 
     @Override
-    public SearchIterator<File> search(final String query, List<Field> cols, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        cols = addIDColumns(cols);
-        if (folderId == FileStorageFileAccess.ALL_FOLDERS) {
-            final List<FileStorageFileAccess> all = getAllFileStorageAccesses();
-            final List<SearchIterator<File>> results = new ArrayList<SearchIterator<File>>(all.size());
-            for (final FileStorageFileAccess files : all) {
-                try {
-                    final SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
-                    if(result != null) {
-                        final FileStorageAccountAccess accountAccess = files.getAccountAccess();
-                        results.add(fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));
-                    }
-                } catch (final Exception e) {
-                    // Ignore failed one in composite search results
-                }
-            }
-            return new MergingSearchIterator<File>(order.comparatorBy(sort), results);
+    public SearchIterator<File> search(final String query, final List<Field> columns, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        final List<Field> cols = addIDColumns(columns);
+        if (FileStorageFileAccess.ALL_FOLDERS != folderId) {
+            final FolderID id = new FolderID(folderId);
+            return getFileAccess(id.getService(), id.getAccountId()).search(query, cols, id.getFolderId(), sort, order, start, end);
         }
-        final FolderID id = new FolderID(folderId);
-        return getFileAccess(id.getService(), id.getAccountId()).search(query, cols, id.getFolderId(), sort, order, start, end);
+        /*
+         * Search in all available folders
+         */
+        final List<FileStorageFileAccess> all = getAllFileStorageAccesses();
+        final int numOfStorages = all.size();
+        if (0 >= numOfStorages) {
+            return SearchIteratorAdapter.emptyIterator();
+        }
+        if (1 == numOfStorages) {
+            final FileStorageFileAccess files = all.get(0);
+            final SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
+            if (result == null) {
+                return SearchIteratorAdapter.emptyIterator();
+            }
+            final FileStorageAccountAccess accountAccess = files.getAccountAccess();
+            return fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId());
+        }
+        /*-
+         * We have to consider multiple file storages
+         * 
+         * Poll them concurrently...
+         */
+        final ConcurrentTIntObjectHashMap<SearchIterator<File>> resultMap = new ConcurrentTIntObjectHashMap<SearchIterator<File>>(numOfStorages);
+        final ThreadPoolCompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool());
+        for (int i = 0; i < numOfStorages; i++) {
+            final FileStorageFileAccess files = all.get(i);
+            final int index = i;
+            completionService.submit(new AbstractTrackableTask<Void>() {
+
+                @Override
+                public Void call() throws OXException {
+                    try {
+                        final SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
+                        if(result != null) {
+                            final FileStorageAccountAccess accountAccess = files.getAccountAccess();
+                            resultMap.put(index, fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));
+                        }
+                    } catch (final Exception e) {
+                        // Ignore failed one in composite search results
+                    }
+                    return null;
+                }
+            });
+        }
+        for (int i = 0; i < numOfStorages; i++) {
+            try {
+                completionService.take().get();
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (final ExecutionException e) {
+                // Cannot occur
+                final Throwable cause = e.getCause();
+                if (cause instanceof OXException) {
+                    throw (OXException) cause;
+                }
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+            }
+        }
+        final List<SearchIterator<File>> results = new ArrayList<SearchIterator<File>>(numOfStorages);
+        for (int i = 0; i < numOfStorages; i++) {
+            final SearchIterator<File> result = resultMap.get(i);
+            if (null != result) {
+                results.add(result);
+            }
+        }
+        return new MergingSearchIterator<File>(order.comparatorBy(sort), results);
     }
 
     @Override

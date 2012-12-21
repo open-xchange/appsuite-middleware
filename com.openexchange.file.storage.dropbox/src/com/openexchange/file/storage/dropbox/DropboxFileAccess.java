@@ -513,7 +513,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
                 }
             }
             // Convert entries to Files
-            final List<File> files = new ArrayList<File>(results.size());
+            List<File> files = new ArrayList<File>(results.size());
             for (final Entry resultsEntry : results) {
                 if (!resultsEntry.isDir) {
                     files.add(new DropboxFile(folderId, resultsEntry.path, userId).parseDropboxFile(resultsEntry));
@@ -521,6 +521,23 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
             }
             // Sort collection
             Collections.sort(files, order.comparatorBy(sort));
+            if ((start != NOT_SET) && (end != NOT_SET)) {
+                final int size = files.size();
+                if ((start) > size) {
+                    /*
+                     * Return empty iterator if start is out of range
+                     */
+                    return SearchIteratorAdapter.emptyIterator();
+                }
+                /*
+                 * Reset end index if out of range
+                 */
+                int toIndex = end;
+                if (toIndex >= size) {
+                    toIndex = size;
+                }
+                files = files.subList(start, toIndex);
+            }
             return new SearchIteratorAdapter<File>(files.iterator(), files.size());
         } catch (final DropboxServerException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());

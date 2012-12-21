@@ -63,6 +63,7 @@ import com.openexchange.file.storage.composition.internal.CompositingIDBasedFile
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
 
 
 /**
@@ -120,7 +121,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{ FileStorageServiceRegistry.class, EventAdmin.class };
+        return new Class<?>[]{ FileStorageServiceRegistry.class, EventAdmin.class, ThreadPoolService.class };
     }
 
     @Override
