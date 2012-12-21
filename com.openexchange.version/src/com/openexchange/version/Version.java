@@ -78,6 +78,27 @@ public class Version {
         return versionString;
     }
 
+    public int getMajor() {
+        if (null == numbers) {
+            throw new IllegalStateException("Central backend version not initialized yet.");
+        }
+        return numbers.getMajor();
+    }
+
+    public int getMinor() {
+        if (null == numbers) {
+            throw new IllegalStateException("Central backend version not initialized yet.");
+        }
+        return numbers.getMinor();
+    }
+
+    public int getPatch() {
+        if (null == numbers) {
+            throw new IllegalStateException("Central backend version not initialized yet.");
+        }
+        return numbers.getPatch();
+    }
+
     private Version() {
         super();
     }
