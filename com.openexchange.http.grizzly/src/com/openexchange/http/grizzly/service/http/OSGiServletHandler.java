@@ -46,7 +46,9 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import javax.servlet.Filter;
@@ -70,7 +72,6 @@ import org.glassfish.grizzly.servlet.ServletConfigImpl;
 import org.glassfish.grizzly.servlet.ServletHandler;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.service.http.HttpContext;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.tools.exceptions.ExceptionUtils;
 
@@ -90,14 +91,24 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     private String servletPath;
 
-    private FilterChainImpl filterChain;
+    private CopyOnWriteArrayList<Filter> servletFilters;
 
+    private FilterChainFactory filterChainFactory;
+
+    /**
+     * Initializes a new {@link OSGiServletHandler}.
+     * 
+     * @param servlet
+     * @param httpContext
+     * @param servletInitParams
+     */
     public OSGiServletHandler(final Servlet servlet, final HttpContext httpContext, final HashMap<String, String> servletInitParams) {
         super(createServletConfig(new OSGiServletContext(httpContext), servletInitParams));
         // noinspection AccessingNonPublicFieldOfAnotherObject
         super.servletInstance = servlet;
         this.httpContext = httpContext;
-        this.filterChain = new FilterChainImpl(servlet, (OSGiServletContext) getServletCtx());
+        servletFilters = new CopyOnWriteArrayList<Filter>();
+        this.filterChainFactory = new FilterChainFactory(servlet, (OSGiServletContext) getServletCtx());
     }
 
     private OSGiServletHandler(final ServletConfigImpl servletConfig) {
@@ -163,17 +174,23 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     @Override
     protected FilterChainInvoker getFilterChain(Request request) {
-        return filterChain;
+        return filterChainFactory.createFilterChain(servletFilters);
     }
 
+    /**
+     * Append a filter to the chain of Filters this ServletHandler manages.
+     * 
+     * @param filter Instance of the Filter to add
+     * @param name Name of this Filter to add
+     * @param initParams Initparameters needed to create a FilterConfig
+     */
     protected void addFilter(final Filter filter, final String name, final Map<String, String> initParams) {
         try {
             filter.init(createFilterConfig(getServletCtx(), name, initParams));
-            filterChain.addFilter(filter);
+            servletFilters.add(filter);
         } catch (Exception e) {
             LOG.error(e.toString(), e);
         }
-
     }
 
     // @Override
@@ -226,6 +243,44 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
         @Override
         protected void setInitParameters(Map<String, String> parameters) {
             super.setInitParameters(parameters);
+        }
+    }
+
+    private static final class FilterChainFactory {
+
+        private final Servlet servlet;
+
+        private final OSGiServletContext servletContext;
+
+        /**
+         * Initializes a new {@link FilterChainFactory}.
+         * 
+         * @param servlet
+         * @param servletContext
+         */
+        public FilterChainFactory(Servlet servlet, OSGiServletContext servletContext) {
+            super();
+            this.servlet = servlet;
+            this.servletContext = servletContext;
+        }
+
+        /**
+         * Construct and return a FilterChain implementation that will wrap the execution of the specified servlet instance. If we should
+         * not execute a filter chain at all, return <code>null</code>.
+         * 
+         * @param request The servlet request we are processing
+         * @param servlet The servlet instance to be wrapped
+         */
+        public FilterChainImpl createFilterChain(List<Filter> servletFilters) {
+
+            if (servletFilters.isEmpty()) {
+                return null;
+            }
+            FilterChainImpl filterChain = new FilterChainImpl(servlet, servletContext);
+            for (Filter servletFilter : servletFilters) {
+                filterChain.addFilter(servletFilter);
+            }
+            return filterChain;
         }
     }
 
@@ -284,26 +339,22 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
          */
         @Override
         public void doFilter(ServletRequest request, ServletResponse response) {
-
-            // Call the next filter if there is one
             if (pos < n) {
-
                 Filter filter = filters[pos++];
-
-                try {
-                    filter.doFilter(request, response, this);
-                } catch (Throwable throwable) {
-                    handleThrowable(throwable, request, response);
+                if (filter != null) {
+                    try {
+                        filter.doFilter(request, response, this);
+                    } catch (Throwable throwable) {
+                        handleThrowable(throwable, request, response);
+                    }
+                    return;
                 }
-                return;
             }
 
             try {
                 if (servlet != null) {
-                    // TODO: wrap request! check cookies
                     servlet.service(request, response);
                 }
-
             } catch (Throwable throwable) {
                 handleThrowable(throwable, request, response);
             }
