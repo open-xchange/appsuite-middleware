@@ -4,7 +4,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-pname=open-xchange-datamining
+pkgname=open-xchange-datamining
 installroot=$(CURDIR)/debian/$(pname)
 
 
