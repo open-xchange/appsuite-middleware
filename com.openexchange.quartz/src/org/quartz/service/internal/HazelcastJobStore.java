@@ -103,7 +103,8 @@ import com.hazelcast.query.Predicate;
  */
 public class HazelcastJobStore implements JobStore {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastJobStore.class);
+    /** The logger */
+    static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastJobStore.class);
     
     private SchedulerSignaler signaler;
     
@@ -1086,7 +1087,7 @@ public class HazelcastJobStore implements JobStore {
                     firstAcquiredTriggerFireTime = trigger.getNextFireTime().getTime();
                 }
                 
-                locallyAcquiredTriggers.put(trigger.getKey(), true);
+                locallyAcquiredTriggers.put(trigger.getKey(), Boolean.TRUE);
                 returnList.add(trigger);
                 if (returnList.size() == maxCount) {
                     break;
@@ -1182,7 +1183,7 @@ public class HazelcastJobStore implements JobStore {
                 firedWrapper.setOwner(nodeIp);
                 triggersByKey.replace(trigger.getKey(), firedWrapper);
                 locallyAcquiredTriggers.remove(trigger.getKey());
-                locallyExecutingTriggers.put(trigger.getKey(), true);
+                locallyExecutingTriggers.put(trigger.getKey(), Boolean.TRUE);
                 JobKey jobKey = trigger.getJobKey();
                 JobDetail job = retrieveJob(jobKey);
                 TriggerFiredResult result;
@@ -1201,7 +1202,7 @@ public class HazelcastJobStore implements JobStore {
                     result = new TriggerFiredResult(firedBundle);
                 }
                 
-                if (job.isConcurrentExectionDisallowed()) {
+                if (job != null && job.isConcurrentExectionDisallowed()) {
                     ISet<TriggerKey> otherTriggers = triggersByJobKey.get(jobKey);
                     for (TriggerKey keyToBlock : otherTriggers) {
                         if (keyToBlock.equals(trigger.getKey())) {
@@ -1436,7 +1437,7 @@ public class HazelcastJobStore implements JobStore {
 
         public static final int STATE_ERROR = 7;
         
-        private final Trigger trigger;
+        final Trigger trigger;
         
         private int state;
         
