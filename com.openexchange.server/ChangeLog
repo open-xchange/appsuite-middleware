@@ -2,6 +2,7 @@
 
  - Fix for bug 24334: Check for an empty String prior to parseInt attempt
  - Fix for bug 24323: Fixed typo in help output
+ - Fix for bug 23524: Dropped unnecessary warning for en_US locale
 
 * 2012-12-20 - marcus.klein@open-xchange.com
 
