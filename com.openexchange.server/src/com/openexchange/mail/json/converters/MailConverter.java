@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
+import javax.mail.MessagingException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,6 +86,7 @@ import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.MimeFilter;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preferences.ServerUserSetting;
@@ -553,7 +555,16 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 ttlMillis,
                 mimeFilter);
         } catch (final OXException e) {
-            if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
+            if (MailExceptionCode.MESSAGING_ERROR.equals(e)) {
+                final Throwable cause = e.getCause();
+                if (cause instanceof javax.mail.MessageRemovedException) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(cause, mail.getMailId(), mail.getFolder());
+                } else if (cause instanceof javax.mail.MessagingException) {
+                    throw MimeMailException.handleMessagingException((MessagingException) cause, null, session);
+                }
+            }
+            // Handle others
+            else if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                 LOG.warn(
                     new StringBuilder("Requested mail could not be found. ").append(
                         "Most likely this is caused by concurrent access of multiple clients ").append(
