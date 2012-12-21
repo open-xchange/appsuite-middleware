@@ -157,14 +157,16 @@ public final class FolderMap {
             return null;
         }
         if (prev.elapsed(maxLifeMillis)) {
-            synchronized (map) {
-                prev = map.get(key);
-                if (prev.elapsed(maxLifeMillis)) {
-                    shrink();
-                    map.put(key, wrapper);
-                    return null;
-                }
+            if (map.remove(key, prev)) {
+                prev = map.putIfAbsent(key, wrapper);
+                return null == prev ? null : prev.value;
             }
+            prev = map.get(key);
+            if (null == prev) {
+                prev = map.putIfAbsent(key, wrapper);
+                return null == prev ? null : prev.value;
+            }
+            return prev.value;
         }
         return prev.getValue();
     }
@@ -358,12 +360,9 @@ public final class FolderMap {
 
     private static final class Wrapper {
 
-        private final Folder value;
-
+        protected final Folder value;
         private final long stamp;
-
         protected final boolean removeAfterAccess;
-
         protected final boolean loadSubfolders;
 
         public Wrapper(final Folder value) {
