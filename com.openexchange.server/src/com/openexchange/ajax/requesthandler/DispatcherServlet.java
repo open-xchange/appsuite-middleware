@@ -206,7 +206,7 @@ public class DispatcherServlet extends SessionServlet {
         boolean sessionParamFound = false;
         {
             final String sSession = req.getParameter("session");
-            if (sSession != null && !sSession.equals("")) {
+            if (sSession != null && sSession.length() > 0) {
                 final String sessionId = getSessionId(req);
                 final ServerSession session = getSession(req, sessionId, sessiondService);
                 verifySession(req, sessiondService, sessionId, session);
