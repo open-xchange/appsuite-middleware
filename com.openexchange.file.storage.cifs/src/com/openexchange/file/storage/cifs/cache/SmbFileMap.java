@@ -135,16 +135,16 @@ public final class SmbFileMap {
             return null;
         }
         if (prev.elapsed(maxLifeMillis)) {
-            if (map.remove(path, prev)) {
-                prev = map.putIfAbsent(path, wrapper);
-                return null == prev ? null : prev.value;
+            if (map.replace(path, prev, wrapper)) {
+                // Successfully replaced with elapsed one
+                return null;
             }
             prev = map.get(path);
             if (null == prev) {
                 prev = map.putIfAbsent(path, wrapper);
-                return null == prev ? null : prev.value;
+                return null == prev ? null : prev.getValue();
             }
-            return prev.value;
+            return prev.getValue();
         }
         return prev.getValue();
     }

@@ -123,16 +123,16 @@ public final class PropertyMap {
             return null;
         }
         if (prev.elapsed(maxLifeMillis)) {
-            if (map.remove(propertyName, prev)) {
-                prev = map.putIfAbsent(propertyName, wrapper);
-                return null == prev ? null : prev.value;
+            if (map.replace(propertyName, prev, wrapper)) {
+                // Successfully replaced with elapsed one
+                return null;
             }
             prev = map.get(propertyName);
             if (null == prev) {
                 prev = map.putIfAbsent(propertyName, wrapper);
-                return null == prev ? null : prev.value;
+                return null == prev ? null : prev.getValue();
             }
-            return prev.value;
+            return prev.getValue();
         }
         return prev.getValue();
     }
