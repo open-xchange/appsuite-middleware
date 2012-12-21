@@ -49,6 +49,9 @@
 
 package com.openexchange.version.internal;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Data object storing the version and build number from the manifest of this bundle.
  *
@@ -56,13 +59,39 @@ package com.openexchange.version.internal;
  */
 public final class Numbers {
 
+    private static final String EXPRESSION = "([0-9]+)\\.([0-9]+)\\.([0-9]+)";
+    private static final Pattern PATTERN = Pattern.compile(EXPRESSION);
+
     private final String version;
     private final String buildNumber;
+    private final int major;
+    private final int minor;
+    private final int patch;
 
-    public Numbers(String version, String buildNumber) {
+    public Numbers(String version, String buildNumber) throws Exception {
         super();
         this.version = version;
         this.buildNumber = buildNumber;
+        Matcher matcher = PATTERN.matcher(version);
+        if (matcher.find()) {
+            try {
+                major = Integer.parseInt(matcher.group(1));
+            } catch (NumberFormatException e) {
+                throw new Exception("Can not parse major out of version \"" + version + "\".", e);
+            }
+            try {
+                minor = Integer.parseInt(matcher.group(2));
+            } catch (NumberFormatException e) {
+                throw new Exception("Can not parse minor out of version \"" + version + "\".", e);
+            }
+            try {
+                patch = Integer.parseInt(matcher.group(1));
+            } catch (NumberFormatException e) {
+                throw new Exception("Can not parse patch out of version \"" + version + "\".", e);
+            }
+        } else {
+            throw new Exception("Version pattern does not match on version string \"" + version + "\".");
+        }
     }
 
     public String getVersion() {
@@ -71,5 +100,17 @@ public final class Numbers {
 
     public String getBuildNumber() {
         return buildNumber;
+    }
+
+    public int getMajor() {
+        return major;
+    }
+
+    public int getMinor() {
+        return minor;
+    }
+
+    public int getPatch() {
+        return patch;
     }
 }
