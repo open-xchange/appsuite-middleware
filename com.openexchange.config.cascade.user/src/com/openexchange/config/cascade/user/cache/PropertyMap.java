@@ -178,7 +178,7 @@ public final class PropertyMap {
         }
         if (wrapper.elapsed(maxLifeMillis)) {
             map.remove(propertyName);
-            ThreadPools.getThreadPool().submit(new Shrinker(this));
+            ThreadPools.getThreadPool().submit(new ShrinkerTask(this));
             return null;
         }
         return wrapper.getValue();
@@ -198,7 +198,7 @@ public final class PropertyMap {
         }
         if (wrapper.elapsed(maxLifeMillis)) {
             map.remove(propertyName);
-            ThreadPools.getThreadPool().submit(new Shrinker(this));
+            ThreadPools.getThreadPool().submit(new ShrinkerTask(this));
             return null;
         }
         return wrapper.getValue();
@@ -217,7 +217,7 @@ public final class PropertyMap {
         }
         if (wrapper.elapsed(maxLifeMillis)) {
             map.remove(propertyName);
-            ThreadPools.getThreadPool().submit(new Shrinker(this));
+            ThreadPools.getThreadPool().submit(new ShrinkerTask(this));
             return null;
         }
         return wrapper.getValue();
@@ -273,11 +273,11 @@ public final class PropertyMap {
 
     } // End of class Wrapper
 
-    private static final class Shrinker extends AbstractTask<Object> {
+    private static final class ShrinkerTask extends AbstractTask<Object> {
 
         private final PropertyMap propertyMap;
 
-        Shrinker(PropertyMap propertyMap) {
+        ShrinkerTask(PropertyMap propertyMap) {
             super();
             this.propertyMap = propertyMap;
         }
