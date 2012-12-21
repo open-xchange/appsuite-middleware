@@ -214,13 +214,15 @@ public abstract class SessionServlet extends AJAXServlet {
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        if (req.getParameter("session") != null && !req.getParameter("session").equals("")) {
-            final String sessionId = getSessionId(req);
-            final ServerSession session = getSession(req, sessionId, sessiondService);
-            verifySession(req, sessiondService, sessionId, session);
-            rememberSession(req, session);
+        {
+            final String sSession = req.getParameter("session");
+            if (sSession != null && !sSession.equals("")) {
+                final String sessionId = getSessionId(req);
+                final ServerSession session = getSession(req, sessionId, sessiondService);
+                verifySession(req, sessiondService, sessionId, session);
+                rememberSession(req, session);
+            }
         }
-        
         // Try public session
         final Cookie[] cookies = req.getCookies();
         
