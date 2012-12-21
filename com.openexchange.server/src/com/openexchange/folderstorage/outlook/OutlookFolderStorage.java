@@ -514,7 +514,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 folderStorage.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
