@@ -316,9 +316,9 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                 close(bufferedWriter);
                 close(in);
             }
-            if (null == updateTaskInformation) {
-                throw new OXContextRestoreException(Code.NO_UPDATE_TASK_INFORMATION_FOUND);
-            }
+            //if (null == updateTaskInformation) {
+            //    throw new OXContextRestoreException(Code.NO_UPDATE_TASK_INFORMATION_FOUND);
+            // }
             return new PoolIdSchemaAndVersionInfo(fileName, cid, poolId, schema, versionInformation, updateTaskInformation);
         }
 
