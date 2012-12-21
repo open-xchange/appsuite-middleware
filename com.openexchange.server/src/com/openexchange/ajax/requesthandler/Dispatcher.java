@@ -76,6 +76,7 @@ public interface Dispatcher {
      * @param session The session providing needed user data
      * @return The result yielded from given request
      * @throws OXException If an error occurs
+     * @see AJAXRequestDataTools#parseRequest(javax.servlet.http.HttpServletRequest, boolean, boolean, ServerSession, String)
      */
     AJAXRequestResult perform(AJAXRequestData requestData, AJAXState state, ServerSession session) throws OXException;
 
@@ -117,6 +118,7 @@ public interface Dispatcher {
      * 
      * @param module The module identifier to check
      * @return <code>true</code> if it can handle the module request, <code>false</code> otherwise
+     * @see AJAXRequestDataTools#getModule(String, javax.servlet.http.HttpServletRequest)
      */
     boolean handles(String module);
 
@@ -127,6 +129,8 @@ public interface Dispatcher {
      * @param action The action identifier
      * @return <code>true</code> if the fall-back session may be used for this action; otherwise <code>false</code>
      * @throws OXException If check fails for any reason
+     * @see AJAXRequestDataTools#getModule(String, javax.servlet.http.HttpServletRequest)
+     * @see AJAXRequestDataTools#getAction(javax.servlet.http.HttpServletRequest)
      */
     boolean mayUseFallbackSession(String module, String action) throws OXException;
     
@@ -137,6 +141,8 @@ public interface Dispatcher {
      * @param action The action identifier
      * @return <code>true</code> if given action can be used without a session; otherwise <code>false</code>
      * @throws OXException If check fails for any reason
+     * @see AJAXRequestDataTools#getModule(String, javax.servlet.http.HttpServletRequest)
+     * @see AJAXRequestDataTools#getAction(javax.servlet.http.HttpServletRequest)
      */
     boolean mayOmitSession(String module, String action) throws OXException;
 }
