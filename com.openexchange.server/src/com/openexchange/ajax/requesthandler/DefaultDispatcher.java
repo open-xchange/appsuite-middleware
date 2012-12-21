@@ -74,8 +74,8 @@ public class DefaultDispatcher implements Dispatcher {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultDispatcher.class);
 
-    private final ConcurrentMap<Strings, Boolean> fallbackSessionActionsCache;
-    private final ConcurrentMap<Strings, Boolean> omitSessionActionsCache;
+    private final ConcurrentMap<StrPair, Boolean> fallbackSessionActionsCache;
+    private final ConcurrentMap<StrPair, Boolean> omitSessionActionsCache;
 
     private final ConcurrentMap<String, AJAXActionServiceFactory> actionFactories;
     private final Queue<AJAXActionCustomizerFactory> customizerFactories;
@@ -85,8 +85,8 @@ public class DefaultDispatcher implements Dispatcher {
      */
     public DefaultDispatcher() {
         super();
-        fallbackSessionActionsCache = new ConcurrentHashMap<Strings, Boolean>(128);
-        omitSessionActionsCache = new ConcurrentHashMap<Strings, Boolean>(128);
+        fallbackSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128);
+        omitSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128);
 
         actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
         customizerFactories = new Java7ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
@@ -314,7 +314,7 @@ public class DefaultDispatcher implements Dispatcher {
 
 	@Override
 	public boolean mayUseFallbackSession(final String module, final String action) throws OXException {
-	    final Strings key = new Strings(module, action);
+	    final StrPair key = new StrPair(module, action);
         Boolean ret = fallbackSessionActionsCache.get(key);
 	    if (null == ret) {
 	        final AJAXActionServiceFactory factory = lookupFactory(module);
@@ -331,7 +331,7 @@ public class DefaultDispatcher implements Dispatcher {
 	
 	@Override
     public boolean mayOmitSession(final String module, final String action) throws OXException {
-	    final Strings key = new Strings(module, action);
+	    final StrPair key = new StrPair(module, action);
         Boolean ret = omitSessionActionsCache.get(key);
         if (null == ret) {
             final AJAXActionServiceFactory factory = lookupFactory(module);
@@ -346,12 +346,12 @@ public class DefaultDispatcher implements Dispatcher {
         return ret.booleanValue();
 	}
 
-	private static final class Strings {
+	private static final class StrPair {
 	    private final String str1;
 	    private final String str2;
 	    private final int hash;
 
-        Strings(String str1, String str2) {
+        StrPair(String str1, String str2) {
             super();
             this.str1 = str1;
             this.str2 = str2;
@@ -372,10 +372,10 @@ public class DefaultDispatcher implements Dispatcher {
             if (this == obj) {
                 return true;
             }
-            if (!(obj instanceof Strings)) {
+            if (!(obj instanceof StrPair)) {
                 return false;
             }
-            Strings other = (Strings) obj;
+            StrPair other = (StrPair) obj;
             if (str1 == null) {
                 if (other.str1 != null) {
                     return false;
