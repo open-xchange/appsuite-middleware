@@ -58,6 +58,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
@@ -71,8 +72,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DefaultDispatcher implements Dispatcher {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DefaultDispatcher.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultDispatcher.class);
+
+    private final ConcurrentMap<Strings, Boolean> fallbackSessionActionsCache;
+    private final ConcurrentMap<Strings, Boolean> omitSessionActionsCache;
 
     private final ConcurrentMap<String, AJAXActionServiceFactory> actionFactories;
     private final Queue<AJAXActionCustomizerFactory> customizerFactories;
@@ -82,6 +85,9 @@ public class DefaultDispatcher implements Dispatcher {
      */
     public DefaultDispatcher() {
         super();
+        fallbackSessionActionsCache = new ConcurrentHashMap<Strings, Boolean>(128);
+        omitSessionActionsCache = new ConcurrentHashMap<Strings, Boolean>(128);
+
         actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
         customizerFactories = new Java7ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
     }
@@ -308,28 +314,85 @@ public class DefaultDispatcher implements Dispatcher {
 
 	@Override
 	public boolean mayUseFallbackSession(final String module, final String action) throws OXException {
-		final AJAXActionServiceFactory factory = lookupFactory(module);
-        if (factory == null) {
-            return false;
+	    final Strings key = new Strings(module, action);
+        Boolean ret = fallbackSessionActionsCache.get(key);
+	    if (null == ret) {
+	        final AJAXActionServiceFactory factory = lookupFactory(module);
+	        if (factory == null) {
+	            ret = Boolean.FALSE;
+	        } else {
+    	        final DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
+    	        ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.allowPublicSession());
+	        }
+	        fallbackSessionActionsCache.put(key, ret);
         }
-        final DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
-        if (actionMetadata == null) {
-        	return false;
-        }
-		return actionMetadata.allowPublicSession();
+	    return ret.booleanValue();
 	}
 	
 	@Override
     public boolean mayOmitSession(final String module, final String action) throws OXException {
-		final AJAXActionServiceFactory factory = lookupFactory(module);
-        if (factory == null) {
-            return false;
+	    final Strings key = new Strings(module, action);
+        Boolean ret = omitSessionActionsCache.get(key);
+        if (null == ret) {
+            final AJAXActionServiceFactory factory = lookupFactory(module);
+            if (factory == null) {
+                ret = Boolean.FALSE;
+            } else {
+                final DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
+                ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.noSession());
+            }
+            omitSessionActionsCache.put(key, ret);
         }
-        final DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
-        if (actionMetadata == null) {
-        	return false;
-        }
-		return actionMetadata.noSession();
+        return ret.booleanValue();
 	}
+
+	private static final class Strings {
+	    private final String str1;
+	    private final String str2;
+	    private final int hash;
+
+        Strings(String str1, String str2) {
+            super();
+            this.str1 = str1;
+            this.str2 = str2;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((str1 == null) ? 0 : str1.hashCode());
+            result = prime * result + ((str2 == null) ? 0 : str2.hashCode());
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Strings)) {
+                return false;
+            }
+            Strings other = (Strings) obj;
+            if (str1 == null) {
+                if (other.str1 != null) {
+                    return false;
+                }
+            } else if (!str1.equals(other.str1)) {
+                return false;
+            }
+            if (str2 == null) {
+                if (other.str2 != null) {
+                    return false;
+                }
+            } else if (!str2.equals(other.str2)) {
+                return false;
+            }
+            return true;
+        }
+
+	} // End of class Strings
 
 }
