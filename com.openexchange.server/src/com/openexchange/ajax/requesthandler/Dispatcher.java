@@ -121,14 +121,22 @@ public interface Dispatcher {
     boolean handles(String module);
 
     /**
-     * Indicates whether the fall-back session may be used for this action
+     * Indicates whether the fall-back session may be used for this action.
      * 
+     * @param module The module identifier
+     * @param action The action identifier
+     * @return <code>true</code> if the fall-back session may be used for this action; otherwise <code>false</code>
      * @throws OXException If check fails for any reason
      */
     boolean mayUseFallbackSession(String module, String action) throws OXException;
     
     /**
-     * Indicates that given action can be used without a session
+     * Indicates that given action can be used without a session.
+     * 
+     * @param module The module identifier
+     * @param action The action identifier
+     * @return <code>true</code> if given action can be used without a session; otherwise <code>false</code>
+     * @throws OXException If check fails for any reason
      */
     boolean mayOmitSession(String module, String action) throws OXException;
 }
