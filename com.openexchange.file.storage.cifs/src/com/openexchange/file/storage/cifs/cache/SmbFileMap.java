@@ -135,14 +135,13 @@ public final class SmbFileMap {
             return null;
         }
         if (prev.elapsed(maxLifeMillis)) {
-            synchronized (map) {
-                prev = map.get(path);
-                if (prev.elapsed(maxLifeMillis)) {
-                    shrink();
-                    map.put(path, wrapper);
-                    return null;
-                }
+            final Wrapper removed = map.remove(path);
+            if (removed == prev) {
+                prev = map.putIfAbsent(path, wrapper);
+                return null == prev ? null : prev.value;
             }
+            map.put(path, removed);
+            return removed.value;
         }
         return prev.getValue();
     }
@@ -253,7 +252,7 @@ public final class SmbFileMap {
 
     private static final class Wrapper {
 
-        private final SmbFile value;
+        final SmbFile value;
         private volatile long stamp;
 
         public Wrapper(final SmbFile value) {
