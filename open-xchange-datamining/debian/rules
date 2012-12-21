@@ -18,7 +18,6 @@ build: build-stamp
 
 build-stamp: configure-stamp 
 	dh_testdir
-	ant -Dprefix=$(instprefix) compile
 	touch build-stamp
 
 clean:
