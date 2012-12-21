@@ -250,31 +250,29 @@ public class DefaultDispatcher implements Dispatcher {
         synchronized (actionFactories) {
             AJAXActionServiceFactory current = actionFactories.putIfAbsent(module, factory);
             if (null != current) {
-                synchronized (actionFactories) {
-                    try {
-                        current = actionFactories.get(module);
-                        final Module moduleAnnotation = current.getClass().getAnnotation(Module.class);
-                        if (null == moduleAnnotation) {
-                            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512).append("There is already a factory associated with module \"");
-                            sb.append(module).append("\": ").append(current.getClass().getName());
-                            sb.append(". Therefore registration is denied for factory \"").append(factory.getClass().getName());
-                            sb.append("\". Unless these two factories provide the \"").append(Module.class.getName()).append(
-                                "\" annotation to specify what actions are supported by each factory.");
-                            LOG.warn(sb.toString());
+                try {
+                    current = actionFactories.get(module);
+                    final Module moduleAnnotation = current.getClass().getAnnotation(Module.class);
+                    if (null == moduleAnnotation) {
+                        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512).append("There is already a factory associated with module \"");
+                        sb.append(module).append("\": ").append(current.getClass().getName());
+                        sb.append(". Therefore registration is denied for factory \"").append(factory.getClass().getName());
+                        sb.append("\". Unless these two factories provide the \"").append(Module.class.getName()).append(
+                            "\" annotation to specify what actions are supported by each factory.");
+                        LOG.warn(sb.toString());
+                    } else {
+                        final CombinedActionFactory combinedFactory;
+                        if (current instanceof CombinedActionFactory) {
+                            combinedFactory = (CombinedActionFactory) current;
                         } else {
-                            final CombinedActionFactory combinedFactory;
-                            if (current instanceof CombinedActionFactory) {
-                                combinedFactory = (CombinedActionFactory) current;
-                            } else {
-                                combinedFactory = new CombinedActionFactory();
-                                combinedFactory.add(current);
-                                actionFactories.put(module, combinedFactory);
-                            }
-                            combinedFactory.add(factory);
+                            combinedFactory = new CombinedActionFactory();
+                            combinedFactory.add(current);
+                            actionFactories.put(module, combinedFactory);
                         }
-                    } catch (final IllegalArgumentException e) {
-                        LOG.error(e.getMessage());
+                        combinedFactory.add(factory);
                     }
+                } catch (final IllegalArgumentException e) {
+                    LOG.error(e.getMessage());
                 }
             }
         }
