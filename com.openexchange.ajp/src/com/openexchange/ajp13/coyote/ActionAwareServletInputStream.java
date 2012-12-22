@@ -124,7 +124,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
     @Override
     public int read(final byte[] b) throws IOException {
         if (b == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("buffer is null");
         }
         final int len = b.length;
         if (len == 0) {
@@ -136,7 +136,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
     @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {
         if (b == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("buffer is null");
         }
         if (off < 0 || len < 0 || len > b.length - off) {
             throw new IndexOutOfBoundsException();
