@@ -164,8 +164,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
          */
         final int bLength = byteChunk.getLength();
         if (bLength >= len) {
-            final int read = byteChunk.substract(b, off, len);
-            return 0 == read ? -1 : read;
+            return byteChunk.substract(b, off, len);
         }
         /*
          * Write available bytes into array
@@ -183,7 +182,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
             res = byteChunk.substract(b, read + off, len - read);
             read += res;
         }
-        return 0 == len ? -1 : len;
+        return len;
     }
 
     private static int markEofIfZero(final int result) {
