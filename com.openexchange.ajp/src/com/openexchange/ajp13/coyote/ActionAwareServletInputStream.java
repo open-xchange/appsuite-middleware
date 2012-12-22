@@ -139,7 +139,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
             throw new NullPointerException("buffer is null");
         }
         if (off < 0 || len < 0 || len > b.length - off) {
-            throw new IndexOutOfBoundsException();
+            throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", available=" + (b.length - off));
         }
         if (len == 0) {
             return 0;
