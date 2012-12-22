@@ -729,8 +729,8 @@ public class ContactServiceImpl extends DefaultContactService {
 		 * limit queried fields when necessary due to permissions
 		 */
 		final EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
-		final QueryFields queryFields;
-		if (permission.canReadAllObjects() || permission.canReadOwnObjects() && 1 == userIDs.length && currentUserID == userIDs[0]) {
+		QueryFields queryFields;
+		if (permission.canReadAllObjects() || 1 == userIDs.length && currentUserID == userIDs[0]) {
 			// no limitation
 			queryFields = new QueryFields(fields);
 		} else {
@@ -790,7 +790,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		final EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
 		QueryFields queryFields;
-		if (permission.canReadAllObjects() || permission.canReadOwnObjects() && 1 == userIDs.length && currentUserID == userIDs[0]) {
+		if (permission.canReadAllObjects() || 1 == userIDs.length && currentUserID == userIDs[0]) {
 			// no limitation
 			queryFields = new QueryFields(fields);
 		} else {
