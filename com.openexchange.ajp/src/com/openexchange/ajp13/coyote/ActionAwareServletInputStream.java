@@ -130,7 +130,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
         if (len == 0) {
             return 0;
         }
-        return read0(b, 0, len);
+        return markEofIfZero(read0(b, 0, len));
     }
 
     @Override
@@ -144,7 +144,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
         if (len == 0) {
             return 0;
         }
-        return read0(b, off, len);
+        return markEofIfZero(read0(b, off, len));
     }
 
     /**
@@ -184,6 +184,10 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
             read += res;
         }
         return 0 == len ? -1 : len;
+    }
+
+    private static int markEofIfZero(final int result) {
+        return result <= 0 ? -1 : result;
     }
 
 }
