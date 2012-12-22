@@ -488,10 +488,27 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         try {
             if (isEmpty(pattern)) {
-                final List<File> files = new LinkedList<File>();
+                List<File> files = new LinkedList<File>();
                 gatherAllFiles("/", files);
                 // Sort collection
                 Collections.sort(files, order.comparatorBy(sort));
+                if ((start != NOT_SET) && (end != NOT_SET)) {
+                    final int size = files.size();
+                    if ((start) > size) {
+                        /*
+                         * Return empty iterator if start is out of range
+                         */
+                        return SearchIteratorAdapter.emptyIterator();
+                    }
+                    /*
+                     * Reset end index if out of range
+                     */
+                    int toIndex = end;
+                    if (toIndex >= size) {
+                        toIndex = size;
+                    }
+                    files = files.subList(start, toIndex);
+                }
                 return new SearchIteratorAdapter<File>(files.iterator(), files.size());
             }
             // Search by pattern
