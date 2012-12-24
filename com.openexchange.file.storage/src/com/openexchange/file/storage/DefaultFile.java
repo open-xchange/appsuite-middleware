@@ -134,6 +134,15 @@ public class DefaultFile extends AbstractFile {
     public String getContent() {
         return content;
     }
+    
+    /**
+     * Sets the content of this file.
+     * 
+     * @param content The content
+     */
+    public void setContent(String content) {
+        this.content = content;
+    }
 
     @Override
     public Date getCreated() {
