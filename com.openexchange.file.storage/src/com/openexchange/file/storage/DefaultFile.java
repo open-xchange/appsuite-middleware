@@ -116,6 +116,9 @@ public class DefaultFile extends AbstractFile {
         properties = new HashMap<String, String>();
     }
 
+    /**
+     * Initializes a new {@link DefaultFile} from given file.
+     */
     public DefaultFile(final File file) {
         copyFrom(file);
     }
