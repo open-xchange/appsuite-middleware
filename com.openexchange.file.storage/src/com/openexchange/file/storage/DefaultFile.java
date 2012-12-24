@@ -93,7 +93,7 @@ public class DefaultFile extends AbstractFile {
 
     private int numberOfVersions;
 
-    private Map<String, String> properties;
+    private final Map<String, String> properties;
 
     private String title;
 
@@ -120,6 +120,13 @@ public class DefaultFile extends AbstractFile {
      * Initializes a new {@link DefaultFile} from given file.
      */
     public DefaultFile(final File file) {
+        super();
+        final Set<String> propertyNames = file.getPropertyNames();
+        final Map<String, String> properties = new HashMap<String, String>(propertyNames.size());
+        for (final String propertyName : propertyNames) {
+            properties.put(propertyName, file.getProperty(propertyName));
+        }
+        this.properties = properties;
         copyFrom(file);
     }
 
