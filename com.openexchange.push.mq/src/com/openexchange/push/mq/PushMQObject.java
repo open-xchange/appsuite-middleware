@@ -234,7 +234,7 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
 
     public static PushMQObject parseString(String toParse) throws OXException {
         final Pattern regex = Pattern.compile(
-            "FOLDER_ID=(.*?),MODULE=(.*?),CONTEXT_ID=(.*?),USERS=(.*?),IS_REMOTE=(.*?),TIMESTAMP=(.*?),TOPIC=(*?),HOSTNAME=(.*?)",
+            "FOLDER_ID=(.*?),MODULE=(.*?),CONTEXT_ID=(.*?),USERS=(.*?),IS_REMOTE=(.*?),TIMESTAMP=(.*?),TOPIC=(.*?),HOSTNAME=(.*?)",
             Pattern.DOTALL);
         Matcher matcher = regex.matcher(toParse);
         if (!matcher.find()) {
