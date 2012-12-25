@@ -89,7 +89,7 @@ public class RevertAction extends AbstractWriteAction {
         final SearchIterator<File> results = versions.results();
         while (results.hasNext()) {
             final String version = results.next().getVersion();
-            if (version != null && !versions.equals("0")) {
+            if (version != null && !version.equals("0")) {
                 versionNumbers.add(version);
             }
         }
