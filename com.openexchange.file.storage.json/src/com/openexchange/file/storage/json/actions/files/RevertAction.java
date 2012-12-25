@@ -84,19 +84,19 @@ public class RevertAction extends AbstractWriteAction {
         final IDBasedFileAccess fileAccess = request.getFileAccess();
 
         final TimedResult<File> versions = fileAccess.getVersions(request.getId());
-        final List<String> versionNumbers = new ArrayList<String>(10);
+        final List<String> versionIdentifiers = new ArrayList<String>(10);
 
         final SearchIterator<File> results = versions.results();
         while (results.hasNext()) {
             final String version = results.next().getVersion();
             if (version != null && !version.equals("0")) {
-                versionNumbers.add(version);
+                versionIdentifiers.add(version);
             }
         }
 
-        final String[] toDelete = new String[versionNumbers.size()];
+        final String[] toDelete = new String[versionIdentifiers.size()];
         for(int i = 0; i < toDelete.length; i++) {
-            toDelete[i] = versionNumbers.get(i);
+            toDelete[i] = versionIdentifiers.get(i);
         }
 
         fileAccess.removeVersion(request.getId(), toDelete);
