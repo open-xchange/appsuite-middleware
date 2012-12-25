@@ -344,9 +344,10 @@ public final class ConfigJSlobService implements JSlobService {
             }
             final SettingStorage stor = SettingStorage.getInstance(session);
             final ConfigTree configTree = ConfigTree.getInstance();
-            final JSONObject jObject = new JSONObject();
-
-            for (final Map.Entry<String, String> mapping : maps[CONFIG2LOB].entrySet()) {
+            
+            final Set<Entry<String, String>> entrySet = maps[CONFIG2LOB].entrySet();
+            final JSONObject jObject = new JSONObject(entrySet.size());
+            for (final Map.Entry<String, String> mapping : entrySet) {
                 final String configTreePath = mapping.getKey();
                 final String lobPath = mapping.getValue();
 
@@ -394,15 +395,16 @@ public final class ConfigJSlobService implements JSlobService {
                     }
                 }
             } else {
-                final JSONArray array = new JSONArray();
+                final JSONArray array = new JSONArray(multiValue.length);
                 for (final Object value : multiValue) {
                     array.put(value);
                 }
                 retval = array;
             }
         } else {
-            final JSONObject json = new JSONObject();
-            for (final Setting subSetting : setting.getElements()) {
+            final Setting[] elements = setting.getElements();
+            final JSONObject json = new JSONObject(elements.length);
+            for (final Setting subSetting : elements) {
                 json.put(subSetting.getName(), convert2JS(subSetting));
             }
             retval = json;
