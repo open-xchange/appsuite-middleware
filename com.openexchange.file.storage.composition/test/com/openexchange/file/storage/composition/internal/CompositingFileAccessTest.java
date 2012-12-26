@@ -83,6 +83,11 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 import com.openexchange.sim.Block;
 import com.openexchange.sim.SimBuilder;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.internal.ThreadPoolProperties;
+import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
+import com.openexchange.threadpool.osgi.ThreadPoolActivator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
@@ -115,8 +120,6 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     private final FolderID folderId2 = new FolderID(fileId2.getService(), fileId2.getAccountId(), fileId2.getFolderId());
 
     private final IDSetter setId = new IDSetter(fileId.getFileId());
-
-
 
     public CompositingFileAccessTest() {
         super(new SimSession());

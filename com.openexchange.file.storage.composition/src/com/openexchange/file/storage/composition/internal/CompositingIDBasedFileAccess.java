@@ -61,6 +61,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -83,9 +84,11 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTrackableTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.MergingSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -577,7 +580,8 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
          * Poll them concurrently...
          */
         final ConcurrentTIntObjectHashMap<SearchIterator<File>> resultMap = new ConcurrentTIntObjectHashMap<SearchIterator<File>>(numOfStorages);
-        final ThreadPoolCompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool());
+        final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        final CompletionService<Void> completionService = null == threadPool ? new CallerRunsCompletionService<Void>() : new ThreadPoolCompletionService<Void>(threadPool);
         for (int i = 0; i < numOfStorages; i++) {
             final FileStorageFileAccess files = all.get(i);
             final int index = i;
