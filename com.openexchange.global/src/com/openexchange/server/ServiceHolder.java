@@ -60,7 +60,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link ServiceHolder} - Provides convenient access to a bundle service formerly applied with {@link #setService(Object)}. The service may
@@ -74,9 +73,16 @@ import com.openexchange.log.LogFactory;
  */
 public abstract class ServiceHolder<S> {
 
+    /** The logger */
+    static final Log LOG = com.openexchange.log.Log.loggerFor(ServiceHolder.class);
+
     private static final Object PRESENT = new Object();
 
     private final class ServiceHolderTask extends TimerTask {
+
+        ServiceHolderTask() {
+            super();
+        }
 
         @Override
         public void run() {
@@ -109,13 +115,10 @@ public abstract class ServiceHolder<S> {
 
     private final class ServiceProxy implements java.lang.reflect.InvocationHandler {
 
-        private final long creationTime;
-
-        private S delegate;
-
-        private S proxyService;
-
-        private final StackTraceElement[] trace;
+        final long creationTime;
+        S delegate;
+        S proxyService;
+        final StackTraceElement[] trace;
 
         public ServiceProxy(final S service, final StackTraceElement[] trace) {
             this.delegate = service;
@@ -186,13 +189,12 @@ public abstract class ServiceHolder<S> {
 
     private static boolean serviceUsageInspection = false;
 
-    private static int serviceUsageTimeout;
+    protected static volatile int serviceUsageTimeout;
 
-    private static Timer serviceHolderTimer;
+    private static volatile Timer serviceHolderTimer;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServiceHolder.class));
-
-    private static final String printStackTrace(final StackTraceElement[] trace) {
+    /** Prints given stack trace */
+    static final String printStackTrace(final StackTraceElement[] trace) {
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
         for (int i = 2; i < trace.length; i++) {
             sb.append("\tat ").append(trace[i]).append('\n');
@@ -200,15 +202,15 @@ public abstract class ServiceHolder<S> {
         return sb.toString();
     }
 
-    private final AtomicInteger countActive;
+    protected final AtomicInteger countActive;
 
-    private final Map<String, ServiceHolderListener<S>> listeners;
+    protected final Map<String, ServiceHolderListener<S>> listeners;
 
-    private final Map<Thread, Map<ServiceProxy, Object>> usingThreads;
+    protected final Map<Thread, Map<ServiceProxy, Object>> usingThreads;
 
-    private final AtomicBoolean waiting;
+    protected final AtomicBoolean waiting;
 
-    private final AtomicReference<S> serviceReference;
+    protected final AtomicReference<S> serviceReference;
 
     /**
      * Default constructor
