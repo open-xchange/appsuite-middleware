@@ -51,11 +51,9 @@ package com.openexchange.groupware.tools.mappings.json;
 
 import java.util.Arrays;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.ArrayFactory;
 import com.openexchange.session.Session;
@@ -93,7 +91,7 @@ public abstract class ArrayMapping<T, O> extends DefaultJsonMapping<T[], O> impl
 	@Override
 	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
 		final T[] value = this.get(from);
-		return null != value ? Arrays.asList(value) : (JSONArray)null;
+		return null != value ? new JSONArray(Arrays.asList(value)) : (JSONArray)null;
 	}
 
 }
