@@ -51,6 +51,7 @@ package com.openexchange.halo.mail;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -154,11 +155,15 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 
 			@Override
 			public int compare(MailMessage arg0, MailMessage arg1) {
-				return arg1.getSentDate().compareTo(arg0.getSentDate());
+				Date sentDate1 = arg1.getSentDate();
+                Date sentDate0 = arg0.getSentDate();
+                if (sentDate1 == null) {
+                    return null == sentDate0 ? 0 : -1;
+                }
+                return null == sentDate0 ? 1 : sentDate1.compareTo(sentDate0);
 			}});
 		
-		limit = limit > messages.size() ? messages.size() : limit;
-		messages = messages.subList(0, limit);
+		messages = messages.subList(0, Math.min(limit, messages.size()));
 		return new AJAXRequestResult(messages, "mail");
 	}
 

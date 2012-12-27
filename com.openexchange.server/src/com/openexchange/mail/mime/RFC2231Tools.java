@@ -70,6 +70,8 @@ public final class RFC2231Tools {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RFC2231Tools.class));
 
+    private static final Locale ENGLISH = Locale.ENGLISH;
+
     /**
      * No instantiation
      */
@@ -270,18 +272,18 @@ public final class RFC2231Tools {
         }
         final com.openexchange.java.StringAllocator retval = new com.openexchange.java.StringAllocator(toEncode.length() * 3);
         if (prepend) {
-            retval.append(charset.toLowerCase(Locale.ENGLISH)).append('\'').append(
+            retval.append(charset.toLowerCase(ENGLISH)).append('\'').append(
                 (language == null) || (language.length() == 0) ? "" : language).append('\'');
         }
-        final char[] chars = toEncode.toCharArray();
         try {
             final Charset cs = Charsets.forName(charset);
-            for (int i = 0; i < chars.length; i++) {
-                final char c = chars[i];
+            final int length = toEncode.length();
+            for (int i = 0; i < length; i++) {
+                final char c = toEncode.charAt(i);
                 if (!isAscii(c) || (c == ' ')) {
                     final byte[] bytes = String.valueOf(c).getBytes(cs);
                     for (int j = 0; j < bytes.length; j++) {
-                        retval.append('%').append(Integer.toHexString(bytes[j] & 0xFF).toUpperCase(Locale.ENGLISH));
+                        retval.append('%').append(Integer.toHexString(bytes[j] & 0xFF).toUpperCase(ENGLISH));
                     }
                 } else {
                     retval.append(c);

@@ -63,7 +63,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -82,6 +81,7 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -182,8 +182,13 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
         final long start = DEBUG ? System.currentTimeMillis() : 0L;
         final boolean started = folderStorage.startTransaction(storageParameters, false);
         try {
-            final List<SortableId> allSubfolderIds =
-                Arrays.asList(folderStorage.getVisibleFolders(treeId, contentType, type, storageParameters));
+            final List<SortableId> allSubfolderIds;
+            try {
+                allSubfolderIds = Arrays.asList(folderStorage.getVisibleFolders(treeId, contentType, type, storageParameters));
+            } catch (final UnsupportedOperationException e) {
+                LOG.warn("Operation is not supported for folder storage " + folderStorage.getClass().getSimpleName() + " (content-type=" + contentType.toString() + ")", e);
+                return new UserizedFolder[0];
+            }
             /*
              * Sort them
              */

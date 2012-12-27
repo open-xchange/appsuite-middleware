@@ -61,10 +61,12 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.Login;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
@@ -75,7 +77,10 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -189,6 +194,56 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     @Override
+    protected void initializeSession(final HttpServletRequest req) throws OXException {
+        if (null != getSessionObject(req, true)) {
+            return;
+        }
+        // Remember session
+        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (sessiondService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
+        }
+        boolean sessionParamFound = false;
+        {
+            final String sSession = req.getParameter("session");
+            if (sSession != null && sSession.length() > 0) {
+                final String sessionId = getSessionId(req);
+                final ServerSession session = getSession(req, sessionId, sessiondService);
+                verifySession(req, sessiondService, sessionId, session);
+                rememberSession(req, session);
+                sessionParamFound = true;
+            }
+        }
+        // Check if associated request allows no session (if no "session" parameter was found)
+        boolean mayOmitSession = false;
+        if (!sessionParamFound) {
+            final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
+            final String module = requestDataTools.getModule(PREFIX.get(), req);
+            final String action = requestDataTools.getAction(req);
+            mayOmitSession = DISPATCHER.get().mayOmitSession(module, action);
+        }
+        // Try public session
+        if (!mayOmitSession) {
+            final Cookie[] cookies = req.getCookies();
+            if (cookies != null) {
+                Session simpleSession = null;
+                for (final Cookie cookie : cookies) {
+                    if (Login.PUBLIC_SESSION_NAME.equals(cookie.getName())) {
+                        simpleSession = sessiondService.getSessionByAlternativeId(cookie.getValue());
+                        break;
+                    }
+                }
+                // CHeck if a simple (aka public) session has been found
+                if (simpleSession != null) {
+                    final ServerSession session = ServerSessionAdapter.valueOf(simpleSession);
+                    verifySession(req, sessiondService, session.getSessionID(), session);
+                    rememberPublicSession(req, session);
+                }
+            }
+        }
+    }
+
+    @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp, false);
     }
@@ -276,7 +331,7 @@ public class DispatcherServlet extends SessionServlet {
             // Handle other OXExceptions
             if (e.isLoggable(LogLevel.ERROR)) {
                 if (LogProperties.isEnabled()) {
-                    StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
+                    final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
                     logBuilder.append(LogProperties.getAndPrettyPrint());
                     LOG.error(logBuilder.toString(), e);
                 } else {
@@ -287,7 +342,7 @@ public class DispatcherServlet extends SessionServlet {
             APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? httpRequest.getMethod().toUpperCase(Locale.US) : action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
             if(LogProperties.isEnabled()) {
-                StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
+                final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
                 logBuilder.append(LogProperties.getAndPrettyPrint());
                 LOG.error(logBuilder.toString(),e);
             } else {
@@ -305,18 +360,18 @@ public class DispatcherServlet extends SessionServlet {
 
     private ServerSession getSession(final HttpServletRequest httpRequest, final Dispatcher dispatcher, final String module, final String action) throws OXException {
         ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
-        if (session == null && dispatcher.mayOmitSession(module, action)) {
-        	session = fakeSession();
-        }
-        if (null == session) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+        if (session == null) {
+            if (!dispatcher.mayOmitSession(module, action)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+            }
+            session = fakeSession();
         }
         return session;
     }
 
 	private ServerSession fakeSession() {
 		final UserImpl user = new UserImpl();
-		user.setAttributes(new HashMap<String, Set<String>>());
+		user.setAttributes(new HashMap<String, Set<String>>(1));
 		return new ServerSessionAdapter(NO_SESSION, new ContextImpl(-1), user);
 	}
 

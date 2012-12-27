@@ -128,21 +128,23 @@ public final class SmbFileMap {
      * @return The SMB file
      */
     public SmbFile putIfAbsent(final String path, final SmbFile smbFile) {
-        final Wrapper wrapper = wrapperOf(smbFile);
+        final Wrapper wrapper = wrapperFor(smbFile);
         Wrapper prev = map.putIfAbsent(path, wrapper);
         if (null == prev) {
             // Successfully put into map
             return null;
         }
         if (prev.elapsed(maxLifeMillis)) {
-            synchronized (map) {
-                prev = map.get(path);
-                if (prev.elapsed(maxLifeMillis)) {
-                    shrink();
-                    map.put(path, wrapper);
-                    return null;
-                }
+            if (map.replace(path, prev, wrapper)) {
+                // Successfully replaced with elapsed one
+                return null;
             }
+            prev = map.get(path);
+            if (null == prev) {
+                prev = map.putIfAbsent(path, wrapper);
+                return null == prev ? null : prev.getValue();
+            }
+            return prev.getValue();
         }
         return prev.getValue();
     }
@@ -212,7 +214,7 @@ public final class SmbFileMap {
      * @return The SMB file
      */
     public SmbFile put(final String path, final SmbFile smbFile) {
-        final Wrapper wrapper = map.put(path, wrapperOf(smbFile));
+        final Wrapper wrapper = map.put(path, wrapperFor(smbFile));
         if (null == wrapper) {
             return null;
         }
@@ -232,10 +234,7 @@ public final class SmbFileMap {
      */
     public SmbFile remove(final String path) {
         final Wrapper wrapper = map.remove(path);
-        if (null == wrapper) {
-            return null;
-        }
-        return wrapper.getIfNotElapsed(maxLifeMillis);
+        return null == wrapper ? null : wrapper.getIfNotElapsed(maxLifeMillis);
     }
 
     /**
@@ -250,13 +249,13 @@ public final class SmbFileMap {
         return map.toString();
     }
 
-    private Wrapper wrapperOf(final SmbFile smbFile) {
+    private Wrapper wrapperFor(final SmbFile smbFile) {
         return new Wrapper(smbFile);
     }
 
     private static final class Wrapper {
 
-        private final SmbFile value;
+        final SmbFile value;
         private volatile long stamp;
 
         public Wrapper(final SmbFile value) {

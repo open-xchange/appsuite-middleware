@@ -136,7 +136,7 @@ import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.impl.Version;
+import com.openexchange.version.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -284,7 +284,7 @@ public class MimeMessageFiller {
         /*
          * Set mailer
          */
-        mimeMessage.setHeader(MessageHeaders.HDR_X_MAILER, "Open-Xchange Mailer v" + Version.getVersionString());
+        mimeMessage.setHeader(MessageHeaders.HDR_X_MAILER, "Open-Xchange Mailer v" + Version.getInstance().getVersionString());
         /*
          * Set organization to context-admin's company field setting
          */

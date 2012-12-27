@@ -1096,7 +1096,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
          * Consider start/end index
          */
         if (start != NOT_SET && end != NOT_SET && end > start) {
-
             final int fromIndex = start;
             int toIndex = end;
             if ((fromIndex) > results.size()) {

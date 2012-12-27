@@ -47,70 +47,49 @@
  *
  */
 
-package com.openexchange.file.storage.cifs.cache;
+package com.openexchange.version.osgi;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Dictionary;
+import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import com.openexchange.version.Version;
+import com.openexchange.version.internal.Numbers;
 
 /**
- * {@link MaxCapacityLinkedHashMap}
+ * Reads version and build number from the bundle manifest.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-final class MaxCapacityLinkedHashMap<K, V> extends LinkedHashMap<K, V> implements ConcurrentMap<K, V> {
+public class VersionActivator implements BundleActivator {
 
-    private static final long serialVersionUID = 8965907246210389424L;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(VersionActivator.class);
 
-    private static final int INITIAL_CAPACITY = 16;
-
-    private static final float LOAD_FACTOR = 0.75f;
-
-    private final int maximumCapacity;
-
-    /**
-     * Initializes a new {@link MaxCapacityLinkedHashMap}.
-     *
-     * @param maximumCapacity The maximum capacity
-     */
-    MaxCapacityLinkedHashMap(final int maximumCapacity) {
-        super(INITIAL_CAPACITY, LOAD_FACTOR, true);
-        this.maximumCapacity = maximumCapacity;
+    public VersionActivator() {
+        super();
     }
 
     @Override
-    protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
-        return size() > maximumCapacity;
-    }
-
-    @Override
-    public V putIfAbsent(final K key, final V value) {
-        final V currentValue = get(key);
-        return (currentValue == null) ? put(key, value) : currentValue;
-    }
-
-    @Override
-    public boolean remove(final Object key, final Object value) {
-        if (value.equals(get(key))) {
-            remove(key);
-            return true;
+    public void start(BundleContext context) throws Exception {
+        LOG.info("Starting bundle com.openexchange.version");
+        Dictionary<String, String> headers = context.getBundle().getHeaders();
+        String version = headers.get("OXVersion");
+        if (null == version) {
+            throw new Exception("Can not read version from bundle manifest " + context.getBundle().getSymbolicName());
         }
-        return false;
-    }
-
-    @Override
-    public V replace(final K key, final V value) {
-        return containsKey(key) ? put(key, value) : null;
-    }
-
-    @Override
-    public boolean replace(final K key, final V oldValue, final V newValue) {
-        final V currentValue = get(key);
-        if (oldValue.equals(currentValue)) {
-            put(key, newValue);
-            return true;
+        String buildNumber = headers.get("OXRevision");
+        if (null == buildNumber) {
+            throw new Exception("Can not read buildNumber from bundle manifest.");
         }
-        return false;
+        Version instance = Version.getInstance();
+        instance.setNumbers(new Numbers(version, buildNumber));
+        LOG.info(Version.NAME + ' ' + instance.getVersionString());
+        LOG.info("(c) Open-Xchange Inc. , Open-Xchange GmbH");
     }
 
+    @Override
+    public void stop(BundleContext context) {
+        LOG.info("Stopping bundle com.openexchange.version");
+        Version.getInstance().setNumbers(null);
+    }
 }

@@ -116,8 +116,6 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     private final IDSetter setId = new IDSetter(fileId.getFileId());
 
-
-
     public CompositingFileAccessTest() {
         super(new SimSession());
     }
@@ -134,7 +132,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testExists() throws OXException {
-        fileAccess.expectCall("exists", fileId.getFolderId(), fileId.getFileId(), 12).andReturn(true);
+        fileAccess.expectCall("exists", fileId.getFolderId(), fileId.getFileId(), "12").andReturn(true);
 
         assertTrue(exists(fileId.toUniqueID(), "12"));
         verifyAccount();
@@ -174,7 +172,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testGetDocument() throws OXException {
-        fileAccess.expectCall("getDocument", fileId.getFolderId(), fileId.getFileId(), 12);
+        fileAccess.expectCall("getDocument", fileId.getFolderId(), fileId.getFileId(), "12");
 
         getDocument(fileId.toUniqueID(), "12");
 
@@ -250,7 +248,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         file.setId(fileId.getFileId());
         file.setFolderId(fileId.getFolderId());
 
-        fileAccess.expectCall("getFileMetadata", fileId.getFolderId(), fileId.getFileId(), 12).andReturn(file);
+        fileAccess.expectCall("getFileMetadata", fileId.getFolderId(), fileId.getFileId(), "12").andReturn(file);
 
         getFileMetadata(fileId.toUniqueID(), "12");
 
@@ -370,7 +368,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     public void testRemoveVersions() throws OXException {
         final String[] versions = new String[] { "1", "2", "3" };
 
-        fileAccess.expectCall("removeVersion", fileId.getFolderId(), fileId.getFileId(), versions).andReturn(new int[0]);
+        fileAccess.expectCall("removeVersion", fileId.getFolderId(), fileId.getFileId(), versions).andReturn(new String[0]);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         removeVersion(fileId.toUniqueID(), versions);

@@ -47,70 +47,35 @@
  *
  */
 
-package com.openexchange.imap.cache.util;
+package com.openexchange.ajax.config;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.GetResponse;
+import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
- * {@link MaxCapacityLinkedHashMap}
+ * Tests is the server reports always the correct version.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class MaxCapacityLinkedHashMap<K, V> extends LinkedHashMap<K, V> implements ConcurrentMap<K, V> {
+public class Bug22389Test extends AbstractAJAXSession {
 
-    private static final long serialVersionUID = 8965907246210389424L;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug22389Test.class);
+    private static final String EXPRESSION = "[67]\\.[0-9]+\\.[0-9]-Rev[0-9]+";
+    private static final Pattern PATTERN = Pattern.compile(EXPRESSION);
 
-    private static final int INITIAL_CAPACITY = 16;
-
-    private static final float LOAD_FACTOR = 0.75f;
-
-    private final int maximumCapacity;
-
-    /**
-     * Initializes a new {@link MaxCapacityLinkedHashMap}.
-     *
-     * @param maximumCapacity The maximum capacity
-     */
-    public MaxCapacityLinkedHashMap(final int maximumCapacity) {
-        super(INITIAL_CAPACITY, LOAD_FACTOR, true);
-        this.maximumCapacity = maximumCapacity;
+    public Bug22389Test(String name) {
+        super(name);
     }
 
-    @Override
-    protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
-        return size() > maximumCapacity;
+    public void testVersion() throws Exception {
+        GetRequest request = new GetRequest(Tree.ServerVersion);
+        GetResponse response = client.execute(request);
+        String version = response.getString();
+        LOG.trace("Server reported version: \"" + version + "\".");
+        assertTrue("Server version does not match required pattern: \"" + version + "\"", PATTERN.matcher(version).matches());
     }
-
-    @Override
-    public V putIfAbsent(final K key, final V value) {
-        final V currentValue = get(key);
-        return (currentValue == null) ? put(key, value) : currentValue;
-    }
-
-    @Override
-    public boolean remove(final Object key, final Object value) {
-        if (value.equals(get(key))) {
-            remove(key);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public V replace(final K key, final V value) {
-        return containsKey(key) ? put(key, value) : null;
-    }
-
-    @Override
-    public boolean replace(final K key, final V oldValue, final V newValue) {
-        final V currentValue = get(key);
-        if (oldValue.equals(currentValue)) {
-            put(key, newValue);
-            return true;
-        }
-        return false;
-    }
-
 }

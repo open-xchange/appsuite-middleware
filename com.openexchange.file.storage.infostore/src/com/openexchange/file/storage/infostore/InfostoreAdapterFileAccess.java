@@ -122,7 +122,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     @Override
     public boolean exists(final String folderId, final String id, final String version) throws OXException {
         try {
-            return getInfostore(folderId).exists( ID(id), Integer.parseInt(version), ctx, user, userConfig);
+            return getInfostore(folderId).exists( ID(id), null == version ? -1 : Integer.parseInt(version), ctx, user, userConfig);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -132,7 +132,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     @Override
     public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
-            return getInfostore(folderId).getDocument(ID( id ), Integer.parseInt(version), ctx, user, userConfig);
+            return getInfostore(folderId).getDocument(ID( id ), null == version ? -1 : Integer.parseInt(version), ctx, user, userConfig);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -142,7 +142,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
     @Override
     public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         try {
-            final DocumentMetadata documentMetadata = getInfostore(folderId).getDocumentMetadata(ID( id ), Integer.parseInt(version), ctx, user, userConfig);
+            final DocumentMetadata documentMetadata = getInfostore(folderId).getDocumentMetadata(ID( id ), null == version ? -1 : Integer.parseInt(version), ctx, user, userConfig);
             return new InfostoreFile( documentMetadata );
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
@@ -198,7 +198,8 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
         }
         final int[] ret = new int[sa.length];
         for (int i = 0; i < sa.length; i++) {
-            ret[i] = Integer.parseInt(sa[i]);
+            final String version = sa[i];
+            ret[i] = null == version ? -1 : Integer.parseInt(version);
         }
         return ret;
     }
@@ -209,7 +210,8 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
         }
         final String[] ret = new String[ia.length];
         for (int i = 0; i < ia.length; i++) {
-            ret[i] = Integer.toString(ia[i]);
+            final int iVersion = ia[i];
+            ret[i] = iVersion < 0 ? null : Integer.toString(iVersion);
         }
         return ret;
     }

@@ -47,40 +47,67 @@
  *
  */
 
-package com.openexchange.server.impl;
+package com.openexchange.version;
+
+import com.openexchange.version.internal.Numbers;
 
 /**
- * Version
- * @author <a href="mailto:sebastian.kauss@open-xchange.de">Sebastian Kauss</a>
+ * Stores the version of the backend
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Version {
-
-    /**
-     * This should be only accessed by the bundle activator.
-     */
-    public static String version = "";
 
     public static final String CODENAME = "Hyperion";
     public static final String NAME = "Open-Xchange";
 
-    /**
-     * This should be only accessed by the bundle activator.
-     */
-    public static String buildnumber = "";
+    public static final Version SINGLETON = new Version();
 
-    private static String versionString = null;
+    private Numbers numbers = null;
+    private String versionString = null;
 
-    public static String getVersionString() {
-        if (null == versionString) {
-            versionString = version + '-' + buildnumber;
+    public String getVersionString() {
+        synchronized (this) {
+            if (null == versionString) {
+                if (null == numbers) {
+                    throw new IllegalStateException("Central backend version not initialized yet.");
+                }
+                versionString = numbers.getVersion() + '-' + numbers.getBuildNumber();
+            }
         }
         return versionString;
     }
 
-    /**
-     * Prevent instantiation.
-     */
+    public int getMajor() {
+        if (null == numbers) {
+            throw new IllegalStateException("Central backend version not initialized yet.");
+        }
+        return numbers.getMajor();
+    }
+
+    public int getMinor() {
+        if (null == numbers) {
+            throw new IllegalStateException("Central backend version not initialized yet.");
+        }
+        return numbers.getMinor();
+    }
+
+    public int getPatch() {
+        if (null == numbers) {
+            throw new IllegalStateException("Central backend version not initialized yet.");
+        }
+        return numbers.getPatch();
+    }
+
     private Version() {
         super();
+    }
+
+    public static final Version getInstance() {
+        return SINGLETON;
+    }
+
+    public void setNumbers(Numbers numbers) {
+        this.numbers = numbers;
     }
 }

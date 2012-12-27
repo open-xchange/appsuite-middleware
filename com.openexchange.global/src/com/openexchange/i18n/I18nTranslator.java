@@ -80,7 +80,7 @@ public class I18nTranslator implements Translator {
     public String translate(final String toTranslate) {
         if (!service.hasKey(toTranslate)) {
             final Locale locale = service.getLocale();
-            if (Locale.US.equals(locale)) {
+            if (isEnUs(locale)) {
                 if (DEBUG_ENABLED) {
                     final String message = new com.openexchange.java.StringAllocator(64).append("I18n service for locale ").append(locale).append(
                         " has no translation for \"").append(toTranslate).append("\".").toString();
@@ -94,4 +94,12 @@ public class I18nTranslator implements Translator {
         }
         return service.getLocalized(toTranslate);
     }
+
+    private static boolean isEnUs(final Locale locale) {
+        if (null == locale) {
+            return false;
+        }
+        return "en".equals(locale.getLanguage()) && "US".equals(locale.getCountry());
+    }
+
 }

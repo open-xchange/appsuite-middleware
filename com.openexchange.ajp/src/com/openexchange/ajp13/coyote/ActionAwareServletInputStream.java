@@ -124,27 +124,27 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
     @Override
     public int read(final byte[] b) throws IOException {
         if (b == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("buffer is null");
         }
         final int len = b.length;
         if (len == 0) {
             return 0;
         }
-        return read0(b, 0, len);
+        return markEofIfZero(read0(b, 0, len));
     }
 
     @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {
         if (b == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("buffer is null");
         }
         if (off < 0 || len < 0 || len > b.length - off) {
-            throw new IndexOutOfBoundsException();
+            throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", available=" + (b.length - off));
         }
         if (len == 0) {
             return 0;
         }
-        return read0(b, off, len);
+        return markEofIfZero(read0(b, off, len));
     }
 
     /**
@@ -164,8 +164,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
          */
         final int bLength = byteChunk.getLength();
         if (bLength >= len) {
-            final int read = byteChunk.substract(b, off, len);
-            return 0 == read ? -1 : read;
+            return byteChunk.substract(b, off, len);
         }
         /*
          * Write available bytes into array
@@ -183,7 +182,11 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
             res = byteChunk.substract(b, read + off, len - read);
             read += res;
         }
-        return 0 == len ? -1 : len;
+        return len;
+    }
+
+    private static int markEofIfZero(final int result) {
+        return result <= 0 ? -1 : result;
     }
 
 }

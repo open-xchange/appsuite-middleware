@@ -303,7 +303,7 @@ public class CSVContactImporter extends AbstractImporter {
                 atLeastOneFieldWithWrongName = true;
                 wrongFields.add(fieldName);
             } else {
-                if (!currEntry.equals("")) {
+                if (currEntry.length() > 0) {
                     currField.doSwitch(conSet, contactObj, currEntry);
                     final Collection<OXException> warns = contactObj.getWarnings();
                     if (!warns.isEmpty()) {

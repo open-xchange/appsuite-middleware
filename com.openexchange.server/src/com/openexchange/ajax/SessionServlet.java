@@ -214,16 +214,17 @@ public abstract class SessionServlet extends AJAXServlet {
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        if (req.getParameter("session") != null && !req.getParameter("session").equals("")) {
-            final String sessionId = getSessionId(req);
-            final ServerSession session = getSession(req, sessionId, sessiondService);
-            verifySession(req, sessiondService, sessionId, session);
-            rememberSession(req, session);
+        {
+            final String sSession = req.getParameter("session");
+            if (sSession != null && !sSession.equals("")) {
+                final String sessionId = getSessionId(req);
+                final ServerSession session = getSession(req, sessionId, sessiondService);
+                verifySession(req, sessiondService, sessionId, session);
+                rememberSession(req, session);
+            }
         }
-        
         // Try public session
         final Cookie[] cookies = req.getCookies();
-        
         if (cookies != null) {
             Session simpleSession = null;
         	for (final Cookie cookie : cookies) {
@@ -232,36 +233,40 @@ public abstract class SessionServlet extends AJAXServlet {
                     break;
                 }
             }
-        	
         	if (simpleSession != null) {
         		final ServerSession session = ServerSessionAdapter.valueOf(simpleSession);
         		verifySession(req, sessiondService, session.getSessionID(), session);
         		rememberPublicSession(req, session);
         	}
-        	
         }
-
     }
 
-	private void verifySession(final HttpServletRequest req,
-			final SessiondService sessiondService, final String sessionId,
-			final ServerSession session) throws OXException {
-		if (!sessionId.equals(session.getSessionID())) {
-		    if (INFO) {
-		        LOG.info("Request's session identifier \"" + sessionId + "\" differs from the one indicated by SessionD service \"" + session.getSessionID() + "\".");
-		    }
-		    throw SessionExceptionCodes.WRONG_SESSION.create();
-		}
-		final Context ctx = session.getContext();
-		if (!ctx.isEnabled()) {
-		    sessiondService.removeSession(sessionId);
-		    if (INFO) {
-		        LOG.info("The context " + ctx.getContextId() + " associated with session is locked.");
-		    }
-		    throw SessionExceptionCodes.CONTEXT_LOCKED.create();
-		}
-		checkIP(session, req.getRemoteAddr());
-	}
+    /**
+     * Verifies given session.
+     * 
+     * @param req The HTTP request
+     * @param sessiondService The service
+     * @param sessionId The session identifier
+     * @param session The session
+     * @throws OXException If verification fails
+     */
+    protected void verifySession(final HttpServletRequest req, final SessiondService sessiondService, final String sessionId, final ServerSession session) throws OXException {
+        if (!sessionId.equals(session.getSessionID())) {
+            if (INFO) {
+                LOG.info("Request's session identifier \"" + sessionId + "\" differs from the one indicated by SessionD service \"" + session.getSessionID() + "\".");
+            }
+            throw SessionExceptionCodes.WRONG_SESSION.create();
+        }
+        final Context ctx = session.getContext();
+        if (!ctx.isEnabled()) {
+            sessiondService.removeSession(sessionId);
+            if (INFO) {
+                LOG.info("The context " + ctx.getContextId() + " associated with session is locked.");
+            }
+            throw SessionExceptionCodes.CONTEXT_LOCKED.create();
+        }
+        checkIP(session, req.getRemoteAddr());
+    }
 
     /**
      * Checks the session ID supplied as a query parameter in the request URI.

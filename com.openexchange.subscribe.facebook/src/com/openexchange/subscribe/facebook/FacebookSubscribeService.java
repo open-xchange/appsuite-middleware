@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -72,12 +71,10 @@ import com.openexchange.subscribe.SubscriptionSource;
  */
 public class FacebookSubscribeService extends AbstractSubscribeService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookSubscribeService.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FacebookSubscribeService.class);
 
     private final SubscriptionSource source = new SubscriptionSource();
-
     private final OAuthServiceMetaData facebookMetaData;
-
     private final FacebookService facebookService;
 
     public FacebookSubscribeService(final OAuthServiceMetaData facebookMetaData, final FacebookService facebookService) {
@@ -104,7 +101,7 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
             subscription.getSession(),
             subscription.getUserId(),
             subscription.getContext().getContextId(),
-            (Integer) subscription.getConfiguration().get("account"));
+            ((Integer) subscription.getConfiguration().get("account")).intValue());
     }
 
     @Override

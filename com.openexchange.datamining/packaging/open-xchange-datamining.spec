@@ -1,53 +1,26 @@
-
+%define	       configfiles     configfiles.list
 # norootforbuild
 
 Name:           open-xchange-datamining
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common
-%if 0%{?suse_version} && 0%{?sles_version} < 11
-%if %{?suse_version} <= 1010
-# SLES10
-BuildRequires:  java-1_5_0-ibm >= 1.5.0_sr9
-BuildRequires:  java-1_5_0-ibm-devel >= 1.5.0_sr9
-BuildRequires:  java-1_5_0-ibm-alsa >= 1.5.0_sr9
-BuildRequires:  update-alternatives
-%endif
-%if %{?suse_version} >= 1100
-BuildRequires:  java-sdk-openjdk
-%endif
-%if %{?suse_version} > 1010 && %{?suse_version} < 1100
-BuildRequires:  java-sdk-1.5.0-sun
-%endif
-%endif
-%if 0%{?sles_version} >= 11
-# SLES11 or higher
-BuildRequires:  java-1_6_0-ibm-devel
-%endif
+BuildRequires: ant
+BuildRequires: ant-nodeps
+BuildRequires: java-devel >= 1.6.0
+BuildRequires: open-xchange-osgi >= @OXVERSION@
+BuildRequires: open-xchange-core >= @OXVERSION@
+Version:       @OXVERSION@
+%define        ox_release 3
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
+License:       GPL-2.0 
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+URL:           http://www.open-xchange.com/            
+Source:        %{name}_%{version}.orig.tar.bz2
+Summary:       The Open-Xchange Custom Strato
+Requires:      open-xchange-osgi >= @OXVERSION@
+Requires:      open-xchange-core >= @OXVERSION@
 
-%if 0%{?rhel_version}
-# libgcj seems to be installed whether we want or not and libgcj needs cairo
-BuildRequires:  java-sdk-sun cairo
-%endif
-%if 0%{?fedora_version}
-%if %{?fedora_version} > 8
-BuildRequires:  java-1.6.0-openjdk-devel saxon
-%endif
-%endif
-%if 0%{?centos_version}
-BuildRequires:  java-1.6.0-openjdk-devel
-%endif
-Version:	@OXVERSION@
-%define		ox_release 2
-Release:	%{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
-License:        GNU General Public License (GPL)
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-#URL:            
-Source:         %{name}_%{version}.orig.tar.gz
-Summary:        The Open-Xchange datamining tool
-Requires:       open-xchange-common
-#
 
 %description
 The Open-Xchange datamining tool
@@ -65,15 +38,28 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 
-ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+rm -f %{configfiles}
+find %{buildroot}/opt/open-xchange/etc \
+        -type f \
+        -printf "%%%config(noreplace) %p\n" > %{configfiles}
+perl -pi -e 's;%{buildroot};;' %{configfiles}
+
 
 %clean
 %{__rm} -rf %{buildroot}
 
-%files
+%post
+
+%files -f %{configfiles}
+
 %defattr(-,root,root)
+%dir /opt/open-xchange/bundles/
 %dir /opt/open-xchange/lib
 %dir /opt/open-xchange/sbin
+%dir /opt/open-xchange/osgi/bundle.d/
+/opt/open-xchange/osgi/bundle.d/*
+
 /opt/open-xchange/lib
 /opt/open-xchange/sbin
 
