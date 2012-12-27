@@ -1,3 +1,7 @@
+* 2012-12-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24346: Null guard
+
 * 2012-12-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 23553: Avoid returning zero as result of java.io.InputStream.read(byte[]) invocation
