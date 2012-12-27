@@ -49,7 +49,6 @@
 
 package com.openexchange.index.solr.internal.mail;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,7 +58,6 @@ import java.util.List;
 import java.util.Set;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.FacetParameters;
@@ -70,16 +68,12 @@ import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
-import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
-import com.openexchange.index.solr.internal.querybuilder.BuilderException;
-import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
 import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.index.MailUUID;
 import com.openexchange.solr.SolrCoreIdentifier;
-import com.openexchange.solr.SolrProperties;
 
 /**
  * {@link SolrMailIndexAccess}
