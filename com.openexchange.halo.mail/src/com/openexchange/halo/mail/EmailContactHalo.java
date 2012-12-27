@@ -154,9 +154,9 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		Collections.sort(messages, new Comparator<MailMessage>(){
 
 			@Override
-			public int compare(MailMessage arg0, MailMessage arg1) {
-				Date sentDate1 = arg1.getSentDate();
-                Date sentDate0 = arg0.getSentDate();
+			public int compare(final MailMessage arg0, final MailMessage arg1) {
+				final Date sentDate1 = arg1.getSentDate();
+                final Date sentDate0 = arg0.getSentDate();
                 if (sentDate1 == null) {
                     return null == sentDate0 ? 0 : -1;
                 }
