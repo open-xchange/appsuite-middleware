@@ -61,8 +61,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
@@ -580,41 +580,65 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
          * Poll them concurrently...
          */
         final ConcurrentTIntObjectHashMap<SearchIterator<File>> resultMap = new ConcurrentTIntObjectHashMap<SearchIterator<File>>(numOfStorages);
-        final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-        final CompletionService<Void> completionService = null == threadPool ? new CallerRunsCompletionService<Void>() : new ThreadPoolCompletionService<Void>(threadPool);
-        for (int i = 0; i < numOfStorages; i++) {
-            final FileStorageFileAccess files = all.get(i);
-            final int index = i;
-            completionService.submit(new AbstractTrackableTask<Void>() {
-
-                @Override
-                public Void call() throws OXException {
-                    try {
-                        final SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
-                        if(result != null) {
-                            final FileStorageAccountAccess accountAccess = files.getAccountAccess();
-                            resultMap.put(index, fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));
+        final CompletionService<Void> completionService;
+        {
+            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+            if (null == threadPool) {
+                completionService = new CallerRunsCompletionService<Void>();
+                for (int i = 0; i < numOfStorages; i++) {
+                    final FileStorageFileAccess files = all.get(i);
+                    final int index = i;
+                    completionService.submit(new Callable<Void>() {
+    
+                        @Override
+                        public Void call() throws Exception {
+                            try {
+                                final SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
+                                if(result != null) {
+                                    final FileStorageAccountAccess accountAccess = files.getAccountAccess();
+                                    resultMap.put(index, fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));
+                                }
+                            } catch (final Exception e) {
+                                // Ignore failed one in composite search results
+                            }
+                            return null;
                         }
-                    } catch (final Exception e) {
-                        // Ignore failed one in composite search results
-                    }
-                    return null;
+                    });
                 }
-            });
+            } else {
+                final ThreadPoolCompletionService<Void> tcompletionService = new ThreadPoolCompletionService<Void>(threadPool);
+                for (int i = 0; i < numOfStorages; i++) {
+                    final FileStorageFileAccess files = all.get(i);
+                    final int index = i;
+                    tcompletionService.submit(new AbstractTrackableTask<Void>() {
+    
+                        @Override
+                        public Void call() throws OXException {
+                            try {
+                                final SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
+                                if(result != null) {
+                                    final FileStorageAccountAccess accountAccess = files.getAccountAccess();
+                                    resultMap.put(index, fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));
+                                }
+                            } catch (final Exception e) {
+                                // Ignore failed one in composite search results
+                            }
+                            return null;
+                        }
+                    });
+                }
+                completionService = tcompletionService;
+            }
         }
+        /*
+         * Take from completion service
+         */
         for (int i = 0; i < numOfStorages; i++) {
             try {
-                completionService.take().get();
+                completionService.take();
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } catch (final ExecutionException e) {
-                // Cannot occur
-                final Throwable cause = e.getCause();
-                if (cause instanceof OXException) {
-                    throw (OXException) cause;
-                }
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
             }
         }
         final List<SearchIterator<File>> results = new ArrayList<SearchIterator<File>>(numOfStorages);
