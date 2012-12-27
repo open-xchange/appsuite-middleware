@@ -163,8 +163,7 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
                 return null == sentDate0 ? 1 : sentDate1.compareTo(sentDate0);
 			}});
 		
-		limit = limit > messages.size() ? messages.size() : limit;
-		messages = messages.subList(0, limit);
+		messages = messages.subList(0, Math.min(limit, messages.size()));
 		return new AJAXRequestResult(messages, "mail");
 	}
 
