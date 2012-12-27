@@ -160,7 +160,7 @@ public class FileWriterTest extends FileTest {
         f.setNumberOfVersions(2);
         f.setTitle("Nice Title");
         f.setURL("url");
-        f.setVersion(2);
+        f.setVersion("2");
         f.setVersionComment("version comment");
         return f;
     }
