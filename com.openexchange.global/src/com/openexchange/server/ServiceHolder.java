@@ -203,13 +203,9 @@ public abstract class ServiceHolder<S> {
     }
 
     protected final AtomicInteger countActive;
-
     protected final Map<String, ServiceHolderListener<S>> listeners;
-
     protected final Map<Thread, Map<ServiceProxy, Object>> usingThreads;
-
     protected final AtomicBoolean waiting;
-
     protected final AtomicReference<S> serviceReference;
 
     /**
