@@ -382,7 +382,9 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
             if (rs.next()) {
-                return new UserConfiguration(rs.getInt(1), userId, groups, ctx);
+                final UserConfiguration userConfiguration = new UserConfiguration(rs.getInt(1), userId, groups, ctx);
+                userConfiguration.setExtendedPermissions(userConfiguration.calcExtendedPermissions());
+                return userConfiguration;
             }
             throw UserConfigurationCodes.NOT_FOUND.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
         } finally {
@@ -447,7 +449,9 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
                 if (userMap.containsKey(userId)) {
                     final int index = userMap.get(userId);
                     final User user = users[index];
-                    retval[index] = new UserConfiguration(result.getInt(2), user.getId(), user.getGroups(), ctx);
+                    final UserConfiguration userConfiguration = new UserConfiguration(result.getInt(2), user.getId(), user.getGroups(), ctx);
+                    userConfiguration.setExtendedPermissions(userConfiguration.calcExtendedPermissions());
+                    retval[index] = userConfiguration;
                 }
             }
         } finally {

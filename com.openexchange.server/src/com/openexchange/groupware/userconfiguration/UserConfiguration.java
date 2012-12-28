@@ -1184,10 +1184,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
         return new StringBuilder(32).append("UserConfiguration_").append(userId).append('@').append(Integer.toBinaryString(permissionBits)).toString();
     }
 
-    private static final String PERMISSION_PROPERTY = "permissions".intern();
-    private static final Pattern P_SPLIT = Pattern.compile("\\s*[, ]\\s*");
-    private static final Locale US = Locale.US;
-    
 	/**
 	 * Gets the extended permissions.
 	 *
@@ -1196,47 +1192,56 @@ public final class UserConfiguration implements Serializable, Cloneable {
     public Set<String> getExtendedPermissions() {
         Set<String> retval = extendedPermissions;
         if (retval == null) {
-            final UserConfigurationStorage configurationStorage = UserConfigurationStorage.getInstance();
-            final Object lock = null == configurationStorage ? this : configurationStorage.getLock(userId, ctx);
-            synchronized (lock) {
+            synchronized (this) {
                 retval = extendedPermissions;
                 if (retval == null) {
-                    retval = new HashSet<String>();
-                    for (final Permission p : Permission.values()) {
-                        if (hasPermissionInternal(p)) {
-                            retval.add(p.name().toLowerCase(US));
-                        }
-                    }
-                    // Now apply modifiers from the config cascade
-                    final ConfigViewFactory configViews = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-                    if (configViews != null) {
-                        try {
-                            final ConfigView view = configViews.getView(getUserId(), getContext().getContextId());
-                            final String[] searchPath = configViews.getSearchPath();
-                            for (final String scope : searchPath) {
-                                final String permissions = view.property(PERMISSION_PROPERTY, String.class).precedence(scope).get();
-                                if (permissions != null) {
-                                    for (String permissionModifier : P_SPLIT.split(permissions)) {
-                                        final char firstChar = permissionModifier.charAt(0);
-                                        if ('-' == firstChar) {
-                                            retval.remove(permissionModifier.substring(1).toLowerCase(US));
-                                            continue;
-                                        } else if ('+' == firstChar) {
-                                            permissionModifier = permissionModifier.substring(1);
-                                        }
-                                        retval.add(permissionModifier.toLowerCase(US));
-                                    }
-                                }
-                            }
-                        } catch (final OXException x) {
-                            LOG.error(x.getMessage(), x);
-                        }
-                    }
-                    if (null != configurationStorage) {
-                        configurationStorage.setExtendedPermissions(retval, userId, ctx);
-                    }
+                    retval = calcExtendedPermissions();
                     this.extendedPermissions = retval;
                 }
+            }
+        }
+        return retval;
+    }
+
+    private static final String PERMISSION_PROPERTY = "permissions".intern();
+    private static final Pattern P_SPLIT = Pattern.compile("\\s*[, ]\\s*");
+    private static final Locale US = Locale.US;
+
+    /**
+     * Calculates this user configuration's extended permissions.
+     * 
+     * @return The extended permissions
+     */
+    public Set<String> calcExtendedPermissions() {
+        final Set<String> retval = new HashSet<String>(128);
+        for (final Permission p : Permission.values()) {
+            if (hasPermissionInternal(p)) {
+                retval.add(p.name().toLowerCase(US));
+            }
+        }
+        // Now apply modifiers from the config cascade
+        final ConfigViewFactory configViews = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (configViews != null) {
+            try {
+                final ConfigView view = configViews.getView(getUserId(), getContext().getContextId());
+                final String[] searchPath = configViews.getSearchPath();
+                for (final String scope : searchPath) {
+                    final String permissions = view.property(PERMISSION_PROPERTY, String.class).precedence(scope).get();
+                    if (permissions != null) {
+                        for (String permissionModifier : P_SPLIT.split(permissions)) {
+                            final char firstChar = permissionModifier.charAt(0);
+                            if ('-' == firstChar) {
+                                retval.remove(permissionModifier.substring(1).toLowerCase(US));
+                                continue;
+                            } else if ('+' == firstChar) {
+                                permissionModifier = permissionModifier.substring(1);
+                            }
+                            retval.add(permissionModifier.toLowerCase(US));
+                        }
+                    }
+                }
+            } catch (final OXException x) {
+                LOG.error(x.getMessage(), x);
             }
         }
         return retval;
