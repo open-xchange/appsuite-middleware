@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -1185,6 +1186,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     
     private static final String PERMISSION_PROPERTY = "permissions".intern();
     private static final Pattern P_SPLIT = Pattern.compile("\\s*[, ]\\s*");
+    private static final Locale US = Locale.US;
     
 	/**
 	 * Gets the extended permissions.
@@ -1202,7 +1204,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
                     retval = new HashSet<String>();
                     for (final Permission p : Permission.values()) {
                         if (hasPermissionInternal(p)) {
-                            retval.add(p.name().toLowerCase());
+                            retval.add(p.name().toLowerCase(US));
                         }
                     }
                     // Now apply modifiers from the config cascade
@@ -1217,12 +1219,12 @@ public final class UserConfiguration implements Serializable, Cloneable {
                                     for (String permissionModifier : P_SPLIT.split(permissions)) {
                                         final char firstChar = permissionModifier.charAt(0);
                                         if ('-' == firstChar) {
-                                            retval.remove(permissionModifier.substring(1).toLowerCase());
+                                            retval.remove(permissionModifier.substring(1).toLowerCase(US));
                                             continue;
                                         } else if ('+' == firstChar) {
                                             permissionModifier = permissionModifier.substring(1);
                                         }
-                                        retval.add(permissionModifier.toLowerCase());
+                                        retval.add(permissionModifier.toLowerCase(US));
                                     }
                                 }
                             }
