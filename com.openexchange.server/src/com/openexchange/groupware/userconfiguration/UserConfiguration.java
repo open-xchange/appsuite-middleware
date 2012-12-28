@@ -407,7 +407,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      *
      * @param extendedPermissions The extended permissions to set
      */
-    void setExtendedPermissions(Set<String> extendedPermissions) {
+    void setExtendedPermissions(final Set<String> extendedPermissions) {
         this.extendedPermissions = extendedPermissions;
     }
 
@@ -1183,7 +1183,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     public String toString() {
         return new StringBuilder(32).append("UserConfiguration_").append(userId).append('@').append(Integer.toBinaryString(permissionBits)).toString();
     }
-    
+
     private static final String PERMISSION_PROPERTY = "permissions".intern();
     private static final Pattern P_SPLIT = Pattern.compile("\\s*[, ]\\s*");
     private static final Locale US = Locale.US;
