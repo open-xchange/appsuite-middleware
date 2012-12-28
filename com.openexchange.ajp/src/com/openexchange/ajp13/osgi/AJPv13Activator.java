@@ -206,7 +206,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
                 this.inits = null;
             }
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(32).append("NIO AJP server successfully stopped.").toString());
+                LOG.info("AJP server successfully stopped.");
             }
             /*
              * Clear service registry
