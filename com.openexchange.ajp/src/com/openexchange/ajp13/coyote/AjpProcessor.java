@@ -1952,11 +1952,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*-
          * Check for echo header presence
          */
-        final String echoHeaderName = AJPv13Response.getEchoHeaderName();
-        if (null != echoHeaderName) {
-            final String echoValue = request.getHeader(echoHeaderName);
-            if (null != echoValue) {
-                response.setHeader(echoHeaderName, urlEncode(echoValue));
+        {
+            final String echoHeaderName = AJPv13Response.getEchoHeaderName();
+            if (null != echoHeaderName) {
+                final String echoValue = request.getHeader(echoHeaderName);
+                if (null != echoValue) {
+                    response.setHeader(echoHeaderName, urlEncode(echoValue));
+                }
             }
         }
         /*
