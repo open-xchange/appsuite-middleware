@@ -62,11 +62,8 @@ import com.openexchange.exception.OXException;
 public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaData {
 
     protected String id;
-
     protected String displayName;
-
     protected String apiKey;
-
     protected String apiSecret;
 
     /**
