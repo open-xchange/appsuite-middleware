@@ -187,16 +187,19 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		final List<ImportResult> results = importStuff(file, "utf-8"); //test-problem: Outlook 2007 German is usually cp1252, but of course not in this test.
 		assertEquals("Only one result" , (Integer) 1 , (Integer) results.size() );
 		final ImportResult res = results.get(0);
-		final Contact conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
-		assertEquals("Position", conObj.getPosition() );
-		assertEquals("Raumnummer", conObj.getRoomNumber() );
-		assertEquals("Bundesland", conObj.getStateHome() );
-		assertEquals("Land", conObj.getCountryHome() );
-		assertEquals("Bundesland (weiteres)", conObj.getStateOther() );
-		assertEquals("Land (weiteres)", conObj.getCountryOther() );
-		assertEquals("E-Mail (weitere)", conObj.getEmail3() );
-		assertEquals("Land", conObj.getStateBusiness() );
-		assertEquals("email@geschaeftlich.tld", conObj.getEmail1() );
+		final String objectId = res.getObjectId();
+        if (null != objectId) {
+            final Contact conObj = getEntry(Integer.parseInt(objectId));
+            assertEquals("Position", conObj.getPosition());
+            assertEquals("Raumnummer", conObj.getRoomNumber());
+            assertEquals("Bundesland", conObj.getStateHome());
+            assertEquals("Land", conObj.getCountryHome());
+            assertEquals("Bundesland (weiteres)", conObj.getStateOther());
+            assertEquals("Land (weiteres)", conObj.getCountryOther());
+            assertEquals("E-Mail (weitere)", conObj.getEmail3());
+            assertEquals("Land", conObj.getStateBusiness());
+            assertEquals("email@geschaeftlich.tld", conObj.getEmail1());
+        }
 	}
 
 	//disabled, waiting for new bug report with English data
