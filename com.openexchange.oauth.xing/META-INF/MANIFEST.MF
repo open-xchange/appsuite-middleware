@@ -37,3 +37,4 @@ Import-Package: com.openexchange.capabilities,
  org.scribe.oauth,
  org.scribe.services,
  org.scribe.utils
+Bundle-Activator: com.openexchange.oauth.xing.osgi.XingOAuthActivator

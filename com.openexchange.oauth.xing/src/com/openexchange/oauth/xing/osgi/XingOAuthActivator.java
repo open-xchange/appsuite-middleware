@@ -47,36 +47,33 @@
  *
  */
 
-package com.openexchange.oauth.xing;
+package com.openexchange.oauth.xing.osgi;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractOAuthServiceMetaData;
+import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.xing.XingOAuthServiceMetaData;
+import com.openexchange.osgi.HousekeepingActivator;
 
 
 /**
- * {@link XingOAuthServiceMetaData}
+ * {@link XingOAuthActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData {
+public final class XingOAuthActivator extends HousekeepingActivator {
 
-    /**
-     * Initializes a new {@link XingOAuthServiceMetaData}.
-     * 
-     * @param configService The configuration service
-     */
-    public XingOAuthServiceMetaData(ConfigurationService configService) {
+    public XingOAuthActivator() {
         super();
-        id = "com.openexchange.oauth.xing";
-        displayName = "Xing";
-        apiKey = configService.getProperty("com.openexchange.oauth.xing.apiKey");
-        apiSecret = configService.getProperty("com.openexchange.oauth.xing.apiSecret");
     }
 
     @Override
-    public API getAPI() {
-        return API.XING;
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(OAuthServiceMetaData.class, new XingOAuthServiceMetaData(getService(ConfigurationService.class)));
     }
 
 }
