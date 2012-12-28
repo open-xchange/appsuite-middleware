@@ -51,7 +51,6 @@ package com.openexchange.groupware.userconfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
@@ -185,31 +184,10 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public void setExtendedPermissions(final Set<String> extendedPermissions, final int userId, final Context ctx) {
+    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx, final boolean initExtendedPermissions) throws OXException {
         final Cache cache = this.cache;
         if (cache == null) {
-            return;
-        }
-        final UserConfiguration userConfig = (UserConfiguration) cache.get(getKey(userId, ctx, cache));
-        if (null != userConfig) {
-            userConfig.setExtendedPermissions(extendedPermissions);
-        }
-    }
-
-    @Override
-    public Object getLock(final int userId, final Context ctx) {
-        try {
-            return getUserConfiguration(userId, null, ctx);
-        } catch (final OXException e) {
-            return new Object();
-        }
-    }
-
-    @Override
-    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
-        final Cache cache = this.cache;
-        if (cache == null) {
-            return getFallback().getUserConfiguration(userId, groups, ctx);
+            return getFallback().getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
         }
         final CacheKey key = getKey(userId, ctx, cache);
         UserConfiguration userConfig = (UserConfiguration) cache.get(key);
@@ -217,11 +195,13 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             cacheWriteLock.lock();
             try {
                 if (null == (userConfig = (UserConfiguration) cache.get(key))) {
-                    userConfig = delegateStorage.getUserConfiguration(userId, groups, ctx);
-                    cache.put(key, userConfig);
+                    userConfig = delegateStorage.getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
+                    if (initExtendedPermissions) {
+                        cache.put(key, userConfig);                        
+                    }
                 }
             } catch (final RuntimeException rte) {
-                return getFallback().getUserConfiguration(userId, groups, ctx);
+                return getFallback().getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
             } finally {
                 cacheWriteLock.unlock();
             }
