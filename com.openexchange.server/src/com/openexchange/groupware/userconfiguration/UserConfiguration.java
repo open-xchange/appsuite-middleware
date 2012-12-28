@@ -53,6 +53,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,11 +81,15 @@ public final class UserConfiguration implements Serializable, Cloneable {
     private static final long serialVersionUID = -8277899698366715803L;
 
     private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserConfiguration.class));
+
+    /** The en_US locale */
+    static final Locale US = Locale.US;
     
     /**
      * Enumeration of known permissions.
      */
     public static enum Permission {
+
         WEBMAIL(UserConfiguration.WEBMAIL, "WebMail"),
         CALENDAR(UserConfiguration.CALENDAR, "Calendar"),
         CONTACTS(UserConfiguration.CONTACTS, "Contacts"),
@@ -117,7 +122,27 @@ public final class UserConfiguration implements Serializable, Cloneable {
         CALDAV(UserConfiguration.CALDAV, "CalDAV"),
         CARDDAV(UserConfiguration.CARDDAV, "CardDAV");
 
-        private static TIntObjectMap<Permission> byBit;
+        private static final class AdderProcedure implements TIntObjectProcedure<Permission> {
+
+            private final Set<String> set;
+            private final int bits;
+
+            AdderProcedure(final int bits, final Set<String> set) {
+                super();
+                this.set = set;
+                this.bits = bits;
+            }
+
+            @Override
+            public boolean execute(final int bit, final Permission p) {
+                if (bit == (bits & bit)) {
+                    set.add(p.name().toLowerCase(US));
+                }
+                return true;
+            }
+        }
+
+        private static final TIntObjectMap<Permission> byBit;
         static {
             final Permission[] permissions = values();
             final TIntObjectMap<Permission> m = new TIntObjectHashMap<Permission>(permissions.length);
@@ -137,30 +162,63 @@ public final class UserConfiguration implements Serializable, Cloneable {
             this.tagName = name;
         }
 
+        /**
+         * Gets the associated bit constant.
+         * 
+         * @return The bit
+         */
         public int getBit() {
             return bit;
         }
 
-        public static Permission byBit(final int permission) {
-            return byBit.get(permission);
-        }
-
+        /**
+         * Gets the tag name.
+         * 
+         * @return The tag name
+         */
         public String getTagName() {
             return tagName;
         }
 
-        public static List<Permission> byBits(final int permissionBit) {
+        /**
+         * Gets the permission associated with given bit.
+         * 
+         * @param bit The bit
+         * @return The associated permission or <code>null</code>
+         */
+        public static Permission byBit(final int bit) {
+            return byBit.get(bit);
+        }
+
+        /**
+         * Gets the permissions associated with given bits.
+         * 
+         * @param bits The bits
+         * @return The associated permissions
+         */
+        public static List<Permission> byBits(final int bits) {
             final Permission[] pa = values();
             final List<Permission> permissions = new ArrayList<Permission>(pa.length);
             for (final Permission p : pa) {
                 final int bit = p.bit;
-                if ((permissionBit & bit) == bit) {
+                if ((bits & bit) == bit) {
                     permissions.add(p);
                 }
             }
             return permissions;
         }
-    }
+
+        /**
+         * Adds the permission names to specified set associated with given bits.
+         * 
+         * @param bits The bits
+         * @param set The set
+         */
+        public static void addByBits(final int bits, final Set<String> set) {
+            byBit.forEachEntry(new AdderProcedure(bits, set));
+        }
+
+    } // End of Permission class
     
     /**
      * The permission bit for mail access.
@@ -1206,7 +1264,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     private static final String PERMISSION_PROPERTY = "permissions".intern();
     private static final Pattern P_SPLIT = Pattern.compile("\\s*[, ]\\s*");
-    private static final Locale US = Locale.US;
 
     /**
      * Calculates this user configuration's extended permissions.
@@ -1215,33 +1272,32 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     public Set<String> calcExtendedPermissions() {
         final Set<String> retval = new HashSet<String>(128);
-        for (final Permission p : Permission.values()) {
-            if (hasPermissionInternal(p)) {
-                retval.add(p.name().toLowerCase(US));
-            }
-        }
+        Permission.addByBits(permissionBits, retval);
         // Now apply modifiers from the config cascade
         final ConfigViewFactory configViews = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
         if (configViews != null) {
             try {
                 final ConfigView view = configViews.getView(getUserId(), getContext().getContextId());
-                final String[] searchPath = configViews.getSearchPath();
-                for (final String scope : searchPath) {
+                for (final String scope : configViews.getSearchPath()) {
                     final String permissions = view.property(PERMISSION_PROPERTY, String.class).precedence(scope).get();
                     if (permissions != null) {
-                        for (String permissionModifier : P_SPLIT.split(permissions)) {
+                        for (final String permissionModifier : P_SPLIT.split(permissions)) {
                             final char firstChar = permissionModifier.charAt(0);
                             if ('-' == firstChar) {
                                 retval.remove(permissionModifier.substring(1).toLowerCase(US));
-                                continue;
-                            } else if ('+' == firstChar) {
-                                permissionModifier = permissionModifier.substring(1);
+                            } else {
+                                if ('+' == firstChar) {
+                                    retval.add(permissionModifier.substring(1).toLowerCase(US));
+                                } else {
+                                    retval.add(permissionModifier.toLowerCase(US));
+                                }
                             }
-                            retval.add(permissionModifier.toLowerCase(US));
                         }
                     }
                 }
             } catch (final OXException x) {
+                LOG.error(x.getMessage(), x);
+            } catch (final RuntimeException x) {
                 LOG.error(x.getMessage(), x);
             }
         }
