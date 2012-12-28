@@ -23,7 +23,7 @@ This bundle provides a datamining tool
 Authors:
 --------
     Open-Xchange
-    
+
 %prep
 %setup -q
 
