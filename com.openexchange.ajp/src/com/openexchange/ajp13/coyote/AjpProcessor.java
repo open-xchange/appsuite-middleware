@@ -50,7 +50,6 @@
 package com.openexchange.ajp13.coyote;
 
 import static com.openexchange.ajp13.AJPv13Response.writeHeaderSafe;
-import static com.openexchange.ajp13.AJPv13Utility.urlEncode;
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.ByteArrayOutputStream;
@@ -62,6 +61,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
 import java.util.Locale;
@@ -915,7 +915,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             if (null != headerName) {
                                 final String echoValue = request.getHeader(headerName);
                                 if (null != echoValue) {
-                                    response.setHeader(headerName, echoValue);
+                                    response.setHeader(headerName, urlEncode(echoValue));
                                 }
                             }
                         }
@@ -2400,6 +2400,20 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 }
                 sb.append('\n');
             }
+        }
+    }
+
+    /**
+     * Generates URL-encoding of specified text.
+     * 
+     * @param text The text
+     * @return The URL-encoded text
+     */
+    private static String urlEncode(final String text) {
+        try {
+            return URLEncoder.encode(text, "iso-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return text;
         }
     }
 
