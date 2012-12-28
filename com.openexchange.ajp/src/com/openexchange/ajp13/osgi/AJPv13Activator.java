@@ -134,7 +134,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
                 }
             };
             AJPv13ServiceRegistry.SERVICE_REGISTRY.set(serviceRegistry);
-            inits = new ArrayList<Initialization>(3);
+            inits = new ArrayList<Initialization>(4);
             /*
              * Set starter dependent on mode
              */
