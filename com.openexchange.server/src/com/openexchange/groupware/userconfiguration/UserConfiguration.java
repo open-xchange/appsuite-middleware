@@ -1277,7 +1277,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
         final ConfigViewFactory configViews = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
         if (configViews != null) {
             try {
-                final ConfigView view = configViews.getView(getUserId(), getContext().getContextId());
+                final ConfigView view = configViews.getView(userId, ctx.getContextId());
                 final String property = PERMISSION_PROPERTY;
                 for (final String scope : configViews.getSearchPath()) {
                     final String permissions = view.property(property, String.class).precedence(scope).get();
