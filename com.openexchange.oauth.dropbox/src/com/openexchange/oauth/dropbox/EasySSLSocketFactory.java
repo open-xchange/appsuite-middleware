@@ -68,7 +68,7 @@ import org.apache.http.params.HttpParams;
  */
 public class EasySSLSocketFactory implements SocketFactory, LayeredSocketFactory {
 
-    private SSLContext sslcontext = null;
+    private volatile SSLContext sslcontext = null;
 
     private static SSLContext createEasySSLContext() throws IOException {
         try {
@@ -81,10 +81,17 @@ public class EasySSLSocketFactory implements SocketFactory, LayeredSocketFactory
     }
 
     private SSLContext getSSLContext() throws IOException {
-        if (this.sslcontext == null) {
-            this.sslcontext = createEasySSLContext();
+        SSLContext sslcontext = this.sslcontext;
+        if (null == sslcontext) {
+            synchronized (this) {
+                sslcontext = this.sslcontext;
+                if (null == sslcontext) {
+                    sslcontext = createEasySSLContext();
+                    this.sslcontext = sslcontext;
+                }
+            }
         }
-        return this.sslcontext;
+        return sslcontext;
     }
 
     /**
