@@ -380,12 +380,12 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
-            if (rs.next()) {
-                final UserConfiguration userConfiguration = new UserConfiguration(rs.getInt(1), userId, groups, ctx);
-                userConfiguration.setExtendedPermissions(userConfiguration.calcExtendedPermissions());
-                return userConfiguration;
+            if (!rs.next()) {
+                throw UserConfigurationCodes.NOT_FOUND.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
             }
-            throw UserConfigurationCodes.NOT_FOUND.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
+            final UserConfiguration userConfiguration = new UserConfiguration(rs.getInt(1), userId, groups, ctx);
+            userConfiguration.setExtendedPermissions(userConfiguration.calcExtendedPermissions());
+            return userConfiguration;
         } finally {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
         }
