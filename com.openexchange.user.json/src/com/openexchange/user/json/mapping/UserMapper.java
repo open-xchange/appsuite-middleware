@@ -49,17 +49,14 @@
 
 package com.openexchange.user.json.mapping;
 
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.mappings.json.ArrayMapping;
@@ -68,6 +65,7 @@ import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
+import com.openexchange.session.Session;
 import com.openexchange.user.json.field.UserField;
 import com.openexchange.user.json.parser.ParsedUser;
 
@@ -277,12 +275,18 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			}
 			
 			@Override
-			public void serialize(User from, JSONObject to, TimeZone timeZone) throws JSONException {
-				if (this.isSet(from)) {
-					final int[] value = this.get(from);
-					to.put(getAjaxName(), null != value ? Arrays.asList(value) : JSONObject.NULL); 
-				}				
-			}
+			public Object serialize(User from, TimeZone timeZone, Session session) throws JSONException {
+		        int[] value = this.get(from);
+		        if (null == value) {
+		            return JSONObject.NULL;
+		        } else {
+		            JSONArray jsonArray = new JSONArray(value.length);
+		            for (int group : value) {
+                        jsonArray.put(group);
+                    }
+		            return jsonArray;
+		        }
+		    }
 
 			@Override
 			public boolean isSet(User object) {
