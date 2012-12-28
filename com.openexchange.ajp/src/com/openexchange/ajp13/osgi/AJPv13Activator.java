@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.AbstractAJPv13Request;
@@ -144,12 +145,15 @@ public final class AJPv13Activator extends HousekeepingActivator {
                 @Override
                 public void stop() {
                     AbstractAJPv13Request.setEchoHeaderName(null);
+                    AJPv13Response.setEchoHeaderName(null);
                 }
 
                 @Override
                 public void start() {
                     final ConfigurationService service = getService(ConfigurationService.class);
-                    AbstractAJPv13Request.setEchoHeaderName(null == service ? null : service.getProperty("com.openexchange.servlet.echoHeaderName"));
+                    final String headerName = null == service ? null : service.getProperty("com.openexchange.servlet.echoHeaderName");
+                    AbstractAJPv13Request.setEchoHeaderName(headerName);
+                    AJPv13Response.setEchoHeaderName(headerName);
                 }
             });
             inits.add(new Initialization() {
