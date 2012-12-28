@@ -1145,6 +1145,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
          * Set or unset specified permission
          */
         permissionBits = enable ? (permissionBits | permission) : (permissionBits & ~permission);
+        extendedPermissions = null;
     }
 
     /**
@@ -1190,17 +1191,17 @@ public final class UserConfiguration implements Serializable, Cloneable {
 	 * @return The extended permissions
 	 */
     public Set<String> getExtendedPermissions() {
-        Set<String> retval = extendedPermissions;
-        if (retval == null) {
+        Set<String> tmp = extendedPermissions;
+        if (tmp == null) {
             synchronized (this) {
-                retval = extendedPermissions;
-                if (retval == null) {
-                    retval = calcExtendedPermissions();
-                    this.extendedPermissions = retval;
+                tmp = extendedPermissions;
+                if (tmp == null) {
+                    tmp = calcExtendedPermissions();
+                    this.extendedPermissions = tmp;
                 }
             }
         }
-        return retval;
+        return tmp;
     }
 
     private static final String PERMISSION_PROPERTY = "permissions".intern();
