@@ -88,6 +88,23 @@ public class Appointment extends CalendarObject implements Cloneable {
         FOLDER_ID,
         // From DataObject
         OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
+    
+    public static final int[] ALL_COLUMNS_FOR_CLONE = {
+        // From AppointmentObject itself
+        LOCATION, FULL_TIME, SHOWN_AS,
+        TIMEZONE,
+        RECURRENCE_START,
+        // From CalendarObject
+        TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_ID, RECURRENCE_POSITION, RECURRENCE_DATE_POSITION, RECURRENCE_TYPE,
+        CHANGE_EXCEPTIONS, DELETE_EXCEPTIONS, DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, NOTIFICATION, RECURRENCE_CALCULATOR,
+        RECURRENCE_COUNT, UID, ORGANIZER, SEQUENCE, ORGANIZER_ID, PRINCIPAL, PRINCIPAL_ID,
+        // From CommonObject
+        CATEGORIES, PRIVATE_FLAG,
+        COLOR_LABEL, NUMBER_OF_LINKS, NUMBER_OF_ATTACHMENTS,
+        // From FolderChildObject
+        FOLDER_ID,
+        // From DataObject
+        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
 
     public static final int RESERVED = 1;
 
@@ -322,7 +339,7 @@ public class Appointment extends CalendarObject implements Cloneable {
     public Appointment clone() {
         Appointment appointmentobject = (Appointment) super.clone();
 
-        for (int field : ALL_COLUMNS) {
+        for (int field : ALL_COLUMNS_FOR_CLONE) {
             if (contains(field)) {
                 appointmentobject.set(field, get(field));
             }
