@@ -68,9 +68,27 @@ import org.apache.http.params.HttpParams;
  */
 public class EasySSLSocketFactory implements SocketFactory, LayeredSocketFactory {
 
+    private static final EasySSLSocketFactory INSTANCE = new EasySSLSocketFactory();
+
+    /**
+     * Gets the instance.
+     * 
+     * @return The instance
+     */
+    public static EasySSLSocketFactory getInstance() {
+        return INSTANCE;
+    }
+
     private volatile SSLContext sslcontext = null;
 
-    private static SSLContext createEasySSLContext() throws IOException {
+    /**
+     * Initializes a new {@link EasySSLSocketFactory}.
+     */
+    private EasySSLSocketFactory() {
+        super();
+    }
+
+    private SSLContext createEasySSLContext() throws IOException {
         try {
             SSLContext context = SSLContext.getInstance("TLS");
             context.init(null, new TrustManager[] { new TrivialTrustManager() }, null);

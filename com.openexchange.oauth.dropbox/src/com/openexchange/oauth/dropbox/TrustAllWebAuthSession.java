@@ -50,9 +50,7 @@
 package com.openexchange.oauth.dropbox;
 
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.WebAuthSession;
@@ -64,6 +62,8 @@ import com.dropbox.client2.session.WebAuthSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TrustAllWebAuthSession extends WebAuthSession {
+
+    private static final Scheme SCHEME_HTTPS = new Scheme("https", EasySSLSocketFactory.getInstance(), 443);
 
     /**
      * Initializes a new {@link TrustAllWebAuthSession}.
@@ -81,10 +81,9 @@ public final class TrustAllWebAuthSession extends WebAuthSession {
 
     @Override
     public synchronized HttpClient getHttpClient() {
+        // Obtain HttpClient from super class, but modify its HTTPS connector scheme
         final HttpClient httpClient = super.getHttpClient();
-        final ClientConnectionManager connectionManager = httpClient.getConnectionManager();
-        final SchemeRegistry schemeRegistry = connectionManager.getSchemeRegistry();
-        schemeRegistry.register(new Scheme("https", new EasySSLSocketFactory(), 443));
+        httpClient.getConnectionManager().getSchemeRegistry().register(SCHEME_HTTPS);
         return httpClient;
     }
 
