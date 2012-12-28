@@ -66,7 +66,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;
 
 /**
- * {@link RdbUserConfigurationStorage} - The database storage implementation of an user configuration storage.
+ * {@link RdbUserConfigurationStorage} - The database storage implementation of a user configuration storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
