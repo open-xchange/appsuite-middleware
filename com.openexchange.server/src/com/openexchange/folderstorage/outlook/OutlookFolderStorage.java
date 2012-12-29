@@ -472,13 +472,21 @@ public final class OutlookFolderStorage implements FolderStorage {
             try {
                 for (final String folderId : folderIds) {
                     final FolderStorage folderStorage = getOpenedStorage(folderId, realTreeId, true, storageParameters, storages);
-                    if (!folderStorage.containsFolder(realTreeId, folderId, storageParameters)) {
-                        // Check if that folder has subfolders
-                        final boolean restore = memoryTree.hasSubfolderIds(folderId);
-                        if (restore) {
-                            folderStorage.restore(realTreeId, folderId, storageParameters);                            
+                    try {
+                        if (!folderStorage.containsFolder(realTreeId, folderId, storageParameters)) {
+                            // Check if that folder has subfolders
+                            final boolean restore = memoryTree.hasSubfolderIds(folderId);
+                            if (restore) {
+                                folderStorage.restore(realTreeId, folderId, storageParameters);                            
+                            } else {
+                                deleteFolder(treeId, folderId, storageParameters, DatabaseFolderType.getInstance().servesFolderId(folderId), memoryTable);
+                            }
+                        }
+                    } catch (final OXException oxe) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId, oxe);
                         } else {
-                            deleteFolder(treeId, folderId, storageParameters, DatabaseFolderType.getInstance().servesFolderId(folderId), memoryTable);
+                            LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId + ":\n" + oxe.getMessage());
                         }
                     }
                 }
@@ -493,7 +501,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 if (LOG.isDebugEnabled()) {
                     LOG.warn("Checking consistency failed in tree " + treeId, e);
                 } else {
-                    LOG.warn("Checking consistency failed in tree " + treeId + ": " + e.getMessage());
+                    LOG.warn("Checking consistency failed in tree " + treeId + ":\n" + e.getMessage());
                 }
             } catch (final RuntimeException e) {
                 for (final FolderStorage folderStorage : storages) {
@@ -502,7 +510,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 if (LOG.isDebugEnabled()) {
                     LOG.warn("Checking consistency failed for in tree " + treeId, e);
                 } else {
-                    LOG.warn("Checking consistency failed for in tree " + treeId + ": " + e.getMessage());
+                    LOG.warn("Checking consistency failed for in tree " + treeId + ":\n" + e.getMessage());
                 }
             }
         }
