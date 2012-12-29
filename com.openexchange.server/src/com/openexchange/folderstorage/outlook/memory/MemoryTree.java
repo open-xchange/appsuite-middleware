@@ -86,12 +86,14 @@ public interface MemoryTree {
      */
     public boolean[] containsFolders(SortableId[] folderIds);
 
+    /** Gets the sub-folders for given parent */
     public List<String[]> getSubfolderIds(String parentId);
 
+    /** Gets all known folder identifiers */
     public List<String> getFolders();
 
     /**
-     * Gets the sorted identifiers of the subfolders located below specified parent.
+     * Gets the sorted identifiers of the sub-folders located below specified parent.
      */
     public String[] getSubfolderIds(Locale locale, String parentId, List<String[]> realSubfolderIds);
 
