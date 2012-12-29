@@ -138,6 +138,12 @@ public final class MemoryTreeImpl implements MemoryTree {
     }
 
     @Override
+    public boolean hasSubfolderIds(String parentId) {
+        final Set<MemoryFolder> set = parentMap.get(parentId);
+        return null == set ? false : !set.isEmpty();
+    }
+
+    @Override
     public List<String[]> getSubfolderIds(final String parentId) {
         final Set<MemoryFolder> set = parentMap.get(parentId);
         if (null == set) {

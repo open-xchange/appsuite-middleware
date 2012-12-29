@@ -86,6 +86,9 @@ public interface MemoryTree {
      */
     public boolean[] containsFolders(SortableId[] folderIds);
 
+    /** Checks for sub-folders for given parent */
+    public boolean hasSubfolderIds(String parentId);
+
     /** Gets the sub-folders for given parent */
     public List<String[]> getSubfolderIds(String parentId);
 
