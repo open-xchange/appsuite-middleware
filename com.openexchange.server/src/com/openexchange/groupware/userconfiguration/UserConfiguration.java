@@ -496,8 +496,9 @@ public final class UserConfiguration implements Serializable, Cloneable {
                 clone.groups = new int[groups.length];
                 System.arraycopy(groups, 0, clone.groups, 0, groups.length);
             }
-            if (extendedPermissions != null) {
-                clone.extendedPermissions = new HashSet<String>(extendedPermissions);
+            final Set<String> thisSet = extendedPermissions;
+            if (thisSet != null) {
+                clone.extendedPermissions = new HashSet<String>(thisSet);
             }
             /*
              * if (userSettingMail != null) { clone.userSettingMail = (UserSettingMail) userSettingMail.clone(); }
