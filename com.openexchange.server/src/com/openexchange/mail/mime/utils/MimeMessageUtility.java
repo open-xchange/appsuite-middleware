@@ -108,6 +108,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.image.ImageActionFactory;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -1108,6 +1109,36 @@ public final class MimeMessageUtility {
             return sb.toString();
         }
         return addressList;
+    }
+
+    /**
+     * Returns a literal replacement <code>String</code> for the specified <code>String</code>. This method produces a <code>String</code>
+     * that will work as a literal replacement <code>s</code> in the <code>appendReplacement</code> method of the {@link Matcher} class. The
+     * <code>String</code> produced will match the sequence of characters in <code>s</code> treated as a literal sequence. Slashes ('\') and
+     * dollar signs ('$') will be given no special meaning.
+     * 
+     * @param s The string to be literalized
+     * @return A literal string replacement
+     */
+    public static String quoteReplacement(final String s) {
+        if (isEmpty(s) || ((s.indexOf('\\') == -1) && (s.indexOf('$') == -1))) {
+            return s;
+        }
+        final int length = s.length();
+        final StringAllocator sb = new StringAllocator(length << 1);
+        for (int i = 0; i < length; i++) {
+            final char c = s.charAt(i);
+            if (c == '\\') {
+                sb.append('\\');
+                sb.append('\\');
+            } else if (c == '$') {
+                sb.append('\\');
+                sb.append('$');
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     // private static final Pattern PAT_QUOTED = Pattern.compile("(^\")([^\"]+?)(\"$)");

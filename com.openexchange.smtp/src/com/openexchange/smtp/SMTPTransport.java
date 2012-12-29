@@ -67,7 +67,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.regex.Matcher;
 import javax.mail.Address;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
@@ -91,6 +90,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -902,7 +902,28 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private static String quoteReplacement(final String str) {
-        return isEmpty(str) ? "" : Matcher.quoteReplacement(str);
+        return isEmpty(str) ? "" : quoteReplacement0(str);
+    }
+
+    private static String quoteReplacement0(final String s) {
+        if ((s.indexOf('\\') == -1) && (s.indexOf('$') == -1)) {
+            return s;
+        }
+        final int length = s.length();
+        final StringAllocator sb = new StringAllocator(length << 1);
+        for (int i = 0; i < length; i++) {
+            final char c = s.charAt(i);
+            if (c == '\\') {
+                sb.append('\\');
+                sb.append('\\');
+            } else if (c == '$') {
+                sb.append('\\');
+                sb.append('$');
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     private static boolean isEmpty(final String string) {
