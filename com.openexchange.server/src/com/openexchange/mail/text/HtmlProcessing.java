@@ -317,7 +317,7 @@ public final class HtmlProcessing {
             return sbuf.append(" style=\"background-color: ").append(color).append(";\"").toString();
         }
         sbuf.setLength(0);
-        m.appendReplacement(sbuf, "style=\"" + Matcher.quoteReplacement(m.group(1)) + " background-color: " + color + ";\"");
+        m.appendReplacement(sbuf, "style=\"" + com.openexchange.java.Strings.quoteReplacement(m.group(1)) + " background-color: " + color + ";\"");
         m.appendTail(sbuf);
         return sbuf.toString();
     }

@@ -52,7 +52,6 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Locale;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -68,6 +67,7 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.session.ServerSession;
 
@@ -237,8 +237,8 @@ public class APIResponseRenderer implements ResponseRenderer {
     private static final Pattern RPL_ACTION = Pattern.compile("**action**", Pattern.LITERAL);
 
     private static String substituteJS(final String json, final String action) {
-        return RPL_ACTION.matcher(RPL_JSON.matcher(JS_FRAGMENT).replaceAll(Matcher.quoteReplacement(json))).replaceAll(
-            Matcher.quoteReplacement(action));
+        return RPL_ACTION.matcher(RPL_JSON.matcher(JS_FRAGMENT).replaceAll(Strings.quoteReplacement(json))).replaceAll(
+            Strings.quoteReplacement(action));
     }
 
 }

@@ -363,7 +363,7 @@ public class Memorizer implements Runnable {
             int lastMatch = 0;
             do {
                 sa.append(val.substring(lastMatch, m.start()));
-                sa.append(Matcher.quoteReplacement(MimeUtility.decodeWord(m.group())));
+                sa.append(com.openexchange.java.Strings.quoteReplacement(MimeUtility.decodeWord(m.group())));
                 lastMatch = m.end();
             } while (m.find());
             sa.append(val.substring(lastMatch));

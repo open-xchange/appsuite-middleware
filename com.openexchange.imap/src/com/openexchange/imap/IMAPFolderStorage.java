@@ -52,7 +52,6 @@ package com.openexchange.imap;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.utils.MailFolderUtility.isEmpty;
-import static java.util.regex.Matcher.quoteReplacement;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -2569,7 +2568,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 getSubscriptionStatus(m, (IMAPFolder) folders[i], oldFullName, newFullName);
             }
         }
-        m.put(f.getFullName().replaceFirst(oldFullName, quoteReplacement(newFullName)), Boolean.valueOf(f.isSubscribed()));
+        m.put(f.getFullName().replaceFirst(oldFullName, com.openexchange.java.Strings.quoteReplacement(newFullName)), Boolean.valueOf(f.isSubscribed()));
     }
 
     private void setFolderSubscription(final IMAPFolder f, final boolean subscribed) throws MessagingException {
