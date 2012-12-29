@@ -50,6 +50,7 @@
 package com.openexchange.oauth.xing;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 
@@ -70,8 +71,18 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
         super();
         id = "com.openexchange.oauth.xing";
         displayName = "Xing";
-        apiKey = configService.getProperty("com.openexchange.oauth.xing.apiKey");
-        apiSecret = configService.getProperty("com.openexchange.oauth.xing.apiSecret");
+
+        final String apiKey = configService.getProperty("com.openexchange.oauth.xing.apiKey");
+        if (Strings.isEmpty(apiKey)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiKey");
+        }
+        this.apiKey = apiKey;
+
+        final String apiSecret = configService.getProperty("com.openexchange.oauth.xing.apiSecret");
+        if (Strings.isEmpty(apiSecret)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiSecret");
+        }
+        this.apiSecret = apiSecret;
     }
 
     @Override
