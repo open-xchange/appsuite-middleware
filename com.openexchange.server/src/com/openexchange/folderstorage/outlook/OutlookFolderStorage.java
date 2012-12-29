@@ -506,40 +506,6 @@ public final class OutlookFolderStorage implements FolderStorage {
                 }
             }
         }
-        
-        
-        
-        final List<FolderStorage> storages = new LinkedList<FolderStorage>();
-        for (final String folderId : folderIds) {
-            
-            final FolderStorage folderStorage = getOpenedStorage(folderId, treeId, true, storageParameters, storages);
-            try {
-                if (!folderStorage.containsFolder(realTreeId, folderId, storageParameters)) {
-                    folderStorage.restore(realTreeId, folderId, storageParameters);
-                }
-                if (started) {
-                    folderStorage.commitTransaction(storageParameters);
-                }
-            } catch (final OXException e) {
-                if (started) {
-                    folderStorage.rollback(storageParameters);
-                }
-                if (LOG.isDebugEnabled()) {
-                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId, e);
-                } else {
-                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId + ": " + e.getMessage());
-                }
-            } catch (final RuntimeException e) {
-                if (started) {
-                    folderStorage.rollback(storageParameters);
-                }
-                if (LOG.isDebugEnabled()) {
-                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId, e);
-                } else {
-                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId + ": " + e.getMessage());
-                }
-            }
-        }
     }
 
     @Override
