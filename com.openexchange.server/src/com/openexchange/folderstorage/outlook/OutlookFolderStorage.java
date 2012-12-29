@@ -461,12 +461,58 @@ public final class OutlookFolderStorage implements FolderStorage {
          */
         final Session session = storageParameters.getSession();
         final int tree = Tools.getUnsignedInteger(treeId);
-
         final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(session);
-        final List<String> folderIds = memoryTable.getTree(tree, session).getFolders();
+        /*
+         * Check for obsolete entries
+         */
+        final MemoryTree memoryTree = memoryTable.getTree(tree, session);
+        final List<String> folderIds = memoryTree.getFolders();
+        if (!folderIds.isEmpty()) {
+            final List<FolderStorage> storages = new LinkedList<FolderStorage>();
+            try {
+                for (final String folderId : folderIds) {
+                    final FolderStorage folderStorage = getOpenedStorage(folderId, realTreeId, true, storageParameters, storages);
+                    if (!folderStorage.containsFolder(realTreeId, folderId, storageParameters)) {
+                        // Check if that folder has subfolders
+                        final boolean restore = memoryTree.hasSubfolderIds(folderId);
+                        if (restore) {
+                            folderStorage.restore(realTreeId, folderId, storageParameters);                            
+                        } else {
+                            deleteFolder(treeId, folderId, storageParameters, DatabaseFolderType.getInstance().servesFolderId(folderId), memoryTable);
+                        }
+                    }
+                }
+                // Commit
+                for (final FolderStorage folderStorage : storages) {
+                    folderStorage.commitTransaction(storageParameters);
+                }
+            } catch (final OXException e) {
+                for (final FolderStorage folderStorage : storages) {
+                    folderStorage.rollback(storageParameters);
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.warn("Checking consistency failed in tree " + treeId, e);
+                } else {
+                    LOG.warn("Checking consistency failed in tree " + treeId + ": " + e.getMessage());
+                }
+            } catch (final RuntimeException e) {
+                for (final FolderStorage folderStorage : storages) {
+                    folderStorage.rollback(storageParameters);
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.warn("Checking consistency failed for in tree " + treeId, e);
+                } else {
+                    LOG.warn("Checking consistency failed for in tree " + treeId + ": " + e.getMessage());
+                }
+            }
+        }
+        
+        
+        
+        final List<FolderStorage> storages = new LinkedList<FolderStorage>();
         for (final String folderId : folderIds) {
-            final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
-            final boolean started = folderStorage.startTransaction(storageParameters, true);
+            
+            final FolderStorage folderStorage = getOpenedStorage(folderId, treeId, true, storageParameters, storages);
             try {
                 if (!folderStorage.containsFolder(realTreeId, folderId, storageParameters)) {
                     folderStorage.restore(realTreeId, folderId, storageParameters);
@@ -685,17 +731,17 @@ public final class OutlookFolderStorage implements FolderStorage {
         final boolean global;
         {
             final Boolean b = storageParameters.getParameter(FolderType.GLOBAL, "global");
-            global = null == b ? true : b.booleanValue();
+            global = null == b ? DatabaseFolderType.getInstance().servesFolderId(folderId) : b.booleanValue();
         }
-        final Session session = storageParameters.getSession();
+        deleteFolder(treeId, folderId, storageParameters, global, MemoryTable.optMemoryTableFor(storageParameters.getSession()));
+    }
+
+    private void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters, final boolean global, final MemoryTable memoryTable) throws OXException {
         final int tree = Tools.getUnsignedInteger(treeId);
-        {
-            final MemoryTable memoryTable = MemoryTable.optMemoryTableFor(session);
-            if (null != memoryTable) {
-                final MemoryTree memoryTree = memoryTable.optTree(tree);
-                if (null != memoryTree) {
-                    memoryTree.getCrud().remove(folderId);
-                }
+        if (null != memoryTable) {
+            final MemoryTree memoryTree = memoryTable.optTree(tree);
+            if (null != memoryTree) {
+                memoryTree.getCrud().remove(folderId);
             }
         }
         {
@@ -704,14 +750,15 @@ public final class OutlookFolderStorage implements FolderStorage {
              */
             final SessiondService sessiondService = OutlookServiceRegistry.getServiceRegistry().getService(SessiondService.class);
             if (null != sessiondService) {
+                final Session session = storageParameters.getSession();
                 final Collection<Session> sessions = sessiondService.getSessions(session.getUserId(), session.getContextId());
                 final Set<String> disposed = new HashSet<String>(sessions.size());
                 disposed.add(session.getSessionID());
                 for (final Session current : sessions) {
                     if (disposed.add(current.getSessionID())) { // Set did not already contain session ID
-                        final MemoryTable memoryTable = MemoryTable.optMemoryTableFor(session);
-                        if (null != memoryTable) {
-                            final MemoryTree memoryTree = memoryTable.optTree(tree);
+                        final MemoryTable memTable = MemoryTable.optMemoryTableFor(session);
+                        if (null != memTable) {
+                            final MemoryTree memoryTree = memTable.optTree(tree);
                             if (null != memoryTree) {
                                 memoryTree.getCrud().remove(folderId);
                             }
@@ -2799,5 +2846,24 @@ public final class OutlookFolderStorage implements FolderStorage {
         public Map<String, Object> optLogProperties() {
             return props;
         }
+    }
+
+    private FolderStorage getOpenedStorage(final String id, final String treeId, final boolean modify, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
+        for (final FolderStorage ps : openedStorages) {
+            if (ps.getFolderType().servesFolderId(id)) {
+                // Found an already opened storage which is capable to server given folderId-treeId-pair
+                return ps;
+            }
+        }
+        // None opened storage is capable to server given folderId-treeId-pair
+        final FolderStorage tmp = folderStorageRegistry.getFolderStorage(treeId, id);
+        if (null == tmp) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
+        }
+        // Open storage and add to list of opened storages
+        if (tmp.startTransaction(storageParameters, modify)) {
+            openedStorages.add(tmp);
+        }
+        return tmp;
     }
 }
