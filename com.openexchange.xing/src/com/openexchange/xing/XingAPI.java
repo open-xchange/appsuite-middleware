@@ -65,7 +65,7 @@ import com.openexchange.xing.exception.XingUnlinkedException;
 import com.openexchange.xing.session.Session;
 
 /**
- * {@link XingAPI}
+ * {@link XingAPI} - The XING API.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
