@@ -183,7 +183,7 @@ public class XingServerException extends XingException {
      * exists.
      */
     public boolean isDuplicateAccount() {
-        return (error == 400 && body != null && body.error.contains("taken"));
+        return error == 400 && body != null && body.error.contains("taken");
     }
 
     @Override

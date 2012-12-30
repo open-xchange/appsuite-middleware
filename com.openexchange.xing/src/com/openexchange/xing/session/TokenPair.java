@@ -32,12 +32,15 @@ public abstract class TokenPair implements Serializable
      * @throws IllegalArgumentException if key or secret is null or invalid.
      */
     public TokenPair(String key, String secret) {
-        if (key == null)
+        if (key == null) {
             throw new IllegalArgumentException("'key' must be non-null");
-        if (key.contains("|"))
+        }
+        if (key.contains("|")) {
             throw new IllegalArgumentException("'key' must not contain a \"|\" character: \"" + key + "\"");
-        if (secret == null)
+        }
+        if (secret == null) {
             throw new IllegalArgumentException("'secret' must be non-null");
+        }
 
         this.key = key;
         this.secret = secret;
@@ -45,7 +48,7 @@ public abstract class TokenPair implements Serializable
 
     @Override
     public int hashCode() {
-        return key.hashCode() ^ (secret.hashCode() << 1);
+        return key.hashCode() ^ secret.hashCode() << 1;
     }
 
     @Override

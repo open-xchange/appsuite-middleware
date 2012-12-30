@@ -122,9 +122,9 @@ public class EasySSLSocketFactory implements SocketFactory, LayeredSocketFactory
         int soTimeout = HttpConnectionParams.getSoTimeout(params);
 
         InetSocketAddress remoteAddress = new InetSocketAddress(host, port);
-        SSLSocket sslsock = (SSLSocket) ((sock != null) ? sock : createSocket());
+        SSLSocket sslsock = (SSLSocket) (sock != null ? sock : createSocket());
 
-        if ((localAddress != null) || (localPort > 0)) {
+        if (localAddress != null || localPort > 0) {
             // we need to bind explicitly
             if (localPort < 0) {
                 localPort = 0; // indicates "any"
@@ -171,7 +171,7 @@ public class EasySSLSocketFactory implements SocketFactory, LayeredSocketFactory
 
     @Override
     public boolean equals(Object obj) {
-        return ((obj != null) && obj.getClass().equals(EasySSLSocketFactory.class));
+        return obj != null && obj.getClass().equals(EasySSLSocketFactory.class);
     }
 
     @Override

@@ -139,7 +139,7 @@ public class JSONCoercion {
      * @return <code>true</code> if specified object needs to be coerced to JSON; otherwise <code>false</code>
      */
     public static boolean needsJSONCoercion(final Object value) {
-        return (value instanceof Map) || (value instanceof Collection) || isArray(value);
+        return value instanceof Map || value instanceof Collection || isArray(value);
     }
 
     /**
@@ -149,7 +149,7 @@ public class JSONCoercion {
      * @return <code>true</code> if specified object needs to be coerced to a native Java object; otherwise <code>false</code>
      */
     public static boolean needsNativeCoercion(final Object value) {
-        return (value instanceof JSONValue);
+        return value instanceof JSONValue;
     }
 
     /**
@@ -210,6 +210,6 @@ public class JSONCoercion {
          * So much that using clazz.getName().charAt(0) == '[' is faster on Sun JVM.
          */
         // return (null != object && object.getClass().isArray());
-        return (null != object && '[' == object.getClass().getName().charAt(0));
+        return null != object && '[' == object.getClass().getName().charAt(0);
     }
 }
