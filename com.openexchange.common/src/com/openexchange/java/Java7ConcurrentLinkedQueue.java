@@ -35,7 +35,6 @@
 
 package com.openexchange.java;
 
-import java.lang.reflect.Field;
 import java.util.AbstractQueue;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -208,9 +207,7 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
 
         static {
             try {
-                final Field theUnsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
-                theUnsafeField.setAccessible(true);
-                UNSAFE = (sun.misc.Unsafe) theUnsafeField.get(null);
+                UNSAFE = sun.misc.Unsafe.getUnsafe();
                 Class k = Node.class;
                 itemOffset = UNSAFE.objectFieldOffset
                     (k.getDeclaredField("item"));
@@ -874,9 +871,7 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
     private static final long tailOffset;
     static {
         try {
-            final Field theUnsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafeField.setAccessible(true);
-            UNSAFE = (sun.misc.Unsafe) theUnsafeField.get(null);
+            UNSAFE = sun.misc.Unsafe.getUnsafe();
             Class k = Java7ConcurrentLinkedQueue.class;
             headOffset = UNSAFE.objectFieldOffset
                 (k.getDeclaredField("head"));
