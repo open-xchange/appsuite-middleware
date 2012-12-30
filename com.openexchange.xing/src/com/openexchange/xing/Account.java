@@ -49,14 +49,23 @@
 
 package com.openexchange.xing;
 
+import static com.openexchange.xing.util.JSONCoercion.coerceToNative;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.xing.exception.XingException;
 
-
 /**
- * {@link Account} - Represents a Xing user's account.
- *
+ * {@link Account} - Represents a XING user account.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Account {
@@ -68,6 +77,22 @@ public class Account {
     private final String pageName;
     private final String permalink;
     private final String gender;
+    private final String activeMail;
+    private final TimeZone timeZone;
+    private final List<String> premiumServices;
+    private final List<String> badges;
+    private final String wants;
+    private final String haves;
+    private final String interests;
+    private final String organisationMember;
+    private final Map<Locale, String> languages;
+    private final Address privateAddress;
+    private final Address businessAddress;
+    private final Map<String, List<String>> webProfiles;
+    private final Map<String, String> instantMessagingAccounts;
+    private final Map<String, Object> professionalExperience;
+    private final Map<String, Object> educationalBackground;
+    private final Map<String, Object> photoUrls;
 
     /**
      * Initializes a new {@link Account}.
@@ -78,159 +103,324 @@ public class Account {
     public Account(final JSONObject accountInfo) throws XingException {
         super();
         try {
-            this.id = accountInfo.getString("id");
-            this.firstName = accountInfo.getString("first_name");
-            this.lastName = accountInfo.getString("last_name");
-            this.displayName = accountInfo.getString("display_name");
-            this.pageName = accountInfo.getString("page_name");
-            this.permalink = accountInfo.getString("permalink");
-            this.gender = accountInfo.getString("gender");
-            
-            // TODO: Parse rest
-            
-            /*-
-             * 
-             * {
-    "id": "123456_abcdef",
-    "first_name": "Max",
-    "last_name": "Mustermann",
-    "display_name": "Max Mustermann",
-    "page_name": "Max_Mustermann",
-    "permalink": "https://www.xing.com/profile/Max_Mustermann",
-    "gender": "m",
-    "birth_date": {
-      "day": 12,
-      "month": 8,
-      "year": 1963
-    },
-    "active_email": "max.mustermann@xing.com",
-    "time_zone": {
-      "name": "Europe/Copenhagen",
-      "utc_offset": 2.0
-    },
-    "premium_services": ["SEARCH", "PRIVATEMESSAGES"],
-    "badges": ["PREMIUM", "MODERATOR"],
-    "wants": "einen neuen Job",
-    "haves": "viele tolle Skills",
-    "interests": "Flitzebogen schießen and so on",
-    "organisation_member": "ACM, GI",
-    "languages": {
-      "de": "NATIVE",
-      "en": "FLUENT",
-      "fr": null,
-      "zh": "BASIC"
-    },
-    "private_address": {
-      "city": "Hamburg",
-      "country": "DE",
-      "zip_code": "20357",
-      "street": "Privatstraße 1",
-      "phone": "49|40|1234560",
-      "fax": "||",
-      "province": "Hamburg",
-      "email": "max@mustermann.de",
-      "mobile_phone": "49|0155|1234567"
-    },
-    "business_address": {
-      "city": "Hamburg",
-      "country": "DE",
-      "zip_code": "20357",
-      "street": "Geschäftsstraße 1a",
-      "phone": "49|40|1234569",
-      "fax": "49|40|1234561",
-      "province": "Hamburg",
-      "email": "max.mustermann@xing.com",
-      "mobile_phone": "49|160|66666661"
-    },
-    "web_profiles": {
-      "qype": ["http://qype.de/users/foo"],
-      "google_plus": ["http://plus.google.com/foo"],
-      "blog": ["http://blog.example.org"],
-      "homepage": ["http://example.org", "http://other-example.org"]
-    },
-    "instant_messaging_accounts": {
-      "skype": "1122334455",
-      "googletalk": "max.mustermann"
-    },
-    "professional_experience": {
-      "primary_company": {
-        "name": "XING AG",
-        "title": "Softwareentwickler",
-        "company_size": "201-500",
-        "tag": null,
-        "url": "http://www.xing.com",
-        "career_level": "PROFESSIONAL_EXPERIENCED",
-        "begin_date": "2010-01",
-        "description": null,
-        "end_date": null,
-        "industry": "AEROSPACE"
-      },
-      "non_primary_companies": [{
-        "name": "Ninja Ltd.",
-        "title": "DevOps",
-        "company_size": null,
-        "tag": "NINJA",
-        "url": "http://www.ninja-ltd.co.uk",
-        "career_level": null,
-        "begin_date": "2009-04",
-        "description": null,
-        "end_date": "2010-07",
-        "industry": "ALTERNATIVE_MEDICINE"
-      },
-      {
-        "name": null,
-        "title": "Wiss. Mitarbeiter",
-        "company_size": null,
-        "tag": "OFFIS",
-        "url": "http://www.uni.de",
-        "career_level": null,
-        "begin_date": "2007",
-        "description": null,
-        "end_date": "2008",
-        "industry": "APPAREL_AND_FASHION"
-      },
-      {
-        "name": null,
-        "title": "TEST NINJA",
-        "company_size": "201-500",
-        "tag": "TESTCOMPANY",
-        "url": null,
-        "career_level": "ENTRY_LEVEL",
-        "begin_date": "1998-12",
-        "description": null,
-        "end_date": "1999-05",
-        "industry": "ARTS_AND_CRAFTS"
-      }],
-      "awards": [{
-        "name": "Awesome Dude Of The Year",
-        "date_awarded": 2007,
-        "url": null
-      }]
-    },
-    "educational_background": {
-      "schools": [{
-        "name": "Carl-von-Ossietzky Universtät Schellenburg",
-        "degree": "MSc CE/CS",
-        "notes": null,
-        "subject": null,
-        "begin_date": "1998-08",
-        "end_date": "2005-02"
-      }],
-      "qualifications": ["TOEFLS", "PADI AOWD"]
-    },
-    "photo_urls": {
-      "large": "http://www.xing.com/img/users/e/3/d/f94ef165a.123456,1.140x185.jpg",
-      "mini_thumb": "http://www.xing.com/img/users/e/3/d/f94ef165a.123456,1.18x24.jpg",
-      "thumb": "http://www.xing.com/img/users/e/3/d/f94ef165a.123456,1.30x40.jpg",
-      "medium_thumb": "http://www.xing.com/img/users/e/3/d/f94ef165a.123456,1.57x75.jpg",
-      "maxi_thumb": "http://www.xing.com/img/users/e/3/d/f94ef165a.123456,1.70x93.jpg"
-    }
-  }
-             */
-            
-        } catch (JSONException e) {
+            this.id = accountInfo.optString("id");
+            this.firstName = accountInfo.optString("first_name");
+            this.lastName = accountInfo.optString("last_name");
+            this.displayName = accountInfo.optString("display_name");
+            this.pageName = accountInfo.optString("page_name");
+            this.permalink = accountInfo.optString("permalink");
+            this.gender = accountInfo.optString("gender");
+            this.activeMail = accountInfo.optString("active_email");
+            if (accountInfo.has("time_zone")) {
+                final JSONObject tz = accountInfo.optJSONObject("time_zone");
+                this.timeZone = TimeZone.getTimeZone(tz.getString("name"));
+            } else {
+                this.timeZone = null;
+            }
+            if (accountInfo.has("premium_services")) {
+                final JSONArray ps = accountInfo.optJSONArray("premium_services");
+                final int length = ps.length();
+                premiumServices = new ArrayList<String>(length);
+                for (int i = 0; i < length; i++) {
+                    premiumServices.add(ps.getString(i));
+                }
+            } else {
+                premiumServices = Collections.emptyList();
+            }
+            if (accountInfo.has("badges")) {
+                final JSONArray b = accountInfo.optJSONArray("badges");
+                final int length = b.length();
+                badges = new ArrayList<String>(length);
+                for (int i = 0; i < length; i++) {
+                    badges.add(b.getString(i));
+                }
+            } else {
+                badges = Collections.emptyList();
+            }
+            this.wants = accountInfo.getString("wants");
+            this.haves = accountInfo.getString("haves");
+            this.interests = accountInfo.getString("interests");
+            this.organisationMember = accountInfo.getString("organisation_member");
+            if (accountInfo.has("languages")) {
+                final JSONObject l = accountInfo.optJSONObject("languages");
+                languages = new LinkedHashMap<Locale, String>(l.length());
+                for (final Entry<String, Object> entry : l.entrySet()) {
+                    final Object value = entry.getValue();
+                    if (null != value) {
+                        languages.put(new Locale(entry.getKey().toLowerCase(Locale.US)), value.toString());
+                    }
+                }
+            } else {
+                languages = Collections.emptyMap();
+            }
+            if (accountInfo.has("private_address")) {
+                this.privateAddress = new Address(accountInfo.optJSONObject("private_address"));
+            } else {
+                this.privateAddress = null;
+            }
+            if (accountInfo.has("business_address")) {
+                this.businessAddress = new Address(accountInfo.optJSONObject("business_address"));
+            } else {
+                this.businessAddress = null;
+            }
+            if (accountInfo.has("web_profiles")) {
+                final JSONObject jo = accountInfo.optJSONObject("web_profiles");
+                this.webProfiles = new LinkedHashMap<String, List<String>>(jo.length());
+                for (final String key : jo.keySet()) {
+                    final JSONArray ja = jo.optJSONArray(key);
+                    final int length = ja.length();
+                    final List<String> addrs = new ArrayList<String>(length);
+                    for (int i = 0; i < length; i++) {
+                        addrs.add(ja.getString(i));
+                    }
+                    webProfiles.put(key, addrs);
+                }
+            } else {
+                webProfiles = Collections.emptyMap();
+            }
+            if (accountInfo.has("instant_messaging_accounts")) {
+                final JSONObject jo = accountInfo.optJSONObject("instant_messaging_accounts");
+                instantMessagingAccounts = new LinkedHashMap<String, String>(jo.length());
+                for (final Entry<String, Object> entry : jo.entrySet()) {
+                    final Object value = entry.getValue();
+                    if (null != value) {
+                        instantMessagingAccounts.put(entry.getKey(), value.toString());
+                    }
+                }
+            } else {
+                instantMessagingAccounts = Collections.emptyMap();
+            }
+            if (accountInfo.has("professional_experience")) {
+                @SuppressWarnings("unchecked")
+                final Map<String, Object> map = (Map<String, Object>) coerceToNative(accountInfo.optJSONObject("professional_experience"));
+                this.professionalExperience = map;
+            } else {
+                this.professionalExperience = Collections.emptyMap();
+            }
+            if (accountInfo.has("educational_background")) {
+                @SuppressWarnings("unchecked")
+                final Map<String, Object> map = (Map<String, Object>) coerceToNative(accountInfo.optJSONObject("educational_background"));
+                this.educationalBackground = map;
+            } else {
+                this.educationalBackground = Collections.emptyMap();
+            }
+            if (accountInfo.has("photo_urls")) {
+                @SuppressWarnings("unchecked")
+                final Map<String, Object> map = (Map<String, Object>) coerceToNative(accountInfo.optJSONObject("photo_urls"));
+                this.photoUrls = map;
+            } else {
+                this.photoUrls = Collections.emptyMap();
+            }
+        } catch (final JSONException e) {
             throw new XingException(e);
         }
+    }
+
+    /**
+     * Gets the identifier
+     * 
+     * @return The identifier
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Gets the display name
+     * 
+     * @return The display name
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /**
+     * Gets the last name
+     * 
+     * @return The last name
+     */
+    public String getLastName() {
+        return lastName;
+    }
+
+    /**
+     * Gets the first name
+     * 
+     * @return The first name
+     */
+    public String getFirstName() {
+        return firstName;
+    }
+
+    /**
+     * Gets the page name
+     * 
+     * @return The page name
+     */
+    public String getPageName() {
+        return pageName;
+    }
+
+    /**
+     * Gets the perma link
+     * 
+     * @return The perma link
+     */
+    public String getPermalink() {
+        return permalink;
+    }
+
+    /**
+     * Gets the gender
+     * 
+     * @return The gender
+     */
+    public String getGender() {
+        return gender;
+    }
+
+    /**
+     * Gets the active mail
+     * 
+     * @return The active mail
+     */
+    public String getActiveMail() {
+        return activeMail;
+    }
+
+    /**
+     * Gets the timeZone
+     * 
+     * @return The timeZone
+     */
+    public TimeZone getTimeZone() {
+        return timeZone;
+    }
+
+    /**
+     * Gets the XING premium services
+     * 
+     * @return The XING premium services
+     */
+    public List<String> getPremiumServices() {
+        return premiumServices;
+    }
+
+    /**
+     * Gets the badges
+     * 
+     * @return The badges
+     */
+    public List<String> getBadges() {
+        return badges;
+    }
+
+    /**
+     * Gets the wants
+     * 
+     * @return The wants
+     */
+    public String getWants() {
+        return wants;
+    }
+
+    /**
+     * Gets the haves
+     * 
+     * @return The haves
+     */
+    public String getHaves() {
+        return haves;
+    }
+
+    /**
+     * Gets the interests
+     * 
+     * @return The interests
+     */
+    public String getInterests() {
+        return interests;
+    }
+
+    /**
+     * Gets the organisation member
+     * 
+     * @return The organisation member
+     */
+    public String getOrganisationMember() {
+        return organisationMember;
+    }
+
+    /**
+     * Gets the languages
+     * 
+     * @return The languages
+     */
+    public Map<Locale, String> getLanguages() {
+        return languages;
+    }
+
+    /**
+     * Gets the private address
+     * 
+     * @return The private address
+     */
+    public Address getPrivateAddress() {
+        return privateAddress;
+    }
+
+    /**
+     * Gets the business address
+     * 
+     * @return The business address
+     */
+    public Address getBusinessAddress() {
+        return businessAddress;
+    }
+
+    /**
+     * Gets the web profiles
+     * 
+     * @return The web profiles
+     */
+    public Map<String, List<String>> getWebProfiles() {
+        return webProfiles;
+    }
+
+    /**
+     * Gets the IM accounts
+     * 
+     * @return The IM accounts
+     */
+    public Map<String, String> getInstantMessagingAccounts() {
+        return instantMessagingAccounts;
+    }
+
+    /**
+     * Gets the professional experience
+     * 
+     * @return The professional experience
+     */
+    public Map<String, Object> getProfessionalExperience() {
+        return professionalExperience;
+    }
+
+    /**
+     * Gets the educational background
+     * 
+     * @return The educational background
+     */
+    public Map<String, Object> getEducationalBackground() {
+        return educationalBackground;
+    }
+
+    /**
+     * Gets the photo URLs
+     * 
+     * @return The photo URLs
+     */
+    public Map<String, Object> getPhotoUrls() {
+        return photoUrls;
     }
 
 }
