@@ -25,8 +25,6 @@ package com.openexchange.xing.session;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -72,6 +70,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.httpclient.EasySSLSocketFactory;
 
@@ -187,45 +186,6 @@ public abstract class AbstractSession implements Session {
             throw new XingException(e);
         } catch (OAuthExpectationFailedException e) {
             throw new XingException(e);
-        }
-    }
-
-    private static String buildOAuthHeader(AppKeyPair appKeyPair,
-            AccessTokenPair signingTokenPair) {
-        StringBuilder buf = new StringBuilder();
-        buf.append("OAuth oauth_version=\"1.0\"");
-        buf.append(", oauth_signature_method=\"PLAINTEXT\"");
-        buf.append(", oauth_consumer_key=\"").append(
-                encode(appKeyPair.key)).append("\"");
-
-        /*
-         * TODO: This is hacky.  The 'signingTokenPair' is null only in auth
-         * step 1, when we acquire a request token.  We really should have two
-         * different buildOAuthHeader functions for the two different
-         * situations.
-         */
-        String sig;
-        if (signingTokenPair != null) {
-            buf.append(", oauth_token=\"").append(
-                    encode(signingTokenPair.key)).append("\"");
-            sig = encode(appKeyPair.secret) + "&"
-                    + encode(signingTokenPair.secret);
-        } else {
-            sig = encode(appKeyPair.secret) + "&";
-        }
-        buf.append(", oauth_signature=\"").append(sig).append("\"");
-
-        // Note: Don't need nonce or timestamp since we do everything over SSL.
-        return buf.toString();
-    }
-
-    private static String encode(String s) {
-        try {
-            return URLEncoder.encode(s, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            AssertionError ae = new AssertionError("UTF-8 isn't available");
-            ae.initCause(ex);
-            throw ae;
         }
     }
 

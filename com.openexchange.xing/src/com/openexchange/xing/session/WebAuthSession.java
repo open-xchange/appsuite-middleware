@@ -22,13 +22,6 @@
 
 package com.openexchange.xing.session;
 
-import java.util.Map;
-import org.apache.http.HttpResponse;
-import com.openexchange.xing.RESTUtility;
-import com.openexchange.xing.RESTUtility.Method;
-import com.openexchange.xing.exception.XingException;
-import com.openexchange.xing.exception.XingParseException;
-
 /**
  * Keeps track of a logged in user contains configuration options for the {@link XingAPI}. This type of {@link Session} uses the web OAuth
  * flow to authenticate users:
@@ -46,26 +39,6 @@ import com.openexchange.xing.exception.XingParseException;
 public class WebAuthSession extends AbstractSession {
 
     /**
-     * Contains the info needed to send the user to the XING web auth page and later retrieve an access token + secret.
-     */
-    public static final class WebAuthInfo {
-
-        /** The URL to redirect the user to. */
-        public final String url;
-
-        /**
-         * The request token to later use with {@link WebAuthSession#retrieveWebAccessToken(RequestTokenPair)}. Expires after a short amount
-         * of time (currently 5 minutes).
-         */
-        public final RequestTokenPair requestTokenPair;
-
-        WebAuthInfo(String url, RequestTokenPair requestTokenPair) {
-            this.url = url;
-            this.requestTokenPair = requestTokenPair;
-        }
-    }
-
-    /**
      * Creates a new web auth session with the given app key pair and access type. The session will not be linked because it has no access
      * token or secret.
      */
@@ -81,93 +54,4 @@ public class WebAuthSession extends AbstractSession {
         super(appKeyPair, accessTokenPair);
     }
 
-    /**
-     * Starts an authentication request with XING servers and gets all the info you need to start authenticating a user. This call blocks
-     * for a non-trivial amount of time due to a network operation. Because a callback URL is not provided, you will have to somehow
-     * determine when the user has finished authenticating on the XING site (for example, put up a prompt after you open a browser window
-     * for authentication). If you want to provide a callback URL, see {@link WebAuthSession#getAuthInfo(String)}.
-     * 
-     * @return a {@link WebAuthInfo}, from which you can obtain the URL to redirect the user to and a request token + secret to log the user
-     *         in later.
-     * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
-     *             meaning of each error code. The most common error codes you can expect from this call are 500, 502, and 503 (all related
-     *             to internal XING server issues).
-     * @throws XingIOException if any network-related error occurs.
-     * @throws XingParseException if a malformed or unknown response was received from the server.
-     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
-     *             catch this exception which signals that some kind of error occurred.
-     */
-    public WebAuthInfo getAuthInfo() throws XingException {
-        return getAuthInfo(null);
-    }
-
-    /**
-     * Starts an authentication request with XING servers and gets all the info you need to start authenticating a user. This call blocks
-     * for a non-trivial amount of time due to a network operation.
-     * 
-     * @param callbackUrl the URL to which XING will redirect the user after he/she has authenticated on the XING site.
-     * @return a {@link WebAuthInfo}, from which you can obtain the URL to redirect the user to and a request token + secret to log the user
-     *         in later.
-     * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
-     *             meaning of each error code. The most common error codes you can expect from this call are 500, 502, and 503 (all for
-     *             internal XING server issues).
-     * @throws XingIOException if any network-related error occurs.
-     * @throws XingParseException if a malformed or unknown response was received from the server.
-     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
-     *             catch this exception which signals that some kind of error occurred.
-     */
-    public WebAuthInfo getAuthInfo(String callbackUrl) throws XingException {
-        setUpToken("/oauth/request_token");
-
-        // Request token pair was set as access token pair as they act the
-        // same. Convert it here.
-        AccessTokenPair accessTokenPair = getAccessTokenPair();
-        RequestTokenPair requestTokenPair = new RequestTokenPair(accessTokenPair.key, accessTokenPair.secret);
-
-        String[] args;
-        if (callbackUrl != null) {
-            args = new String[] { "oauth_token", requestTokenPair.key, "oauth_callback", callbackUrl, "locale", getLocale().toString() };
-        } else {
-            args = new String[] { "oauth_token", requestTokenPair.key, "locale", getLocale().toString() };
-        }
-
-        String url = RESTUtility.buildURL(getWebServer(), 1, "/oauth/authorize", args);
-
-        return new WebAuthInfo(url, requestTokenPair);
-    }
-
-    /**
-     * When called after the user is done authenticating, sets the user's access token + secret on this session. This call blocks for a
-     * non-trivial amount of time due to a network operation. Since the request token + secret expire after a short time (currently 5
-     * minutes), this should be called right after a user comes back from auth on the XING site.
-     * 
-     * @param requestTokenPair the request token pair from the {@link WebAuthInfo} returned from {@code getAuthInfo()}.
-     * @return the XING UID of the authenticated user.
-     * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
-     *             meaning of each error code. The most common error codes you can expect from this call are 401 (bad request token), 403
-     *             (bad app key pair), 500, 502, and 503 (all for internal XING server issues).
-     * @throws XingIOException if any network-related error occurs.
-     * @throws XingParseException if a malformed or unknown response was received from the server.
-     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
-     *             catch this exception which signals that some kind of error occurred.
-     */
-    public String retrieveWebAccessToken(RequestTokenPair requestTokenPair) throws XingException {
-        setAccessTokenPair(requestTokenPair);
-        Map<String, String> result = setUpToken("/oauth/access_token");
-        return result.get("uid");
-    }
-
-    private Map<String, String> setUpToken(String path) throws XingException {
-        HttpResponse response = RESTUtility.streamRequest(Method.GET, getAPIServer(), path, 1, new String[] {
-            "locale", getLocale().toString() }, this).response;
-        Map<String, String> result = RESTUtility.parseAsQueryString(response);
-
-        if (!result.containsKey("oauth_token") || !result.containsKey("oauth_token_secret")) {
-            throw new XingParseException("Did not get tokens from Xing");
-        }
-
-        setAccessTokenPair(new AccessTokenPair(result.get("oauth_token"), result.get("oauth_token_secret")));
-
-        return result;
-    }
 }
