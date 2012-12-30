@@ -184,34 +184,34 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
          * only be seen after publication via casNext.
          */
         Node(E item) {
-            UNSAFE.putObject(this, itemOffset, item);
+            MY_UNSAFE.putObject(this, itemOffset, item);
         }
 
         boolean casItem(E cmp, E val) {
-            return UNSAFE.compareAndSwapObject(this, itemOffset, cmp, val);
+            return MY_UNSAFE.compareAndSwapObject(this, itemOffset, cmp, val);
         }
 
         void lazySetNext(Node<E> val) {
-            UNSAFE.putOrderedObject(this, nextOffset, val);
+            MY_UNSAFE.putOrderedObject(this, nextOffset, val);
         }
 
         boolean casNext(Node<E> cmp, Node<E> val) {
-            return UNSAFE.compareAndSwapObject(this, nextOffset, cmp, val);
+            return MY_UNSAFE.compareAndSwapObject(this, nextOffset, cmp, val);
         }
 
         // Unsafe mechanics
 
-        private static final sun.misc.Unsafe UNSAFE;
+        private static final sun.misc.Unsafe MY_UNSAFE;
         private static final long itemOffset;
         private static final long nextOffset;
 
         static {
             try {
-                UNSAFE = sun.misc.Unsafe.getUnsafe();
+                MY_UNSAFE = sun.misc.Unsafe.getUnsafe();
                 Class k = Node.class;
-                itemOffset = UNSAFE.objectFieldOffset
+                itemOffset = MY_UNSAFE.objectFieldOffset
                     (k.getDeclaredField("item"));
-                nextOffset = UNSAFE.objectFieldOffset
+                nextOffset = MY_UNSAFE.objectFieldOffset
                     (k.getDeclaredField("next"));
             } catch (Exception e) {
                 throw new Error(e);
@@ -272,7 +272,9 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
             if (h == null) {
                 h = t = newNode;
             } else {
-                t.lazySetNext(newNode);
+                if (null != t) {
+                    t.lazySetNext(newNode);
+                }
                 t = newNode;
             }
         }
@@ -554,7 +556,9 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
             if (beginningOfTheEnd == null) {
                 beginningOfTheEnd = last = newNode;
             } else {
-                last.lazySetNext(newNode);
+                if (null != last) {
+                    last.lazySetNext(newNode);
+                }
                 last = newNode;
             }
         }
@@ -756,14 +760,13 @@ public class Java7ConcurrentLinkedQueue<E> extends AbstractQueue<E>
                     nextNode = p;
                     nextItem = item;
                     return x;
-                } else {
-                    // skip over nulls
-                    Node<E> next = succ(p);
-                    if (pred != null && next != null) {
-                        pred.casNext(p, next);
-                    }
-                    p = next;
                 }
+                // skip over nulls
+                Node<E> next = succ(p);
+                if (pred != null && next != null) {
+                    pred.casNext(p, next);
+                }
+                p = next;
             }
         }
 
