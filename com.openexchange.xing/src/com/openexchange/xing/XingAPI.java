@@ -94,7 +94,7 @@ public class XingAPI<S extends Session> {
     }
 
     /**
-     * Throws a {@link DropboxUnlinkedException} if the session in this instance is not linked.
+     * Throws a {@link XingUnlinkedException} if the session in this instance is not linked.
      */
     protected void assertAuthenticated() throws XingUnlinkedException {
         if (!session.isLinked()) {
