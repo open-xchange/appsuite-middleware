@@ -48,7 +48,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
@@ -1005,7 +1004,7 @@ public class ForkJoinPool extends AbstractExecutorService {
             int pc = parallelism;
             do {
                 ForkJoinWorkerThread[] ws; ForkJoinWorkerThread w;
-                int e, ac, tc, rc, i;
+                int e, ac, tc, i;
                 long c = ctl;
                 int u = (int)(c >>> 32);
                 if ((e = (int)c) < 0) {
@@ -1066,7 +1065,6 @@ public class ForkJoinPool extends AbstractExecutorService {
      * @param joinMe the task
      */
     final void tryAwaitJoin(ForkJoinTask<?> joinMe) {
-        int s;
         Thread.interrupted(); // clear interrupts before checking termination
         if (joinMe.status >= 0) {
             if (tryPreBlock()) {
@@ -1206,7 +1204,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                         int n = ws.length;
                         if (k < 0 || k >= n || ws[k] != null) {
                             for (k = 0; k < n && ws[k] != null; ++k) {
-                                ;
+                                //;
                             }
                             if (k == n) {
                                 ws = workers = Arrays.copyOf(ws, n << 1);
@@ -1347,6 +1345,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                                 try {
                                     w.interrupt();
                                 } catch (SecurityException ignore) {
+                                    // Ignore
                                 }
                             }
                         }
@@ -1367,6 +1366,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                 try {
                     task.cancel(false);
                 } catch (Throwable ignore) {
+                    // Ignore
                 }
             }
         }
@@ -1567,10 +1567,9 @@ public class ForkJoinPool extends AbstractExecutorService {
         if ((t instanceof ForkJoinWorkerThread) &&
             ((ForkJoinWorkerThread)t).pool == this) {
             return task.invoke();  // bypass submit if in same pool
-        } else {
-            addSubmission(task);
-            return task.join();
         }
+        addSubmission(task);
+        return task.join();
     }
 
     /**
@@ -1715,6 +1714,7 @@ public class ForkJoinPool extends AbstractExecutorService {
     static final class InvokeAll<T> extends RecursiveAction {
         final ArrayList<ForkJoinTask<T>> tasks;
         InvokeAll(ArrayList<ForkJoinTask<T>> tasks) { this.tasks = tasks; }
+        @Override
         public void compute() {
             try { invokeAll(tasks); }
             catch (Exception ignore) {}
