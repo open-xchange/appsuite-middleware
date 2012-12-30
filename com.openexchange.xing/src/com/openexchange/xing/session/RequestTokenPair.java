@@ -10,7 +10,7 @@ import java.io.Serializable;
 public final class RequestTokenPair extends AccessTokenPair implements Serializable {
 
     // Do not change.
-    private static final long serialVersionUID = 7933124160414910085L;
+    private static final long serialVersionUID = 7933124160414911195L;
 
     public RequestTokenPair(String key, String secret) {
         super(key, secret);
