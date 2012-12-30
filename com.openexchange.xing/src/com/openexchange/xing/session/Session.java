@@ -98,17 +98,17 @@ public interface Session {
     public void setRequestTimeout(HttpUriRequest request);
 
     /**
-     * Returns the Xing API server. Changing this will break things.
+     * Returns the XING API server. Changing this will break things.
      */
     public String getAPIServer();
 
     /**
-     * Returns the Xing content server. Changing this will break things.
+     * Returns the XING content server. Changing this will break things.
      */
     public String getContentServer();
 
     /**
-     * Returns the Xing web server. Changing this will break things.
+     * Returns the XING web server. Changing this will break things.
      */
     public String getWebServer();
 

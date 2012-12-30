@@ -146,7 +146,7 @@ public abstract class AbstractSession implements Session {
      * <br/><br/>
      * The default implementation always returns {@code Locale.ENLISH}, but you
      * are highly encouraged to localize your application and return the system
-     * locale instead. Note: as of the time this was written, Xing supports
+     * locale instead. Note: as of the time this was written, XING supports
      * the de, en, es, fr, and ja locales - if you use a locale other than
      * these, messages will be returned in English. However, it is good
      * practice to pass along the correct locale as we will add more languages
@@ -255,7 +255,7 @@ public abstract class AbstractSession implements Session {
                 client = this.client.get();
                 if (client == null) {
                     // Set up default connection params. There are two routes to
-                    // Xing - api server and content server.
+                    // XING - api server and content server.
                     final HttpParams connParams = new BasicHttpParams();
                     ConnManagerParams.setMaxConnectionsPerRoute(connParams, new ConnPerRoute() {
 
@@ -386,7 +386,7 @@ public abstract class AbstractSession implements Session {
 
             return timeout;
         }
-    }
+    } // End of DBKeepAliveStrategy class
 
     private static final class DBConnectionReuseStrategy extends DefaultConnectionReuseStrategy {
 
@@ -499,7 +499,7 @@ public abstract class AbstractSession implements Session {
             // non-persistent
             return !ver.lessEquals(HttpVersion.HTTP_1_0);
         }
-    }
+    } // End of DBConnectionReuseStrategy class
 
     private static class DBClientConnManager extends ThreadSafeClientConnManager {
         public DBClientConnManager(HttpParams params, SchemeRegistry schreg) {
@@ -512,7 +512,7 @@ public abstract class AbstractSession implements Session {
             IdleConnectionCloserThread.ensureRunning(this, KEEP_ALIVE_DURATION_SECS, KEEP_ALIVE_MONITOR_INTERVAL_SECS);
             return super.requestConnection(route, state);
         }
-    }
+    } // End of DBClientConnManager class
 
     private static class IdleConnectionCloserThread extends Thread {
         private final DBClientConnManager manager;
@@ -558,7 +558,7 @@ public abstract class AbstractSession implements Session {
                 thread = null;
             }
         }
-    }
+    } // End of IdleConnectionCloserThread class
 
     private static class GzipDecompressingEntity extends HttpEntityWrapper {
 

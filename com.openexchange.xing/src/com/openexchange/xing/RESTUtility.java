@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.UnsupportedCharsetException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,11 +54,12 @@ import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.xing.exception.XingApiException;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingIOException;
@@ -69,7 +71,7 @@ import com.openexchange.xing.session.Session;
 import com.openexchange.xing.session.Session.ProxyInfo;
 
 /**
- * This class is mostly used internally by {@link XingAPI} for creating and executing REST requests to the Xing API, and parsing responses.
+ * This class is mostly used internally by {@link XingAPI} for creating and executing REST requests to the XING API, and parsing responses.
  * You probably won't have a use for it other than {@link #parseDate(String)} for parsing modified times returned in metadata, or (in very
  * rare circumstances) writing your own API calls.
  */
@@ -86,7 +88,29 @@ public class RESTUtility {
     }
 
     /**
-     * Creates and sends a request to the Xing API, parses the response as JSON, and returns the result.
+     * Creates and sends a request to the XING API, parses the response as JSON, and returns the result.
+     * 
+     * @param method GET or POST.
+     * @param host the hostname to use. Should be either api server, content server, or web server.
+     * @param path the URL path, starting with a '/'.
+     * @param apiVersion the API version to use. This should almost always be set to {@code XingAPI.VERSION}.
+     * @param session the {@link Session} to use for this request.
+     * @return a parsed JSON object, typically a Map or a JSONArray.
+     * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException if any network-related error occurs.
+     * @throws XingUnlinkedException if the user has revoked access.
+     * @throws XingParseException if a malformed or unknown response was received from the server.
+     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    static public Object request(final Method method, final String host, final String path, final int apiVersion, final Session session) throws XingException {
+        final HttpResponse resp = streamRequest(method, host, path, apiVersion, null, session).response;
+        return parseAsJSON(resp);
+    }
+
+    /**
+     * Creates and sends a request to the XING API, parses the response as JSON, and returns the result.
      * 
      * @param method GET or POST.
      * @param host the hostname to use. Should be either api server, content server, or web server.
@@ -102,16 +126,16 @@ public class RESTUtility {
      * @throws XingIOException if any network-related error occurs.
      * @throws XingUnlinkedException if the user has revoked access.
      * @throws XingParseException if a malformed or unknown response was received from the server.
-     * @throws XingException for any other unknown errors. This is also a superclass of all other Xing exceptions, so you may want to only
+     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    static public Object request(Method method, String host, String path, int apiVersion, String[] params, Session session) throws XingException {
-        HttpResponse resp = streamRequest(method, host, path, apiVersion, params, session).response;
+    static public Object request(final Method method, final String host, final String path, final int apiVersion, final String[] params, final Session session) throws XingException {
+        final HttpResponse resp = streamRequest(method, host, path, apiVersion, params, session).response;
         return parseAsJSON(resp);
     }
 
     /**
-     * Creates and sends a request to the Xing API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
+     * Creates and sends a request to the XING API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
      * {@link HttpResponse}.
      * 
      * @param method GET or POST.
@@ -127,10 +151,10 @@ public class RESTUtility {
      *             meaning of each error code.
      * @throws XingIOException if any network-related error occurs.
      * @throws XingUnlinkedException if the user has revoked access.
-     * @throws XingException for any other unknown errors. This is also a superclass of all other Xing exceptions, so you may want to only
+     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public static RequestAndResponse streamRequest(Method method, String host, String path, int apiVersion, String params[], Session session) throws XingException {
+    public static RequestAndResponse streamRequest(final Method method, final String host, final String path, final int apiVersion, final String params[], final Session session) throws XingException {
         HttpRequestBase req = null;
         String target = null;
 
@@ -139,13 +163,13 @@ public class RESTUtility {
             req = new HttpGet(target);
         } else {
             target = buildURL(host, apiVersion, path, null);
-            HttpPost post = new HttpPost(target);
+            final HttpPost post = new HttpPost(target);
 
             if (params != null && params.length >= 2) {
                 if (params.length % 2 != 0) {
                     throw new IllegalArgumentException("Params must have an even number of elements.");
                 }
-                List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+                final List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 
                 for (int i = 0; i < params.length; i += 2) {
                     if (params[i + 1] != null) {
@@ -154,8 +178,8 @@ public class RESTUtility {
                 }
 
                 try {
-                    post.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
-                } catch (UnsupportedEncodingException e) {
+                    post.setEntity(new UrlEncodedFormEntity(nvps, Charsets.UTF_8));
+                } catch (final UnsupportedCharsetException e) {
                     throw new XingException(e);
                 }
             }
@@ -164,7 +188,7 @@ public class RESTUtility {
         }
 
         session.sign(req);
-        HttpResponse resp = execute(session, req);
+        final HttpResponse resp = execute(session, req);
         return new RequestAndResponse(req, resp);
     }
 
@@ -178,17 +202,17 @@ public class RESTUtility {
      * @throws XingIOException if any network-related error occurs while reading in content from the {@link HttpResponse}.
      * @throws XingUnlinkedException if the user has revoked access.
      * @throws XingParseException if a malformed or unknown response was received from the server.
-     * @throws XingException for any other unknown errors. This is also a superclass of all other Xing exceptions, so you may want to only
+     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public static JSONValue parseAsJSON(HttpResponse response) throws XingException {
+    public static JSONValue parseAsJSON(final HttpResponse response) throws XingException {
         JSONValue result = null;
 
         BufferedReader bin = null;
         try {
-            HttpEntity ent = response.getEntity();
+            final HttpEntity ent = response.getEntity();
             if (ent != null) {
-                InputStreamReader in = new InputStreamReader(ent.getContent());
+                final InputStreamReader in = new InputStreamReader(ent.getContent());
                 // Wrap this with a Buffer, so we can re-parse it if it's
                 // not JSON
                 // Has to be at least 16384, because this is defined as the buffer size in
@@ -202,16 +226,16 @@ public class RESTUtility {
                     checkForError((JSONObject) result);
                 }
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new XingIOException(e);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             if (XingServerException.isValidWithNullBody(response)) {
                 // We have something from Xing, but it's an error with no reason
                 throw new XingServerException(response);
             }
             // This is from Xing, and we shouldn't be getting it
             throw new XingParseException(bin);
-        } catch (OutOfMemoryError e) {
+        } catch (final OutOfMemoryError e) {
             throw new XingException(e);
         } finally {
             Streams.close(bin);
@@ -237,14 +261,14 @@ public class RESTUtility {
     /**
      * Reads in content from an {@link HttpResponse} and parses it as a query string.
      * 
-     * @param response the {@link HttpResponse}.
-     * @return a map of parameter names to values from the query string.
+     * @param response The {@link HttpResponse}.
+     * @return A map of parameter names to values from the query string.
      * @throws XingIOException if any network-related error occurs while reading in content from the {@link HttpResponse}.
      * @throws XingParseException if a malformed or unknown response was received from the server.
-     * @throws XingException for any other unknown errors. This is also a superclass of all other Xing exceptions, so you may want to only
+     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public static Map<String, String> parseAsQueryString(HttpResponse response) throws XingException {
+    public static Map<String, String> parseAsQueryString(final HttpResponse response) throws XingException {
         final HttpEntity entity = response.getEntity();
         if (entity == null) {
             throw new XingParseException("Bad response from Xing.");
@@ -253,14 +277,14 @@ public class RESTUtility {
         final Scanner scanner;
         try {
             scanner = new Scanner(entity.getContent()).useDelimiter("&");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new XingIOException(e);
         }
 
-        Map<String, String> result = new HashMap<String, String>();
+        final Map<String, String> result = new HashMap<String, String>();
         while (scanner.hasNext()) {
-            String nameValue = scanner.next();
-            String[] parts = nameValue.split("=");
+            final String nameValue = scanner.next();
+            final String[] parts = nameValue.split("=");
             if (parts.length != 2) {
                 throw new XingParseException("Bad query string from Xing.");
             }
@@ -272,45 +296,45 @@ public class RESTUtility {
     /**
      * Executes an {@link HttpUriRequest} with the given {@link Session} and returns an {@link HttpResponse}.
      * 
-     * @param session the session to use.
-     * @param req the request to execute.
-     * @return an {@link HttpResponse}.
-     * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
+     * @param session The session to use.
+     * @param req The request to execute.
+     * @return An {@link HttpResponse}.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
-     * @throws XingIOException if any network-related error occurs.
-     * @throws XingUnlinkedException if the user has revoked access.
-     * @throws XingException for any other unknown errors. This is also a superclass of all other Xing exceptions, so you may want to only
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingUnlinkedException If the user has revoked access.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public static HttpResponse execute(Session session, HttpUriRequest req) throws XingException {
+    public static HttpResponse execute(final Session session, final HttpUriRequest req) throws XingException {
         return execute(session, req, -1);
     }
 
     /**
      * Executes an {@link HttpUriRequest} with the given {@link Session} and returns an {@link HttpResponse}.
      * 
-     * @param session the session to use.
-     * @param req the request to execute.
-     * @param socketTimeoutOverrideMs if >= 0, the socket timeout to set on this request. Does nothing if set to a negative number.
-     * @return an {@link HttpResponse}.
-     * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
+     * @param session The session to use.
+     * @param req The request to execute.
+     * @param socketTimeoutOverrideMs If >= 0, the socket timeout to set on this request. Does nothing if set to a negative number.
+     * @return An {@link HttpResponse}.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
-     * @throws XingIOException if any network-related error occurs.
-     * @throws XingUnlinkedException if the user has revoked access.
-     * @throws XingException for any other unknown errors. This is also a superclass of all other Xing exceptions, so you may want to only
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingUnlinkedException If the user has revoked access.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public static HttpResponse execute(Session session, HttpUriRequest req, int socketTimeoutOverrideMs) throws XingException {
-        HttpClient client = updatedHttpClient(session);
+    public static HttpResponse execute(final Session session, final HttpUriRequest req, final int socketTimeoutOverrideMs) throws XingException {
+        final HttpClient client = updatedHttpClient(session);
 
         // Set request timeouts.
         session.setRequestTimeout(req);
         if (socketTimeoutOverrideMs >= 0) {
-            HttpParams reqParams = req.getParams();
+            final HttpParams reqParams = req.getParams();
             HttpConnectionParams.setSoTimeout(reqParams, socketTimeoutOverrideMs);
         }
 
-        boolean repeatable = isRequestRepeatable(req);
+        final boolean repeatable = isRequestRepeatable(req);
 
         try {
             HttpResponse response = null;
@@ -322,7 +346,7 @@ public class RESTUtility {
                  */
                 try {
                     response = client.execute(req);
-                } catch (NullPointerException e) {
+                } catch (final NullPointerException e) {
                     // Leave 'response' as null. This is handled below.
                 }
 
@@ -344,30 +368,30 @@ public class RESTUtility {
                 throw new XingIOException("Apache HTTPClient encountered an error. No response, try again.");
             }
 
-            int statusCode = response.getStatusLine().getStatusCode();
+            final int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != XingServerException._200_OK && statusCode != XingServerException._206_PARTIAL_CONTENT) {
                 // This will throw the right thing: either a XingServerException or a XingProxyException
                 parseAsJSON(response);
             }
 
             return response;
-        } catch (SSLException e) {
+        } catch (final SSLException e) {
             throw new XingSSLException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // Quite common for network going up & down or the request being
             // cancelled, so don't worry about logging this
             throw new XingIOException(e);
-        } catch (OutOfMemoryError e) {
+        } catch (final OutOfMemoryError e) {
             throw new XingException(e);
         }
     }
 
-    private static boolean isRequestRepeatable(HttpRequest req) {
+    private static boolean isRequestRepeatable(final HttpRequest req) {
         // If the request contains an HttpEntity that can't be "reset" (like an InputStream),
         // then it isn't repeatable.
         if (req instanceof HttpEntityEnclosingRequest) {
-            HttpEntityEnclosingRequest ereq = (HttpEntityEnclosingRequest) req;
-            HttpEntity entity = ereq.getEntity();
+            final HttpEntityEnclosingRequest ereq = (HttpEntityEnclosingRequest) req;
+            final HttpEntity entity = ereq.getEntity();
             if (entity != null && !entity.isRepeatable()) {
                 return false;
             }
@@ -376,50 +400,51 @@ public class RESTUtility {
     }
 
     /**
-     * Creates a URL for a request to the Xing API.
+     * Creates a URL for a request to the XING API.
      * 
-     * @param host the Xing host (i.e., api server, content server, or web server).
-     * @param apiVersion the API version to use. You should almost always use {@code XingAPI.VERSION} for this.
-     * @param target the target path, staring with a '/'.
-     * @param params any URL params in an array, with the even numbered elements the parameter names and odd numbered elements the values,
+     * @param host The XING host (i.e., api server, content server, or web server).
+     * @param apiVersion The API version to use. You should almost always use {@code XingAPI.VERSION} for this.
+     * @param target The target path, staring with a '/'.
+     * @param params Any URL params in an array, with the even numbered elements the parameter names and odd numbered elements the values,
      *            e.g. <code>new String[] {"path", "/Public", "locale",
      *         "en"}</code>.
-     * @return a full URL for making a request.
+     * @return A full URL for making a request.
      */
-    public static String buildURL(String host, int apiVersion, String target, String[] params) {
-        if (!target.startsWith("/")) {
-            target = "/" + target;
+    public static String buildURL(final String host, final int apiVersion, final String target, final String[] params) {
+        String trgt = target;
+        if (!trgt.startsWith("/")) {
+            trgt = "/" + trgt;
         }
 
         try {
             // We have to encode the whole line, then remove + and / encoding
             // to get a good OAuth URL.
-            target = URLEncoder.encode("/" + apiVersion + target, "UTF-8");
-            target = target.replace("%2F", "/");
+            trgt = URLEncoder.encode(new StringAllocator(16).append("/v").append(apiVersion).append(trgt).toString(), "UTF-8");
+            trgt = trgt.replace("%2F", "/");
 
             if (params != null && params.length > 0) {
-                target += "?" + urlencode(params);
+                trgt += "?" + urlencode(params);
             }
 
             // These substitutions must be made to keep OAuth happy.
-            target = target.replace("+", "%20").replace("*", "%2A");
-        } catch (UnsupportedEncodingException uce) {
+            trgt = trgt.replace("+", "%20").replace("*", "%2A");
+        } catch (final UnsupportedEncodingException uce) {
             return null;
         }
 
-        return "https://" + host + ":443" + target;
+        return new StringAllocator(32).append("https://").append(host).append(":443").append(trgt).toString();
     }
 
     /**
-     * Parses a date/time returned by the Xing API. Returns null if it cannot be parsed.
+     * Parses a date/time returned by the XING API. Returns <code>null</code> if it cannot be parsed.
      * 
-     * @param date a date returned by the API.
-     * @return a {@link Date}.
+     * @param date A date returned by the API.
+     * @return A {@link Date}.
      */
-    public static Date parseDate(String date) {
+    public static Date parseDate(final String date) {
         try {
             return dateFormat.parse(date);
-        } catch (java.text.ParseException e) {
+        } catch (final java.text.ParseException e) {
             return null;
         }
     }
@@ -427,8 +452,8 @@ public class RESTUtility {
     /**
      * Gets the session's client and updates its proxy.
      */
-    private static synchronized HttpClient updatedHttpClient(Session session) {
-        HttpClient client = session.getHttpClient();
+    private static synchronized HttpClient updatedHttpClient(final Session session) {
+        final HttpClient client = session.getHttpClient();
         updateClientProxy(client, session);
         return client;
     }
@@ -436,8 +461,8 @@ public class RESTUtility {
     /**
      * Updates the given client's proxy from the session.
      */
-    private static void updateClientProxy(HttpClient client, Session session) {
-        ProxyInfo proxyInfo = session.getProxyInfo();
+    private static void updateClientProxy(final HttpClient client, final Session session) {
+        final ProxyInfo proxyInfo = session.getProxyInfo();
         if (proxyInfo != null && proxyInfo.host != null && !proxyInfo.host.equals("")) {
             HttpHost proxy;
             if (proxyInfo.port < 0) {
@@ -454,7 +479,7 @@ public class RESTUtility {
     /**
      * URL encodes an array of parameters into a query string.
      */
-    private static String urlencode(String[] params) {
+    private static String urlencode(final String[] params) {
         if (params.length % 2 != 0) {
             throw new IllegalArgumentException("Params must have an even number of elements.");
         }
@@ -473,7 +498,7 @@ public class RESTUtility {
                 }
             }
             result.replace("*", "%2A");
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             return null;
         }
         return result;

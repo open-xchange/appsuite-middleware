@@ -49,8 +49,16 @@
 
 package com.openexchange.xing;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.xing.RESTUtility.Method;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingUnlinkedException;
@@ -62,6 +70,10 @@ import com.openexchange.xing.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class XingAPI<S extends Session> {
+
+    private static final int MAX_LIMIT = 100;
+
+    private static final int DEFAULT_LIMIT = 10;
 
     /**
      * The version of the API that this code uses.
@@ -91,28 +103,167 @@ public class XingAPI<S extends Session> {
     }
 
     /**
-     * Returns the {@link Account} associated with the current {@link Session}.
+     * Returns the {@link User} associated with the current {@link Session}.
      * 
-     * @return the current session's {@link Account}.
+     * @return the current session's {@link User}.
      * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
      * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
      * @throws XingIOException If any network-related error occurs.
-     * @throws XingException For any other unknown errors. This is also a superclass of all other Xing exceptions, so you may want to only
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public Account accountInfo() throws XingException {
+    public User userInfo() throws XingException {
         assertAuthenticated();
         try {
             final JSONObject accountInfo = (JSONObject) RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
-                "/v1/users/me",
+                "/users/me",
                 VERSION,
-                null,
                 session);
-            return new Account(accountInfo.getJSONArray("users").getJSONObject(0));
+            return new User(accountInfo.getJSONArray("users").getJSONObject(0));
         } catch (final JSONException e) {
+            throw new XingException(e);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
+     * Returns the {@link User} associated with given user identifier.
+     * 
+     * @param userId The user identifier
+     * @return The specified user.
+     * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public User userInfo(final String userId) throws XingException {
+        assertAuthenticated();
+        try {
+            final JSONObject accountInfo = (JSONObject) RESTUtility.request(
+                Method.GET,
+                session.getAPIServer(),
+                "/users/" + userId,
+                VERSION,
+                session);
+            return new User(accountInfo.getJSONArray("users").getJSONObject(0));
+        } catch (final JSONException e) {
+            throw new XingException(e);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
+     * Gets the requested user's contacts.
+     * 
+     * @param userId The user identifier
+     * @param limit The number of contacts to be returned. Must be zero or a positive number. Default: <code>10</code>, Maximum:
+     *            <code>100</code>. If its value is equal to zero, default limit is passed to request 
+     * @param offset The offset. Must be zero or a positive number. Default: <code>0</code>
+     * @param orderBy Determines the ascending order of the returned list. Currently only supports <code>"last_name"</code>. Defaults to
+     *            <code>"id"</code>
+     * @param userFields List of user attributes to return. If this parameter is not used, only the ID will be returned.
+     * @return The user's contacts
+     * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public List<User> getContactsFrom(final String userId, final int limit, final int offset, final OrderBy orderBy, final Collection<UserField> userFields) throws XingException {
+        if (limit < 0 || limit > 100) {
+            throw new XingException("Invalid limit: " + limit + ". Must be zero OR less than or equal to 100.");
+        }
+        if (offset < 0) {
+            throw new XingException("Invalid offset: " + offset + ". Must be greater than zero.");
+        }
+        assertAuthenticated();
+        try {
+            // Add parameters limit & offset
+            final List<String> params = new ArrayList<String>(Arrays.asList(
+                "limit",
+                Integer.toString(limit == 0 ? DEFAULT_LIMIT : limit),
+                "offset",
+                Integer.toString(offset)));
+            // Add order-by
+            if (null != orderBy) {
+                params.add("orderBy");
+                params.add(orderBy.getFieldName());
+            }
+            // Add user fields
+            if (null != userFields && !userFields.isEmpty()) {
+                params.add("user_fields");
+                final Iterator<UserField> iter = userFields.iterator();
+                final StringAllocator fields = new StringAllocator(userFields.size() << 4);
+                fields.append(iter.next().getFieldName());
+                while (iter.hasNext()) {
+                    fields.append(',').append(iter.next().getFieldName());
+                }
+                params.add(fields.toString());
+            }
+
+            final JSONObject usersJsonObject = (JSONObject) RESTUtility.request(
+                Method.GET,
+                session.getAPIServer(),
+                "/users/" + userId + "/contacts",
+                VERSION,
+                params.toArray(new String[0]),
+                session);
+
+            final JSONArray users = usersJsonObject.getJSONArray("users");
+            final int length = users.length();
+            final List<User> retval = new ArrayList<User>(length);
+            for (int i = 0; i < length; i++) {
+                retval.add(new User(users.getJSONObject(i)));
+            }
+            return retval;
+        } catch (final JSONException e) {
+            throw new XingException(e);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
+     * Gets all of the requested user's contacts.
+     * 
+     * @param userId The user identifier
+     * @param orderBy Determines the ascending order of the returned list. Currently only supports <code>"last_name"</code>. Defaults to
+     *            <code>"id"</code>
+     * @param userFields List of user attributes to return. If this parameter is not used, only the ID will be returned.
+     * @return The user's contacts
+     * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public List<User> getContactsFrom(final String userId, final OrderBy orderBy, final Collection<UserField> userFields) throws XingException {
+        assertAuthenticated();
+        try {
+            final List<User> retval = new LinkedList<User>();
+            final int limit = MAX_LIMIT;
+            int offset = 0;
+            while (offset >= 0) {
+                final List<User> contacts = getContactsFrom(userId, offset, limit, orderBy, userFields);
+                retval.addAll(contacts);
+                if (contacts.size() < limit) {
+                    // Obtained less than requested; no more contacts available then
+                    offset = -1;
+                } else {
+                    offset += limit;
+                }
+            }
+            return retval;
+        } catch (final RuntimeException e) {
             throw new XingException(e);
         }
     }

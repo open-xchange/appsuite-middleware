@@ -64,11 +64,11 @@ import org.json.JSONObject;
 import com.openexchange.xing.exception.XingException;
 
 /**
- * {@link Account} - Represents a XING user account.
+ * {@link User} - Represents a XING user account.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Account {
+public class User {
 
     private final String id;
     private final String displayName;
@@ -95,22 +95,22 @@ public class Account {
     private final Map<String, Object> photoUrls;
 
     /**
-     * Initializes a new {@link Account}.
+     * Initializes a new {@link User}.
      * 
      * @param accountInfo The JSON account information
      * @throws XingException If parsing account information fails
      */
-    public Account(final JSONObject accountInfo) throws XingException {
+    public User(final JSONObject accountInfo) throws XingException {
         super();
         try {
-            this.id = accountInfo.optString("id");
-            this.firstName = accountInfo.optString("first_name");
-            this.lastName = accountInfo.optString("last_name");
-            this.displayName = accountInfo.optString("display_name");
-            this.pageName = accountInfo.optString("page_name");
-            this.permalink = accountInfo.optString("permalink");
-            this.gender = accountInfo.optString("gender");
-            this.activeMail = accountInfo.optString("active_email");
+            this.id = accountInfo.optString("id", null);
+            this.firstName = accountInfo.optString("first_name", null);
+            this.lastName = accountInfo.optString("last_name", null);
+            this.displayName = accountInfo.optString("display_name", null);
+            this.pageName = accountInfo.optString("page_name", null);
+            this.permalink = accountInfo.optString("permalink", null);
+            this.gender = accountInfo.optString("gender", null);
+            this.activeMail = accountInfo.optString("active_email", null);
             if (accountInfo.has("time_zone")) {
                 final JSONObject tz = accountInfo.optJSONObject("time_zone");
                 this.timeZone = TimeZone.getTimeZone(tz.getString("name"));
@@ -137,10 +137,10 @@ public class Account {
             } else {
                 badges = Collections.emptyList();
             }
-            this.wants = accountInfo.getString("wants");
-            this.haves = accountInfo.getString("haves");
-            this.interests = accountInfo.getString("interests");
-            this.organisationMember = accountInfo.getString("organisation_member");
+            this.wants = accountInfo.optString("wants", null);
+            this.haves = accountInfo.optString("haves", null);
+            this.interests = accountInfo.optString("interests", null);
+            this.organisationMember = accountInfo.optString("organisation_member", null);
             if (accountInfo.has("languages")) {
                 final JSONObject l = accountInfo.optJSONObject("languages");
                 languages = new LinkedHashMap<Locale, String>(l.length());

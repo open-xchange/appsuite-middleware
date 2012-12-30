@@ -88,15 +88,15 @@ public class Address {
      */
     public Address(final JSONObject addressInformation) {
         super();
-        this.city = addressInformation.optString("city");
-        this.country = addressInformation.optString("country");
-        this.zipCode = addressInformation.optString("zip_code");
-        this.street = addressInformation.optString("street");
-        this.phone = addressInformation.optString("phone");
-        this.fax = addressInformation.optString("fax");
-        this.province = addressInformation.optString("province");
-        this.email = addressInformation.optString("email");
-        this.mobilePhone = addressInformation.optString("mobile_phone");
+        this.city = addressInformation.optString("city", null);
+        this.country = addressInformation.optString("country", null);
+        this.zipCode = addressInformation.optString("zip_code", null);
+        this.street = addressInformation.optString("street", null);
+        this.phone = addressInformation.optString("phone", null);
+        this.fax = addressInformation.optString("fax", null);
+        this.province = addressInformation.optString("province", null);
+        this.email = addressInformation.optString("email", null);
+        this.mobilePhone = addressInformation.optString("mobile_phone", null);
     }
 
     /**

@@ -24,7 +24,7 @@
 package com.openexchange.xing.exception;
 
 /**
- * Used when only part of a file was transferred to/from Xing when using the
+ * Used when only part of a file was transferred to/from XING when using the
  * API.
  */
 public class XingPartialFileException extends XingException {

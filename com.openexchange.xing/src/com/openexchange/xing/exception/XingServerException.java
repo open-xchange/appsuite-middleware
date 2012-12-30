@@ -107,7 +107,7 @@ public class XingServerException extends XingException {
 
     /**
      * Typically from trying to upload over HTTP using chunked encoding. The
-     * Xing API currently does not support chunked transfer encoding.
+     * XING API currently does not support chunked transfer encoding.
      */
     public static final int _411_LENGTH_REQUIRED = 411;
 
@@ -123,10 +123,10 @@ public class XingServerException extends XingException {
     /** Not implemented. */
     public static final int _501_NOT_IMPLEMENTED = 501;
 
-    /** If a Xing server is down - try again later. */
+    /** If a XING server is down - try again later. */
     public static final int _502_BAD_GATEWAY = 502;
 
-    /** If a Xing server is not working properly - try again later. */
+    /** If a XING server is not working properly - try again later. */
     public static final int _503_SERVICE_UNAVAILABLE = 503;
 
     /** User is over quota. */
