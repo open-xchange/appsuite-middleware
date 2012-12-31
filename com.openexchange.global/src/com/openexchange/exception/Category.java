@@ -49,17 +49,21 @@
 
 package com.openexchange.exception;
 
+import java.io.Serializable;
+
 /**
  * {@link Category} - The category for an {@link OXException} determines its behavior during exception handling and logging.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Category {
+public interface Category extends Serializable {
 
     /**
      * The category for an error using error log level.
      */
     public static final Category CATEGORY_ERROR = new Category() {
+
+        private static final long serialVersionUID = 8788884465853335875L;
 
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
@@ -88,6 +92,8 @@ public interface Category {
      */
     public static final Category CATEGORY_USER_INPUT = new Category() {
 
+        private static final long serialVersionUID = -1061550386431721392L;
+
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
             return LogLevel.DEBUG;
@@ -114,6 +120,8 @@ public interface Category {
      * The default category for a configuration issue (e.g. missing required property).
      */
     public static final Category CATEGORY_CONFIGURATION = new Category() {
+
+        private static final long serialVersionUID = 4740329857692772795L;
 
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
@@ -142,6 +150,8 @@ public interface Category {
      */
     public static final Category CATEGORY_PERMISSION_DENIED = new Category() {
 
+        private static final long serialVersionUID = -4586701001738617769L;
+
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
             return LogLevel.ERROR;
@@ -168,6 +178,8 @@ public interface Category {
      * The default category for a try-again issue using debug log level.
      */
     public static final Category CATEGORY_TRY_AGAIN = new Category() {
+
+        private static final long serialVersionUID = 1904303883657823251L;
 
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
@@ -196,6 +208,8 @@ public interface Category {
      */
     public static final Category CATEGORY_CONNECTIVITY = new Category() {
 
+        private static final long serialVersionUID = 5564096898988894716L;
+
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
             return LogLevel.ERROR;
@@ -222,6 +236,8 @@ public interface Category {
      * The default category for a missing service or system (e.g. database) using debug log level.
      */
     public static final Category CATEGORY_SERVICE_DOWN = new Category() {
+
+        private static final long serialVersionUID = 7140947565971113147L;
 
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
@@ -250,6 +266,8 @@ public interface Category {
      */
     public static final Category CATEGORY_TRUNCATED = new Category() {
 
+        private static final long serialVersionUID = 4682222945052171797L;
+
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
             return LogLevel.DEBUG;
@@ -276,6 +294,8 @@ public interface Category {
      * The default category for conflicting data using debug log level.
      */
     public static final Category CATEGORY_CONFLICT = new Category() {
+
+        private static final long serialVersionUID = -8923913404605944423L;
 
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
@@ -304,6 +324,8 @@ public interface Category {
      */
     public static final Category CATEGORY_CAPACITY = new Category() {
 
+        private static final long serialVersionUID = -5312069374248973061L;
+
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
             return LogLevel.ERROR;
@@ -330,6 +352,8 @@ public interface Category {
      * The default category for a warning displayed to user.
      */
     public static final Category CATEGORY_WARNING = new Category() {
+
+        private static final long serialVersionUID = 6009692480995110169L;
 
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
