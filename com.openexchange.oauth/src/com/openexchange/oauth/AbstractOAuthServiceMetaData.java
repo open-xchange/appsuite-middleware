@@ -130,7 +130,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, Map<String, Object> state) throws OXException {
+    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) throws OXException {
         // no-op
     }
 
@@ -140,7 +140,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public OAuthInteraction initOAuth(String callbackUrl) throws OXException {
+    public OAuthInteraction initOAuth(final String callbackUrl) throws OXException {
         return null;
     }
 
@@ -165,7 +165,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public String modifyCallbackURL(String callbackUrl) {
+    public String modifyCallbackURL(final String callbackUrl) {
         return callbackUrl;
     }
 
