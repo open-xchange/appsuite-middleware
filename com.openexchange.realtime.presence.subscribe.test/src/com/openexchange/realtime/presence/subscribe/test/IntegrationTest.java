@@ -224,6 +224,21 @@ public class IntegrationTest extends TestCase {
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+
+            @Override
+            public boolean isSecure() {
+                return false;
+            }
+
+            @Override
+            public String getServerName() {
+                return "";
+            }
+
+            @Override
+            public int getServerPort() {
+                return 0;
+            }
         });
 
         return ServerSessionAdapter.valueOf(login.getSession());

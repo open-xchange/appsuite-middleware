@@ -473,6 +473,13 @@ public final class Tools {
         return req.isSecure();
     }
 
+    public static boolean considerSecure(HttpServletRequest req, boolean force) {
+        if (force && !Cookies.isLocalLan(req)) {
+            return true;
+        }
+        return req.isSecure();
+    }
+
     /**
      * Gets the route for specified HTTP session identifier to be used along with <i>";jsessionid"</i> URL part.
      * 

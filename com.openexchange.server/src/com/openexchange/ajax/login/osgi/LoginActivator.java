@@ -101,14 +101,12 @@ public class LoginActivator extends HousekeepingActivator {
                 context.ungetService(reference);
                 ServerServiceRegistry.getInstance().removeService(service.getClass());
             }
-            
         }
         track(OAuthProviderService.class, new ServerServiceRegistryTracker<OAuthProviderService>());
         track(OAuth2ProviderService.class, new ServerServiceRegistryTracker<OAuth2ProviderService>());
-        
+
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
         rememberTracker(new ServiceTracker<Object, Object>(context, filter, new LoginServletRegisterer(context)));
         openTrackers();
     }
-
 }

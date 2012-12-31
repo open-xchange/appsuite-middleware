@@ -52,7 +52,23 @@ package com.openexchange.ajax.login;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
+import static com.openexchange.login.Interface.HTTP_JSON;
+import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.ajax.Login;
+import com.openexchange.ajax.fields.Header;
+import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.authentication.Cookie;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
+import com.openexchange.login.Interface;
+import com.openexchange.login.LoginRequest;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * Shared methods for login operations.
@@ -116,5 +132,144 @@ public final class LoginTools {
         // Alright, we already have a fragment, let's append a new parameter
 
         return retval + "&" + param + "=" + value + query;
+    }
+
+    public static String parseAuthId(HttpServletRequest req, boolean strict) throws OXException {
+        final String authIdParam = req.getParameter(LoginFields.AUTHID_PARAM);
+        if (null == authIdParam) {
+            if (strict) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.AUTHID_PARAM);
+            }
+            return UUIDs.getUnformattedString(UUID.randomUUID());
+        }
+        return authIdParam;
+    }
+
+    public static String parseClient(HttpServletRequest req, boolean strict, String defaultClient) throws OXException {
+        final String parameter = req.getParameter(LoginFields.CLIENT_PARAM);
+        if (null == parameter) {
+            if (strict) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_PARAM);
+            }
+            return defaultClient;
+        }
+        return parameter;
+    }
+
+    public static String parseClientIP(HttpServletRequest req) {
+        final String parameter = req.getParameter(LoginFields.CLIENT_IP_PARAM);
+        return null == parameter ? req.getRemoteAddr() : parameter;
+    }
+
+    public static String parseUserAgent(HttpServletRequest req) {
+        final String parameter = req.getParameter(LoginFields.USER_AGENT);
+        return null == parameter ? req.getHeader(Header.USER_AGENT) : parameter;
+    }
+
+    public static boolean parseVolatile(HttpServletRequest req) {
+        final String parameter = req.getParameter(LoginFields.VOLATILE);
+        if (Login.isEmpty(parameter)) {
+            return false;
+        }
+        return Boolean.parseBoolean(parameter.trim());
+    }
+
+    public static LoginRequest parseLogin(final HttpServletRequest req, final String login, final String password, boolean strict, String defaultClient, final boolean forceHTTPS) throws OXException {
+        final String authId = parseAuthId(req, strict);
+        final String client = parseClient(req, strict, defaultClient);
+        final String version;
+        if (null == req.getParameter(LoginFields.VERSION_PARAM)) {
+            if (strict) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.VERSION_PARAM);
+            }
+            version = null;
+        } else {
+            version = req.getParameter(LoginFields.VERSION_PARAM);
+        }
+        final String clientIP = parseClientIP(req);
+        final String userAgent = parseUserAgent(req);
+        final boolean isVolatile = parseVolatile(req);
+        final Map<String, List<String>> headers = copyHeaders(req);
+        final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
+        final LoginRequest loginRequest = new LoginRequest() {
+    
+            private final String hash = HashCalculator.getHash(req, userAgent, client);
+    
+            @Override
+            public boolean isVolatile() {
+                return isVolatile;
+            }
+    
+            @Override
+            public String getLogin() {
+                return login;
+            }
+    
+            @Override
+            public String getPassword() {
+                return password;
+            }
+    
+            @Override
+            public String getClientIP() {
+                return clientIP;
+            }
+    
+            @Override
+            public String getUserAgent() {
+                return userAgent;
+            }
+    
+            @Override
+            public String getAuthId() {
+                return authId;
+            }
+    
+            @Override
+            public String getClient() {
+                return client;
+            }
+    
+            @Override
+            public String getVersion() {
+                return version;
+            }
+    
+            @Override
+            public Interface getInterface() {
+                return HTTP_JSON;
+            }
+    
+            @Override
+            public String getHash() {
+                return hash;
+            }
+    
+            @Override
+            public Map<String, List<String>> getHeaders() {
+                return headers;
+            }
+    
+            @Override
+            public com.openexchange.authentication.Cookie[] getCookies() {
+                return cookies;
+            }
+    
+            @Override
+            public boolean isSecure() {
+                return Tools.considerSecure(req, forceHTTPS);
+            }
+    
+            @Override
+            public String getServerName() {
+                return req.getServerName();
+            }
+    
+            @Override
+            public int getServerPort() {
+                return req.getServerPort();
+            }
+        };
+        return loginRequest;
     }
 }

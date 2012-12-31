@@ -255,6 +255,7 @@ public final class LoginPerformer {
                 if (null != req) {
                     session.setParameter(HostnameService.PARAM_HOST_DATA, new HostDataImpl(req, user.getId(), ctx.getContextId()));
                 }
+                session.setParameter(HostnameService.PARAM_HOST_DATA, new HostDataImpl(req, user.getId(), ctx.getContextId()));
                 final String capabilities = (String) properties.get("client.capabilities");
                 if (null == capabilities) {
                     session.setParameter(Session.PARAM_CAPABILITIES, Collections.<String> emptyList());

@@ -76,7 +76,7 @@ public final class HostDataImpl implements HostData {
      * @param httpRequest The HTTP Servlet request
      */
     public HostDataImpl(final HttpServletRequest httpRequest, final int userId, final int contextId) {
-        this();
+        super();
         secure = Tools.considerSecure(httpRequest);
         {
             final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
@@ -91,11 +91,12 @@ public final class HostDataImpl implements HostData {
         route = Tools.getRoute(httpRequest.getSession(true).getId());
     }
 
-    /**
-     * Initializes a new empty {@link HostDataImpl}.
-     */
-    public HostDataImpl() {
+    public HostDataImpl(boolean secure, String host, int port, String route) {
         super();
+        this.secure = secure;
+        this.host = host;
+        this.port = port;
+        this.route = route;
     }
 
     @Override

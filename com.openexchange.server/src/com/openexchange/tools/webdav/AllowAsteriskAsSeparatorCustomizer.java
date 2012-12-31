@@ -125,6 +125,21 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
             public Cookie[] getCookies() {
                 return loginReq.getCookies();
             }
+
+            @Override
+            public boolean isSecure() {
+                return loginReq.isSecure();
+            }
+
+            @Override
+            public String getServerName() {
+                return loginReq.getServerName();
+            }
+
+            @Override
+            public int getServerPort() {
+                return loginReq.getServerPort();
+            }
         };
     }
 }

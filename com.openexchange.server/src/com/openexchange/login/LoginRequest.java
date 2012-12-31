@@ -81,6 +81,12 @@ public interface LoginRequest {
     Interface getInterface();
 
     Map<String, List<String>> getHeaders();
-    
+
     Cookie[] getCookies();
+
+    boolean isSecure();
+
+    String getServerName();
+
+    int getServerPort();
 }

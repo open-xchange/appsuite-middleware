@@ -339,7 +339,7 @@ public class Login extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: " + session.getContextId() + "/" + session.getUserId());
+                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: " + session.getContextId() + '/' + session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -498,7 +498,7 @@ public class Login extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: " + session.getContextId() + "/" + session.getUserId());
+                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: " + session.getContextId() + '/' + session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -701,6 +701,7 @@ public class Login extends AJAXServlet {
                 }
             }
         }
+        final boolean disableTrimLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.DISABLE_TRIM_LOGIN.getPropertyName()));
         LoginConfiguration conf = new LoginConfiguration(
             uiWebPath,
             sessiondAutoLogin,
@@ -715,7 +716,8 @@ public class Login extends AJAXServlet {
             ipCheck,
             ipCheckWhitelist,
             redirectIPChangeAllowed,
-            ranges);
+            ranges,
+            disableTrimLogin);
         confReference.set(conf);
         handlerMap.put(ACTION_FORMLOGIN, new FormLogin(conf));
     }
@@ -834,7 +836,7 @@ public class Login extends AJAXServlet {
         doCookieReWrite(req, resp, CookieType.SECRET);
     }
 
-    protected static void logAndSendException(final HttpServletResponse resp, final OXException e) throws IOException {
+    public static void logAndSendException(final HttpServletResponse resp, final OXException e) throws IOException {
         LOG.debug(e.getMessage(), e);
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -952,7 +954,14 @@ public class Login extends AJAXServlet {
 
             @Override
             public LoginResult doLogin(final HttpServletRequest req2) throws OXException {
-                final LoginRequest request = parseLogin(req2, LoginFields.NAME_PARAM, false, confReference.get().getDefaultClient());
+                LoginConfiguration conf = confReference.get();
+                final LoginRequest request = parseLogin(
+                    req2,
+                    LoginFields.NAME_PARAM,
+                    false,
+                    conf.getDefaultClient(),
+                    conf.isCookieForceHTTPS(),
+                    conf.isDisableTrimLogin());
                 return LoginPerformer.getInstance().doLogin(request);
             }
         });
@@ -970,7 +979,8 @@ public class Login extends AJAXServlet {
                     providerService.getValidator().validateMessage(requestMessage, accessor);
                     final String login = accessor.<String> getProperty(OAuthProviderConstants.PROP_LOGIN);
                     final String password = accessor.<String> getProperty(OAuthProviderConstants.PROP_PASSWORD);
-                    final LoginRequest request = parseLogin(req2, login, password, false, confReference.get().getDefaultClient());
+                    LoginConfiguration conf = confReference.get();
+                    final LoginRequest request = LoginTools.parseLogin(req2, login, password, false, conf.getDefaultClient(), conf.isCookieForceHTTPS());
                     return LoginPerformer.getInstance().doLogin(request);
                 } catch (final OAuthProblemException e) {
                     try {
@@ -1115,117 +1125,28 @@ public class Login extends AJAXServlet {
         return new Cookie(cookie.getName(), cookie.getValue());
     }
 
-    public static LoginRequest parseLogin(HttpServletRequest req, String loginParamName, boolean strict, String defaultClient) throws OXException {
-        final String login;
-        {
-            String tmp = req.getParameter(loginParamName);
-            if (null == tmp) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(loginParamName);
-            }
-            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            final Object prop = null == service ? null : service.getProperty("com.openexchange.login.disableTrimLogin");
-            if (null == prop || !(Boolean.parseBoolean(prop.toString()))) {
-                tmp = tmp.trim();
-            }
-            login = tmp;
+    public static LoginRequest parseLogin(HttpServletRequest req, String loginParamName, boolean strict, String defaultClient, boolean forceHTTPS, boolean disableTrimLogin) throws OXException {
+        String login = req.getParameter(loginParamName);
+        if (null == login) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(loginParamName);
         }
-        final String password = req.getParameter(LoginFields.PASSWORD_PARAM);
+        if (!disableTrimLogin) {
+            login = login.trim();
+        }
+        String password = req.getParameter(LoginFields.PASSWORD_PARAM);
         if (null == password) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.PASSWORD_PARAM);
         }
-        return parseLogin(req, login, password, strict, defaultClient);
-    }
-
-    protected static LoginRequest parseLogin(final HttpServletRequest req, final String login, final String password, boolean strict, String defaultClient) throws OXException {
-        final String authId = parseAuthId(req, strict);
-        final String client = parseClient(req, strict, defaultClient);
-        final String version;
-        if (null == req.getParameter(LoginFields.VERSION_PARAM)) {
-            if (strict) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.VERSION_PARAM);
-            }
-            version = null;
-        } else {
-            version = req.getParameter(LoginFields.VERSION_PARAM);
-        }
-        final String clientIP = parseClientIP(req);
-        final String userAgent = parseUserAgent(req);
-        final boolean isVolatile = parseVolatile(req, false);
-        final Map<String, List<String>> headers = copyHeaders(req);
-        final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
-        final LoginRequest loginRequest = new LoginRequest() {
-
-            private final String hash = HashCalculator.getHash(req, userAgent, client);
-
-            @Override
-            public boolean isVolatile() {
-                return isVolatile;
-            }
-
-            @Override
-            public String getLogin() {
-                return login;
-            }
-
-            @Override
-            public String getPassword() {
-                return password;
-            }
-
-            @Override
-            public String getClientIP() {
-                return clientIP;
-            }
-
-            @Override
-            public String getUserAgent() {
-                return userAgent;
-            }
-
-            @Override
-            public String getAuthId() {
-                return authId;
-            }
-
-            @Override
-            public String getClient() {
-                return client;
-            }
-
-            @Override
-            public String getVersion() {
-                return version;
-            }
-
-            @Override
-            public Interface getInterface() {
-                return HTTP_JSON;
-            }
-
-            @Override
-            public String getHash() {
-                return hash;
-            }
-
-            @Override
-            public Map<String, List<String>> getHeaders() {
-                return headers;
-            }
-
-            @Override
-            public com.openexchange.authentication.Cookie[] getCookies() {
-                return cookies;
-            }
-        };
-        return loginRequest;
+        return LoginTools.parseLogin(req, login, password, strict, defaultClient, forceHTTPS);
     }
 
     protected LoginRequest parseAutoLoginRequest(final HttpServletRequest req) throws OXException {
-        final String authId = parseAuthId(req, false);
-        final String client = parseClient(req, false, confReference.get().getDefaultClient());
-        final String clientIP = parseClientIP(req);
-        final String userAgent = parseUserAgent(req);
-        final boolean isVolatile = parseVolatile(req, false);
+        final LoginConfiguration conf = confReference.get();
+        final String authId = LoginTools.parseAuthId(req, false);
+        final String client = LoginTools.parseClient(req, false, conf.getDefaultClient());
+        final String clientIP = LoginTools.parseClientIP(req);
+        final String userAgent = LoginTools.parseUserAgent(req);
+        final boolean isVolatile = LoginTools.parseVolatile(req);
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         return new LoginRequest() {
@@ -1291,55 +1212,30 @@ public class Login extends AJAXServlet {
             public com.openexchange.authentication.Cookie[] getCookies() {
                 return cookies;
             }
-        };
-    }
 
-    private static boolean parseVolatile(final HttpServletRequest req, final boolean fallback) {
-        final String parameter = req.getParameter(LoginFields.VOLATILE);
-        if (isEmpty(parameter)) {
-            return fallback;
-        }
-        return Boolean.parseBoolean(parameter.trim());
-    }
-
-    private static String parseUserAgent(final HttpServletRequest req) {
-        final String parameter = req.getParameter(LoginFields.USER_AGENT);
-        return null == parameter ? req.getHeader(Header.USER_AGENT) : parameter;
-    }
-
-    private static String parseClientIP(final HttpServletRequest req) {
-        final String parameter = req.getParameter(LoginFields.CLIENT_IP_PARAM);
-        return null == parameter ? req.getRemoteAddr() : parameter;
-    }
-
-    private static String parseClient(HttpServletRequest req, boolean strict, String defaultClient) throws OXException {
-        final String parameter = req.getParameter(LoginFields.CLIENT_PARAM);
-        if (null == parameter) {
-            if (strict) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_PARAM);
+            @Override
+            public boolean isSecure() {
+                return Tools.considerSecure(req, conf.isCookieForceHTTPS());
             }
-            return defaultClient;
-        }
-        return parameter;
+
+            @Override
+            public String getServerName() {
+                return req.getServerName();
+            }
+
+            @Override
+            public int getServerPort() {
+                return req.getServerPort();
+            }
+        };
     }
 
     private String parseClient(final HttpServletRequest req) {
         try {
-            return parseClient(req, false, confReference.get().getDefaultClient());
+            return LoginTools.parseClient(req, false, confReference.get().getDefaultClient());
         } catch (final OXException e) {
             return confReference.get().getDefaultClient();
         }
-    }
-
-    private static String parseAuthId(final HttpServletRequest req, final boolean strict) throws OXException {
-        final String authIdParam = req.getParameter(LoginFields.AUTHID_PARAM);
-        if (null == authIdParam) {
-            if (strict) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.AUTHID_PARAM);
-            }
-            return UUIDs.getUnformattedString(UUID.randomUUID());
-        }
-        return authIdParam;
     }
 
     protected static void appendModules(final Session session, final JSONObject json, final HttpServletRequest req) {
@@ -1386,9 +1282,9 @@ public class Login extends AJAXServlet {
             throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create("");
         }
         final String client = parseClient(req);
-        final String clientIP = parseClientIP(req);
-        final String userAgent = parseUserAgent(req);
-        final boolean isVolatile = parseVolatile(req, false);
+        final String clientIP = LoginTools.parseClientIP(req);
+        final String userAgent = LoginTools.parseUserAgent(req);
+        final boolean isVolatile = LoginTools.parseVolatile(req);
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         final LoginRequest request = new LoginRequest() {
@@ -1454,6 +1350,21 @@ public class Login extends AJAXServlet {
             public com.openexchange.authentication.Cookie[] getCookies() {
                 return cookies;
             }
+
+            @Override
+            public boolean isSecure() {
+                return Tools.considerSecure(req, conf.isCookieForceHTTPS());
+            }
+
+            @Override
+            public String getServerName() {
+                return req.getServerName();
+            }
+
+            @Override
+            public int getServerPort() {
+                return req.getServerPort();
+            }
         };
         final Map<String, Object> properties = new HashMap<String, Object>(1);
         properties.put("http.request", req);
@@ -1471,7 +1382,7 @@ public class Login extends AJAXServlet {
         resp.sendRedirect(LoginTools.generateRedirectURL(null, conf.getHttpAuthAutoLogin(), session.getSessionID(), conf.getUiWebPath()));
     }
 
-    private static boolean isEmpty(final String string) {
+    public static boolean isEmpty(final String string) {
         if (null == string) {
             return true;
         }

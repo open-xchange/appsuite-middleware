@@ -49,32 +49,24 @@
 
 package com.openexchange.ajax.login;
 
-import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginRequest;
-import com.openexchange.login.LoginResult;
-import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * Implementes the formLogin action.
+ * Implements the tokenLogin action.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class FormLogin implements LoginRequestHandler {
+public final class TokenLogin implements LoginRequestHandler {
 
-    private LoginConfiguration conf;
+    private final LoginConfiguration conf;
 
-    public FormLogin(LoginConfiguration conf) {
+    public TokenLogin(LoginConfiguration conf) {
         super();
         this.conf = conf;
     }
@@ -82,15 +74,13 @@ public class FormLogin implements LoginRequestHandler {
     @Override
     public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
-            doFormLogin(req, resp);
+            doTokenLogin(req, resp);
         } catch (OXException e) {
-            String errorPage = conf.getErrorPageTemplate().replace("ERROR_MESSAGE", e.getMessage());
-            resp.setContentType(CONTENTTYPE_HTML);
-            resp.getWriter().write(errorPage);
+            Login.logAndSendException(resp, e);
         }
     }
 
-    private void doFormLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
+    private void doTokenLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException {
         LoginRequest request = Login.parseLogin(
             req,
             LoginFields.LOGIN_PARAM,
@@ -98,23 +88,8 @@ public class FormLogin implements LoginRequestHandler {
             conf.getDefaultClient(),
             conf.isCookieForceHTTPS(),
             conf.isDisableTrimLogin());
-        Map<String, Object> properties = new HashMap<String, Object>(1);
-        properties.put("http.request", req);
-        {
-            String capabilities = req.getParameter("capabilities");
-            if (null != capabilities) {
-                properties.put("client.capabilities", capabilities);
-            }
-        }
-        LoginResult result = LoginPerformer.getInstance().doLogin(request, properties);
-        Session session = result.getSession();
-        User user = result.getUser();
+        
+        // TODO Auto-generated method stub
 
-        Tools.disableCaching(resp);
-        Login.writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
-        resp.sendRedirect(LoginTools.generateRedirectURL(
-            req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
-            req.getParameter(LoginFields.AUTOLOGIN_PARAM),
-            session, user.getPreferredLanguage(), conf.getUiWebPath()));
     }
 }
