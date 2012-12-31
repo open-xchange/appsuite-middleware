@@ -27,31 +27,32 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.UnsupportedCharsetException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 import javax.net.ssl.SSLException;
+import org.apache.commons.codec.CharEncoding;
+import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.net.URLCodec;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.json.JSONException;
@@ -84,7 +85,7 @@ public class RESTUtility {
 
     /** The HTTP method enumeration */
     public static enum Method {
-        GET, POST;
+        GET, POST, PUT, DELETE;
     }
 
     /**
@@ -104,7 +105,7 @@ public class RESTUtility {
      * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    static public Object request(final Method method, final String host, final String path, final int apiVersion, final Session session) throws XingException {
+    public static JSONValue request(final Method method, final String host, final String path, final int apiVersion, final Session session) throws XingException {
         final HttpResponse resp = streamRequest(method, host, path, apiVersion, null, session).response;
         return parseAsJSON(resp);
     }
@@ -129,7 +130,7 @@ public class RESTUtility {
      * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    static public Object request(final Method method, final String host, final String path, final int apiVersion, final String[] params, final Session session) throws XingException {
+    public static JSONValue request(final Method method, final String host, final String path, final int apiVersion, final String[] params, final Session session) throws XingException {
         final HttpResponse resp = streamRequest(method, host, path, apiVersion, params, session).response;
         return parseAsJSON(resp);
     }
@@ -155,38 +156,61 @@ public class RESTUtility {
      *             catch this exception which signals that some kind of error occurred.
      */
     public static RequestAndResponse streamRequest(final Method method, final String host, final String path, final int apiVersion, final String params[], final Session session) throws XingException {
-        HttpRequestBase req = null;
-        String target = null;
+        return streamRequest(method, host, path, apiVersion, params, null, session);
+    }
 
-        if (method == Method.GET) {
-            target = buildURL(host, apiVersion, path, params);
-            req = new HttpGet(target);
-        } else {
-            target = buildURL(host, apiVersion, path, null);
-            final HttpPost post = new HttpPost(target);
-
-            if (params != null && params.length >= 2) {
-                if (params.length % 2 != 0) {
-                    throw new IllegalArgumentException("Params must have an even number of elements.");
+    /**
+     * Creates and sends a request to the XING API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
+     * {@link HttpResponse}.
+     * 
+     * @param method GET or POST.
+     * @param host the hostname to use. Should be either api server, content server, or web server.
+     * @param path the URL path, starting with a '/'.
+     * @param apiVersion the API version to use. This should almost always be set to {@code XingAPI.VERSION}.
+     * @param params the URL params in an array, with the even numbered elements the parameter names and odd numbered elements the values,
+     *            e.g. <code>new String[] {"path", "/Public", "locale",
+     *         "en"}</code>.
+     * @param requestInformation The request's JSON object
+     * @param session the {@link Session} to use for this request.
+     * @return a parsed JSON object, typically a Map or a JSONArray.
+     * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException if any network-related error occurs.
+     * @throws XingUnlinkedException if the user has revoked access.
+     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public static RequestAndResponse streamRequest(final Method method, final String host, final String path, final int apiVersion, final String params[], final JSONObject requestInformation, final Session session) throws XingException {
+        final HttpRequestBase req;
+        switch (method) {
+        case PUT:
+            {
+                final HttpPut put = new HttpPut(buildURL(host, apiVersion, path, params));
+                if (null != requestInformation) {
+                    put.setEntity(new ByteArrayEntity(requestInformation.toString().getBytes(Charsets.UTF_8), ContentType.APPLICATION_JSON));
                 }
-                final List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-
-                for (int i = 0; i < params.length; i += 2) {
-                    if (params[i + 1] != null) {
-                        nvps.add(new BasicNameValuePair(params[i], params[i + 1]));
-                    }
-                }
-
-                try {
-                    post.setEntity(new UrlEncodedFormEntity(nvps, Charsets.UTF_8));
-                } catch (final UnsupportedCharsetException e) {
-                    throw new XingException(e);
-                }
+                req = put;
             }
-
-            req = post;
+            break;
+        case POST:
+            {
+                final HttpPost post = new HttpPost(buildURL(host, apiVersion, path, params));
+                if (null != requestInformation) {
+                    post.setEntity(new ByteArrayEntity(requestInformation.toString().getBytes(Charsets.UTF_8), ContentType.APPLICATION_JSON));
+                }
+                req = post;
+            }
+            break;
+        case GET:
+            req = new HttpGet(buildURL(host, apiVersion, path, params));
+            break;
+        case DELETE:
+            req = new HttpDelete(buildURL(host, apiVersion, path, params));
+            break;
+        default:
+            throw new XingException("Unsupported HTTP method: " + method);
         }
-
+        // Sign request
         session.sign(req);
         final HttpResponse resp = execute(session, req);
         return new RequestAndResponse(req, resp);
@@ -483,24 +507,49 @@ public class RESTUtility {
         if (params.length % 2 != 0) {
             throw new IllegalArgumentException("Params must have an even number of elements.");
         }
-
-        String result = "";
         try {
+            final StringAllocator result = new StringAllocator(params.length << 4);
             boolean firstTime = true;
             for (int i = 0; i < params.length; i += 2) {
-                if (params[i + 1] != null) {
+                final String value = params[i + 1];
+                if (null != value) {
                     if (firstTime) {
                         firstTime = false;
                     } else {
-                        result += "&";
+                        result.append('&');
                     }
-                    result += URLEncoder.encode(params[i], "UTF-8") + "=" + URLEncoder.encode(params[i + 1], "UTF-8");
+                    result.append(encodeUrl(params[i])).append('=').append(encodeUrl(value));
                 }
             }
-            result.replace("*", "%2A");
-        } catch (final UnsupportedEncodingException e) {
+            return result.toString().replace("*", "%2A");
+        } catch (final RuntimeException e) {
             return null;
         }
-        return result;
     }
+
+    private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.UTF_8);
+
+    /**
+     * URL encodes given string.
+     */
+    public static final String encodeUrl(String s) {
+        try {
+            return isEmpty(s) ? s : URL_CODEC.encode(s);
+        } catch (EncoderException e) {
+            return s;
+        }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }
