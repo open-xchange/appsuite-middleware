@@ -52,10 +52,10 @@ package com.openexchange.xing;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.java.StringAllocator;
@@ -74,6 +74,8 @@ public class XingAPI<S extends Session> {
     private static final int MAX_LIMIT = 100;
 
     private static final int DEFAULT_LIMIT = 10;
+
+    private static final int DEFAULT_WITH_LATEST_MESSAGES = 0;
 
     /**
      * The version of the API that this code uses.
@@ -116,13 +118,13 @@ public class XingAPI<S extends Session> {
     public User userInfo() throws XingException {
         assertAuthenticated();
         try {
-            final JSONObject accountInfo = (JSONObject) RESTUtility.request(
+            final JSONObject responseInformation = (JSONObject) RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
                 "/users/me",
                 VERSION,
                 session);
-            return new User(accountInfo.getJSONArray("users").getJSONObject(0));
+            return new User(responseInformation.getJSONArray("users").getJSONObject(0));
         } catch (final JSONException e) {
             throw new XingException(e);
         } catch (final RuntimeException e) {
@@ -145,13 +147,13 @@ public class XingAPI<S extends Session> {
     public User userInfo(final String userId) throws XingException {
         assertAuthenticated();
         try {
-            final JSONObject accountInfo = (JSONObject) RESTUtility.request(
+            final JSONObject responseInformation = (JSONObject) RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
                 "/users/" + userId,
                 VERSION,
                 session);
-            return new User(accountInfo.getJSONArray("users").getJSONObject(0));
+            return new User(responseInformation.getJSONArray("users").getJSONObject(0));
         } catch (final JSONException e) {
             throw new XingException(e);
         } catch (final RuntimeException e) {
@@ -164,7 +166,7 @@ public class XingAPI<S extends Session> {
      * 
      * @param userId The user identifier
      * @param limit The number of contacts to be returned. Must be zero or a positive number. Default: <code>10</code>, Maximum:
-     *            <code>100</code>. If its value is equal to zero, default limit is passed to request 
+     *            <code>100</code>. If its value is equal to zero, default limit is passed to request
      * @param offset The offset. Must be zero or a positive number. Default: <code>0</code>
      * @param orderBy Determines the ascending order of the returned list. Currently only supports <code>"last_name"</code>. Defaults to
      *            <code>"id"</code>
@@ -177,12 +179,12 @@ public class XingAPI<S extends Session> {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public List<User> getContactsFrom(final String userId, final int limit, final int offset, final OrderBy orderBy, final Collection<UserField> userFields) throws XingException {
+    public Contacts getContactsFrom(final String userId, final int limit, final int offset, final OrderBy orderBy, final Collection<UserField> userFields) throws XingException {
         if (limit < 0 || limit > 100) {
             throw new XingException("Invalid limit: " + limit + ". Must be zero OR less than or equal to 100.");
         }
         if (offset < 0) {
-            throw new XingException("Invalid offset: " + offset + ". Must be greater than zero.");
+            throw new XingException("Invalid offset: " + offset + ". Must be greater than or equal to zero.");
         }
         assertAuthenticated();
         try {
@@ -209,7 +211,7 @@ public class XingAPI<S extends Session> {
                 params.add(fields.toString());
             }
 
-            final JSONObject usersJsonObject = (JSONObject) RESTUtility.request(
+            final JSONObject responseInformation = (JSONObject) RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
                 "/users/" + userId + "/contacts",
@@ -217,13 +219,7 @@ public class XingAPI<S extends Session> {
                 params.toArray(new String[0]),
                 session);
 
-            final JSONArray users = usersJsonObject.getJSONArray("users");
-            final int length = users.length();
-            final List<User> retval = new ArrayList<User>(length);
-            for (int i = 0; i < length; i++) {
-                retval.add(new User(users.getJSONObject(i)));
-            }
-            return retval;
+            return new Contacts(responseInformation.getJSONObject("contacts"));
         } catch (final JSONException e) {
             throw new XingException(e);
         } catch (final RuntimeException e) {
@@ -246,23 +242,150 @@ public class XingAPI<S extends Session> {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public List<User> getContactsFrom(final String userId, final OrderBy orderBy, final Collection<UserField> userFields) throws XingException {
+    public Contacts getContactsFrom(final String userId, final OrderBy orderBy, final Collection<UserField> userFields) throws XingException {
         assertAuthenticated();
         try {
-            final List<User> retval = new LinkedList<User>();
-            final int limit = MAX_LIMIT;
+            final List<User> users = new LinkedList<User>();
+            final int maxLimit = MAX_LIMIT;
+            final int total;
             int offset = 0;
-            while (offset >= 0) {
-                final List<User> contacts = getContactsFrom(userId, offset, limit, orderBy, userFields);
-                retval.addAll(contacts);
-                if (contacts.size() < limit) {
+            // Request first chunk to determine total number of contacts
+            {
+                final Contacts contacts = getContactsFrom(userId, maxLimit, offset, null, userFields);
+                final List<User> chunk = contacts.getUsers();
+                final int chunkSize = chunk.size();
+                if (chunkSize < maxLimit) {
                     // Obtained less than requested; no more contacts available then
-                    offset = -1;
-                } else {
-                    offset += limit;
+                    return contacts;
                 }
+                total = contacts.getTotal();
+                users.addAll(chunk);
+                offset += chunkSize;
             }
-            return retval;
+            // Request remaining chunks
+            while (offset < total) {
+                final int remain = total - offset;
+                final List<User> chunk = getContactsFrom(userId, remain > maxLimit ? maxLimit : remain, offset, null, userFields).getUsers();
+                users.addAll(chunk);
+                offset += chunk.size();
+            }
+            // Sort users
+            Collections.sort(users, (null == orderBy ? OrderBy.ID : orderBy).getUserField().getComparator(false));
+            return new Contacts(total, users);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
+     * Gets the conversations for specified user.
+     * 
+     * @param userId The user identifier
+     * @param limit The number of conversations to be returned. Must be zero or a positive number. Default: <code>10</code>, Maximum:
+     *            <code>100</code>. If its value is equal to zero, default limit is passed to request
+     * @param offset The offset. Must be zero or a positive number. Default: <code>0</code>
+     * @param userFields List of user attributes to return. If this parameter is not used, only the ID will be returned.
+     * @param withLatestMessages The number of latest messages to be returned. Must be zero or a positive number. Default: <code>0</code>,
+     *            Maximum: <code>100</code>. If its value is equal to zero, default limit is passed to request
+     * @return The user's conversations
+     * @throws XingException
+     */
+    public Conversations getConversationsFrom(final String userId, final int limit, final int offset, final Collection<UserField> userFields, final int withLatestMessages) throws XingException {
+        if (limit < 0 || limit > 100) {
+            throw new XingException("Invalid limit: " + limit + ". Must be zero OR less than or equal to 100.");
+        }
+        if (offset < 0) {
+            throw new XingException("Invalid offset: " + offset + ". Must be greater than or equal to zero.");
+        }
+        if (withLatestMessages < 0 || withLatestMessages > 100) {
+            throw new XingException("Invalid withLatestMessages: " + withLatestMessages + ". Must be zero OR less than or equal to 100.");
+        }
+        assertAuthenticated();
+        try {
+            // Add parameters limit & offset
+            final List<String> params = new ArrayList<String>(Arrays.asList(
+                "limit",
+                Integer.toString(limit == 0 ? DEFAULT_LIMIT : limit),
+                "offset",
+                Integer.toString(offset),
+                "with_latest_messages",
+                Integer.toString(withLatestMessages == 0 ? DEFAULT_WITH_LATEST_MESSAGES : withLatestMessages)));
+            // Add user fields
+            if (null != userFields && !userFields.isEmpty()) {
+                params.add("user_fields");
+                final Iterator<UserField> iter = userFields.iterator();
+                final StringAllocator fields = new StringAllocator(userFields.size() << 4);
+                fields.append(iter.next().getFieldName());
+                while (iter.hasNext()) {
+                    fields.append(',').append(iter.next().getFieldName());
+                }
+                params.add(fields.toString());
+            }
+
+            final JSONObject responseInformation = (JSONObject) RESTUtility.request(
+                Method.GET,
+                session.getAPIServer(),
+                "/users/" + userId + "/conversations",
+                VERSION,
+                params.toArray(new String[0]),
+                session);
+            return new Conversations(responseInformation.getJSONObject("conversations"));
+        } catch (final JSONException e) {
+            throw new XingException(e);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
+     * Gets all of the requested user's conversations.
+     * 
+     * @param userId The user identifier
+     * @param userFields List of user attributes to return. If this parameter is not used, only the ID will be returned.
+     * @param withLatestMessages The number of latest messages to be returned. Must be zero or a positive number. Default: <code>0</code>,
+     *            Maximum: <code>100</code>. If its value is equal to zero, default limit is passed to request
+     * @return The user's conversations
+     * @return The user's conversations
+     * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public Conversations getConversationsFrom(final String userId, final Collection<UserField> userFields, final int withLatestMessages) throws XingException {
+        assertAuthenticated();
+        try {
+            final List<Conversation> items = new LinkedList<Conversation>();
+            final int maxLimit = MAX_LIMIT;
+            final int total;
+            int offset = 0;
+            // Request first chunk to determine total number of conversations
+            {
+                final Conversations conversations = getConversationsFrom(userId, maxLimit, offset, userFields, withLatestMessages);
+                final List<Conversation> chunk = conversations.getItems();
+                final int chunkSize = chunk.size();
+                if (chunkSize < maxLimit) {
+                    // Obtained less than requested; no more conversations available then
+                    return conversations;
+                }
+                total = conversations.getTotal();
+                items.addAll(chunk);
+                offset += chunkSize;
+            }
+            // Request remaining chunks
+            while (offset < total) {
+                final int remain = total - offset;
+                final List<Conversation> chunk = getConversationsFrom(
+                    userId,
+                    remain > maxLimit ? maxLimit : remain,
+                    offset,
+                    userFields,
+                    withLatestMessages).getItems();
+                items.addAll(chunk);
+                offset += chunk.size();
+            }
+            return new Conversations(total, items);
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }

@@ -49,132 +49,88 @@
 
 package com.openexchange.xing;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.xing.exception.XingException;
 
 /**
- * {@link Message} - Represent a single XING message.
- * <p>
- * 
- * <pre>
- * {
- *   "id": "104401_09361f",
- *   "created_at": "2012-04-04T16:30:00Z",
- *   "content": "Yes of course!",
- *   "read": false,
- *   "sender": {
- *   "id": "146234_dc52a7",
- *   "display_name": "Hans"
- * }
- * </pre>
+ * {@link Conversations} - Represents a XING conversations response.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Message {
+public class Conversations {
 
-    private static final DateFormat DATE_FORMAT;
-    static {
-        final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'kk:mm:ss'Z'", Locale.US);
-        df.setTimeZone(TimeZone.getTimeZone("GMT"));
-        DATE_FORMAT = df;
-    }
+    private final int total;
+    private int unreadCount;
+    private final List<Conversation> items;
 
     /**
-     * Gets the messaging date format.
-     * 
-     * @return The date format.
+     * Initializes a new {@link Conversations}.
      */
-    public static DateFormat getDateFormat() {
-        return DATE_FORMAT;
+    public Conversations(int total, List<Conversation> items) {
+        super();
+        this.total = total;
+        this.items = items;
     }
 
-    private final String id;
-    private final Date createdAt;
-    private final String content;
-    private final boolean read;
-    private User sender;
-
     /**
-     * Initializes a new {@link Message}.
+     * Initializes a new {@link Conversations}.
      * 
      * @throws XingException If initialization fails
      */
-    public Message(final JSONObject messageInformation) throws XingException {
+    public Conversations(final JSONObject conversationsInformation) throws XingException {
         super();
-        this.id = messageInformation.optString("id", null);
-        {
-            final String sdate = messageInformation.optString("created_at", null);
-            if (null == sdate) {
-                createdAt = null;
-            } else {
-                synchronized (DATE_FORMAT) {
-                    Date d;
-                    try {
-                        d = DATE_FORMAT.parse(sdate);
-                    } catch (final ParseException e) {
-                        d = null;
-                    }
-                    this.createdAt = d;
-                }
+        this.total = conversationsInformation.optInt("total", 0);
+        this.unreadCount = conversationsInformation.optInt("unread_count", 0);
+        if (conversationsInformation.hasAndNotNull("items")) {
+            final JSONArray itemsInformation = conversationsInformation.optJSONArray("items");
+            final int length = itemsInformation.length();
+            this.items = new ArrayList<Conversation>(length);
+            for (int i = 0; i < length; i++) {
+                items.add(new Conversation(itemsInformation.optJSONObject(i)));
             }
-        }
-        this.content = messageInformation.optString("content", null);
-        this.read = messageInformation.optBoolean("read", false);
-        final JSONObject userInformation = messageInformation.optJSONObject("sender");
-        if (null != userInformation) {
-            this.sender = new User(userInformation);
+        } else {
+            items = Collections.emptyList();
         }
     }
 
     /**
-     * Gets the identifier
+     * Gets the total
      * 
-     * @return The identifier
+     * @return The total
      */
-    public String getId() {
-        return id;
+    public int getTotal() {
+        return total;
     }
 
     /**
-     * Gets the created-at time stamp.
+     * Gets the unread count
      * 
-     * @return The created-at time stamp
+     * @return The unread count
      */
-    public Date getCreatedAt() {
-        return createdAt;
+    public int getUnreadCount() {
+        return unreadCount;
     }
 
     /**
-     * Gets the content
+     * Sets the unread count.
      * 
-     * @return The content
+     * @param unreadCount The unread count
      */
-    public String getContent() {
-        return content;
+    public void setUnreadCount(int unreadCount) {
+        this.unreadCount = unreadCount;
     }
 
     /**
-     * Gets the read
+     * Gets the items
      * 
-     * @return The read
+     * @return The items
      */
-    public boolean isRead() {
-        return read;
-    }
-
-    /**
-     * Gets the sender
-     * 
-     * @return The sender
-     */
-    public User getSender() {
-        return sender;
+    public List<Conversation> getItems() {
+        return items;
     }
 
 }

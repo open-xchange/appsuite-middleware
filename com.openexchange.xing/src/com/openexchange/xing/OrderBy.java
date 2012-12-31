@@ -10,13 +10,17 @@ public enum OrderBy {
 
     ID(UserField.ID), LAST_NAME(UserField.LAST_NAME);
 
-    private final String fieldName;
+    private final UserField userField;
 
     private OrderBy(final UserField userField) {
-        this.fieldName = userField.getFieldName();
+        this.userField = userField;
+    }
+
+    public UserField getUserField() {
+        return userField;
     }
 
     public String getFieldName() {
-        return fieldName;
+        return userField.getFieldName();
     }
 }
