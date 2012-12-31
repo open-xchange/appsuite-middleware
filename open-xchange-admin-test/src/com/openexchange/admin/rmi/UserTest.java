@@ -67,7 +67,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.TimeZone;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -1344,8 +1343,7 @@ public class UserTest extends AbstractTest {
         aliase.add("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         usr.setAliases(aliase);
 
-        final Calendar cal = Calendar.getInstance();
-        cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+        final Calendar cal = Calendar.getInstance(TimeZones.UTC);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
@@ -1502,17 +1500,15 @@ public class UserTest extends AbstractTest {
         compareNonCriticFields(a, b);
     }
 
-    private static void assertDatesAreEqualsAtYMD(String message, Date date1, Date date2){
-        Calendar cal1 = Calendar.getInstance();
-        cal1.setTimeZone(TimeZones.UTC);
-        Calendar cal2 = Calendar.getInstance();
-        cal2.setTimeZone(TimeZones.UTC);
+    private static void assertDatesAreEqualsAtYMD(String message, Date date1, Date date2) {
+        Calendar cal1 = Calendar.getInstance(TimeZones.UTC);
+        Calendar cal2 = Calendar.getInstance(TimeZones.UTC);
         if (date1 != null && date2 != null) {
             cal1.setTime(date1);
             cal2.setTime(date2);
-            assertEquals(message, new Integer(cal1.get(Calendar.YEAR)) , new Integer(cal2.get(Calendar.YEAR)));
-            assertEquals(message, new Integer(cal1.get(Calendar.MONTH)) , new Integer(cal2.get(Calendar.MONTH)));
-            assertEquals(message, new Integer(cal1.get(Calendar.DAY_OF_MONTH)) , new Integer(cal2.get(Calendar.DAY_OF_MONTH)));
+            assertEquals(message, cal1.get(Calendar.YEAR), cal2.get(Calendar.YEAR));
+            assertEquals(message, cal1.get(Calendar.MONTH), cal2.get(Calendar.MONTH));
+            assertEquals(message + date1.getClass().getName() + "," + date2.getClass().getName(), cal1.get(Calendar.DAY_OF_MONTH), cal2.get(Calendar.DAY_OF_MONTH));
         }
     }
 
