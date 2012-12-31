@@ -50,9 +50,7 @@
 package com.openexchange.groupware.delete;
 
 import java.sql.Connection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -67,7 +65,6 @@ import com.openexchange.groupware.filestore.FileStorageRemover;
 import com.openexchange.groupware.infostore.InfostoreDelete;
 import com.openexchange.groupware.tasks.TasksDelete;
 import com.openexchange.groupware.userconfiguration.UserConfigurationDeleteListener;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.mail.usersetting.UserSettingMailDeleteListener;
 import com.openexchange.mailaccount.internal.MailAccountDeleteListener;
 import com.openexchange.preferences.UserSettingServerDeleteListener;
@@ -135,7 +132,7 @@ public final class DeleteRegistry {
     /**
      * The listener queue for dynamically added listeners.
      */
-    private final Queue<DeleteListener> listeners;
+    private final List<DeleteListener> listeners = new CopyOnWriteArrayList<DeleteListener>();
 
     /**
      * Initializes a new {@link DeleteRegistry}.
@@ -148,7 +145,6 @@ public final class DeleteRegistry {
             classes.put(deleteListener.getClass(), PRESENT);
         }
         this.staticListeners = new CopyOnWriteArrayList<DeleteListener>(tmpListeners);
-        listeners = new Java7ConcurrentLinkedQueue<DeleteListener>();
     }
 
     /**
@@ -215,7 +211,7 @@ public final class DeleteRegistry {
         if (null != classes.putIfAbsent(listener.getClass(), PRESENT)) {
             return false;
         }
-        return listeners.offer(listener);
+        return listeners.add(listener);
     }
 
     /**
@@ -242,15 +238,13 @@ public final class DeleteRegistry {
         /*
          * At first trigger dynamically added listeners
          */
-        for (final Iterator<DeleteListener> iter = listeners.iterator(); iter.hasNext();) {
-            final DeleteListener listener = iter.next();
+        for (DeleteListener listener : listeners) {
             listener.deletePerformed(deleteEvent, readCon, writeCon);
         }
         /*
          * Now trigger static listeners
          */
-        for (final Iterator<DeleteListener> iter = staticListeners.iterator(); iter.hasNext();) {
-            final DeleteListener listener = iter.next();
+        for (DeleteListener listener : staticListeners) {
             listener.deletePerformed(deleteEvent, readCon, writeCon);
         }
     }

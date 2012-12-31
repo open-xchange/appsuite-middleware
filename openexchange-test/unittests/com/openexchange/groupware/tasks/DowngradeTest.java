@@ -83,16 +83,10 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
 public class DowngradeTest extends TestCase {
 
     private Context ctx;
-
     private User user;
-
     private User secondUser;
-
     private Session session;
 
-    /**
-     * @param name
-     */
     public DowngradeTest(final String name) {
         super(name);
     }
@@ -102,9 +96,6 @@ public class DowngradeTest extends TestCase {
         return pos == -1 ? un : un.substring(0, pos);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void setUp() throws Exception {
         super.setUp();

@@ -36,6 +36,7 @@
 package com.openexchange.java;
 
 import java.util.Random;
+import com.openexchange.java.forkjoin.ForkJoinTask;
 
 /**
  * A random number generator isolated to the current thread.  Like the

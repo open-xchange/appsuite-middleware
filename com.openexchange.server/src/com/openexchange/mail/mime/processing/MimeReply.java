@@ -52,7 +52,6 @@ package com.openexchange.mail.mime.processing;
 import static com.openexchange.mail.mime.filler.MimeMessageFiller.setReplyHeaders;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
-import static java.util.regex.Matcher.quoteReplacement;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -602,7 +601,7 @@ public final class MimeReply {
                 try {
                     replyPrefix =
                         PATTERN_DATE.matcher(replyPrefix).replaceFirst(
-                            date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedDate(
+                            date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedDate(
                                 date,
                                 DateFormat.LONG,
                                 ltz.locale,
@@ -617,7 +616,7 @@ public final class MimeReply {
                 try {
                     replyPrefix =
                         PATTERN_TIME.matcher(replyPrefix).replaceFirst(
-                            date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedTime(
+                            date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedTime(
                                 date,
                                 DateFormat.SHORT,
                                 ltz.locale,
@@ -633,7 +632,7 @@ public final class MimeReply {
                 final InternetAddress[] from = msg.getFrom();
                 replyPrefix =
                     PATTERN_SENDER.matcher(replyPrefix).replaceFirst(
-                        from == null || from.length == 0 ? "" : quoteReplacement(from[0].toUnicodeString()));
+                        from == null || from.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(from[0].toUnicodeString()));
             }
             {
                 final char nextLine = '\n';

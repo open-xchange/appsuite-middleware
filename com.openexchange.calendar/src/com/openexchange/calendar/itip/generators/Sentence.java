@@ -52,7 +52,6 @@ package com.openexchange.calendar.itip.generators;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.calendar.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
@@ -121,7 +120,7 @@ public class Sentence {
         if (isEmpty(format) || format.indexOf('$') < 0) {
             return format;
         }
-        return SANE_FORMAT.matcher(format).replaceAll("$1" + Matcher.quoteReplacement("$s") + "$2");
+        return SANE_FORMAT.matcher(format).replaceAll("$1" + com.openexchange.java.Strings.quoteReplacement("$s") + "$2");
     }
 
     private static boolean isEmpty(final String string) {

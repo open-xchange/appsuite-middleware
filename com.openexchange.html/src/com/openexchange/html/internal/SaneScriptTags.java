@@ -49,7 +49,6 @@
 
 package com.openexchange.html.internal;
 
-import static java.util.regex.Matcher.quoteReplacement;
 import java.net.URLDecoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -105,7 +104,7 @@ public final class SaneScriptTags {
             }
             final StringBuffer sb = new StringBuffer(html.length());
             do {
-                m.appendReplacement(sb, quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
+                m.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
             } while (m.find());
             m.appendTail(sb);
             return sb.toString();

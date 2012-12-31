@@ -81,7 +81,6 @@ import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.AJPv13Utility;
-import com.openexchange.ajp13.AbstractAJPv13Request;
 import com.openexchange.ajp13.AjpLongRunningRegistry;
 import com.openexchange.ajp13.coyote.util.ByteChunk;
 import com.openexchange.ajp13.coyote.util.CookieParser;
@@ -907,20 +906,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         response.setStatus(503, "Only one long-running request is permitted at once. Please retry later.");
                         error = true;
                     } else {
-                        /*
-                         * Set echo header (if available) and ...
-                         */
-                        {
-                            final String headerName = AbstractAJPv13Request.getEchoHeaderName();
-                            if (null != headerName) {
-                                final String echoValue = request.getHeader(headerName);
-                                if (null != echoValue) {
-                                    response.setHeader(headerName, urlEncode(echoValue));
-                                }
-                            }
-                        }
                        /*
-                        * ... call Servlet's service() method
+                        * Call Servlet's service() method
                         */
                         servlet.service(request, response);
                         if (!started) {
@@ -1965,11 +1952,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*-
          * Check for echo header presence
          */
-        final String echoHeaderName = AJPv13Response.getEchoHeaderName();
-        if (null != echoHeaderName) {
-            final String echoValue = request.getHeader(echoHeaderName);
-            if (null != echoValue) {
-                response.setHeader(echoHeaderName, echoValue);
+        {
+            final String echoHeaderName = AJPv13Response.getEchoHeaderName();
+            if (null != echoHeaderName) {
+                final String echoValue = request.getHeader(echoHeaderName);
+                if (null != echoValue) {
+                    response.setHeader(echoHeaderName, urlEncode(echoValue));
+                }
             }
         }
         /*

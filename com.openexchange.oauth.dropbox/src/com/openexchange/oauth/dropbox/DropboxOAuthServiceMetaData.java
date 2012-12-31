@@ -62,6 +62,7 @@ import com.dropbox.client2.session.WebAuthSession;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.AbstractParameterizableOAuthInteraction;
@@ -88,8 +89,18 @@ public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaD
         super();
         id = "com.openexchange.oauth.dropbox";
         displayName = "Dropbox";
-        apiKey = configService.getProperty("com.openexchange.oauth.dropbox.apiKey");
-        apiSecret = configService.getProperty("com.openexchange.oauth.dropbox.apiSecret");
+
+        final String apiKey = configService.getProperty("com.openexchange.oauth.dropbox.apiKey");
+        if (Strings.isEmpty(apiKey)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.dropbox.apiKey");
+        }
+        this.apiKey = apiKey;
+
+        final String apiSecret = configService.getProperty("com.openexchange.oauth.dropbox.apiSecret");
+        if (Strings.isEmpty(apiSecret)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.dropbox.apiSecret");
+        }
+        this.apiSecret = apiSecret;
     }
 
     @Override

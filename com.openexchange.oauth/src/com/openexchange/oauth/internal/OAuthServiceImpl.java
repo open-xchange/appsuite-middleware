@@ -78,6 +78,7 @@ import org.scribe.builder.api.GoogleApi;
 import org.scribe.builder.api.LinkedInApi;
 import org.scribe.builder.api.TumblrApi;
 import org.scribe.builder.api.TwitterApi;
+import org.scribe.builder.api.XingApi;
 import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
@@ -730,6 +731,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             apiClass = FlickrApi.class;
         } else if (serviceId.indexOf("dropbox") >= 0) {
             apiClass = DropBoxApi.class;
+        } else if (serviceId.indexOf("xing") >= 0) {
+            apiClass = XingApi.class;
         } else {
             throw OAuthExceptionCodes.UNSUPPORTED_SERVICE.create(serviceId);
         }

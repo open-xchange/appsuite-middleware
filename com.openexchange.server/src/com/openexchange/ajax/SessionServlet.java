@@ -57,8 +57,8 @@ import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -87,7 +87,6 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -129,7 +128,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
 
-    private static final Queue<IPRange> RANGES = new Java7ConcurrentLinkedQueue<IPRange>();
+    private static final List<IPRange> RANGES = new LinkedList<IPRange>();
 
     private static final AtomicBoolean INITIALIZED = new AtomicBoolean();
 
@@ -399,7 +398,7 @@ public abstract class SessionServlet extends AJAXServlet {
         checkIP(checkIP, getRanges(), session, actual, clientWhitelist);
     }
 
-    private Queue<IPRange> getRanges() {
+    private List<IPRange> getRanges() {
         return RANGES;
     }
 
@@ -456,7 +455,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param whitelist The optional IP check whitelist (by client identifier)
      * @throws OXException if the IP addresses don't match.
      */
-    public static void checkIP(final boolean doCheck, final Queue<IPRange> ranges, final Session session, final String actual, final ClientWhitelist whitelist) throws OXException {
+    public static void checkIP(final boolean doCheck, final List<IPRange> ranges, final Session session, final String actual, final ClientWhitelist whitelist) throws OXException {
         if (null == actual || !actual.equals(session.getLocalIp())) {
             // IP is missing or changed
             if (doCheck && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist) && !allowedSubnet.areInSameSubnet(actual, session.getLocalIp())) {
@@ -498,7 +497,7 @@ public abstract class SessionServlet extends AJAXServlet {
         return null != whitelist && !whitelist.isEmpty() && whitelist.isAllowed(session.getClient());
     }
 
-    public static boolean isWhitelistedFromIPCheck(final String actual, final Queue<IPRange> ranges) {
+    public static boolean isWhitelistedFromIPCheck(final String actual, final List<IPRange> ranges) {
         for (final IPRange range : ranges) {
             if (range.contains(actual)) {
                 return true;
