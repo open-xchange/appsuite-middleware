@@ -55,10 +55,12 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
 import org.quartz.Calendar;
+import org.quartz.JobKey;
 import org.quartz.TriggerKey;
 import org.quartz.spi.OperableTrigger;
 import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
+import com.hazelcast.core.ISet;
 import com.openexchange.quartz.hazelcast.TriggerStateWrapper;
 import com.openexchange.quartz.hazelcast.predicates.AcquiredAndExecutingTriggersPredicate;
 
@@ -133,6 +135,9 @@ public final class ConsistencyTask extends TimerTask {
                     stateWrapper.resetOwner();
                     triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
                 }
+                
+                ISet<JobKey> blockedJobs = jobStore.getBlockedJobs();
+                blockedJobs.remove(stateWrapper.getTrigger().getJobKey());
 
                 ++restored;
             }

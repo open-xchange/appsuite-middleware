@@ -956,6 +956,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
                         }
 
                         ((JobDetailImpl) jobDetail).setJobDataMap(newData);
+                        jobsByKey.put(jobKey, jobDetail);
                     }
                     
                     if (jobDetail.isConcurrentExectionDisallowed()) {
@@ -1077,6 +1078,10 @@ public class ImprovedHazelcastJobStore implements JobStore {
     
     public SchedulerSignaler getSignaler() {
         return signaler;
+    }
+    
+    public ISet<JobKey> getBlockedJobs() {
+        return blockedJobs;
     }
     
     private boolean applyMisfire(TriggerStateWrapper stateWrapper) throws JobPersistenceException {
