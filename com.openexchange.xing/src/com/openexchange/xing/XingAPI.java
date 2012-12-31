@@ -75,6 +75,8 @@ public class XingAPI<S extends Session> {
 
     private static final int DEFAULT_LIMIT = 10;
 
+    private static final int MAX_WITH_LATEST_MESSAGES = 100;
+
     private static final int DEFAULT_WITH_LATEST_MESSAGES = 0;
 
     /**
@@ -386,6 +388,54 @@ public class XingAPI<S extends Session> {
                 offset += chunk.size();
             }
             return new Conversations(total, items);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
+     * Gets the denoted conversation for specified user.
+     * 
+     * @param id The conversation identifier
+     * @param userId The user identifier
+     * @param userFields List of user attributes to return. If this parameter is not used, only the ID will be returned.
+     * @param withLatestMessages The number of latest messages to be returned. Must be zero or a positive number. Default: <code>0</code>,
+     *            Maximum: <code>100</code>. If its value is equal to zero, default limit is passed to request
+     * @return The conversation
+     * @throws XingException
+     */
+    public Conversation getConversationFrom(final String id, final String userId, final Collection<UserField> userFields, final int withLatestMessages) throws XingException {
+        if (withLatestMessages < 0 || withLatestMessages > 100) {
+            throw new XingException("Invalid withLatestMessages: " + withLatestMessages + ". Must be zero OR less than or equal to 100.");
+        }
+        assertAuthenticated();
+        try {
+            // Add parameters limit & offset
+            final List<String> params = new ArrayList<String>(Arrays.asList(
+                "with_latest_messages",
+                Integer.toString(withLatestMessages == 0 ? DEFAULT_WITH_LATEST_MESSAGES : withLatestMessages)));
+            // Add user fields
+            if (null != userFields && !userFields.isEmpty()) {
+                params.add("user_fields");
+                final Iterator<UserField> iter = userFields.iterator();
+                final StringAllocator fields = new StringAllocator(userFields.size() << 4);
+                fields.append(iter.next().getFieldName());
+                while (iter.hasNext()) {
+                    fields.append(',').append(iter.next().getFieldName());
+                }
+                params.add(fields.toString());
+            }
+
+            final JSONObject responseInformation = (JSONObject) RESTUtility.request(
+                Method.GET,
+                session.getAPIServer(),
+                "/users/" + userId + "/conversations/" + id,
+                VERSION,
+                params.toArray(new String[0]),
+                session);
+            return new Conversation(responseInformation.getJSONObject("conversation"));
+        } catch (final JSONException e) {
+            throw new XingException(e);
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
