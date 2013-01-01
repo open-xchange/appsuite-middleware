@@ -49,14 +49,18 @@
 
 package com.openexchange.subscribe.xing;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.oauth.API;
@@ -70,8 +74,10 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.xing.session.XingOAuthAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.xing.Address;
 import com.openexchange.xing.Contacts;
 import com.openexchange.xing.OrderBy;
+import com.openexchange.xing.User;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingUnlinkedException;
@@ -138,9 +144,12 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 OrderBy.ID,
                 Arrays.asList(UserField.values()));
 
-            // TODO: Convert to contacts
+            final List<Contact> ret = new ArrayList<Contact>(xingContacts.getTotal());
+            for (final User xingContact : xingContacts.getUsers()) {
+                // TODO: Convert
+            }
 
-            return null;
+            return ret;
         } catch (final XingUnlinkedException e) {
             throw XingSubscribeExceptionCodes.UNLINKED_ERROR.create();
         } catch (final XingException e) {
@@ -205,6 +214,99 @@ public class XingSubscribeService extends AbstractSubscribeService {
         final Map<String, Object> query = new HashMap<String, Object>();
         query.put("account", Integer.toString(id));
         removeWhereConfigMatches(context, query);
+    }
+
+    private static Contact convert(final User xingUser) {
+        if (null == xingUser) {
+            return null;
+        }
+        final Contact oxContact = new Contact();
+        {
+            final String s = xingUser.getId();
+            if (null != s) {
+                oxContact.setUserField20(s);
+            }
+        }
+        {
+            final String s = xingUser.getActiveMail();
+            if (null != s) {
+                oxContact.setEmail1(s);
+            }
+        }
+        {
+            final String s = xingUser.getDisplayName();
+            if (null != s) {
+                oxContact.setDisplayName(s);
+            }
+        }
+        {
+            final String s = xingUser.getFirstName();
+            if (null != s) {
+                oxContact.setGivenName(s);
+            }
+        }
+        {
+            final String s = xingUser.getLastName();
+            if (null != s) {
+                oxContact.setSurName(s);
+            }
+        }
+        {
+            final String s = xingUser.getGender();
+            if (null != s) {
+                oxContact.setTitle("m".equals(s) ? "Mr." : "Mrs.");
+            }
+        }
+        {
+            final String s = xingUser.getHaves();
+            if (null != s) {
+                oxContact.setUserField02(s);
+            }
+        }
+        {
+            final String s = xingUser.getInterests();
+            if (null != s) {
+                oxContact.setUserField01(s);
+            }
+        }
+        {
+            final String s = xingUser.getWants();
+            if (null != s) {
+                oxContact.setUserField03(s);
+            }
+        }
+        {
+            final String s = xingUser.getOrganisationMember();
+            if (null != s) {
+                oxContact.setPosition(s);
+            }
+        }
+        {
+            final String s = xingUser.getPermalink();
+            if (null != s) {
+                oxContact.setURL(s);
+            }
+        }
+        {
+            final Date d = xingUser.getBirthDate();
+            if (null != d) {
+                oxContact.setBirthday(d);
+            }
+        }
+        {
+            final Address a = xingUser.getPrivateAddress();
+            if (null != a) {
+                String s = a.getCity();
+                if (null != s) {
+                    oxContact.setCityHome(s);
+                }
+                
+                
+                // TODO: Complete
+                
+            }
+        }
+
     }
 
     private static boolean isEmpty(final String string) {
