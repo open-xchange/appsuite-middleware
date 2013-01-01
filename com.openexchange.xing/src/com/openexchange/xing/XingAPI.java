@@ -441,4 +441,11 @@ public class XingAPI<S extends Session> {
         }
     }
 
+    /**
+     * Gets the associated session.
+     */
+    public S getSession() {
+        return session;
+    }
+
 }
