@@ -49,16 +49,22 @@
 
 package com.openexchange.file.storage.dropbox.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxServices;
+import com.openexchange.file.storage.dropbox.session.DropboxEventHandler;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
 
@@ -96,6 +102,12 @@ public final class DropboxActivator extends HousekeepingActivator {
             final DropboxServiceRegisterer registerer = new DropboxServiceRegisterer(context);
             rememberTracker(new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, registerer));
             openTrackers();
+            /*
+             * Register event handler
+             */
+            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            registerService(EventHandler.class, new DropboxEventHandler(), serviceProperties);
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DropboxActivator.class)).error(e.getMessage(), e);
             throw e;
