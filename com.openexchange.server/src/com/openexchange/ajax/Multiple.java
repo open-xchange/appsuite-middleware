@@ -100,6 +100,8 @@ public class Multiple extends SessionServlet {
 
     private static final long serialVersionUID = 3029074251138469122L;
 
+    private static final String ACTION = PARAMETER_ACTION;
+
     protected static final String MODULE = "module";
 
     // protected static final String MODULE_INFOSTORE = "infostore";
@@ -255,7 +257,7 @@ public class Multiple extends SessionServlet {
         try {
             final OXJSONWriter jWriter = new OXJSONWriter();
             final JSONObject inObject = jsonInOut.getInputObject();
-            ajaxState = doAction(module, inObject.optString(PARAMETER_ACTION), inObject, session, req, jWriter, null);
+            ajaxState = doAction(module, inObject.optString(ACTION), inObject, session, req, jWriter, null);
             jsonInOut.setOutputObject(jWriter.getObject());
         } finally {
             if (null != ajaxState) {
@@ -266,7 +268,7 @@ public class Multiple extends SessionServlet {
 
     protected static final AJAXState parseActionElement(final JSONObject inObject, final JSONArray serialResponses, final ServerSession session, final HttpServletRequest req, final AJAXState state) throws OXException {
         try {
-            return doAction(DataParser.checkString(inObject, MODULE), inObject.optString(PARAMETER_ACTION), inObject, session, req, new OXJSONWriter(serialResponses), state);
+            return doAction(DataParser.checkString(inObject, MODULE), inObject.optString(ACTION), inObject, session, req, new OXJSONWriter(serialResponses), state);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
