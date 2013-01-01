@@ -57,8 +57,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -84,15 +82,13 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.LogFactory;
-import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.threadpool.AbstractTrackableTask;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -188,7 +184,6 @@ public class Multiple extends SessionServlet {
                 // Distinguish between serially and concurrently executable requests
                 List<JsonInOut> serialTasks = null;
                 ThreadPoolCompletionService<Object> concurrentTasks = null;
-                Props props = null;
                 int concurrentTasksCount = 0;
                 // Build-up mapping & schedule for serial or concurrent execution
                 final ConcurrentTIntObjectHashMap<JsonInOut> mapping = new ConcurrentTIntObjectHashMap<JsonInOut>(length);
@@ -210,10 +205,7 @@ public class Multiple extends SessionServlet {
                         if (null == concurrentTasks) {
                             concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
                         }
-                        if (null == props) {
-                            props = LogProperties.getLogProperties();
-                        }
-                        concurrentTasks.submit(new TaskImpl(jsonInOut, session, module, req, props));
+                        concurrentTasks.submit(new TaskImpl(jsonInOut, session, module, req));
                         concurrentTasksCount++;
                     }
                 }
@@ -235,19 +227,10 @@ public class Multiple extends SessionServlet {
                     // Await completion service
                     for (int i = 0; i < concurrentTasksCount; i++) {
                         try {
-                            concurrentTasks.take().get();
+                            concurrentTasks.take();
                         } catch (final InterruptedException e) {
                             Thread.currentThread().interrupt();
                             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                        } catch (final ExecutionException e) {
-                            final Throwable cause = e.getCause();
-                            if (cause instanceof JSONException) {
-                                throw (JSONException) cause;
-                            }
-                            if (cause instanceof OXException) {
-                                throw (OXException) cause;
-                            }
-                            ThreadPools.launderThrowable(e, RuntimeException.class);
                         }
                     }
                 }
@@ -559,26 +542,19 @@ public class Multiple extends SessionServlet {
         }
     }
 
-    private static final class TaskImpl extends AbstractTrackableTask<Object> {
+    private static final class TaskImpl extends AbstractTask<Object> {
 
         private final JsonInOut jsonDataResponse;
         private final ServerSession session;
         private final String module;
         private final HttpServletRequest req;
-        private final Map<String, Object> logProperties;
 
-        protected TaskImpl(final JsonInOut jsonDataResponse, final ServerSession session, final String module, final HttpServletRequest req, final Props props) {
+        protected TaskImpl(final JsonInOut jsonDataResponse, final ServerSession session, final String module, final HttpServletRequest req) {
             super();
             this.jsonDataResponse = jsonDataResponse;
             this.session = session;
             this.module = module;
             this.req = req;
-            logProperties = props.getMap();
-        }
-
-        @Override
-        public Map<String, Object> optLogProperties() {
-            return logProperties;
         }
 
         @Override
