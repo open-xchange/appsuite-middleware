@@ -306,7 +306,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 
             }
         }
-
+        return oxContact;
     }
 
     private static boolean isEmpty(final String string) {
