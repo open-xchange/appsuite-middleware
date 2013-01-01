@@ -85,6 +85,8 @@ import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTrackableTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -607,6 +609,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                 }
             } else {
                 final ThreadPoolCompletionService<Void> tcompletionService = new ThreadPoolCompletionService<Void>(threadPool);
+                final Props props = LogProperties.getLogProperties();
                 for (int i = 0; i < numOfStorages; i++) {
                     final FileStorageFileAccess files = all.get(i);
                     final int index = i;
@@ -624,6 +627,11 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                                 // Ignore failed one in composite search results
                             }
                             return null;
+                        }
+
+                        @Override
+                        public Map<String, Object> optLogProperties() {
+                            return props.getMap();
                         }
                     });
                 }
