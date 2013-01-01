@@ -2941,7 +2941,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Parse body into a JSON array
                  */
-                final JSONArray ja = (JSONArray) searchValue;
+                final JSONArray ja = searchValue.toArray();
                 final int length = ja.length();
                 if (length > 0) {
                     final int[] searchCols = new int[length];
@@ -3021,7 +3021,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                 }
             } else {
-                final JSONArray searchArray = ((JSONObject) searchValue).getJSONArray(PARAMETER_FILTER);
+                final JSONArray searchArray = searchValue.toObject().getJSONArray(PARAMETER_FILTER);
                 /*
                  * Search mails
                  */

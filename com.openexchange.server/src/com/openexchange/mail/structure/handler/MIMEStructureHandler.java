@@ -266,7 +266,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             final JSONValue prev = currentBodyObject;
             final JSONArray jsonArray;
             if (prev.isArray()) {
-                jsonArray = (JSONArray) prev;
+                jsonArray = prev.toArray();
             } else {
                 jsonArray = new JSONArray();
                 jsonArray.put(prev);

@@ -127,7 +127,7 @@ public final class SearchAction extends AbstractMailAction {
                 /*
                  * Parse body into a JSON array
                  */
-                final JSONArray ja = (JSONArray) searchValue;
+                final JSONArray ja = searchValue.toArray();
                 final int length = ja.length();
                 if (length > 0) {
                     final int[] searchCols = new int[length];
@@ -208,7 +208,7 @@ public final class SearchAction extends AbstractMailAction {
                     result = new AJAXRequestResult(new JSONArray(), "json");
                 }
             } else {
-                final JSONArray searchArray = ((JSONObject) searchValue).getJSONArray(Mail.PARAMETER_FILTER);
+                final JSONArray searchArray = searchValue.toObject().getJSONArray(Mail.PARAMETER_FILTER);
                 /*
                  * Pre-Select field writers
                  */

@@ -82,7 +82,7 @@ public class JSONCoercion {
             return null;
         }
         if (object.isArray()) {
-            final JSONArray jsonArray = (JSONArray) object;
+            final JSONArray jsonArray = object.toArray();
             final int length = jsonArray.length();
             final List<Object> list = new ArrayList<Object>(length);
             for (int i = 0; i < length; i++) {
@@ -91,7 +91,7 @@ public class JSONCoercion {
             return list;
         }
         if (object.isObject()) {
-            final JSONObject jsonObject = (JSONObject) object;
+            final JSONObject jsonObject = object.toObject();
             final Map<String, Object> map = new LinkedHashMap<String, Object>(jsonObject.length());
             for (final String key : jsonObject.keySet()) {
                 map.put(key, coerceToNative(jsonObject.get(key)));
