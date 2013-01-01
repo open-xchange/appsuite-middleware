@@ -89,6 +89,7 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTrackableTask;
+import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -610,11 +611,12 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
             } else {
                 final ThreadPoolCompletionService<Void> tcompletionService = new ThreadPoolCompletionService<Void>(threadPool);
                 final Props props = LogProperties.getLogProperties();
+                final int mlen = numOfStorages - 1;
                 for (int i = 0; i < numOfStorages; i++) {
                     final FileStorageFileAccess files = all.get(i);
                     final int index = i;
-                    tcompletionService.submit(new AbstractTrackableTask<Void>() {
-    
+                    final Task<Void> task = new AbstractTrackableTask<Void>() {
+                        
                         @Override
                         public Void call() throws OXException {
                             try {
@@ -633,7 +635,13 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                         public Map<String, Object> optLogProperties() {
                             return props.getMap();
                         }
-                    });
+                    };
+                    if (i == mlen) {
+                        // Run last task with this thread
+                        tcompletionService.callerRuns(task);
+                    } else {
+                        tcompletionService.submit(task);
+                    }
                 }
                 completionService = tcompletionService;
             }
