@@ -218,7 +218,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         serviceRegistrations.put(service, context.registerService(clazz, service, properties));
     }
 
-       /**
+    /**
      * Registers specified service under the specified class.
      *
      * @param clazz The service's class
