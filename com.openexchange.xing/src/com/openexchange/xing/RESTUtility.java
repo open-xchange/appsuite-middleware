@@ -51,14 +51,14 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.json.JSONException;
+import org.json.JSONInputStream;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.xing.exception.XingApiException;
@@ -187,7 +187,7 @@ public class RESTUtility {
             {
                 final HttpPut put = new HttpPut(buildURL(host, apiVersion, path, params));
                 if (null != requestInformation) {
-                    put.setEntity(new ByteArrayEntity(requestInformation.toString().getBytes(Charsets.UTF_8), ContentType.APPLICATION_JSON));
+                    put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
                 }
                 req = put;
             }
@@ -196,7 +196,7 @@ public class RESTUtility {
             {
                 final HttpPost post = new HttpPost(buildURL(host, apiVersion, path, params));
                 if (null != requestInformation) {
-                    post.setEntity(new ByteArrayEntity(requestInformation.toString().getBytes(Charsets.UTF_8), ContentType.APPLICATION_JSON));
+                    post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
                 }
                 req = post;
             }
