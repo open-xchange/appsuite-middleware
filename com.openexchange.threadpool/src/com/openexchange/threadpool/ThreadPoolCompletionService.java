@@ -165,6 +165,21 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
         return f;
     }
 
+    /**
+     * Runs given task with calling thread.
+     * 
+     * @param task The task
+     * @return The associated {@link Future}
+     */
+    public Future<V> callerRuns(final Task<V> task) {
+        if (task == null) {
+            throw new NullPointerException();
+        }
+        final QueueingFuture<V> f = new QueueingFuture<V>(task, completionQueue);
+        f.run();
+        return f;
+    }
+
     @Override
     public Future<V> submit(final Callable<V> task) {
         if (task == null) {
