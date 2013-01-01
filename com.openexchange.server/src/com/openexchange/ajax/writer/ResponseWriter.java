@@ -554,7 +554,7 @@ public final class ResponseWriter {
             if (writer instanceof OXJSONWriter) {
                 final JSONValue jv = ((OXJSONWriter) writer).getObject();
                 if (jv.isObject()) {
-                    final JSONObject json = (JSONObject) jv;
+                    final JSONObject json = jv.toObject();
                     if (!json.hasAndNotNull(ERROR)) {
                         addException(json, warning, locale);
                     }
@@ -577,7 +577,7 @@ public final class ResponseWriter {
             if (!warnings.isEmpty() && (writer instanceof OXJSONWriter)) {
                 final JSONValue jv = ((OXJSONWriter) writer).getObject();
                 if (jv.isObject()) {
-                    final JSONObject json = (JSONObject) jv;
+                    final JSONObject json = jv.toObject();
                     if (!json.hasAndNotNull(ERROR)) {
                         addException(json, warnings.get(0), locale);
                     }

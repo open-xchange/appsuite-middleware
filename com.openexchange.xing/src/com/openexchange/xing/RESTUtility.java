@@ -247,7 +247,7 @@ public class RESTUtility {
 
                 result = JSONObject.parse(bin);
                 if (result.isObject()) {
-                    checkForError((JSONObject) result);
+                    checkForError(result.toObject());
                 }
             }
         } catch (final IOException e) {
