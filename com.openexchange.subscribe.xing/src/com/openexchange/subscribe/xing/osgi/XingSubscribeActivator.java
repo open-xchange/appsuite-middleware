@@ -51,6 +51,7 @@ package com.openexchange.subscribe.xing.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
@@ -71,6 +72,8 @@ import com.openexchange.subscribe.xing.session.XingEventHandler;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class XingSubscribeActivator extends HousekeepingActivator {
+
+    private ServiceRegistration<SubscribeService> serviceRegistration;
 
     /**
      * Initializes a new {@link XingSubscribeActivator}.
@@ -99,6 +102,7 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
+        unregisterSubscribeService();
         super.stopBundle();
         Services.setServices(null);
     }
@@ -106,18 +110,23 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
     /**
      * Registers the subscribe service.
      */
-    public void registerSubscribeService() {
-        final XingSubscribeService xingSubscribeService = new XingSubscribeService(this);
-        registerService(SubscribeService.class, xingSubscribeService);
-        com.openexchange.log.Log.loggerFor(XingSubscribeActivator.class).info("XingSubscribeService was started");
+    public synchronized void registerSubscribeService() {
+        if (null == serviceRegistration) {
+            serviceRegistration = context.registerService(SubscribeService.class, new XingSubscribeService(this), null);
+            com.openexchange.log.Log.loggerFor(XingSubscribeActivator.class).info("XingSubscribeService was started");
+        }
     }
 
     /**
      * Un-registers the subscribe service.
      */
-    public void unregisterSubscribeService() {
-        unregisterServices();
-        com.openexchange.log.Log.loggerFor(XingSubscribeActivator.class).info("XingSubscribeService was stopped");
+    public synchronized void unregisterSubscribeService() {
+        final ServiceRegistration<SubscribeService> serviceRegistration = this.serviceRegistration;
+        if (null != serviceRegistration) {
+            serviceRegistration.unregister();
+            this.serviceRegistration = null;
+            com.openexchange.log.Log.loggerFor(XingSubscribeActivator.class).info("XingSubscribeService was stopped");
+        }
     }
 
     /**
