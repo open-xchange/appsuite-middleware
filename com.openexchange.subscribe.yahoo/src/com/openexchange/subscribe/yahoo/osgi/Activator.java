@@ -67,7 +67,7 @@ import com.openexchange.subscribe.yahoo.YahooSubscribeService;
  */
 public class Activator extends HousekeepingActivator {
 
-    private OAuthServiceMetaData oAuthServiceMetaData;
+    private volatile OAuthServiceMetaData oAuthServiceMetaData;
 
     private YahooService yahooService;
 
