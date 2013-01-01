@@ -51,7 +51,10 @@ package com.openexchange.xing;
 
 import static com.openexchange.xing.util.JSONCoercion.coerceToNative;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -69,6 +72,8 @@ import com.openexchange.xing.exception.XingException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class User {
+
+    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     private final String id;
     private final String displayName;
@@ -93,6 +98,7 @@ public class User {
     private final Map<String, Object> professionalExperience;
     private final Map<String, Object> educationalBackground;
     private final Map<String, Object> photoUrls;
+    private final Date birthDate;
 
     /**
      * Initializes a new {@link User}.
@@ -116,6 +122,15 @@ public class User {
                 this.timeZone = TimeZone.getTimeZone(tz.getString("name"));
             } else {
                 this.timeZone = null;
+            }
+            if (accountInfo.has("birth_date")) {
+                final JSONObject jo = accountInfo.getJSONObject("birth_date");
+                final Calendar cal = GregorianCalendar.getInstance(UTC);
+                cal.set(jo.getInt("year"), jo.getInt("month") - 1, jo.getInt("day"), 0, 0, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                this.birthDate = cal.getTime();
+            } else {
+                this.birthDate = null;
             }
             if (accountInfo.has("premium_services")) {
                 final JSONArray ps = accountInfo.optJSONArray("premium_services");
@@ -223,6 +238,15 @@ public class User {
      */
     public String getId() {
         return id;
+    }
+
+    /**
+     * Gets the birth date.
+     * 
+     * @return The birth date
+     */
+    public Date getBirthDate() {
+        return birthDate;
     }
 
     /**
