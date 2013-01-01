@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -88,7 +89,6 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -149,7 +149,8 @@ public class Multiple extends SessionServlet {
                 Streams.close(reader);
             }
         }
-        JSONArray respArr = new JSONArray(1);
+        JSONArray respArr = new JSONArray();
+
         try {
             final ServerSession session = getSessionObject(req);
             if (session == null) {
@@ -203,7 +204,7 @@ public class Multiple extends SessionServlet {
                         if (null == concurrentTasks) {
                             concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
                         }
-                        concurrentTasks.submit(new TaskImpl(jsonInOut, session, module, req));
+                        concurrentTasks.submit(new CallableImpl(jsonInOut, session, module, req));
                         concurrentTasksCount++;
                     }
                 }
@@ -540,14 +541,14 @@ public class Multiple extends SessionServlet {
         }
     }
 
-    private static final class TaskImpl extends AbstractTask<Object> {
+    private static final class CallableImpl implements Callable<Object> {
 
         private final JsonInOut jsonDataResponse;
         private final ServerSession session;
         private final String module;
         private final HttpServletRequest req;
 
-        protected TaskImpl(final JsonInOut jsonDataResponse, final ServerSession session, final String module, final HttpServletRequest req) {
+        protected CallableImpl(final JsonInOut jsonDataResponse, final ServerSession session, final String module, final HttpServletRequest req) {
             super();
             this.jsonDataResponse = jsonDataResponse;
             this.session = session;
