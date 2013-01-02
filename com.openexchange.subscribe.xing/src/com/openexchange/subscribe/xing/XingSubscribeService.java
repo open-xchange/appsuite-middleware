@@ -87,7 +87,6 @@ import com.openexchange.subscribe.xing.session.XingOAuthAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.xing.Address;
 import com.openexchange.xing.Contacts;
-import com.openexchange.xing.OrderBy;
 import com.openexchange.xing.User;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.exception.XingException;
@@ -154,7 +153,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
             final XingOAuthAccess xingOAuthAccess = XingOAuthAccess.accessFor(xingOAuthAccount, session);
             final Contacts xingContacts = xingOAuthAccess.getXingAPI().getContactsFrom(
                 xingOAuthAccess.getXingUserId(),
-                OrderBy.ID,
+                UserField.ID,
                 Arrays.asList(UserField.values()));
 
             final List<Contact> ret = new ArrayList<Contact>(xingContacts.getTotal());
