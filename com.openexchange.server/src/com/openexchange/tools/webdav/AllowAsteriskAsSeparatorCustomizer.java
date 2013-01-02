@@ -140,6 +140,11 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
             public int getServerPort() {
                 return loginReq.getServerPort();
             }
+
+            @Override
+            public String getHttpSessionID() {
+                return loginReq.getHttpSessionID();
+            }
         };
     }
 }

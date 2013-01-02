@@ -49,85 +49,74 @@
 
 package com.openexchange.groupware.notify.hostname.internal;
 
-import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.login.BlockingLoginHandlerService;
+import com.openexchange.login.LoginRequest;
+import com.openexchange.login.LoginResult;
+import com.openexchange.session.Session;
+import com.openexchange.systemname.SystemNameService;
 
 /**
- * {@link HostDataImpl} - The {@link HostData} implementation.
+ * Adds the host data to every session.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class HostDataImpl implements HostData {
+public final class HostDataLoginHandler implements BlockingLoginHandlerService {
 
-    private String host;
+    private HostnameService hostnameService;
+    private SystemNameService systemNameService;
 
-    private String route;
-
-    private int port;
-
-    private boolean secure;
-
-    public HostDataImpl(boolean secure, String host, int port, String route) {
+    public HostDataLoginHandler() {
         super();
-        this.secure = secure;
-        this.host = host;
-        this.port = port;
-        this.route = route;
     }
 
     @Override
-    public String getRoute() {
-        return route;
+    public void handleLogin(LoginResult login) {
+        LoginRequest request = login.getRequest();
+        Session session = login.getSession();
+        HostDataImpl hostData = new HostDataImpl(
+            request.isSecure(),
+            determineHost(request, session.getContextId(), session.getUserId()),
+            request.getServerPort(),
+            determineHttpSessionId(request.getHttpSessionID()));
+        session.setParameter(HostnameService.PARAM_HOST_DATA, hostData);
     }
 
-    @Override
-    public String getHost() {
+    private String determineHost(LoginRequest request, int contextId, int userId) {
+        String host = request.getServerName();
+        if (null != hostnameService) {
+            String tmp = hostnameService.getHostname(userId, contextId);
+            if (null != tmp) {
+                host = tmp;
+            }
+        }
         return host;
     }
 
-    @Override
-    public int getPort() {
-        return port;
+    private String determineHttpSessionId(String httpSessionId) {
+        final String retval;
+        if (null == httpSessionId) {
+            retval = "0123456789." + systemNameService.getSystemName();
+        } else {
+            if (httpSessionId.indexOf('.') > 0) {
+                retval = httpSessionId;
+            } else {
+                retval = httpSessionId + '.' + systemNameService.getSystemName();
+            }
+        }
+        return retval;
     }
 
     @Override
-    public boolean isSecure() {
-        return secure;
+    public void handleLogout(LoginResult logout) {
+        // Nothing to do.
     }
 
-    /**
-     * Sets the route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
-     *
-     * @param route The route to set
-     */
-    public void setRoute(final String route) {
-        this.route = route;
+    public void setHostnameService(HostnameService hostnameService) {
+        this.hostnameService = hostnameService;
     }
 
-    /**
-     * Sets the host
-     *
-     * @param host The host to set
-     */
-    public void setHost(final String host) {
-        this.host = host;
+    public void setSystemNameService(SystemNameService systemNameService) {
+        this.systemNameService = systemNameService;
     }
-
-    /**
-     * Sets the port
-     *
-     * @param port The port to set
-     */
-    public void setPort(final int port) {
-        this.port = port;
-    }
-
-    /**
-     * Sets the secure
-     *
-     * @param secure The secure to set
-     */
-    public void setSecure(final boolean secure) {
-        this.secure = secure;
-    }
-
 }

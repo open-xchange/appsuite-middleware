@@ -47,87 +47,45 @@
  *
  */
 
-package com.openexchange.groupware.notify.hostname.internal;
+package com.openexchange.groupware.notify.hostname.osgi;
 
-import com.openexchange.groupware.notify.hostname.HostData;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.groupware.notify.hostname.internal.HostDataLoginHandler;
 
 /**
- * {@link HostDataImpl} - The {@link HostData} implementation.
+ * {@link HostnameCustomizer}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class HostDataImpl implements HostData {
+public final class HostnameCustomizer implements ServiceTrackerCustomizer<HostnameService, HostnameService> {
 
-    private String host;
+    private final BundleContext context;
+    private final HostDataLoginHandler loginHandler;
 
-    private String route;
-
-    private int port;
-
-    private boolean secure;
-
-    public HostDataImpl(boolean secure, String host, int port, String route) {
+    public HostnameCustomizer(BundleContext context, HostDataLoginHandler loginHandler) {
         super();
-        this.secure = secure;
-        this.host = host;
-        this.port = port;
-        this.route = route;
+        this.context = context;
+        this.loginHandler = loginHandler;
     }
 
     @Override
-    public String getRoute() {
-        return route;
+    public HostnameService addingService(ServiceReference<HostnameService> reference) {
+        HostnameService hostnameService = context.getService(reference);
+        loginHandler.setHostnameService(hostnameService);
+        return hostnameService;
     }
 
     @Override
-    public String getHost() {
-        return host;
+    public void modifiedService(ServiceReference<HostnameService> reference, HostnameService service) {
+        // Nothing to do.
     }
 
     @Override
-    public int getPort() {
-        return port;
+    public void removedService(ServiceReference<HostnameService> reference, HostnameService service) {
+        loginHandler.setHostnameService(null);
+        context.ungetService(reference);
     }
-
-    @Override
-    public boolean isSecure() {
-        return secure;
-    }
-
-    /**
-     * Sets the route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
-     *
-     * @param route The route to set
-     */
-    public void setRoute(final String route) {
-        this.route = route;
-    }
-
-    /**
-     * Sets the host
-     *
-     * @param host The host to set
-     */
-    public void setHost(final String host) {
-        this.host = host;
-    }
-
-    /**
-     * Sets the port
-     *
-     * @param port The port to set
-     */
-    public void setPort(final int port) {
-        this.port = port;
-    }
-
-    /**
-     * Sets the secure
-     *
-     * @param secure The secure to set
-     */
-    public void setSecure(final boolean secure) {
-        this.secure = secure;
-    }
-
 }

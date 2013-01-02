@@ -239,6 +239,11 @@ public class IntegrationTest extends TestCase {
             public int getServerPort() {
                 return 0;
             }
+
+            @Override
+            public String getHttpSessionID() {
+                return "0123456789";
+            }
         });
 
         return ServerSessionAdapter.valueOf(login.getSession());

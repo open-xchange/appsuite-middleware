@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import javax.security.auth.login.LoginException;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
@@ -77,8 +76,6 @@ import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
@@ -251,11 +248,6 @@ public final class LoginPerformer {
             }
             // Initial parameters
             {
-                final HttpServletRequest req = (HttpServletRequest) properties.get("http.request");
-                if (null != req) {
-                    session.setParameter(HostnameService.PARAM_HOST_DATA, new HostDataImpl(req, user.getId(), ctx.getContextId()));
-                }
-                session.setParameter(HostnameService.PARAM_HOST_DATA, new HostDataImpl(req, user.getId(), ctx.getContextId()));
                 final String capabilities = (String) properties.get("client.capabilities");
                 if (null == capabilities) {
                     session.setParameter(Session.PARAM_CAPABILITIES, Collections.<String> emptyList());
@@ -392,19 +384,17 @@ public final class LoginPerformer {
                     if (null == completionService) {
                         completionService = new ThreadPoolCompletionService<Void>(executor);
                     }
-                    final Callable<Void> task = new Callable<Void>() {
-
+                    Callable<Void> callable = new Callable<Void>() {
                         @Override
                         public Void call() {
                             handleSafely(login, handler, true);
                             return null;
                         }
                     };
-                    completionService.submit(task);
+                    completionService.submit(callable);
                     blocking++;
                 } else {
                     executor.submit(new LoginPerformerTask() {
-
                         @Override
                         public Object call() {
                             handleSafely(login, handler, true);
@@ -442,15 +432,14 @@ public final class LoginPerformer {
                     if (null == completionService) {
                         completionService = new ThreadPoolCompletionService<Void>(executor);
                     }
-                    final Callable<Void> task = new Callable<Void>() {
-
+                    Callable<Void> callable = new Callable<Void>() {
                         @Override
                         public Void call() {
                             handleSafely(logout, handler, false);
                             return null;
                         }
                     };
-                    completionService.submit(task);
+                    completionService.submit(callable);
                     blocking++;
                 } else {
                     executor.submit(new LoginPerformerTask() {

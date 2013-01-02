@@ -96,7 +96,6 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.ResultCode;
 import com.openexchange.config.ConfigTools;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
@@ -1019,7 +1018,6 @@ public class Login extends AJAXServlet {
         LoginResult result = null;
         try {
             final Map<String, Object> properties = new HashMap<String, Object>(1);
-            properties.put("http.request", req);
             {
                 final String capabilities = req.getParameter("capabilities");
                 if (null != capabilities) {
@@ -1149,6 +1147,7 @@ public class Login extends AJAXServlet {
         final boolean isVolatile = LoginTools.parseVolatile(req);
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
+        final String httpSessionId = req.getSession(true).getId();
         return new LoginRequest() {
 
             private final String hash = HashCalculator.getHash(req, client);
@@ -1227,6 +1226,11 @@ public class Login extends AJAXServlet {
             public int getServerPort() {
                 return req.getServerPort();
             }
+
+            @Override
+            public String getHttpSessionID() {
+                return httpSessionId;
+            }
         };
     }
 
@@ -1287,6 +1291,7 @@ public class Login extends AJAXServlet {
         final boolean isVolatile = LoginTools.parseVolatile(req);
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
+        final String httpSessionId = req.getSession(true).getId();
         final LoginRequest request = new LoginRequest() {
 
             private final String hash = HashCalculator.getHash(req, userAgent, client);
@@ -1365,9 +1370,13 @@ public class Login extends AJAXServlet {
             public int getServerPort() {
                 return req.getServerPort();
             }
+
+            @Override
+            public String getHttpSessionID() {
+                return httpSessionId;
+            }
         };
         final Map<String, Object> properties = new HashMap<String, Object>(1);
-        properties.put("http.request", req);
         {
             final String capabilities = req.getParameter("capabilities");
             if (null != capabilities) {

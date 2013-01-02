@@ -47,87 +47,40 @@
  *
  */
 
-package com.openexchange.groupware.notify.hostname.internal;
+package com.openexchange.groupware.notify.hostname.osgi;
 
-import com.openexchange.groupware.notify.hostname.HostData;
+import java.util.Stack;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.groupware.notify.hostname.internal.HostDataLoginHandler;
+import com.openexchange.osgi.Tools;
+import com.openexchange.systemname.SystemNameService;
 
 /**
- * {@link HostDataImpl} - The {@link HostData} implementation.
+ * {@link HostDataActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class HostDataImpl implements HostData {
+public final class HostDataActivator implements BundleActivator {
 
-    private String host;
+    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
 
-    private String route;
-
-    private int port;
-
-    private boolean secure;
-
-    public HostDataImpl(boolean secure, String host, int port, String route) {
+    public HostDataActivator() {
         super();
-        this.secure = secure;
-        this.host = host;
-        this.port = port;
-        this.route = route;
     }
 
     @Override
-    public String getRoute() {
-        return route;
+    public void start(BundleContext context) {
+        HostDataLoginHandler loginHandler = new HostDataLoginHandler();
+        trackers.push(new ServiceTracker<HostnameService, HostnameService>(context, HostnameService.class, new HostnameCustomizer(context, loginHandler)));
+        trackers.push(new ServiceTracker<SystemNameService, SystemNameService>(context, SystemNameService.class, new HostDataLoginHandlerRegisterer(context, loginHandler)));
+        Tools.open(trackers);
     }
 
     @Override
-    public String getHost() {
-        return host;
+    public void stop(BundleContext context) {
+        Tools.close(trackers);
     }
-
-    @Override
-    public int getPort() {
-        return port;
-    }
-
-    @Override
-    public boolean isSecure() {
-        return secure;
-    }
-
-    /**
-     * Sets the route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
-     *
-     * @param route The route to set
-     */
-    public void setRoute(final String route) {
-        this.route = route;
-    }
-
-    /**
-     * Sets the host
-     *
-     * @param host The host to set
-     */
-    public void setHost(final String host) {
-        this.host = host;
-    }
-
-    /**
-     * Sets the port
-     *
-     * @param port The port to set
-     */
-    public void setPort(final int port) {
-        this.port = port;
-    }
-
-    /**
-     * Sets the secure
-     *
-     * @param secure The secure to set
-     */
-    public void setSecure(final boolean secure) {
-        this.secure = secure;
-    }
-
 }

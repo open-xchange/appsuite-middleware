@@ -196,6 +196,11 @@ public abstract class OXServlet extends WebDavServlet {
         public int getServerPort() {
             return req.getServerPort();
         }
+
+        @Override
+        public String getHttpSessionID() {
+            return req.getSession(true).getId();
+        }
     }
 
     /**
@@ -301,7 +306,6 @@ public abstract class OXServlet extends WebDavServlet {
             }
             try {
                 final Map<String, Object> properties = new HashMap<String, Object>(1);
-                properties.put("http.request", req);
                 session = addSession(loginRequest, properties);
             } catch (final OXException e) {
                 if (e.getCategory() == Category.CATEGORY_USER_INPUT) {

@@ -52,6 +52,7 @@ package com.openexchange.login;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.authentication.Cookie;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * Data to process a login request.
@@ -84,9 +85,20 @@ public interface LoginRequest {
 
     Cookie[] getCookies();
 
+    /**
+     * Every login mechanism defining this value must consider the following topics:
+     * <li>
+     * <ul>if com.openexchange.forceHTTPS is configured to true, then this must be true but not if the client comes through localhost</ul>
+     * <ul>the value told by the servlet container if the request was retrieved through HTTPS</ul>
+     * </li>
+     * @see Tools#considerSecure(javax.servlet.http.HttpServletRequest, boolean)
+     * @return <code>true</code> if URLs should be told to the client with HTTPS.
+     */
     boolean isSecure();
 
     String getServerName();
 
     int getServerPort();
+
+    String getHttpSessionID();
 }

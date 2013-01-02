@@ -99,7 +99,6 @@ public class FormLogin implements LoginRequestHandler {
             conf.isCookieForceHTTPS(),
             conf.isDisableTrimLogin());
         Map<String, Object> properties = new HashMap<String, Object>(1);
-        properties.put("http.request", req);
         {
             String capabilities = req.getParameter("capabilities");
             if (null != capabilities) {
