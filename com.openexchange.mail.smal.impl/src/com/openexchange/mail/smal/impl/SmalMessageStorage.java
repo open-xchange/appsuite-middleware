@@ -189,7 +189,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         IndexFacadeService indexFacade = getIndexFacadeService();
-        if (indexFacade == null || isBlacklisted() || !isIndexingAllowed()) {
+        if (searchTerm == null || indexFacade == null || isBlacklisted() || !isIndexingAllowed()) {
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
         
@@ -198,7 +198,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             MailFields mfs = new MailFields(fields);
             indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
             boolean isIndexed = indexAccess.isIndexed(String.valueOf(accountId), folder);
-            if (isIndexed && searchTerm != null && MailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
+            if (isIndexed && MailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
                 AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
                 QueryParameters.Builder builder = new QueryParameters
                     .Builder()
