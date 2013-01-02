@@ -203,8 +203,10 @@ public class XingAPI<S extends Session> {
             // Add order-by
             boolean sorted = false;
             if (null == orderBy || SUPPORTED_SORT_FIELDS.contains(orderBy)) {
-                params.add("orderBy");
-                params.add((null == orderBy ? UserField.ID : orderBy).getFieldName());
+                if (null != orderBy) {
+                    params.add("orderBy");
+                    params.add(orderBy.getFieldName());
+                }
                 sorted = true;
             }
             // Add user fields
