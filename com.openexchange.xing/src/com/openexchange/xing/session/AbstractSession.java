@@ -523,7 +523,6 @@ public abstract class AbstractSession implements Session {
                 manager.closeIdleConnections(idleTimeoutSeconds, TimeUnit.SECONDS);
                 if (manager.getConnectionsInPool() == 0) {
                     stop();
-                    return;
                 }
             } catch (final Exception e) {
                 stop();
