@@ -326,10 +326,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             mailAccess.connect();
             // Get messages
             final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fa.getFullname(), mailIds, fields);
+            final int unifiedAccountId = this.access.getAccountId();
             for (final MailMessage mail : mails) {
                 if (null != mail) {
                     mail.setFolder(fullName);
-                    mail.setAccountId(accountId);
+                    mail.setAccountId(unifiedAccountId);
                 }
             }
             return mails;
@@ -373,9 +374,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             if (null == mail) {
                 return null;
             }
+            final int unifiedAccountId = this.access.getAccountId();
             mail.loadContent();
             mail.setFolder(fullName);
-            mail.setAccountId(fa.getAccountId());
+            mail.setAccountId(unifiedAccountId);
             return mail;
         } finally {
                 closeSafe(mailAccess);
@@ -837,9 +839,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Get account's messages
             final MailMessage[] mails =
                 mailAccess.getMessageStorage().getThreadSortedMessages(fa.getFullname(), indexRange, sortField, order, searchTerm, fields);
+            final int unifiedAccountId = this.access.getAccountId();
             for (final MailMessage mail : mails) {
                 mail.setFolder(fullName);
-                mail.setAccountId(accountId);
+                mail.setAccountId(unifiedAccountId);
             }
             return mails;
         } finally {
@@ -974,9 +977,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Get account's messages
             final MailMessage[] mails =
                 mailAccess.getMessageStorage().searchMessages(fa.getFullname(), indexRange, sortField, order, searchTerm, fields);
+            final int unifiedAccountId = this.access.getAccountId();
             for (final MailMessage mail : mails) {
                 mail.setFolder(fullName);
-                mail.setAccountId(accountId);
+                mail.setAccountId(unifiedAccountId);
             }
             return mails;
         } finally {
@@ -1075,9 +1079,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             mailAccess.connect();
             // Get account's messages
             final MailMessage[] mails = mailAccess.getMessageStorage().getUnreadMessages(fa.getFullname(), sortField, order, fields, limit);
+            final int unifiedAccountId = this.access.getAccountId();
             for (final MailMessage mail : mails) {
                 mail.setFolder(fullName);
-                mail.setAccountId(accountId);
+                mail.setAccountId(unifiedAccountId);
             }
             return mails;
         } finally {
