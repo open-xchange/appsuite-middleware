@@ -49,6 +49,14 @@
 
 package com.openexchange.subscribe.xing;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -56,6 +64,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.activation.FileTypeMap;
 import org.apache.commons.logging.Log;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
@@ -63,6 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Streams;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
@@ -71,6 +81,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.xing.session.XingOAuthAccess;
 import com.openexchange.tools.session.ServerSession;
@@ -146,9 +157,8 @@ public class XingSubscribeService extends AbstractSubscribeService {
 
             final List<Contact> ret = new ArrayList<Contact>(xingContacts.getTotal());
             for (final User xingContact : xingContacts.getUsers()) {
-                // TODO: Convert
+                ret.add(convert(xingContact));
             }
-
             return ret;
         } catch (final XingUnlinkedException e) {
             throw XingSubscribeExceptionCodes.UNLINKED_ERROR.create();
@@ -216,7 +226,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         removeWhereConfigMatches(context, query);
     }
 
-    private static Contact convert(final User xingUser) {
+    private Contact convert(final User xingUser) {
         if (null == xingUser) {
             return null;
         }
@@ -300,16 +310,116 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 if (null != s) {
                     oxContact.setCityHome(s);
                 }
-                
-                
-                // TODO: Complete
-                
+                s = a.getCountry();
+                if (null != s) {
+                    oxContact.setCountryHome(s);
+                }
+                s = a.getEmail();
+                if (null != s) {
+                    oxContact.setEmail3(s);
+                }
+                s = a.getFax();
+                if (null != s) {
+                    oxContact.setFaxHome(s);
+                }
+                s = a.getMobilePhone();
+                if (null != s) {
+                    oxContact.setCellularTelephone2(s);
+                }
+                s = a.getPhone();
+                if (null != s) {
+                    oxContact.setTelephoneHome1(s);
+                }
+                s = a.getProvince();
+                if (null != s) {
+                    oxContact.setStateHome(s);
+                }
+                s = a.getStreet();
+                if (null != s) {
+                    oxContact.setStreetHome(s);
+                }
+                s = a.getZipCode();
+                if (null != s) {
+                    oxContact.setPostalCodeHome(s);
+                }
+            }
+        }
+        {
+            final Address a = xingUser.getBusinessAddress();
+            if (null != a) {
+                String s = a.getCity();
+                if (null != s) {
+                    oxContact.setCityBusiness(s);
+                }
+                s = a.getCountry();
+                if (null != s) {
+                    oxContact.setCountryBusiness(s);
+                }
+                s = a.getEmail();
+                if (null != s) {
+                    oxContact.setEmail2(s);
+                }
+                s = a.getFax();
+                if (null != s) {
+                    oxContact.setFaxBusiness(s);
+                }
+                s = a.getMobilePhone();
+                if (null != s) {
+                    oxContact.setCellularTelephone1(s);
+                }
+                s = a.getPhone();
+                if (null != s) {
+                    oxContact.setTelephoneBusiness1(s);
+                }
+                s = a.getProvince();
+                if (null != s) {
+                    oxContact.setStateBusiness(s);
+                }
+                s = a.getStreet();
+                if (null != s) {
+                    oxContact.setStreetBusiness(s);
+                }
+                s = a.getZipCode();
+                if (null != s) {
+                    oxContact.setPostalCodeBusiness(s);
+                }
+            }
+        }
+        {
+            final Map<String, String> instantMessagingAccounts = xingUser.getInstantMessagingAccounts();
+            if (null != instantMessagingAccounts) {
+                final String skypeId = instantMessagingAccounts.get("skype");
+                if (null != skypeId) {
+                    oxContact.setInstantMessenger1(skypeId);
+                }
+                for (final Map.Entry<String, String> e : instantMessagingAccounts.entrySet()) {
+                    if (!"skype".equals(e.getKey())) {
+                        oxContact.setInstantMessenger2(e.getValue());
+                        break;
+                    }
+                }
+            }
+
+        }
+        {
+            final Map<String, Object> photoUrls = xingUser.getPhotoUrls();
+            if (null != photoUrls) {
+                final Object pic = photoUrls.get("maxi_thumb");
+                if (null != pic) {
+                    try {
+                        final String sUrl = pic.toString();
+                        loadImageFromURL(oxContact, sUrl);
+                    } catch (final OXException e) {
+                        final Throwable cause = e.getCause();
+                        LOG.warn("Couldn't load XING user's image", null == cause ? e : cause);
+                    }
+                }
             }
         }
         return oxContact;
     }
 
-    private static boolean isEmpty(final String string) {
+    private boolean isEmpty(final String string) {
         if (null == string) {
             return true;
         }
@@ -319,6 +429,90 @@ public class XingSubscribeService extends AbstractSubscribeService {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /**
+     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
+     * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
+     * 
+     * @param contact The contact container to fill
+     * @param url The URI parameter's value
+     * @throws OXException If converting image's data fails
+     */
+    private void loadImageFromURL(final Contact contact, final String url) throws OXException {
+        try {
+            loadImageFromURL(contact, new URL(url));
+        } catch (final MalformedURLException e) {
+            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
+     * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
+     * 
+     * @param contact The contact container to fill
+     * @param url The image URL
+     * @throws OXException If converting image's data fails
+     */
+    private void loadImageFromURL(final Contact contact, final URL url) throws OXException {
+        String mimeType = null;
+        byte[] bytes = null;
+        try {
+            final URLConnection urlCon = url.openConnection();
+            urlCon.setConnectTimeout(2500);
+            urlCon.setReadTimeout(2500);
+            urlCon.connect();
+            mimeType = urlCon.getContentType();
+            final InputStream in = urlCon.getInputStream();
+            try {
+                final ByteArrayOutputStream buffer = Streams.newByteArrayOutputStream(in.available());
+                transfer(in, buffer);
+                bytes = buffer.toByteArray();
+            } finally {
+                Streams.close(in);
+            }
+        } catch (final SocketTimeoutException e) {
+            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+        if (mimeType == null) {
+            mimeType = ImageTypeDetector.getMimeType(bytes);
+            if ("application/octet-stream".equals(mimeType)) {
+                mimeType = getMimeType(url.toString());
+            }
+        }
+        if (bytes != null && isValidImage(bytes)) {
+            // Mime type should be of image type. Otherwise web server send some error page instead of 404 error code.
+            contact.setImage1(bytes);
+            contact.setImageContentType(mimeType);
+        }
+    }
+
+    private static final FileTypeMap DEFAULT_FILE_TYPE_MAP = FileTypeMap.getDefaultFileTypeMap();
+
+    private String getMimeType(final String filename) {
+        return DEFAULT_FILE_TYPE_MAP.getContentType(filename);
+    }
+
+    private boolean isValidImage(final byte[] data) {
+        java.awt.image.BufferedImage bimg = null;
+        try {
+            bimg = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(data));
+        } catch (final Exception e) {
+            return false;
+        }
+        return (bimg != null);
+    }
+
+    private static void transfer(final InputStream in, final OutputStream out) throws IOException {
+        final byte[] buffer = new byte[4096];
+        int length;
+        while ((length = in.read(buffer)) > 0) {
+            out.write(buffer, 0, length);
+        }
+        out.flush();
     }
 
 }
