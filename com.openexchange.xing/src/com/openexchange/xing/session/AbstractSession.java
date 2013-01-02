@@ -519,13 +519,11 @@ public abstract class AbstractSession implements Session {
         @Override
         public void run() {
             try {
-                while (true) {
-                    manager.closeExpiredConnections();
-                    manager.closeIdleConnections(idleTimeoutSeconds, TimeUnit.SECONDS);
-                    if (manager.getConnectionsInPool() == 0) {
-                        stop();
-                        return;
-                    }
+                manager.closeExpiredConnections();
+                manager.closeIdleConnections(idleTimeoutSeconds, TimeUnit.SECONDS);
+                if (manager.getConnectionsInPool() == 0) {
+                    stop();
+                    return;
                 }
             } catch (final Exception e) {
                 stop();
