@@ -1,6 +1,7 @@
 * 2013-01-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 24363: Retry to load from backup tables
+ - Fix for bug 24357: Fixed access to nested unified mail folders
 
 * 2012-12-29 - thorben.betten@open-xchange.com
 
