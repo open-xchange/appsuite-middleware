@@ -723,23 +723,24 @@ public final class MimeReply {
     private static boolean gatherAllTextContents(final MailPart multipartPart, final ContentType mpContentType, final ParameterContainer pc) throws OXException, MessagingException, IOException {
         final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
+        final boolean htmlPreferred = pc.usm.isDisplayHtmlInlineContent();
         boolean found = false;
-        if (pc.usm.isDisplayHtmlInlineContent() && mpContentType.startsWithAny(MimeTypes.MIME_MULTIPART_ALTERNATIVE, MimeTypes.MIME_MULTIPART_RELATED) && count >= 2) {
+        if (htmlPreferred && mpContentType.startsWithAny(MimeTypes.MIME_MULTIPART_ALTERNATIVE, MimeTypes.MIME_MULTIPART_RELATED) && count >= 2) {
             /*
              * Prefer HTML content within multipart/alternative part
              */
-            found = getTextContent(true, multipartPart, count, partContentType, pc);
+            found = getTextContent(true, false, multipartPart, count, partContentType, pc);
             if (!found) {
                 /*
                  * No HTML part found, retry with any text part
                  */
-                found = getTextContent(false, multipartPart, count, partContentType, pc);
+                found = getTextContent(false, false, multipartPart, count, partContentType, pc);
             }
         } else {
             /*
              * Get any text content
              */
-            found = getTextContent(true, multipartPart, count, partContentType, pc);
+            found = getTextContent(htmlPreferred, !htmlPreferred, multipartPart, count, partContentType, pc);
         }
         /*
          * Look for enclosed messages in any case
@@ -780,7 +781,7 @@ public final class MimeReply {
         return found;
     }
 
-    private static boolean getTextContent(final boolean preferHTML, final MailPart multipartPart, final int count, final ContentType partContentType, final ParameterContainer pc) throws OXException, MessagingException, IOException {
+    private static boolean getTextContent(final boolean preferHTML, final boolean avoidHTML, final MailPart multipartPart, final int count, final ContentType partContentType, final ParameterContainer pc) throws OXException, MessagingException, IOException {
         boolean found = false;
         if (preferHTML) {
             for (int i = 0; !found && i < count; i++) {
@@ -816,7 +817,7 @@ public final class MimeReply {
         for (int i = 0; i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.startsWith(TEXT) && !partContentType.startsWith(TEXT_HTM) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
+            if (partContentType.startsWith(TEXT) && (avoidHTML ? !partContentType.startsWith(TEXT_HTM) : true) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
                 if (pc.retvalContentType.getPrimaryType() == null) {
                     pc.retvalContentType.setContentType(partContentType);
                     final String charset = MessageUtility.checkCharset(part, partContentType);
