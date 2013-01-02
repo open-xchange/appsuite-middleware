@@ -868,7 +868,14 @@ public final class DatabaseFolderStorage implements FolderStorage {
          * Check shared...
          */
         if (owner != storageParameters.getUserId() && PrivateType.getInstance().equals(folder.getType())) {
-            return getFolder(treeId, folder.getID(), StorageType.WORKING, storageParameters);
+            try {
+                return getFolder(treeId, folder.getID(), StorageType.WORKING, storageParameters);
+            } catch (final OXException e) {
+                if (OXFolderExceptionCode.NOT_EXISTS.equals(e) || FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
+                    return getFolder(treeId, folder.getID(), StorageType.BACKUP, storageParameters);
+                }
+                throw e;
+            }
         }
         return folder;
     }
