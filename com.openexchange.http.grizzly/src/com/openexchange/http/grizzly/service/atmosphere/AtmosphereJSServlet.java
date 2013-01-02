@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.grizzly.services.atmosphere;
+package com.openexchange.http.grizzly.service.atmosphere;
 
 import java.io.IOException;
 import java.io.InputStream;
