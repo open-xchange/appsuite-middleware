@@ -150,21 +150,6 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
         return this;
     }
 
-    /**
-     * Submits given task.
-     * 
-     * @param task The task
-     * @return The associated {@link Future}
-     */
-    public Future<V> submit(final Task<V> task) {
-        if (task == null) {
-            throw new NullPointerException();
-        }
-        final QueueingFuture<V> f = new QueueingFuture<V>(task, completionQueue);
-        submittedFutures.add(threadPoolService.submit(task, behavior));
-        return f;
-    }
-
     @Override
     public Future<V> submit(final Callable<V> task) {
         if (task == null) {
