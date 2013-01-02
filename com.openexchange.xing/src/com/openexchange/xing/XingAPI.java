@@ -201,13 +201,12 @@ public class XingAPI<S extends Session> {
                 "offset",
                 Integer.toString(offset)));
             // Add order-by
-            boolean sorted = false;
-            if (null == orderBy || SUPPORTED_SORT_FIELDS.contains(orderBy)) {
+            final boolean serverSort = (null == orderBy || SUPPORTED_SORT_FIELDS.contains(orderBy));
+            if (serverSort) {
                 if (null != orderBy) {
                     params.add("orderBy");
                     params.add(orderBy.getFieldName());
                 }
-                sorted = true;
             }
             // Add user fields
             if (null != userFields && !userFields.isEmpty()) {
@@ -229,7 +228,7 @@ public class XingAPI<S extends Session> {
                 params.toArray(new String[0]),
                 session);
 
-            if (sorted) {
+            if (serverSort) {
                 return new Contacts(responseInformation.getJSONObject("contacts"));
             }
             // Manually sort contacts
