@@ -70,9 +70,12 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.httpclient.EasySSLSocketFactory;
+import com.openexchange.xing.util.Services;
 
 /**
  * Keeps track of a logged in user and contains configuration options for the
@@ -103,7 +106,7 @@ public abstract class AbstractSession implements Session {
      * Creates a new session with the given app key and secret, and access
      * type. The session will not be linked because it has no access token pair.
      */
-    public AbstractSession(AppKeyPair appKeyPair) {
+    public AbstractSession(final AppKeyPair appKeyPair) {
         this(appKeyPair, null);
     }
 
@@ -112,7 +115,7 @@ public abstract class AbstractSession implements Session {
      * type. The session will be linked to the account corresponding to the
      * given access token pair.
      */
-    public AbstractSession(AppKeyPair appKeyPair, AccessTokenPair accessTokenPair) {
+    public AbstractSession(final AppKeyPair appKeyPair, final AccessTokenPair accessTokenPair) {
         if (appKeyPair == null) {
             throw new IllegalArgumentException("'appKeyPair' must be non-null");
         }
@@ -123,7 +126,7 @@ public abstract class AbstractSession implements Session {
     /**
      * Links the session with the given access token and secret.
      */
-    public void setAccessTokenPair(AccessTokenPair accessTokenPair) {
+    public void setAccessTokenPair(final AccessTokenPair accessTokenPair) {
         if (accessTokenPair == null) {
             throw new IllegalArgumentException("'accessTokenPair' must be non-null");
         }
@@ -180,11 +183,11 @@ public abstract class AbstractSession implements Session {
             final CommonsHttpOAuthConsumer signer = new CommonsHttpOAuthConsumer(appKeyPair.key, appKeyPair.secret);
             signer.setTokenWithSecret(accessTokenPair.key, accessTokenPair.secret);
             signer.sign(request);
-        } catch (OAuthCommunicationException e) {
+        } catch (final OAuthCommunicationException e) {
             throw new XingException(e);
-        } catch (OAuthMessageSignerException e) {
+        } catch (final OAuthMessageSignerException e) {
             throw new XingException(e);
-        } catch (OAuthExpectationFailedException e) {
+        } catch (final OAuthExpectationFailedException e) {
             throw new XingException(e);
         }
     }
@@ -297,8 +300,8 @@ public abstract class AbstractSession implements Session {
      * The default implementation always sets a 30 second timeout.
      */
     @Override
-    public void setRequestTimeout(HttpUriRequest request) {
-        HttpParams reqParams = request.getParams();
+    public void setRequestTimeout(final HttpUriRequest request) {
+        final HttpParams reqParams = request.getParams();
         HttpConnectionParams.setSoTimeout(reqParams, DEFAULT_TIMEOUT_MILLIS);
         HttpConnectionParams.setConnectionTimeout(reqParams, DEFAULT_TIMEOUT_MILLIS);
     }
@@ -325,20 +328,20 @@ public abstract class AbstractSession implements Session {
         }
 
         @Override
-        public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
+        public long getKeepAliveDuration(final HttpResponse response, final HttpContext context) {
             // Keep-alive for the shorter of 20 seconds or what the server specifies.
             long timeout = KEEP_ALIVE_DURATION_SECS * 1000;
 
-            HeaderElementIterator i = new BasicHeaderElementIterator(
+            final HeaderElementIterator i = new BasicHeaderElementIterator(
                     response.headerIterator(HTTP.CONN_KEEP_ALIVE));
             while (i.hasNext()) {
-                HeaderElement element = i.nextElement();
-                String name = element.getName();
-                String value = element.getValue();
+                final HeaderElement element = i.nextElement();
+                final String name = element.getName();
+                final String value = element.getValue();
                 if (value != null && name.equalsIgnoreCase("timeout")) {
                     try {
                         timeout = Math.min(timeout, Long.parseLong(value) * 1000);
-                    } catch (NumberFormatException e) {
+                    } catch (final NumberFormatException e) {
                         // Ignore
                     }
                 }
@@ -462,39 +465,54 @@ public abstract class AbstractSession implements Session {
     } // End of DBConnectionReuseStrategy class
 
     private static class DBClientConnManager extends ThreadSafeClientConnManager {
-        public DBClientConnManager(HttpParams params, SchemeRegistry schreg) {
+
+        public DBClientConnManager(final HttpParams params, final SchemeRegistry schreg) {
             super(params, schreg);
         }
 
         @Override
-        public ClientConnectionRequest requestConnection(HttpRoute route,
-                Object state) {
-            IdleConnectionCloserThread.ensureRunning(this, KEEP_ALIVE_DURATION_SECS, KEEP_ALIVE_MONITOR_INTERVAL_SECS);
+        public ClientConnectionRequest requestConnection(final HttpRoute route, final Object state) {
+            IdleConnectionCloser.ensureRunning(this, KEEP_ALIVE_DURATION_SECS, KEEP_ALIVE_MONITOR_INTERVAL_SECS);
             return super.requestConnection(route, state);
         }
     } // End of DBClientConnManager class
 
-    private static class IdleConnectionCloserThread extends Thread {
+    private static class IdleConnectionCloser implements Runnable {
         private final DBClientConnManager manager;
         private final int idleTimeoutSeconds;
-        private final int checkIntervalMs;
-        private static IdleConnectionCloserThread thread = null;
+        private volatile static ScheduledTimerTask timerTask;
 
-        public IdleConnectionCloserThread(DBClientConnManager manager,
-                int idleTimeoutSeconds, int checkIntervalSeconds) {
+        public IdleConnectionCloser(final DBClientConnManager manager, final int idleTimeoutSeconds) {
             super();
             this.manager = manager;
             this.idleTimeoutSeconds = idleTimeoutSeconds;
-            this.checkIntervalMs = checkIntervalSeconds * 1000;
         }
 
-        public static synchronized void ensureRunning(
-                DBClientConnManager manager, int idleTimeoutSeconds,
-                int checkIntervalSeconds) {
-            if (thread == null) {
-                thread = new IdleConnectionCloserThread(manager,
-                        idleTimeoutSeconds, checkIntervalSeconds);
-                thread.start();
+        public static void ensureRunning(final DBClientConnManager manager, final int idleTimeoutSeconds,final int checkIntervalSeconds) {
+            ScheduledTimerTask tmp = timerTask;
+            if (null == tmp) {
+                synchronized (IdleConnectionCloser.class) {
+                    tmp = timerTask;
+                    if (null == tmp) {
+                        final IdleConnectionCloser task = new IdleConnectionCloser(manager, idleTimeoutSeconds);
+                        tmp = Services.getService(TimerService.class).scheduleWithFixedDelay(task, checkIntervalSeconds, checkIntervalSeconds, TimeUnit.SECONDS);
+                        timerTask = tmp;
+                    }
+                }
+            }
+        }
+
+        private static void stop() {
+            ScheduledTimerTask tmp = timerTask;
+            if (null != tmp) {
+                synchronized (IdleConnectionCloser.class) {
+                    tmp = timerTask;
+                    if (null != tmp) {
+                        tmp.cancel();
+                        Services.getService(TimerService.class).purge();
+                        timerTask = null;
+                    }
+                }
             }
         }
 
@@ -502,20 +520,15 @@ public abstract class AbstractSession implements Session {
         public void run() {
             try {
                 while (true) {
-                    synchronized (this) {
-                        wait(checkIntervalMs);
-                    }
                     manager.closeExpiredConnections();
                     manager.closeIdleConnections(idleTimeoutSeconds, TimeUnit.SECONDS);
-                    synchronized (IdleConnectionCloserThread.class) {
-                        if (manager.getConnectionsInPool() == 0) {
-                            thread = null;
-                            return;
-                        }
+                    if (manager.getConnectionsInPool() == 0) {
+                        stop();
+                        return;
                     }
                 }
-            } catch (InterruptedException e) {
-                thread = null;
+            } catch (final Exception e) {
+                stop();
             }
         }
     } // End of IdleConnectionCloserThread class
@@ -560,7 +573,7 @@ public abstract class AbstractSession implements Session {
             throws IOException, IllegalStateException {
 
             // the wrapped entity's getContent() decides about repeatability
-            InputStream wrappedin = wrappedEntity.getContent();
+            final InputStream wrappedin = wrappedEntity.getContent();
 
             return new GZIPInputStream(wrappedin);
         }
