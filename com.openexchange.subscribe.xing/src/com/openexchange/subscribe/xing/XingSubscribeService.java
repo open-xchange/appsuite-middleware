@@ -235,67 +235,67 @@ public class XingSubscribeService extends AbstractSubscribeService {
         final Contact oxContact = new Contact();
         {
             final String s = xingUser.getId();
-            if (null != s) {
+            if (isNotNull(s)) {
                 oxContact.setUserField20(s);
             }
         }
         {
             final String s = xingUser.getActiveMail();
-            if (null != s) {
+            if (isNotNull(s)) {
                 oxContact.setEmail1(s);
             }
         }
         {
             final String s = xingUser.getDisplayName();
-            if (null != s) {
+            if (isNotNull(s)) {
                 oxContact.setDisplayName(s);
             }
         }
         {
             final String s = xingUser.getFirstName();
-            if (null != s) {
+            if (isNotNull(s)) {
                 oxContact.setGivenName(s);
             }
         }
         {
             final String s = xingUser.getLastName();
-            if (null != s) {
+            if (isNotNull(s)) {
                 oxContact.setSurName(s);
             }
         }
         {
             final String s = xingUser.getGender();
-            if (null != s) {
+            if (isNotNull(s)) {
                 oxContact.setTitle("m".equals(s) ? "Mr." : "Mrs.");
             }
         }
         {
             final String s = xingUser.getHaves();
-            if (null != s) {
+            if (isNotNull(s)) {
                 oxContact.setUserField02(s);
             }
         }
         {
             final String s = xingUser.getInterests();
-            if (null != s) {
+            if (isNotNull(s)) {
                 oxContact.setUserField01(s);
             }
         }
         {
             final String s = xingUser.getWants();
-            if (null != s) {
+            if (isNotNull(s)) {
                 oxContact.setUserField03(s);
             }
         }
         {
             final String s = xingUser.getOrganisationMember();
-            if (null != s) {
+            if (isNotNull(s)) {
                 oxContact.setPosition(s);
             }
         }
         {
             final String s = xingUser.getPermalink();
-            if (null != s) {
+            if (isNotNull(s)) {
                 oxContact.setURL(s);
             }
         }
@@ -309,39 +309,39 @@ public class XingSubscribeService extends AbstractSubscribeService {
             final Address a = xingUser.getPrivateAddress();
             if (null != a) {
                 String s = a.getCity();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setCityHome(s);
                 }
                 s = a.getCountry();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setCountryHome(s);
                 }
                 s = a.getEmail();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setEmail3(s);
                 }
                 s = a.getFax();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setFaxHome(s);
                 }
                 s = a.getMobilePhone();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setCellularTelephone2(s);
                 }
                 s = a.getPhone();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setTelephoneHome1(s);
                 }
                 s = a.getProvince();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setStateHome(s);
                 }
                 s = a.getStreet();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setStreetHome(s);
                 }
                 s = a.getZipCode();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setPostalCodeHome(s);
                 }
             }
@@ -350,39 +350,39 @@ public class XingSubscribeService extends AbstractSubscribeService {
             final Address a = xingUser.getBusinessAddress();
             if (null != a) {
                 String s = a.getCity();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setCityBusiness(s);
                 }
                 s = a.getCountry();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setCountryBusiness(s);
                 }
                 s = a.getEmail();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setEmail2(s);
                 }
                 s = a.getFax();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setFaxBusiness(s);
                 }
                 s = a.getMobilePhone();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setCellularTelephone1(s);
                 }
                 s = a.getPhone();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setTelephoneBusiness1(s);
                 }
                 s = a.getProvince();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setStateBusiness(s);
                 }
                 s = a.getStreet();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setStreetBusiness(s);
                 }
                 s = a.getZipCode();
-                if (null != s) {
+                if (isNotNull(s)) {
                     oxContact.setPostalCodeBusiness(s);
                 }
             }
@@ -391,11 +391,11 @@ public class XingSubscribeService extends AbstractSubscribeService {
             final Map<String, String> instantMessagingAccounts = xingUser.getInstantMessagingAccounts();
             if (null != instantMessagingAccounts) {
                 final String skypeId = instantMessagingAccounts.get("skype");
-                if (null != skypeId) {
+                if (isNotNull(skypeId)) {
                     oxContact.setInstantMessenger1(skypeId);
                 }
                 for (final Map.Entry<String, String> e : instantMessagingAccounts.entrySet()) {
-                    if (!"skype".equals(e.getKey())) {
+                    if (!"skype".equals(e.getKey()) && !"null".equals(e.getValue())) {
                         oxContact.setInstantMessenger2(e.getValue());
                         break;
                     }
@@ -407,7 +407,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
             final Map<String, Object> photoUrls = xingUser.getPhotoUrls();
             if (null != photoUrls) {
                 final Object pic = photoUrls.get("maxi_thumb");
-                if (null != pic) {
+                if (null != pic && !"null".equals(pic.toString())) {
                     try {
                         final String sUrl = pic.toString();
                         loadImageFromURL(oxContact, sUrl);
@@ -419,6 +419,10 @@ public class XingSubscribeService extends AbstractSubscribeService {
             }
         }
         return oxContact;
+    }
+
+    private boolean isNotNull(final String s) {
+        return null != s && !"null".equals(s);
     }
 
     private boolean isEmpty(final String string) {
