@@ -126,7 +126,7 @@ public class User {
             if (accountInfo.hasAndNotNull("birth_date")) {
                 final JSONObject jo = accountInfo.getJSONObject("birth_date");
                 final Calendar cal = GregorianCalendar.getInstance(UTC);
-                cal.set(jo.getInt("year"), jo.getInt("month") - 1, jo.getInt("day"), 0, 0, 0);
+                cal.set(Integer.parseInt(jo.get("year").toString()), Integer.parseInt(jo.get("month").toString()) - 1, Integer.parseInt(jo.get("day").toString()), 0, 0, 0);
                 cal.set(Calendar.MILLISECOND, 0);
                 this.birthDate = cal.getTime();
             } else {
