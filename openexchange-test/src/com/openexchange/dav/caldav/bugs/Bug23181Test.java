@@ -96,6 +96,9 @@ public class Bug23181Test extends CalDAVTest {
     }
 
     public void testImportAppointment() throws Exception {
+        StringBuilder info = new StringBuilder("DEBUG for Bug23181Test\r\n");
+        info.append("manager userID: " + getClient().getValues().getUserId()).append("\r\n");
+        info.append("manager2 userID: " + manager2.getClient().getValues().getUserId()).append("\r\n");
         /*
          * fetch sync token for later synchronization
          */
@@ -105,6 +108,8 @@ public class Bug23181Test extends CalDAVTest {
          */
         String userA = super.getLogin(User.User1);
         String userB = super.getLogin(User.User2);
+        info.append("userA: " + userA).append("\r\n");
+        info.append("userB: " + userB).append("\r\n");
         String uid = randomUID();
         String summary = "Bug23181Test";
         String location = "tbd";
@@ -147,6 +152,7 @@ public class Bug23181Test extends CalDAVTest {
             "END:VEVENT" + "\r\n" +
             "END:VCALENDAR"
         ;
+        info.append("iCal: " + iCal).append("\r\n");
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(uid, iCal));
         /*
          * verify appointment as user A on server
@@ -158,12 +164,14 @@ public class Bug23181Test extends CalDAVTest {
         UserParticipant partipantA = null;
         UserParticipant partipantB = null;
         for (UserParticipant user : appointment.getUsers()) {
+            info.append("user: " + user.getIdentifier() + ' ' + user.getDisplayName() + ' ' + user.getEmailAddress()).append("\r\n");
             if (getAJAXClient().getValues().getUserId() == user.getIdentifier()) {
                 partipantA = user;
             } else if (manager2.getClient().getValues().getUserId() == user.getIdentifier()) {
                 partipantB = user;
             }
         }
+        System.out.println(info.toString());
         assertNotNull("added user participant not found", partipantA);
         assertNotNull("previous participant not found", partipantB);
         assertEquals("confirmation status wrong", Appointment.ACCEPT, partipantA.getConfirm());
