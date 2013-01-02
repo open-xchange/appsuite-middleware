@@ -61,7 +61,6 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
-import com.openexchange.authentication.Cookie;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.Interface;
@@ -191,83 +190,89 @@ public final class LoginTools {
         final boolean isVolatile = parseVolatile(req);
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
+        final String httpSessionId = req.getSession(true).getId();
         final LoginRequest loginRequest = new LoginRequest() {
-    
+
             private final String hash = HashCalculator.getHash(req, userAgent, client);
-    
+
             @Override
             public boolean isVolatile() {
                 return isVolatile;
             }
-    
+
             @Override
             public String getLogin() {
                 return login;
             }
-    
+
             @Override
             public String getPassword() {
                 return password;
             }
-    
+
             @Override
             public String getClientIP() {
                 return clientIP;
             }
-    
+
             @Override
             public String getUserAgent() {
                 return userAgent;
             }
-    
+
             @Override
             public String getAuthId() {
                 return authId;
             }
-    
+
             @Override
             public String getClient() {
                 return client;
             }
-    
+
             @Override
             public String getVersion() {
                 return version;
             }
-    
+
             @Override
             public Interface getInterface() {
                 return HTTP_JSON;
             }
-    
+
             @Override
             public String getHash() {
                 return hash;
             }
-    
+
             @Override
             public Map<String, List<String>> getHeaders() {
                 return headers;
             }
-    
+
             @Override
             public com.openexchange.authentication.Cookie[] getCookies() {
                 return cookies;
             }
-    
+
             @Override
             public boolean isSecure() {
                 return Tools.considerSecure(req, forceHTTPS);
             }
-    
+
             @Override
             public String getServerName() {
                 return req.getServerName();
             }
-    
+
             @Override
             public int getServerPort() {
                 return req.getServerPort();
+            }
+
+            @Override
+            public String getHttpSessionID() {
+                return httpSessionId;
             }
         };
         return loginRequest;
