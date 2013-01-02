@@ -81,21 +81,21 @@ public final class XingOAuthAccess {
     public static XingOAuthAccess accessFor(final OAuthAccount oauthAccount, final Session session) throws OXException {
         final XingOAuthAccessRegistry registry = XingOAuthAccessRegistry.getInstance();
         final int accountId = oauthAccount.getId();
-        XingOAuthAccess dropboxOAuthAccess = registry.getSession(session.getContextId(), session.getUserId(), accountId);
-        if (null == dropboxOAuthAccess) {
+        XingOAuthAccess xingOAuthAccess = registry.getSession(session.getContextId(), session.getUserId(), accountId);
+        if (null == xingOAuthAccess) {
             final XingOAuthAccess newInstance = new XingOAuthAccess(oauthAccount);
-            dropboxOAuthAccess = registry.addSession(session.getContextId(), session.getUserId(), accountId, newInstance);
-            if (null == dropboxOAuthAccess) {
-                dropboxOAuthAccess = newInstance;
+            xingOAuthAccess = registry.addSession(session.getContextId(), session.getUserId(), accountId, newInstance);
+            if (null == xingOAuthAccess) {
+                xingOAuthAccess = newInstance;
             }
         }
-        return dropboxOAuthAccess;
+        return xingOAuthAccess;
     }
 
     /**
      * The XING user identifier.
      */
-    private final String dropboxUserId;
+    private final String xingUserId;
 
     /**
      * The XING user's full name
@@ -110,7 +110,7 @@ public final class XingOAuthAccess {
     /**
      * The XING API reference.
      */
-    private XingAPI<WebAuthSession> dropboxApi;
+    private XingAPI<WebAuthSession> xingApi;
 
     /**
      * Initializes a new {@link XingOAuthAccess}.
@@ -129,10 +129,10 @@ public final class XingOAuthAccess {
             final OAuthServiceMetaData xingOAuthServiceMetaData = Services.getService(OAuthServiceMetaData.class);
             final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(), xingOAuthServiceMetaData.getAPISecret());
             webAuthSession = new WebAuthSession(appKeys, new AccessTokenPair(oauthAccount.getToken(), oauthAccount.getSecret()));
-            dropboxApi = new XingAPI<WebAuthSession>(webAuthSession);
+            xingApi = new XingAPI<WebAuthSession>(webAuthSession);
             // Get account information
-            final User accountInfo = dropboxApi.userInfo();
-            dropboxUserId = accountInfo.getId();
+            final User accountInfo = xingApi.userInfo();
+            xingUserId = accountInfo.getId();
             xingUserName = accountInfo.getDisplayName();
         } catch (final XingUnlinkedException e) {
             throw XingSubscribeExceptionCodes.UNLINKED_ERROR.create();
@@ -149,7 +149,7 @@ public final class XingOAuthAccess {
      * @return The XING API reference
      */
     public XingAPI<WebAuthSession> getXingAPI() {
-        return dropboxApi;
+        return xingApi;
     }
 
     /**
@@ -165,7 +165,7 @@ public final class XingOAuthAccess {
      * @return The XING user identifier
      */
     public String getXingUserId() {
-        return dropboxUserId;
+        return xingUserId;
     }
 
     /**

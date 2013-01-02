@@ -133,7 +133,7 @@ public enum UserField {
             }
             return null == user2 ? 1 : 0;
         }}),
-    ACTIVE_MAIL(new Comparator<User>() {
+    ACTIVE_EMAIL(new Comparator<User>() {
 
         @Override
         public int compare(final User user1, final User user2) {
@@ -237,7 +237,7 @@ public enum UserField {
         public int compare(final User user1, final User user2) {
             return 0;
         }}),
-    PROESSIONAL_EXPERIENCE(new Comparator<User>() {
+    PROFESSIONAL_EXPERIENCE(new Comparator<User>() {
 
         @Override
         public int compare(final User user1, final User user2) {
