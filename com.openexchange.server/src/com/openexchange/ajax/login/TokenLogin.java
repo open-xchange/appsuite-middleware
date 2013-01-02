@@ -49,13 +49,22 @@
 
 package com.openexchange.ajax.login;
 
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginRequest;
+import com.openexchange.login.LoginResult;
+import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * Implements the tokenLogin action.
@@ -80,7 +89,7 @@ public final class TokenLogin implements LoginRequestHandler {
         }
     }
 
-    private void doTokenLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException {
+    private void doTokenLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
         LoginRequest request = Login.parseLogin(
             req,
             LoginFields.LOGIN_PARAM,
@@ -88,8 +97,45 @@ public final class TokenLogin implements LoginRequestHandler {
             conf.getDefaultClient(),
             conf.isCookieForceHTTPS(),
             conf.isDisableTrimLogin());
-        
-        // TODO Auto-generated method stub
+        Map<String, Object> properties = new HashMap<String, Object>(1);
+        {
+            String capabilities = req.getParameter("capabilities");
+            if (null != capabilities) {
+                properties.put("client.capabilities", capabilities);
+            }
+        }
+        properties.put(LoginFields.CLIENT_TOKEN, LoginTools.parseParameter(req, LoginFields.CLIENT_TOKEN, true, null));
+        LoginResult result = LoginPerformer.getInstance().doLogin(request, properties);
+        Session session = result.getSession();
+        User user = result.getUser();
 
+        Tools.disableCaching(resp);
+        resp.sendRedirect(generateRedirectURL(
+            req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
+            req.getParameter(LoginFields.AUTOLOGIN_PARAM),
+            session,
+            user.getPreferredLanguage(),
+            conf.getUiWebPath(),
+            request.getHttpSessionID()));
+    }
+
+    private static String generateRedirectURL(String uiWebPathParam, String shouldStore, Session session, String language, String uiWebPath, String httpSessionId) {
+        String retval = uiWebPathParam;
+        if (null == retval) {
+            retval = uiWebPath;
+        }
+        // Prevent HTTP response splitting.
+        retval = retval.replaceAll("[\n\r]", "");
+        retval = retval + ";jsessionid=" + httpSessionId;
+        // TODO server side token
+        // App Suite UI requires some additional values.
+        retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER, session.getLogin());
+        retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER_ID, Integer.toString(session.getUserId()));
+        retval = LoginTools.addFragmentParameter(retval, "language", language);
+        if (shouldStore != null) {
+            retval = LoginTools.addFragmentParameter(retval, "store", shouldStore);
+        }
+        // client side token should be added to the end by the client
+        return retval;
     }
 }

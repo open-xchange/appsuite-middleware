@@ -47,42 +47,41 @@
  *
  */
 
-package com.openexchange.ajax.fields;
+package com.openexchange.login.internal;
+
+import java.util.Map;
+import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.authentication.service.Authentication;
+import com.openexchange.exception.OXException;
+import com.openexchange.login.LoginRequest;
 
 /**
- * JSON attribute names definitions.
- *
+ * Uses the auto login authentication method to perform the authentication.
+ * @see AuthenticationService#handleAutoLoginInfo(com.openexchange.authentication.LoginInfo)
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class LoginFields {
+final class AutoLoginMethod implements LoginMethodClosure {
 
-    public static final String NAME_PARAM = "name";
+    private final LoginRequest request;
+    private final Map<String, Object> properties;
 
-    public static final String PASSWORD_PARAM = "password";
-
-    public static final String UI_WEB_PATH_PARAM = "uiWebPath";
-
-    public static final String LOGIN_PARAM = "login";
-
-    public static final String AUTHID_PARAM = "authId";
-
-    public static final String CLIENT_PARAM = "client";
-
-    public static final String VERSION_PARAM = "version";
-
-    public static final String RANDOM_PARAM = "random";
-
-    public static final String AUTOLOGIN_PARAM = "autologin";
-
-    public static final String CLIENT_IP_PARAM = "clientIP";
-
-    public static final String USER_AGENT = "clientUserAgent";
-
-    public static final String VOLATILE = "volatile";
-
-    public static final String CLIENT_TOKEN = "clientToken";
-
-    private LoginFields() {
+    AutoLoginMethod(LoginRequest request, Map<String, Object> properties) {
         super();
+        this.request = request;
+        this.properties = properties;
+    }
+
+    @Override
+    public Authenticated doAuthentication(LoginResultImpl retval) throws OXException {
+        try {
+            return Authentication.autologin(request.getLogin(), request.getPassword(), properties);
+        } catch (OXException e) {
+            if (LoginExceptionCodes.NOT_SUPPORTED.equals(e)) {
+                return null;
+            }
+            throw e;
+        }
     }
 }

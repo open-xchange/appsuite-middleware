@@ -50,22 +50,18 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
-import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
-import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
 import static com.openexchange.login.Interface.HTTP_JSON;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.Login;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -94,24 +90,6 @@ public final class LoginTools {
         return retval;
     }
 
-    public static String generateRedirectURL(String uiWebPathParam, String shouldStore, Session session, String language, String uiWebPath) {
-        String retval = uiWebPathParam;
-        if (null == retval) {
-            retval = uiWebPath;
-        }
-        // Prevent HTTP response splitting.
-        retval = retval.replaceAll("[\n\r]", "");
-        retval = addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
-        // App Suite UI requires some additional values.
-        retval = addFragmentParameter(retval, PARAMETER_USER, session.getLogin());
-        retval = addFragmentParameter(retval, PARAMETER_USER_ID, Integer.toString(session.getUserId()));
-        retval = addFragmentParameter(retval, "language", language);
-        if (shouldStore != null) {
-            retval = addFragmentParameter(retval, "store", shouldStore);
-        }
-        return retval;
-    }
-
     public static String addFragmentParameter(String usedUIWebPath, String param, String value) {
         String retval = usedUIWebPath;
         final int fragIndex = retval.indexOf('#');
@@ -126,48 +104,43 @@ public final class LoginTools {
         // Now let's see, if this url already contains a fragment
         if (retval.indexOf('#') < 0) {
             // Apparently it didn't, so we can append our own
-            return retval + "#" + param + "=" + value + query;
+            return retval + '#' + param + '=' + value + query;
         }
         // Alright, we already have a fragment, let's append a new parameter
 
-        return retval + "&" + param + "=" + value + query;
+        return retval + '&' + param + '=' + value + query;
     }
 
     public static String parseAuthId(HttpServletRequest req, boolean strict) throws OXException {
-        final String authIdParam = req.getParameter(LoginFields.AUTHID_PARAM);
-        if (null == authIdParam) {
-            if (strict) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.AUTHID_PARAM);
-            }
-            return UUIDs.getUnformattedString(UUID.randomUUID());
-        }
-        return authIdParam;
+        return parseParameter(req, LoginFields.AUTHID_PARAM, strict, UUIDs.getUnformattedString(UUID.randomUUID()));
     }
 
     public static String parseClient(HttpServletRequest req, boolean strict, String defaultClient) throws OXException {
-        final String parameter = req.getParameter(LoginFields.CLIENT_PARAM);
-        if (null == parameter) {
+        return parseParameter(req, LoginFields.CLIENT_PARAM, strict, defaultClient);
+    }
+
+    public static String parseParameter(HttpServletRequest req, String paramName, boolean strict, String fallback) throws OXException {
+        final String value = req.getParameter(paramName);
+        if (null == value) {
             if (strict) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_PARAM);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(paramName);
             }
-            return defaultClient;
+            return fallback;
         }
-        return parameter;
+        return value;
     }
 
-    public static String parseClientIP(HttpServletRequest req) {
-        final String parameter = req.getParameter(LoginFields.CLIENT_IP_PARAM);
-        return null == parameter ? req.getRemoteAddr() : parameter;
+    public static String parseClientIP(HttpServletRequest req) throws OXException {
+        return parseParameter(req, LoginFields.CLIENT_IP_PARAM, false, req.getRemoteAddr());
     }
 
-    public static String parseUserAgent(HttpServletRequest req) {
-        final String parameter = req.getParameter(LoginFields.USER_AGENT);
-        return null == parameter ? req.getHeader(Header.USER_AGENT) : parameter;
+    public static String parseUserAgent(HttpServletRequest req) throws OXException {
+        return parseParameter(req, LoginFields.USER_AGENT, false, req.getHeader(Header.USER_AGENT));
     }
 
     public static boolean parseVolatile(HttpServletRequest req) {
         final String parameter = req.getParameter(LoginFields.VOLATILE);
-        if (Login.isEmpty(parameter)) {
+        if (isEmpty(parameter)) {
             return false;
         }
         return Boolean.parseBoolean(parameter.trim());
@@ -276,5 +249,17 @@ public final class LoginTools {
             }
         };
         return loginRequest;
+    }
+
+    public static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 }

@@ -47,42 +47,33 @@
  *
  */
 
-package com.openexchange.ajax.fields;
+package com.openexchange.login.internal;
+
+import java.util.Map;
+import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.service.Authentication;
+import com.openexchange.exception.OXException;
+import com.openexchange.login.LoginRequest;
 
 /**
- * JSON attribute names definitions.
- *
+ * Uses the normal login authentication method to perform the authentication.
+ * @see AuthenticationService#handleLoginInfo(com.openexchange.authentication.LoginInfo)
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class LoginFields {
+final class NormalLoginMethod implements LoginMethodClosure {
 
-    public static final String NAME_PARAM = "name";
+    private final Map<String, Object> properties;
+    private final LoginRequest request;
 
-    public static final String PASSWORD_PARAM = "password";
-
-    public static final String UI_WEB_PATH_PARAM = "uiWebPath";
-
-    public static final String LOGIN_PARAM = "login";
-
-    public static final String AUTHID_PARAM = "authId";
-
-    public static final String CLIENT_PARAM = "client";
-
-    public static final String VERSION_PARAM = "version";
-
-    public static final String RANDOM_PARAM = "random";
-
-    public static final String AUTOLOGIN_PARAM = "autologin";
-
-    public static final String CLIENT_IP_PARAM = "clientIP";
-
-    public static final String USER_AGENT = "clientUserAgent";
-
-    public static final String VOLATILE = "volatile";
-
-    public static final String CLIENT_TOKEN = "clientToken";
-
-    private LoginFields() {
+    NormalLoginMethod(LoginRequest request, Map<String, Object> properties) {
         super();
+        this.request = request;
+        this.properties = properties;
+    }
+
+    @Override
+    public Authenticated doAuthentication(final LoginResultImpl retval) throws OXException {
+        return Authentication.login(request.getLogin(), request.getPassword(), properties);
     }
 }

@@ -47,42 +47,18 @@
  *
  */
 
-package com.openexchange.ajax.fields;
+package com.openexchange.login.internal;
+
+import com.openexchange.authentication.Authenticated;
+import com.openexchange.exception.OXException;
 
 /**
- * JSON attribute names definitions.
+ * Closure interface for the two different login methods.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class LoginFields {
+interface LoginMethodClosure {
 
-    public static final String NAME_PARAM = "name";
+    Authenticated doAuthentication(LoginResultImpl retval) throws OXException;
 
-    public static final String PASSWORD_PARAM = "password";
-
-    public static final String UI_WEB_PATH_PARAM = "uiWebPath";
-
-    public static final String LOGIN_PARAM = "login";
-
-    public static final String AUTHID_PARAM = "authId";
-
-    public static final String CLIENT_PARAM = "client";
-
-    public static final String VERSION_PARAM = "version";
-
-    public static final String RANDOM_PARAM = "random";
-
-    public static final String AUTOLOGIN_PARAM = "autologin";
-
-    public static final String CLIENT_IP_PARAM = "clientIP";
-
-    public static final String USER_AGENT = "clientUserAgent";
-
-    public static final String VOLATILE = "volatile";
-
-    public static final String CLIENT_TOKEN = "clientToken";
-
-    private LoginFields() {
-        super();
-    }
 }
