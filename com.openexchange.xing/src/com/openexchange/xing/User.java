@@ -125,10 +125,17 @@ public class User {
             }
             if (accountInfo.hasAndNotNull("birth_date")) {
                 final JSONObject jo = accountInfo.getJSONObject("birth_date");
-                final Calendar cal = GregorianCalendar.getInstance(UTC);
-                cal.set(Integer.parseInt(jo.get("year").toString()), Integer.parseInt(jo.get("month").toString()) - 1, Integer.parseInt(jo.get("day").toString()), 0, 0, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                this.birthDate = cal.getTime();
+                final int year = jo.optInt("year", -1);
+                final int month = jo.optInt("month", -1);
+                final int day = jo.optInt("day", -1);
+                if (year > 0 && month > 0 && day > 0) {
+                    final Calendar cal = GregorianCalendar.getInstance(UTC);
+                    cal.set(year, month - 1, day, 0, 0, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    this.birthDate = cal.getTime();
+                } else {
+                    this.birthDate = null;
+                }
             } else {
                 this.birthDate = null;
             }
