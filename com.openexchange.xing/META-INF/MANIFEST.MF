@@ -15,6 +15,9 @@ Import-Package: com.openexchange.capabilities,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.threadpool,
+ com.openexchange.threadpool.behavior,
+ com.openexchange.timer,
  com.openexchange.tools.versit.converter,
  org.apache.commons.codec,
  org.apache.commons.codec.binary,
@@ -74,3 +77,4 @@ Export-Package: com.openexchange.xing,
  com.openexchange.xing.session
 Bundle-ClassPath: lib/signpost-1.2.1.2.jar,
  .
+Bundle-Activator: com.openexchange.xing.osgi.XingActivator
