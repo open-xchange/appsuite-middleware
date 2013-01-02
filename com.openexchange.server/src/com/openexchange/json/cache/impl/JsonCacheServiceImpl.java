@@ -49,19 +49,23 @@
 
 package com.openexchange.json.cache.impl;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONInputStream;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
 import com.openexchange.server.ServiceLookup;
@@ -112,21 +116,29 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             if (!rs.next()) {
                 return null;
             }
-            final String sJson = rs.getString(1);
-            if ("null".equals(sJson)) {
+            final UnsynchronizedPushbackReader reader = new UnsynchronizedPushbackReader(rs.getNCharacterStream(1));
+            final int read = reader.read();
+            // Check for possible JSON
+            if (read < 0) {
                 return null;
             }
-            if ('{' == sJson.charAt(0)) {
-                return new JSONObject(sJson);
+            final char c = (char) read;
+            reader.unread(c);
+            if ('[' == c || '{' == c) {
+                // Either starting JSON object or JSON array
+                return JSONObject.parse(reader);
             }
-            if ('[' == sJson.charAt(0)) {
-                return new JSONArray(sJson);
+            final String s = AJAXServlet.readFrom(reader);
+            if ("null".equals(s)) {
+                return null;
             }
             throw AjaxExceptionCodes.JSON_ERROR.create("Not a JSON value.");
         } catch (final SQLException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -187,10 +199,10 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
              * Update or insert
              */
             final long now = System.currentTimeMillis();
-            final String asciiOnly = toJavaNotation(jsonValue.toString());
+            //final String asciiOnly = toJavaNotation(jsonValue.toString());
             if (update) {
                 stmt = con.prepareStatement("UPDATE jsonCache SET json=?, size=?, lastUpdate=?, took=? WHERE cid=? AND user=? AND id=?");
-                stmt.setString(1, asciiOnly);
+                stmt.setNCharacterStream(1, new InputStreamReader(new JSONInputStream(jsonValue, "US-ASCII"), Charsets.US_ASCII));
                 stmt.setLong(2, jsonValue.length());
                 stmt.setLong(3, now);
                 if (duration < 0) {
@@ -206,7 +218,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setString(3, id);
-                stmt.setString(4, asciiOnly);
+                stmt.setNCharacterStream(4, new InputStreamReader(new JSONInputStream(jsonValue, "US-ASCII"), Charsets.US_ASCII));
                 stmt.setLong(5, jsonValue.length());
                 stmt.setLong(6, now);
                 if (duration < 0) {
@@ -244,31 +256,32 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             stmt.setString(3, id);
             rs = stmt.executeQuery();
             final boolean update;
-            final JSONValue prev;
+            JSONValue prev = null;
             {
                 if (rs.next()) {
                     update = true;
-                    final String sJson = rs.getString(1);
-                    if (rs.wasNull()) {
-                        prev = null;
-                    } else { // Not NULL
-                        if ("null".equalsIgnoreCase(sJson)) {
-                            prev = null;
-                        } else {
-                            JSONValue tmp;
+                    final UnsynchronizedPushbackReader reader = new UnsynchronizedPushbackReader(rs.getNCharacterStream(1));
+                    if (!rs.wasNull()) { // Not NULL
+                        final int read = reader.read();
+                        // Check for possible JSON
+                        if (read >= 0) {
                             try {
-                                if ('{' == sJson.charAt(0)) {
-                                    tmp = new JSONObject(sJson);
-                                } else if ('[' == sJson.charAt(0)) {
-                                    tmp = new JSONArray(sJson);
+                                final char c = (char) read;
+                                reader.unread(c);
+                                if ('[' == c || '{' == c) {
+                                    // Either starting JSON object or JSON array
+                                    prev = JSONObject.parse(reader);
                                 } else {
-                                    throw AjaxExceptionCodes.JSON_ERROR.create("Not a JSON value: " + abbreviate(sJson, 0, 256));
+                                    final String s = AJAXServlet.readFrom(reader);
+                                    if ("null".equals(s)) {
+                                        prev = null;
+                                    }
+                                    throw AjaxExceptionCodes.JSON_ERROR.create("Not a JSON value.");
                                 }
                             } catch (final JSONException e) {
                                 // Read invalid JSON data
-                                tmp = null;
+                                prev = null;
                             }
-                            prev = tmp;
                         }
                     }
                 } else {
@@ -288,11 +301,11 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             /*
              * Update or insert
              */
-            final String asciiOnly = toJavaNotation(jsonValue.toString());
+            // final String asciiOnly = toJavaNotation(jsonValue.toString());
             final long now = System.currentTimeMillis();
             if (update) {
                 stmt = con.prepareStatement("UPDATE jsonCache SET json=?, size=?, lastUpdate=?, took=? WHERE cid=? AND user=? AND id=?");
-                stmt.setString(1, asciiOnly);
+                stmt.setNCharacterStream(1, new InputStreamReader(new JSONInputStream(jsonValue, "US-ASCII"), Charsets.US_ASCII));
                 stmt.setLong(2, jsonValue.length());
                 stmt.setLong(3, now);
                 if (duration < 0) {
@@ -308,7 +321,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setString(3, id);
-                stmt.setString(4, asciiOnly);
+                stmt.setNCharacterStream(4, new InputStreamReader(new JSONInputStream(jsonValue, "US-ASCII"), Charsets.US_ASCII));
                 stmt.setLong(5, jsonValue.length());
                 stmt.setLong(6, now);
                 if (duration < 0) {
@@ -321,6 +334,8 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             return true;
         } catch (final SQLException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
