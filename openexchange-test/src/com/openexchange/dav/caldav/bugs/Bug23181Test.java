@@ -171,6 +171,9 @@ public class Bug23181Test extends CalDAVTest {
                 partipantB = user;
             }
         }
+        for (com.openexchange.groupware.container.Participant participant : appointment.getParticipants()) {
+            info.append("participant: " + participant.getDisplayName() + ' ' + participant.getEmailAddress()).append("\r\n");
+        }
         System.out.println(info.toString());
         assertNotNull("added user participant not found", partipantA);
         assertNotNull("previous participant not found", partipantB);
