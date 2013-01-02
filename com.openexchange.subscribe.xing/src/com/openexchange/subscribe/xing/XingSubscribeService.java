@@ -103,7 +103,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(XingSubscribeService.class);
 
     private final ServiceLookup services;
-    private final SubscriptionSource source = new SubscriptionSource();
+    private final SubscriptionSource source;
 
     /**
      * Initializes a new {@link XingSubscribeService}.
@@ -114,6 +114,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         super();
         this.services = services;
 
+        final SubscriptionSource source = new SubscriptionSource();
         source.setDisplayName("XING");
         source.setFolderModule(FolderObject.CONTACT);
         source.setId("com.openexchange.subscribe.socialplugin.xing");
@@ -126,6 +127,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         form.add(oauthAccount);
 
         source.setFormDescription(form);
+        this.source = source;
     }
 
     private OAuthAccount getXingOAuthAccount(final Session session) throws OXException {
