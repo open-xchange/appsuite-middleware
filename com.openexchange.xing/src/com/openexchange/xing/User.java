@@ -117,22 +117,29 @@ public class User {
             this.permalink = accountInfo.optString("permalink", null);
             this.gender = accountInfo.optString("gender", null);
             this.activeMail = accountInfo.optString("active_email", null);
-            if (accountInfo.has("time_zone")) {
+            if (accountInfo.hasAndNotNull("time_zone")) {
                 final JSONObject tz = accountInfo.optJSONObject("time_zone");
                 this.timeZone = TimeZone.getTimeZone(tz.getString("name"));
             } else {
                 this.timeZone = null;
             }
-            if (accountInfo.has("birth_date")) {
+            if (accountInfo.hasAndNotNull("birth_date")) {
                 final JSONObject jo = accountInfo.getJSONObject("birth_date");
-                final Calendar cal = GregorianCalendar.getInstance(UTC);
-                cal.set(jo.getInt("year"), jo.getInt("month") - 1, jo.getInt("day"), 0, 0, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                this.birthDate = cal.getTime();
+                final int year = jo.optInt("year", -1);
+                final int month = jo.optInt("month", -1);
+                final int day = jo.optInt("day", -1);
+                if (year > 0 && month > 0 && day > 0) {
+                    final Calendar cal = GregorianCalendar.getInstance(UTC);
+                    cal.set(year, month - 1, day, 0, 0, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    this.birthDate = cal.getTime();
+                } else {
+                    this.birthDate = null;
+                }
             } else {
                 this.birthDate = null;
             }
-            if (accountInfo.has("premium_services")) {
+            if (accountInfo.hasAndNotNull("premium_services")) {
                 final JSONArray ps = accountInfo.optJSONArray("premium_services");
                 final int length = ps.length();
                 premiumServices = new ArrayList<String>(length);
@@ -142,7 +149,7 @@ public class User {
             } else {
                 premiumServices = Collections.emptyList();
             }
-            if (accountInfo.has("badges")) {
+            if (accountInfo.hasAndNotNull("badges")) {
                 final JSONArray b = accountInfo.optJSONArray("badges");
                 final int length = b.length();
                 badges = new ArrayList<String>(length);
@@ -156,7 +163,7 @@ public class User {
             this.haves = accountInfo.optString("haves", null);
             this.interests = accountInfo.optString("interests", null);
             this.organisationMember = accountInfo.optString("organisation_member", null);
-            if (accountInfo.has("languages")) {
+            if (accountInfo.hasAndNotNull("languages")) {
                 final JSONObject l = accountInfo.optJSONObject("languages");
                 languages = new LinkedHashMap<Locale, String>(l.length());
                 for (final Entry<String, Object> entry : l.entrySet()) {
@@ -168,32 +175,37 @@ public class User {
             } else {
                 languages = Collections.emptyMap();
             }
-            if (accountInfo.has("private_address")) {
+            if (accountInfo.hasAndNotNull("private_address")) {
                 this.privateAddress = new Address(accountInfo.optJSONObject("private_address"));
             } else {
                 this.privateAddress = null;
             }
-            if (accountInfo.has("business_address")) {
+            if (accountInfo.hasAndNotNull("business_address")) {
                 this.businessAddress = new Address(accountInfo.optJSONObject("business_address"));
             } else {
                 this.businessAddress = null;
             }
-            if (accountInfo.has("web_profiles")) {
+            if (accountInfo.hasAndNotNull("web_profiles")) {
                 final JSONObject jo = accountInfo.optJSONObject("web_profiles");
                 this.webProfiles = new LinkedHashMap<String, List<String>>(jo.length());
                 for (final String key : jo.keySet()) {
-                    final JSONArray ja = jo.optJSONArray(key);
-                    final int length = ja.length();
-                    final List<String> addrs = new ArrayList<String>(length);
-                    for (int i = 0; i < length; i++) {
-                        addrs.add(ja.getString(i));
+                    final Object value = jo.opt(key);
+                    if (value instanceof JSONArray) {
+                        final JSONArray ja = (JSONArray) value;
+                        final int length = ja.length();
+                        final List<String> addrs = new ArrayList<String>(length);
+                        for (int i = 0; i < length; i++) {
+                            addrs.add(ja.getString(i));
+                        }
+                        webProfiles.put(key, addrs);
+                    } else {
+                        webProfiles.put(key, Collections.singletonList(value.toString()));
                     }
-                    webProfiles.put(key, addrs);
                 }
             } else {
                 webProfiles = Collections.emptyMap();
             }
-            if (accountInfo.has("instant_messaging_accounts")) {
+            if (accountInfo.hasAndNotNull("instant_messaging_accounts")) {
                 final JSONObject jo = accountInfo.optJSONObject("instant_messaging_accounts");
                 instantMessagingAccounts = new LinkedHashMap<String, String>(jo.length());
                 for (final Entry<String, Object> entry : jo.entrySet()) {
@@ -205,21 +217,21 @@ public class User {
             } else {
                 instantMessagingAccounts = Collections.emptyMap();
             }
-            if (accountInfo.has("professional_experience")) {
+            if (accountInfo.hasAndNotNull("professional_experience")) {
                 @SuppressWarnings("unchecked")
                 final Map<String, Object> map = (Map<String, Object>) coerceToNative(accountInfo.optJSONObject("professional_experience"));
                 this.professionalExperience = map;
             } else {
                 this.professionalExperience = Collections.emptyMap();
             }
-            if (accountInfo.has("educational_background")) {
+            if (accountInfo.hasAndNotNull("educational_background")) {
                 @SuppressWarnings("unchecked")
                 final Map<String, Object> map = (Map<String, Object>) coerceToNative(accountInfo.optJSONObject("educational_background"));
                 this.educationalBackground = map;
             } else {
                 this.educationalBackground = Collections.emptyMap();
             }
-            if (accountInfo.has("photo_urls")) {
+            if (accountInfo.hasAndNotNull("photo_urls")) {
                 @SuppressWarnings("unchecked")
                 final Map<String, Object> map = (Map<String, Object>) coerceToNative(accountInfo.optJSONObject("photo_urls"));
                 this.photoUrls = map;
