@@ -186,17 +186,17 @@ public class APIResponseRenderer implements ResponseRenderer {
      * 
      */
 
-    private static final String JS_FRAGMENT_PART1 = "<!DOCTYPE HTML PUBLIC "
+    private static final char[] JS_FRAGMENT_PART1 = ("<!DOCTYPE HTML PUBLIC "
         + "\"-//W3C//DTD HTML 4.01//EN\" "
         + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
         + "<META http-equiv=\"Content-Type\" "
         + "content=\"text/html; charset=UTF-8\">"
         + "<script type=\"text/javascript\">"
-        + "(parent.callback_";
+        + "(parent.callback_").toCharArray();
 
-    private static final String JS_FRAGMENT_PART2 = " || window.opener && window.opener.callback_";
+    private static final char[] JS_FRAGMENT_PART2 = " || window.opener && window.opener.callback_".toCharArray();
 
-    private static final String JS_FRAGMENT_PART3 = ")</script></head></html>";
+    private static final char[] JS_FRAGMENT_PART3 = ")</script></head></html>".toCharArray();
 
     private static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp, final boolean plainJson) {
         try {
