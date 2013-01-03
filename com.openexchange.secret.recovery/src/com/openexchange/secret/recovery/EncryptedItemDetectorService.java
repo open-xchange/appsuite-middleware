@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link EncryptedItemDetectorService}
+ * {@link EncryptedItemDetectorService} - See {@link #hasEncryptedItems(ServerSession)}.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
