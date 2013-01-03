@@ -97,6 +97,7 @@ import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.links.Links;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -1550,6 +1551,16 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      */
     @Override
     public void deleteValidatedFolder(final int folderID, final long lastModified, final int type, final boolean hardDelete) throws OXException {
+        final FolderObject storageFolder;
+        try {
+            storageFolder = getFolderFromMaster(folderID, false);
+        } catch (final OXException e) {
+            if (!OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                throw e;
+            }
+            // Already deleted
+            return;
+        }
         if (hardDelete) {
             /*
              * Delete contained items
@@ -1650,6 +1661,23 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     stmt = wc.prepareStatement("DELETE FROM subscriptions WHERE cid=? AND folder_id=?");
                     stmt.setInt(1, ctx.getContextId());
                     stmt.setInt(2, folderID);
+                    stmt.executeUpdate();
+                } catch (final SQLException e) {
+                    throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    DBUtils.closeSQLStuff(stmt);
+                }
+            }
+            /*
+             * Publications
+             */
+            {
+                PreparedStatement stmt = null;
+                try {
+                    stmt = wc.prepareStatement("DELETE FROM publications WHERE cid=? AND entity=? AND module=?");
+                    stmt.setInt(1, ctx.getContextId());
+                    stmt.setInt(2, folderID);
+                    stmt.setString(3, Module.getModuleString(storageFolder.getModule(), folderID));
                     stmt.executeUpdate();
                 } catch (final SQLException e) {
                     throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());

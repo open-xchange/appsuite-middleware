@@ -50,7 +50,9 @@
 package com.openexchange.groupware.modules;
 
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
@@ -78,13 +80,17 @@ public enum Module {
     }
 
     private static final TIntObjectMap<Module> folderConstant2Module;
+    private static final TObjectIntMap<String> string2FolderConstant;
     static {
         final Module[] values = values();
-        final TIntObjectMap<Module> map = new TIntObjectHashMap<Module>(values.length);
+        final TIntObjectMap<Module> map1 = new TIntObjectHashMap<Module>(values.length);
+        final TObjectIntMap<String> map2 = new TObjectIntHashMap<String>(values.length, 0.5f, -1);
         for (final Module module : values) {
-            map.put(module.folderConstant, module);
+            map1.put(module.folderConstant, module);
+            map2.put(module.name, module.folderConstant);
         }
-        folderConstant2Module = map;
+        folderConstant2Module = map1;
+        string2FolderConstant = map2;
     }
 
     /**
@@ -162,12 +168,13 @@ public enum Module {
         return moduleStr;
     }
 
+    /**
+     * Gets the module's numeric identifier.
+     *
+     * @param module The module string
+     * @return The module's numeric identifier or <code>-1</code> if unknown
+     */
     public static final int getModuleInteger(final String moduleStr) {
-        for (Module module : values()) {
-            if (module.getName().equalsIgnoreCase(moduleStr)) {
-                return module.folderConstant;
-            }
-        }
-        return -1;
+        return null == moduleStr ? -1 : string2FolderConstant.get(moduleStr);
     }
 }
