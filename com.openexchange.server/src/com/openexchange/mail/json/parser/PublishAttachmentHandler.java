@@ -726,9 +726,6 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             if (this == obj) {
                 return true;
             }
-            if (obj == null) {
-                return false;
-            }
             if (!(obj instanceof LinkAndNamePair)) {
                 return false;
             }
