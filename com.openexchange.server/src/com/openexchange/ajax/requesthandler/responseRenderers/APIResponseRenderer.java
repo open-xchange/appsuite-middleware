@@ -132,6 +132,16 @@ public class APIResponseRenderer implements ResponseRenderer {
     }
 
     /**
+     * Gets the locale for given HTTP request
+     * 
+     * @param req The request
+     * @return The locale
+     */
+    protected static Locale localeFrom(final HttpServletRequest req) {
+        return localeFrom(getSession(req));
+    }
+
+    /**
      * Gets the locale for given server session
      * 
      * @param session The server session
@@ -191,7 +201,7 @@ public class APIResponseRenderer implements ResponseRenderer {
     private static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp, final boolean plainJson) {
         try {
             if (plainJson) {
-                ResponseWriter.write(response, resp.getWriter(), localeFrom(getSession(req)), true);
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(req), true);
             } else if (isMultipartContent(req) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
                 String callback = req.getParameter(CALLBACK);
@@ -205,7 +215,7 @@ public class APIResponseRenderer implements ResponseRenderer {
                 writer.write(JS_FRAGMENT_PART2);
                 writer.write(callback);
                 writer.write(")(");
-                ResponseWriter.write(response, writer, localeFrom(getSession(req)), true);
+                ResponseWriter.write(response, writer, localeFrom(req), true);
                 writer.write(JS_FRAGMENT_PART3);
                 /*-
                  * Previous code:
@@ -222,10 +232,10 @@ public class APIResponseRenderer implements ResponseRenderer {
                 final PrintWriter writer = resp.getWriter();
                 writer.write(call);
                 writer.write('(');
-                ResponseWriter.write(response, writer, localeFrom(getSession(req)), true);
+                ResponseWriter.write(response, writer, localeFrom(req), true);
                 writer.write(')');
             } else {
-                ResponseWriter.write(response, resp.getWriter(), localeFrom(getSession(req)), true);
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(req), true);
             }
         } catch (final JSONException e) {
             LOG.error(e.getMessage(), e);
