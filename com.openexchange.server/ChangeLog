@@ -6,6 +6,7 @@
 
  - Fix for bug 24375: Check for content behind closing <body> tag and append if present
  - Fix for bug 21949: No concurrent execution of a subscription
+ - Fix for bug 24376: Manually delete publications on folder deletion, too
 
 * 2013-01-02 - thorben.betten@open-xchange.com
 
