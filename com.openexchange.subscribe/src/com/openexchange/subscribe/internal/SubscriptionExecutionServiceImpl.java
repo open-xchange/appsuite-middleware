@@ -83,6 +83,10 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SubscriptionExecutionServiceImpl.class));
 
+    /*-
+     * -------------------------------- Guard stuff -------------------------------
+     */
+
     private static final ConcurrentMap<SubscriptionKey, Object> GUARD_MAP = new ConcurrentHashMap<SubscriptionKey, Object>(1024);
 
     private static final Object PRESENT = new Object();
@@ -110,6 +114,10 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
     private static void unlock(final int subscriptionId, final Session session) {
         GUARD_MAP.remove(key(subscriptionId, session));
     }
+
+    /*-
+     * -------------------------------- Member stuff -------------------------------
+     */
 
     private final SubscriptionSourceDiscoveryService discoverer;
     private final Collection<FolderUpdaterService<?>> folderUpdaters;
