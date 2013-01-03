@@ -62,7 +62,7 @@ public interface EncryptedItemDetectorService {
     /**
      * Checks for available encrypted items.
      *
-     * @param session The session providing needed user data
+     * @param session The session providing needed user information
      * @return <code>true</code> if there are encrypted items; otherwise <code>false</code>
      * @throws OXException If check for encrypted items fails
      */
