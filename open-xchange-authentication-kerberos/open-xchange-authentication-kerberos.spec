@@ -16,7 +16,7 @@ BuildRequires: java-1_6_0-ibm-devel
 BuildRequires: java-1.6.0-sun-devel
 %endif
 Version:       @OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -70,6 +70,8 @@ done
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Jan 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for public patch 2013-01-15
 * Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 6.22.0
 * Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
