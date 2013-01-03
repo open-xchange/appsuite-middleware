@@ -234,7 +234,7 @@ public abstract class AbstractSession implements Session {
                     schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
                     schemeRegistry.register(new Scheme("https", EasySSLSocketFactory.getInstance(), 443));
 
-                    final DBClientConnManager cm = new DBClientConnManager(connParams, schemeRegistry);
+                    final XingClientConnManager cm = new XingClientConnManager(connParams, schemeRegistry);
 
                     // Set up client params.
                     final HttpParams httpParams = new BasicHttpParams();
@@ -247,12 +247,12 @@ public abstract class AbstractSession implements Session {
 
                         @Override
                         protected ConnectionKeepAliveStrategy createConnectionKeepAliveStrategy() {
-                            return new DBKeepAliveStrategy();
+                            return new XingKeepAliveStrategy();
                         }
 
                         @Override
                         protected ConnectionReuseStrategy createConnectionReuseStrategy() {
-                            return new DBConnectionReuseStrategy();
+                            return new XingConnectionReuseStrategy();
                         }
                     };
 
@@ -321,9 +321,9 @@ public abstract class AbstractSession implements Session {
         return WEB_SERVER;
     }
 
-    private static final class DBKeepAliveStrategy implements ConnectionKeepAliveStrategy {
+    private static final class XingKeepAliveStrategy implements ConnectionKeepAliveStrategy {
         
-        DBKeepAliveStrategy() {
+        XingKeepAliveStrategy() {
             super();
         }
 
@@ -351,9 +351,9 @@ public abstract class AbstractSession implements Session {
         }
     } // End of DBKeepAliveStrategy class
 
-    private static final class DBConnectionReuseStrategy extends DefaultConnectionReuseStrategy {
+    private static final class XingConnectionReuseStrategy extends DefaultConnectionReuseStrategy {
 
-        DBConnectionReuseStrategy() {
+        XingConnectionReuseStrategy() {
             super();
         }
 
@@ -464,9 +464,9 @@ public abstract class AbstractSession implements Session {
         }
     } // End of DBConnectionReuseStrategy class
 
-    private static class DBClientConnManager extends ThreadSafeClientConnManager {
+    private static class XingClientConnManager extends ThreadSafeClientConnManager {
 
-        public DBClientConnManager(final HttpParams params, final SchemeRegistry schreg) {
+        public XingClientConnManager(final HttpParams params, final SchemeRegistry schreg) {
             super(params, schreg);
         }
 
@@ -478,17 +478,17 @@ public abstract class AbstractSession implements Session {
     } // End of DBClientConnManager class
 
     private static class IdleConnectionCloser implements Runnable {
-        private final DBClientConnManager manager;
+        private final XingClientConnManager manager;
         private final int idleTimeoutSeconds;
         private volatile static ScheduledTimerTask timerTask;
 
-        public IdleConnectionCloser(final DBClientConnManager manager, final int idleTimeoutSeconds) {
+        public IdleConnectionCloser(final XingClientConnManager manager, final int idleTimeoutSeconds) {
             super();
             this.manager = manager;
             this.idleTimeoutSeconds = idleTimeoutSeconds;
         }
 
-        public static void ensureRunning(final DBClientConnManager manager, final int idleTimeoutSeconds,final int checkIntervalSeconds) {
+        public static void ensureRunning(final XingClientConnManager manager, final int idleTimeoutSeconds,final int checkIntervalSeconds) {
             ScheduledTimerTask tmp = timerTask;
             if (null == tmp) {
                 synchronized (IdleConnectionCloser.class) {

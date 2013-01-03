@@ -86,7 +86,6 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.AbstractTrackableTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -610,7 +609,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                 for (int i = 0; i < numOfStorages; i++) {
                     final FileStorageFileAccess files = all.get(i);
                     final int index = i;
-                    tcompletionService.submit(new AbstractTrackableTask<Void>() {
+                    tcompletionService.submit(new Callable<Void>() {
     
                         @Override
                         public Void call() throws OXException {
