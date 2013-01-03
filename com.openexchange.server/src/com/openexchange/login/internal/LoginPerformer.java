@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
@@ -92,8 +93,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.Parameterized;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -392,7 +391,7 @@ public final class LoginPerformer {
                     if (null == completionService) {
                         completionService = new ThreadPoolCompletionService<Void>(executor);
                     }
-                    final Task<Void> task = new AbstractTask<Void>() {
+                    final Callable<Void> task = new Callable<Void>() {
 
                         @Override
                         public Void call() {
@@ -442,7 +441,7 @@ public final class LoginPerformer {
                     if (null == completionService) {
                         completionService = new ThreadPoolCompletionService<Void>(executor);
                     }
-                    final Task<Void> task = new AbstractTask<Void>() {
+                    final Callable<Void> task = new Callable<Void>() {
 
                         @Override
                         public Void call() {

@@ -53,9 +53,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.java.StringAllocator;
@@ -163,6 +165,8 @@ public class XingAPI<S extends Session> {
         }
     }
 
+    private static final Set<UserField> SUPPORTED_SORT_FIELDS = EnumSet.of(UserField.ID, UserField.LAST_NAME);
+
     /**
      * Gets the requested user's contacts.
      * 
@@ -181,7 +185,7 @@ public class XingAPI<S extends Session> {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public Contacts getContactsFrom(final String userId, final int limit, final int offset, final OrderBy orderBy, final Collection<UserField> userFields) throws XingException {
+    public Contacts getContactsFrom(final String userId, final int limit, final int offset, final UserField orderBy, final Collection<UserField> userFields) throws XingException {
         if (limit < 0 || limit > 100) {
             throw new XingException("Invalid limit: " + limit + ". Must be zero OR less than or equal to 100.");
         }
@@ -197,9 +201,12 @@ public class XingAPI<S extends Session> {
                 "offset",
                 Integer.toString(offset)));
             // Add order-by
-            if (null != orderBy) {
-                params.add("orderBy");
-                params.add(orderBy.getFieldName());
+            final boolean serverSort = (null == orderBy || SUPPORTED_SORT_FIELDS.contains(orderBy));
+            if (serverSort) {
+                if (null != orderBy) {
+                    params.add("orderBy");
+                    params.add(orderBy.getFieldName());
+                }
             }
             // Add user fields
             if (null != userFields && !userFields.isEmpty()) {
@@ -221,7 +228,13 @@ public class XingAPI<S extends Session> {
                 params.toArray(new String[0]),
                 session);
 
-            return new Contacts(responseInformation.getJSONObject("contacts"));
+            if (serverSort) {
+                return new Contacts(responseInformation.getJSONObject("contacts"));
+            }
+            // Manually sort contacts
+            final Contacts contacts = new Contacts(responseInformation.getJSONObject("contacts"));
+            Collections.sort(contacts.getUsers(), (null == orderBy ? UserField.ID : orderBy).getComparator(false));
+            return contacts;
         } catch (final JSONException e) {
             throw new XingException(e);
         } catch (final RuntimeException e) {
@@ -244,7 +257,7 @@ public class XingAPI<S extends Session> {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public Contacts getContactsFrom(final String userId, final OrderBy orderBy, final Collection<UserField> userFields) throws XingException {
+    public Contacts getContactsFrom(final String userId, final UserField orderBy, final Collection<UserField> userFields) throws XingException {
         assertAuthenticated();
         try {
             final List<User> users = new LinkedList<User>();
@@ -272,7 +285,7 @@ public class XingAPI<S extends Session> {
                 offset += chunk.size();
             }
             // Sort users
-            Collections.sort(users, (null == orderBy ? OrderBy.ID : orderBy).getUserField().getComparator(false));
+            Collections.sort(users, (null == orderBy ? UserField.ID : orderBy).getComparator(false));
             return new Contacts(total, users);
         } catch (final RuntimeException e) {
             throw new XingException(e);

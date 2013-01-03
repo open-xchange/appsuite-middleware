@@ -56,6 +56,7 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.passcrypt.PasswordCrypter;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 
@@ -117,9 +118,10 @@ public final class PasscryptActivator extends HousekeepingActivator {
              * Register services
              */
             final PasswordCrypter passwordCrypter = new PasswordCrypter(getService(ConfigurationService.class));
-            registerService(LoginHandlerService.class, passwordCrypter, null);
-            registerService(EncryptedItemDetectorService.class, passwordCrypter, null);
-            registerService(SecretMigrator.class, passwordCrypter, null);
+            registerService(LoginHandlerService.class, passwordCrypter);
+            registerService(EncryptedItemDetectorService.class, passwordCrypter);
+            registerService(EncryptedItemCleanUpService.class, passwordCrypter);
+            registerService(SecretMigrator.class, passwordCrypter);
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PasscryptActivator.class)).error(e.getMessage(), e);
             throw e;

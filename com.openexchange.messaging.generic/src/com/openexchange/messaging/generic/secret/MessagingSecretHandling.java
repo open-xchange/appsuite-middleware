@@ -54,6 +54,7 @@ import java.util.Collections;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingService;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.tools.session.ServerSession;
@@ -64,7 +65,14 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class MessagingSecretHandling implements EncryptedItemDetectorService, SecretMigrator {
+public class MessagingSecretHandling implements EncryptedItemDetectorService, SecretMigrator, EncryptedItemCleanUpService {
+
+    /**
+     * Initializes a new {@link MessagingSecretHandling}.
+     */
+    public MessagingSecretHandling() {
+        super();
+    }
 
     @Override
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
@@ -89,6 +97,15 @@ public class MessagingSecretHandling implements EncryptedItemDetectorService, Se
             }
         }
         return false;
+    }
+
+    @Override
+    public void cleanUpEncryptedItems(final String secret, final ServerSession session) throws OXException {
+        final Collection<MessagingService> messagingServices = getMessagingServices();
+        for (final MessagingService messagingService : messagingServices) {
+            final MessagingAccountManager accountManager = messagingService.getAccountManager();
+            accountManager.cleanUp(secret, session);
+        }
     }
 
 }

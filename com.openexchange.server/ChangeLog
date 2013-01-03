@@ -1,3 +1,19 @@
+* 2013-01-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24296: Removed App Suite localization marker files for fr_FR and lv_LV.
+
+* 2013-01-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24375: Check for content behind closing <body> tag and append if present
+ - Fix for bug 21949: No concurrent execution of a subscription
+ - Fix for bug 24376: Manually delete publications on folder deletion, too
+
+* 2013-01-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24363: Retry to load from backup tables
+ - Fix for bug 24357: Fixed access to nested unified mail folders
+ - Fix for bug 24067: Select proper text version on text-only reply attempt
+
 * 2012-12-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 23400: Restore only if subfolders are available

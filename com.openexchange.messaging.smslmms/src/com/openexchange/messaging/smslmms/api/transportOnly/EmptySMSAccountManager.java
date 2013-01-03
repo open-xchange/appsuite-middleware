@@ -126,4 +126,9 @@ public final class EmptySMSAccountManager implements MessagingAccountManager {
         // Nope
     }
 
+    @Override
+    public void cleanUp(String secret, Session session) throws OXException {
+        // Nope
+    }
+
 }

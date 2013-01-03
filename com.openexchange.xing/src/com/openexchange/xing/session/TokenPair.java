@@ -1,41 +1,39 @@
+
 package com.openexchange.xing.session;
 
 import java.io.Serializable;
 
 /**
  * <p>
- * Just two strings -- a "key" and a "secret". Used by OAuth in several
- * places (consumer key/secret, request token/secret, access token/secret).
- * Use specific subclasses instead of using this class directly.
+ * Just two strings -- a "key" and a "secret". Used by OAuth in several places (consumer key/secret, request token/secret, access
+ * token/secret). Use specific subclasses instead of using this class directly.
  * </p>
  */
-public abstract class TokenPair implements Serializable
-{
+public abstract class TokenPair implements Serializable {
+
+    private static final long serialVersionUID = -2045713563484764236L;
 
     /**
-     * The "key" portion of the pair.  For example, the "consumer key",
-     * "request token", or "access token".  Will never contain the "|"
+     * The "key" portion of the pair. For example, the "consumer key", "request token", or "access token". Will never contain the "|"
      * character.
      */
     public final String key;
 
     /**
-     * The "secret" portion of the pair.  For example, the "consumer secret",
-     * "request token secret", or "access token secret".
+     * The "secret" portion of the pair. For example, the "consumer secret", "request token secret", or "access token secret".
      */
     public final String secret;
 
     /**
      * @param key assigned to {@link #key}.
      * @param secret assigned to {@link #secret}.
-     *
      * @throws IllegalArgumentException if key or secret is null or invalid.
      */
     public TokenPair(String key, String secret) {
+        super();
         if (key == null) {
             throw new IllegalArgumentException("'key' must be non-null");
-        }
-        if (key.contains("|")) {
+        } else if (key.contains("|")) {
             throw new IllegalArgumentException("'key' must not contain a \"|\" character: \"" + key + "\"");
         }
         if (secret == null) {

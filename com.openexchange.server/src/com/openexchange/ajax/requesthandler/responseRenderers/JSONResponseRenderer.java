@@ -52,13 +52,11 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link JSONResponseRenderer}
@@ -66,11 +64,6 @@ import com.openexchange.log.LogFactory;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class JSONResponseRenderer implements ResponseRenderer {
-
-    /**
-     * The logger constant.
-     */
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(JSONResponseRenderer.class));
 
     private static final String FORMAT = "json";
 

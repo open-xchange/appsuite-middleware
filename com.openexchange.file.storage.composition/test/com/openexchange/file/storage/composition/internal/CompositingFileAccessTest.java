@@ -940,22 +940,17 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         return Arrays.asList(account);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountManager#migrateToNewSecret(java.lang.String, java.lang.String,
-     * com.openexchange.session.Session)
-     */
     @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
         // Nothing to do
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountManager#updateAccount(com.openexchange.file.storage.FileStorageAccount,
-     * com.openexchange.session.Session)
-     */
+    @Override
+    public void cleanUp(String secret, Session session) throws OXException {
+        // noop
+    }
+
     @Override
     public void updateAccount(final FileStorageAccount account, final Session session) throws OXException {
         // Nothing to do

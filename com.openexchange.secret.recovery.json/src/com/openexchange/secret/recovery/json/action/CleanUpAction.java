@@ -47,70 +47,41 @@
  *
  */
 
-package com.openexchange.secret.recovery.mail.osgi;
+package com.openexchange.secret.recovery.json.action;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
-import com.openexchange.secret.recovery.EncryptedItemDetectorService;
-import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.recovery.SecretCleanUpService;
+import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link MailSecretRecoveryActivator}
+ * {@link CleanUpAction}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailSecretRecoveryActivator extends HousekeepingActivator {
+public final class CleanUpAction extends AbstractSecretRecoveryAction {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailAccountStorageService.class };
+    /**
+     * Initializes a new {@link CleanUpAction}.
+     *
+     * @param services
+     */
+    public CleanUpAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Ignore
-    }
+    protected AJAXRequestResult perform(final SecretRecoveryAJAXRequest req) throws OXException, JSONException {
+        final String secret = getService(SecretService.class).getSecret(req.getSession());
+        getService(SecretCleanUpService.class).cleanUp(secret, req.getSession());
 
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Ignore
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final MailAccountStorageService mailAccountStorage = getService(MailAccountStorageService.class);
-        registerService(EncryptedItemDetectorService.class, new EncryptedItemDetectorService() {
-
-            @Override
-            public boolean hasEncryptedItems(final ServerSession session) throws OXException {
-                return mailAccountStorage.hasAccounts(session);
-            }
-
-        });
-        registerService(SecretMigrator.class, new SecretMigrator() {
-
-            @Override
-            public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
-                mailAccountStorage.migratePasswords(session.getUserId(), session.getContextId(), oldSecret, newSecret);
-            }
-
-        });
-        registerService(EncryptedItemCleanUpService.class, new EncryptedItemCleanUpService() {
-
-            @Override
-            public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
-                mailAccountStorage.cleanUp(secret, session);
-            }
-
-        });
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        cleanUp();
+        final JSONObject object = new JSONObject();
+        object.put("clean_up", true);
+        return new AJAXRequestResult(object, "json");
     }
 
 }

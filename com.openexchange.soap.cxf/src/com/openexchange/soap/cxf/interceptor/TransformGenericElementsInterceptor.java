@@ -77,7 +77,7 @@ public class TransformGenericElementsInterceptor extends AbstractInDatabindingIn
     @Override
     public void handleMessage(Message message) throws Fault {
         XMLStreamReader reader = message.getContent(XMLStreamReader.class);
-        if (reader.hasName()) {
+        if (null != reader && reader.hasName()) {
             QName name = reader.getName();
             reader = TransformUtils.createNewReaderIfNeeded(reader, message.getContent(InputStream.class));
             Exchange exchange = message.getExchange();
