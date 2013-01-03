@@ -63,6 +63,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.SecretUsesPasswordChecker;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.SecretCleanUpService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
@@ -106,7 +107,8 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
              */
             final WhiteboardSecretMigrator migrator = this.migrator = new WhiteboardSecretMigrator(context);
             final WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector = this.whiteboardEncryptedItemDetector = new WhiteboardEncryptedItemDetector(context);
-            final WhiteboardEncryptedCleanUpService whiteboardCleanUpService = this.whiteboardCleanUpService = new WhiteboardEncryptedCleanUpService(context);
+            final WhiteboardEncryptedCleanUpService whiteboardCleanUpService = new WhiteboardEncryptedCleanUpService(context);
+            this.whiteboardCleanUpService = whiteboardCleanUpService;
             /*
              * Register SecretInconsistencyDetector
              */
@@ -115,6 +117,7 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
             final SecretService secretService = checker.passwordUsingSecretService();
             final FastSecretInconsistencyDetector detector = new FastSecretInconsistencyDetector(secretService, cryptoService, userService, whiteboardEncryptedItemDetector);
             registerService(SecretInconsistencyDetector.class, detector);
+            registerService(EncryptedItemCleanUpService.class, detector);
             /*
              * Register SecretMigrator
              */
