@@ -117,9 +117,12 @@ public enum SessionExceptionCodes implements OXExceptionCode {
     /**
      * Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s
      */
-    MAX_SESSION_PER_CLIENT_EXCEPTION(SessionExceptionMessages.MAX_SESSION_PER_CLIENT_EXCEPTION_MSG, Category.CATEGORY_ERROR, 207),
-    
-    ;
+    MAX_SESSION_PER_CLIENT_EXCEPTION(MAX_SESSION_PER_CLIENT_EXCEPTION_MSG, Category.CATEGORY_ERROR, 207),
+    /**
+     * Session daemon is not initialized yet.
+     * TODO Refactoring of the session daemon should make the service public only then, when it is completely initialized.
+     */
+    NOT_INITIALIZED(NOT_INITIALIZED_MSG, Category.CATEGORY_ERROR, 208);
 
     private static final String PREFIX = "SES";
 

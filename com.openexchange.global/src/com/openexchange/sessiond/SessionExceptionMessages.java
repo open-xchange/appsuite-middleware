@@ -85,7 +85,7 @@ public final class SessionExceptionMessages implements LocalizableStrings {
     // %1$s is replaced with the new sessions login.
     public static final String SESSIONID_COLLISION_MSG = "Got a collision while adding a new session to the session container. Colliding session has login %1$s and new session has login %2$s.";
 
-    // This message is thrown if an inconcistency in SessionD bundle is detected when a session should be fetched by its random token.
+    // This message is thrown if an inconsistency in SessionD bundle is detected when a session should be fetched by its random token.
     // %1$s is replaced with the session identifier that is returned from the data structures.
     // %2$s is replaced with that sessions random token.
     // %3$s is replaced with the random token for that a session should be found.
@@ -104,6 +104,9 @@ public final class SessionExceptionMessages implements LocalizableStrings {
 
     // Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s exceeded
     public static final String MAX_SESSION_PER_CLIENT_EXCEPTION_MSG = "Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s";
+
+    // This problem occurs if the session daemon is accessed before it is initialized completely.
+    public static final String NOT_INITIALIZED_MSG = "Session daemon is not initialized yet.";
 
     private SessionExceptionMessages() {
         super();
