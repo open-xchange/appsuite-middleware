@@ -1,3 +1,7 @@
+* 2013-01-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24375: Check for content behind closing <body> tag and append if present
+
 * 2013-01-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 24363: Retry to load from backup tables
