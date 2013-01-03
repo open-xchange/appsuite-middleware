@@ -142,6 +142,8 @@ public class FileResponseRenderer implements ResponseRenderer {
         String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
         if (null == contentDisposition) {
             contentDisposition = file.getDisposition();
+        } else {
+            contentDisposition = Utils.encodeUrl(contentDisposition);
         }
 
         InputStream documentData = null;
@@ -178,10 +180,10 @@ public class FileResponseRenderer implements ResponseRenderer {
                             if (pos >= 0) {
                                 resp.setHeader("Content-Disposition", contentDisposition + disposition.substring(pos));
                             } else {
-                                resp.setHeader("Content-Disposition", Utils.encodeUrl(contentDisposition));
+                                resp.setHeader("Content-Disposition", contentDisposition);
                             }
                         } else {
-                            resp.setHeader("Content-Disposition", Utils.encodeUrl(contentDisposition));
+                            resp.setHeader("Content-Disposition", contentDisposition);
                         }
                     }
                 }
