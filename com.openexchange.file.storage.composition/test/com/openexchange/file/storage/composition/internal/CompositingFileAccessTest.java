@@ -74,11 +74,11 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.file.storage.composition.FileID;
-import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 import com.openexchange.sim.Block;
@@ -116,8 +116,6 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     private final IDSetter setId = new IDSetter(fileId.getFileId());
 
-
-
     public CompositingFileAccessTest() {
         super(new SimSession());
     }
@@ -134,9 +132,9 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testExists() throws OXException {
-        fileAccess.expectCall("exists", fileId.getFolderId(), fileId.getFileId(), 12).andReturn(true);
+        fileAccess.expectCall("exists", fileId.getFolderId(), fileId.getFileId(), "12").andReturn(true);
 
-        assertTrue(exists(fileId.toUniqueID(), 12));
+        assertTrue(exists(fileId.toUniqueID(), "12"));
         verifyAccount();
 
         fileAccess.assertAllWereCalled();
@@ -174,9 +172,9 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testGetDocument() throws OXException {
-        fileAccess.expectCall("getDocument", fileId.getFolderId(), fileId.getFileId(), 12);
+        fileAccess.expectCall("getDocument", fileId.getFolderId(), fileId.getFileId(), "12");
 
-        getDocument(fileId.toUniqueID(), 12);
+        getDocument(fileId.toUniqueID(), "12");
 
         verifyAccount();
         fileAccess.assertAllWereCalled();
@@ -250,9 +248,9 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         file.setId(fileId.getFileId());
         file.setFolderId(fileId.getFolderId());
 
-        fileAccess.expectCall("getFileMetadata", fileId.getFolderId(), fileId.getFileId(), 12).andReturn(file);
+        fileAccess.expectCall("getFileMetadata", fileId.getFolderId(), fileId.getFileId(), "12").andReturn(file);
 
-        getFileMetadata(fileId.toUniqueID(), 12);
+        getFileMetadata(fileId.toUniqueID(), "12");
 
         fileAccess.assertAllWereCalled();
     }
@@ -368,9 +366,9 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testRemoveVersions() throws OXException {
-        final int[] versions = new int[] { 1, 2, 3 };
+        final String[] versions = new String[] { "1", "2", "3" };
 
-        fileAccess.expectCall("removeVersion", fileId.getFolderId(), fileId.getFileId(), versions).andReturn(new int[0]);
+        fileAccess.expectCall("removeVersion", fileId.getFolderId(), fileId.getFileId(), versions).andReturn(new String[0]);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         removeVersion(fileId.toUniqueID(), versions);
@@ -728,7 +726,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public String getDisplayName() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -738,7 +736,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public DynamicFormDescription getFormDescription() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -757,7 +755,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public Set<String> getSecretProperties() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -788,7 +786,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -798,7 +796,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -808,7 +806,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public boolean cacheable() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -818,7 +816,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public void close() {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -828,7 +826,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public void connect() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -838,7 +836,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public boolean isConnected() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -848,7 +846,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public boolean ping() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -858,7 +856,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public FileStorageService getService() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return this;
     }
 
@@ -874,7 +872,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public String addAccount(final FileStorageAccount account, final Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -883,7 +881,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public boolean hasEncryptedItems(final Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -894,7 +892,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public void deleteAccount(final FileStorageAccount account, final Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -904,7 +902,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -918,19 +916,19 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
                     @Override
                     public Map<String, Object> getConfiguration() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return null;
             }
 
                     @Override
                     public String getDisplayName() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return null;
             }
 
                     @Override
                     public FileStorageService getFileStorageService() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return null;
             }
 
@@ -949,7 +947,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -960,7 +958,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      */
     @Override
     public void updateAccount(final FileStorageAccount account, final Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -995,7 +993,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     public FileStorageAccountManagerProvider getProvider() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -1005,13 +1003,13 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
             
             @Override
             public void sendEvent(Event arg0) {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 
             }
             
             @Override
             public void postEvent(Event arg0) {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 
             }
         };

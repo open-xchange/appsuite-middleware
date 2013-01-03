@@ -52,7 +52,6 @@ package com.openexchange.calendar.itip;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.i18n.tools.StringHelper;
@@ -229,7 +228,7 @@ public class HumanReadableRecurrences {
         if (isEmpty(format) || format.indexOf('$') < 0) {
             return format;
         }
-        return SANE_FORMAT.matcher(format).replaceAll("$1" + Matcher.quoteReplacement("$s") + "$2");
+        return SANE_FORMAT.matcher(format).replaceAll("$1" + com.openexchange.java.Strings.quoteReplacement("$s") + "$2");
     }
 
     private static boolean isEmpty(final String string) {

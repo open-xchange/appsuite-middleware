@@ -81,7 +81,6 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link ContactServiceImpl}
@@ -270,8 +269,6 @@ public class ContactServiceImpl extends DefaultContactService {
 		new EventClient(session).modify(storedContact, contact, targetFolder);
 	}
 
-	private static final String GAB = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-
 	@Override
     protected void doUpdateContact(final Session session, final String folderID, final String objectID, final Contact contact, final Date lastRead) throws OXException {
 		final int userID = session.getUserId();
@@ -285,20 +282,10 @@ public class ContactServiceImpl extends DefaultContactService {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		}
 		/*
-		 * check general permissions
+		 * check general permissions with regard to global address book
 		 */
-		EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		try {
-            Check.canWriteOwn(permission, session);
-        } catch (OXException e) {
-            if (!GAB.equals(folderID) || !ContactExceptionCodes.NO_CHANGE_PERMISSION.equals(e) || !OXFolderProperties.isEnableInternalUsersEdit()) {
-                throw e;
-            }
-            OXFolderProperties.updatePermissions(true, contextID);
-            // check again
-            permission = Tools.getPermission(contextID, folderID, userID);
-            Check.canWriteOwn(permission, session);
-        }
+		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+		Check.canWriteOwn(permission, session);
 		/*
 		 * check currently stored contact
 		 */
@@ -369,6 +356,103 @@ public class ContactServiceImpl extends DefaultContactService {
 		}
 		new EventClient(session).modify(storedContact, contact, folder);
 	}
+
+    @Override
+    protected void doUpdateUser(final Session session, final String folderID, final String objectID, final Contact contact, 
+        final Date lastRead) throws OXException {
+        int userID = session.getUserId();
+        int contextID = session.getContextId();
+        ContactStorage storage = Tools.getStorage(session, folderID);
+        /*
+         * check supplied contact
+         */
+        Check.validateProperties(contact);
+        if (contact.containsObjectID() && contact.getObjectID() > 0 && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
+        }
+        /*
+         * check folder
+         */
+        if (FolderObject.SYSTEM_LDAP_FOLDER_ID != parse(folderID) ||
+            contact.containsParentFolderID() && 0 < contact.getParentFolderID() && 
+            FolderObject.SYSTEM_LDAP_FOLDER_ID != contact.getParentFolderID()) {
+            throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(FolderObject.SYSTEM_LDAP_FOLDER_ID, contextID, userID);
+        }
+        /*
+         * check currently stored contact
+         */
+        Contact storedContact = storage.get(session, folderID, objectID, ContactField.values());
+        Check.contactNotNull(storedContact, contextID, Tools.parse(objectID));
+        if (storedContact.getCreatedBy() != userID) {
+            if (storedContact.getCreatedBy() == Tools.getContext(contextID).getContextId()) {
+                /*
+                 * take over bugfix for https://bugs.open-xchange.com/show_bug.cgi?id=19128#c9:
+                 * Accepting context admin as a user's contact creator, too, and executing self-healing mechanism
+                 */                
+                contact.setCreatedBy(contact.getInternalUserId());
+            } else {
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
+            }
+        }
+        Check.lastModifiedBefore(storedContact, lastRead);
+        Check.folderEquals(storedContact, folderID, contextID);
+        /*
+         * check special GAB permissions
+         */
+        Check.canWriteInGAB(storage, session, folderID, contact);
+        /*
+         * check for not allowed changes
+         */
+        final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
+        if (delta.containsContextId() && delta.getContextId() > 0) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
+        } else if (delta.containsObjectID() && delta.getObjectID() > 0) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
+        } else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
+        } else if (delta.containsCreatedBy()) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
+        } else if (delta.containsCreationDate()) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
+        } else if (delta.containsParentFolderID()) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
+        } else if (delta.containsPrivateFlag() && delta.getPrivateFlag() && storedContact.getModifiedBy() != userID) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
+        }
+        /*
+         * prepare update
+         */
+        final Date now = new Date();
+        delta.setLastModified(now);
+        delta.setModifiedBy(userID);
+        if ((false == storedContact.containsUid() || Tools.isEmpty(storedContact.getUid())) && false == delta.containsUid()) {
+            delta.setUid(UUID.randomUUID().toString());
+        }
+        if (delta.containsImage1()) {
+            delta.setImageLastModified(now);
+            if (null != delta.getImage1()) {
+                delta.setNumberOfImages(1);
+            } else {
+                delta.setNumberOfImages(0);
+                delta.setImageContentType(null);
+            }
+        }
+        Tools.invalidateAddressesIfNeeded(delta);
+        /*
+         * pass through to storage
+         */
+        storage.update(session, folderID, objectID, delta, lastRead);
+        /*
+         * broadcast event
+         */
+        ContactMapper.getInstance().mergeDifferences(contact, delta);
+        contact.setObjectID(storedContact.getObjectID());
+        contact.setParentFolderID(storedContact.getParentFolderID());
+        for (final ContactStorage contactStorage : Tools.getStorages(session)) {
+            contactStorage.updateReferences(session, contact);
+        }
+        new EventClient(session).modify(storedContact, contact, Tools.getFolder(contextID, folderID));
+    }
 
     @Override
     protected void doDeleteContact(final Session session, final String folderID, final String objectID, final Date lastRead) throws OXException {
@@ -760,7 +844,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
 		QueryFields queryFields;
-		if (permission.canReadAllObjects() || permission.canReadOwnObjects() && 1 == userIDs.length && currentUserID == userIDs[0]) {
+		if (permission.canReadAllObjects() || 1 == userIDs.length && currentUserID == userIDs[0]) {
 			// no limitation
 			queryFields = new QueryFields(fields);
 		} else {
@@ -811,7 +895,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		final EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
 		QueryFields queryFields;
-		if (permission.canReadAllObjects() || permission.canReadOwnObjects() && 1 == userIDs.length && currentUserID == userIDs[0]) {
+		if (permission.canReadAllObjects() || 1 == userIDs.length && currentUserID == userIDs[0]) {
 			// no limitation
 			queryFields = new QueryFields(fields);
 		} else {

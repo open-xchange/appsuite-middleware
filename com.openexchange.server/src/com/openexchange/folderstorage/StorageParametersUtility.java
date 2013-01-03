@@ -49,6 +49,12 @@
 
 package com.openexchange.folderstorage;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+
 /**
  * {@link StorageParametersUtility} - A utility class for {@link StorageParameters}.
  * 
@@ -76,6 +82,42 @@ public final class StorageParametersUtility {
         }
         final Object permissionsHandling = decorator.getProperty("permissions");
         return null != permissionsHandling && "inherit".equalsIgnoreCase(permissionsHandling.toString());
+    }
+
+    /**
+     * Gets specified boolean parameter.
+     * 
+     * @param name The name
+     * @param params The storage parameters
+     * @return <code>true</code> if boolean parameter is present and set to <code>true</code>; otherwise <code>false</code>
+     */
+    public static boolean getBoolParameter(final String name, final StorageParameters params) {
+        final FolderServiceDecorator decorator = params.getDecorator();
+        if (null == decorator) {
+            return false;
+        }
+        final Object tmp = decorator.getProperty(name);
+        return null != tmp && ((tmp instanceof Boolean) ? ((Boolean) tmp).booleanValue() : parseBoolParameter(tmp.toString()));
+    }
+
+    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        "true",
+        "1",
+        "yes",
+        "y",
+        "on")));
+
+    /**
+     * Parses denoted <tt>boolean</tt> value from specified <tt>String</tt> parameter.
+     * <p>
+     * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
+     * "1".
+     * 
+     * @param value The parameter value to check
+     * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
+     */
+    public static boolean parseBoolParameter(final String value) {
+        return (null != value) && BOOL_VALS.contains(value.trim().toLowerCase(Locale.ENGLISH));
     }
 
 }

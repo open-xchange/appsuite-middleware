@@ -49,8 +49,10 @@
 
 package com.openexchange.capabilities.osgi;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,6 +61,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 
 import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -73,6 +76,8 @@ import com.openexchange.tools.session.ServerSession;
 public class CapabilityServiceImpl implements CapabilityService {
 	
 	private ConcurrentMap<String, Capability> capabilities = new ConcurrentHashMap<String, Capability>();
+	private Set<String> declaredCapabilities = new HashSet<String>();
+	
 	private ServiceLookup services;
 	
 	/**
@@ -93,7 +98,9 @@ public class CapabilityServiceImpl implements CapabilityService {
 		Set<Capability> capabilities = new HashSet<Capability>();
 		if (!session.isAnonymous()) {
 			for(String type: session.getUserConfiguration().getExtendedPermissions()) {
-				capabilities.add(getCapability(type));
+				if (check(type, session)) {
+					capabilities.add(getCapability(type));
+				}
 			}
 		}
 		
@@ -105,10 +112,24 @@ public class CapabilityServiceImpl implements CapabilityService {
 			capabilities.add(new Capability("autologin", true));
 		}
 		
+		for(String cap: declaredCapabilities) {
+			if (check(cap, session)) {
+				capabilities.add(getCapability(cap));
+			}
+		}
 		
 		return capabilities;
 	}
 	
+	private boolean check(String cap, ServerSession session) throws OXException {
+		for(CapabilityChecker checker: getCheckers()) {
+			if (!checker.isEnabled(cap, session)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public Set<Capability> getAllKnownCapabilities() throws OXException {
 		return new HashSet<Capability>(capabilities.values());
 	}
@@ -122,6 +143,15 @@ public class CapabilityServiceImpl implements CapabilityService {
 		}
 		
 		return capability;
+	}
+
+	@Override
+	public void declareCapability(String capability) {
+		declaredCapabilities.add(capability);
+	}
+	
+	public List<CapabilityChecker> getCheckers() {
+		return Collections.emptyList();
 	}
 	
 	

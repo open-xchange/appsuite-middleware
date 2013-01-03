@@ -160,61 +160,61 @@ public class SimMailAccount implements MailAccount {
 
     @Override
     public void addProperty(final String name, final String value) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public String generateMailServerURL() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String generateTransportServerURL() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String getConfirmedHam() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String getConfirmedHamFullname() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String getConfirmedSpam() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String getConfirmedSpamFullname() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String getDrafts() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String getDraftsFullname() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public int getId() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
@@ -270,31 +270,31 @@ public class SimMailAccount implements MailAccount {
 
     @Override
     public String getSent() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String getSentFullname() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String getSpam() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String getSpamFullname() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String getSpamHandler() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -325,25 +325,25 @@ public class SimMailAccount implements MailAccount {
 
     @Override
     public String getTrash() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String getTrashFullname() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public int getUserId() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
     @Override
     public boolean isDefaultAccount() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -359,7 +359,7 @@ public class SimMailAccount implements MailAccount {
 
     @Override
     public boolean isUnifiedINBOXEnabled() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 

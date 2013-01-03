@@ -229,7 +229,7 @@ public class Restriction extends EnforceableDataObject implements Cloneable {
      */
     @Override
     public String[] getMandatoryMembersDelete() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -238,7 +238,7 @@ public class Restriction extends EnforceableDataObject implements Cloneable {
      */
     @Override
     public String[] getMandatoryMembersRegister() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

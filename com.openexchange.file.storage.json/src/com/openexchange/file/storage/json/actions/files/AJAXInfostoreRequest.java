@@ -103,7 +103,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     private List<String> ids = null;
 
-    private int[] versions;
+    private String[] versions;
 
     private static final FileMetadataParser parser = FileMetadataParser.getInstance();
 
@@ -170,7 +170,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
 
         final String parameter = data.getParameter(Param.COLUMNS.getName());
-        if (parameter == null || parameter.equals("")) {
+        if (parameter == null || parameter.length() == 0) {
             return columns = Arrays.asList(File.Field.values());
         }
         final String[] columnStrings = parameter.split("\\s*,\\s*");
@@ -251,12 +251,12 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     @Override
-    public int getVersion() {
+    public String getVersion() {
         final String parameter = data.getParameter(Param.VERSION.getName());
         if (parameter == null) {
             return FileStorageFileAccess.CURRENT_VERSION;
         }
-        return Integer.parseInt(parameter);
+        return parameter;
     }
     
     @Override
@@ -328,16 +328,16 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     @Override
-    public int[] getVersions() throws OXException {
+    public String[] getVersions() throws OXException {
         if (versions != null) {
             return versions;
         }
         final JSONArray body = (JSONArray) data.getData();
 
         try {
-            versions = new int[body.length()];
+            versions = new String[body.length()];
             for (int i = 0; i < versions.length; i++) {
-                versions[i] = body.getInt(i);
+                versions[i] = body.getString(i);
             }
         } catch (final JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create( x.getMessage());

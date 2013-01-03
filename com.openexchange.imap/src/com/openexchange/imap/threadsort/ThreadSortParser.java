@@ -87,22 +87,23 @@ final class ThreadSortParser {
     }
 
     private void parse(final String threadList, final List<ThreadSortNode> recthreads) throws OXException {
-        if (DEBUG) {
-            LOG.debug(new StringBuilder("Start parse: ").append(threadList).toString());
+        final boolean debug = DEBUG;
+        if (debug) {
+            LOG.debug(new com.openexchange.java.StringAllocator("Start parse: ").append(threadList).toString());
         }
         final int length = threadList.length();
         if (threadList.charAt(0) == '{') {
             // Now in a thread the thread starts normally with a number.
             final MessageInfo message = getMessageID(threadList);
-            if (DEBUG) {
-                LOG.debug(new StringBuilder("Found message: ").append(message).toString());
+            if (debug) {
+                LOG.debug(new com.openexchange.java.StringAllocator("Found message: ").append(message).toString());
             }
             final ThreadSortNode actual = new ThreadSortNode(message, -1L);
             recthreads.add(actual);
             // Now thread ends or answers are there.
             final int messageIDLength = message.getSlen();
             if ((length > messageIDLength) && (threadList.charAt(messageIDLength) == ' ')) {
-                if (DEBUG) {
+                if (debug) {
                     LOG.debug("Parsing child threads.");
                 }
                 final List<ThreadSortNode> childThreads = new ArrayList<ThreadSortNode>();
@@ -114,25 +115,25 @@ final class ThreadSortParser {
                     "Found unexpected character: " + threadList.charAt(messageIDLength));
             }
         } else if (threadList.charAt(0) == '(') {
-            if (DEBUG) {
+            if (debug) {
                 LOG.debug("Parsing list.");
             }
             // Parse list of threads.
             int pos = 0;
             do {
-                if (DEBUG) {
-                    LOG.debug(new StringBuilder("Position: ").append(pos).toString());
+                if (debug) {
+                    LOG.debug(new com.openexchange.java.StringAllocator("Position: ").append(pos).toString());
                 }
                 final int closingBracket = findMatchingBracket(threadList.substring(pos));
                 if (closingBracket == -1) {
                     throw IMAPException.create(IMAPException.Code.THREAD_SORT_PARSING_ERROR, "Closing parenthesis not found.");
                 }
-                if (DEBUG) {
-                    LOG.debug(new StringBuilder("Closing bracket: ").append((pos + closingBracket)).toString());
+                if (debug) {
+                    LOG.debug(new com.openexchange.java.StringAllocator("Closing bracket: ").append((pos + closingBracket)).toString());
                 }
                 final String subList = threadList.substring(pos + 1, pos + closingBracket);
                 if (subList.charAt(0) == '(') {
-                    if (DEBUG) {
+                    if (debug) {
                         LOG.debug("Parsing childs of thread with no parent.");
                     }
                     final ThreadSortNode emptyParent = new ThreadSortNode(MessageInfo.DUMMY, -1L);
@@ -147,8 +148,8 @@ final class ThreadSortParser {
                 }
                 pos += closingBracket + 1;
             } while (pos < length);
-            if (DEBUG) {
-                LOG.debug(new StringBuilder("List: ").append(recthreads).toString());
+            if (debug) {
+                LOG.debug(new com.openexchange.java.StringAllocator("List: ").append(recthreads).toString());
             }
         } else {
             throw IMAPException.create(IMAPException.Code.THREAD_SORT_PARSING_ERROR, "Found unexpected character: " + threadList.charAt(0));
@@ -156,22 +157,12 @@ final class ThreadSortParser {
     }
 
     private MessageInfo getMessageID(final String threadList) {
-        if (DEBUG) {
-            LOG.debug(new StringBuilder("Parsing messageID: ").append(threadList).toString());
-        }
-        final MessageInfo messageId = MessageInfo.valueOf(threadList, 0, threadList.indexOf('}') + 1);
-        if (DEBUG) {
-            LOG.debug(new StringBuilder("Parsed number: ").append(messageId).toString());
-        }
-        return messageId;
+        return MessageInfo.valueOf(threadList, 0, threadList.indexOf('}') + 1);
     }
 
     private int findMatchingBracket(final String threadList) {
         int openingBrackets = 0;
         int pos = 0;
-        if (DEBUG) {
-            LOG.debug(new StringBuilder("findMatchingBracket: ").append(threadList).toString());
-        }
         do {
             final char actual = threadList.charAt(pos);
             if (actual == '(') {
@@ -179,15 +170,9 @@ final class ThreadSortParser {
             } else if (actual == ')') {
                 openingBrackets--;
             }
-            if (DEBUG) {
-                LOG.debug(new StringBuilder("Char: ").append(actual).append(" Pos ").append(pos).toString());
-            }
             pos++;
         } while ((openingBrackets > 0) && (pos < threadList.length()));
         pos--;
-        if (DEBUG) {
-            LOG.debug(new StringBuilder("Found: ").append(pos).toString());
-        }
         return pos;
     }
 

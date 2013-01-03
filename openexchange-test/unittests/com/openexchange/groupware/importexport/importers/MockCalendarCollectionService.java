@@ -104,7 +104,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public RecurringResultsInterface calculateRecurring(CalendarObject cdao, long range_start, long range_end, int pos, int PMAXTC, boolean ignore_exceptions) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -113,7 +113,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public RecurringResultsInterface calculateRecurring(CalendarObject cdao, long range_start, long range_end, int pos, int PMAXTC, boolean ignore_exceptions, boolean calc_until) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -122,7 +122,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public Date calculateRecurringDate(long date, long time, int timeZoneOffsetDiff) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -131,7 +131,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public RecurringResultsInterface calculateRecurringIgnoringExceptions(CalendarObject cdao, long range_start, long range_end, int pos) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -140,7 +140,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean check(Object a, Object b) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -149,7 +149,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public int[] checkAndAlterCols(int[] cols) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -158,7 +158,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void checkAndConfirmIfUserUserIsParticipantInPublicFolder(CalendarDataObject cdao, UserParticipant up) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -167,7 +167,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void checkAndFillIfUserIsParticipant(CalendarDataObject cdao, UserParticipant up) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -176,7 +176,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void checkAndFillIfUserIsUser(CalendarDataObject cdao, Participant p) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -185,7 +185,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public UserParticipant[] checkAndModifyAlarm(CalendarDataObject cdao, UserParticipant[] check, int uid, UserParticipant[] orig) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -194,7 +194,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void checkAndRemovePastReminders(CalendarDataObject cdao, CalendarDataObject edao) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -203,7 +203,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void checkForInvalidCharacters(CalendarDataObject cdao) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -212,7 +212,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean checkForSoloReminderUpdate(CalendarDataObject cdao, int[] ucols, MBoolean cup) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -221,7 +221,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean checkIfArrayKeyExistInArray(Object[] a, Object[] b) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -230,7 +230,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean checkIfDateOccursInRecurrence(Date date, CalendarDataObject recurringAppointment) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -239,7 +239,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean checkIfDatesOccurInRecurrence(Date[] dates, CalendarDataObject recurringAppointment) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -248,7 +248,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean checkIfUserIsParticipant(CalendarDataObject cdao, UserParticipant up) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -257,7 +257,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean checkMillisInThePast(long check) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -266,7 +266,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean checkParticipants(Participant[] newParticipants, Participant[] oldParticipants) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -275,7 +275,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean checkPermissions(CalendarDataObject cdao, Session so, Context ctx, Connection readcon, int action, int inFolder) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -284,7 +284,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void checkRecurring(CalendarObject cdao) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -293,7 +293,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void checkRecurringCompleteness(CalendarObject cdao, boolean ignoreUntilAndOccurrence) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -302,7 +302,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void checkUserParticipantObject(UserParticipant up, int folder_type) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -311,7 +311,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public CalendarDataObject cloneObjectForRecurringException(CalendarDataObject cdao, CalendarDataObject edao, int sessionUser) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -320,7 +320,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void closePreparedStatement(PreparedStatement prep) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -329,7 +329,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void closeResultSet(ResultSet rs) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -338,7 +338,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void closeStatement(Statement stmt) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -347,7 +347,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public String convertDates2String(Date[] d) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -356,7 +356,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public Date[] convertString2Dates(String s) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -365,7 +365,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public String createDSString(CalendarDataObject cdao) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -374,7 +374,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void debugActiveDates(long start, long end, boolean[] activeDates) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -383,7 +383,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void debugRecurringResult(RecurringResultInterface rr) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -392,7 +392,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void detectFolderMoveAction(CalendarDataObject cdao, CalendarDataObject edao) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -401,7 +401,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean detectTimeChange(CalendarDataObject cdao, CalendarDataObject edao) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -410,7 +410,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public int[] enhanceCols(int[] cols, int[] ara, int i) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -419,7 +419,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean exceedsHourOfDay(long millis, String timeZoneID) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -428,7 +428,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean exceedsHourOfDay(long millis, TimeZone zone) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -437,7 +437,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean existsReminder(Context c, int oid, int uid) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -446,7 +446,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean fillDAO(CalendarDataObject cdao) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -454,7 +454,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#fillEventInformation(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[])
      */
     public void fillEventInformation(CalendarDataObject cdao, CalendarDataObject edao, UserParticipant[] up_event, UserParticipant[] new_userparticipants, UserParticipant[] deleted_userparticipants, Participant[] p_event, Participant[] new_participants, Participant[] deleted_participants) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -463,7 +463,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void fillMap(RecurringResultsInterface rss, long s, long diff, int d, int counter) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -472,7 +472,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public CalendarDataObject fillObject(CalendarDataObject source, CalendarDataObject destination) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -481,7 +481,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public CalendarFolderObject getAllVisibleAndReadableFolderObject(int uid, int[] groups, Context c, UserConfiguration uc) throws SQLException, OXException, OXException, OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -490,7 +490,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public CalendarDataObject getAppointmentByID(int id, Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -499,7 +499,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public int getAppointmentFolder(int objectId, int userId, Context ctx) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
@@ -508,7 +508,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public String getAppointmentTitle(int objectId, Context ctx) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -517,7 +517,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public Appointment[] getAppointmentsByID(int folderId, int[] ids, int[] fields, Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -526,7 +526,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public CalendarDataObject getChangeExceptionByDate(int folderId, int recurrenceId, Date exDate, int[] fields, Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -535,7 +535,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public long[] getChangeExceptionDatesByRecurrence(int recurrenceId, Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -544,7 +544,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public CalendarDataObject[] getChangeExceptionsByRecurrence(int recurrenceId, int[] fields, Session session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -553,7 +553,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public Context getContext(Session so) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -562,7 +562,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public CalendarDataObject getDAOFromList(List<CalendarDataObject> list, int oid) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -571,7 +571,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public int[] getDatesPositions(Date[] dates, CalendarDataObject recurringAppointment) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -580,7 +580,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public int getFieldId(String fieldName) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
@@ -589,7 +589,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public String getFieldName(int fieldId) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -598,7 +598,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public String[] getFieldNames(int[] fieldIds) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -607,7 +607,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public long getLongByPosition(CalendarDataObject cdao, int pos) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
@@ -616,7 +616,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public int getMAX_END_YEARS() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
@@ -625,7 +625,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public Date getMaxUntilDate(CalendarDataObject cdao) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -634,7 +634,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public Date getNextReminderDate(int oid, int fid, Session so) throws OXException, SQLException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -643,7 +643,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public Date getNextReminderDate(int oid, int fid, Session so, long last) throws OXException, SQLException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -652,7 +652,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public Date getOccurenceDate(CalendarDataObject cdao) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -661,7 +661,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public Date getOccurenceDate(CalendarDataObject cdao, int occurrence) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -670,7 +670,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean getReadPermission(int oid, int fid, Session so, Context ctx) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -679,7 +679,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public int getRecurringAppointmentDeleteAction(CalendarDataObject cdao, CalendarDataObject edao) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
@@ -688,7 +688,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public int getRecurringAppoiontmentUpdateAction(CalendarDataObject cdao, CalendarDataObject edao) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
@@ -697,7 +697,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public String getSQLInStringForParticipants(List<UserParticipant> userParticipant) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -706,7 +706,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public String getSQLInStringForParticipants(Participant[] participant) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -715,7 +715,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public String getSQLInStringForResources(Participant[] participant) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -724,7 +724,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public String getString(CalendarDataObject cdao, int fieldID) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -735,25 +735,25 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
 
     @Override
     public String getUTCDateFormat(long timeMillis) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String getUTCDateFormat(Date date) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public String getUniqueCalendarSessionName() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public User getUser(Session so, Context ctx) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -762,7 +762,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public UserConfiguration getUserConfiguration(Context ctx, int userId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -771,7 +771,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public long getUserTimeUTCDate(Date date, String timezone) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
@@ -780,7 +780,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public CalendarFolderObject getVisibleAndReadableFolderObject(int uid, int[] groups, Context c, UserConfiguration uc, Connection readcon) throws SQLException, OXException, OXException, OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -789,7 +789,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void getVisibleFolderSQLInString(StringBuilder sb, int uid, int[] groups, Context c, UserConfiguration uc, Connection readcon) throws SQLException, OXException, OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -798,7 +798,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean getWritePermission(int oid, int fid, Session so, Context ctx) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -807,7 +807,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean inBetween(long check_start, long check_end, long range_start, long range_end) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -816,7 +816,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean isException(long t, Set<Long> ce, Set<Long> de) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -824,7 +824,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#isInThePast(java.sql.Date)
      */
     public boolean isInThePast(java.sql.Date check) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -833,7 +833,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean isInThePast(Date check) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -842,7 +842,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean isOccurrenceDate(long date, long ignoreDate, CalendarDataObject cdao, long[] changeExceptions) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -851,7 +851,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public boolean isRecurringMaster(CalendarDataObject edao) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -860,7 +860,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public Date[] mergeExceptionDates(Date[] ddates, Date[] cdates) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -869,7 +869,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public long normalizeLong(long millis) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
@@ -878,7 +878,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void purgeExceptionFieldsFromObject(CalendarDataObject cdao) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -887,7 +887,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void recoverForInvalidPattern(CalendarDataObject cdao) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -896,7 +896,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public Date[] removeException(Date[] dates, Date d) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -905,7 +905,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public Date[] removeException(Date[] dates, long dateTime) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -914,7 +914,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void removeFieldsFromObject(CalendarDataObject cdao) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -923,7 +923,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void removeParticipant(CalendarDataObject cdao, int uid) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -932,7 +932,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void removeRecurringType(CalendarDataObject cdao) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -941,7 +941,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void removeUserParticipant(CalendarDataObject cdao, int uid) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -950,7 +950,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void replaceDatesWithFirstOccurence(Appointment appointment) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -959,7 +959,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public int resolveFolderIDForUser(int oid, int uid, Context c) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
@@ -968,7 +968,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void safelySetStartAndEndDateForRecurringAppointment(CalendarDataObject cdao) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -977,7 +977,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void setMAX_END_YEARS(int MAX_END_YEARS) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -986,7 +986,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void setRecurrencePositionOrDateInDAO(CalendarDataObject cdao) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -995,25 +995,25 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void simpleParticipantCheck(CalendarDataObject cdao) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void triggerEvent(Session session, int action, Appointment appointmentobject) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void triggerModificationEvent(Session session, CalendarDataObject oldAppointment, CalendarDataObject newAppointment) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void updateDefaultStatus(CalendarDataObject cdao, Context ctx, int uid, int inFolder) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
     /* (non-Javadoc)
@@ -1021,18 +1021,18 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public void fillEventInformation(CalendarDataObject cdao, CalendarDataObject edao, UserParticipant[] up_event, UserParticipant[] new_userparticipants, UserParticipant[] deleted_userparticipants, UserParticipant[] modified_userparticipants, Participant[] p_event, Participant[] new_participants, Participant[] deleted_participants, Participant[] modified_participants) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
     @Override
     public CalendarFolderObject getAllVisibleAndReadableFolderObject(int uid, int[] groups, Context c, UserConfiguration uc, Connection con) throws SQLException, OXException, OXException, OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 	@Override
 	public void setRecurrencePositionOrDateInDAO(CalendarDataObject cdao,
 			boolean ignore_exceptions) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		
 	}
 

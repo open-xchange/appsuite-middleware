@@ -65,7 +65,7 @@ public class SimContextService implements ContextService{
      */
     @Override
     public List<Integer> getAllContextIds() throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -74,13 +74,13 @@ public class SimContextService implements ContextService{
      */
     @Override
     public Context getContext(int contextId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public Context loadContext(int contextId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -89,7 +89,7 @@ public class SimContextService implements ContextService{
      */
     @Override
     public int getContextId(String loginContextInfo) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
@@ -98,7 +98,7 @@ public class SimContextService implements ContextService{
      */
     @Override
     public void invalidateContext(int contextId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -107,7 +107,7 @@ public class SimContextService implements ContextService{
      */
     @Override
     public void invalidateLoginInfo(String loginContextInfo) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 }

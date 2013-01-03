@@ -155,7 +155,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
         if (isDummy()) {
             return "[dummy]";
         }
-        final StringBuilder builder = new StringBuilder(32);
+        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32);
         builder.append("Threadable [");
         if (fullName != null) {
             builder.append("fullName=").append(fullName).append(", ");

@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond;
 
+import java.util.Set;
 import com.openexchange.session.Session;
 
 /**
@@ -67,6 +68,18 @@ public interface Parameterized {
      * The parameter name for a volatile flag.
      */
     public static final String PARAM_VOLATILE = "__volatile";
+
+    /**
+     * The parameter name for idle time.
+     */
+    public static final String PARAM_IDLE_TIME = "__idleTime";
+
+    /**
+     * Gets the names of contained parameters.
+     * 
+     * @return The parameter names
+     */
+    Set<String> getParameterNames();
 
     /**
      * Gets the denoted parameter.

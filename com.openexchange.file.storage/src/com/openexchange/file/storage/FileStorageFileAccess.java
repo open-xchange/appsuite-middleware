@@ -145,7 +145,7 @@ public interface FileStorageFileAccess extends TransactionAware {
     /**
      * A version number pointing at the current version of a file
      */
-    public static final int CURRENT_VERSION = -1;
+    public static final String CURRENT_VERSION = null;
 
     /**
      * An ID value denoting a newly created file, or a file that should be created
@@ -262,7 +262,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return true when the file exists and is readable, false otherwise.
      * @throws OXException
      */
-    public boolean exists(String folderId, String id, int version) throws OXException;
+    public boolean exists(String folderId, String id, String version) throws OXException;
 
     /**
      * Load the metadata about a file
@@ -273,7 +273,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return The File Metadata
      * @throws OXException
      */
-    public File getFileMetadata(String folderId, String id, int version) throws OXException;
+    public File getFileMetadata(String folderId, String id, String version) throws OXException;
 
     /**
      * Save the file metadata.
@@ -319,7 +319,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return
      * @throws OXException
      */
-    public InputStream getDocument(String folderId, String id, int version) throws OXException;
+    public InputStream getDocument(String folderId, String id, String version) throws OXException;
 
     /**
      * Save the file metadata and binary content
@@ -372,7 +372,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return
      * @throws OXException
      */
-    public int[] removeVersion(String folderId, String id, int[] versions) throws OXException;
+    public String[] removeVersion(String folderId, String id, String[] versions) throws OXException;
 
     /**
      * Unlocks a given file.

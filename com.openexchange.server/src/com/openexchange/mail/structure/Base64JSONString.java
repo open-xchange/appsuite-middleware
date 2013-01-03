@@ -89,7 +89,7 @@ public final class Base64JSONString implements JSONString {
             final byte[] buf = new byte[BUFLEN];
             out = new UnsynchronizedByteArrayOutputStream(BUFLEN << 2);
             int read;
-            while ((read = in.read(buf, 0, BUFLEN)) >= 0) {
+            while ((read = in.read(buf, 0, BUFLEN)) > 0) {
                 out.write(buf, 0, read);
             }
         } catch (final IOException e) {

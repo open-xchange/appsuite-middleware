@@ -63,7 +63,7 @@ public final class IndexEventHandler implements EventHandler {
 
     @Override
     public void handleEvent(Event event) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 

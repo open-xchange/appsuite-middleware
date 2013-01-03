@@ -98,7 +98,7 @@ CREATE TABLE resource (
     displayName VARCHAR(128) NOT NULL,
     mail VARCHAR(256),
     available boolean NOT NULL,
-    description VARCHAR(255),
+    description TEXT,
     lastModified INT8 NOT NULL,
     PRIMARY KEY (cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -110,7 +110,7 @@ CREATE TABLE del_resource (
     displayName VARCHAR(128) NOT NULL,
     mail VARCHAR(256),
     available boolean NOT NULL,
-    description VARCHAR(255),
+    description TEXT,
     lastModified INT8 NOT NULL,
     PRIMARY KEY (cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

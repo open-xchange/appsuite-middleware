@@ -101,7 +101,21 @@ public final class ChecksumPairImpl implements com.openexchange.rdiff.ChecksumPa
 
     @Override
     public boolean equals(final Object obj) {
-        return checksumPair.equals(obj);
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ChecksumPairImpl)) {
+            return false;
+        }
+        final ChecksumPairImpl other = (ChecksumPairImpl) obj;
+        if (null == checksumPair) {
+            if (null != other.checksumPair) {
+                return false;
+            }
+        } else if (!checksumPair.equals(other.checksumPair)) {
+            return false;
+        }
+        return true;
     }
 
     @Override

@@ -10,7 +10,12 @@ Package: open-xchange-l10n-de-de
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Description: Package containing Open-Xchange backend localization for de_DE
- 
+
+Package: open-xchange-l10n-en-us
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Description: Package containing Open-Xchange backend localization for en_US
+
 Package: open-xchange-l10n-fr-fr
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)

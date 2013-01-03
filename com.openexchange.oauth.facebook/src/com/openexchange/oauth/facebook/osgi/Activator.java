@@ -51,6 +51,8 @@ package com.openexchange.oauth.facebook.osgi;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
+
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
@@ -71,8 +73,7 @@ public final class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class[]{CapabilityService.class};
     }
 
     @Override
@@ -80,6 +81,8 @@ public final class Activator extends HousekeepingActivator {
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + OAuthService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DeferringURLService.class.getName() + "))");
         track(filter, new FacebookRegisterer(context));
         openTrackers();
+        getService(CapabilityService.class).declareCapability("facebook");
+
     }
 
     @Override

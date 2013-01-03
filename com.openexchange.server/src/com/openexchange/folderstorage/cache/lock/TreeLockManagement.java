@@ -77,14 +77,14 @@ public final class TreeLockManagement {
         return INSTANCE;
     }
 
-    private final ConcurrentMap<Key, ConcurrentMap<String, ReadWriteLock>> map;
+    private final ConcurrentMap<Integer, ConcurrentMap<Integer, ConcurrentMap<String, ReadWriteLock>>> map;
 
     /**
      * Initializes a new {@link TreeLockManagement}.
      */
     private TreeLockManagement() {
         super();
-        map = new ConcurrentHashMap<Key, ConcurrentMap<String, ReadWriteLock>>();
+        map = new ConcurrentHashMap<Integer, ConcurrentMap<Integer,ConcurrentMap<String,ReadWriteLock>>>(32);
     }
 
     /**
@@ -100,10 +100,25 @@ public final class TreeLockManagement {
      * @param session The session
      */
     public void dropFor(final Session session) {
-        map.remove(keyFor(session));
+        final ConcurrentMap<Integer, ConcurrentMap<String, ReadWriteLock>> userMap = map.get(Integer.valueOf(session.getContextId()));
+        if (null != userMap) {
+            userMap.remove(Integer.valueOf(session.getUserId()));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(new com.openexchange.java.StringAllocator("Cleaned folder locks for user ").append(session.getUserId()).append(" in context ").append(
+                    session.getContextId()).toString());
+            }
+        }
+    }
+
+    /**
+     * Drops locks for given context.
+     *
+     * @param contextId The context identifier
+     */
+    public void dropFor(final int contextId) {
+        map.remove(Integer.valueOf(contextId));
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned folder locks for user ").append(session.getUserId()).append(" in context ").append(
-                session.getContextId()).toString());
+            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned folder locks for context ").append(contextId).toString());
         }
     }
 
@@ -127,11 +142,18 @@ public final class TreeLockManagement {
      * @return The read-write lock
      */
     public ReadWriteLock getFor(final String treeId, final int userId, final int contextId) {
-        final Key key = keyFor(userId, contextId);
-        ConcurrentMap<String, ReadWriteLock> lockMap = map.get(key);
+        ConcurrentMap<Integer, ConcurrentMap<String, ReadWriteLock>> userMap = map.get(Integer.valueOf(contextId));
+        if (null == userMap) {
+            final ConcurrentMap<Integer, ConcurrentMap<String, ReadWriteLock>> newUserMap = new ConcurrentHashMap<Integer, ConcurrentMap<String,ReadWriteLock>>(32);
+            userMap = map.putIfAbsent(Integer.valueOf(contextId), newUserMap);
+            if (null == userMap) {
+                userMap = newUserMap;
+            }
+        }
+        ConcurrentMap<String, ReadWriteLock> lockMap = userMap.get(Integer.valueOf(userId));
         if (null == lockMap) {
             final ConcurrentMap<String, ReadWriteLock> nlm = new ConcurrentHashMap<String, ReadWriteLock>(4);
-            lockMap = map.putIfAbsent(key, nlm);
+            lockMap = userMap.putIfAbsent(Integer.valueOf(userId), nlm);
             if (null == lockMap) {
                 lockMap = nlm;
             }
@@ -155,64 +177,15 @@ public final class TreeLockManagement {
      * @return The lock or <code>null</code> if absent
      */
     public ReadWriteLock optFor(final String treeId, final Session session) {
-        final Key key = keyFor(session);
-        final ConcurrentMap<String, ReadWriteLock> lockMap = map.get(key);
+        ConcurrentMap<Integer, ConcurrentMap<String, ReadWriteLock>> userMap = map.get(Integer.valueOf(session.getContextId()));
+        if (null == userMap) {
+            return null;
+        }
+        ConcurrentMap<String, ReadWriteLock> lockMap = userMap.get(Integer.valueOf(session.getUserId()));
         if (null == lockMap) {
             return null;
         }
         return lockMap.get(treeId);
-    }
-
-    private static Key keyFor(final Session session) {
-        return new Key(session.getUserId(), session.getContextId());
-    }
-
-    private static Key keyFor(final int userId, final int contextId) {
-        return new Key(userId, contextId);
-    }
-
-    private static final class Key {
-
-        private final int cid;
-
-        private final int user;
-
-        private final int hash;
-
-        protected Key(final int user, final int cid) {
-            super();
-            this.user = user;
-            this.cid = cid;
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + cid;
-            result = prime * result + user;
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            if (cid != other.cid) {
-                return false;
-            }
-            if (user != other.user) {
-                return false;
-            }
-            return true;
-        }
-
     }
 
 }

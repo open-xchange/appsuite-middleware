@@ -398,7 +398,7 @@ public final class DatabaseOAuth2ProviderService extends AbstractOAuthProviderSe
         if (authz != null) {
             if (authz.substring(0, 5).equals("Basic")) {
                 final String userPass = new String(Base64.decodeBase64(authz.substring(6).getBytes()), "UTF-8");
-                final int loc = userPass.indexOf(":");
+                final int loc = userPass.indexOf(':');
                 if (loc == -1) {
                     throw new OAuth2ProblemException(BaseErrorCode.INVALID_CLIENT);
                 }

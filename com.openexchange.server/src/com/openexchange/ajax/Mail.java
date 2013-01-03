@@ -1908,7 +1908,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final InputStream zipInputStream = mf.getInputStream();
                 try {
                     final byte[] buffer = new byte[0xFFFF];
-                    for (int len; (len = zipInputStream.read(buffer, 0, buffer.length)) != -1;) {
+                    for (int len; (len = zipInputStream.read(buffer, 0, buffer.length)) > 0;) {
                         out.write(buffer, 0, len);
                     }
                     out.flush();
@@ -1985,7 +1985,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final InputStream zipInputStream = mf.getInputStream();
                 try {
                     final byte[] buffer = new byte[0xFFFF];
-                    for (int len; (len = zipInputStream.read(buffer, 0, buffer.length)) != -1;) {
+                    for (int len; (len = zipInputStream.read(buffer, 0, buffer.length)) > 0;) {
                         out.write(buffer, 0, len);
                     }
                     out.flush();
@@ -2238,7 +2238,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 try {
                     final int buflen = 0xFFFF;
                     final byte[] buffer = new byte[buflen];
-                    for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) != -1;) {
+                    for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) > 0;) {
                         out.write(buffer, 0, len);
                     }
                     out.flush();
@@ -2941,7 +2941,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Parse body into a JSON array
                  */
-                final JSONArray ja = (JSONArray) searchValue;
+                final JSONArray ja = searchValue.toArray();
                 final int length = ja.length();
                 if (length > 0) {
                     final int[] searchCols = new int[length];
@@ -3021,7 +3021,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                 }
             } else {
-                final JSONArray searchArray = ((JSONObject) searchValue).getJSONArray(PARAMETER_FILTER);
+                final JSONArray searchArray = searchValue.toObject().getJSONArray(PARAMETER_FILTER);
                 /*
                  * Search mails
                  */

@@ -91,6 +91,9 @@ public final class DropboxExceptionMessages implements LocalizableStrings {
     // Missing configuration for account "%1$s".
     public static final String MISSING_CONFIG_MSG = "Missing configuration for account \"%1$s\".";
 
+    // Bad or expired access token. Need to re-authenticate user.
+    public static final String UNLINKED_ERROR_MSG = "Bad or expired access token. Need to re-authenticate user.";
+
     /**
      * Initializes a new {@link DropboxExceptionMessages}.
      */

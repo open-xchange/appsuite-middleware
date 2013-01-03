@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
 
 /**
  * {@link Strings} - A library for performing operations that create Strings
@@ -60,6 +61,54 @@ import java.util.List;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Strings {
+
+    /**
+     * Returns a literal replacement <code>String</code> for the specified <code>String</code>. This method produces a <code>String</code>
+     * that will work as a literal replacement <code>s</code> in the <code>appendReplacement</code> method of the {@link Matcher} class. The
+     * <code>String</code> produced will match the sequence of characters in <code>s</code> treated as a literal sequence. Slashes ('\') and
+     * dollar signs ('$') will be given no special meaning.
+     * 
+     * @param s The string to be literalized
+     * @return A literal string replacement
+     */
+    public static String quoteReplacement(final String s) {
+        if (isEmpty(s) || ((s.indexOf('\\') == -1) && (s.indexOf('$') == -1))) {
+            return s;
+        }
+        final int length = s.length();
+        final StringAllocator sb = new StringAllocator(length << 1);
+        for (int i = 0; i < length; i++) {
+            final char c = s.charAt(i);
+            if (c == '\\') {
+                sb.append('\\');
+                sb.append('\\');
+            } else if (c == '$') {
+                sb.append('\\');
+                sb.append('$');
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Checks for an empty string.
+     * 
+     * @param string The string
+     * @return <code>true</code> if empty; else <code>false</code>
+     */
+    public static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 
     /**
      * Joins a collection of objects by connecting the results of their #toString() method with a connector

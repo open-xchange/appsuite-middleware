@@ -68,14 +68,11 @@ public class HazelcastStoredSession extends StoredSession implements DataSeriali
 
     private static final long serialVersionUID = -2346327568417617677L;
 
-    private long lastAccess;
-
     /**
      * Initializes a new {@link HazelcastStoredSession}.
      */
     public HazelcastStoredSession() {
         super();
-        this.lastAccess = System.currentTimeMillis();
     }
 
     /**
@@ -85,35 +82,12 @@ public class HazelcastStoredSession extends StoredSession implements DataSeriali
      */
     public HazelcastStoredSession(final Session session) {
         super(session);
-        this.lastAccess = System.currentTimeMillis();
     }
     
-    /**
-     * Gets the last-accessed time stamp.
-     * 
-     * @return The last-accessed time stamp
-     */
-    public long getLastAccess() {
-        return lastAccess;
-    }
-
-    /**
-     * Sets the last-accessed time stamp.
-     * 
-     * @param lastAccess The last-accessed time stamp
-     */
-    public void setLastAccess(final long lastAccess) {
-        this.lastAccess = lastAccess;
-    }
-
     @Override
     public void writeData(DataOutput out) throws IOException {
         /*
-         * own properties
-         */
-        out.writeLong(lastAccess);
-        /*
-         * inherited from stored session
+         * basic properties
          */
         writeString(out, loginName);
         writeString(out, password);
@@ -148,11 +122,7 @@ public class HazelcastStoredSession extends StoredSession implements DataSeriali
     @Override
     public void readData(DataInput in) throws IOException {
         /*
-         * own properties
-         */
-        lastAccess = in.readLong();
-        /*
-         * inherited from stored session
+         * basic properties
          */
         loginName = readString(in);
         password = readString(in);

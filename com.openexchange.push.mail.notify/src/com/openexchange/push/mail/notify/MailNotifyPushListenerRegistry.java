@@ -186,7 +186,7 @@ public final class MailNotifyPushListenerRegistry {
                 if( useEmailAddress ) {
                     ret[i] = alias.toLowerCase();
                 } else {
-                    final int idx = alias.indexOf("@");
+                    final int idx = alias.indexOf('@');
                     if( idx != -1) {
                         ret[i] = alias.substring(0, idx).toLowerCase();
                     } else {

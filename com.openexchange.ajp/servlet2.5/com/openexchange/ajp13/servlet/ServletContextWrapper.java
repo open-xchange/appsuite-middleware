@@ -62,7 +62,7 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import com.openexchange.server.impl.Version;
+import com.openexchange.version.Version;
 
 /**
  * {@link ServletContextWrapper} - A wrapper class for {@link ServletContext} interface.
@@ -185,17 +185,7 @@ public class ServletContextWrapper implements ServletContext {
 
     @Override
     public int getMajorVersion() {
-        // E.g. 6.13.0-Rev5
-        final String version = Version.getVersionString();
-        final int pos = version.indexOf('.');
-        if (pos > 0) {
-            try {
-                return Integer.parseInt(version.substring(0, pos));
-            } catch (final NumberFormatException e) {
-                return OX_SERVLET_MAJOR;
-            }
-        }
-        return OX_SERVLET_MAJOR;
+        return Version.getInstance().getMajor();
     }
 
     @Override
@@ -205,16 +195,7 @@ public class ServletContextWrapper implements ServletContext {
 
     @Override
     public int getMinorVersion() {
-        // E.g. 6.13.0-Rev5
-        final String[] tokens = Version.getVersionString().split("\\.");
-        if (tokens.length < 2) {
-            return OX_SERVLET_MINOR;
-        }
-        try {
-            return Integer.parseInt(tokens[1]);
-        } catch (final NumberFormatException e) {
-            return OX_SERVLET_MINOR;
-        }
+        return Version.getInstance().getMinor();
     }
 
     @Override

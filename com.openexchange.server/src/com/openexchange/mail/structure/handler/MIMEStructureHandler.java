@@ -266,7 +266,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             final JSONValue prev = currentBodyObject;
             final JSONArray jsonArray;
             if (prev.isArray()) {
-                jsonArray = (JSONArray) prev;
+                jsonArray = prev.toArray();
             } else {
                 jsonArray = new JSONArray();
                 jsonArray.put(prev);
@@ -718,7 +718,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                         final byte[] buf = new byte[BUFLEN];
                         final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUFLEN << 2);
                         int read;
-                        while ((read = inputStream.read(buf, 0, BUFLEN)) >= 0) {
+                        while ((read = inputStream.read(buf, 0, BUFLEN)) > 0) {
                             out.write(buf, 0, read);
                         }
                         bytes = out.toByteArray();
@@ -765,6 +765,8 @@ public final class MIMEStructureHandler implements StructureHandler {
             HeaderName.valueOf("Resent-Sender"),
             HeaderName.valueOf("Disposition-Notification-To")));
 
+    private static final Pattern P_DOUBLE_BACKSLASH = Pattern.compile(Pattern.quote("\\\\\\\""));
+
     private JSONObject generateHeadersObject(final Iterator<Entry<String, String>> iter, final JSONObject parent) throws OXException {
         try {
             final JSONObject hdrObject = new JSONObject();
@@ -787,7 +789,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                             final JSONObject addressJsonObject = new JSONObject();
                             final String personal = internetAddress.getPersonal();
                             if (null != personal) {
-                                addressJsonObject.put("personal", personal);
+                                addressJsonObject.put("personal", P_DOUBLE_BACKSLASH.matcher(personal).replaceAll("\\\""));
                             }
                             addressJsonObject.put("address", address);
                             ja.put(addressJsonObject);

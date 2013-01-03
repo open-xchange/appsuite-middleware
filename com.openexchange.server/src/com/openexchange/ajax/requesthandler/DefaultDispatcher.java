@@ -58,6 +58,8 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -70,8 +72,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DefaultDispatcher implements Dispatcher {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DefaultDispatcher.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultDispatcher.class);
+
+    private final ConcurrentMap<StrPair, Boolean> fallbackSessionActionsCache;
+    private final ConcurrentMap<StrPair, Boolean> omitSessionActionsCache;
 
     private final ConcurrentMap<String, AJAXActionServiceFactory> actionFactories;
     private final Queue<AJAXActionCustomizerFactory> customizerFactories;
@@ -81,6 +85,9 @@ public class DefaultDispatcher implements Dispatcher {
      */
     public DefaultDispatcher() {
         super();
+        fallbackSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128);
+        omitSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128);
+
         actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
         customizerFactories = new Java7ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
     }
@@ -104,6 +111,9 @@ public class DefaultDispatcher implements Dispatcher {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final AJAXState state, final ServerSession session) throws OXException {
+        if (null == session) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_SESSION);
+        }
         List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
         final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
         /*
@@ -246,31 +256,29 @@ public class DefaultDispatcher implements Dispatcher {
         synchronized (actionFactories) {
             AJAXActionServiceFactory current = actionFactories.putIfAbsent(module, factory);
             if (null != current) {
-                synchronized (actionFactories) {
-                    try {
-                        current = actionFactories.get(module);
-                        final Module moduleAnnotation = current.getClass().getAnnotation(Module.class);
-                        if (null == moduleAnnotation) {
-                            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512).append("There is already a factory associated with module \"");
-                            sb.append(module).append("\": ").append(current.getClass().getName());
-                            sb.append(". Therefore registration is denied for factory \"").append(factory.getClass().getName());
-                            sb.append("\". Unless these two factories provide the \"").append(Module.class.getName()).append(
-                                "\" annotation to specify what actions are supported by each factory.");
-                            LOG.warn(sb.toString());
+                try {
+                    current = actionFactories.get(module);
+                    final Module moduleAnnotation = current.getClass().getAnnotation(Module.class);
+                    if (null == moduleAnnotation) {
+                        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512).append("There is already a factory associated with module \"");
+                        sb.append(module).append("\": ").append(current.getClass().getName());
+                        sb.append(". Therefore registration is denied for factory \"").append(factory.getClass().getName());
+                        sb.append("\". Unless these two factories provide the \"").append(Module.class.getName()).append(
+                            "\" annotation to specify what actions are supported by each factory.");
+                        LOG.warn(sb.toString());
+                    } else {
+                        final CombinedActionFactory combinedFactory;
+                        if (current instanceof CombinedActionFactory) {
+                            combinedFactory = (CombinedActionFactory) current;
                         } else {
-                            final CombinedActionFactory combinedFactory;
-                            if (current instanceof CombinedActionFactory) {
-                                combinedFactory = (CombinedActionFactory) current;
-                            } else {
-                                combinedFactory = new CombinedActionFactory();
-                                combinedFactory.add(current);
-                                actionFactories.put(module, combinedFactory);
-                            }
-                            combinedFactory.add(factory);
+                            combinedFactory = new CombinedActionFactory();
+                            combinedFactory.add(current);
+                            actionFactories.put(module, combinedFactory);
                         }
-                    } catch (final IllegalArgumentException e) {
-                        LOG.error(e.getMessage());
+                        combinedFactory.add(factory);
                     }
+                } catch (final IllegalArgumentException e) {
+                    LOG.error(e.getMessage());
                 }
             }
         }
@@ -306,28 +314,85 @@ public class DefaultDispatcher implements Dispatcher {
 
 	@Override
 	public boolean mayUseFallbackSession(final String module, final String action) throws OXException {
-		final AJAXActionServiceFactory factory = lookupFactory(module);
-        if (factory == null) {
-            return false;
+	    final StrPair key = new StrPair(module, action);
+        Boolean ret = fallbackSessionActionsCache.get(key);
+	    if (null == ret) {
+	        final AJAXActionServiceFactory factory = lookupFactory(module);
+	        if (factory == null) {
+	            ret = Boolean.FALSE;
+	        } else {
+    	        final DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
+    	        ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.allowPublicSession());
+	        }
+	        fallbackSessionActionsCache.put(key, ret);
         }
-        final DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
-        if (actionMetadata == null) {
-        	return false;
-        }
-		return actionMetadata.allowPublicSession();
+	    return ret.booleanValue();
 	}
 	
 	@Override
     public boolean mayOmitSession(final String module, final String action) throws OXException {
-		final AJAXActionServiceFactory factory = lookupFactory(module);
-        if (factory == null) {
-            return false;
+	    final StrPair key = new StrPair(module, action);
+        Boolean ret = omitSessionActionsCache.get(key);
+        if (null == ret) {
+            final AJAXActionServiceFactory factory = lookupFactory(module);
+            if (factory == null) {
+                ret = Boolean.FALSE;
+            } else {
+                final DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
+                ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.noSession());
+            }
+            omitSessionActionsCache.put(key, ret);
         }
-        final DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
-        if (actionMetadata == null) {
-        	return false;
-        }
-		return actionMetadata.noSession();
+        return ret.booleanValue();
 	}
+
+	private static final class StrPair {
+	    private final String str1;
+	    private final String str2;
+	    private final int hash;
+
+        StrPair(String str1, String str2) {
+            super();
+            this.str1 = str1;
+            this.str2 = str2;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((str1 == null) ? 0 : str1.hashCode());
+            result = prime * result + ((str2 == null) ? 0 : str2.hashCode());
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof StrPair)) {
+                return false;
+            }
+            StrPair other = (StrPair) obj;
+            if (str1 == null) {
+                if (other.str1 != null) {
+                    return false;
+                }
+            } else if (!str1.equals(other.str1)) {
+                return false;
+            }
+            if (str2 == null) {
+                if (other.str2 != null) {
+                    return false;
+                }
+            } else if (!str2.equals(other.str2)) {
+                return false;
+            }
+            return true;
+        }
+
+	} // End of class Strings
 
 }

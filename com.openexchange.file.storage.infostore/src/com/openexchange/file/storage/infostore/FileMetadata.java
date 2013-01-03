@@ -184,7 +184,8 @@ public class FileMetadata implements DocumentMetadata {
 
     @Override
     public int getVersion() {
-        return file.getVersion();
+        final String version = file.getVersion();
+        return isEmpty(version) ? -1 : Integer.parseInt(version);
     }
 
     @Override
@@ -289,7 +290,7 @@ public class FileMetadata implements DocumentMetadata {
 
     @Override
     public void setVersion(final int version) {
-        file.setVersion(version);
+        file.setVersion(version < 0 ? FileStorageFileAccess.CURRENT_VERSION : Integer.toString(version));
     }
 
     @Override
@@ -307,5 +308,16 @@ public class FileMetadata implements DocumentMetadata {
         this.fileSpool = string;
     }
 
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 
 }

@@ -57,52 +57,39 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
+import com.openexchange.version.Version;
 
 /**
  * Adds the configuration setting tree entry for the server version.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ServerVersion implements PreferencesItemService {
 
     public static final String NAME = "serverVersion";
 
-    /**
-     * Default constructor.
-     */
     public ServerVersion() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String[] getPath() {
         return new String[] { NAME };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
-            /**
-             * {@inheritDoc}
-             */
+
             @Override
-            public boolean isAvailable(final UserConfiguration userConfig) {
+            public boolean isAvailable(UserConfiguration userConfig) {
                 return true;
             }
-            /**
-             * {@inheritDoc}
-             */
+
             @Override
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                setting.setSingleValue(Version.getVersionString());
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                setting.setSingleValue(Version.getInstance().getVersionString());
             }
         };
     }

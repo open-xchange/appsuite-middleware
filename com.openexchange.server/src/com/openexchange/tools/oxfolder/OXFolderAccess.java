@@ -150,8 +150,21 @@ public class OXFolderAccess {
      * @throws OXException
      */
     public final FolderObject getFolderObject(final int folderId) throws OXException {
+        return getFolderObject(folderId, true);
+    }
+
+    /**
+     * Loads matching <code>com.openexchange.groupware.container.FolderObject</code> instance either from cache (if enabled) or from
+     * underlying storage.
+     *
+     * @param folderId - the folder ID
+     * @param fromCache - <code>true</code> to look-up cache; otherwise <code>false</code>
+     * @return matching <code>com.openexchange.groupware.container.FolderObject</code> instance
+     * @throws OXException
+     */
+    public final FolderObject getFolderObject(final int folderId, final boolean fromCache) throws OXException {
         final FolderObject fo;
-        if (FolderCacheManager.isEnabled()) {
+        if (fromCache && FolderCacheManager.isEnabled()) {
             fo = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
         } else {
             fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);

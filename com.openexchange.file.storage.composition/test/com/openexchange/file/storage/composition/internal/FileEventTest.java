@@ -129,15 +129,15 @@ public class FileEventTest {
                 assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.DELETE_TOPIC));
                 String folderId = FileStorageEventHelper.extractFolderId(event);
                 String objectId = FileStorageEventHelper.extractObjectId(event);
-                Set<Integer> versions = FileStorageEventHelper.extractVersions(event);
+                Set<String> versions = FileStorageEventHelper.extractVersions(event);
                 assertEquals("Wrong folder.", file.getFolderId(), folderId);
                 assertEquals("Wrong id.", file.getId(), objectId);
                 assertTrue("Too much versions.", versions.size() == 1);
-                Integer next = versions.iterator().next();
-                assertTrue("Wrong version.", next.intValue() == file.getVersion());
+                String next = versions.iterator().next();
+                assertTrue("Wrong version.", next == file.getVersion());
             }
         });
-        int[] notRemoved = fileAccess.removeVersion(file.getId(), new int[] { file.getVersion() });
+        String[] notRemoved = fileAccess.removeVersion(file.getId(), new String[] { file.getVersion() });
         assertTrue("Version not removed.", notRemoved.length == 0); 
         
         fileAccess.setEventVerifier(new EventVerifier() {            

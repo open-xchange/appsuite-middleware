@@ -181,12 +181,12 @@ public class InfostoreRequestTest extends FileTest {
     }
 
     public void testGetVersion() {
-        final int version = request().param("version", "2").getVersion();
-        assertEquals(2, version);
+        final String version = request().param("version", "2").getVersion();
+        assertEquals("2", version);
     }
 
     public void testGetVersionDefaultsToCurrentVersion()  {
-        final int version = request().getVersion();
+        final String version = request().getVersion();
         assertEquals(FileStorageFileAccess.CURRENT_VERSION, version);
     }
 
@@ -212,11 +212,11 @@ public class InfostoreRequestTest extends FileTest {
     }
 
     public void testGetVersions() throws JSONException, OXException {
-        final int[] versions = request().body(new JSONArray("[1,3,5]")).getVersions();
+        final String[] versions = request().body(new JSONArray("[1,3,5]")).getVersions();
 
-        assertEquals(1, versions[0]);
-        assertEquals(3, versions[1]);
-        assertEquals(5, versions[2]);
+        assertEquals("1", versions[0]);
+        assertEquals("3", versions[1]);
+        assertEquals("5", versions[2]);
 
     }
 

@@ -72,7 +72,7 @@ public class AJAXGroupResolver implements GroupResolver {
 
 	@Override
     public Contact[] resolveGroup(String simpleName) {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 

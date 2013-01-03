@@ -79,7 +79,7 @@ public class FolderMoveStep extends NeedExistingStep<FolderObject> {
      */
     @Override
     public void cleanUp() throws Exception {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 

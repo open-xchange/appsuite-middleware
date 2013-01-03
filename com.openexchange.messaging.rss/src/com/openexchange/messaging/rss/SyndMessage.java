@@ -119,7 +119,7 @@ public class SyndMessage implements MessagingMessage {
     }
 
     private String createId(final String link, final String title, final Date publishedDate) {
-        final StringBuilder sb = new StringBuilder();
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
         if (link != null) {
             sb.append(link);
         }

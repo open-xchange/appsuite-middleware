@@ -70,7 +70,7 @@ public class PreferencesActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

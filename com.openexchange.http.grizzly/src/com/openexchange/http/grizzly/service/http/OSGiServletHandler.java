@@ -46,7 +46,9 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import javax.servlet.Filter;
@@ -70,7 +72,6 @@ import org.glassfish.grizzly.servlet.ServletConfigImpl;
 import org.glassfish.grizzly.servlet.ServletHandler;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.service.http.HttpContext;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.tools.exceptions.ExceptionUtils;
 
@@ -90,14 +91,24 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     private String servletPath;
 
-    private FilterChainImpl filterChain;
+    private CopyOnWriteArrayList<Filter> servletFilters;
 
+    private FilterChainFactory filterChainFactory;
+
+    /**
+     * Initializes a new {@link OSGiServletHandler}.
+     * 
+     * @param servlet
+     * @param httpContext
+     * @param servletInitParams
+     */
     public OSGiServletHandler(final Servlet servlet, final HttpContext httpContext, final HashMap<String, String> servletInitParams) {
         super(createServletConfig(new OSGiServletContext(httpContext), servletInitParams));
         // noinspection AccessingNonPublicFieldOfAnotherObject
         super.servletInstance = servlet;
         this.httpContext = httpContext;
-        this.filterChain = new FilterChainImpl(servlet, (OSGiServletContext) getServletCtx());
+        servletFilters = new CopyOnWriteArrayList<Filter>();
+        this.filterChainFactory = new FilterChainFactory(servlet, (OSGiServletContext) getServletCtx());
     }
 
     private OSGiServletHandler(final ServletConfigImpl servletConfig) {
@@ -163,17 +174,23 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     @Override
     protected FilterChainInvoker getFilterChain(Request request) {
-        return filterChain;
+        return filterChainFactory.createFilterChain(servletFilters);
     }
 
+    /**
+     * Append a filter to the chain of Filters this ServletHandler manages.
+     * 
+     * @param filter Instance of the Filter to add
+     * @param name Name of this Filter to add
+     * @param initParams Initparameters needed to create a FilterConfig
+     */
     protected void addFilter(final Filter filter, final String name, final Map<String, String> initParams) {
         try {
             filter.init(createFilterConfig(getServletCtx(), name, initParams));
-            filterChain.addFilter(filter);
+            servletFilters.add(filter);
         } catch (Exception e) {
             LOG.error(e.toString(), e);
         }
-
     }
 
     // @Override
@@ -226,6 +243,44 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
         @Override
         protected void setInitParameters(Map<String, String> parameters) {
             super.setInitParameters(parameters);
+        }
+    }
+
+    private static final class FilterChainFactory {
+
+        private final Servlet servlet;
+
+        private final OSGiServletContext servletContext;
+
+        /**
+         * Initializes a new {@link FilterChainFactory}.
+         * 
+         * @param servlet
+         * @param servletContext
+         */
+        public FilterChainFactory(Servlet servlet, OSGiServletContext servletContext) {
+            super();
+            this.servlet = servlet;
+            this.servletContext = servletContext;
+        }
+
+        /**
+         * Construct and return a FilterChain implementation that will wrap the execution of the specified servlet instance. If we should
+         * not execute a filter chain at all, return <code>null</code>.
+         * 
+         * @param request The servlet request we are processing
+         * @param servlet The servlet instance to be wrapped
+         */
+        public FilterChainImpl createFilterChain(List<Filter> servletFilters) {
+
+            if (servletFilters.isEmpty()) {
+                return null;
+            }
+            FilterChainImpl filterChain = new FilterChainImpl(servlet, servletContext);
+            for (Filter servletFilter : servletFilters) {
+                filterChain.addFilter(servletFilter);
+            }
+            return filterChain;
         }
     }
 
@@ -284,26 +339,22 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
          */
         @Override
         public void doFilter(ServletRequest request, ServletResponse response) {
-
-            // Call the next filter if there is one
             if (pos < n) {
-
                 Filter filter = filters[pos++];
-
-                try {
-                    filter.doFilter(request, response, this);
-                } catch(Throwable throwable) {
-                    handleThrowable(throwable, request, response);
+                if (filter != null) {
+                    try {
+                        filter.doFilter(request, response, this);
+                    } catch (Throwable throwable) {
+                        handleThrowable(throwable, request, response);
+                    }
+                    return;
                 }
-                return;
             }
 
             try {
                 if (servlet != null) {
-                    // TODO: wrap request! check cookies
                     servlet.service(request, response);
                 }
-
             } catch (Throwable throwable) {
                 handleThrowable(throwable, request, response);
             }
@@ -312,21 +363,22 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         /**
          * Let the ExceptionUtils handle the Throwable for us and set a proper HttpStatus on the response.
+         * 
          * @param throwable The Throwable that needs to be handled.
          * @param request The request that couldn't be serviced because of throwable
          * @param response The associated Response
          */
         private void handleThrowable(Throwable throwable, ServletRequest request, ServletResponse response) {
             ExceptionUtils.handleThrowable(throwable);
-            
+
             StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
-            if(LogProperties.isEnabled()) {
+            if (LogProperties.isEnabled()) {
                 logBuilder.append(LogProperties.getAndPrettyPrint());
             }
-            
-            if(request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
+
+            if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
                 HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-                HttpServletResponse httpServletResponse= (HttpServletResponse) response;
+                HttpServletResponse httpServletResponse = (HttpServletResponse) response;
                 appendHttpServletRequestInfo(logBuilder, httpServletRequest);
                 // 500 - Internal Server Error
                 httpServletResponse.setStatus(500);
@@ -338,8 +390,36 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         // ------------------------------------------------------- Protected Methods
 
+        protected void addFilter(final Filter filter) {
+            if (filter == null) {
+                throw new IllegalArgumentException("Obligatory parameter is null: filter");
+            }
+            synchronized (lock) {
+                // Don't ad Filters twice
+                boolean isAlreadyAdded = false;
+                for (Filter currentFilter : filters) {
+                    if (currentFilter != null && currentFilter.getClass().equals(filter.getClass())) {
+                        isAlreadyAdded = true;
+                        LOG.error("Tried to add Filter " + filter + " multiple times.");
+                        break;
+                    }
+                }
+                if (!isAlreadyAdded) {
+                    if (n == filters.length) {
+                        Filter[] newFilters = new Filter[n + 4];
+                        System.arraycopy(filters, 0, newFilters, 0, n);
+                        filters = newFilters;
+                    }
+
+                    filters[n++] = filter;
+                }
+            }
+        }
+
+        // --------------------------------------------------------- Private Methods
         /**
          * Add ServletName and Parameters of the request to the log string allocator.
+         * 
          * @param logBuilder The existing StringBuilder user for building the log message
          * @param request The Request that couldn't be executed successfully.
          */
@@ -347,17 +427,16 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
             logBuilder.append("servlet name=''");
             logBuilder.append(servlet.getServletConfig().getServletName());
             logBuilder.append("servlet parameters=''");
-            @SuppressWarnings("unchecked")
-            Enumeration<String> parameterNames = request.getParameterNames();
-            boolean firstParam=true;
-            while(parameterNames.hasMoreElements()) {
-                if(firstParam) {
+            @SuppressWarnings("unchecked") Enumeration<String> parameterNames = request.getParameterNames();
+            boolean firstParam = true;
+            while (parameterNames.hasMoreElements()) {
+                if (firstParam) {
                     String name = parameterNames.nextElement();
                     String value = request.getParameter(name);
                     logBuilder.append(name);
                     logBuilder.append("=");
                     logBuilder.append(value);
-                    firstParam=false;
+                    firstParam = false;
                 } else {
                     logBuilder.append("&");
                     String name = parameterNames.nextElement();
@@ -371,6 +450,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         /**
          * Add Uri and QueryString of the httpServletRequest to the log string allocator
+         * 
          * @param logBuilder The existing StringBuilder user for building the log message
          * @param httpServletRequest The HttpServletRequest that couldn't be executed successfully
          */
@@ -381,29 +461,6 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
             logBuilder.append(httpServletRequest.getQueryString());
             logBuilder.append("''");
         }
-
-        protected void addFilter(final Filter filter) {
-            boolean isAlreadyAdded = false;
-            for (Filter currentFilter : filters) {
-                if (currentFilter!=null && currentFilter.equals(filter)) {
-                    isAlreadyAdded = true;
-                    break;
-                }
-            }
-            if (!isAlreadyAdded) {
-                synchronized (lock) {
-                    if (n == filters.length) {
-                        Filter[] newFilters = new Filter[n + 4];
-                        System.arraycopy(filters, 0, newFilters, 0, n);
-                        filters = newFilters;
-                    }
-
-                    filters[n++] = filter;
-                }
-            }
-        }
-
-        // --------------------------------------------------------- Private Methods
 
         private void requestDestroyed(ServletRequestEvent event) {
             // TODO don't create the event unless necessary

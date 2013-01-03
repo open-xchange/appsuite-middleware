@@ -70,14 +70,16 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
+import org.scribe.builder.api.DropBoxApi;
 import org.scribe.builder.api.FacebookApi;
+import org.scribe.builder.api.FlickrApi;
 import org.scribe.builder.api.FoursquareApi;
 import org.scribe.builder.api.GoogleApi;
 import org.scribe.builder.api.LinkedInApi;
-import org.scribe.builder.api.TwitterApi;
-import org.scribe.builder.api.YahooApi;
 import org.scribe.builder.api.TumblrApi;
-import org.scribe.builder.api.FlickrApi;
+import org.scribe.builder.api.TwitterApi;
+import org.scribe.builder.api.XingApi;
+import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
@@ -266,7 +268,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Process authorization URL
              */
-            final String authURL = metaData.processAuthorizationURL(authorizationURL.toString());
+            final String authURL = metaData.processAuthorizationURLCallbackAware(metaData.processAuthorizationURL(authorizationURL.toString()), callbackUrl);
             /*
              * Return interaction
              */
@@ -582,24 +584,26 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
     
     @Override
-	public OAuthAccount getDefaultAccount(final API api, final Session session) throws OXException {
-    	final List<OAuthServiceMetaData> allServices = registry.getAllServices(session.getUserId(), session.getContextId());
-    	for (final OAuthServiceMetaData metaData : allServices) {
-			if (metaData.getAPI() == api) {
-				final List<OAuthAccount> accounts = getAccounts(metaData.getId(), session, session.getUserId(), session.getContextId());
-				OAuthAccount likely = null;
-				for(final OAuthAccount acc: accounts){
-					if(likely == null || acc.getId() < likely.getId()){
-						likely = acc;
-					}
-				}
-				if(likely != null){
-					return likely;
-				}
-			}
-		}
-    	throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create("default:"+api.toString(), session.getUserId(), session.getContextId());
-	}
+    public OAuthAccount getDefaultAccount(final API api, final Session session) throws OXException {
+        final int contextId = session.getContextId();
+        final int userId = session.getUserId();
+        final List<OAuthServiceMetaData> allServices = registry.getAllServices(userId, contextId);
+        for (final OAuthServiceMetaData metaData : allServices) {
+            if (metaData.getAPI() == api) {
+                final List<OAuthAccount> accounts = getAccounts(metaData.getId(), session, userId, contextId);
+                OAuthAccount likely = null;
+                for (final OAuthAccount acc : accounts) {
+                    if (likely == null || acc.getId() < likely.getId()) {
+                        likely = acc;
+                    }
+                }
+                if (likely != null) {
+                    return likely;
+                }
+            }
+        }
+        throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create("default:" + api.toString(), Integer.valueOf(userId), Integer.valueOf(contextId));
+    }
 
     @Override
     public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
@@ -725,6 +729,10 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             apiClass = TumblrApi.class;
         } else if (serviceId.indexOf("flickr") >= 0) {
             apiClass = FlickrApi.class;
+        } else if (serviceId.indexOf("dropbox") >= 0) {
+            apiClass = DropBoxApi.class;
+        } else if (serviceId.indexOf("xing") >= 0) {
+            apiClass = XingApi.class;
         } else {
             throw OAuthExceptionCodes.UNSUPPORTED_SERVICE.create(serviceId);
         }

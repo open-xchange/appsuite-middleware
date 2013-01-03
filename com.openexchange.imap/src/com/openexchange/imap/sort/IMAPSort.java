@@ -132,7 +132,7 @@ public final class IMAPSort {
                     seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug(new StringBuilder(128).append("IMAP sort took ").append((System.currentTimeMillis() - start)).append(
+                        LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP sort took ").append((System.currentTimeMillis() - start)).append(
                             "msec").toString());
                     }
                 }
@@ -152,7 +152,7 @@ public final class IMAPSort {
                     body).doCommand();
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(seqNums.length).append(" messages took ").append(
+                    LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP fetch for ").append(seqNums.length).append(" messages took ").append(
                         (System.currentTimeMillis() - start)).append("msec").toString());
                 }
                 if ((msgs == null) || (msgs.length == 0)) {
@@ -337,8 +337,8 @@ public final class IMAPSort {
 
         @Override
         public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-            final String command = new StringBuilder("UID SORT (").append(descending ? "REVERSE " : "").append("ARRIVAL) UTF-8 ALL").toString();
-            final Response[] r = p.command(command, null);
+            final String command = new com.openexchange.java.StringAllocator("UID SORT (").append(descending ? "REVERSE " : "").append("ARRIVAL) UTF-8 ALL").toString();
+            final Response[] r = IMAPCommandsCollection.performCommand(p, command);
             final Response response = r[r.length - 1];
             final TLongList list = new TLongArrayList(256);
             if (response.isOK()) {

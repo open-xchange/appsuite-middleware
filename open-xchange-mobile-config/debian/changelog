@@ -1,3 +1,33 @@
+open-xchange-mobile-config (7.0.0-4) unstable; urgency=low
+
+  * Build for public patch 2012-12-21
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Fri, 21 Dec 2012 13:55:21 +0100
+
+open-xchange-mobile-config (7.0.0-3) unstable; urgency=low
+
+  * Third release candidate for 7.0.0
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 18 Dec 2012 14:14:53 +0100
+
+open-xchange-mobile-config (7.0.0-2) unstable; urgency=low
+
+  * Second release candidate for 7.0.0
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Mon, 17 Dec 2012 17:36:16 +0100
+
+open-xchange-mobile-config (7.0.0-1) unstable; urgency=low
+
+  * First release candidate for 7.0.0
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 04 Dec 2012 13:48:12 +0100
+
+open-xchange-mobile-config (7.0.0-0) unstable; urgency=low
+
+  * prepare for 7.0.0 release
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 04 Dec 2012 09:28:54 +0100
+
 open-xchange-mobile-config (6.23.0-5) unstable; urgency=low
 
   * First release candidate for EDP drop #6

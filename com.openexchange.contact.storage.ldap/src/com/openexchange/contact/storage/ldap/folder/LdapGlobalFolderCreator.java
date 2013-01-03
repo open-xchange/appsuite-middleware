@@ -287,13 +287,13 @@ public class LdapGlobalFolderCreator {
 
             @Override
             public void setLocalIp(final String ip) {
-                // TODO Auto-generated method stub
+                // Nothing to do
 
             }
 
             @Override
             public void setHash(final String hash) {
-                // TODO Auto-generated method stub
+                // Nothing to do
 
             }
 

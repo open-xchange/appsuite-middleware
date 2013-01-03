@@ -124,4 +124,7 @@ public class UploadExceptionMessage implements LocalizableStrings {
      */
     public final static String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
 
+    // Request rejected because its size exceeds the maximum configured size of %1$s
+    public static final String MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN_MSG = "Request rejected because its size exceeds the maximum configured size of %1$s";
+
 }

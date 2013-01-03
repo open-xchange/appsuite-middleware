@@ -120,9 +120,9 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
 
 
     @Override
-    public boolean exists(final String folderId, final String id, final int version) throws OXException {
+    public boolean exists(final String folderId, final String id, final String version) throws OXException {
         try {
-            return getInfostore(folderId).exists( ID(id), version, ctx, user, userConfig);
+            return getInfostore(folderId).exists( ID(id), null == version ? -1 : Integer.parseInt(version), ctx, user, userConfig);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -130,9 +130,9 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
 
 
     @Override
-    public InputStream getDocument(final String folderId, final String id, final int version) throws OXException {
+    public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
-            return getInfostore(folderId).getDocument(ID( id ), version, ctx, user, userConfig);
+            return getInfostore(folderId).getDocument(ID( id ), null == version ? -1 : Integer.parseInt(version), ctx, user, userConfig);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -140,9 +140,9 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
 
 
     @Override
-    public File getFileMetadata(final String folderId, final String id, final int version) throws OXException {
+    public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         try {
-            final DocumentMetadata documentMetadata = getInfostore(folderId).getDocumentMetadata(ID( id ), version, ctx, user, userConfig);
+            final DocumentMetadata documentMetadata = getInfostore(folderId).getDocumentMetadata(ID( id ), null == version ? -1 : Integer.parseInt(version), ctx, user, userConfig);
             return new InfostoreFile( documentMetadata );
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
@@ -188,10 +188,33 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
 
 
     @Override
-    public int[] removeVersion(final String folderId, final String id, final int[] versions) throws OXException {
-        return getInfostore(folderId).removeVersion(ID(id), versions, sessionObj);
+    public String[] removeVersion(final String folderId, final String id, final String[] versions) throws OXException {
+        return toStrings(getInfostore(folderId).removeVersion(ID(id), parseInts(versions), sessionObj));
     }
 
+    private static int[] parseInts(final String[] sa) {
+        if (null == sa) {
+            return null;
+        }
+        final int[] ret = new int[sa.length];
+        for (int i = 0; i < sa.length; i++) {
+            final String version = sa[i];
+            ret[i] = null == version ? -1 : Integer.parseInt(version);
+        }
+        return ret;
+    }
+
+    private static String[] toStrings(final int[] ia) {
+        if (null == ia) {
+            return null;
+        }
+        final String[] ret = new String[ia.length];
+        for (int i = 0; i < ia.length; i++) {
+            final int iVersion = ia[i];
+            ret[i] = iVersion < 0 ? null : Integer.toString(iVersion);
+        }
+        return ret;
+    }
 
     @Override
     public void saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {

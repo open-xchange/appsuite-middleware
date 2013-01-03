@@ -200,7 +200,7 @@ public class FormalFieldParser {
         String searchTerm;
 
         if (term.contains(":")) {
-            searchTerm = term.substring(term.indexOf(":") + 1, term.length());
+            searchTerm = term.substring(term.indexOf(':') + 1, term.length());
         } else
             throw new RuntimeException();
 
@@ -226,8 +226,8 @@ public class FormalFieldParser {
             String mf = rawMap.get(formalField);
             if (mf.contains("{")) {
                 log.trace("[createMapping]: is multi-field");
-                String prefix = mf.substring(0, mf.indexOf("{"));
-                String[] locales = mf.substring(mf.indexOf("{") + 1, mf.length() - 1).split(",");
+                String prefix = mf.substring(0, mf.indexOf('{'));
+                String[] locales = mf.substring(mf.indexOf('{') + 1, mf.length() - 1).split(",");
                 for (String s : locales) {
                     schemaFields.add(prefix + "_" + s.trim());
                 }

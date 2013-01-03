@@ -67,7 +67,7 @@ public class AbstractSimSessiondService implements SessiondService {
 
     @Override
     public void changeSessionPassword(final String sessionId, final String newPassword) {
-        // TODO Auto-generated method stub
+        // Nothing to do
     }
 
     @Override
@@ -130,7 +130,7 @@ public class AbstractSimSessiondService implements SessiondService {
      */
     @Override
     public void removeContextSessions(final int contextId) {
-        // TODO Auto-generated method stub
+        // Nothing to do
         
     }
 }

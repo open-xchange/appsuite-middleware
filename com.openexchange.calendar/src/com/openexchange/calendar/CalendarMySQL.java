@@ -196,6 +196,8 @@ public class CalendarMySQL implements CalendarSqlImp {
     private static final String PARTICIPANTS_IDENTIFIER_IN = " AND object_id IN ";
 
     private static final String UNION = " UNION ";
+    
+    private static final String CAL_TABLE_NAME = "prg_dates";
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarMySQL.class));
 
@@ -1669,12 +1671,33 @@ public class CalendarMySQL implements CalendarSqlImp {
             pst.setInt(i++, cdao.getShownAs());
             pst.setInt(i++, I(cdao.getFullTime()));
             pst.setInt(i++, cdao.getNumberOfAttachments());
-            pst.setString(i++, cdao.getTitle());
-            if (cdao.containsLocation()) {
-                pst.setString(i++, cdao.getLocation());
+            
+            if (cdao.isExternalOrganizer()) {
+                int descMaxLength = DBUtils.getColumnSize(writecon, CAL_TABLE_NAME, "field01");
+                int locMaxLength = DBUtils.getColumnSize(writecon, CAL_TABLE_NAME, "field02");
+                
+                if (cdao.getTitle().length() > descMaxLength)
+                    pst.setString(i++, cdao.getTitle().substring(0, descMaxLength));
+                else
+                    pst.setString(i++, cdao.getTitle());
+                
+                if (cdao.containsLocation()) {
+                    if (cdao.getLocation().length() > locMaxLength)
+                        pst.setString(i++, cdao.getLocation().substring(0, locMaxLength));
+                    else
+                        pst.setString(i++, cdao.getLocation());
+                } else {
+                    pst.setNull(i++, java.sql.Types.VARCHAR);
+                }
             } else {
-                pst.setNull(i++, java.sql.Types.VARCHAR);
+                pst.setString(i++, cdao.getTitle());
+                if (cdao.containsLocation()) {
+                    pst.setString(i++, cdao.getLocation());
+                } else {
+                    pst.setNull(i++, java.sql.Types.VARCHAR);
+                }
             }
+            
             if (cdao.containsNote()) {
                 pst.setString(i++, cdao.getNote());
             } else {
@@ -2471,13 +2494,33 @@ public class CalendarMySQL implements CalendarSqlImp {
     public final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException {
         return updateAppointment(cdao, edao, writecon, so, ctx, inFolder, clientLastModified, true, false);
     }
+    
+    private boolean isForbiddenPrivateMoveToPublicFolder(CalendarDataObject cdao, CalendarDataObject edao) {
+        if (!(cdao.getFolderMove() && cdao.getFolderType() == FolderObject.PUBLIC)) {
+            return false;
+        }
+        
+        if (edao.getPrivateFlag() && !cdao.containsPrivateFlag()) {
+            return true;
+        }
+        
+        if (edao.getPrivateFlag() && cdao.containsPrivateFlag() && cdao.getPrivateFlag()) {
+            return true;
+        }
+        
+        if (!edao.getPrivateFlag() && cdao.containsPrivateFlag() && cdao.getPrivateFlag()) {
+            return true;
+        }
+        
+        return false;
+    }
 
     private final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean clientLastModifiedCheck, final boolean skipParticipants) throws DataTruncation, SQLException, OXException {
         CalendarVolatileCache.getInstance().invalidateGroup(String.valueOf(cdao.getContextID()));
 
         final CalendarOperation co = new CalendarOperation();
 
-        if (cdao.getFolderMove() && cdao.getFolderType() == FolderObject.PUBLIC && edao.getPrivateFlag()) {
+        if (isForbiddenPrivateMoveToPublicFolder(cdao, edao)) {
             throw OXCalendarExceptionCodes.PRIVATE_MOVE_TO_PUBLIC.create();
         }
 

@@ -12,6 +12,14 @@
 
     <import file="build-project.xml"/>
 
+    <target name="installConf">
+        <copy todir="${destDir}/${confInstallDir}">
+            <fileset dir="${confDir}">
+                <include name="**/${language}.properties"/>
+            </fileset>
+        </copy>
+    </target>
+
     <target name="postInstall" description="Installs the language files.">
         <antcall target="installLanguage"/>
     </target>

@@ -104,7 +104,7 @@ public class SimpleConfiguration implements Configuration {
 
                 if (parts[0].startsWith(Configuration.TRANSLATOR + ".")) {
                     log.debug("[SimpleConfiguration]: Extracting translator ...");
-                    String handlerName = parts[0].substring(parts[0].indexOf(".") + 1).trim();
+                    String handlerName = parts[0].substring(parts[0].indexOf('.') + 1).trim();
                     log.debug("[SimpleConfiguration]: Handler is " + handlerName);
                     log.debug("[SimpleConfiguration]: Translator is " + parts[1].trim());
                     translators.put(handlerName, parts[1].trim());
@@ -143,8 +143,9 @@ public class SimpleConfiguration implements Configuration {
     public Set<String> getKeys(String handlerName) {
         Set<String> dictKeys = new HashSet<String>();
         for (String key : dictionary.keySet()) {
-            if (key.startsWith(handlerName))
+            if (key.startsWith(handlerName)) {
                 dictKeys.add(key);
+            }
         }
         return dictKeys;
     }
@@ -179,7 +180,7 @@ public class SimpleConfiguration implements Configuration {
     private List<String> assembleFieldList(String input) {
         List<String> fieldList = new ArrayList<String>();
 
-        int prefixIdx = input.indexOf("{");
+        int prefixIdx = input.indexOf('{');
         String prefix = input.substring(0, prefixIdx).trim();
         String suffixes = input.substring(prefixIdx + 1, input.length() - 1);
         String[] suffixArray = suffixes.split(",");

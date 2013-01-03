@@ -53,7 +53,6 @@ package com.openexchange.mail.text;
 import java.awt.Color;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.regex.Matcher;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Document;
@@ -439,7 +438,7 @@ public final class Rtf2HtmlConverter {
             hsm.updateState(attributeset, sb, element);
             final String s1 = element.getName();
             if (s1.equalsIgnoreCase("content")) {
-                s = s.replaceAll("\\t", Matcher.quoteReplacement(hsm.getSpaceTab(8)));
+                s = s.replaceAll("\\t", com.openexchange.java.Strings.quoteReplacement(hsm.getSpaceTab(8)));
                 s = s.replaceAll("\\n", "<br />\n");
                 s = hsm.performFirstLineIndent(s);
                 sb.append(s);

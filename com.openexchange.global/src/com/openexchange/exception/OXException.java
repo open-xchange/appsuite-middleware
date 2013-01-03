@@ -74,7 +74,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OXException extends Exception implements OXExceptionConstants, Serializable {
+public class OXException extends Exception implements OXExceptionConstants {
 
     // ([A-Z_]+)\((".*").*,
     // public static final String $1_MSG = $2;

@@ -71,7 +71,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SimContactService implements ContactService {
-	
+
     private final Map<String, List<Contact>> folders = new HashMap<String, List<Contact>>();
 
     public void simulateContact(final int cid, final int folderId, final int id1, final String surname) {
@@ -102,19 +102,19 @@ public class SimContactService implements ContactService {
         folders.put(folderId, new LinkedList<Contact>());
         return folders.get(folderId);
     }
-	
+
 
 	@Override
 	public Contact getContact(final Session session, final String folderId, final String id)
 			throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public Contact getContact(final Session session, final String folderId, final String id,
 			final ContactField[] fields) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
@@ -136,7 +136,7 @@ public class SimContactService implements ContactService {
 	}
 
 	@Override
-	public SearchIterator<Contact> getAllContacts(final Session session, final String folderId, final ContactField[] fields, final SortOptions sortOptions) 
+	public SearchIterator<Contact> getAllContacts(final Session session, final String folderId, final ContactField[] fields, final SortOptions sortOptions)
 			throws OXException {
         return new SearchIteratorAdapter<Contact>(getFolderList(folderId).iterator());
 	}
@@ -144,7 +144,7 @@ public class SimContactService implements ContactService {
 	@Override
 	public SearchIterator<Contact> getContacts(final Session session,
 			final String folderId, final String[] ids) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
@@ -152,7 +152,7 @@ public class SimContactService implements ContactService {
 	public SearchIterator<Contact> getContacts(final Session session,
 			final String folderId, final String[] ids, final SortOptions sortOptions)
 			throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
@@ -160,7 +160,7 @@ public class SimContactService implements ContactService {
 	public SearchIterator<Contact> getContacts(final Session session,
 			final String folderId, final String[] ids, final ContactField[] fields)
 			throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
@@ -168,14 +168,14 @@ public class SimContactService implements ContactService {
 	public SearchIterator<Contact> getContacts(final Session session,
 			final String folderId, final String[] ids, final ContactField[] fields,
 			final SortOptions sortOptions) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public SearchIterator<Contact> getDeletedContacts(final Session session,
 			final String folderId, final Date since) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
@@ -183,7 +183,7 @@ public class SimContactService implements ContactService {
 	public SearchIterator<Contact> getDeletedContacts(final Session session,
 			final String folderId, final Date since, final ContactField[] fields)
 			throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
@@ -191,14 +191,14 @@ public class SimContactService implements ContactService {
 	public SearchIterator<Contact> getDeletedContacts(final Session session,
 			final String folderId, final Date since, final ContactField[] fields,
 			final SortOptions sortOptions) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public SearchIterator<Contact> getModifiedContacts(final Session session,
 			final String folderId, final Date since) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
@@ -206,7 +206,7 @@ public class SimContactService implements ContactService {
 	public SearchIterator<Contact> getModifiedContacts(final Session session,
 			final String folderId, final Date since, final ContactField[] fields)
 			throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
@@ -214,28 +214,28 @@ public class SimContactService implements ContactService {
 	public SearchIterator<Contact> getModifiedContacts(final Session session,
 			final String folderId, final Date since, final ContactField[] fields,
 			final SortOptions sortOptions) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public <O> SearchIterator<Contact> searchContacts(final Session session,
 			final SearchTerm<O> term) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public <O> SearchIterator<Contact> searchContacts(final Session session,
 			final SearchTerm<O> term, final SortOptions sortOptions) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public <O> SearchIterator<Contact> searchContacts(final Session session,
 			final SearchTerm<O> term, final ContactField[] fields) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
@@ -243,47 +243,47 @@ public class SimContactService implements ContactService {
 	public <O> SearchIterator<Contact> searchContacts(final Session session,
 			final SearchTerm<O> term, final ContactField[] fields, final SortOptions sortOptions)
 			throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public void createContact(final Session session, final String folderId, final Contact contact)
 			throws OXException {
-		// TODO Auto-generated method stub
-		
+		// Nothing to do
+
 	}
 
 	@Override
 	public void updateContact(final Session session, final String folderId, final String id,
 			final Contact contact, final Date lastRead) throws OXException {
-		// TODO Auto-generated method stub
-		
+		// Nothing to do
+
 	}
 
 	@Override
 	public void deleteContact(final Session session, final String folderId, final String id,
 			final Date lastRead) throws OXException {
-		// TODO Auto-generated method stub
-		
+		// Nothing to do
+
 	}
 
 	@Override
 	public Contact getUser(final Session session, final int userID) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public Contact getUser(final Session session, final int userID, final ContactField[] fields)
 			throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public String getOrganization(final Session session) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
@@ -292,7 +292,7 @@ public class SimContactService implements ContactService {
      */
     @Override
     public SearchIterator<Contact> getUsers(final Session session, final int[] userIDs) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -301,14 +301,14 @@ public class SimContactService implements ContactService {
      */
     @Override
     public SearchIterator<Contact> getUsers(final Session session, final int[] userIDs, final ContactField[] fields) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
 	@Override
-	public SearchIterator<Contact> getAllUsers(Session session,
-			ContactField[] fields, SortOptions sortOptions) throws OXException {
-		// TODO Auto-generated method stub
+	public SearchIterator<Contact> getAllUsers(final Session session,
+			final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+		// Nothing to do
 		return null;
 	}
 
@@ -316,95 +316,101 @@ public class SimContactService implements ContactService {
      * @see com.openexchange.contact.ContactService#searchUsers(com.openexchange.session.Session, com.openexchange.search.SearchTerm, com.openexchange.groupware.contact.helpers.ContactField[], com.openexchange.contact.SortOptions)
      */
     @Override
-    public <O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    public <O> SearchIterator<Contact> searchUsers(final Session session, final SearchTerm<O> term, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
         return null;
     }
 
 	@Override
-	public SearchIterator<Contact> searchContacts(Session session,
-			ContactSearchObject contactSearch) throws OXException {
-		// TODO Auto-generated method stub
+	public SearchIterator<Contact> searchContacts(final Session session,
+			final ContactSearchObject contactSearch) throws OXException {
+		// Nothing to do
 		return null;
 	}
 
 	@Override
-	public SearchIterator<Contact> searchContacts(Session session,
-			ContactSearchObject contactSearch, SortOptions sortOptions)
+	public SearchIterator<Contact> searchContacts(final Session session,
+			final ContactSearchObject contactSearch, final SortOptions sortOptions)
 			throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
-	public SearchIterator<Contact> searchContacts(Session session,
-			ContactSearchObject contactSearch, ContactField[] fields)
+	public SearchIterator<Contact> searchContacts(final Session session,
+			final ContactSearchObject contactSearch, final ContactField[] fields)
 			throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
-	public SearchIterator<Contact> searchContacts(Session session,
-			ContactSearchObject contactSearch, ContactField[] fields,
-			SortOptions sortOptions) throws OXException {
-		// TODO Auto-generated method stub
+	public SearchIterator<Contact> searchContacts(final Session session,
+			final ContactSearchObject contactSearch, final ContactField[] fields,
+			final SortOptions sortOptions) throws OXException {
+		// Nothing to do
 		return null;
 	}
 
 	@Override
-	public SearchIterator<Contact> searchUsers(Session session,
-			ContactSearchObject contactSearch, ContactField[] fields,
-			SortOptions sortOptions) throws OXException {
-		// TODO Auto-generated method stub
+	public SearchIterator<Contact> searchUsers(final Session session,
+			final ContactSearchObject contactSearch, final ContactField[] fields,
+			final SortOptions sortOptions) throws OXException {
+		// Nothing to do
 		return null;
 	}
 
     @Override
-    public void deleteContacts(Session session, String folderId) throws OXException {
-        // TODO Auto-generated method stub
-        
+    public void deleteContacts(final Session session, final String folderId) throws OXException {
+        // Nothing to do
+
     }
 
     @Override
-    public void deleteContacts(Session session, String folderId, String[] ids, Date lastRead) throws OXException {
-        // TODO Auto-generated method stub
-        
+    public void deleteContacts(final Session session, final String folderId, final String[] ids, final Date lastRead) throws OXException {
+        // Nothing to do
+
     }
 
     @Override
-    public SearchIterator<Contact> searchContactsWithBirthday(Session session, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        // TODO Auto-generated method stub
+    public SearchIterator<Contact> searchContactsWithBirthday(final Session session, final Date from, final Date until, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+        // Nothing to do
         return null;
     }
 
     @Override
-    public SearchIterator<Contact> searchContactsWithBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        // TODO Auto-generated method stub
+    public SearchIterator<Contact> searchContactsWithBirthday(final Session session, final List<String> folderIDs, final Date from, final Date until, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+        // Nothing to do
         return null;
     }
 
     @Override
-    public SearchIterator<Contact> searchContactsWithAnniversary(Session session, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        // TODO Auto-generated method stub
+    public SearchIterator<Contact> searchContactsWithAnniversary(final Session session, final Date from, final Date until, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+        // Nothing to do
         return null;
     }
 
     @Override
-    public SearchIterator<Contact> searchContactsWithAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        // TODO Auto-generated method stub
+    public SearchIterator<Contact> searchContactsWithAnniversary(final Session session, final List<String> folderIDs, final Date from, final Date until, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+        // Nothing to do
         return null;
     }
 
     @Override
-    public SearchIterator<Contact> getAllContacts(Session session, List<String> folderIDs, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        // TODO Auto-generated method stub
+    public SearchIterator<Contact> getAllContacts(final Session session, final List<String> folderIDs, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+        // Nothing to do
         return null;
     }
 
     @Override
-    public SearchIterator<Contact> getAllContacts(Session session, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        // TODO Auto-generated method stub
+    public SearchIterator<Contact> getAllContacts(final Session session, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+        // Nothing to do
         return null;
+    }
+
+    @Override
+    public void updateUser(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead) throws OXException {
+        // TODO Auto-generated method stub
+
     }
 
 }

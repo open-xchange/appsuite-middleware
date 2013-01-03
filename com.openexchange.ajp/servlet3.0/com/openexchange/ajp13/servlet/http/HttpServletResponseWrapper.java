@@ -259,7 +259,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
             anchor = path.substring(pound);
             path = path.substring(0, pound);
         }
-        final StringBuilder sb = new StringBuilder(path);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(path);
         if (httpSessionId != null && sb.length() > 0) {
             sb.append("/");
             sb.append(AJPv13RequestHandler.JSESSIONID_URI);

@@ -75,7 +75,7 @@ public class FileStorageEventHelper {
         return event;
     }
 
-    public static Event buildDeleteEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final Set<Integer> versions) {
+    public static Event buildDeleteEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final Set<String> versions) {
         final Dictionary<String, Object> properties = buildProperties(session, service, accountId, folderId, objectId);
         /*
          * version may be null to indicate a complete deletion of a document.
@@ -150,13 +150,13 @@ public class FileStorageEventHelper {
         return extractValue(event, FileStorageEventConstants.SERVICE);
     }
 
-    public static Set<Integer> extractVersions(final Event event) {
+    public static Set<String> extractVersions(final Event event) {
         final Object versionsObj = event.getProperty(FileStorageEventConstants.VERSIONS);
         if (versionsObj == null || !(versionsObj instanceof Set<?>)) {
             return null;
         }
 
-        return (Set<Integer>) versionsObj;
+        return (Set<String>) versionsObj;
     }
 
     public static String createDebugMessage(final String eventName, final Event event) {
