@@ -1508,7 +1508,8 @@ public class UserTest extends AbstractTest {
             cal2.setTime(date2);
             assertEquals(message, cal1.get(Calendar.YEAR), cal2.get(Calendar.YEAR));
             assertEquals(message, cal1.get(Calendar.MONTH), cal2.get(Calendar.MONTH));
-            assertEquals(message + date1.getClass().getName() + "," + date2.getClass().getName(), cal1.get(Calendar.DAY_OF_MONTH), cal2.get(Calendar.DAY_OF_MONTH));
+            // TODO Wrong day at this place can only be fixed by using useLegacyDatetimeCode=false for MySQL connections.
+            assertEquals(message, cal1.get(Calendar.DAY_OF_MONTH), cal2.get(Calendar.DAY_OF_MONTH));
         }
     }
 
