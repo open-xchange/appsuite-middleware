@@ -1,3 +1,7 @@
+* 2013-01-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24296: Removed App Suite localization marker files for fr_FR and lv_LV.
+
 * 2013-01-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 24375: Check for content behind closing <body> tag and append if present
