@@ -87,10 +87,26 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
 
     private static final Object PRESENT = new Object();
 
+    /**
+     * Acquires the lock only if it is free at the time of invocation.
+     * <p>
+     * Acquires the lock if it is available and returns immediately with the value {@code true}. If the lock is not available then this
+     * method will return immediately with the value {@code false}.
+     * 
+     * @param subscriptionId The subscription identifier
+     * @param session The associated session
+     * @return {@code true} if the lock was acquired and {@code false} otherwise
+     */
     private static boolean tryLock(final int subscriptionId, final Session session) {
         return (null == GUARD_MAP.putIfAbsent(key(subscriptionId, session), PRESENT));
     }
 
+    /**
+     * Releases the lock.
+     * 
+     * @param subscriptionId The subscription identifier
+     * @param session The associated session
+     */
     private static void unlock(final int subscriptionId, final Session session) {
         GUARD_MAP.remove(key(subscriptionId, session));
     }
