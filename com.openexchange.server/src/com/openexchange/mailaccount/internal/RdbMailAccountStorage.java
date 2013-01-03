@@ -56,7 +56,6 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.net.InetAddress;
@@ -2126,22 +2125,24 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             rs = selectStmt.executeQuery();
             while (rs.next()) {
                 final String password = rs.getString(2);
-                final int id = rs.getInt(1);
-                if (id != MailAccount.DEFAULT_ID) {
-                    try {
-                        // If we can decrypt the password with the newSecret, we don't need to do anything about this account
-                        MailPasswordUtil.decrypt(password, newSecret);
-                    } catch (final GeneralSecurityException x) {
-                        // We couldn't decrypt the password, so, let's try the oldSecret and do the migration
-                        final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
-                        if (null == updateStmt) {
-                            updateStmt = con.prepareStatement(UPDATE_PASSWORD1);
-                            updateStmt.setInt(2, cid);
-                            updateStmt.setInt(4, user);
+                if (!isEmpty(password)) {
+                    final int id = rs.getInt(1);
+                    if (id != MailAccount.DEFAULT_ID) {
+                        try {
+                            // If we can decrypt the password with the newSecret, we don't need to do anything about this account
+                            MailPasswordUtil.decrypt(password, newSecret);
+                        } catch (final GeneralSecurityException x) {
+                            // We couldn't decrypt the password, so, let's try the oldSecret and do the migration
+                            final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
+                            if (null == updateStmt) {
+                                updateStmt = con.prepareStatement(UPDATE_PASSWORD1);
+                                updateStmt.setInt(2, cid);
+                                updateStmt.setInt(4, user);
+                            }
+                            updateStmt.setString(1, transcribed);
+                            updateStmt.setInt(3, id);
+                            updateStmt.addBatch();
                         }
-                        updateStmt.setString(1, transcribed);
-                        updateStmt.setInt(3, id);
-                        updateStmt.addBatch();
                     }
                 }
             }
@@ -2163,19 +2164,21 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             rs = selectStmt.executeQuery();
             while (rs.next()) {
                 final String password = rs.getString(2);
-                final int id = rs.getInt(1);
-                if (id == MailAccount.DEFAULT_ID) {
-                    continue;
+                if (!isEmpty(password)) {
+                    final int id = rs.getInt(1);
+                    if (id == MailAccount.DEFAULT_ID) {
+                        continue;
+                    }
+                    final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
+                    if (null == updateStmt) {
+                        updateStmt = con.prepareStatement(UPDATE_PASSWORD2);
+                        updateStmt.setInt(2, cid);
+                        updateStmt.setInt(4, user);
+                    }
+                    updateStmt.setString(1, transcribed);
+                    updateStmt.setInt(3, id);
+                    updateStmt.addBatch();
                 }
-                final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
-                if (null == updateStmt) {
-                    updateStmt = con.prepareStatement(UPDATE_PASSWORD2);
-                    updateStmt.setInt(2, cid);
-                    updateStmt.setInt(4, user);
-                }
-                updateStmt.setString(1, transcribed);
-                updateStmt.setInt(3, id);
-                updateStmt.addBatch();
             }
             if (null != updateStmt) {
                 updateStmt.executeBatch();
@@ -2226,18 +2229,32 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             selectStmt.setInt(1, cid);
             selectStmt.setInt(2, user);
             rs = selectStmt.executeQuery();
-            final TIntSet ids = new TIntHashSet(8);
             while (rs.next()) {
                 final String password = rs.getString(2);
-                final int id = rs.getInt(1);
-                if (id != MailAccount.DEFAULT_ID) {
-                    try {
-                        MailPasswordUtil.decrypt(password, secret);
-                    } catch (final GeneralSecurityException x) {
-                        // We couldn't decrypt the password
-                        ids.add(id);
+                if (!isEmpty(password)) {
+                    final int id = rs.getInt(1);
+                    if (id != MailAccount.DEFAULT_ID) {
+                        try {
+                            // If we can decrypt the password with the newSecret, we don't need to do anything about this account
+                            MailPasswordUtil.decrypt(password, secret);
+                        } catch (final GeneralSecurityException x) {
+                            // We couldn't decrypt
+                            if (null == updateStmt) {
+                                updateStmt = con.prepareStatement(UPDATE_PASSWORD1);
+                                updateStmt.setInt(2, cid);
+                                updateStmt.setInt(4, user);
+                            }
+                            updateStmt.setString(1, "");
+                            updateStmt.setInt(3, id);
+                            updateStmt.addBatch();
+                        }
                     }
                 }
+            }
+            if (null != updateStmt) {
+                updateStmt.executeBatch();
+                DBUtils.closeSQLStuff(updateStmt);
+                updateStmt = null;
             }
             /*
              * Close stuff
@@ -2252,35 +2269,25 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             rs = selectStmt.executeQuery();
             while (rs.next()) {
                 final String password = rs.getString(2);
-                final int id = rs.getInt(1);
-                if (id == MailAccount.DEFAULT_ID) {
-                    continue;
-                }
-                ids.add(id);
-            }
-            // Check for candidates
-            if (!ids.isEmpty()) {
-                try {
-                    final Connection connection = con;
-                    ids.forEach(new TIntProcedure() {
-                        
-                        @Override
-                        public boolean execute(final int id) {
-                            try {
-                                deleteMailAccount(id, Collections.<String, Object> emptyMap(), user, cid, false, connection);
-                                return true;
-                            } catch (final OXException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                    });
-                } catch (final RuntimeException e) {
-                    final Throwable cause = e.getCause();
-                    if (cause instanceof OXException) {
-                        throw (OXException) cause;
+                if (!isEmpty(password)) {
+                    final int id = rs.getInt(1);
+                    if (id == MailAccount.DEFAULT_ID) {
+                        continue;
                     }
-                    throw e;
+                    if (null == updateStmt) {
+                        updateStmt = con.prepareStatement(UPDATE_PASSWORD2);
+                        updateStmt.setInt(2, cid);
+                        updateStmt.setInt(4, user);
+                    }
+                    updateStmt.setString(1, "");
+                    updateStmt.setInt(3, id);
+                    updateStmt.addBatch();
                 }
+            }
+            if (null != updateStmt) {
+                updateStmt.executeBatch();
+                DBUtils.closeSQLStuff(updateStmt);
+                updateStmt = null;
             }
             con.commit(); // COMMIT
             rollback = false;

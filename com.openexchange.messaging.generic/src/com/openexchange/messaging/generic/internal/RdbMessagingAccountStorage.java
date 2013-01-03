@@ -53,7 +53,6 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.procedure.TIntIntProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -682,7 +681,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
             update.clear();
             for (final String field : secretProperties) {
                 final String encrypted = (String) content.get(field);
-                if (encrypted != null) {
+                if (!isEmpty(encrypted)) {
                     try {
                         // Try using the new secret. Maybe this account doesn't need the migration
                         cryptoService.decrypt(encrypted, newSecret);
@@ -741,44 +740,42 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         // Proceed...
         final Context ctx = getContext(session);
         final Map<String, Object> content = new HashMap<String, Object>();
-        final TIntIntMap toDelete = new TIntIntHashMap(confId2AccountMap.size());
+        final Map<String, Object> update = new HashMap<String, Object>();
         for (final int confId : confId2AccountMap.keys()) {
             content.clear();
             genericConfStorageService.fill(ctx, confId, content);
-            for (final String field : secretProperties) {
-                final String encrypted = (String) content.get(field);
-                if (encrypted != null) {
-                    try {
-                        // Check it
-                        cryptoService.decrypt(encrypted, secret);
-                    } catch (final OXException x) {
-                        // Needs migration
-                        final int accountId = confId2AccountMap.get(confId);
-                        toDelete.put(accountId, confId);
-                        break;
+            update.clear();
+            for (final Map.Entry<String, Object> entry : content.entrySet()) {
+                final String field = entry.getKey();
+                if (secretProperties.contains(field)) {
+                    final String encrypted = entry.getValue().toString();
+                    if (!isEmpty(encrypted)) {
+                        try {
+                            // Check it
+                            cryptoService.decrypt(encrypted, secret);
+                        } catch (final OXException x) {
+                            // Discard
+                            update.put(field, "");
+                        }
                     }
                 }
             }
+            if (!update.isEmpty()) {
+                genericConfStorageService.update(ctx, confId, update);
+            }
         }
-        // Check for candidates
-        if (!toDelete.isEmpty()) {
-            final List<MessagingAccount> accounts = new ArrayList<MessagingAccount>(toDelete.size());
-            final TIntList confIds = new TIntArrayList(toDelete.size());
-            toDelete.forEachEntry(new TIntIntProcedure() {
-                
-                @Override
-                public boolean execute(final int accountId, final int confId) {
-                    final DefaultMessagingAccount acc = new DefaultMessagingAccount();
-                    acc.setId(accountId);
-                    // Add to collections
-                    accounts.add(acc);
-                    confIds.add(confId);
-                    return true;
-                }
-            });
-            // Batch delete
-            deleteAccounts(serviceId, accounts.toArray(new MessagingAccount[0]), confIds.toArray(), session, null);
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
         }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

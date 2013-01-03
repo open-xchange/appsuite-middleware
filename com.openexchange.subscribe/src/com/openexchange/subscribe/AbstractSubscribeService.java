@@ -259,7 +259,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                 boolean save = false;
                 for (final String passwordField : passwordFields) {
                     final String password = (String) configuration.get(passwordField);
-                    if (password != null) {
+                    if (!isEmpty(password)) {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, newSecret);
@@ -290,22 +290,28 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         final List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
         final String id = subscriptionSource.getId();
         final CryptoService cryptoService = CRYPTO_SERVICE.get();
+        final Map<String, Object> update = new HashMap<String, Object>();
         for (final Subscription subscription : allSubscriptions) {
             if (id.equals(getSubscriptionSourceId(subscription))) {
                 final Map<String, Object> configuration = subscription.getConfiguration();
-                boolean delete = false;
+                update.clear();
+                boolean save = false;
                 for (final String passwordField : passwordFields) {
                     final String password = (String) configuration.get(passwordField);
-                    if (password != null) {
+                    if (!isEmpty(password)) {
                         try {
+                            // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, secret);
                         } catch (final OXException x) {
-                            delete = true;
+                            // This one needs clean-up
+                            update.put(passwordField, "");
+                            save = true;
                         }
                     }
                 }
-                if (delete) {
-                    unsubscribe(subscription);
+                if (save) {
+                    subscription.setConfiguration(update);
+                    STORAGE.get().updateSubscription(subscription);
                 }
             }
         }
@@ -364,5 +370,17 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         
         
         return new OXFolderAccess(ctx).getFolderPermission(folderId, userId, userConfig);
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 }

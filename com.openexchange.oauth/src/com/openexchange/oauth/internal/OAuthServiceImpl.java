@@ -898,8 +898,14 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             do {
                 try {
                     // Try using the secret.
-                    cryptoService.decrypt(rs.getString(2), secret);
-                    cryptoService.decrypt(rs.getString(3), secret);
+                    final String accessToken = rs.getString(2);
+                    if (!isEmpty(accessToken)) {
+                        cryptoService.decrypt(accessToken, secret);
+                    }
+                    final String accessSecret = rs.getString(3);
+                    if (!isEmpty(accessSecret)) {
+                        cryptoService.decrypt(accessSecret, secret);
+                    }
                 } catch (final OXException e) {
                     // Clean-up
                     accounts.add(Integer.valueOf(rs.getInt(1)));
@@ -916,9 +922,17 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             committed = Boolean.FALSE;
             startTransaction(con);
+            // Statement
+            stmt = con.prepareStatement("UPDATE oauthAccounts SET accessToken = ?, accessSecret = ? WHERE cid = ? AND user = ? AND id = ?");
+            stmt.setString(1, "");
+            stmt.setString(2, "");
+            stmt.setInt(3, contextId);
+            stmt.setInt(4, session.getUserId());
             for (final Integer accountId : accounts) {
-                deleteAccount(accountId.intValue(), session.getUserId(), contextId, con);
+                stmt.setInt(5, accountId.intValue());
+                stmt.addBatch();
             }
+            stmt.executeBatch();
             con.commit();
             committed = Boolean.TRUE;
         } catch (final SQLException e) {
@@ -971,8 +985,14 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             do {
                 try {
                     // Try using the new secret. Maybe this account doesn't need the migration
-                    cryptoService.decrypt(rs.getString(2), newSecret);
-                    cryptoService.decrypt(rs.getString(3), newSecret);
+                    final String accessToken = rs.getString(2);
+                    if (!isEmpty(accessToken)) {
+                        cryptoService.decrypt(accessToken, newSecret);
+                    }
+                    final String accessSecret = rs.getString(3);
+                    if (!isEmpty(accessSecret)) {
+                        cryptoService.decrypt(accessSecret, newSecret);
+                    }
                 } catch (final OXException e) {
                     // Needs migration
                     final DefaultOAuthAccount account = new DefaultOAuthAccount();
