@@ -65,6 +65,7 @@ import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
+import com.openexchange.ajax.requesthandler.Utils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
@@ -177,10 +178,10 @@ public class FileResponseRenderer implements ResponseRenderer {
                             if (pos >= 0) {
                                 resp.setHeader("Content-Disposition", contentDisposition + disposition.substring(pos));
                             } else {
-                                resp.setHeader("Content-Disposition", contentDisposition);
+                                resp.setHeader("Content-Disposition", Utils.encodeUrl(contentDisposition));
                             }
                         } else {
-                            resp.setHeader("Content-Disposition", contentDisposition);
+                            resp.setHeader("Content-Disposition", Utils.encodeUrl(contentDisposition));
                         }
                     }
                 }
