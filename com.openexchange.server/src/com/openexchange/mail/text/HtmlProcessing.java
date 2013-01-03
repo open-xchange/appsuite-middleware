@@ -295,6 +295,11 @@ public final class HtmlProcessing {
         }
         sb.append(bodyMatcher.group(2));
         sb.append("</div>");
+        // Is there more behind closing <body> tag?
+        final int end = bodyMatcher.end();
+        if (end < htmlContent.length()) {
+            sb.append(htmlContent.substring(end));
+        }
         return sb.toString();
     }
 
