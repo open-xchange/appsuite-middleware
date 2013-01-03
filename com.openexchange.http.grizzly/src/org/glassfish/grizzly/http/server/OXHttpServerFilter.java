@@ -113,9 +113,9 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
         super(config, delayedExecutor);
         suspendedResponseQueue = Response.createDelayQueue(delayedExecutor);
         httpRequestInProcessAttr = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.
-                createAttribute("OXHttpServerFilter.Request");
+                createAttribute("HttpServerFilter.Request");
         reregisterForReadAttr = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.
-                createAttribute("OXHttpServerFilter.reregisterForReadAttr");
+                createAttribute("HttpServerFilter.reregisterForReadAttr");
     }
     
     @SuppressWarnings({"UnusedDeclaration"})
