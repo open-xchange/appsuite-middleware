@@ -755,10 +755,9 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
     private static final class PublicationAndInfostoreID {
 
         final Publication publication;
-
         final String infostoreId;
 
-        public PublicationAndInfostoreID(final Publication publication, final String infostoreId) {
+        PublicationAndInfostoreID(final Publication publication, final String infostoreId) {
             super();
             this.publication = publication;
             this.infostoreId = infostoreId;
