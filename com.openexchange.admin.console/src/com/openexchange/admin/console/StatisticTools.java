@@ -504,8 +504,8 @@ public class StatisticTools extends AbstractJMXTools {
         HTTPCODECFILTER("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=HttpCodecFilter,name=HttpCodecFilter", new String[] {
             "total-bytes-written", "total-bytes-received", "http-codec-error-count" }),
         HTTPSERVERFILTER("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=HttpServerFilter,name=HttpServerFilter", new String[] {
-            "current-suspended-request-count", "current-suspended-request-count", "requests-cancelled-count", "requests-completed-count",
-            "requests-received-count", "requests-timed-out-count" }),
+            "current-suspended-request-count", "requests-cancelled-count", "requests-completed-count", "requests-received-count",
+            "requests-timed-out-count" }),
         KEEPALIVE("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=KeepAlive,name=Keep-Alive", new String[] {
             "hits-count", "idle-timeout-seconds", "live-connections-count", "max-requests-count", "refuses-count", "timeouts-count" }),
         NETWORKLISTENER("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer],type=NetworkListener,name=NetworkListener[http-listener]", new String[] {
