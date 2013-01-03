@@ -53,8 +53,9 @@ import static com.openexchange.subscribe.SubscriptionErrorMessage.INACTIVE_SOURC
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -62,6 +63,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
+import com.openexchange.log.LogFactory;
+import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionExecutionService;
@@ -73,17 +76,27 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SubscriptionExecutionServiceImpl}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionService, FolderUpdaterRegistry {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SubscriptionExecutionServiceImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SubscriptionExecutionServiceImpl.class));
+
+    private static final ConcurrentMap<SubscriptionKey, Object> GUARD_MAP = new ConcurrentHashMap<SubscriptionKey, Object>(1024);
+
+    private static final Object PRESENT = new Object();
+
+    private static boolean tryLock(final int subscriptionId, final Session session) {
+        return (null == GUARD_MAP.putIfAbsent(key(subscriptionId, session), PRESENT));
+    }
+
+    private static void unlock(final int subscriptionId, final Session session) {
+        GUARD_MAP.remove(key(subscriptionId, session));
+    }
 
     private final SubscriptionSourceDiscoveryService discoverer;
-
     private final Collection<FolderUpdaterService<?>> folderUpdaters;
-
     private final ContextService contextService;
 
     public SubscriptionExecutionServiceImpl(final SubscriptionSourceDiscoveryService discoverer, final Collection<FolderUpdaterService<?>> folderUpdaters, final ContextService contexts) {
@@ -94,17 +107,26 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
 
     @Override
     public int executeSubscription(final String sourceId, final ServerSession session, final int subscriptionId) throws OXException {
-        final SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
-        final Subscription subscription = subscribeService.loadSubscription(session.getContext(), subscriptionId, null);
-        subscription.setSession(session);
-        final boolean knowsSource = discoverer.filter(subscription.getUserId(), session.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
-        if(!knowsSource) {
-            throw INACTIVE_SOURCE.create();
+        if (false == tryLock(subscriptionId, session)) {
+            // Concurrent subscribe attempt
+            return 0;
         }
-        final Collection<?> data = subscribeService.getContent(subscription);
-
-        storeData(data, subscription);
-        return data.size();
+        try {
+            final SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
+            final Subscription subscription = subscribeService.loadSubscription(session.getContext(), subscriptionId, null);
+            subscription.setSession(session);
+            final boolean knowsSource =
+                discoverer.filter(subscription.getUserId(), session.getContextId()).knowsSource(
+                    subscribeService.getSubscriptionSource().getId());
+            if (!knowsSource) {
+                throw INACTIVE_SOURCE.create();
+            }
+            final Collection<?> data = subscribeService.getContent(subscription);
+            storeData(data, subscription);
+            return data.size();
+        } finally {
+            unlock(subscriptionId, session);
+        }
     }
 
     /**
@@ -121,14 +143,20 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
      */
     @Override
     public FolderUpdaterService getFolderUpdater(final TargetFolderDefinition target) throws OXException {
-        final FolderObject folder = getFolder(new TargetFolderSession(target), target.getContext().getContextId(), target.getFolderIdAsInt());
-//
-        final boolean moreThanOneSubscriptionOnThisFolder = isThereMoreThanOneSubscriptionOnThisFolder(target.getContext(), target.getFolderId(), null);
+        final FolderObject folder =
+            getFolder(new TargetFolderSession(target), target.getContext().getContextId(), target.getFolderIdAsInt());
+        //
+        final boolean moreThanOneSubscriptionOnThisFolder =
+            isThereMoreThanOneSubscriptionOnThisFolder(target.getContext(), target.getFolderId(), null);
         for (final FolderUpdaterService updater : folderUpdaters) {
             if (updater.handles(folder)) {
                 // if there are 2 or more subscriptions on the folder: use the multiple-variant of the strategy if it exists
-                if (moreThanOneSubscriptionOnThisFolder && updater.usesMultipleStrategy()) {return updater;}
-                if (!moreThanOneSubscriptionOnThisFolder && !updater.usesMultipleStrategy()) {return updater;}
+                if (moreThanOneSubscriptionOnThisFolder && updater.usesMultipleStrategy()) {
+                    return updater;
+                }
+                if (!moreThanOneSubscriptionOnThisFolder && !updater.usesMultipleStrategy()) {
+                    return updater;
+                }
 
             }
         }
@@ -148,20 +176,31 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
 
     @Override
     public int executeSubscription(final ServerSession session, final int subscriptionId) throws OXException {
-        final Context context = session.getContext();
-        final SubscriptionSource source = discoverer.getSource(context, subscriptionId);
-        if(source == null) {
-            throw INACTIVE_SOURCE.create();
+        if (false == tryLock(subscriptionId, session)) {
+            // Concurrent subscribe attempt
+            return 0;
         }
-        final SubscribeService subscribeService = source.getSubscribeService();
-        final Subscription subscription = subscribeService.loadSubscription(context, subscriptionId, null);
-        subscription.setSession(session);
-        final boolean knowsSource = discoverer.filter(subscription.getUserId(), context.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
-        if(!knowsSource) {
-            throw INACTIVE_SOURCE.create();
-        }        final Collection data = subscribeService.getContent(subscription);
-        storeData(data, subscription);
-        return data.size();
+        try {
+            final Context context = session.getContext();
+            final SubscriptionSource source = discoverer.getSource(context, subscriptionId);
+            if (source == null) {
+                throw INACTIVE_SOURCE.create();
+            }
+            final SubscribeService subscribeService = source.getSubscribeService();
+            final Subscription subscription = subscribeService.loadSubscription(context, subscriptionId, null);
+            subscription.setSession(session);
+            final boolean knowsSource =
+                discoverer.filter(subscription.getUserId(), context.getContextId()).knowsSource(
+                    subscribeService.getSubscriptionSource().getId());
+            if (!knowsSource) {
+                throw INACTIVE_SOURCE.create();
+            }
+            final Collection<?> data = subscribeService.getContent(subscription);
+            storeData(data, subscription);
+            return data.size();
+        } finally {
+            unlock(subscriptionId, session);
+        }
     }
 
     @Override
@@ -169,27 +208,35 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         int sum = 0;
         for (final Subscription subscription : subscriptionsToRefresh) {
             subscription.setSession(session);
-            if(!subscription.isEnabled()) {
-                LOG.debug("Skipping subscription "+subscription.getDisplayName()+" because it is disabled");
-
+            if (!subscription.isEnabled()) {
+                LOG.debug("Skipping subscription " + subscription.getDisplayName() + " because it is disabled");
             } else {
-            	final SubscriptionSource source = subscription.getSource();
-            	if(source == null) {
-                	throw INACTIVE_SOURCE.create();
-            	}
-            	final SubscribeService subscribeService = source.getSubscribeService();
-            	final Collection data = subscribeService.getContent(subscription);
-            	storeData(data, subscription);
-            	sum += data.size();
+                final int subscriptionId = subscription.getId();
+                if (tryLock(subscriptionId, session)) {
+                    try {
+                        final SubscriptionSource source = subscription.getSource();
+                        if (source == null) {
+                            throw INACTIVE_SOURCE.create();
+                        }
+                        final SubscribeService subscribeService = source.getSubscribeService();
+                        final Collection<?> data = subscribeService.getContent(subscription);
+                        storeData(data, subscription);
+                        sum += data.size();
+                    } finally {
+                        unlock(subscriptionId, session);
+                    }
+                }
             }
         }
         return sum;
     }
+
     private boolean isThereMoreThanOneSubscriptionOnThisFolder(final Context context, final String folder, final String secret) throws OXException {
         final List<SubscriptionSource> sources = discoverer.getSources();
         final List<Subscription> allSubscriptionsOnThisFolder = new ArrayList<Subscription>(10);
         for (final SubscriptionSource subscriptionSource : sources) {
-            final Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(context, folder, secret);
+            final Collection<Subscription> subscriptions =
+                subscriptionSource.getSubscribeService().loadSubscriptions(context, folder, secret);
             if (subscriptions != null) {
                 allSubscriptionsOnThisFolder.addAll(subscriptions);
             }
@@ -197,7 +244,66 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         return allSubscriptionsOnThisFolder.size() >= 2;
     }
 
+    /*-
+     * -------------------------- Helper class --------------------------
+     */
 
+    private static SubscriptionKey key(final int subscriptionId, final Session session) {
+        return new SubscriptionKey(subscriptionId, session.getUserId(), session.getContextId());
+    }
 
+    private static final class SubscriptionKey {
+
+        private final int subscriptionId;
+        private final int userId;
+        private final int contextId;
+        private final int hash;
+
+        SubscriptionKey(final int subscriptionId, final int userId, final int contextId) {
+            super();
+            this.subscriptionId = subscriptionId;
+            this.userId = userId;
+            this.contextId = contextId;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + contextId;
+            result = prime * result + subscriptionId;
+            result = prime * result + userId;
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof SubscriptionKey)) {
+                return false;
+            }
+            final SubscriptionKey other = (SubscriptionKey) obj;
+            if (contextId != other.contextId) {
+                return false;
+            }
+            if (subscriptionId != other.subscriptionId) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder(32).append('{').append("subscriptionId=").append(subscriptionId).append(", userId=").append(userId).append(
+                ", contextId=").append(contextId).append('}').toString();
+        }
+
+    } // End of class SubscriptionKey
 
 }
