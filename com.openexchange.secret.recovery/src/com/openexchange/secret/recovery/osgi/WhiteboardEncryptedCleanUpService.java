@@ -47,70 +47,40 @@
  *
  */
 
-package com.openexchange.secret.recovery.mail.osgi;
+package com.openexchange.secret.recovery.osgi;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
-import com.openexchange.secret.recovery.EncryptedItemDetectorService;
-import com.openexchange.secret.recovery.SecretMigrator;
+import com.openexchange.secret.recovery.SecretCleanUpService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MailSecretRecoveryActivator}
- *
+ * {@link WhiteboardEncryptedCleanUpService}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailSecretRecoveryActivator extends HousekeepingActivator {
+public class WhiteboardEncryptedCleanUpService extends ServiceTracker<EncryptedItemCleanUpService, EncryptedItemCleanUpService> implements SecretCleanUpService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailAccountStorageService.class };
+    /**
+     * Initializes a new {@link WhiteboardEncryptedCleanUpService}.
+     * 
+     * @param context The bundle context
+     */
+    public WhiteboardEncryptedCleanUpService(final BundleContext context) {
+        super(context, EncryptedItemCleanUpService.class, null);
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Ignore
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Ignore
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final MailAccountStorageService mailAccountStorage = getService(MailAccountStorageService.class);
-        registerService(EncryptedItemDetectorService.class, new EncryptedItemDetectorService() {
-
-            @Override
-            public boolean hasEncryptedItems(final ServerSession session) throws OXException {
-                return mailAccountStorage.hasAccounts(session);
+    public void cleanUp(final String secret, final ServerSession session) throws OXException {
+        for (final EncryptedItemCleanUpService cleaner : getTracked().values()) {
+            if (cleaner == this) {
+                continue;
             }
-
-        });
-        registerService(SecretMigrator.class, new SecretMigrator() {
-
-            @Override
-            public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
-                mailAccountStorage.migratePasswords(session.getUserId(), session.getContextId(), oldSecret, newSecret);
-            }
-
-        });
-        registerService(EncryptedItemCleanUpService.class, new EncryptedItemCleanUpService() {
-
-            @Override
-            public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
-                mailAccountStorage.cleanUp(secret, session);
-            }
-
-        });
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        cleanUp();
+            cleaner.cleanUpEncryptedItems(secret, session);
+        }
     }
 
 }

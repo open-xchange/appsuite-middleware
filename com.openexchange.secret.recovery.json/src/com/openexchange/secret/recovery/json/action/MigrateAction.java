@@ -52,6 +52,8 @@ package com.openexchange.secret.recovery.json.action;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 
@@ -74,9 +76,9 @@ public final class MigrateAction extends AbstractSecretRecoveryAction {
     @Override
     protected AJAXRequestResult perform(final SecretRecoveryAJAXRequest req) throws OXException, JSONException {
         final String password = req.getParameter("password");
-        final String secret = secretService.getSecret(req.getSession());
+        final String secret = getService(SecretService.class).getSecret(req.getSession());
 
-        migrator.migrate(password, secret, req.getSession());
+        getService(SecretMigrator.class).migrate(password, secret, req.getSession());
 
         return new AJAXRequestResult(Integer.valueOf(1), "int");
     }

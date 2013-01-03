@@ -56,6 +56,7 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.net.InetAddress;
@@ -2111,9 +2112,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement selectStmt = null;
         PreparedStatement updateStmt = null;
         ResultSet rs = null;
+        boolean rollback = false;
         try {
             con = Database.get(cid, true);
             con.setAutoCommit(false); // BEGIN
+            rollback = true;
             /*
              * Perform SELECT query
              */
@@ -2180,19 +2183,115 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 updateStmt = null;
             }
             con.commit(); // COMMIT
-        } catch (final OXException e) {
-            DBUtils.rollback(con);
-            throw e;
+            rollback = false;
         } catch (final SQLException e) {
-            DBUtils.rollback(con);
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final GeneralSecurityException e) {
-            DBUtils.rollback(con);
             throw MailAccountExceptionCodes.PASSWORD_ENCRYPTION_FAILED.create(e, "", "", Integer.valueOf(user), Integer.valueOf(cid));
         } catch (final RuntimeException e) {
-            DBUtils.rollback(con);
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            DBUtils.closeSQLStuff(rs, selectStmt);
+            DBUtils.closeSQLStuff(updateStmt);
+            if (con != null) {
+                DBUtils.autocommit(con);
+                Database.back(cid, true, con);
+            }
+        }
+    }
+
+    @Override
+    public void cleanUp(String secret, Session session) throws OXException {
+        final int user = session.getUserId();
+        final int cid = session.getContextId();
+        // Clear possible cached MailAccess instances
+        cleanUp(user, cid);
+        // Migrate password
+        Connection con = null;
+        PreparedStatement selectStmt = null;
+        PreparedStatement updateStmt = null;
+        ResultSet rs = null;
+        boolean rollback = false;
+        try {
+            con = Database.get(cid, true);
+            con.setAutoCommit(false); // BEGIN
+            rollback = true;
+            /*
+             * Perform SELECT query
+             */
+            selectStmt = con.prepareStatement(SELECT_PASSWORD1);
+            selectStmt.setInt(1, cid);
+            selectStmt.setInt(2, user);
+            rs = selectStmt.executeQuery();
+            final TIntSet ids = new TIntHashSet(8);
+            while (rs.next()) {
+                final String password = rs.getString(2);
+                final int id = rs.getInt(1);
+                if (id != MailAccount.DEFAULT_ID) {
+                    try {
+                        MailPasswordUtil.decrypt(password, secret);
+                    } catch (final GeneralSecurityException x) {
+                        // We couldn't decrypt the password
+                        ids.add(id);
+                    }
+                }
+            }
+            /*
+             * Close stuff
+             */
+            DBUtils.closeSQLStuff(rs, selectStmt);
+            /*
+             * Perform other SELECT query
+             */
+            selectStmt = con.prepareStatement(SELECT_PASSWORD2);
+            selectStmt.setInt(1, cid);
+            selectStmt.setInt(2, user);
+            rs = selectStmt.executeQuery();
+            while (rs.next()) {
+                final String password = rs.getString(2);
+                final int id = rs.getInt(1);
+                if (id == MailAccount.DEFAULT_ID) {
+                    continue;
+                }
+                ids.add(id);
+            }
+            // Check for candidates
+            if (!ids.isEmpty()) {
+                try {
+                    final Connection connection = con;
+                    ids.forEach(new TIntProcedure() {
+                        
+                        @Override
+                        public boolean execute(final int id) {
+                            try {
+                                deleteMailAccount(id, Collections.<String, Object> emptyMap(), user, cid, false, connection);
+                                return true;
+                            } catch (final OXException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    });
+                } catch (final RuntimeException e) {
+                    final Throwable cause = e.getCause();
+                    if (cause instanceof OXException) {
+                        throw (OXException) cause;
+                    }
+                    throw e;
+                }
+            }
+            con.commit(); // COMMIT
+            rollback = false;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
             DBUtils.closeSQLStuff(rs, selectStmt);
             DBUtils.closeSQLStuff(updateStmt);
             if (con != null) {

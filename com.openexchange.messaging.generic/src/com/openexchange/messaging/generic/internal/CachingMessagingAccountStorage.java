@@ -247,4 +247,8 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         return delegatee.hasAccount(service, session);
     }
 
+    public void cleanUp(MessagingService service, String secret, Session session) throws OXException {
+        delegatee.cleanUp(service, secret, session);
+    }
+
 }

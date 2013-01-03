@@ -222,6 +222,11 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
+    public void cleanUp(final String secret, final Session session) throws OXException {
+        storageService.cleanUp(secret, session);
+    }
+
+    @Override
     public boolean hasAccounts(final Session session) throws OXException {
         return storageService.hasAccounts(session);
     }

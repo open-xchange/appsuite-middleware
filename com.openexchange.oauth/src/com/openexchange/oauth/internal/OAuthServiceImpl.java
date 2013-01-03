@@ -105,6 +105,7 @@ import com.openexchange.oauth.services.ServiceRegistry;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.session.Session;
@@ -122,7 +123,7 @@ import com.openexchange.tools.session.SessionHolder;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<PWUpdate>, EncryptedItemDetectorService, SecretMigrator {
+public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<PWUpdate>, EncryptedItemDetectorService, SecretMigrator, EncryptedItemCleanUpService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceImpl.class));
 
@@ -426,11 +427,28 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     public void deleteAccount(final int accountId, final int user, final int contextId) throws OXException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(false, context);
+        startTransaction(con);
+        boolean committed = false;
         try {
-            con.setAutoCommit(false); // BEGIN
+            deleteAccount(accountId, user, contextId, con);
+            con.commit(); // COMMIT
+            committed = true;
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
+            throw e;
+        } catch (final RuntimeException e) {
+            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (!committed) {
+                rollback(con);
+            }
+            autocommit(con);
+            provider.releaseReadConnection(context, con);
         }
+    }
+
+    private void deleteAccount(final int accountId, final int user, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             final DeleteListenerRegistry deleteListenerRegistry = DeleteListenerRegistry.getInstance();
@@ -446,20 +464,14 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Post folder event
              */
             postOAuthDeleteEvent(accountId, user, contextId);
-            con.commit(); // COMMIT
         } catch (final SQLException e) {
-            rollback(con);
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            rollback(con);
             throw e;
-        } catch (final Exception e) {
-            rollback(con);
+        } catch (final RuntimeException e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            autocommit(con);
-            provider.releaseReadConnection(context, con);
         }
     }
 
@@ -866,6 +878,61 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     @Override
+    public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
+        final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class);
+        final int contextId = session.getContextId();
+        final Context context = getContext(contextId);
+        final Connection con = getConnection(false, context);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Boolean committed = null;
+        try {
+            stmt = con.prepareStatement("SELECT id, accessToken, accessSecret FROM oauthAccounts WHERE cid = ? AND user = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, session.getUserId());
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return;
+            }
+            final List<Integer> accounts = new ArrayList<Integer>(8);
+            do {
+                try {
+                    // Try using the secret.
+                    cryptoService.decrypt(rs.getString(2), secret);
+                    cryptoService.decrypt(rs.getString(3), secret);
+                } catch (final OXException e) {
+                    // Clean-up
+                    accounts.add(Integer.valueOf(rs.getInt(1)));
+                }
+            } while (rs.next());
+            closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+            if (accounts.isEmpty()) {
+                return;
+            }
+            /*
+             * Delete them
+             */
+            committed = Boolean.FALSE;
+            startTransaction(con);
+            for (final Integer accountId : accounts) {
+                deleteAccount(accountId.intValue(), session.getUserId(), contextId, con);
+            }
+            con.commit();
+            committed = Boolean.TRUE;
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != committed && !committed.booleanValue()) {
+                rollback(con);
+            }
+            closeSQLStuff(rs, stmt);
+            provider.releaseWriteConnection(context, con);
+        }
+    }
+
+    @Override
     public boolean hasEncryptedItems(final ServerSession session) throws OXException {
         final int contextId = session.getContextId();
         final Context context = getContext(contextId);
@@ -940,6 +1007,12 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         }
     }
 
-	
+    private static void startTransaction(final Connection con) throws OXException {
+        try {
+            con.setAutoCommit(false); // BEGIN
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
 
 }

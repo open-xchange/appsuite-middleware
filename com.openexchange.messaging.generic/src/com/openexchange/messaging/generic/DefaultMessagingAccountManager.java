@@ -156,4 +156,9 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         return CACHE.hasAccount(service, session);
     }
 
+    @Override
+    public void cleanUp(String secret, Session session) throws OXException {
+        CACHE.cleanUp(service, secret, session);
+    }
+
 }
