@@ -59,7 +59,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessionstorage.SessionStorageService;
@@ -79,15 +79,15 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
     
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class };
+        return new Class<?>[] { ThreadPoolService.class, HazelcastConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.sessionstorage.hazelcast");
         Services.setServiceLookup(this);
-        final ConfigurationService configService = getService(ConfigurationService.class);
-        final boolean enabled = configService.getBoolProperty("com.openexchange.sessionstorage.hazelcast.enabled", false);
+        final HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
+        final boolean enabled = configService.isEnabled();
         if (enabled) {
             // Track HazelcastInstance
             final BundleContext context = this.context;

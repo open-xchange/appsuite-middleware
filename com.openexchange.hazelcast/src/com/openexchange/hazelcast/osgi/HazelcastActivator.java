@@ -86,8 +86,8 @@ public class HazelcastActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final Log logger = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
-        final ConfigurationService service = getService(ConfigurationService.class);
-        if (null != service && !service.getBoolProperty("com.openexchange.hazelcast.enabled", true)) {
+        final HazelcastConfigurationService service = getService(HazelcastConfigurationService.class);
+        if (!service.isEnabled()) {
             logger.info("\nHazelcast\n\tStartup of Hazelcast clustering and data distribution platform denied per configuration.");
             return;
         }
