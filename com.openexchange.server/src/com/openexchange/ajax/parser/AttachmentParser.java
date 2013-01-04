@@ -50,6 +50,7 @@
 package com.openexchange.ajax.parser;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentField;
@@ -72,6 +73,10 @@ public class AttachmentParser {
         public String getColumn(){
             return idString;
         }
+    }
+
+    public AttachmentMetadata getAttachmentMetadata(final JSONObject json) {
+        return new JSONAttachmentMetadata(json);
     }
 
     public AttachmentMetadata getAttachmentMetadata(final String json) throws JSONException {
