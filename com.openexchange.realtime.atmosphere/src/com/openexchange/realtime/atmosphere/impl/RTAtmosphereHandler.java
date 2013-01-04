@@ -79,7 +79,6 @@ import com.openexchange.realtime.StanzaSender;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
-import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
 import com.openexchange.realtime.packet.ID;
@@ -321,13 +320,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @throws IOException
      */
     private void writeExceptionToResource(Exception exception, AtmosphereResource resource) throws IOException {
-        JSONObject jsonObject = new JSONObject();
         try {
+            final JSONObject jsonObject = new JSONObject();
             jsonObject.put("error", exception.toString());
-            resource.getResponse().getWriter().write(jsonObject.toString());
+            jsonObject.write(resource.getResponse().getWriter());
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new IOException(e.getMessage(), e);
         }
     }
 
