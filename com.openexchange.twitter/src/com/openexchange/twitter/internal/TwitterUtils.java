@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,56 @@
  *
  */
 
-package com.openexchange.twitter;
+package com.openexchange.twitter.internal;
 
-import twitter4j.TwitterException;
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.exception.OXException;
+import com.openexchange.twitter.TwitterExceptionCodes;
+
 
 /**
- * {@link TwitterExceptionMessages} - Exception messages for {@link TwitterException} that must be translated.
+ * {@link TwitterUtils} - A utility class for Twitter.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterExceptionMessages implements LocalizableStrings {
-
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // Missing property: %1$s
-    public static final String MISSING_PROPERTY_MSG = "Missing property: %1$s";
-
-    // Invalid property value in property \"%1$s\": %2$s
-    public static final String INVALID_PROPERTY_MSG = "Invalid property value in property \"%1$s\": %2$s";
-
-    // The consumer key/consumer secret pair is missing in configuration.
-    public static final String MISSING_CONSUMER_KEY_SECRET_MSG = "The consumer key/consumer secret pair is missing in configuration.";
-
-    // The access token for twitter user %1$s could not be obtained.
-    public static final String ACCESS_TOKEN_FAILED_MSG = "The access token for twitter user %1$s could not be obtained.";
-
-    // The configured consumer key/consumer secret pair is invalid. Please provide a valid consumer key/consumer secret through configuration.
-    public static final String INVALID_CONSUMER_KEY_SECRET_MSG = "The configured consumer key/consumer secret pair is invalid. Please provide a valid consumer key/consumer secret through configuration.";
-
-    // Please (re-)authorize your Twitter accounts.
-    // Twitter responded with: %1$s
-    public static final String REAUTHORIZE_ERROR_MSG = "Please (re-)authorize your Twitter accounts.\nTwitter responded with: %1$s";
-
-    // The request is understood, but it has been refused or access is not allowed: %1$s
-    public static final String DENIED_ERROR_MSG = "The request is understood, but it has been refused or access is not allowed: %1$s";
-
-    // Invalid format in search query.
-    public static final String INVALID_QUERY_MSG = "Invalid format in search query.";
+public final class TwitterUtils {
 
     /**
-     * Initializes a new {@link TwitterExceptionMessages}.
+     * Initializes a new {@link TwitterUtils}.
      */
-    private TwitterExceptionMessages() {
+    private TwitterUtils() {
         super();
+    }
+
+    /** Bad or expired access token. Need to re-authenticate user. */
+    public static final int _401_UNAUTHORIZED = 401;
+
+    /**
+     * Converts given <code>twitter4j.TwitterException</code> instance to an appropriate <code>OXException</code> instance.
+     * <p>
+     * See <a href="https://dev.twitter.com/docs/error-codes-responses">https://dev.twitter.com/docs/error-codes-responses</a>.
+     *
+     * @param e The Twitter error
+     * @return An appropriate {@code OXException} instance
+     */
+    public static OXException handleTwitterException(final twitter4j.TwitterException e) {
+        if (null == e) {
+            return null;
+        }
+        // According to https://dev.twitter.com/docs/error-codes-responses
+        final int statusCode = e.getStatusCode();
+        if (400 == statusCode) {
+            return TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+        if (_401_UNAUTHORIZED == statusCode) {
+            return TwitterExceptionCodes.REAUTHORIZE_ERROR.create(e, e.getMessage());
+        }
+        if (403 == statusCode) {
+            return TwitterExceptionCodes.DENIED_ERROR.create(e, e.getMessage());
+        }
+        if (406 == statusCode) {
+            return TwitterExceptionCodes.INVALID_QUERY.create(e, e.getMessage());
+        }
+        return TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
     }
 
 }
