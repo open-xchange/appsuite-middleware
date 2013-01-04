@@ -1,3 +1,7 @@
+* 2013-01-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24347: Supply distributed map configurations on node startup
+
 * 2013-01-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 24296: Removed App Suite localization marker files for fr_FR and lv_LV.
