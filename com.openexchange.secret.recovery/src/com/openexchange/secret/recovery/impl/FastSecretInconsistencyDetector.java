@@ -80,14 +80,15 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
     private static final String PROPERTY = "com.openexchange.secret.recovery.fast.token";
 
     private final SecretService secretService;
-
     private final CryptoService cryptoService;
-
     private final UserService userService;
-
     private final EncryptedItemDetectorService detector;
     
+    /**
+     * Initializes a new {@link FastSecretInconsistencyDetector}.
+     */
     public FastSecretInconsistencyDetector(final SecretService secretService, final CryptoService cryptoService, final UserService userService, final EncryptedItemDetectorService detector) {
+        super();
         this.secretService = secretService;
         this.cryptoService = cryptoService;
         this.userService = userService;
