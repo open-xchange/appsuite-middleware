@@ -396,7 +396,20 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     private static final String STR_ERROR_PARAMS = "error_params";
 
-	// JavaScript for substituteJS()
+	/**
+	 * JavaScript for <code>substituteJS()</code>.
+	 * <pre>
+     *      &lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+     *      &lt;html&gt;
+     *       &lt;head&gt;
+     *        &lt;META http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+     *        &lt;script type="text/javascript"&gt;
+     *          (parent.callback_**action** || window.opener && window.opener.callback_**action**)(**json**)
+     *        &lt;/script&gt;
+     *       &lt;/head&gt;
+     *      &lt;/html&gt;
+	 * </pre>
+	 */
 	public static final String JS_FRAGMENT = "<!DOCTYPE HTML PUBLIC "
 			+ "\"-//W3C//DTD HTML 4.01//EN\" "
 			+ "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
