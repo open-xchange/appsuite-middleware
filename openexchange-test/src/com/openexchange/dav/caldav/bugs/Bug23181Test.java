@@ -52,6 +52,8 @@ package com.openexchange.dav.caldav.bugs;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.StatusCodes;
@@ -91,6 +93,9 @@ public class Bug23181Test extends CalDAVTest {
     protected void tearDown() throws Exception {
         if (null != this.manager2) {
             this.manager2.cleanUp();
+            if (null != manager2.getClient()) {
+                manager2.getClient().logout();
+            }
         }
         super.tearDown();
     }
@@ -106,8 +111,10 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * Create appointment in user B's calendar on server
          */
-        String userA = super.getLogin(User.User1);
-        String userB = super.getLogin(User.User2);
+//      String userA = super.getLogin(User.User1);
+        String userA = client.execute(new GetRequest(Tree.DefaultAddress)).getString();
+//      String userB = super.getLogin(User.User2);
+        String userB = manager2.getClient().execute(new GetRequest(Tree.DefaultAddress)).getString();
         info.append("userA: " + userA).append("\r\n");
         info.append("userB: " + userB).append("\r\n");
         String uid = randomUID();
