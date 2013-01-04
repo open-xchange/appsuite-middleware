@@ -1,6 +1,7 @@
 * 2013-01-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 24354: Signal responded 401 error code as an appropriate re-authorize error message
+ - Fix for bug 24399: Skip not installed MBeans
 
 * 2013-01-04 - tobias.friedrich@open-xchange.com
 
