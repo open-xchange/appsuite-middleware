@@ -76,7 +76,7 @@ import com.mysql.jdbc.MySQLConnection;
 /**
  * This is a simple Tool to get an idea how a specific installation of Open-Xchange is used. Operating on the MySQL-database exclusively it
  * is quite fast and uses few resources. Off-hours are still recommended for its usage to limit any performance-impact, though. It will find its required parameters automatically in the file
- * /opt/open-xchange/etc/groupware/configdb.properties. Otherwise it is possible to specify all parameters explicitly. Output is a single
+ * /opt/open-xchange/etc/configdb.properties. Otherwise it is possible to specify all parameters explicitly. Output is a single
  * text-file. The filename starts with "open-xchange_datamining" and includes the current date in YYYY-MM-DD format. The content of the file
  * is camelCased-Parameters, unique and one per line. This should make using these files as input, for example for a visualization, pretty
  * easy.
@@ -100,13 +100,7 @@ public class Datamining {
 
     private static MySQLConnection instance = null;
 
-    private static Connection configdbConnection = null;
-
-    private static String hostname = "";
-
-    private static String dbPort = "3306";
-
-    private static String dbName = "";
+    private static Connection configdbConnection = null;    
 
     private static String configDBURL = "";
 
@@ -137,11 +131,9 @@ public class Datamining {
         final long before = rightNow.getTime().getTime();
 
         setReportFilename();
+        readProperties();
         readParameters(args);
-        if ((configDBURL.equals("") || configDBUser.equals("") || configDBPassword.equals("")) && !helpPrinted) {
-            readProperties();
-        }
-
+                   
         if (configDBURL.equals("") || configDBUser.equals("") || configDBPassword.equals("")) {
             if (!helpPrinted)
                 printHelp();
@@ -168,6 +160,18 @@ public class Datamining {
             Questions.reportNumberOfUsersWhoChangedTheirContactsInTheLast30Days();
             Questions.reportAverageNumberOfContactsPerUserWhoHasContactsAtAll();
             Questions.reportNumberOfUsersWithLinkedSocialNetworkingAccounts();
+            Questions.reportNumberOfUsersConnectedToFacebook();
+            Questions.reportNumberOfUsersConnectedToLinkedIn();
+            Questions.reportNumberOfUsersConnectedToTwitter();
+            Questions.reportNumberOfUsersConnectedToGoogle();
+            Questions.reportNumberOfUsersConnectedToMSN();
+            Questions.reportNumberOfUsersConnectedToYahoo();
+            Questions.reportNumberOfUsersConnectedToXing();
+            Questions.reportNumberOfUsersConnectedToTOnline();
+            Questions.reportNumberOfUsersConnectedToGMX();
+            Questions.reportNumberOfUsersConnectedToWebDe();
+            Questions.reportNumberOfUsersWithTasks();
+            Questions.reportNumberOfUsersWhoChangedTheirTasksInTheLast30Days();
             Questions.reportNumberOfUsersWhoSelectedTeamViewAsCalendarDefault();
             Questions.reportNumberOfUsersWhoSelectedCalendarViewAsCalendarDefault();
             Questions.reportNumberOfUsersWhoSelectedListViewAsCalendarDefault();
@@ -177,7 +181,7 @@ public class Datamining {
             Questions.reportNumberOfUsersWhoSelectedHSplitViewAsTasksDefault();
             Questions.reportNumberOfUsersWhoSelectedListViewAsInfostoreDefault();
             Questions.reportNumberOfUsersWhoSelectedHSplitViewAsInfostoreDefault();
-            Questions.reportNumberOfUsersWhoActivatedMiniCalendar();
+            Questions.reportNumberOfUsersWhoActivatedMiniCalendar();                        
 
             rightNow = Calendar.getInstance();
             final long after = rightNow.getTime().getTime();
@@ -215,7 +219,9 @@ public class Datamining {
             System.out.println("---");
             System.out.println("Usage of the Open-Xchange datamining-tool:\n\n");
             optionParser.printHelpOn(System.out);
-            System.out.println("\nEither specify these parameters manually or use this tool on an Open-Xchange application server where all necessary info\n is automatically found in the file /opt/open-xchange/etc/groupware/configdb.properties");
+            System.out.println("\nEither specify these parameters manually or use this tool on an Open-Xchange application server where all necessary info\n is automatically found in the file /opt/open-xchange/etc/configdb.properties");
+            System.out.println("\nEven then it is possible to override parameters from configdb.properties by setting them manually.");
+            System.out.println("\nPlease note that if you want to override hostname / dbName / dbPort at least hostname must be given (no default) and defaults will apply for the other 2.");
             System.out.println("---");
         } catch (IOException io) {
             io.printStackTrace();
@@ -246,7 +252,10 @@ public class Datamining {
         return allTheAnswers.get(parameter);
     }
 
-    private static void readParameters(String[] args) {        
+    private static void readParameters(String[] args) { 
+    	
+    	String hostname, dbPort, dbName;
+    	
         // mandatory
         optionParser.acceptsAll(Arrays.asList("hostname", "n"), "Host where the Open-Xchange MySQL-database is running").withRequiredArg().describedAs(
             "hostname").ofType(String.class);
@@ -258,7 +267,7 @@ public class Datamining {
         optionParser.acceptsAll(Arrays.asList("dbName", "d"), "Name of the MySQL-database that contains the Open-Xchange configDB").withRequiredArg().describedAs(
             "dbname").ofType(String.class).defaultsTo("configdb");
         optionParser.acceptsAll(Arrays.asList("reportfilePath"), "Path where the report-file is saved").withRequiredArg().describedAs(
-            "path").ofType(String.class).defaultsTo("");
+            "path").ofType(String.class).defaultsTo("./");
         optionParser.acceptsAll(Arrays.asList("v", "verbose"), "With this the tool prints what it is doing live");
         optionParser.acceptsAll(Arrays.asList("dbPort"), "Port where MySQL is running on the host specified with \"-hostname\"").withRequiredArg().describedAs(
             "port").defaultsTo("3306");
@@ -286,17 +295,22 @@ public class Datamining {
         if (!helpCalled) {
             try {
                 OptionSet options = optionParser.parse(args);
-                hostname = setItIfThereIsAValueForIt("hostname", options);
-                dbName = setItIfThereIsAValueForIt("dbName", options);
-                configDBUser = setItIfThereIsAValueForIt("dbUser", options);
-                configDBPassword = setItIfThereIsAValueForIt("dbPassword", options);
-                verbose = options.has("verbose");
-                // there is _always_ a value for this one
+                hostname = getValueForOption("hostname", options);
+                dbName = getValueForOption("dbName", options);
                 dbPort = (String) options.valueOf("dbPort");
+                
+                if (!getValueForOption("dbUser", options).equals("")){
+                	configDBUser = getValueForOption("dbUser", options);
+                }
+                if (!getValueForOption("dbPassword", options).equals("")){
+                	configDBPassword = getValueForOption("dbPassword", options);
+                }
+                verbose = options.has("verbose");
+                
                 if (!hostname.equals("") && !dbName.equals("") && !dbPort.equals("")){
                     configDBURL = "jdbc:mysql://" + hostname + ":" + dbPort + "/" + dbName;
                 }
-                reportfilePath = setItIfThereIsAValueForIt("reportfilePath", options);
+                reportfilePath = getValueForOption("reportfilePath", options);
             } catch (OptionException e) {
                 System.out.println(e.getMessage());
             }
@@ -305,10 +319,10 @@ public class Datamining {
 
     private static void readProperties() {
         // Try to read configdb.properties
-        System.out.println("Trying /opt/open-xchange/etc/groupware/configdb.properties");
+        System.out.println("Trying /opt/open-xchange/etc/configdb.properties");
         Properties configdbProperties = new Properties();
         try {
-            configdbProperties.load(new FileInputStream("/opt/open-xchange/etc/groupware/configdb.properties"));
+            configdbProperties.load(new FileInputStream("/opt/open-xchange/etc/configdb.properties"));
             configDBURL = configdbProperties.getProperty("readUrl");
 
             configDBUser = configdbProperties.getProperty("readProperty.1").substring(5);
@@ -317,9 +331,9 @@ public class Datamining {
                 System.out.println("All necessary parameters found in configdb.properties");
             }
         } catch (FileNotFoundException e) {
-            System.out.println("File /opt/open-xchange/etc/groupware/configdb.properties not available");
+            System.out.println("File /opt/open-xchange/etc/configdb.properties not available");
         } catch (IOException e) {
-            System.out.println("File /opt/open-xchange/etc/groupware/configdb.properties not available");
+            System.out.println("File /opt/open-xchange/etc/configdb.properties not available");
         }
     }
 
@@ -443,7 +457,7 @@ public class Datamining {
         Float numberInAllSchemata = new Float(0.0);
         try {
             for (Schema schema : allSchemata) {
-                String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + ":" + dbPort + "/" + schema.getSchemaname();
+                String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
                 MySQLConnection conn = getDBConnection(url, schema.getLogin(), schema.getPassword());
                 if (conn != null) {
                     Statement query;
@@ -473,7 +487,7 @@ public class Datamining {
         Float numberInAllSchemata = new Float(0.0);
         try {
             for (Schema schema : allSchemata) {
-                String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + ":" + dbPort + "/" + schema.getSchemaname();
+                String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
                 MySQLConnection conn = getDBConnection(url, schema.getLogin(), schema.getPassword());
                 if (conn != null) {
                     Statement query;
@@ -501,7 +515,7 @@ public class Datamining {
     protected static BigInteger countOverAllSchemata(String sql) {
         BigInteger numberOfObjects = new BigInteger("0");
         for (Schema schema : allSchemata) {
-            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + ":" + dbPort + "/" + schema.getSchemaname();
+            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
             MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
             if (conn != null) {
                 Statement query;
@@ -526,10 +540,13 @@ public class Datamining {
         return numberOfObjects;
     }
     
-    private static String setItIfThereIsAValueForIt(String parameterName, OptionSet allParameters){
-        if (allParameters.has(parameterName)){
-            return (String) allParameters.valueOf(parameterName);
-        } else {
+    private static String getValueForOption(String parameterName, OptionSet allParameters){
+        String returnString = "";
+        returnString = (String) allParameters.valueOf(parameterName);
+        if (returnString != null) {
+        	return returnString;
+        }
+        else {
             return "";
         }
     }
