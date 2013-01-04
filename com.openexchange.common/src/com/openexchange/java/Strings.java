@@ -51,7 +51,6 @@ package com.openexchange.java;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.UnsupportedCharsetException;
@@ -139,7 +138,7 @@ public class Strings {
 
     private static final CharsetDecoder UTF8_CHARSET_DECODER;
     static {
-        final CharsetDecoder utf8Decoder = Charset.forName("UTF-8").newDecoder();
+        final CharsetDecoder utf8Decoder = Charsets.UTF_8.newDecoder();
         utf8Decoder.onMalformedInput(CodingErrorAction.REPORT);
         utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
         UTF8_CHARSET_DECODER = utf8Decoder;
