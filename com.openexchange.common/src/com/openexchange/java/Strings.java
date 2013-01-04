@@ -147,7 +147,7 @@ public class Strings {
     /**
      * Checks given bytes for valid UTF-8 bytes.
      * 
-     * @param bytes he bytes to check
+     * @param bytes The bytes to check
      * @return <code>true</code> for valid UTF-8 bytes; otherwise <code>false</code>
      */
     public static boolean isUTF8Bytes(final byte[] bytes) {
