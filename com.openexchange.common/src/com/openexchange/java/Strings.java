@@ -49,6 +49,12 @@
 
 package com.openexchange.java;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -57,7 +63,7 @@ import java.util.regex.Matcher;
 
 /**
  * {@link Strings} - A library for performing operations that create Strings
- *
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Strings {
@@ -111,8 +117,52 @@ public class Strings {
     }
 
     /**
+     * Fixes possible charset problem in given string.
+     * 
+     * @param s The string to check
+     * @return The fixed string
+     */
+    public static String fixCharsetProblem(final String s) {
+        if (isEmpty(s)) {
+            return s;
+        }
+        try {
+            final byte[] bytes = s.getBytes(Charsets.ISO_8859_1);
+            if (isUTF8Bytes(bytes)) {
+                return new String(bytes, Charsets.UTF_8);
+            }
+            return s;
+        } catch (final UnsupportedCharsetException e) {
+            return s;
+        }
+    }
+
+    private static final CharsetDecoder UTF8_CHARSET_DECODER;
+    static {
+        final CharsetDecoder utf8Decoder = Charset.forName("UTF-8").newDecoder();
+        utf8Decoder.onMalformedInput(CodingErrorAction.REPORT);
+        utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+        UTF8_CHARSET_DECODER = utf8Decoder;
+    }
+
+    /**
+     * Checks given bytes for valid UTF-8 bytes.
+     * 
+     * @param bytes he bytes to check
+     * @return <code>true</code> for valid UTF-8 bytes; otherwise <code>false</code>
+     */
+    public static boolean isUTF8Bytes(final byte[] bytes) {
+        try {
+            UTF8_CHARSET_DECODER.decode(ByteBuffer.wrap(bytes));
+            return true;
+        } catch (final CharacterCodingException e) {
+            return false;
+        }
+    }
+
+    /**
      * Joins a collection of objects by connecting the results of their #toString() method with a connector
-     *
+     * 
      * @param coll Collection to be connected
      * @param connector Connector place between two objects
      * @return connected strings or null if collection == null or empty string if collection is empty
@@ -158,39 +208,38 @@ public class Strings {
 
     /**
      * Removes byte order marks from UTF8 strings.
+     * 
      * @return new instance of trimmed string - or reference to old one if unchanged
      */
-    public static String trimBOM(String str) {
-		final byte[][] byteOrderMarks = new byte[][]{
-				new byte[]{(byte)0x00, (byte)0x00, (byte)0xFE,(byte)0xFF},
-				new byte[]{(byte)0xFF, (byte)0xFE, (byte)0x00,(byte)0x0},
-				new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF},
-				new byte[]{(byte)0xFE, (byte)0xFF},
-				new byte[]{(byte)0xFE, (byte)0xFF}
-			};
+    public static String trimBOM(final String str) {
+        final byte[][] byteOrderMarks =
+            new byte[][] {
+                new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF },
+                new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 }, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF },
+                new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
 
-		byte[] bytes = str.getBytes();
-		for(byte[] bom: byteOrderMarks){
-			if(bom.length > bytes.length) {
+        final byte[] bytes = str.getBytes();
+        for (final byte[] bom : byteOrderMarks) {
+            if (bom.length > bytes.length) {
                 continue;
             }
 
-			String pattern = new String(bom);
-			if(! str.startsWith(pattern)) {
+            final String pattern = new String(bom);
+            if (!str.startsWith(pattern)) {
                 continue;
             }
 
-			int bomLen = new String(bom).getBytes().length; //sadly the BOM got encoded meanwhile
+            final int bomLen = new String(bom).getBytes().length; // sadly the BOM got encoded meanwhile
 
-			int len = bytes.length-bomLen;
-			byte[] trimmed = new byte[len];
-			for(int i = 0; i < len; i++) {
-                trimmed[i] = bytes[i+bomLen];
+            final int len = bytes.length - bomLen;
+            final byte[] trimmed = new byte[len];
+            for (int i = 0; i < len; i++) {
+                trimmed[i] = bytes[i + bomLen];
             }
-			return new String(trimmed);
-		}
+            return new String(trimmed);
+        }
 
-		return str;
-	}
+        return str;
+    }
 
 }
