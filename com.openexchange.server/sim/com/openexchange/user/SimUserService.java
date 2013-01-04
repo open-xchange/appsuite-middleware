@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.User;
 
 
@@ -62,6 +63,11 @@ import com.openexchange.groupware.ldap.User;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SimUserService implements UserService {
+
+    @Override
+    public Context getContext(int contextId) throws OXException {
+        return new SimContext(contextId);
+    }
 
     @Override
     public String getUserAttribute(final String name, final int userId, final Context context) throws OXException {
