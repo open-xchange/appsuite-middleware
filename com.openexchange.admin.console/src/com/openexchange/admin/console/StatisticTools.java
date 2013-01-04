@@ -233,7 +233,7 @@ public class StatisticTools extends AbstractJMXTools {
                         "com.openexchange.usm.session",
                         "name",
                         "com.openexchange.usm.session.impl.USMSessionInformation"));
-                } catch (final Exception e) {
+                } catch (final IllegalStateException e) {
                     // Skip it
                 }
             }
