@@ -54,7 +54,7 @@ import com.openexchange.twitter.TwitterExceptionCodes;
 
 
 /**
- * {@link TwitterUtils}
+ * {@link TwitterUtils} - A utility class for Twitter.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
