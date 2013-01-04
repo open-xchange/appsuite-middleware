@@ -978,7 +978,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         String errorMsgStr = ERROR_PAGE_TEMPL;
         errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll(
             "#STATUS_MSG#",
-            Matcher.quoteReplacement(this.statusMsg)).replaceFirst("#STATUS_DESC#", desc);
+            com.openexchange.java.Strings.quoteReplacement(this.statusMsg)).replaceFirst("#STATUS_DESC#", com.openexchange.java.Strings.quoteReplacement(desc));
         synchronized (HEADER_DATE_FORMAT) {
             errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
         }

@@ -379,7 +379,7 @@ public final class HtmlServiceImpl implements HtmlService {
             urlStr.startsWith("www.") || urlStr.startsWith("news.") ? new StringBuilder("http://").append(urlStr).toString() : urlStr).getHost();
         if (null != host && !isAscii(host)) {
             final String encodedHost = gnu.inet.encoding.IDNA.toASCII(host);
-            urlStr = Pattern.compile(Pattern.quote(host)).matcher(urlStr).replaceFirst(Matcher.quoteReplacement(encodedHost));
+            urlStr = Pattern.compile(Pattern.quote(host)).matcher(urlStr).replaceFirst(com.openexchange.java.Strings.quoteReplacement(encodedHost));
         }
         /*
          * Still contains any non-ascii character?
@@ -565,9 +565,9 @@ public final class HtmlServiceImpl implements HtmlService {
         do {
             final String tail = m.group(1);
             if (null == tail || "</hr>".equals(tail)) {
-                m.appendReplacement(sb, Matcher.quoteReplacement(repl));
+                m.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(repl));
             } else {
-                m.appendReplacement(sb, Matcher.quoteReplacement(repl + tail.substring(0, tail.length() - 5)));
+                m.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(repl + tail.substring(0, tail.length() - 5)));
             }
         } while (m.find());
         m.appendTail(sb);
@@ -1252,7 +1252,7 @@ public final class HtmlServiceImpl implements HtmlService {
             StringBuilder tmp = null;
             do {
                 // Un-quote
-                final String match = Matcher.quoteReplacement(PATTERN_UNQUOTE2.matcher(
+                final String match = com.openexchange.java.Strings.quoteReplacement(PATTERN_UNQUOTE2.matcher(
                     PATTERN_UNQUOTE1.matcher(m.group(2)).replaceAll("<!--")).replaceAll("-->"));
                 // Check for additional HTML comments
                 if (PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("").indexOf(endingComment) == -1) {

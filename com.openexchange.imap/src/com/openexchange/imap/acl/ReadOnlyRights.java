@@ -58,7 +58,7 @@ import com.sun.mail.imap.Rights;
  */
 final class ReadOnlyRights extends Rights {
 
-    private final boolean constructed;
+    private boolean constructed = false;
 
     /**
      * Initializes a new {@link ReadOnlyRights}.

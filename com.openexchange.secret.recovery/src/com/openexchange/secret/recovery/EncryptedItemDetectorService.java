@@ -53,11 +53,18 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link EncryptedItemDetectorService}
+ * {@link EncryptedItemDetectorService} - Checks for available encrypted items.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface EncryptedItemDetectorService {
 
+    /**
+     * Checks for available encrypted items.
+     *
+     * @param session The session providing needed user information
+     * @return <code>true</code> if there are encrypted items; otherwise <code>false</code>
+     * @throws OXException If check for encrypted items fails
+     */
     public boolean hasEncryptedItems(ServerSession session) throws OXException;
 }

@@ -56,7 +56,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletionService;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
@@ -382,7 +382,7 @@ public final class LoginPerformer {
                 handleSafely(login, handler, true);
             }
         } else {
-            CompletionService<Void> completionService = null;
+            ThreadPoolCompletionService<Void> completionService = null;
             int blocking = 0;
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 final LoginHandlerService handler = it.next();
@@ -391,14 +391,15 @@ public final class LoginPerformer {
                     if (null == completionService) {
                         completionService = new ThreadPoolCompletionService<Void>(executor);
                     }
-                    final Runnable task = new Runnable() {
-                        
+                    final Callable<Void> task = new Callable<Void>() {
+
                         @Override
-                        public void run() {
+                        public Void call() {
                             handleSafely(login, handler, true);
+                            return null;
                         }
                     };
-                    completionService.submit(task, null);
+                    completionService.submit(task);
                     blocking++;
                 } else {
                     executor.submit(new LoginPerformerTask() {
@@ -431,7 +432,7 @@ public final class LoginPerformer {
                 handleSafely(logout, it.next(), false);
             }
         } else {
-            CompletionService<Void> completionService = null;
+            ThreadPoolCompletionService<Void> completionService = null;
             int blocking = 0;
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 final LoginHandlerService handler = it.next();
@@ -440,14 +441,15 @@ public final class LoginPerformer {
                     if (null == completionService) {
                         completionService = new ThreadPoolCompletionService<Void>(executor);
                     }
-                    final Runnable task = new Runnable() {
-                        
+                    final Callable<Void> task = new Callable<Void>() {
+
                         @Override
-                        public void run() {
+                        public Void call() {
                             handleSafely(logout, handler, false);
+                            return null;
                         }
                     };
-                    completionService.submit(task, null);
+                    completionService.submit(task);
                     blocking++;
                 } else {
                     executor.submit(new LoginPerformerTask() {

@@ -170,7 +170,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
 
         final String parameter = data.getParameter(Param.COLUMNS.getName());
-        if (parameter == null || parameter.equals("")) {
+        if (parameter == null || parameter.length() == 0) {
             return columns = Arrays.asList(File.Field.values());
         }
         final String[] columnStrings = parameter.split("\\s*,\\s*");

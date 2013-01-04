@@ -79,13 +79,13 @@ public class RevertTest extends FileActionTest {
         request().param("id", "12");
 
         final DefaultFile f1 = new DefaultFile();
-        f1.setVersion(0);
+        f1.setVersion("0");
 
         final DefaultFile f2 = new DefaultFile();
-        f2.setVersion(3);
+        f2.setVersion("3");
 
         final DefaultFile f3 = new DefaultFile();
-        f3.setVersion(4);
+        f3.setVersion("4");
 
         fileAccess().expectCall("getVersions", "12").andReturn(new TimedResult<File>() {
 

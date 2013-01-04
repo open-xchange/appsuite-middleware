@@ -60,7 +60,6 @@ import javax.net.ssl.X509TrustManager;
  */
 public final class TrivialTrustManager implements X509TrustManager {
 
-    
     /**
      * Initializes a new {@link TrivialTrustManager}.
      */

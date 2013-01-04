@@ -254,8 +254,8 @@ public class Starter implements Initialization {
             try {
                 init.start();
                 started.push(init);
-            } catch (final OXException e) {
-                LOG.error("Initialization of " + init.getClass().getName() + " failed", e);
+            } catch (Throwable t) {
+                LOG.error("initialization of " + init.getClass().getName() + " failed", t);
             }
         }
 

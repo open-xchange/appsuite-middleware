@@ -75,6 +75,7 @@
         <replace dir="${patchConfDir}">
             <replacefilter token="@oxgroupwaresysconfdir@" value="${confSubstPatch}"/>
             <replacefilter token="@oxconfdir@" value="${confSubstPatch}"/>
+            <replacefilter token="@rootinstalldir@" value="${confSubstPatch}/../"/>
         </replace>
     </target>
 

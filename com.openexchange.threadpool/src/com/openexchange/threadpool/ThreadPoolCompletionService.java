@@ -91,6 +91,44 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
         }
     }
 
+    /**
+     * FutureTask extension to enqueue upon completion
+     */
+    private static final class QueueingTaskFuture<V> extends FutureTask<V> {
+
+        private final BlockingQueue<Future<V>> queue;
+        private final Task<V> t;
+
+        QueueingTaskFuture(final Task<V> t, final BlockingQueue<Future<V>> queue) {
+            super(t);
+            this.queue = queue;
+            this.t = t;
+        }
+
+        @Override
+        public void run() {
+            boolean ran = false;
+            t.beforeExecute(Thread.currentThread());
+            try {
+                super.run();
+                ran = true;
+                t.afterExecute(null);
+            } catch (final Exception ex) {
+                if (!ran) {
+                    t.afterExecute(ex);
+                }
+                // Else the exception occurred within
+                // afterExecute itself in which case we don't
+                // want to call it again.
+            }
+        }
+
+        @Override
+        protected void done() {
+            queue.add(this);
+        }
+    }
+
     private final ThreadPoolService threadPoolService;
     private final BlockingQueue<Future<V>> completionQueue;
     private final RefusedExecutionBehavior<V> behavior;
@@ -160,8 +198,8 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
         if (task == null) {
             throw new NullPointerException();
         }
-        final QueueingFuture<V> f = new QueueingFuture<V>(task, completionQueue);
-        submittedFutures.add(threadPoolService.submit(task, behavior));
+        final QueueingTaskFuture<V> f = new QueueingTaskFuture<V>(task, completionQueue);
+        submittedFutures.add(threadPoolService.submit(ThreadPools.task(f, (V) null, trackable), behavior));
         return f;
     }
 

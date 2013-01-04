@@ -77,6 +77,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -139,31 +140,30 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 	                    ctx, con)).asQueue();
 	                for (final FolderObject folder : queue) {
                         final EffectivePermission perm = folder.getEffectiveUserPermission(userId, userConfig);
-                        if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
-                            own.add(Integer.valueOf(folder.getObjectID()));
-                        } else if (perm.canReadAllObjects()) {
+                        if (perm.canReadAllObjects()) {
                             all.add(Integer.valueOf(folder.getObjectID()));
+                        } else if (perm.canReadOwnObjects()) {
+                            own.add(Integer.valueOf(folder.getObjectID()));
                         }
 	                }
 	            } else {
 	                final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userConfig, con);
-	                if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
-	                    own.add(Integer.valueOf(folderId));
-	                } else if (perm.canReadAllObjects()) {
-	                    all.add(Integer.valueOf(folderId));
-	                } else {
-	                    return SearchIteratorAdapter.emptyIterator();
-	                }
+	                if (perm.canReadAllObjects()) {
+                        all.add(Integer.valueOf(folderId));
+                    } else if (perm.canReadOwnObjects()) {
+                        own.add(Integer.valueOf(folderId));
+                    } else {
+                        return SearchIteratorAdapter.emptyIterator();
+                    }
+	            }
+	            if (all.isEmpty() && own.isEmpty()) {
+	                return SearchIteratorAdapter.emptyIterator();
 	            }
 	            all = Collections.unmodifiableList(all);
 	            own = Collections.unmodifiableList(own);
 	        }
 	
-	        if (all.isEmpty() && own.isEmpty()) {
-	            return SearchIteratorAdapter.emptyIterator();
-	        }
-	
-	        final StringBuilder SQL_QUERY = new StringBuilder();
+	        final StringAllocator SQL_QUERY = new StringAllocator(512);
 	        SQL_QUERY.append(getResultFieldsSelect(cols));
 	        SQL_QUERY.append(
 	            " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(
@@ -186,7 +186,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 	        } else {
 	            SQL_QUERY.append(')');
 	        }
-	        if (!query.equals("") && !query.equals("*")) {
+	        if (query.length() > 0 && !"*".equals(query)) {
 	            checkPatternLength(query);
 	            final boolean containsWildcard = query.contains("*");
 	            addQuery = true;

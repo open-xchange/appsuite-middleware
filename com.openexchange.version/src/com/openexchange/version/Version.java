@@ -72,7 +72,7 @@ public class Version {
                 if (null == numbers) {
                     throw new IllegalStateException("Central backend version not initialized yet.");
                 }
-                versionString = numbers.getVersion() + '-' + numbers.getBuildNumber();
+                versionString = numbers.getVersion() + "-Rev" + numbers.getBuildNumber();
             }
         }
         return versionString;

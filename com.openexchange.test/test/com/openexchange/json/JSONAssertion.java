@@ -102,13 +102,13 @@ public class JSONAssertion implements JSONCondition {
             if (!jsonValue2.isArray()) {
                 return false;
             }
-            return getListFrom((JSONArray) jsonValue1).equals(getListFrom((JSONArray) jsonValue2));
+            return getListFrom(jsonValue1.toArray()).equals(getListFrom(jsonValue2.toArray()));
         }
         if (jsonValue1.isObject()) {
             if (!jsonValue2.isObject()) {
                 return false;
             }
-            return getMapFrom((JSONObject) jsonValue1).equals(getMapFrom((JSONObject) jsonValue2));
+            return getMapFrom(jsonValue1.toObject()).equals(getMapFrom(jsonValue2.toObject()));
         }
         return false;
     }

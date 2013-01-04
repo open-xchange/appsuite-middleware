@@ -181,7 +181,7 @@ public interface OAuthService {
     /**
      * Gets a default account for the given API type. Throws an exception if no account for the API can be found.
      * @param api The API type
-     * @param session TODO
+     * @param session The session
      * @return The default account for this API type
      * @throws OXException 
      */

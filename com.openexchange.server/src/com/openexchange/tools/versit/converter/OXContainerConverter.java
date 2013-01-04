@@ -1068,6 +1068,13 @@ public class OXContainerConverter {
      * @throws OXException
      */
     private static byte[] scaleImageIfNeeded(byte[] source, int maxWidth, int maxHeight, String formatName) throws IOException, OXException {
+        /*
+         * don't try problematic image formats
+         */
+        if ("vnd.microsoft.icon".equalsIgnoreCase(formatName) || "x-icon".equalsIgnoreCase(formatName)) {
+            // ImageIO has problems reading icons: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6633448
+            return source;
+        }        
         InputStream inputStream = null;
         try {
             /*
@@ -1788,6 +1795,8 @@ public class OXContainerConverter {
                     } catch (IOException x) {
                         LOG.error("error scaling image, falling back to unscaled image.", x);
                     } catch (OXException x) {
+                        LOG.error("error scaling image, falling back to unscaled image.", x);
+                    } catch (RuntimeException x) {
                         LOG.error("error scaling image, falling back to unscaled image.", x);
                     }
                     /*

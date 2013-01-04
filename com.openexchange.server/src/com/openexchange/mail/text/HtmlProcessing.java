@@ -295,6 +295,11 @@ public final class HtmlProcessing {
         }
         sb.append(bodyMatcher.group(2));
         sb.append("</div>");
+        // Is there more behind closing <body> tag?
+        final int end = bodyMatcher.end();
+        if (end < htmlContent.length()) {
+            sb.append(htmlContent.substring(end));
+        }
         return sb.toString();
     }
 
@@ -317,7 +322,7 @@ public final class HtmlProcessing {
             return sbuf.append(" style=\"background-color: ").append(color).append(";\"").toString();
         }
         sbuf.setLength(0);
-        m.appendReplacement(sbuf, "style=\"" + Matcher.quoteReplacement(m.group(1)) + " background-color: " + color + ";\"");
+        m.appendReplacement(sbuf, "style=\"" + com.openexchange.java.Strings.quoteReplacement(m.group(1)) + " background-color: " + color + ";\"");
         m.appendTail(sbuf);
         return sbuf.toString();
     }

@@ -118,6 +118,7 @@ import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.AbortBehavior;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -458,6 +459,9 @@ public final class CacheFolderStorage implements FolderStorage {
             } catch (final OXException e) {
                 if (started) {
                     storage.rollback(storageParameters);
+                }
+                if (OXFolderExceptionCode.NOT_EXISTS.equals(e) || FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
+                    return folder;
                 }
                 throw e;
             } catch (final Exception e) {

@@ -51,6 +51,7 @@ package com.openexchange.halo.mail;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -153,12 +154,16 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		Collections.sort(messages, new Comparator<MailMessage>(){
 
 			@Override
-			public int compare(MailMessage arg0, MailMessage arg1) {
-				return arg1.getSentDate().compareTo(arg0.getSentDate());
+			public int compare(final MailMessage arg0, final MailMessage arg1) {
+				final Date sentDate1 = arg1.getSentDate();
+                final Date sentDate0 = arg0.getSentDate();
+                if (sentDate1 == null) {
+                    return null == sentDate0 ? 0 : -1;
+                }
+                return null == sentDate0 ? 1 : sentDate1.compareTo(sentDate0);
 			}});
 		
-		limit = limit > messages.size() ? messages.size() : limit;
-		messages = messages.subList(0, limit);
+		messages = messages.subList(0, Math.min(limit, messages.size()));
 		return new AJAXRequestResult(messages, "mail");
 	}
 
@@ -167,10 +172,11 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		for (String addr : addresses) {
 			queries.add(new FromTerm(addr));
 		}
-		if (queries.size() == 3) {
+		final int size = queries.size();
+        if (size == 3) {
             return new ORTerm(new ORTerm(queries.get(0), queries.get(1)), queries.get(2));
         }
-		if (queries.size() == 2) {
+		if (size == 2) {
             return new ORTerm(queries.get(0), queries.get(1));
         }
 		return queries.get(0);

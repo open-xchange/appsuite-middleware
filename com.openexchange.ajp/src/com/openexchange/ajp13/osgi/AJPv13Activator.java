@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.AbstractAJPv13Request;
@@ -79,7 +80,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
      */
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class));
 
-    private List<Initialization> inits;
+    private volatile List<Initialization> inits;
 
     /**
      * Initializes a new {@link AJPv13Activator}.
@@ -133,7 +134,8 @@ public final class AJPv13Activator extends HousekeepingActivator {
                 }
             };
             AJPv13ServiceRegistry.SERVICE_REGISTRY.set(serviceRegistry);
-            inits = new ArrayList<Initialization>(3);
+            final List<Initialization> inits = new ArrayList<Initialization>(4);
+            this.inits = inits;
             /*
              * Set starter dependent on mode
              */
@@ -144,12 +146,15 @@ public final class AJPv13Activator extends HousekeepingActivator {
                 @Override
                 public void stop() {
                     AbstractAJPv13Request.setEchoHeaderName(null);
+                    AJPv13Response.setEchoHeaderName(null);
                 }
 
                 @Override
                 public void start() {
                     final ConfigurationService service = getService(ConfigurationService.class);
-                    AbstractAJPv13Request.setEchoHeaderName(null == service ? null : service.getProperty("com.openexchange.servlet.echoHeaderName"));
+                    final String headerName = null == service ? null : service.getProperty("com.openexchange.servlet.echoHeaderName");
+                    AbstractAJPv13Request.setEchoHeaderName(headerName);
+                    AJPv13Response.setEchoHeaderName(headerName);
                 }
             });
             inits.add(new Initialization() {
@@ -193,14 +198,15 @@ public final class AJPv13Activator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         try {
             cleanUp();
+            final List<Initialization> inits = this.inits;
             if (inits != null) {
                 while (!inits.isEmpty()) {
                     inits.remove(0).stop();
                 }
-                inits = null;
+                this.inits = null;
             }
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(32).append("NIO AJP server successfully stopped.").toString());
+                LOG.info("AJP server successfully stopped.");
             }
             /*
              * Clear service registry

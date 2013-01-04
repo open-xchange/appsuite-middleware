@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console;
 
 import java.io.IOException;
@@ -73,9 +74,9 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_STATS_SHORT = 'x';
 
     private static final String OPT_STATS_LONG = "xchangestats";
-    
+
     private static final char OPT_TPSTATS_SHORT = 'p';
-    
+
     private static final String OPT_TPSTATS_LONG = "threadpoolstats";
 
     private static final char OPT_RUNTIME_STATS_SHORT = 'r';
@@ -105,9 +106,9 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_DOOPERATIONS_STATS_SHORT = 'd';
 
     private static final String OPT_DOOPERATIONS_STATS_LONG = "dooperation";
-    
+
     private CLIOption xchangestats = null;
-    
+
     private CLIOption threadpoolstats = null;
 
     private CLIOption runtimestats = null;
@@ -123,13 +124,16 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption showoperation = null;
 
     private CLIOption dooperation = null;
+
     private CLIOption sessionStats = null;
 
     private CLIOption usmSessionStats = null;
 
     private CLIOption jsonStats = null;
-    
+
     private CLIOption clusterStats = null;
+
+    private CLIOption grizzlyStats = null;
 
     public static void main(final String args[]) {
         final StatisticTools st = new StatisticTools();
@@ -204,6 +208,13 @@ public class StatisticTools extends AbstractJMXTools {
                 count++;
             }
         }
+        if (null != parser.getOptionValue(this.grizzlyStats)) {
+            if (0 == count) {
+                final MBeanServerConnection initConnection = initConnection(admin, env);
+                showGrizzlyData(initConnection);
+                count++;
+            }
+        }
         if (null != parser.getOptionValue(this.allstats)) {
             if (0 == count) {
                 final MBeanServerConnection initConnection = initConnection(admin, env);
@@ -215,7 +226,12 @@ public class StatisticTools extends AbstractJMXTools {
                 showMemoryPoolData(initConnection);
                 showSysThreadingData(initConnection);
                 System.out.print(getStats(initConnection, "org.json", "name", "JSONMBean"));
-                System.out.print(getStats(initConnection, "com.openexchange.usm.session", "name", "com.openexchange.usm.session.impl.USMSessionInformation"));
+                showGrizzlyData(initConnection);
+                System.out.print(getStats(
+                    initConnection,
+                    "com.openexchange.usm.session",
+                    "name",
+                    "com.openexchange.usm.session.impl.USMSessionInformation"));
             }
             count++;
 
@@ -241,9 +257,9 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.println("Done");
         }
         if (0 == count) {
-            System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ")
-                    .append(OPT_RUNTIME_STATS_LONG).append(", ").append(OPT_OS_STATS_LONG).append(", ")
-                    .append(OPT_THREADING_STATS_LONG).append(", ").append(OPT_ALL_STATS_LONG).append(", sessionstats)"));
+            System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ").append(OPT_RUNTIME_STATS_LONG).append(
+                ", ").append(OPT_OS_STATS_LONG).append(", ").append(OPT_THREADING_STATS_LONG).append(", ").append(OPT_ALL_STATS_LONG).append(
+                ", sessionstats)"));
             parser.printUsage();
         } else if (count > 1) {
             System.err.println("More than one of the stat options given. Using the first one only");
@@ -252,19 +268,86 @@ public class StatisticTools extends AbstractJMXTools {
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
-        this.xchangestats = setShortLongOpt(parser, OPT_STATS_SHORT, OPT_STATS_LONG, "shows Open-Xchange stats", false, NeededQuadState.notneeded);
-        this.threadpoolstats = setShortLongOpt(parser, OPT_TPSTATS_SHORT, OPT_TPSTATS_LONG, "shows OX-Server threadpool stats", false, NeededQuadState.notneeded);
-        this.runtimestats = setShortLongOpt(parser, OPT_RUNTIME_STATS_SHORT, OPT_RUNTIME_STATS_LONG, "shows Java runtime stats", false, NeededQuadState.notneeded);
-        this.osstats = setShortLongOpt(parser, OPT_OS_STATS_SHORT, OPT_OS_STATS_LONG, "shows operating system stats", false, NeededQuadState.notneeded);
-        this.threadingstats = setShortLongOpt(parser, OPT_THREADING_STATS_SHORT, OPT_THREADING_STATS_LONG, "shows threading stats", false, NeededQuadState.notneeded);
-        this.allstats = setShortLongOpt(parser, OPT_ALL_STATS_SHORT, OPT_ALL_STATS_LONG, "shows all stats", false, NeededQuadState.notneeded);
-        this.admindaemonstats = setShortLongOpt(parser, OPT_ADMINDAEMON_STATS_SHORT, OPT_ADMINDAEMON_STATS_LONG, "shows stats for the admin instead of the groupware", false, NeededQuadState.notneeded);
-        this.showoperation = setShortLongOpt(parser, OPT_SHOWOPERATIONS_STATS_SHORT, OPT_SHOWOPERATIONS_STATS_LONG, "shows the operations for the registered beans", false, NeededQuadState.notneeded);
-        this.dooperation = setShortLongOpt(parser, OPT_DOOPERATIONS_STATS_SHORT, OPT_DOOPERATIONS_STATS_LONG, "operation", "Syntax is <canonical object name (the first part from showoperatons)>!<operationname>", false);
-        this.sessionStats = setShortLongOpt(parser, 'i', "sessionstats", "shows the statistics of the session container", false, NeededQuadState.notneeded);
-        this.usmSessionStats = setShortLongOpt(parser, 'u', "usmsessionstats", "shows the statistics of the USM session container", false, NeededQuadState.notneeded);
+        this.xchangestats = setShortLongOpt(
+            parser,
+            OPT_STATS_SHORT,
+            OPT_STATS_LONG,
+            "shows Open-Xchange stats",
+            false,
+            NeededQuadState.notneeded);
+        this.threadpoolstats = setShortLongOpt(
+            parser,
+            OPT_TPSTATS_SHORT,
+            OPT_TPSTATS_LONG,
+            "shows OX-Server threadpool stats",
+            false,
+            NeededQuadState.notneeded);
+        this.runtimestats = setShortLongOpt(
+            parser,
+            OPT_RUNTIME_STATS_SHORT,
+            OPT_RUNTIME_STATS_LONG,
+            "shows Java runtime stats",
+            false,
+            NeededQuadState.notneeded);
+        this.osstats = setShortLongOpt(
+            parser,
+            OPT_OS_STATS_SHORT,
+            OPT_OS_STATS_LONG,
+            "shows operating system stats",
+            false,
+            NeededQuadState.notneeded);
+        this.threadingstats = setShortLongOpt(
+            parser,
+            OPT_THREADING_STATS_SHORT,
+            OPT_THREADING_STATS_LONG,
+            "shows threading stats",
+            false,
+            NeededQuadState.notneeded);
+        this.allstats = setShortLongOpt(
+            parser,
+            OPT_ALL_STATS_SHORT,
+            OPT_ALL_STATS_LONG,
+            "shows all stats",
+            false,
+            NeededQuadState.notneeded);
+        this.admindaemonstats = setShortLongOpt(
+            parser,
+            OPT_ADMINDAEMON_STATS_SHORT,
+            OPT_ADMINDAEMON_STATS_LONG,
+            "shows stats for the admin instead of the groupware",
+            false,
+            NeededQuadState.notneeded);
+        this.showoperation = setShortLongOpt(
+            parser,
+            OPT_SHOWOPERATIONS_STATS_SHORT,
+            OPT_SHOWOPERATIONS_STATS_LONG,
+            "shows the operations for the registered beans",
+            false,
+            NeededQuadState.notneeded);
+        this.dooperation = setShortLongOpt(
+            parser,
+            OPT_DOOPERATIONS_STATS_SHORT,
+            OPT_DOOPERATIONS_STATS_LONG,
+            "operation",
+            "Syntax is <canonical object name (the first part from showoperatons)>!<operationname>",
+            false);
+        this.sessionStats = setShortLongOpt(
+            parser,
+            'i',
+            "sessionstats",
+            "shows the statistics of the session container",
+            false,
+            NeededQuadState.notneeded);
+        this.usmSessionStats = setShortLongOpt(
+            parser,
+            'u',
+            "usmsessionstats",
+            "shows the statistics of the USM session container",
+            false,
+            NeededQuadState.notneeded);
         this.jsonStats = setShortLongOpt(parser, 'j', "jsonstats", "shows the JSON statistics", false, NeededQuadState.notneeded);
         this.clusterStats = setShortLongOpt(parser, 'c', "clusterstats", "shows the cluster statistics", false, NeededQuadState.notneeded);
+        this.grizzlyStats = setShortLongOpt(parser, 'g', "grizzlystats", "shows the grizzly statistics", false, NeededQuadState.notneeded);
     }
 
     private void showMemoryPoolData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
@@ -287,11 +370,11 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(getStats(mbc, "com.openexchange.database.internal.Overview"));
         }
     }
-    
+
     private void showThreadPoolData(MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
         System.out.print(getStats(mbc, "com.openexchange.threadpool.internal.ThreadPoolInformation"));
     }
-    
+
     @SuppressWarnings("unchecked")
     private void showOperations(final MBeanServerConnection mbc) throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
         final Set<ObjectName> queryNames = mbc.queryNames(null, null);
@@ -299,13 +382,13 @@ public class StatisticTools extends AbstractJMXTools {
             final MBeanInfo beanInfo = mbc.getMBeanInfo(objname);
             final MBeanOperationInfo[] operations = beanInfo.getOperations();
             for (final MBeanOperationInfo operation : operations) {
-                System.out.println(new StringBuilder(objname.getCanonicalName()).append(", operationname: ").append(operation.getName()).append(", desciption: ").append(operation.getDescription()));
+                System.out.println(new StringBuilder(objname.getCanonicalName()).append(", operationname: ").append(operation.getName()).append(
+                    ", desciption: ").append(operation.getDescription()));
             }
         }
     }
-    
-    private void showClusterData(MBeanServerConnection mbc) throws MalformedObjectNameException, NullPointerException, IOException, 
-        InstanceNotFoundException, IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
+
+    private void showClusterData(MBeanServerConnection mbc) throws MalformedObjectNameException, NullPointerException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
         /*
          * general info
          */
@@ -319,20 +402,22 @@ public class StatisticTools extends AbstractJMXTools {
                         for (String keyword : new String[] { "groupConfig=", "properties=", "interfaces=", "tcpIpConfig=" }) {
                             int startIdx = value.indexOf(keyword);
                             if (-1 < startIdx && startIdx + keyword.length() < value.length()) {
-                                System.out.println(objectName + "," + keyword.substring(0, keyword.length() - 1) + " = " +
-                                    extractTextInBrackets(value, startIdx + keyword.length()));
+                                System.out.println(objectName + "," + keyword.substring(0, keyword.length() - 1) + " = " + extractTextInBrackets(
+                                    value,
+                                    startIdx + keyword.length()));
                             }
                         }
                     } else {
                         try {
-                            System.out.println(objectName + "," + attributeInfo.getName() + " = " + 
-                                mbc.getAttribute(objectName, attributeInfo.getName()));
+                            System.out.println(objectName + "," + attributeInfo.getName() + " = " + mbc.getAttribute(
+                                objectName,
+                                attributeInfo.getName()));
                         } catch (Exception e) {
-                            System.out.println(objectName + "," + attributeInfo.getName() + " = [" + e.getMessage() + "]"); 
+                            System.out.println(objectName + "," + attributeInfo.getName() + " = [" + e.getMessage() + "]");
                         }
                     }
                 }
-            }            
+            }
         }
         /*
          * maps
@@ -342,10 +427,38 @@ public class StatisticTools extends AbstractJMXTools {
             MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
             for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
                 try {
-                    System.out.println(objectName + "," + attributeInfo.getName() + " = " + 
-                        mbc.getAttribute(objectName, attributeInfo.getName()));
+                    System.out.println(objectName + "," + attributeInfo.getName() + " = " + mbc.getAttribute(
+                        objectName,
+                        attributeInfo.getName()));
                 } catch (Exception e) {
-                    System.out.println(objectName + "," + attributeInfo.getName() + " = [" + e.getMessage() + "]"); 
+                    System.out.println(objectName + "," + attributeInfo.getName() + " = [" + e.getMessage() + "]");
+                }
+            }
+        }
+    }
+
+    /**
+     * Print Grizzly related management info to stdout if Grizzly's MBeans can be found.
+     * 
+     * @param mbeanServerConnection The MBeanServerConnection to be used for querying MBeans.
+     * @throws IOException
+     * @throws MalformedObjectNameException
+     * @throws NullPointerException
+     */
+    private void showGrizzlyData(MBeanServerConnection mbeanServerConnection) throws MalformedObjectNameException, NullPointerException, IOException {
+        // Iterate over the MBeans we are interested in, query by objectName
+        for (GrizzlyMBean grizzlyMBean : GrizzlyMBean.values()) {
+            ObjectName objectName = new ObjectName(grizzlyMBean.getObjectName());
+            Set<ObjectInstance> mBeans = mbeanServerConnection.queryMBeans(objectName, null);
+            // Iterate over the found MBeans and print the desired attributes for this MBean. If no MBeans are found (jmx disabled, ajp
+            // backend in use) nothig will be printed to stdout
+            for (ObjectInstance mBean : mBeans) {
+                for (String attribute : grizzlyMBean.getAttributes()) {
+                    try {
+                        System.out.println(objectName + "," + attribute + " = " + mbeanServerConnection.getAttribute(objectName, attribute));
+                    } catch (Exception e) {
+                        System.out.println(objectName + "," + attribute + " = [" + e.getMessage() + "]");
+                    }
                 }
             }
         }
@@ -381,5 +494,59 @@ public class StatisticTools extends AbstractJMXTools {
         }
         return stringBuilder.toString();
     }
-    
+
+    /**
+     * {@link GrizzlyMBean} Enum of MBeans we are interested in. Each containing the ObjectName and the attributes to query.
+     * 
+     * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
+     */
+    private enum GrizzlyMBean {
+        HTTPCODECFILTER("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=HttpCodecFilter,name=HttpCodecFilter", new String[] {
+            "total-bytes-written", "total-bytes-received", "http-codec-error-count" }),
+        HTTPSERVERFILTER("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=HttpServerFilter,name=HttpServerFilter", new String[] {
+            "current-suspended-request-count", "requests-cancelled-count", "requests-completed-count", "requests-received-count",
+            "requests-timed-out-count" }),
+        KEEPALIVE("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=KeepAlive,name=Keep-Alive", new String[] {
+            "hits-count", "idle-timeout-seconds", "live-connections-count", "max-requests-count", "refuses-count", "timeouts-count" }),
+        NETWORKLISTENER("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer],type=NetworkListener,name=NetworkListener[http-listener]", new String[] {
+            "host", "port", "secure", "started", "paused", "chunking-enabled", "max-http-header-size", "max-pending-bytes" }),
+        TCPNIOTRANSPORT("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=TCPNIOTransport,name=Transport", new String[] {
+            "bound-addresses", "bytes-read", "bytes-written", "client-connect-timeout-millis", "client-socket-so-timeout", "last-error",
+            "open-connections-count", "total-connections-count", "read-buffer-size", "selector-threads-count", "thread-pool-type",
+            "server-socket-so-timeout", "socket-keep-alive", "socket-linger", "state", "write-buffer-size" });
+
+        private final String objectName;
+
+        private final String[] attributes;
+
+        /**
+         * Initializes a new {@link GrizzlyMBean}.
+         * 
+         * @param objectName The object name needed to query for this MBean
+         * @param attributes The attributes of the MBean we are interested in.
+         */
+        GrizzlyMBean(String objectName, String[] attributes) {
+            this.objectName = objectName;
+            this.attributes = attributes;
+        }
+
+        /**
+         * Gets the object name of the MBean we are interested in.
+         * 
+         * @return The object name
+         */
+        public String getObjectName() {
+            return objectName;
+        }
+
+        /**
+         * Gets the attributes of the MBean we are interested in.
+         * 
+         * @return The attributes
+         */
+        public String[] getAttributes() {
+            return attributes;
+        }
+
+    }
 }

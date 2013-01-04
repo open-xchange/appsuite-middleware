@@ -132,6 +132,7 @@ public final class SmbFileMapManagement {
             if (null != timerService) {
                 timerService.purge();
             }
+            this.timerTask = null;
         }
     }
 

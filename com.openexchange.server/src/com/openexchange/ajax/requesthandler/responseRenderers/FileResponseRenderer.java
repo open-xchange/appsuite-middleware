@@ -66,6 +66,7 @@ import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
+import com.openexchange.ajax.requesthandler.Utils;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.images.ImageTransformationService;
@@ -91,10 +92,10 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private volatile ImageTransformationService scaler;
 
-    private final String DELIVERY = "delivery";
+    private static final String DELIVERY = "delivery";
 
-    private final String DOWNLOAD = "download";
-    private final String VIEW = "view";
+    private static final String DOWNLOAD = "download";
+    private static final String VIEW = "view";
 
     /**
      * Initializes a new {@link FileResponseRenderer}.
@@ -139,6 +140,8 @@ public class FileResponseRenderer implements ResponseRenderer {
         String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
         if (null == contentDisposition) {
             contentDisposition = file.getDisposition();
+        } else {
+            contentDisposition = Utils.encodeUrl(contentDisposition);
         }
 
         InputStream documentData = null;

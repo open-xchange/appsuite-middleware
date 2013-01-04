@@ -51,7 +51,6 @@ package com.openexchange.groupware.userconfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -61,9 +60,11 @@ import com.openexchange.groupware.ldap.User;
  */
 public class OverridingUserConfigurationStorage extends UserConfigurationStorage{
 
-    protected UserConfigurationStorage delegate = null;
+    /** The delegate */
+    protected final UserConfigurationStorage delegate;
 
     public OverridingUserConfigurationStorage(final UserConfigurationStorage delegate) {
+        super();
         this.delegate = delegate;
     }
 
@@ -78,22 +79,15 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     }
 
     @Override
-    public Object getLock(int userId, Context ctx) {
-        return delegate.getLock(userId, ctx);
-    }
-
-    @Override
-    public void setExtendedPermissions(Set<String> extendedPermissions, int userId, Context ctx) {
-        delegate.setExtendedPermissions(extendedPermissions, userId, ctx);
-    }
-
-    @Override
     public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
         final UserConfiguration config = getOverride(userId, groups, ctx);
-        if( config != null) {
-            return config;
-        }
-        return delegate.getUserConfiguration(userId, groups, ctx);
+        return config == null ? delegate.getUserConfiguration(userId, groups, ctx) : config;
+    }
+
+    @Override
+    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx, final boolean initExtendedPermissions) throws OXException {
+        final UserConfiguration config = getOverride(userId, groups, ctx, initExtendedPermissions);
+        return config == null ? delegate.getUserConfiguration(userId, groups, ctx, initExtendedPermissions) : config;
     }
 
     @Override
@@ -116,6 +110,10 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     }
 
     public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws OXException {
+        return null;
+    }
+
+    public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx, final boolean initExtendedPermissions) throws OXException {
         return null;
     }
 

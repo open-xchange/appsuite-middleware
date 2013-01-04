@@ -1500,7 +1500,7 @@ public class MimeMessageFiller {
         // htmlContent), false, usm.getAutoLinebreak()),
         // MailConfig.getDefaultMimeCharset());
         text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, Matcher.quoteReplacement(charset)));
+        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, com.openexchange.java.Strings.quoteReplacement(charset)));
         return text;
     }
 
@@ -1515,7 +1515,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If a messaging error occurs
      */
     protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException {
-        final String contentType = PAT_HTML_CT.replaceFirst(REPLACE_CS, Matcher.quoteReplacement(charset));
+        final String contentType = PAT_HTML_CT.replaceFirst(REPLACE_CS, com.openexchange.java.Strings.quoteReplacement(charset));
         final MimeBodyPart html = new MimeBodyPart();
         if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
             html.setContent(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType);
@@ -1708,7 +1708,7 @@ public class MimeMessageFiller {
                     /*
                      * Replace "src" attribute
                      */
-                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", Matcher.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\""));
+                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", com.openexchange.java.Strings.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\""));
                     iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + VERSION_NAME + "\"", "");
                     m.appendLiteralReplacement(sb, iTag);
                 } else {
@@ -1738,7 +1738,7 @@ public class MimeMessageFiller {
         final StringBuffer buffer = new StringBuffer(s.length());
         while (m.find()) {
             final char[] chars = Character.toChars(Integer.parseInt(m.group(1), 16));
-            m.appendReplacement(buffer, Matcher.quoteReplacement(new String(chars)));
+            m.appendReplacement(buffer, com.openexchange.java.Strings.quoteReplacement(new String(chars)));
         }
         m.appendTail(buffer);
         return buffer.toString();

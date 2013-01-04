@@ -49,6 +49,7 @@
 
 package com.openexchange.jslob.storage.db;
 
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -63,11 +64,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.json.JSONException;
+import org.json.JSONInputStream;
 import org.json.JSONObject;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Charsets;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.JSlobId;
@@ -354,7 +356,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             if (!rs.next()) {
                 return null;
             }
-            return new JSlob(new JSONObject(rs.getString(1))).setId(id);
+            return new JSlob(new JSONObject(new InputStreamReader(rs.getBinaryStream(1), Charsets.US_ASCII))).setId(id);
         } catch (final SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
@@ -398,7 +400,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             }
             final List<JSlob> list = new LinkedList<JSlob>();
             do {
-                list.add(new JSlob(new JSONObject(rs.getString(1))).setId(new JSlobId(id.getServiceId(), rs.getString(2), id.getUser(), contextId)));
+                list.add(new JSlob(new JSONObject(new InputStreamReader(rs.getBinaryStream(1), Charsets.US_ASCII))).setId(new JSlobId(id.getServiceId(), rs.getString(2), id.getUser(), contextId)));
             } while (rs.next());
             return list;
         } catch (final SQLException e) {
@@ -521,7 +523,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                         throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
                     }
                     stmt = con.prepareStatement(SQL_UPDATE);
-                    stmt.setString(1, toAscii(jslob.getJsonObject().toString()));
+                    stmt.setBinaryStream(1, new JSONInputStream(jslob.getJsonObject(), "US-ASCII"));
                     stmt.setLong(2, contextId);
                     stmt.setLong(3, id.getUser());
                     stmt.setString(4, id.getServiceId());
@@ -536,7 +538,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                     stmt.setLong(2, id.getUser());
                     stmt.setString(3, id.getServiceId());
                     stmt.setString(4, id.getId());
-                    stmt.setString(5, toAscii(jslob.getJsonObject().toString()));
+                    stmt.setBinaryStream(5, new JSONInputStream(jslob.getJsonObject(), "US-ASCII"));
                     stmt.executeUpdate();
                 }
                 con.commit();
@@ -560,51 +562,6 @@ public final class DBJSlobStorage implements JSlobStorage {
 
     private DatabaseService getDatabaseService() {
         return services.getService(DatabaseService.class);
-    }
-
-    private static String toAscii(final String str) {
-        if (null == str) {
-            return str;
-        }
-        final int length = str.length();
-        if (0 == length || isAscii(str)) {
-            return str;
-        }
-        final StringAllocator sa = new StringAllocator((length * 3)/2 + 1);
-        for (int i = 0; i < length; i++) {
-            final char c = str.charAt(i);
-            if (c > 127) {
-                appendAsJsonUnicode(c, sa);
-            } else {
-                sa.append(c);
-            }
-        }
-        return sa.toString();
-    }
-
-    private static void appendAsJsonUnicode(final int ch, final StringAllocator sa) {
-        sa.append("\\u").append(String.format("%04x", Integer.valueOf(ch)));
-    }
-
-    /**
-     * Checks whether the specified string's characters are ASCII 7 bit
-     *
-     * @param s The string to check
-     * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
-     */
-    public static boolean isAscii(final String s) {
-        if (null == s) {
-            return true;
-        }
-        final int length = s.length();
-        if (0 == length) {
-            return true;
-        }
-        boolean isAscci = true;
-        for (int i = 0; (i < length) && isAscci; i++) {
-            isAscci &= (s.charAt(i) < 128);
-        }
-        return isAscci;
     }
 
 }

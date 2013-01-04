@@ -206,7 +206,7 @@ public class DispatcherServlet extends SessionServlet {
         boolean sessionParamFound = false;
         {
             final String sSession = req.getParameter("session");
-            if (sSession != null && !sSession.equals("")) {
+            if (sSession != null && sSession.length() > 0) {
                 final String sessionId = getSessionId(req);
                 final ServerSession session = getSession(req, sessionId, sessiondService);
                 verifySession(req, sessiondService, sessionId, session);
@@ -360,18 +360,18 @@ public class DispatcherServlet extends SessionServlet {
 
     private ServerSession getSession(final HttpServletRequest httpRequest, final Dispatcher dispatcher, final String module, final String action) throws OXException {
         ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
-        if (session == null && dispatcher.mayOmitSession(module, action)) {
-        	session = fakeSession();
-        }
-        if (null == session) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+        if (session == null) {
+            if (!dispatcher.mayOmitSession(module, action)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+            }
+            session = fakeSession();
         }
         return session;
     }
 
 	private ServerSession fakeSession() {
 		final UserImpl user = new UserImpl();
-		user.setAttributes(new HashMap<String, Set<String>>());
+		user.setAttributes(new HashMap<String, Set<String>>(1));
 		return new ServerSessionAdapter(NO_SESSION, new ContextImpl(-1), user);
 	}
 

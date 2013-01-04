@@ -49,14 +49,17 @@
 
 package com.openexchange.groupware.modules;
 
-import java.util.HashMap;
-import java.util.Map;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link Module}
- *
+ * {@link Module} - A module known to Open-Xchange Server.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum Module {
     TASK("tasks", FolderObject.TASK),
@@ -68,38 +71,64 @@ public enum Module {
     INFOSTORE("infostore", FolderObject.INFOSTORE),
     SYSTEM("system", FolderObject.SYSTEM_MODULE);
 
-    private static Map<Integer, Module> folderConstant2Module = new HashMap<Integer, Module>();
-    static {
-        for(Module module : values()) {
-            folderConstant2Module.put(module.folderConstant, module);
-        }
-    }
-
-    private String name;
-    private int folderConstant;
+    private final String name;
+    private final int folderConstant;
 
     Module(String name, int folderConstant) {
         this.name = name;
         this.folderConstant = folderConstant;
     }
 
+    private static final TIntObjectMap<Module> folderConstant2Module;
+    private static final TObjectIntMap<String> string2FolderConstant;
+    static {
+        final Module[] values = values();
+        final TIntObjectMap<Module> map1 = new TIntObjectHashMap<Module>(values.length);
+        final TObjectIntMap<String> map2 = new TObjectIntHashMap<String>(values.length, 0.5f, -1);
+        for (final Module module : values) {
+            map1.put(module.folderConstant, module);
+            map2.put(module.name, module.folderConstant);
+        }
+        folderConstant2Module = map1;
+        string2FolderConstant = map2;
+    }
 
+    /**
+     * Gets the module for given numeric identifier.
+     *
+     * @param constant The numeric identifier
+     * @return The module or <code>null</code>
+     */
     public static Module getForFolderConstant(int constant) {
         return folderConstant2Module.get(constant);
     }
 
+    /**
+     * Gets the module string.
+     *
+     * @return The module string
+     */
     public String getName() {
         return name;
     }
 
-
+    /**
+     * Gets the module's numeric identifier
+     *
+     * @return The numeric identifier
+     */
     public int getFolderConstant() {
         return folderConstant;
     }
 
-
-
-    public static final String getModuleString(final int module, final int objectId) {
+    /**
+     * Gets the module string.
+     *
+     * @param module The module identifier
+     * @param folderId The folder identifier
+     * @return The module string or an empty string if unknown
+     */
+    public static final String getModuleString(final int module, final int folderId) {
         String moduleStr = null;
         switch (module) {
         case FolderObject.TASK:
@@ -124,9 +153,9 @@ public enum Module {
             moduleStr = INFOSTORE.getName();
             break;
         case FolderObject.SYSTEM_MODULE:
-            if (objectId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
+            if (folderId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
                 moduleStr = PROJECT.getName();
-            } else if (objectId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+            } else if (folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
                 moduleStr = INFOSTORE.getName();
             } else {
                 moduleStr = SYSTEM.getName();
@@ -139,12 +168,13 @@ public enum Module {
         return moduleStr;
     }
 
+    /**
+     * Gets the module's numeric identifier.
+     *
+     * @param module The module string
+     * @return The module's numeric identifier or <code>-1</code> if unknown
+     */
     public static final int getModuleInteger(final String moduleStr) {
-        for(Module module : values()) {
-            if(module.getName().equalsIgnoreCase(moduleStr)) {
-                return module.folderConstant;
-            }
-        }
-        return -1;
+        return null == moduleStr ? -1 : string2FolderConstant.get(moduleStr);
     }
 }

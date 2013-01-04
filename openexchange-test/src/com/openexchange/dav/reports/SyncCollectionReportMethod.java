@@ -105,11 +105,15 @@ public class SyncCollectionReportMethod extends ReportMethod {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-        ElementIterator it = DomUtil.getChildren(document.getDocumentElement(), PropertyNames.SYNC_TOKEN.getName(), 
-        		PropertyNames.SYNC_TOKEN.getNamespace());
-        if (it.hasNext()) {
-            Element respElem = it.nextElement();
-            this.syncToken = respElem.getTextContent();
+        if (null != document) {
+            ElementIterator it = DomUtil.getChildren(
+                document.getDocumentElement(),
+                PropertyNames.SYNC_TOKEN.getName(),
+                PropertyNames.SYNC_TOKEN.getNamespace());
+            if (it.hasNext()) {
+                Element respElem = it.nextElement();
+                this.syncToken = respElem.getTextContent();
+            }
         }
     }	
 

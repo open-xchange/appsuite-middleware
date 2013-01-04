@@ -500,10 +500,24 @@ public final class ResponseWriter {
      * @throws IOException If an I/O error occurs during writing
      */
     public static void write(final Response response, final Writer writer, final Locale locale) throws JSONException, IOException {
+        write(response, writer, locale, false);
+    }
+
+    /**
+     * Serializes a Response object to the writer.
+     *
+     * @param response Response object to serialize.
+     * @param writer the serialized object will be written to this writer.
+     * @param locale The locale
+     * @param asciiOnly <code>true</code> to only write ASCII characters; otherwise <code>false</code>
+     * @throws JSONException if writing fails.
+     * @throws IOException If an I/O error occurs during writing
+     */
+    public static void write(final Response response, final Writer writer, final Locale locale, final boolean asciiOnly) throws JSONException, IOException {
         final JSONObject json = new JSONObject();
         ResponseWriter.write(response, json, locale);
         try {
-            json.write(writer);
+            json.write(writer, asciiOnly);
         } catch (final JSONException e) {
             if (e.getCause() instanceof IOException) {
                 /*
@@ -554,7 +568,7 @@ public final class ResponseWriter {
             if (writer instanceof OXJSONWriter) {
                 final JSONValue jv = ((OXJSONWriter) writer).getObject();
                 if (jv.isObject()) {
-                    final JSONObject json = (JSONObject) jv;
+                    final JSONObject json = jv.toObject();
                     if (!json.hasAndNotNull(ERROR)) {
                         addException(json, warning, locale);
                     }
@@ -577,7 +591,7 @@ public final class ResponseWriter {
             if (!warnings.isEmpty() && (writer instanceof OXJSONWriter)) {
                 final JSONValue jv = ((OXJSONWriter) writer).getObject();
                 if (jv.isObject()) {
-                    final JSONObject json = (JSONObject) jv;
+                    final JSONObject json = jv.toObject();
                     if (!json.hasAndNotNull(ERROR)) {
                         addException(json, warnings.get(0), locale);
                     }

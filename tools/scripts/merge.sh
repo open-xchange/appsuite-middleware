@@ -89,9 +89,18 @@ mergePSF() {
     do
         echo $FILE
         git show $SOURCE:$FILE >$TEMPFILE
+        # For hotfix branches often the branch description is not changed in the PSF files.
+        sed -i "s/,master,/,$DESTINATION,/g" $TEMPFILE
         sed -i "s/,$SOURCE,/,$DESTINATION,/g" $TEMPFILE
         TEMPFILE2=$(mktemp)
         git show $DESTINATION:$FILE >$TEMPFILE2
+        diff $TEMPFILE2 $TEMPFILE
+        if [ "$?" -eq "0" ]
+        then
+            cp $TEMPFILE $FILE
+            git add $FILE
+            continue
+        fi
         vimdiff -d $TEMPFILE2 $TEMPFILE
         rm $TEMPFILE2
         echo "Merged correctly?"

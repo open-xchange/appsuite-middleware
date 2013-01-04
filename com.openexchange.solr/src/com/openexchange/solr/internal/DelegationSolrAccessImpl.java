@@ -364,17 +364,20 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 
     public void shutDown() throws OXException {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        LifecycleService lifecycleService = hazelcast.getLifecycleService();
-        if (hazelcast != null && lifecycleService != null && lifecycleService.isRunning()) {
-            Collection<String> activeCores = embeddedAccess.getActiveCores();
-            IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
-            String localAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
-            solrNodes.remove(localAddress);
-            for (String coreName : activeCores) {
-                IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
-                solrCores.removeAsync(coreName);
+        if (hazelcast != null) {
+            LifecycleService lifecycleService = hazelcast.getLifecycleService();
+            if (lifecycleService != null && lifecycleService.isRunning()) {
+                Collection<String> activeCores = embeddedAccess.getActiveCores();
+                IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
+                String localAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
+                solrNodes.remove(localAddress);
+                for (String coreName : activeCores) {
+                    IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
+                    solrCores.removeAsync(coreName);
+                }
             }
         }
+        
         embeddedAccess.shutDown();
     }
 
@@ -516,7 +519,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
     private SolrAccessServiceRmiWrapper getRMIAccess(SolrCoreIdentifier identifier, String server) throws OXException {
         try {
             ConfigurationService config = Services.getService(ConfigurationService.class);
-            int rmiPort = config.getIntProperty("RMI_PORT", 1099);
+            int rmiPort = config.getIntProperty("com.openexchange.rmi.port", 1099);
             Registry registry = LocateRegistry.getRegistry(server, rmiPort);
             RMISolrAccessService rmiAccess = (RMISolrAccessService) registry.lookup(RMISolrAccessService.RMI_NAME);
             rmiAccess.pingRmi(identifier);
@@ -563,7 +566,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         try {
             rmiCache.remove(server);
             ConfigurationService config = Services.getService(ConfigurationService.class);
-            int rmiPort = config.getIntProperty("RMI_PORT", 1099);
+            int rmiPort = config.getIntProperty("com.openexchange.rmi.port", 1099);
             Registry registry = LocateRegistry.getRegistry(server, rmiPort);
             RMISolrAccessService rmiAccess = (RMISolrAccessService) registry.lookup(RMISolrAccessService.RMI_NAME);
 

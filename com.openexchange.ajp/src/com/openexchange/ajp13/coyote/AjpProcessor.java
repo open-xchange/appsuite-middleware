@@ -50,7 +50,6 @@
 package com.openexchange.ajp13.coyote;
 
 import static com.openexchange.ajp13.AJPv13Response.writeHeaderSafe;
-import static com.openexchange.ajp13.AJPv13Utility.urlEncode;
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.ByteArrayOutputStream;
@@ -62,6 +61,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
 import java.util.Locale;
@@ -906,6 +906,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         response.setStatus(503, "Only one long-running request is permitted at once. Please retry later.");
                         error = true;
                     } else {
+                       /*
+                        * Call Servlet's service() method
+                        */
                         servlet.service(request, response);
                         if (!started) {
                             // Stopped in the meantime
@@ -1949,11 +1952,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*-
          * Check for echo header presence
          */
-        final String echoHeaderName = AJPv13Response.getEchoHeaderName();
-        if (null != echoHeaderName) {
-            final String echoValue = request.getHeader(echoHeaderName);
-            if (null != echoValue) {
-                response.setHeader(echoHeaderName, echoValue);
+        {
+            final String echoHeaderName = AJPv13Response.getEchoHeaderName();
+            if (null != echoHeaderName) {
+                final String echoValue = request.getHeader(echoHeaderName);
+                if (null != echoValue) {
+                    response.setHeader(echoHeaderName, urlEncode(echoValue));
+                }
             }
         }
         /*
@@ -2384,6 +2389,20 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 }
                 sb.append('\n');
             }
+        }
+    }
+
+    /**
+     * Generates URL-encoding of specified text.
+     * 
+     * @param text The text
+     * @return The URL-encoded text
+     */
+    private static String urlEncode(final String text) {
+        try {
+            return URLEncoder.encode(text, "iso-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return text;
         }
     }
 

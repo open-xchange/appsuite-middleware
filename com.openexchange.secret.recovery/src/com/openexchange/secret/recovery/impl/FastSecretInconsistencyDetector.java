@@ -52,12 +52,13 @@ package com.openexchange.secret.recovery.impl;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
 import com.openexchange.secret.SecretService;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
@@ -70,7 +71,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FastSecretInconsistencyDetector implements SecretInconsistencyDetector, SecretMigrator {
+public class FastSecretInconsistencyDetector implements SecretInconsistencyDetector, SecretMigrator, EncryptedItemCleanUpService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FastSecretInconsistencyDetector.class));
 
@@ -150,6 +151,11 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
     @Override
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
         saveNewToken(session.getUser(), newSecret, session.getContext());
+    }
+
+    @Override
+    public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
+        userService.setAttribute(PROPERTY, null, session.getUserId(), session.getContext());
     }
 
 }

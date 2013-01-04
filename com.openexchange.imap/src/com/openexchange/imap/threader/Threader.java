@@ -526,7 +526,7 @@ public class Threader {
                 // They're both dummies; merge them.
                 ThreadContainer tail;
                 for (tail = old.child; tail != null && tail.next != null; tail = tail.next) {
-                    ;
+                    // Nothing
                 }
                 tail.next = c.child;
                 for (tail = c.child; tail != null; tail = tail.next) {

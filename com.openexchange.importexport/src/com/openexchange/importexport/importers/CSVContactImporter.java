@@ -52,6 +52,8 @@ package com.openexchange.importexport.importers;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.transformInputStreamToString;
 import static com.openexchange.java.Autoboxing.I;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -94,6 +96,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.io.IOUtils;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -162,7 +165,20 @@ public class CSVContactImporter extends AbstractImporter {
         if (!canImport(sessObj, format, folders, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_IMPORT.create(folder, format);
         }
-        String csvStr = transformInputStreamToString(is, "UTF-8");
+        final InputStream input;
+        if (is.markSupported()) {
+            input = is;
+        } else {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                IOUtils.transfer(is, baos);
+            } catch (IOException e) {
+                throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
+            }
+            input = new ByteArrayInputStream(baos.toByteArray());
+        }
+        input.mark(Integer.MAX_VALUE);
+        String csvStr = transformInputStreamToString(input, "UTF-8");
         CSVParser csvParser = getCSVParser();
         List<List<String>> csv = csvParser.parse(csvStr);
         if (csv.size() < 2) {
@@ -180,11 +196,11 @@ public class CSVContactImporter extends AbstractImporter {
         // re-read now the we have guessed the format and the encoding
         if (!"UTF-8".equalsIgnoreCase(getCurrentMapper().getEncoding())) {
         	try {
-				is.reset();
+				input.reset();
 			} catch (IOException e) {
-				LOG.error("Tried to reset an uploaded stream to parse it again after having guessed the encoding, but couldn't; CSV parsed might be weird");
+                throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
 			}
-            csvStr = transformInputStreamToString(is, getCurrentMapper().getEncoding());
+            csvStr = transformInputStreamToString(input, getCurrentMapper().getEncoding());
         }
         // reading entries...
         final List<ImportIntention> intentions = new LinkedList<ImportIntention>();
@@ -303,7 +319,7 @@ public class CSVContactImporter extends AbstractImporter {
                 atLeastOneFieldWithWrongName = true;
                 wrongFields.add(fieldName);
             } else {
-                if (!currEntry.equals("")) {
+                if (currEntry.length() > 0) {
                     currField.doSwitch(conSet, contactObj, currEntry);
                     final Collection<OXException> warns = contactObj.getWarnings();
                     if (!warns.isEmpty()) {

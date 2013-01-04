@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -69,6 +69,8 @@ ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
 /sbin/rcopen-xchange
 
 %changelog
+* Fri Dec 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Build for public patch 2012-12-21
 * Tue Dec 18 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release candidate for 7.0.0
 * Mon Dec 17 2012 Marcus Klein <marcus.klein@open-xchange.com>
