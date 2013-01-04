@@ -92,6 +92,14 @@ public enum TwitterExceptionCodes implements OXExceptionCode {
      * Twitter responded with: %1$s
      */
     REAUTHORIZE_ERROR(TwitterExceptionMessages.REAUTHORIZE_ERROR_MSG, CATEGORY_USER_INPUT, 7),
+    /**
+     * The request is understood, but it has been refused or access is not allowed: %1$s
+     */
+    DENIED_ERROR(TwitterExceptionMessages.DENIED_ERROR_MSG, CATEGORY_USER_INPUT, 8),
+    /**
+     * Invalid format in search query.
+     */
+    INVALID_QUERY(TwitterExceptionMessages.INVALID_QUERY_MSG, CATEGORY_USER_INPUT, 9),
 
     ;
 

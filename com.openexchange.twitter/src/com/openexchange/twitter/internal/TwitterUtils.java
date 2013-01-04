@@ -72,6 +72,8 @@ public final class TwitterUtils {
 
     /**
      * Converts given <code>twitter4j.TwitterException</code> instance to an appropriate <code>OXException</code> instance.
+     * <p>
+     * See <a href="https://dev.twitter.com/docs/error-codes-responses">https://dev.twitter.com/docs/error-codes-responses</a>.
      *
      * @param e The Twitter error
      * @return An appropriate {@code OXException} instance
@@ -80,9 +82,19 @@ public final class TwitterUtils {
         if (null == e) {
             return null;
         }
+        // According to https://dev.twitter.com/docs/error-codes-responses
         final int statusCode = e.getStatusCode();
+        if (400 == statusCode) {
+            return TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
         if (_401_UNAUTHORIZED == statusCode) {
             return TwitterExceptionCodes.REAUTHORIZE_ERROR.create(e, e.getMessage());
+        }
+        if (403 == statusCode) {
+            return TwitterExceptionCodes.DENIED_ERROR.create(e, e.getMessage());
+        }
+        if (406 == statusCode) {
+            return TwitterExceptionCodes.INVALID_QUERY.create(e, e.getMessage());
         }
         return TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
     }
