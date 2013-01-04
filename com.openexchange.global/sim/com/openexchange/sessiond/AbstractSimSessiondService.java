@@ -50,6 +50,7 @@
 package com.openexchange.sessiond;
 
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
@@ -92,6 +93,12 @@ public class AbstractSimSessiondService implements SessiondService {
 
     @Override
     public Session getSessionByRandomToken(final String randomToken) {
+        return null;
+    }
+
+    @Override
+    public Session getSessionWithTokens(String clientToken, String serverToken) throws OXException {
+        // FIXME throw some exception.
         return null;
     }
 

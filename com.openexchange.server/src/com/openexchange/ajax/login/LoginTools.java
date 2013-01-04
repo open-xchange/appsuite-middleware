@@ -50,6 +50,12 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
+import static com.openexchange.ajax.fields.LoginFields.AUTHID_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.CLIENT_IP_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.PASSWORD_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.VERSION_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.VOLATILE;
 import static com.openexchange.login.Interface.HTTP_JSON;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.util.List;
@@ -110,11 +116,11 @@ public final class LoginTools {
     }
 
     public static String parseAuthId(HttpServletRequest req, boolean strict) throws OXException {
-        return parseParameter(req, LoginFields.AUTHID_PARAM, strict, UUIDs.getUnformattedString(UUID.randomUUID()));
+        return parseParameter(req, AUTHID_PARAM, strict, UUIDs.getUnformattedString(UUID.randomUUID()));
     }
 
     public static String parseClient(HttpServletRequest req, boolean strict, String defaultClient) throws OXException {
-        return parseParameter(req, LoginFields.CLIENT_PARAM, strict, defaultClient);
+        return parseParameter(req, CLIENT_PARAM, strict, defaultClient);
     }
 
     public static String parseParameter(HttpServletRequest req, String paramName, boolean strict, String fallback) throws OXException {
@@ -128,16 +134,32 @@ public final class LoginTools {
         return value;
     }
 
-    public static String parseClientIP(HttpServletRequest req) throws OXException {
-        return parseParameter(req, LoginFields.CLIENT_IP_PARAM, false, req.getRemoteAddr());
+    public static String parseParameter(HttpServletRequest req, String paramName, String fallback) {
+        final String value = req.getParameter(paramName);
+        if (null == value) {
+            return fallback;
+        }
+        return value;
     }
 
-    public static String parseUserAgent(HttpServletRequest req) throws OXException {
-        return parseParameter(req, LoginFields.USER_AGENT, false, req.getHeader(Header.USER_AGENT));
+    public static String parseParameter(HttpServletRequest req, String paramName) throws OXException {
+        final String value = req.getParameter(paramName);
+        if (null == value) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(paramName);
+        }
+        return value;
+    }
+
+    public static String parseClientIP(HttpServletRequest req) {
+        return parseParameter(req, CLIENT_IP_PARAM, req.getRemoteAddr());
+    }
+
+    public static String parseUserAgent(HttpServletRequest req) {
+        return parseParameter(req, LoginFields.USER_AGENT, req.getHeader(Header.USER_AGENT));
     }
 
     public static boolean parseVolatile(HttpServletRequest req) {
-        final String parameter = req.getParameter(LoginFields.VOLATILE);
+        final String parameter = req.getParameter(VOLATILE);
         if (isEmpty(parameter)) {
             return false;
         }
@@ -148,13 +170,13 @@ public final class LoginTools {
         final String authId = parseAuthId(req, strict);
         final String client = parseClient(req, strict, defaultClient);
         final String version;
-        if (null == req.getParameter(LoginFields.VERSION_PARAM)) {
+        if (null == req.getParameter(VERSION_PARAM)) {
             if (strict) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.VERSION_PARAM);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(VERSION_PARAM);
             }
             version = null;
         } else {
-            version = req.getParameter(LoginFields.VERSION_PARAM);
+            version = req.getParameter(VERSION_PARAM);
         }
         final String clientIP = parseClientIP(req);
         final String userAgent = parseUserAgent(req);
@@ -201,9 +223,9 @@ public final class LoginTools {
         if (!disableTrimLogin) {
             login = login.trim();
         }
-        String password = req.getParameter(LoginFields.PASSWORD_PARAM);
+        String password = req.getParameter(PASSWORD_PARAM);
         if (null == password) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.PASSWORD_PARAM);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PASSWORD_PARAM);
         }
         return parseLogin(req, login, password, strict, defaultClient, forceHTTPS);
     }

@@ -214,6 +214,12 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
+    public Session getSessionWithTokens(String clientToken, String serverToken) throws OXException {
+        // FIXME needs to be implements within SessionHandler.
+        return null;
+    }
+
+    @Override
     public int getNumberOfActiveSessions() {
         return SessionHandler.getNumberOfActiveSessions();
     }

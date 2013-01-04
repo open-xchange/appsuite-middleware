@@ -221,6 +221,11 @@ public final class InvalidatedAwareSessiondService implements SessiondServiceExt
     }
 
     @Override
+    public Session getSessionWithTokens(String clientToken, String serverToken) throws OXException {
+        return impl.getSessionWithTokens(clientToken, serverToken);
+    }
+
+    @Override
     public int getNumberOfActiveSessions() {
         // Not possible to check for invalidated-marker in this method
         return impl.getNumberOfActiveSessions();

@@ -173,6 +173,17 @@ public interface SessiondService {
     public Session getSessionByRandomToken(final String randomToken);
 
     /**
+     * Picks up the session associated with the given client and server token. If a session exists for the given tokens and both tokens
+     * match, the session object is put into the normal session container and into the session storage. It is removed from the session
+     * container with tokens so a second request with the same tokens will fail.
+     * @param clientToken Client side token passed within the {@link #addSession(AddSessionParameter)} call.
+     * @param serverToken Server side token returned inside the session from the {@link #addSession(AddSessionParameter)} call.
+     * @return the matching session
+     * @throws OXException if one of the tokens does not match.
+     */
+    Session getSessionWithTokens(String clientToken, String serverToken) throws OXException;
+
+    /**
      * Gets the number of active sessions.
      *
      * @return The number of active sessions
