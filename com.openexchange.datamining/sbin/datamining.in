@@ -52,7 +52,7 @@ OXFUNCTIONS=@oxfunctions@
 OXCONFIG=@oxscriptconf@
 OXPREFIX=@oxprefix@
 OXBUNDLES=$OXPREFIX/bundles
-BUNDLELIBPATH=@oxcommonbundlelib@
+BUNDLELIBPATH=@libDir@
 
 
 test -f $OXFUNCTIONS || {
@@ -73,7 +73,7 @@ JAVA_OPTS="${JAVA_XTRAOPTS} \
 -Dopenexchange.propdir=$PROPERTIESDIR \
 -Dopenexchange.propdir2=$COMMONPROPERTIESDIR"
 
-CLASSPATH="-classpath $OXPREFIX/lib/com.openexchange.datamining.jar:$OXPREFIX/lib/jopt-simple-4.2.jar:$OXPREFIX/lib/junit-4.6.jar:$OXPREFIX/lib/mysql-connector-java-5.1.21-bin.jar"
+CLASSPATH="-classpath @classpath@"
 
 umask 066
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.datamining.Datamining $@
