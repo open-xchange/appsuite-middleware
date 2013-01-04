@@ -56,11 +56,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import org.apache.commons.logging.Log;
-import com.google.common.base.Predicate;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.ISet;
 import com.hazelcast.core.MapEntry;
@@ -74,6 +72,7 @@ import com.openexchange.caching.ElementAttributes;
 import com.openexchange.caching.LockAware;
 import com.openexchange.caching.PutIfAbsent;
 import com.openexchange.exception.OXException;
+import com.openexchange.hazelcast.Hazelcasts;
 
 /**
  * {@link HazelcastCache}
