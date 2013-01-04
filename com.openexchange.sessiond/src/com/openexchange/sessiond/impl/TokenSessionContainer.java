@@ -73,7 +73,7 @@ public final class TokenSessionContainer {
         super();
     }
 
-    TokenSessionContainer getInstance() {
+    static TokenSessionContainer getInstance() {
         return SINGLETON;
     }
 

@@ -98,7 +98,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
-    public String addSession(final AddSessionParameter param) throws OXException {
+    public Session addSession(final AddSessionParameter param) throws OXException {
         final Parameterized parameterized = (param instanceof Parameterized) ? (Parameterized) param : null;
         final boolean isVolatile;
         if (null == parameterized) {
@@ -107,14 +107,25 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             final Boolean parameter = parameterized.<Boolean> getParameter(PARAM_VOLATILE);
             isVolatile = null == parameter ? false : parameter.booleanValue();
         }
-        final SessionImpl session = SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext().getContextId(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient(), isVolatile ? new VolatileParams(parameterized) : null);
+        final SessionImpl session = SessionHandler.addSession(
+            param.getUserId(),
+            param.getUserLoginInfo(),
+            param.getPassword(),
+            param.getContext().getContextId(),
+            param.getClientIP(),
+            param.getFullLogin(),
+            param.getAuthId(),
+            param.getHash(),
+            param.getClient(),
+            isVolatile ? new VolatileParams(parameterized) : null,
+            param.getClientToken());
         if (null == session) {
             return null;
         }
         if (null != parameterized) {
             parameterized.setParameter(PARAM_SESSION, session);
         }
-        return session.getSessionID();
+        return session;
     }
 
     @Override

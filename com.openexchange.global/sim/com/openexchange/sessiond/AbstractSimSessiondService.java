@@ -61,7 +61,7 @@ import com.openexchange.session.Session;
 public class AbstractSimSessiondService implements SessiondService {
 
     @Override
-    public String addSession(final AddSessionParameter parameterObject) {
+    public Session addSession(final AddSessionParameter parameterObject) {
         return null;
     }
 

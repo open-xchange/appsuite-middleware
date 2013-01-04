@@ -89,7 +89,9 @@ import com.openexchange.ajax.login.FormLogin;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
+import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
+import com.openexchange.ajax.login.TokenLogin;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -167,6 +169,7 @@ public class Login extends AJAXServlet {
     public static final String PUBLIC_SESSION_NAME = "open-xchange-public-session".intern();
 
     public static final String ACTION_FORMLOGIN = "formlogin";
+    public static final String ACTION_TOKENLOGIN = "tokenLogin";
 
     /**
      * <code>"changeip"</code>
@@ -719,6 +722,7 @@ public class Login extends AJAXServlet {
             disableTrimLogin);
         confReference.set(conf);
         handlerMap.put(ACTION_FORMLOGIN, new FormLogin(conf));
+        handlerMap.put(ACTION_TOKENLOGIN, new TokenLogin(conf));
     }
 
     @Override
@@ -954,7 +958,7 @@ public class Login extends AJAXServlet {
             @Override
             public LoginResult doLogin(final HttpServletRequest req2) throws OXException {
                 LoginConfiguration conf = confReference.get();
-                final LoginRequest request = parseLogin(
+                final LoginRequest request = LoginTools.parseLogin(
                     req2,
                     LoginFields.NAME_PARAM,
                     false,
@@ -1123,21 +1127,6 @@ public class Login extends AJAXServlet {
         return new Cookie(cookie.getName(), cookie.getValue());
     }
 
-    public static LoginRequest parseLogin(HttpServletRequest req, String loginParamName, boolean strict, String defaultClient, boolean forceHTTPS, boolean disableTrimLogin) throws OXException {
-        String login = req.getParameter(loginParamName);
-        if (null == login) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(loginParamName);
-        }
-        if (!disableTrimLogin) {
-            login = login.trim();
-        }
-        String password = req.getParameter(LoginFields.PASSWORD_PARAM);
-        if (null == password) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.PASSWORD_PARAM);
-        }
-        return LoginTools.parseLogin(req, login, password, strict, defaultClient, forceHTTPS);
-    }
-
     protected LoginRequest parseAutoLoginRequest(final HttpServletRequest req) throws OXException {
         final LoginConfiguration conf = confReference.get();
         final String authId = LoginTools.parseAuthId(req, false);
@@ -1148,90 +1137,23 @@ public class Login extends AJAXServlet {
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         final String httpSessionId = req.getSession(true).getId();
-        return new LoginRequest() {
-
-            private final String hash = HashCalculator.getHash(req, client);
-
-            @Override
-            public boolean isVolatile() {
-                return isVolatile;
-            }
-
-            @Override
-            public String getVersion() {
-                return null;
-            }
-
-            @Override
-            public String getUserAgent() {
-                return userAgent;
-            }
-
-            @Override
-            public String getPassword() {
-                return null;
-            }
-
-            @Override
-            public String getLogin() {
-                return null;
-            }
-
-            @Override
-            public Interface getInterface() {
-                return HTTP_JSON;
-            }
-
-            @Override
-            public Map<String, List<String>> getHeaders() {
-                return headers;
-            }
-
-            @Override
-            public String getHash() {
-                return hash;
-            }
-
-            @Override
-            public String getClientIP() {
-                return clientIP;
-            }
-
-            @Override
-            public String getClient() {
-                return client;
-            }
-
-            @Override
-            public String getAuthId() {
-                return authId;
-            }
-
-            @Override
-            public com.openexchange.authentication.Cookie[] getCookies() {
-                return cookies;
-            }
-
-            @Override
-            public boolean isSecure() {
-                return Tools.considerSecure(req, conf.isCookieForceHTTPS());
-            }
-
-            @Override
-            public String getServerName() {
-                return req.getServerName();
-            }
-
-            @Override
-            public int getServerPort() {
-                return req.getServerPort();
-            }
-
-            @Override
-            public String getHttpSessionID() {
-                return httpSessionId;
-            }
-        };
+        return new LoginRequestImpl(
+            null,
+            null,
+            clientIP,
+            userAgent,
+            authId,
+            client,
+            null,
+            HashCalculator.getHash(req, client),
+            isVolatile,
+            HTTP_JSON,
+            headers,
+            cookies,
+            Tools.considerSecure(req, conf.isCookieForceHTTPS()),
+            req.getServerName(),
+            req.getServerPort(),
+            httpSessionId);
     }
 
     private String parseClient(final HttpServletRequest req) {
@@ -1292,90 +1214,23 @@ public class Login extends AJAXServlet {
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         final String httpSessionId = req.getSession(true).getId();
-        final LoginRequest request = new LoginRequest() {
-
-            private final String hash = HashCalculator.getHash(req, userAgent, client);
-
-            @Override
-            public boolean isVolatile() {
-                return isVolatile;
-            }
-
-            @Override
-            public String getVersion() {
-                return version;
-            }
-
-            @Override
-            public String getUserAgent() {
-                return userAgent;
-            }
-
-            @Override
-            public String getPassword() {
-                return creds.getPassword();
-            }
-
-            @Override
-            public String getLogin() {
-                return creds.getLogin();
-            }
-
-            @Override
-            public Interface getInterface() {
-                return Interface.HTTP_JSON;
-            }
-
-            @Override
-            public String getHash() {
-                return hash;
-            }
-
-            @Override
-            public String getClientIP() {
-                return clientIP;
-            }
-
-            @Override
-            public String getClient() {
-                return client;
-            }
-
-            @Override
-            public String getAuthId() {
-                return UUIDs.getUnformattedString(UUID.randomUUID());
-            }
-
-            @Override
-            public Map<String, List<String>> getHeaders() {
-                return headers;
-            }
-
-            @Override
-            public com.openexchange.authentication.Cookie[] getCookies() {
-                return cookies;
-            }
-
-            @Override
-            public boolean isSecure() {
-                return Tools.considerSecure(req, conf.isCookieForceHTTPS());
-            }
-
-            @Override
-            public String getServerName() {
-                return req.getServerName();
-            }
-
-            @Override
-            public int getServerPort() {
-                return req.getServerPort();
-            }
-
-            @Override
-            public String getHttpSessionID() {
-                return httpSessionId;
-            }
-        };
+        final LoginRequest request = new LoginRequestImpl(
+            creds.getLogin(),
+            creds.getPassword(),
+            clientIP,
+            userAgent,
+            UUIDs.getUnformattedString(UUID.randomUUID()),
+            UUIDs.getUnformattedString(UUID.randomUUID()),
+            version,
+            HashCalculator.getHash(req, userAgent, client),
+            isVolatile,
+            Interface.HTTP_JSON,
+            headers,
+            cookies,
+            Tools.considerSecure(req, conf.isCookieForceHTTPS()),
+            req.getServerName(),
+            req.getServerPort(),
+            httpSessionId);
         final Map<String, Object> properties = new HashMap<String, Object>(1);
         {
             final String capabilities = req.getParameter("capabilities");

@@ -58,9 +58,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
@@ -90,13 +90,14 @@ public final class TokenLogin implements LoginRequestHandler {
     }
 
     private void doTokenLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
-        LoginRequest request = Login.parseLogin(
+        LoginRequestImpl request = LoginTools.parseLogin(
             req,
             LoginFields.LOGIN_PARAM,
             true,
             conf.getDefaultClient(),
             conf.isCookieForceHTTPS(),
             conf.isDisableTrimLogin());
+        request.setClientToken(LoginTools.parseParameter(req, LoginFields.CLIENT_TOKEN, true, null));
         Map<String, Object> properties = new HashMap<String, Object>(1);
         {
             String capabilities = req.getParameter("capabilities");
@@ -104,8 +105,11 @@ public final class TokenLogin implements LoginRequestHandler {
                 properties.put("client.capabilities", capabilities);
             }
         }
-        properties.put(LoginFields.CLIENT_TOKEN, LoginTools.parseParameter(req, LoginFields.CLIENT_TOKEN, true, null));
         LoginResult result = LoginPerformer.getInstance().doLogin(request, properties);
+        String serverToken = result.getServerToken();
+        if (null == serverToken) {
+            throw LoginExceptionCodes.SERVER_TOKEN_NOT_CREATED.create();
+        }
         Session session = result.getSession();
         User user = result.getUser();
 
@@ -116,10 +120,11 @@ public final class TokenLogin implements LoginRequestHandler {
             session,
             user.getPreferredLanguage(),
             conf.getUiWebPath(),
-            request.getHttpSessionID()));
+            request.getHttpSessionID(),
+            serverToken));
     }
 
-    private static String generateRedirectURL(String uiWebPathParam, String shouldStore, Session session, String language, String uiWebPath, String httpSessionId) {
+    private static String generateRedirectURL(String uiWebPathParam, String shouldStore, Session session, String language, String uiWebPath, String httpSessionId, String serverToken) {
         String retval = uiWebPathParam;
         if (null == retval) {
             retval = uiWebPath;
@@ -127,11 +132,12 @@ public final class TokenLogin implements LoginRequestHandler {
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");
         retval = retval + ";jsessionid=" + httpSessionId;
-        // TODO server side token
+        retval = LoginTools.addFragmentParameter(retval, LoginFields.SERVER_TOKEN, serverToken);
         // App Suite UI requires some additional values.
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER, session.getLogin());
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER_ID, Integer.toString(session.getUserId()));
         retval = LoginTools.addFragmentParameter(retval, "language", language);
+        // Pass through parameter
         if (shouldStore != null) {
             retval = LoginTools.addFragmentParameter(retval, "store", shouldStore);
         }

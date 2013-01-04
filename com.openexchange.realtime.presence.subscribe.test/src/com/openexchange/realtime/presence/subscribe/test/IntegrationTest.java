@@ -244,6 +244,11 @@ public class IntegrationTest extends TestCase {
             public String getHttpSessionID() {
                 return "0123456789";
             }
+
+            @Override
+            public String getClientToken() {
+                return null;
+            }
         });
 
         return ServerSessionAdapter.valueOf(login.getSession());

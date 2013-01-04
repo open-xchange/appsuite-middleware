@@ -72,9 +72,15 @@ import com.openexchange.tools.servlet.http.Tools;
 public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> extends AbstractAJAXParser<T> {
 
     private String location;
+    private final boolean cookiesNeeded;
 
     AbstractRedirectParser() {
+        this(true);
+    }
+
+    AbstractRedirectParser(boolean cookiesNeeded) {
         super(true);
+        this.cookiesNeeded = cookiesNeeded;
     }
 
     @Override
@@ -89,22 +95,24 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
         assertEquals("There should be exactly one Location header.", 1, headers.length);
         location = headers[0].getValue();
         assertNotNull("Location for redirect is missing.", location);
-        boolean oxCookieFound = false;
-        boolean jsessionIdCookieFound = false;
-        HeaderElementIterator iter = new BasicHeaderElementIterator(resp.headerIterator("Set-Cookie"));
-        while (iter.hasNext()) {
-            HeaderElement element = iter.nextElement();
-            if (element.getName().startsWith(Login.SECRET_PREFIX)) {
-                oxCookieFound = true;
-                continue;
+        if (cookiesNeeded) {
+            boolean oxCookieFound = false;
+            boolean jsessionIdCookieFound = false;
+            HeaderElementIterator iter = new BasicHeaderElementIterator(resp.headerIterator("Set-Cookie"));
+            while (iter.hasNext()) {
+                HeaderElement element = iter.nextElement();
+                if (element.getName().startsWith(Login.SECRET_PREFIX)) {
+                    oxCookieFound = true;
+                    continue;
+                }
+                if (Tools.JSESSIONID_COOKIE.equals(element.getName())) {
+                    jsessionIdCookieFound = true;
+                    continue;
+                }
             }
-            if (Tools.JSESSIONID_COOKIE.equals(element.getName())) {
-                jsessionIdCookieFound = true;
-                continue;
-            }
+            assertTrue("Session cookie is missing.", oxCookieFound);
+            assertTrue("JSESSIONID cookie is missing.", jsessionIdCookieFound);
         }
-        assertTrue("Session cookie is missing.", oxCookieFound);
-        assertTrue("JSESSIONID cookie is missing.", jsessionIdCookieFound);
         return EntityUtils.toString(resp.getEntity());
     }
 

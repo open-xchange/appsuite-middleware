@@ -94,7 +94,7 @@ public class FormLogin implements LoginRequestHandler {
     }
 
     private void doFormLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
-        LoginRequest request = Login.parseLogin(
+        LoginRequest request = LoginTools.parseLogin(
             req,
             LoginFields.LOGIN_PARAM,
             true,

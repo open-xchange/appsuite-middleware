@@ -145,6 +145,11 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
             public String getHttpSessionID() {
                 return loginReq.getHttpSessionID();
             }
+
+            @Override
+            public String getClientToken() {
+                return loginReq.getClientToken();
+            }
         };
     }
 }

@@ -119,4 +119,10 @@ public interface AddSessionParameter {
      * @return the identifier of the client using the session.
      */
     String getClient();
+
+    /**
+     * The client token will only be present when the token login is used. This attribute does not apply to any other login mechanism.
+     * @return the client token from the token login. Otherwise <code>null</code>.
+     */
+    String getClientToken();
 }

@@ -76,10 +76,10 @@ public interface SessiondService {
      * with {@link Parameterized#PARAM_SESSION} name.
      * 
      * @param parameterObject The parameter object describing the session to create
-     * @return The session identifier of the newly created session as a <code>String</code>
+     * @return The session object interface of the newly created session.
      * @throws OXException If creating the session fails
      */
-    public String addSession(AddSessionParameter parameterObject) throws OXException;
+    public Session addSession(AddSessionParameter parameterObject) throws OXException;
 
     /**
      * Replaces the currently stored password in session identified through given session identifier with specified <code>newPassword</code>.

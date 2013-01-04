@@ -201,6 +201,11 @@ public abstract class OXServlet extends WebDavServlet {
         public String getHttpSessionID() {
             return req.getSession(true).getId();
         }
+
+        @Override
+        public String getClientToken() {
+            return null;
+        }
     }
 
     /**

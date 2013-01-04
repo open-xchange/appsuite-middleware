@@ -60,8 +60,6 @@ import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.login.Interface;
-import com.openexchange.login.LoginRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -146,7 +144,7 @@ public final class LoginTools {
         return Boolean.parseBoolean(parameter.trim());
     }
 
-    public static LoginRequest parseLogin(final HttpServletRequest req, final String login, final String password, boolean strict, String defaultClient, final boolean forceHTTPS) throws OXException {
+    public static LoginRequestImpl parseLogin(HttpServletRequest req, String login, String password, boolean strict, String defaultClient, boolean forceHTTPS) throws OXException {
         final String authId = parseAuthId(req, strict);
         final String client = parseClient(req, strict, defaultClient);
         final String version;
@@ -164,91 +162,23 @@ public final class LoginTools {
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         final String httpSessionId = req.getSession(true).getId();
-        final LoginRequest loginRequest = new LoginRequest() {
-
-            private final String hash = HashCalculator.getHash(req, userAgent, client);
-
-            @Override
-            public boolean isVolatile() {
-                return isVolatile;
-            }
-
-            @Override
-            public String getLogin() {
-                return login;
-            }
-
-            @Override
-            public String getPassword() {
-                return password;
-            }
-
-            @Override
-            public String getClientIP() {
-                return clientIP;
-            }
-
-            @Override
-            public String getUserAgent() {
-                return userAgent;
-            }
-
-            @Override
-            public String getAuthId() {
-                return authId;
-            }
-
-            @Override
-            public String getClient() {
-                return client;
-            }
-
-            @Override
-            public String getVersion() {
-                return version;
-            }
-
-            @Override
-            public Interface getInterface() {
-                return HTTP_JSON;
-            }
-
-            @Override
-            public String getHash() {
-                return hash;
-            }
-
-            @Override
-            public Map<String, List<String>> getHeaders() {
-                return headers;
-            }
-
-            @Override
-            public com.openexchange.authentication.Cookie[] getCookies() {
-                return cookies;
-            }
-
-            @Override
-            public boolean isSecure() {
-                return Tools.considerSecure(req, forceHTTPS);
-            }
-
-            @Override
-            public String getServerName() {
-                return req.getServerName();
-            }
-
-            @Override
-            public int getServerPort() {
-                return req.getServerPort();
-            }
-
-            @Override
-            public String getHttpSessionID() {
-                return httpSessionId;
-            }
-        };
-        return loginRequest;
+        return new LoginRequestImpl(
+            login,
+            password,
+            clientIP,
+            userAgent,
+            authId,
+            client,
+            version,
+            HashCalculator.getHash(req, userAgent, client),
+            isVolatile,
+            HTTP_JSON,
+            headers,
+            cookies,
+            Tools.considerSecure(req, forceHTTPS),
+            req.getServerName(),
+            req.getServerPort(),
+            httpSessionId);
     }
 
     public static boolean isEmpty(final String string) {
@@ -261,5 +191,20 @@ public final class LoginTools {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    public static LoginRequestImpl parseLogin(HttpServletRequest req, String loginParamName, boolean strict, String defaultClient, boolean forceHTTPS, boolean disableTrimLogin) throws OXException {
+        String login = req.getParameter(loginParamName);
+        if (null == login) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(loginParamName);
+        }
+        if (!disableTrimLogin) {
+            login = login.trim();
+        }
+        String password = req.getParameter(LoginFields.PASSWORD_PARAM);
+        if (null == password) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.PASSWORD_PARAM);
+        }
+        return parseLogin(req, login, password, strict, defaultClient, forceHTTPS);
     }
 }

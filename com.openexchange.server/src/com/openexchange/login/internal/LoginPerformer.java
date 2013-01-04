@@ -60,6 +60,7 @@ import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -201,9 +202,7 @@ public final class LoginPerformer {
             checkClient(request, user, ctx);
             // Create session
             final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
-            // TODO optional client token which puts the session the to the token session container.
-            final String sessionId = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
-            final Session session = sessiondService.getSession(sessionId);
+            final Session session = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
             if (null == session) {
                 // Session could not be created
                 throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
@@ -224,6 +223,7 @@ public final class LoginPerformer {
                     }
                 }
             }
+            retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             if (SessionEnhancement.class.isInstance(authed)) {
                 ((SessionEnhancement) authed).enhanceSession(session);
             }

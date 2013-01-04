@@ -113,7 +113,7 @@ public final class InvalidatedAwareSessiondService implements SessiondServiceExt
     }
 
     @Override
-    public String addSession(final AddSessionParameter param) throws OXException {
+    public Session addSession(final AddSessionParameter param) throws OXException {
         checkInvalidatedAndRemoveIfPresent(param.getContext().getContextId());
         return impl.addSession(param);
     }

@@ -47,64 +47,51 @@
  *
  */
 
-package com.openexchange.login;
+package com.openexchange.ajax.session.actions;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.authentication.Cookie;
-import com.openexchange.tools.servlet.http.Tools;
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_ACTION;
+import static com.openexchange.ajax.Login.ACTION_TOKENLOGIN;
+import static com.openexchange.ajax.fields.LoginFields.AUTHID_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.AUTOLOGIN_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.CLIENT_TOKEN;
+import static com.openexchange.ajax.fields.LoginFields.LOGIN_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.PASSWORD_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.VERSION_PARAM;
+import java.util.UUID;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.session.LoginTools;
+import com.openexchange.java.util.UUIDs;
 
 /**
- * Data to process a login request.
+ * {@link TokenLoginRequest}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface LoginRequest {
+public final class TokenLoginRequest extends AbstractRequest<TokenLoginResponse> {
 
-    String getLogin();
+    private final String clientToken;
 
-    String getPassword();
+    public TokenLoginRequest(String login, String password, String authId, String client, String version, boolean autologin, String clientToken) {
+        super(new Parameter[] {
+            new URLParameter(PARAMETER_ACTION, ACTION_TOKENLOGIN),
+            new FieldParameter(LOGIN_PARAM, login),
+            new FieldParameter(PASSWORD_PARAM, password),
+            new FieldParameter(AUTHID_PARAM, authId),
+            new FieldParameter(CLIENT_PARAM, client),
+            new FieldParameter(VERSION_PARAM, version),
+            new FieldParameter(AUTOLOGIN_PARAM, Boolean.toString(autologin)),
+            new FieldParameter(CLIENT_TOKEN, clientToken)
+        });
+        this.clientToken = clientToken;
+    }
 
-    String getClientIP();
+    public TokenLoginRequest(String login, String password) {
+        this(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, true, UUIDs.getUnformattedString(UUID.randomUUID()));
+    }
 
-    String getUserAgent();
-
-    String getAuthId();
-
-    String getClient();
-
-    String getVersion();
-
-    String getHash();
-
-    /**
-     * The client token will only be present when the token login is used. This attribute does not apply to any other login mechanism.
-     * @return the client token from the token login. Otherwise <code>null</code>.
-     */
-    String getClientToken();
-
-    boolean isVolatile();
-
-    Interface getInterface();
-
-    Map<String, List<String>> getHeaders();
-
-    Cookie[] getCookies();
-
-    /**
-     * Every login mechanism defining this value must consider the following topics:
-     * <li>
-     * <ul>if com.openexchange.forceHTTPS is configured to true, then this must be true but not if the client comes through localhost</ul>
-     * <ul>the value told by the servlet container if the request was retrieved through HTTPS</ul>
-     * </li>
-     * @see Tools#considerSecure(javax.servlet.http.HttpServletRequest, boolean)
-     * @return <code>true</code> if URLs should be told to the client with HTTPS.
-     */
-    boolean isSecure();
-
-    String getServerName();
-
-    int getServerPort();
-
-    String getHttpSessionID();
+    @Override
+    public TokenLoginParser getParser() {
+        return new TokenLoginParser(clientToken);
+    }
 }

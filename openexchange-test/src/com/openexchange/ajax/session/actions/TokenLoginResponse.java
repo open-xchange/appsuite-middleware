@@ -47,64 +47,61 @@
  *
  */
 
-package com.openexchange.login;
+package com.openexchange.ajax.session.actions;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.authentication.Cookie;
-import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * Data to process a login request.
+ * {@link TokenLoginResponse}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface LoginRequest {
+public final class TokenLoginResponse extends AbstractAJAXResponse {
 
-    String getLogin();
+    private final String path;
+    private final String clientToken;
+    private final String serverToken;
+    private final String login;
+    private final int userId;
+    private final String language;
+    private final boolean store;
 
-    String getPassword();
+    TokenLoginResponse(String path, String clientToken, String serverToken, String login, int userId, String language, boolean store) {
+        super(null);
+        this.path = path;
+        this.clientToken = clientToken;
+        this.serverToken = serverToken;
+        this.login = login;
+        this.userId = userId;
+        this.language = language;
+        this.store = store;
+    }
 
-    String getClientIP();
+    public String getPath() {
+        return path;
+    }
 
-    String getUserAgent();
+    public String getClientToken() {
+        return clientToken;
+    }
 
-    String getAuthId();
+    public String getServerToken() {
+        return serverToken;
+    }
 
-    String getClient();
+    public String getLogin() {
+        return login;
+    }
 
-    String getVersion();
+    public int getUserId() {
+        return userId;
+    }
 
-    String getHash();
+    public String getLanguage() {
+        return language;
+    }
 
-    /**
-     * The client token will only be present when the token login is used. This attribute does not apply to any other login mechanism.
-     * @return the client token from the token login. Otherwise <code>null</code>.
-     */
-    String getClientToken();
-
-    boolean isVolatile();
-
-    Interface getInterface();
-
-    Map<String, List<String>> getHeaders();
-
-    Cookie[] getCookies();
-
-    /**
-     * Every login mechanism defining this value must consider the following topics:
-     * <li>
-     * <ul>if com.openexchange.forceHTTPS is configured to true, then this must be true but not if the client comes through localhost</ul>
-     * <ul>the value told by the servlet container if the request was retrieved through HTTPS</ul>
-     * </li>
-     * @see Tools#considerSecure(javax.servlet.http.HttpServletRequest, boolean)
-     * @return <code>true</code> if URLs should be told to the client with HTTPS.
-     */
-    boolean isSecure();
-
-    String getServerName();
-
-    int getServerPort();
-
-    String getHttpSessionID();
+    public boolean isStore() {
+        return store;
+    }
 }

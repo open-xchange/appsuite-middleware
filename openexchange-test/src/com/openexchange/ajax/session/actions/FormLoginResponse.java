@@ -63,14 +63,16 @@ public class FormLoginResponse extends AbstractAJAXResponse {
     private final String login;
     private final int userId;
     private final String language;
+    private final boolean store;
 
-    protected FormLoginResponse(String path, String sessionId, String login, int userId, String language) {
+    protected FormLoginResponse(String path, String sessionId, String login, int userId, String language, boolean store) {
         super(null);
         this.path = path;
         this.sessionId = sessionId;
         this.login = login;
         this.userId = userId;
         this.language = language;
+        this.store = store;
     }
 
     public String getPath() {
@@ -91,5 +93,9 @@ public class FormLoginResponse extends AbstractAJAXResponse {
 
     public String getLanguage() {
         return language;
+    }
+
+    public boolean isStore() {
+        return store;
     }
 }

@@ -124,6 +124,11 @@ final class AddSessionParameterImpl implements AddSessionParameter, Parameterize
     }
 
     @Override
+    public String getClientToken() {
+        return request.getClientToken();
+    }
+
+    @Override
     public Set<String> getParameterNames() {
         return parameters.keySet();
     }
