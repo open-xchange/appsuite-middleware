@@ -117,6 +117,8 @@ public class Strings {
 
     /**
      * Fixes possible charset problem in given string.
+     * <p>
+     * E.g.:&nbsp;&quot;&#195;&#164&quot; instead of &quot;&auml;&quot;
      * 
      * @param s The string to check
      * @return The fixed string
