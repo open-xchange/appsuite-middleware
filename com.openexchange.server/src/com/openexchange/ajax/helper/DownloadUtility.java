@@ -209,13 +209,13 @@ public final class DownloadUtility {
         if (overridingDisposition == null) {
             final String baseType = contentType.getBaseType();
             final StringBuilder builder = new StringBuilder(32).append("attachment");
-            appendFilenameParameter(fileName, baseType, userAgent, builder);
+            appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : baseType, userAgent, builder);
             return new CheckedDownload(baseType, builder.toString(), in);
         }
         if (overridingDisposition.indexOf(';') < 0) {
             final String baseType = contentType.getBaseType();
             final StringBuilder builder = new StringBuilder(32).append(overridingDisposition);
-            appendFilenameParameter(fileName, baseType, userAgent, builder);
+            appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : baseType, userAgent, builder);
             return new CheckedDownload(baseType, builder.toString(), in);
         }
 
