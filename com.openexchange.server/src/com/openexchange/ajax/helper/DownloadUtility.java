@@ -249,8 +249,7 @@ public final class DownloadUtility {
             }
         }
         fn = escapeBackslashAndQuote(fn);
-        final BrowserDetector browserDetector = new BrowserDetector(userAgent);
-        if (null != userAgent && browserDetector.isMSIE()) {
+        if (null != userAgent && new BrowserDetector(userAgent).isMSIE()) {
             // InternetExplorer
             appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"');
             return;
@@ -304,8 +303,7 @@ public final class DownloadUtility {
             }
         }
         fn = escapeBackslashAndQuote(fn);
-        final BrowserDetector browserDetector = new BrowserDetector(userAgent);
-        if (null != userAgent && browserDetector.isMSIE()) {
+        if (null != userAgent && new BrowserDetector(userAgent).isMSIE()) {
             // InternetExplorer
             appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"');
             return;
