@@ -162,10 +162,13 @@ public class FileResponseRenderer implements ResponseRenderer {
             if (SAVE_AS_TYPE.equals(contentType) || (delivery != null && delivery.equalsIgnoreCase(DOWNLOAD))) {
                 if (null == contentDisposition) {
                     final StringBuilder sb = new StringBuilder(32).append("attachment");
-                    DownloadUtility.appendFilenameParameter(fileName, SAVE_AS_TYPE, userAgent, sb);
+                    DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
                     resp.setHeader("Content-Disposition", sb.toString());
                 } else {
-                    Tools.setHeaderForFileDownload(userAgent, resp, fileName, contentDisposition);
+                    final StringBuilder sb = new StringBuilder(32).append(contentDisposition.trim());
+                    DownloadUtility.appendFilenameParameter(file.getName(), null, userAgent, sb);
+                    resp.setHeader("Content-Disposition", sb.toString());
+                    //Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);
                 }
                 resp.setContentType(contentType);
             } else {
