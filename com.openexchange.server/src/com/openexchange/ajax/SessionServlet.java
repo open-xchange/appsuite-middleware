@@ -571,12 +571,12 @@ public abstract class SessionServlet extends AJAXServlet {
         }
         if (LogProperties.isEnabled()) {
             final Props properties = LogProperties.getLogProperties();
-            properties.put("com.openexchange.session.sessionId", sessionId);
-            properties.put("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
-            properties.put("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
+            properties.put(LogProperties.Name.SESSION_SESSION_ID, sessionId);
+            properties.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(session.getUserId()));
+            properties.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(session.getContextId()));
             final String client  = session.getClient();
-            properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
-            properties.put("com.openexchange.session.session", session);
+            properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : client);
+            properties.put(LogProperties.Name.SESSION_SESSION, session);
         }
         /*
          * Get session secret
@@ -781,14 +781,14 @@ public abstract class SessionServlet extends AJAXServlet {
         final Props props = LogProperties.optLogProperties();
         if (null != props) {
             final HttpServletRequest httpRequest = (HttpServletRequest) req;
-            props.put("javax.servlet.servletPath", ForceLog.valueOf(httpRequest.getServletPath()));
+            props.put(LogProperties.Name.SERVLET_SERVLET_PATH, ForceLog.valueOf(httpRequest.getServletPath()));
             final String pathInfo = httpRequest.getPathInfo();
             if (null != pathInfo) {
-                props.put("javax.servlet.pathInfo", ForceLog.valueOf(pathInfo));
+                props.put(LogProperties.Name.SERVLET_PATH_INFO, ForceLog.valueOf(pathInfo));
             }
             final String queryString = httpRequest.getQueryString();
             if (null != queryString) {
-                props.put("javax.servlet.queryString", ForceLog.valueOf(queryString));
+                props.put(LogProperties.Name.SERVLET_QUERY_STRING, ForceLog.valueOf(queryString));
             }
         }
         return null;
