@@ -130,7 +130,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         IFileHolder file = (IFileHolder) result.getResultObject();
         final String fileContentType = file.getContentType();
         final String fileName = file.getName();
-
+        // Check certain parameters
         String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
         if (null == contentType) {
             contentType = fileContentType;
@@ -145,7 +145,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         } else {
             contentDisposition = Utils.encodeUrl(contentDisposition);
         }
-
+        // Write to Servlet's output stream
         InputStream documentData = null;
         try {
             file = rotateIfImage(file);
@@ -160,16 +160,10 @@ public class FileResponseRenderer implements ResponseRenderer {
             documentData = new BufferedInputStream(stream);
             final String userAgent = req.getHeader("user-agent");
             if (SAVE_AS_TYPE.equals(contentType) || (delivery != null && delivery.equalsIgnoreCase(DOWNLOAD))) {
-                if (null == contentDisposition) {
-                    final StringBuilder sb = new StringBuilder(32).append("attachment");
-                    DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
-                    resp.setHeader("Content-Disposition", sb.toString());
-                } else {
-                    final StringBuilder sb = new StringBuilder(32).append(contentDisposition.trim());
-                    DownloadUtility.appendFilenameParameter(file.getName(), null, userAgent, sb);
-                    resp.setHeader("Content-Disposition", sb.toString());
-                    //Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);
-                }
+                final StringBuilder sb = new StringBuilder(32);
+                sb.append(isEmpty(contentDisposition) ? "attachment" : contentDisposition.trim());
+                DownloadUtility.appendFilenameParameter(file.getName(), null, userAgent, sb);
+                resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(contentType);
             } else {
                 final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, fileContentType, contentDisposition, userAgent);
@@ -331,6 +325,18 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
         }
         return true;
+    }
+
+    private boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
