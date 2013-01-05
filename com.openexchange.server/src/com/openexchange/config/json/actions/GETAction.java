@@ -137,7 +137,7 @@ public final class GETAction extends AbstractConfigAction {
                     }
                 }
             } else {
-                final JSONArray array = new JSONArray();
+                final JSONArray array = new JSONArray(multiValue.length);
                 for (final Object value : multiValue) {
                     array.put(value);
                 }
