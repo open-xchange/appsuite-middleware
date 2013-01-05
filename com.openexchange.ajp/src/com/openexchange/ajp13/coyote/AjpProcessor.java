@@ -1494,6 +1494,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 properties.put("com.openexchange.ajp13.requestURI", request.getRequestURI());
                 properties.put("com.openexchange.ajp13.servletPath", request.getServletPath());
                 properties.put("com.openexchange.ajp13.pathInfo", request.getPathInfo());
+                final String action = request.getParameter("action");
+                if (null != action) {
+                    properties.put("com.openexchange.ajax.action", action);
+                }
             }
             properties.put("com.openexchange.ajp13.requestIp", request.getRemoteAddr());
             properties.put("com.openexchange.ajp13.serverName", serverName);
