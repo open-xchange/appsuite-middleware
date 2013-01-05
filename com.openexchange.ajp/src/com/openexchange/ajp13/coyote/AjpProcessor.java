@@ -1256,65 +1256,67 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
 
         // Decode headers
-        final int hCount = requestHeaderMessage.getInt();
-        for (int i = 0; i < hCount; i++) {
-            final String hName;
-            // Header names are encoded as either an integer code starting
-            // with 0xA0, or as a normal string (in which case the first
-            // two bytes are the length).
-            int isc = requestHeaderMessage.peekInt();
-            int hId = isc & 0xFF;
-            isc &= 0xFF00;
-            if (0xA000 == isc) {
-                requestHeaderMessage.getInt(); // To advance the read position
-                hName = Constants.headerTransArray[hId - 1];
-            } else {
-                // reset hId -- if the header currently being read
-                // happens to be 7 or 8 bytes long, the code below
-                // will think it's the content-type header or the
-                // content-length header - SC_REQ_CONTENT_TYPE=7,
-                // SC_REQ_CONTENT_LENGTH=8 - leading to unexpected
-                // behaviour. see bug 5861 for more information.
-                hId = -1;
-                hName = requestHeaderMessage.getString(temp);
-            }
-            final String hValue = requestHeaderMessage.getString(temp);
-            /*
-             * Check for "Content-Length" and "Content-Type" headers
-             */
-            if (hId == Constants.SC_REQ_CONTENT_LENGTH || (hId == -1 && hName.equalsIgnoreCase("Content-Length"))) {
-                /*
-                 * Read the content-length header, so set it
-                 */
-                final long cl = Long.parseLong(hValue);
-                if (cl < Integer.MAX_VALUE) {
-                    request.setContentLength(cl);
+        {
+            final int hCount = requestHeaderMessage.getInt();
+            for (int i = 0; i < hCount; i++) {
+                final String hName;
+                // Header names are encoded as either an integer code starting
+                // with 0xA0, or as a normal string (in which case the first
+                // two bytes are the length).
+                int isc = requestHeaderMessage.peekInt();
+                int hId = isc & 0xFF;
+                isc &= 0xFF00;
+                if (0xA000 == isc) {
+                    requestHeaderMessage.getInt(); // To advance the read position
+                    hName = Constants.headerTransArray[hId - 1];
+                } else {
+                    // reset hId -- if the header currently being read
+                    // happens to be 7 or 8 bytes long, the code below
+                    // will think it's the content-type header or the
+                    // content-length header - SC_REQ_CONTENT_TYPE=7,
+                    // SC_REQ_CONTENT_LENGTH=8 - leading to unexpected
+                    // behaviour. see bug 5861 for more information.
+                    hId = -1;
+                    hName = requestHeaderMessage.getString(temp);
                 }
-            } else if (hId == Constants.SC_REQ_CONTENT_TYPE || (hId == -1 && hName.equalsIgnoreCase("Content-Type"))) {
+                final String hValue = requestHeaderMessage.getString(temp);
                 /*
-                 * Read the content-type header, so set it
+                 * Check for "Content-Length" and "Content-Type" headers
                  */
-                try {
-                    request.setContentType(hValue);
-                } catch (final AJPv13Exception e) {
-                    response.setStatus(403);
-                    error = true;
-                }
-            } else if (hId == Constants.SC_REQ_COOKIE || (hId == -1 && hName.equalsIgnoreCase("Cookie"))) {
-                /*
-                 * Read a cookie, so set it
-                 */
-                try {
-                    request.setCookies(CookieParser.parseCookieHeader(hValue));
-                } catch (final AJPv13Exception e) {
-                    response.setStatus(403);
-                    error = true;
-                }
-            } else {
-                try {
-                    request.setHeader(hName, hValue, false);
-                } catch (final AJPv13Exception e) {
-                    // Cannot occur
+                if (hId == Constants.SC_REQ_CONTENT_LENGTH || (hId == -1 && hName.equalsIgnoreCase("Content-Length"))) {
+                    /*
+                     * Read the content-length header, so set it
+                     */
+                    final long cl = Long.parseLong(hValue);
+                    if (cl < Integer.MAX_VALUE) {
+                        request.setContentLength(cl);
+                    }
+                } else if (hId == Constants.SC_REQ_CONTENT_TYPE || (hId == -1 && hName.equalsIgnoreCase("Content-Type"))) {
+                    /*
+                     * Read the content-type header, so set it
+                     */
+                    try {
+                        request.setContentType(hValue);
+                    } catch (final AJPv13Exception e) {
+                        response.setStatus(403);
+                        error = true;
+                    }
+                } else if (hId == Constants.SC_REQ_COOKIE || (hId == -1 && hName.equalsIgnoreCase("Cookie"))) {
+                    /*
+                     * Read a cookie, so set it
+                     */
+                    try {
+                        request.setCookies(CookieParser.parseCookieHeader(hValue));
+                    } catch (final AJPv13Exception e) {
+                        response.setStatus(403);
+                        error = true;
+                    }
+                } else {
+                    try {
+                        request.setHeader(hName, hValue, false);
+                    } catch (final AJPv13Exception e) {
+                        // Cannot occur
+                    }
                 }
             }
         }
@@ -1449,27 +1451,29 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*
          * Check for a full URI (including protocol://host:port/)
          */
-        final String requestURI = request.getRequestURI();
-        if (requestURI.regionMatches(true, 0, "http", 0, 4)) {
-            final int pos = requestURI.indexOf("://", 4);
-            int slashPos = -1;
-            if (pos != -1) {
-                slashPos = requestURI.indexOf('/', pos + 3);
-                if (slashPos == -1) {
-                    slashPos = requestURI.length();
-                    /*
-                     * Set URI as "/"
-                     */
-                    request.setRequestURI("/");
-                } else {
-                    request.setRequestURI(requestURI.substring(slashPos));
-                }
-                final String host = request.getHeader("host");
-                if (null != host) {
-                    try {
-                        request.setHeader("host", host.substring(pos + 3, slashPos), false);
-                    } catch (final AJPv13Exception e) {
-                        // Cannot occur
+        {
+            final String requestURI = request.getRequestURI();
+            if (requestURI.regionMatches(true, 0, "http", 0, 4)) {
+                final int pos = requestURI.indexOf("://", 4);
+                int slashPos = -1;
+                if (pos != -1) {
+                    slashPos = requestURI.indexOf('/', pos + 3);
+                    if (slashPos == -1) {
+                        slashPos = requestURI.length();
+                        /*
+                         * Set URI as "/"
+                         */
+                        request.setRequestURI("/");
+                    } else {
+                        request.setRequestURI(requestURI.substring(slashPos));
+                    }
+                    final String host = request.getHeader("host");
+                    if (null != host) {
+                        try {
+                            request.setHeader("host", host.substring(pos + 3, slashPos), false);
+                        } catch (final AJPv13Exception e) {
+                            // Cannot occur
+                        }
                     }
                 }
             }
@@ -1477,9 +1481,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*
          * Parse host header
          */
-        final String host = request.getHeader("host");
-        if (null != host) {
-            parseHost(host);
+        {
+            final String host = request.getHeader("host");
+            if (null != host) {
+                parseHost(host);
+            }
         }
         /*-
          * Parsing done
