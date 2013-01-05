@@ -168,10 +168,12 @@ public class FileResponseRenderer implements ResponseRenderer {
             } else {
                 final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, fileContentType, contentDisposition, userAgent);
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
-                    if (contentDisposition == null) {
+                    if (isEmpty(contentDisposition)) {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     } else {
-                        if (contentDisposition.indexOf(';') < 0) {
+                        if (contentDisposition.indexOf(';') >= 0) {
+                            resp.setHeader("Content-Disposition", contentDisposition);
+                        } else {
                             final String disposition = checkedDownload.getContentDisposition();
                             final int pos = disposition.indexOf(';');
                             if (pos >= 0) {
@@ -179,8 +181,6 @@ public class FileResponseRenderer implements ResponseRenderer {
                             } else {
                                 resp.setHeader("Content-Disposition", contentDisposition);
                             }
-                        } else {
-                            resp.setHeader("Content-Disposition", contentDisposition);
                         }
                     }
                 }
