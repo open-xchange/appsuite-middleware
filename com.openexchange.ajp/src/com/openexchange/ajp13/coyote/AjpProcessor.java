@@ -1833,7 +1833,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
-                        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
+                        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, id);
                         jsessionIDCookie.setSecure(request.isSecure() || (forceHttps && !Cookies.isLocalLan(request)));
                         httpSessionCookie = jsessionIDCookie;
                         httpSessionJoined = true;
