@@ -96,6 +96,10 @@ public final class LogProperties {
          */
         AJP_REQUEST_IP("com.openexchange.ajpv13.requestIp"),
         /**
+         * com.openexchange.ajpv13.requestId
+         */
+        AJP_REQUEST_ID("com.openexchange.ajpv13.requestId"),
+        /**
          * com.openexchange.ajpv13.serverName
          */
         AJP_SERVER_NAME("com.openexchange.ajpv13.serverName"),
@@ -111,6 +115,10 @@ public final class LogProperties {
          * com.openexchange.ajpv13.remoteAddres
          */
         AJP_REMOTE_ADDRESS("com.openexchange.ajpv13.remoteAddress"),
+        /**
+         * com.openexchange.ajp13.httpSession
+         */
+        AJP_HTTP_SESSION("com.openexchange.ajp13.httpSession"),
         /**
          * com.openexchange.session.sessionId
          */

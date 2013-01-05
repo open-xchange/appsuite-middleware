@@ -1328,7 +1328,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             if (null != echoHeaderName) {
                 final String echoValue = request.getHeader(echoHeaderName);
                 if (null != echoValue) {
-                    LogProperties.putLogProperty("com.openexchange.ajp13.requestId", echoValue);
+                    LogProperties.putLogProperty(LogProperties.Name.AJP_REQUEST_ID, echoValue);
                 }
             }
         }
@@ -1775,7 +1775,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
-                        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
+                        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, id);
                         jsessionIDCookie.setSecure(request.isSecure() || (forceHttps && !Cookies.isLocalLan(request)));
                         httpSessionCookie = jsessionIDCookie;
                         httpSessionJoined = true;
@@ -1870,7 +1870,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
         final String id = jsessionIDVal.toString();
         final Cookie jsessionIDCookie = newJsessionIdCookie(id, domain);
-        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
+        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, id);
         jsessionIDCookie.setSecure(request.isSecure() || (forceHttps && !Cookies.isLocalLan(request)));
         httpSessionCookie = jsessionIDCookie;
         httpSessionJoined = false;
@@ -1906,7 +1906,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             join = false;
         }
         final Cookie jsessionIDCookie = newJsessionIdCookie(jsessionIdVal, domain);
-        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", jsessionIdVal);
+        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, jsessionIdVal);
         jsessionIDCookie.setSecure(request.isSecure() || (forceHttps && !Cookies.isLocalLan(request)));
         httpSessionCookie = jsessionIDCookie;
         httpSessionJoined = join;
