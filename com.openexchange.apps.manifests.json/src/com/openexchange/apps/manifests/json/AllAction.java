@@ -50,7 +50,6 @@
 package com.openexchange.apps.manifests.json;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,8 +76,8 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(noSession = true)
 public class AllAction implements AJAXActionService {
 
-	private JSONArray manifests;
-	private ServiceLookup services;
+	private final JSONArray manifests;
+	private final ServiceLookup services;
 
 	public AllAction(ServiceLookup services, JSONArray manifests) {
 		super();
@@ -110,7 +109,7 @@ public class AllAction implements AJAXActionService {
 				for (int i = 0, size = manifests.length(); i < size; i++) {
 					JSONObject definition = manifests.getJSONObject(i);
 					if (hasCapability(capMap, definition)) {
-						result.put(new JSONObject(definition.toString()));
+						result.put(new JSONObject(definition));
 					}
 				}
 			} else {
@@ -119,7 +118,7 @@ public class AllAction implements AJAXActionService {
 				for (int i = 0, size = manifests.length(); i < size; i++) {
 					JSONObject definition = manifests.getJSONObject(i);
 					if (isSigninPlugin(definition)) {
-						result.put(new JSONObject(definition.toString()));
+						result.put(new JSONObject(definition));
 					}
 				}
 
