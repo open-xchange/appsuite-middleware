@@ -66,7 +66,6 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -191,13 +190,15 @@ public class AJAXRequestDataTools {
                     final char c = (char) read;
                     reader.unread(c);
                     if ('[' == c || '{' == c) {
-                        retval.setData(JSONObject.parse(reader));
+                        try {
+                            retval.setData(JSONObject.parse(reader));
+                        } catch (JSONException e) {
+                            retval.setData(AJAXServlet.readFrom(reader));
+                        }
                     } else {
                         retval.setData(AJAXServlet.readFrom(reader));
                     }
                 }
-            } catch (final JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             } finally {
                 Streams.close(reader);
             }
