@@ -97,11 +97,13 @@ public class ApplicationResultConverter implements ResultConverter {
     }
 
     private void convertInstall(AJAXRequestResult result) {
-        JSONArray json = new JSONArray();
+        final JSONArray json;
         if (Boolean.class.isInstance(result.getResultObject())) {
+            json = new JSONArray(1);
             json.put(result.getResultObject());
         } else {
             Collection<Boolean> values = (Collection<Boolean>) result.getResultObject();
+            json = new JSONArray(values.size());
             for (Boolean value : values) {
                 json.put(value);
             }
@@ -111,12 +113,14 @@ public class ApplicationResultConverter implements ResultConverter {
     }
 
     private void convertInstalled(AJAXRequestResult result) {
-        JSONArray appJson = new JSONArray();
+        final JSONArray appJson;
         if (Application.class.isInstance(result.getResultObject())) {
             Application app = (Application) result.getResultObject();
+            appJson = new JSONArray(1);
             appJson.put(app.getName());
         } else {
             Collection<Application> apps = (Collection<Application>) result.getResultObject();
+            appJson = new JSONArray(apps.size());
             for (Application app : apps) {
                 appJson.put(app.getName());
             }
@@ -126,20 +130,22 @@ public class ApplicationResultConverter implements ResultConverter {
     }
 
     private void convertGet(AJAXRequestResult result) throws OXException {
-        JSONArray appJson = new JSONArray();
+        final JSONArray appJson;
 
         if (Application.class.isInstance(result.getResultObject())) {
-            Application app = (Application) result.getResultObject();
+            final Application app = (Application) result.getResultObject();
             try {
                 JSONObject jsonCont = new JSONObject(app.getDescription());
                 jsonCont.put("path", app.getRelativePath());
+                appJson = new JSONArray(1);
                 appJson.put(jsonCont);
             } catch (JSONException e) {
                 throw AppException.jsonError();
             }
         } else {
-            Collection<Application> apps = (Collection<Application>) result.getResultObject();
-            for (Application app : apps) {
+            final Collection<Application> apps = (Collection<Application>) result.getResultObject();
+            appJson = new JSONArray(apps.size());
+            for (final Application app : apps) {
                 try {
                     JSONObject jsonCont = new JSONObject(app.getDescription());
                     jsonCont.put("path", app.getRelativePath());
