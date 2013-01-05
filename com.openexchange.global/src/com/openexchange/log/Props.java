@@ -52,6 +52,7 @@ package com.openexchange.log;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
+import com.openexchange.log.LogProperties.Name;
 
 /**
  * {@link Props} - The log properties associated with a certain {@link Thread thread}.
@@ -121,6 +122,20 @@ public final class Props {
      * @param value The property value
      * @return <code>true</code> if there was already a mapping for specified property name (that is now overwritten); otherwise <code>false</code>
      */
+    public <V> boolean put(final Name name, final V value) {
+        if (null == name) {
+            return false;
+        }
+        return put(name.getName(), value);
+    }
+
+    /**
+     * Puts specified mapping. Any existing mapping is overwritten.
+     * 
+     * @param name The property name
+     * @param value The property value
+     * @return <code>true</code> if there was already a mapping for specified property name (that is now overwritten); otherwise <code>false</code>
+     */
     public <V> boolean put(final String name, final V value) {
         if (null == name) {
             return false;
@@ -129,6 +144,15 @@ public final class Props {
             return (null != map.remove(name));
         }
         return (null != map.put(name, value));
+    }
+
+    /**
+     * Removes the property associated with given name.
+     * 
+     * @param name The property name
+     */
+    public void remove(final Name name) {
+        map.remove(name.getName());
     }
 
     /**

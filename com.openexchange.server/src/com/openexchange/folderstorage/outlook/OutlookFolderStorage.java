@@ -1589,18 +1589,18 @@ public final class OutlookFolderStorage implements FolderStorage {
                                         final FileStorageAccountAccess accountAccess = getFSAccountAccess(storageParameters, userAccount);
                                         accountAccess.connect();
                                         try {
-                                            props.put("com.openexchange.file.storage.accountId", userAccount.getId());
-                                            props.put("com.openexchange.file.storage.configuration", userAccount.getConfiguration().toString());
-                                            props.put("com.openexchange.file.storage.serviceId", fsService.getId());
+                                            props.put(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID, userAccount.getId());
+                                            props.put(LogProperties.Name.FILE_STORAGE_CONFIGURATION, userAccount.getConfiguration().toString());
+                                            props.put(LogProperties.Name.FILE_STORAGE_SERVICE_ID, fsService.getId());
                                             final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
                                             if (null != rootFolder) {
                                                 fsAccounts.add(userAccount);
                                             }
                                         } finally {
                                             accountAccess.close();
-                                            props.remove("com.openexchange.file.storage.accountId");
-                                            props.remove("com.openexchange.file.storage.configuration");
-                                            props.remove("com.openexchange.file.storage.serviceId");
+                                            props.remove(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID);
+                                            props.remove(LogProperties.Name.FILE_STORAGE_CONFIGURATION);
+                                            props.remove(LogProperties.Name.FILE_STORAGE_SERVICE_ID);
                                         }
                                     }
                                 }

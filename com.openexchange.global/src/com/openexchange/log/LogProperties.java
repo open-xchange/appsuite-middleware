@@ -68,6 +68,151 @@ import com.openexchange.java.StringAllocator;
 public final class LogProperties {
 
     /**
+     * Enumeration of log properties' names.
+     */
+    public static enum Name {
+        /**
+         * com.openexchange.ajax.requestNumber
+         */
+        AJAX_REQUEST_NUMBER("com.openexchange.ajax.requestNumber"),
+        /**
+         * com.openexchange.ajax.action
+         */
+        AJAX_ACTION("com.openexchange.ajax.action"),
+        /**
+         * com.openexchange.ajpv13.requestURI
+         */
+        AJP_REQUEST_URI("com.openexchange.ajpv13.requestURI"),
+        /**
+         * com.openexchange.ajpv13.servletPath
+         */
+        AJP_SERVLET_PATH("com.openexchange.ajpv13.servletPath"),
+        /**
+         * com.openexchange.ajpv13.pathInfo
+         */
+        AJP_PATH_INFO("com.openexchange.ajpv13.pathInfo"),
+        /**
+         * com.openexchange.ajpv13.requestIp
+         */
+        AJP_REQUEST_IP("com.openexchange.ajpv13.requestIp"),
+        /**
+         * com.openexchange.ajpv13.serverName
+         */
+        AJP_SERVER_NAME("com.openexchange.ajpv13.serverName"),
+        /**
+         * com.openexchange.ajpv13.threadName
+         */
+        AJP_THREAD_NAME("com.openexchange.ajpv13.threadName"),
+        /**
+         * com.openexchange.ajpv13.remotePort
+         */
+        AJP_REMOTE_PORT("com.openexchange.ajpv13.remotePort"),
+        /**
+         * com.openexchange.ajpv13.remoteAddres
+         */
+        AJP_REMOTE_ADDRESS("com.openexchange.ajpv13.remoteAddress"),
+        /**
+         * com.openexchange.session.sessionId
+         */
+        SESSION_SESSION_ID("com.openexchange.session.sessionId"),
+        /**
+         * com.openexchange.session.userId
+         */
+        SESSION_USER_ID("com.openexchange.session.userId"),
+        /**
+         * com.openexchange.session.contextId
+         */
+        SESSION_CONTEXT_ID("com.openexchange.session.contextId"),
+        /**
+         * com.openexchange.session.clientId
+         */
+        SESSION_CLIENT_ID("com.openexchange.session.clientId"),
+        /**
+         * com.openexchange.session.session
+         */
+        SESSION_SESSION("com.openexchange.session.session"),
+        /**
+         * com.openexchange.grizzly.requestURI
+         */
+        GRIZZLY_REQUEST_URI("com.openexchange.grizzly.requestURI"),
+        /**
+         * com.openexchange.grizzly.servletPath
+         */
+        GRIZZLY_SERVLET_PATH("com.openexchange.grizzly.servletPath"),
+        /**
+         * com.openexchange.grizzly.pathInfo
+         */
+        GRIZZLY_PATH_INFO("com.openexchange.grizzly.pathInfo"),
+        /**
+         * com.openexchange.grizzly.requestIp
+         */
+        GRIZZLY_REQUEST_IP("com.openexchange.grizzly.requestIp"),
+        /**
+         * com.openexchange.grizzly.serverName
+         */
+        GRIZZLY_SERVER_NAME("com.openexchange.grizzly.serverName"),
+        /**
+         * com.openexchange.grizzly.threadName
+         */
+        GRIZZLY_THREAD_NAME("com.openexchange.grizzly.threadName"),
+        /**
+         * com.openexchange.grizzly.remotePort
+         */
+        GRIZZLY_REMOTE_PORT("com.openexchange.grizzly.remotePort"),
+        /**
+         * com.openexchange.grizzly.remoteAddres
+         */
+        GRIZZLY_REMOTE_ADDRESS("com.openexchange.grizzly.remoteAddress"),
+        /**
+         * javax.servlet.servletPath
+         */
+        SERVLET_SERVLET_PATH("javax.servlet.servletPath"),
+        /**
+         * javax.servlet.pathInfo
+         */
+        SERVLET_PATH_INFO("javax.servlet.pathInfo"),
+        /**
+         * javax.servlet.queryString
+         */
+        SERVLET_QUERY_STRING("javax.servlet.queryString"),
+        /**
+         * com.openexchange.file.storage.accountId
+         */
+        FILE_STORAGE_ACCOUNT_ID("com.openexchange.file.storage.accountId"),
+        /**
+         * com.openexchange.file.storage.configuration
+         */
+        FILE_STORAGE_CONFIGURATION("com.openexchange.file.storage.configuration"),
+        /**
+         * com.openexchange.file.storage.serviceId
+         */
+        FILE_STORAGE_SERVICE_ID("com.openexchange.file.storage.serviceId"),
+        
+        
+        ;
+        
+        /*
+         * "com.openexchange.file.storage.accountId", userAccount.getId());
+                                            props.put("com.openexchange.file.storage.configuration", userAccount.getConfiguration().toString());
+                                            props.put("com.openexchange.file.storage.serviceId"
+         */
+
+        private final String name;
+        private Name(final String name) {
+            this.name = name;
+        }
+
+        /**
+         * Gets the name
+         * 
+         * @return The name
+         */
+        public String getName() {
+            return name;
+        }
+    }
+
+    /**
      * Initializes a new {@link LogProperties}.
      */
     private LogProperties() {
