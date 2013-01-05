@@ -376,6 +376,17 @@ public final class LogProperties {
      * @param value The property value
      * @see #isEnabled()
      */
+    public static void putLogProperty(final LogProperties.Name name, final Object value) {
+        putLogProperty(name.getName(), value);
+    }
+
+    /**
+     * Puts specified log property. A <code>null</code> value removes the property.
+     *
+     * @param name The property name
+     * @param value The property value
+     * @see #isEnabled()
+     */
     public static void putLogProperty(final String name, final Object value) {
         if (null == value) {
             getLogProperties().remove(name);
