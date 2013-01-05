@@ -97,12 +97,12 @@ public class ThreadLocalSessionHolder implements SessionHolderExtended {
         session.set(serverSession);
         if (LogProperties.isEnabled() && serverSession != null) {
             final Props properties = LogProperties.getLogProperties();
-            properties.put("com.openexchange.session.sessionId", serverSession.getSessionID());
-            properties.put("com.openexchange.session.userId", Integer.valueOf(serverSession.getUserId()));
-            properties.put("com.openexchange.session.contextId", Integer.valueOf(serverSession.getContextId()));
+            properties.put(LogProperties.Name.SESSION_SESSION_ID, serverSession.getSessionID());
+            properties.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(serverSession.getUserId()));
+            properties.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(serverSession.getContextId()));
             final String client = serverSession.getClient();
-            properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
-            properties.put("com.openexchange.session.session", serverSession);
+            properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : client);
+            properties.put(LogProperties.Name.SESSION_SESSION, serverSession);
         }
     }
 
