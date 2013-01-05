@@ -187,14 +187,40 @@ public final class LogProperties {
          * com.openexchange.file.storage.serviceId
          */
         FILE_STORAGE_SERVICE_ID("com.openexchange.file.storage.serviceId"),
-        
+        /**
+         * com.openexchange.mail.host
+         */
+        MAIL_HOST("com.openexchange.mail.host"),
+        /**
+         * com.openexchange.mail.fullName
+         */
+        MAIL_FULL_NAME("com.openexchange.mail.fullName"),
+        /**
+         * com.openexchange.mail.mailId
+         */
+        MAIL_MAIL_ID("com.openexchange.mail.mailId"),
+        /**
+         * com.openexchange.mail.accountId
+         */
+        MAIL_ACCOUNT_ID("com.openexchange.mail.accountId"),
+        /**
+         * com.openexchange.mail.login
+         */
+        MAIL_LOGIN("com.openexchange.mail.login"),
         
         ;
         
         /*
-         * "com.openexchange.file.storage.accountId", userAccount.getId());
-                                            props.put("com.openexchange.file.storage.configuration", userAccount.getConfiguration().toString());
-                                            props.put("com.openexchange.file.storage.serviceId"
+         * "com.openexchange.mail.login";
+
+
+    public static final String LOG_PROPERTY_HOST = "com.openexchange.mail.host";
+
+    public static final String LOG_PROPERTY_FULL_NAME = "com.openexchange.mail.fullName";
+
+    public static final String LOG_PROPERTY_MAIL_ID = "com.openexchange.mail.mailId";
+
+    public static final String LOG_PROPERTY_ACCOUNT_ID = "com.openexchange.mail.accountId";
          */
 
         private final String name;
