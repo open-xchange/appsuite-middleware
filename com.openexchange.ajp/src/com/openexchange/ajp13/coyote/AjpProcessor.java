@@ -715,9 +715,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  * Gather logging info
                  */
                 final Props properties = LogProperties.getLogProperties();
-                properties.put("com.openexchange.ajp13.threadName", thread.getName());
-                properties.put("com.openexchange.ajp13.remotePort", Integer.valueOf(socket.getPort()));
-                properties.put("com.openexchange.ajp13.remoteAddress", socket.getInetAddress().getHostAddress());
+                properties.put(LogProperties.Name.AJP_THREAD_NAME, thread.getName());
+                properties.put(LogProperties.Name.AJP_REMOTE_PORT, Integer.valueOf(socket.getPort()));
+                properties.put(LogProperties.Name.AJP_REMOTE_ADDRESS, socket.getInetAddress().getHostAddress());
             }
             final boolean debug = LOG.isDebugEnabled();
             try {
@@ -1497,16 +1497,16 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         {
             final Props properties = LogProperties.getLogProperties();
             if (LogProperties.isEnabled()) {
-                properties.put("com.openexchange.ajp13.requestURI", request.getRequestURI());
-                properties.put("com.openexchange.ajp13.servletPath", request.getServletPath());
-                properties.put("com.openexchange.ajp13.pathInfo", request.getPathInfo());
+                properties.put(LogProperties.Name.AJP_REQUEST_URI, request.getRequestURI());
+                properties.put(LogProperties.Name.AJP_SERVLET_PATH, request.getServletPath());
+                properties.put(LogProperties.Name.AJP_PATH_INFO, request.getPathInfo());
                 final String action = request.getParameter("action");
                 if (null != action) {
-                    properties.put("com.openexchange.ajax.action", action);
+                    properties.put(LogProperties.Name.AJAX_ACTION, action);
                 }
             }
-            properties.put("com.openexchange.ajp13.requestIp", request.getRemoteAddr());
-            properties.put("com.openexchange.ajp13.serverName", serverName);
+            properties.put(LogProperties.Name.AJP_REQUEST_IP, request.getRemoteAddr());
+            properties.put(LogProperties.Name.AJP_SERVER_NAME, serverName);
         }
         /*
          * Set proper JSESSIONID cookie and pre-create associated HTTP session
