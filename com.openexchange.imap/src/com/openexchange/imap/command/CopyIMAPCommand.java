@@ -53,6 +53,7 @@ import static com.openexchange.imap.IMAPCommandsCollection.prepareStringArgument
 import java.util.Arrays;
 import java.util.Locale;
 import javax.mail.MessagingException;
+import com.openexchange.java.Strings;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -249,7 +250,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
         /*
          * Split by ATOMs
          */
-        final String[] sa = resp.substring(pos).split("\\s+");
+        final String[] sa = Strings.splitByWhitespaces(resp.substring(pos));
         if (sa.length >= 3) {
             /*-
              * Array contains atoms like:
