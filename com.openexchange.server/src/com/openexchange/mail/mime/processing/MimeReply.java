@@ -844,7 +844,7 @@ public final class MimeReply {
      * ---------------------------------------- Stuff to cite plain text ----------------------------------------
      */
 
-    private static final Pattern PATTERN_TEXT_CITE = Pattern.compile("(?m)^");
+    private static final Pattern PATTERN_TEXT_CITE = Pattern.compile("^", Pattern.MULTILINE);
 
     private static String citeText(final String textContent) {
         return PATTERN_TEXT_CITE.matcher(textContent).replaceAll("> ");
