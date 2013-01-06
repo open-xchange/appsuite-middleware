@@ -126,7 +126,10 @@ public final class Props {
         if (null == name) {
             return false;
         }
-        return put(name.getName(), value);
+        if (null == value) {
+            return (null != map.remove(name.getName()));
+        }
+        return (null != map.put(name.getName(), value));
     }
 
     /**
@@ -152,7 +155,9 @@ public final class Props {
      * @param name The property name
      */
     public void remove(final Name name) {
-        map.remove(name.getName());
+        if (null != name) {
+            map.remove(name.getName());
+        }
     }
 
     /**
@@ -161,7 +166,9 @@ public final class Props {
      * @param name The property name
      */
     public void remove(final String name) {
-        map.remove(name);
+        if (null != name) {
+            map.remove(name);
+        }
     }
 
 	/**
