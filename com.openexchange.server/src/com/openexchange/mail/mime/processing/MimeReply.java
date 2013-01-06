@@ -661,9 +661,9 @@ public final class MimeReply {
                  */
                 final String replyTextBody;
                 if (isHtml) {
-                    replyTextBody = quoteHtml(textBuilder.toString());
+                    replyTextBody = citeHtml(textBuilder.toString());
                 } else {
-                    replyTextBody = quoteText(textBuilder.toString());
+                    replyTextBody = citeText(textBuilder.toString());
                 }
                 textBuilder.setLength(0);
                 if (isHtml) {
@@ -680,11 +680,11 @@ public final class MimeReply {
                 final String replyTextBody;
                 if (isHtml) {
                     textBuilder.insert(getBodyTagEndPos(textBuilder), replyPrefix);
-                    replyTextBody = quoteHtml(textBuilder.toString());
+                    replyTextBody = citeHtml(textBuilder.toString());
                 } else {
                     textBuilder.insert(0, replyPrefix);
                     textBuilder.insert(replyPrefix.length(), '\n');
-                    replyTextBody = quoteText(textBuilder.toString());
+                    replyTextBody = citeText(textBuilder.toString());
                 }
                 textBuilder.setLength(0);
                 textBuilder.append(replyTextBody);
@@ -840,11 +840,19 @@ public final class MimeReply {
         return found;
     }
 
-    private static final Pattern PATTERN_TEXT_QUOTE = Pattern.compile("(?m)^");
+    /*-
+     * ---------------------------------------- Stuff to cite plain text ----------------------------------------
+     */
 
-    private static String quoteText(final String textContent) {
-        return PATTERN_TEXT_QUOTE.matcher(textContent).replaceAll("> ");
+    private static final Pattern PATTERN_TEXT_CITE = Pattern.compile("(?m)^");
+
+    private static String citeText(final String textContent) {
+        return PATTERN_TEXT_CITE.matcher(textContent).replaceAll("> ");
     }
+
+    /*-
+     * ---------------------------------------- Stuff to cite HTML text ----------------------------------------
+     */
 
     private static final Pattern PATTERN_HTML_START = Pattern.compile("<html[^>]*?>", Pattern.CASE_INSENSITIVE);
 
@@ -855,7 +863,7 @@ public final class MimeReply {
 
     private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
 
-    private static String quoteHtml(final String htmlContent) {
+    private static String citeHtml(final String htmlContent) {
         Matcher m = PATTERN_HTML_START.matcher(htmlContent);
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
         final StringBuilder sb = new StringBuilder(htmlContent.length());
