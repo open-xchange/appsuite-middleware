@@ -304,7 +304,7 @@ public final class LogProperties {
         if (props == null) {
         	return null;
         }
-        return props.copy();
+        return props;
     }
 
     /**
@@ -322,7 +322,7 @@ public final class LogProperties {
         if (props == null) {
             return null;
         }
-        return props.copy();
+        return props;
     }
 
     /**
