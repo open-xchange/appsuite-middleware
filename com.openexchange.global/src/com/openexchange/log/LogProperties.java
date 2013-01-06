@@ -172,6 +172,10 @@ public final class LogProperties {
          */
         GRIZZLY_REMOTE_ADDRESS("com.openexchange.grizzly.remoteAddress"),
         /**
+         * com.openexchange.http.grizzly.session
+         */
+        GRIZZLY_HTTP_SESSION("com.openexchange.http.grizzly.session"),
+        /**
          * javax.servlet.servletPath
          */
         SERVLET_SERVLET_PATH("javax.servlet.servletPath"),
