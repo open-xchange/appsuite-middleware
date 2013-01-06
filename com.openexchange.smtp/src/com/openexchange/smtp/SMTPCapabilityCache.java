@@ -65,6 +65,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import com.openexchange.java.Strings;
 import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
@@ -309,7 +310,7 @@ public final class SMTPCapabilityCache {
         public Capabilities(final String sCapabilities) {
             super();
             final Map<String, String> capabilities = new HashMap<String, String>(8);
-            final String[] strings = sCapabilities.split("\r?\n");
+            final String[] strings = Strings.splitByCRLF(sCapabilities);
             for (String cap : strings) {
                 if (cap.startsWith("250")) {
                     cap = cap.substring(4); // Swallow "250-" or "250 "

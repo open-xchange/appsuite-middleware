@@ -62,6 +62,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogPropertyName;
@@ -203,7 +204,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
         if (null == property) {
             LogProperties.configuredProperties(Collections.<LogPropertyName> emptyList());
         } else {
-            final List<String> list = Arrays.asList(property.split(" *, *"));
+            final List<String> list = Arrays.asList(Strings.splitByComma(property));
             final List<LogPropertyName> names = new ArrayList<LogPropertyName>(list.size());
             for (final String configuredName : list) {
                 if (!isEmpty(configuredName)) {

@@ -55,6 +55,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 
@@ -351,7 +352,7 @@ public class PushRequest {
     }
 
     private int[] convertString2UserIDArray(final String s) throws OXException {
-        final String tmp[] = s.split(",");
+        final String tmp[] = Strings.splitByComma(s);
         final int i[] = new int[tmp.length];
         try {
             for (int a = 0; a < i.length; a++) {

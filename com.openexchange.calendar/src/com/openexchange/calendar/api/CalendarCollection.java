@@ -116,6 +116,7 @@ import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.DBPool;
@@ -2428,7 +2429,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         } else if (s.length() == 0) {
             return new Date[0];
         }
-        final String[] sa = s.split(" *, *");
+        final String[] sa = Strings.splitByComma(s);
         final Date dates[] = new Date[sa.length];
         for (int i = 0; i < dates.length; i++) {
             dates[i] = new Date(Long.parseLong(sa[i]));

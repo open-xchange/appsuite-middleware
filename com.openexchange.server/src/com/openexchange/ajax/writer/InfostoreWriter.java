@@ -54,6 +54,7 @@ package com.openexchange.ajax.writer;
 import java.util.Date;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -233,7 +234,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 				}
 				return null;
 			}
-			final String[] categoriesArray = categoriesString.split("\\s*,\\s*");
+			final String[] categoriesArray = Strings.splitByComma(categoriesString);
 
 			try {
 				writer.array();
