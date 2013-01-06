@@ -199,6 +199,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
     }
 
     private void configureLogProperties() {
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
         final ConfigurationService service = getService(ConfigurationService.class);
         final String property = service.getProperty("com.openexchange.log.propertyNames");
         if (null == property) {
@@ -210,17 +211,27 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                 if (!isEmpty(configuredName)) {
                     final int pos = configuredName.indexOf('(');
                     if (pos < 0) {
-                        names.add(new LogPropertyName(configuredName, LogLevel.ALL));
+                        final LogProperties.Name name = LogProperties.Name.nameFor(configuredName);
+                        if (null == name) {
+                            log.warn("Unknown log property: " + configuredName);
+                        } else {
+                            names.add(new LogPropertyName(name, LogLevel.ALL));
+                        }
                     } else {
                         final String propertyName = configuredName.substring(0, pos);
                         if (!isEmpty(propertyName)) {
-                            final int closing = configuredName.indexOf(')', pos + 1);
-                            if (closing < 0) { // No closing parenthesis
-                                names.add(new LogPropertyName(propertyName, LogLevel.ALL));
+                            final LogProperties.Name name = LogProperties.Name.nameFor(propertyName);
+                            if (null == name) {
+                                log.warn("Unknown log property: " + configuredName);
                             } else {
-                                names.add(new LogPropertyName(
-                                    propertyName,
-                                    LogLevel.logLevelFor(configuredName.substring(pos + 1, closing))));
+                                final int closing = configuredName.indexOf(')', pos + 1);
+                                if (closing < 0) { // No closing parenthesis
+                                    names.add(new LogPropertyName(name, LogLevel.ALL));
+                                } else {
+                                    names.add(new LogPropertyName(
+                                        name,
+                                        LogLevel.logLevelFor(configuredName.substring(pos + 1, closing))));
+                                }
                             }
                         }
                     }

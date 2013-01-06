@@ -50,6 +50,7 @@
 package com.openexchange.log;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -239,6 +240,26 @@ public final class LogProperties {
         public String getName() {
             return name;
         }
+
+        private static final Map<String, Name> STRING2NAME;
+        static {
+            final Name[] values = Name.values();
+            final Map<String, Name> m = new HashMap<String, Name>(values.length);
+            for (final Name name : values) {
+                m.put(name.getName(), name);
+            }
+            STRING2NAME = m;
+        }
+
+        /**
+         * Gets the associated {@code Name} enum.
+         * 
+         * @param sName The name string
+         * @return The {@code Name} enum or <code>null</code>
+         */
+        public static Name nameFor(final String sName) {
+            return null == sName ? null : STRING2NAME.get(sName);
+        }
     }
 
     /**
@@ -337,7 +358,7 @@ public final class LogProperties {
         final Thread thread = Thread.currentThread();
         Props props = THREAD_LOCAL.get(thread);
         if (null == props) {
-            final Props newprops = new Props(new ConcurrentHashMap<String, Object>(16));
+            final Props newprops = new Props();
             props = THREAD_LOCAL.putIfAbsent(thread, newprops);
             if (null == props) {
                 props = newprops;
@@ -357,7 +378,7 @@ public final class LogProperties {
         if (null == props) {
             return;
         }
-        THREAD_LOCAL.put(other, new Props(new ConcurrentHashMap<String, Object>(props.getMap())));
+        THREAD_LOCAL.put(other, new Props(props));
     }
 
     /**
@@ -366,10 +387,10 @@ public final class LogProperties {
      * @param name The property name
      * @return The log property or <code>null</code> if absent
      */
-    public static <V> V getLogProperty(final String name) {
+    public static <V> V getLogProperty(final LogProperties.Name name) {
         final Thread thread = Thread.currentThread();
         final Props props = THREAD_LOCAL.get(thread);
-        return null == props ? null : props.<V> get(name);
+        return null == props ? null : props.<V>get(name);
     }
 
     /**
@@ -380,17 +401,6 @@ public final class LogProperties {
      * @see #isEnabled()
      */
     public static void putLogProperty(final LogProperties.Name name, final Object value) {
-        putLogProperty(name.getName(), value);
-    }
-
-    /**
-     * Puts specified log property. A <code>null</code> value removes the property.
-     *
-     * @param name The property name
-     * @param value The property value
-     * @see #isEnabled()
-     */
-    public static void putLogProperty(final String name, final Object value) {
         if (null == value) {
             getLogProperties().remove(name);
         } else {
@@ -414,14 +424,14 @@ public final class LogProperties {
         // If we have additional log properties from the ThreadLocal add it to the logBuilder
         if (logProperties != null) {
             StringAllocator logBuilder = new StringAllocator(1024);
-            Map<String, Object> propertyMap = logProperties.getMap();
+            Map<LogProperties.Name, Object> propertyMap = logProperties.getMap();
             // Sort the properties for readability
             Map<String, String> sorted = new TreeMap<String, String>();
-            for (Entry<String, Object> propertyEntry : propertyMap.entrySet()) {
-                String propertyName = propertyEntry.getKey();
+            for (Entry<LogProperties.Name, Object> propertyEntry : propertyMap.entrySet()) {
+                LogProperties.Name propertyName = propertyEntry.getKey();
                 Object value = propertyEntry.getValue();
                 if (null != value) {
-                    sorted.put(propertyName, value.toString());
+                    sorted.put(propertyName.getName(), value.toString());
                 }
             }
             // And add them to the logBuilder

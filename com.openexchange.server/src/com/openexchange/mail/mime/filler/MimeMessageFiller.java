@@ -340,7 +340,7 @@ public class MimeMessageFiller {
                 }
                 // Prefer request's remote address if local IP seems to denote local host
                 final Props logProperties = LogProperties.optLogProperties();
-                final String clientIp = null == logProperties ? null : logProperties.<String> get("com.openexchange.ajp13.requestIp");
+                final String clientIp = null == logProperties ? null : logProperties.<String> get(LogProperties.Name.AJP_REQUEST_IP);
                 mimeMessage.setHeader("X-Originating-IP", clientIp == null ? localIp : clientIp);
             } else {
                 mimeMessage.setHeader("X-Originating-IP", localIp);

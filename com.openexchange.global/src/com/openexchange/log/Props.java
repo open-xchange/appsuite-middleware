@@ -49,8 +49,11 @@
 
 package com.openexchange.log;
 
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogProperties.Name;
 
@@ -63,16 +66,24 @@ public final class Props {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(Props.class);
 
-    private final Map<String, Object> map;
+    private final EnumMap<LogProperties.Name, Object> map;
+
+    /**
+     * Initializes a new {@link Props}.
+     */
+    protected Props() {
+        super();
+        this.map = new EnumMap<LogProperties.Name, Object>(LogProperties.Name.class);
+    }
 
     /**
      * Initializes a new {@link Props}.
      * 
-     * @param map The backing map
+     * @param other The source properties
      */
-    protected Props(final Map<String, Object> map) {
+    protected Props(final Props other) {
         super();
-        this.map = map;
+        this.map = new EnumMap<LogProperties.Name, Object>(other.map);
     }
 
     @Override
@@ -85,8 +96,31 @@ public final class Props {
      * 
      * @return The backing map
      */
-    public Map<String, Object> getMap() {
+    public Map<LogProperties.Name, Object> getMap() {
         return map;
+    }
+
+    /**
+     * Gets the {@code Map} view on this {@code Props}
+     * 
+     * @return The map
+     */
+    public Map<String, Object> asMap() {
+        return asMap(false);
+    }
+
+    /**
+     * Gets the {@code Map} view on this {@code Props}
+     * 
+     * @param sorted Whether returned map shall be sorted.
+     * @return The map
+     */
+    public Map<String, Object> asMap(final boolean sorted) {
+        final Map<String, Object> m = sorted ? new TreeMap<String, Object>() : new HashMap<String, Object>(map.size());
+        for (final Entry<Name, Object> entry : map.entrySet()) {
+            m.put(entry.getKey().getName(), entry.getValue());
+        }
+        return m;
     }
 
     /**
@@ -95,8 +129,22 @@ public final class Props {
      * @param name The property name
      * @return <code>true</code> if present; otherwise <code>false</code>
      */
-    public boolean contains(final String name) {
+    public boolean contains(final LogProperties.Name name) {
         return map.containsKey(name);
+    }
+
+    /**
+     * Gets the property associated with given name.
+     * 
+     * @param sName The property name
+     * @return The property value or <code>null</code> if absent
+     */
+    public <V> V get(final String sName) {
+        final LogProperties.Name name = LogProperties.Name.nameFor(sName);
+        if (null == name) {
+            return null;
+        }
+        return get(name);
     }
 
     /**
@@ -106,7 +154,7 @@ public final class Props {
      * @return The property value or <code>null</code> if absent
      */
     @SuppressWarnings("unchecked")
-    public <V> V get(final String name) {
+    public <V> V get(final LogProperties.Name name) {
         try {
             return (V) map.get(name);
         } catch (final ClassCastException e) {
@@ -127,23 +175,6 @@ public final class Props {
             return false;
         }
         if (null == value) {
-            return (null != map.remove(name.getName()));
-        }
-        return (null != map.put(name.getName(), value));
-    }
-
-    /**
-     * Puts specified mapping. Any existing mapping is overwritten.
-     * 
-     * @param name The property name
-     * @param value The property value
-     * @return <code>true</code> if there was already a mapping for specified property name (that is now overwritten); otherwise <code>false</code>
-     */
-    public <V> boolean put(final String name, final V value) {
-        if (null == name) {
-            return false;
-        }
-        if (null == value) {
             return (null != map.remove(name));
         }
         return (null != map.put(name, value));
@@ -160,24 +191,13 @@ public final class Props {
         }
     }
 
-    /**
-     * Removes the property associated with given name.
-     * 
-     * @param name The property name
-     */
-    public void remove(final String name) {
-        if (null != name) {
-            map.remove(name);
-        }
-    }
-
 	/**
 	 * Creates a shallow copy of this log properties.
 	 * 
 	 * @return The shallow copy
 	 */
 	public Props copy() {
-		return new Props(new ConcurrentHashMap<String, Object>(map));
+		return new Props(this);
 	}
 
 }

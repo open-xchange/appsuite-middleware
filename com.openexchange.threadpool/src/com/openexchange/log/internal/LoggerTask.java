@@ -57,6 +57,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogPropertyName;
 import com.openexchange.log.Loggable;
 import com.openexchange.threadpool.AbstractTask;
@@ -107,7 +108,7 @@ final class LoggerTask extends AbstractTask<Object> {
         }
 
         @Override
-        public Map<String, Object> properties() {
+        public Map<LogProperties.Name, Object> properties() {
             return Collections.emptyMap();
         }
     };

@@ -812,11 +812,11 @@ public class Login extends AJAXServlet {
             if (LogProperties.isEnabled()) {
                 final Props properties = LogProperties.optLogProperties();
                 if (null != properties) {
-                    properties.remove("com.openexchange.session.sessionId");
-                    properties.remove("com.openexchange.session.userId");
-                    properties.remove("com.openexchange.session.contextId");
-                    properties.remove("com.openexchange.session.clientId");
-                    properties.remove("com.openexchange.session.session");
+                    properties.remove(LogProperties.Name.SESSION_SESSION_ID);
+                    properties.remove(LogProperties.Name.SESSION_USER_ID);
+                    properties.remove(LogProperties.Name.SESSION_CONTEXT_ID);
+                    properties.remove(LogProperties.Name.SESSION_CLIENT_ID);
+                    properties.remove(LogProperties.Name.SESSION_SESSION);
                 }
             }
         }
@@ -930,7 +930,7 @@ public class Login extends AJAXServlet {
              */
             cookie.setMaxAge(conf.getCookieExpiry());
         }
-        final String domain = getDomainValue(null == serverName ? LogProperties.<String> getLogProperty("com.openexchange.ajp13.serverName") : serverName);
+        final String domain = getDomainValue(null == serverName ? LogProperties.<String> getLogProperty(LogProperties.Name.AJP_SERVER_NAME) : serverName);
         if (null != domain) {
             cookie.setDomain(domain);
         }

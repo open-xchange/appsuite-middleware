@@ -340,11 +340,11 @@ public abstract class SessionServlet extends AJAXServlet {
             if (LogProperties.isEnabled()) {
                 final Props properties = LogProperties.optLogProperties();
                 if (null != properties) {
-                    properties.remove("com.openexchange.session.sessionId");
-                    properties.remove("com.openexchange.session.userId");
-                    properties.remove("com.openexchange.session.contextId");
-                    properties.remove("com.openexchange.session.clientId");
-                    properties.remove("com.openexchange.session.session");
+                    properties.remove(LogProperties.Name.SESSION_SESSION_ID);
+                    properties.remove(LogProperties.Name.SESSION_USER_ID);
+                    properties.remove(LogProperties.Name.SESSION_CONTEXT_ID);
+                    properties.remove(LogProperties.Name.SESSION_CLIENT_ID);
+                    properties.remove(LogProperties.Name.SESSION_SESSION);
                 }
             }
             if (null != counter) {
@@ -425,11 +425,11 @@ public abstract class SessionServlet extends AJAXServlet {
             } finally {
                 if (LogProperties.isEnabled()) {
                     final Props properties = LogProperties.getLogProperties();
-                    properties.remove("com.openexchange.session.sessionId");
-                    properties.remove("com.openexchange.session.userId");
-                    properties.remove("com.openexchange.session.contextId");
-                    properties.remove("com.openexchange.session.clientId");
-                    properties.remove("com.openexchange.session.session");
+                    properties.remove(LogProperties.Name.SESSION_SESSION_ID);
+                    properties.remove(LogProperties.Name.SESSION_USER_ID);
+                    properties.remove(LogProperties.Name.SESSION_CONTEXT_ID);
+                    properties.remove(LogProperties.Name.SESSION_CLIENT_ID);
+                    properties.remove(LogProperties.Name.SESSION_SESSION);
                 }
             }
         }

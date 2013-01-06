@@ -2409,7 +2409,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         public MailFolderCallable(final FolderNameComparator comparator, final Locale locale, final User user, final int contextId, final int tree, final StorageParameters parameters) {
             super();
             final Props props = LogProperties.optLogProperties(Thread.currentThread());
-            this.props = null == props ? null : Collections.unmodifiableMap(props.getMap());
+            this.props = null == props ? null : Collections.unmodifiableMap(props.asMap());
             this.comparator = comparator;
             this.locale = locale == null ? Locale.US : locale;
             this.user = user;
@@ -2813,7 +2813,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         TrackableCallable() {
             super();
             final Props props = LogProperties.optLogProperties(Thread.currentThread());
-            this.props = null == props ? null : Collections.unmodifiableMap(props.getMap());
+            this.props = null == props ? null : Collections.unmodifiableMap(props.asMap());
         }
 
         @Override

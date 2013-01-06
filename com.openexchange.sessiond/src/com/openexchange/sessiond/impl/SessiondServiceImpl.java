@@ -211,7 +211,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     public Session getAnyActiveSessionForUser(final int userId, final int contextId) {
         final Props logProperties = LogProperties.optLogProperties();
         if (null != logProperties) {
-            final Session session = logProperties.get("com.openexchange.session.session");
+            final Session session = logProperties.get(LogProperties.Name.SESSION_SESSION);
             if (null != session && userId == session.getUserId() && contextId == session.getContextId()) {
                 return session;
             }
