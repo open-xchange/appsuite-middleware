@@ -176,7 +176,7 @@ public class WebdavPath implements Iterable<String>{
     }
 
     private String _escape(final String component) {
-        if(!component.contains("/") && !component.contains("\\")) {
+        if(component.indexOf('/') < 0 && component.indexOf('\\') < 0) {
             return component;
         }
         return component.replaceAll("\\\\","\\\\\\\\").replaceAll("/","\\\\/");

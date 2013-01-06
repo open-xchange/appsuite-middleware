@@ -89,8 +89,7 @@ public class EntityMap implements Map<String, EntityType>{
 
     @Override
     public EntityType get(Object key) {
-        boolean slash = key.toString().contains("/");
-        if(slash) {
+        if(key.toString().indexOf('/') >= 0) {
             return ID;
         }
         return FOLDER;

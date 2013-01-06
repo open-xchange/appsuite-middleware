@@ -107,7 +107,7 @@ public class CoreStoreCLI {
         
         try {
             String action = args[0];
-            if (action.contains("/")) {
+            if (action.indexOf('/') >= 0) {
                 action = action.substring(action.lastIndexOf('/') + 1);
             }
             

@@ -152,30 +152,28 @@ public class NetUtil {
     public final static boolean isValidNetmask(final String mask) {
         if (mask == null) {
             return false;
-        } else {
-            if( isValidDDN(mask) ) {
-                int []imask = stringDDN2Int(mask);
+        }
+        if( isValidDDN(mask) ) {
+            int []imask = stringDDN2Int(mask);
 
-                // do the real check:
-                // there must not follow a '1' after a '0' in a netmask
-                boolean foundZero=false;
-                for(int p=0; p<4; p++) {
-                    for(int bs=7; bs>=0; bs--) {
-                        final int bit = 1 << bs;
-                        final int erg = (imask[p] & bit);
-                        if( erg == 0) {
-                            foundZero = true;
-                        } else if( erg == bit && foundZero ) {
-                            return false;
-                        }
+            // do the real check:
+            // there must not follow a '1' after a '0' in a netmask
+            boolean foundZero=false;
+            for(int p=0; p<4; p++) {
+                for(int bs=7; bs>=0; bs--) {
+                    final int bit = 1 << bs;
+                    final int erg = (imask[p] & bit);
+                    if( erg == 0) {
+                        foundZero = true;
+                    } else if( erg == bit && foundZero ) {
+                        return false;
                     }
                 }
-
-                return true;
-            } else {
-                return false;
             }
+
+            return true;
         }
+        return false;
     }
 
     /**
@@ -187,9 +185,8 @@ public class NetUtil {
     public final static boolean isValidIPAddress(final String address) {
         if (address == null) {
             return false;
-        } else {
-            return isValidDDN(address);
         }
+        return isValidDDN(address);
     }
 
     /**
@@ -202,23 +199,23 @@ public class NetUtil {
     public final static boolean isValidIPNetmask(final String ipmask) {
         if (ipmask == null) {
             return false;
-        } else {
-            if (!ipmask.contains("/")) {
-                return false;
-            }
-            final String ip = ipmask.split("/")[0];
-            if (!isValidIPAddress(ip)) {
-                return false;
-            }
-            final String mask = ipmask.split("/")[1];
-            if (mask.contains(".")) {
-                return isValidNetmask(mask);
-            }
-            if (mask.replaceAll("[0-9]", "").length() > 0) {
-                return false;
-            }
-            return true;
         }
+        int pos;
+        if ((pos = ipmask.indexOf('/')) < 0) {
+            return false;
+        }
+        final String ip = ipmask.substring(0, pos);
+        if (!isValidIPAddress(ip)) {
+            return false;
+        }
+        final String mask = pos < ipmask.length()-1 ? ipmask.substring(pos + 1) : "";
+        if (mask.indexOf('.') >= 0) {
+            return isValidNetmask(mask);
+        }
+        if (mask.replaceAll("[0-9]", "").length() > 0) {
+            return false;
+        }
+        return true;
     }
 
     /**
