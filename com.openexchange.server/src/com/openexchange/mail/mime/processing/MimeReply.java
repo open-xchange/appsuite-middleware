@@ -840,8 +840,10 @@ public final class MimeReply {
         return found;
     }
 
+    private static final Pattern PATTERN_TEXT_QUOTE = Pattern.compile("(?m)^");
+
     private static String quoteText(final String textContent) {
-        return textContent.replaceAll("(?m)^", "> ");
+        return PATTERN_TEXT_QUOTE.matcher(textContent).replaceAll("> ");
     }
 
     private static final Pattern PATTERN_HTML_START = Pattern.compile("<html[^>]*?>", Pattern.CASE_INSENSITIVE);
