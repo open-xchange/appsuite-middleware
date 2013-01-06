@@ -904,17 +904,11 @@ public final class MimeReply {
     private static final class ParameterContainer {
 
         final ContentType retvalContentType;
-
         final StringBuilder textBuilder;
-
         final StringHelper strHelper;
-
         final UserSettingMail usm;
-
         final javax.mail.Session mailSession;
-
         final LocaleAndTimeZone ltz;
-
         final List<String> replyTexts;
 
         ParameterContainer(final ContentType retvalContentType, final StringBuilder textBuilder, final StringHelper strHelper, final UserSettingMail usm, final javax.mail.Session mailSession, final LocaleAndTimeZone ltz, final List<String> replyTexts) {
@@ -927,7 +921,6 @@ public final class MimeReply {
             this.ltz = ltz;
             this.replyTexts = replyTexts;
         }
-
     }
 
     private static boolean isEmpty(final String string) {
