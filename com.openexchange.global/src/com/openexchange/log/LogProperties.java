@@ -215,21 +215,12 @@ public final class LogProperties {
          * com.openexchange.mail.login
          */
         MAIL_LOGIN("com.openexchange.mail.login"),
+        /**
+         * com.openexchange.database.schema
+         */
+        DATABASE_SCHEMA("com.openexchange.database.schema"),
         
         ;
-        
-        /*
-         * "com.openexchange.mail.login";
-
-
-    public static final String LOG_PROPERTY_HOST = "com.openexchange.mail.host";
-
-    public static final String LOG_PROPERTY_FULL_NAME = "com.openexchange.mail.fullName";
-
-    public static final String LOG_PROPERTY_MAIL_ID = "com.openexchange.mail.mailId";
-
-    public static final String LOG_PROPERTY_ACCOUNT_ID = "com.openexchange.mail.accountId";
-         */
 
         private final String name;
         private Name(final String name) {
