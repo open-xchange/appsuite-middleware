@@ -87,6 +87,7 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -187,7 +188,7 @@ public abstract class SessionServlet extends AJAXServlet {
                     // Serialize range parsing. This might happen more than once, but shouldn't matter, since the list
                     // is accessed exclusively, so it winds up correct.
                     RANGES.clear();
-                    final String[] lines = text.split("\n");
+                    final String[] lines = Strings.splitByCRLF(text);
                     for (String line : lines) {
                         line = line.replaceAll("\\s", "");
                         if (!line.equals("") && (line.length() == 0 || line.charAt(0) != '#')) {

@@ -64,6 +64,7 @@ import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -157,7 +158,7 @@ public class AllAction implements AJAXActionService {
 		}
 
 		for (String c : capDef) {
-			String[] split = c.split("\\s+");
+			String[] split = Strings.splitByWhitespaces(c);
 			String name = split[0];
 			boolean inverse = false;
 			if (name.charAt(0) == '!') {
@@ -181,13 +182,12 @@ public class AllAction implements AJAXActionService {
 			} else {
 				if (capability == null) {
 					return false;
-				} else {
-					if (needsBackend) {
-						if (!capability.isSupportedByBackend()) {
-							return false;
-						}
-					}
 				}
+                if (needsBackend) {
+                	if (!capability.isSupportedByBackend()) {
+                		return false;
+                	}
+                }
 			}
 
 		}

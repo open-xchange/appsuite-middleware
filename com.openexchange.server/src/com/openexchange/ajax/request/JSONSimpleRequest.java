@@ -52,46 +52,42 @@ package com.openexchange.ajax.request;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.java.Strings;
 
 public class JSONSimpleRequest implements SimpleRequest {
 
-	private final JSONObject jsonObject;
+    private final JSONObject jsonObject;
 
-	public JSONSimpleRequest(final JSONObject object) {
-		this.jsonObject = object;
-	}
+    public JSONSimpleRequest(final JSONObject object) {
+        this.jsonObject = object;
+    }
 
-	@Override
+    @Override
     public String getParameter(final String param) {
-		try {
-			return jsonObject.getString(param);
-		} catch (final JSONException e) {
-			return null;
-		}
-	}
+        try {
+            return jsonObject.getString(param);
+        } catch (final JSONException e) {
+            return null;
+        }
+    }
 
-	@Override
+    @Override
     public String[] getParameterValues(final String param) {
-		return getParameter(param).split("\\s*,\\s*");
-	}
+        return Strings.splitByComma(getParameter(param));
+    }
 
-	@Override
+    @Override
     public Object getBody() {
-		try {
-			return jsonObject.get(ResponseFields.DATA);
-		} catch (final JSONException e) {
-			return null;
-		}
-	}
+        try {
+            return jsonObject.get(ResponseFields.DATA);
+        } catch (final JSONException e) {
+            return null;
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return jsonObject.toString();
-	}
+    @Override
+    public String toString() {
+        return jsonObject.toString();
+    }
 
 }

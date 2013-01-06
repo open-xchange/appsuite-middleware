@@ -73,7 +73,6 @@ public class Strings {
     }
 
     private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
-
     /**
      * Splits given string by comma separator.
      * 
@@ -88,7 +87,6 @@ public class Strings {
     }
 
     private static final Pattern P_SPLIT_CRLF = Pattern.compile("\r?\n");
-
     /**
      * Splits given string by CR?LF; yields line-wise output.
      * 
@@ -100,6 +98,20 @@ public class Strings {
             return null;
         }
         return P_SPLIT_CRLF.split(s, 0);
+    }
+
+    private static final Pattern P_SPLIT_WHITESPACE = Pattern.compile("\\s+");
+    /**
+     * Splits given string by whitespaces.
+     * 
+     * @param s The string to split
+     * @return The splitted string
+     */
+    public static String[] splitByWhitespaces(final String s) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_WHITESPACE.split(s, 0);
     }
 
     /**

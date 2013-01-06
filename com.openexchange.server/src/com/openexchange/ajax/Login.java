@@ -109,6 +109,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -692,7 +693,7 @@ public class Login extends AJAXServlet {
         final List<IPRange> ranges = new LinkedList<IPRange>();
         final String tmp = config.getInitParameter(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName());
         if (tmp != null) {
-            final String[] lines = tmp.split("\n");
+            final String[] lines = Strings.splitByCRLF(tmp);
             for (String line : lines) {
                 line = line.replaceAll("\\s", "");
                 if (!line.equals("") && (line.length() == 0 || line.charAt(0) != '#')) {
