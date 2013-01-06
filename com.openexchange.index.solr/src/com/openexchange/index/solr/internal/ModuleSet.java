@@ -51,6 +51,7 @@ package com.openexchange.index.solr.internal;
 
 import java.util.HashSet;
 import java.util.Set;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -69,7 +70,7 @@ public class ModuleSet {
     
     public ModuleSet(String moduleStr) {
         super();
-        String[] split = moduleStr.split("\\s*,\\s*");
+        String[] split = Strings.splitByComma(moduleStr);
         for (String s : split) {
             try {
                 modules.add(new Integer(s.trim()));
