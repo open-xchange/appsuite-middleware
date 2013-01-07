@@ -54,6 +54,7 @@ import net.fortuna.ical4j.model.component.VEvent;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 
@@ -84,6 +85,12 @@ public class Location extends AbstractVerifyingAttributeConverter<VEvent, Appoin
 
     @Override
     public void parse(final int index, final VEvent event, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
-        appointment.setLocation(event.getProperty("LOCATION").getValue());
+        int locMaxLength = 255; //hack for 20972
+        String location = event.getProperty("LOCATION").getValue();
+        if (location.length() > locMaxLength) {
+            location = location.substring(0, locMaxLength);
+            warnings.add(new ConversionWarning(index, ConversionWarning.Code.TRUNCATION_WARNING, location));
+        }
+        appointment.setLocation(location);
     }
 }

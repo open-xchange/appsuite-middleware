@@ -196,6 +196,11 @@ public class ConversionWarning extends OXException {
          * An error occurred: %1$s
          */
         UNEXPECTED_ERROR(ConversionWarningMessage.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 19),
+        
+        /**
+         * Element automatically truncated: %s
+         */
+        TRUNCATION_WARNING(ConversionWarningMessage.TRUNCATION_WARNING_MSG, Category.CATEGORY_ERROR, 20),
 
         ;
 
