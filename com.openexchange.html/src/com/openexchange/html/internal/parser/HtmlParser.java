@@ -57,6 +57,7 @@ import java.util.Map;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import com.openexchange.java.Strings;
 
 /**
  * {@link HtmlParser} - Parses a well-formed HTML document based on {@link XmlPullParser}. The corresponding events are delegated to a given
@@ -254,7 +255,7 @@ public final class HtmlParser {
     }
 
     private static void dumpHtml(final String html, final StringBuilder sb) {
-        final String[] lines = html.split("\r?\n");
+        final String[] lines = Strings.splitByCRLF(html);
         final DecimalFormat df = new DecimalFormat("0000");
         int count = 1;
         for (final String line : lines) {

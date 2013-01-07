@@ -154,8 +154,9 @@ public class ConfigMenu extends SessionServlet {
                 retval = array;
             }
         } else {
-            final JSONObject json = new JSONObject();
-            for (final Setting subSetting : setting.getElements()) {
+            final Setting[] elements = setting.getElements();
+            final JSONObject json = new JSONObject(elements.length);
+            for (final Setting subSetting : elements) {
                 json.put(subSetting.getName(), convert2JS(subSetting));
             }
             retval = json;

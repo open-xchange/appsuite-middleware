@@ -109,7 +109,7 @@ public final class LoginTools {
             retval = retval.substring(0, questionMarkIndex);
         }
         // Now let's see, if this url already contains a fragment
-        if (!retval.contains("#")) {
+        if (retval.indexOf('#') < 0) {
             // Apparently it didn't, so we can append our own
             return retval + "#" + param + "=" + value + query;
         }

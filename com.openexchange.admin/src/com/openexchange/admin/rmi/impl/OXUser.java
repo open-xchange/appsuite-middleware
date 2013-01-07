@@ -1163,7 +1163,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         final String lang = newuser.getLanguage();
-        if (lang != null && !lang.contains("_")) {
+        if (lang != null && lang.indexOf('_') < 0) {
             throw new InvalidDataException("Language must contain an underscore, e.g. en_US.");
         }
 

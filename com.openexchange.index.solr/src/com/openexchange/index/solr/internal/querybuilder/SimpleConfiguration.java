@@ -59,7 +59,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Streams;
 
 /**
  * This class encapsulates a simple file-based dictionary for the field-mappings. The syntax for the mapping is <br>
@@ -73,51 +75,54 @@ import org.apache.commons.logging.Log;
  */
 public class SimpleConfiguration implements Configuration {
 
+    private static final Log log = com.openexchange.log.Log.loggerFor(SimpleConfiguration.class);
+
     private final Map<String, String> rawMapping;
-
     private final Map<String, List<String>> dictionary;
-
     private final Map<String, String> translators;
 
-    private static Log log = com.openexchange.log.Log.loggerFor(SimpleConfiguration.class);
-
     public SimpleConfiguration(String configPath) throws BuilderException {
+        super();
         dictionary = new HashMap<String, List<String>>();
         rawMapping = new HashMap<String, String>();
         translators = new HashMap<String, String>();
 
+        BufferedReader reader = null;
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(new File(configPath)));
+            reader = new BufferedReader(new FileReader(new File(configPath)));
+            final String translatorPrefix = Configuration.TRANSLATOR + ".";
+            final Pattern patternSplit = Pattern.compile("=");
             int lineCount = 0;
             while (reader.ready()) {
-                String line = reader.readLine();
-                lineCount++;
-                if (line.trim().startsWith("#")) {
-                    continue;
-                }
-                String[] parts = line.split("=");
-                if (parts.length != 2) {
-                    log.warn("[SimpleConfiguration]: Invalid line " + lineCount + ": " + line);
-                    continue;
-                }
-                rawMapping.put(parts[0].trim(), parts[1].trim());
-
-                if (parts[0].startsWith(Configuration.TRANSLATOR + ".")) {
-                    log.debug("[SimpleConfiguration]: Extracting translator ...");
-                    String handlerName = parts[0].substring(parts[0].indexOf('.') + 1).trim();
-                    log.debug("[SimpleConfiguration]: Handler is " + handlerName);
-                    log.debug("[SimpleConfiguration]: Translator is " + parts[1].trim());
-                    translators.put(handlerName, parts[1].trim());
-                    continue;
-                }
-                if (parts[1].contains("{")) {
-                    log.debug("[SimpleConfiguration]: found a compound field");
-                    dictionary.put(parts[0].trim(), this.assembleFieldList(parts[1].trim()));
-                } else {
-                    log.debug("[SimpleConfiguration]: found a simple field");
-                    List<String> val = new ArrayList<String>();
-                    val.add(parts[1].trim());
-                    dictionary.put(parts[0].trim(), val);
+                final String line = reader.readLine();
+                if (null != line) {
+                    lineCount++;
+                    if (isEmpty(line) || line.trim().charAt(0) == '#') {
+                        continue;
+                    }
+                    String[] parts = patternSplit.split(line, 0);
+                    if (parts.length != 2) {
+                        log.warn("[SimpleConfiguration]: Invalid line " + lineCount + ": " + line);
+                        continue;
+                    }
+                    rawMapping.put(parts[0].trim(), parts[1].trim());
+                    if (parts[0].startsWith(translatorPrefix)) {
+                        log.debug("[SimpleConfiguration]: Extracting translator ...");
+                        String handlerName = parts[0].substring(parts[0].indexOf('.') + 1).trim();
+                        log.debug("[SimpleConfiguration]: Handler is " + handlerName);
+                        log.debug("[SimpleConfiguration]: Translator is " + parts[1].trim());
+                        translators.put(handlerName, parts[1].trim());
+                        continue;
+                    }
+                    if (parts[1].indexOf('{') >= 0) {
+                        log.debug("[SimpleConfiguration]: found a compound field");
+                        dictionary.put(parts[0].trim(), this.assembleFieldList(parts[1].trim()));
+                    } else {
+                        log.debug("[SimpleConfiguration]: found a simple field");
+                        List<String> val = new ArrayList<String>();
+                        val.add(parts[1].trim());
+                        dictionary.put(parts[0].trim(), val);
+                    }
                 }
             }
         } catch (FileNotFoundException e) {
@@ -126,6 +131,8 @@ public class SimpleConfiguration implements Configuration {
         } catch (IOException e) {
             log.error("[SimpleConfiguration]: Error during instantiation: " + e.getMessage());
             throw new BuilderException(e);
+        } finally {
+            Streams.close(reader);
         }
     }
 
@@ -177,18 +184,34 @@ public class SimpleConfiguration implements Configuration {
 
     // -------------------------- private methods below ----------------------------------- //
 
-    private List<String> assembleFieldList(String input) {
-        List<String> fieldList = new ArrayList<String>();
+    private static final Pattern PATTERN_SPLIT_COMMA = Pattern.compile(" *, *");
 
+    private List<String> assembleFieldList(String input) {
         int prefixIdx = input.indexOf('{');
         String prefix = input.substring(0, prefixIdx).trim();
         String suffixes = input.substring(prefixIdx + 1, input.length() - 1);
-        String[] suffixArray = suffixes.split(",");
+        String[] suffixArray = PATTERN_SPLIT_COMMA.split(suffixes, 0);
 
+        List<String> fieldList = new ArrayList<String>(suffixArray.length);
         for (int i = 0; i < suffixArray.length; i++) {
             fieldList.add(prefix + "_" + suffixArray[i].trim());
         }
 
         return fieldList;
     }
+
+    // -------------------------- helper methods below ----------------------------------- //
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }

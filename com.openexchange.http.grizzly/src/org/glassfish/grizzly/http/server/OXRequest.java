@@ -155,7 +155,7 @@ public class OXRequest extends Request {
         response.addCookie(createSessionCookie(sessionId));
         if (LogProperties.isEnabled()) {
             Props logProperties = LogProperties.getLogProperties();
-            logProperties.put("com.openexchange.http.grizzly.session", sessionId);
+            logProperties.put(LogProperties.Name.GRIZZLY_HTTP_SESSION, sessionId);
         }
     }
 
@@ -311,8 +311,9 @@ public class OXRequest extends Request {
 
         if (len > 0) {
 
-            if (!checkPostContentType(getContentType()))
+            if (!checkPostContentType(getContentType())) {
                 return;
+            }
 
             try {
                 final Buffer formData = getPostBody(len);

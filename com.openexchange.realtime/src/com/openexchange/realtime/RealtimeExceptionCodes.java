@@ -66,7 +66,10 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
     /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
     NO_APPROPRIATE_CHANNEL(RealtimeExceptionMessages.NO_APPROPRIATE_CHANNEL, Category.EnumCategory.CONNECTIVITY, 2),
     /** The following needed service is missing: "%1$s" */
-    NEEDED_SERVICE_MISSING(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 3);
+    NEEDED_SERVICE_MISSING(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 3),
+    /** Unexpected error: %1$s */
+    UNEXPECTED_ERROR(RealtimeExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 4),
+    ;
 
     private int number;
 

@@ -58,6 +58,7 @@ import java.util.List;
 import org.osgi.framework.Constants;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -79,7 +80,7 @@ public class StaticClusterDiscoveryActivator extends HousekeepingActivator {
         if (isEmpty(snodes)) {
             nodes = Collections.emptyList();
         } else {
-            final String[] strings = snodes.split(" *, *");
+            final String[] strings = Strings.splitByComma(snodes);
             final List<InetAddress> list = new ArrayList<InetAddress>(strings.length);
             for (final String snode : strings) {
                 list.add(InetAddress.getByName(snode));

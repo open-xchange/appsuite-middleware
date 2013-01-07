@@ -37,10 +37,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %{__rm} -rf %{buildroot}
 
 %post
-. /opt/open-xchange/lib/oxfunctions.sh
+#. /opt/open-xchange/lib/oxfunctions.sh
 
 # prevent bash from expanding, see bug 13316
-GLOBIGNORE='*'
+#GLOBIGNORE='*'
 
 %files
 %defattr(-,root,root)
@@ -52,9 +52,10 @@ GLOBIGNORE='*'
 %config(noreplace) /opt/open-xchange/etc/*.properties
 %config(noreplace) /opt/open-xchange/etc/meta/*
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
-
+%dir /opt/open-xchange/lib/
 /opt/open-xchange/lib
-/opt/open-xchange/sbin
+%dir /opt/open-xchange/sbin/
+/opt/open-xchange/sbin/*
 
 %changelog
 * Fri Dec 21 2012 Karsten Will <karsten.will@open-xchange.com>

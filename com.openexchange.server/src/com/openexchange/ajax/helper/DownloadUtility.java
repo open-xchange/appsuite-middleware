@@ -55,7 +55,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
@@ -209,13 +208,13 @@ public final class DownloadUtility {
         if (overridingDisposition == null) {
             final String baseType = contentType.getBaseType();
             final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append("attachment");
-            appendFilenameParameter(fileName, baseType, userAgent, builder);
+            appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : baseType, userAgent, builder);
             return new CheckedDownload(baseType, builder.toString(), in);
         }
         if (overridingDisposition.indexOf(';') < 0) {
             final String baseType = contentType.getBaseType();
             final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append(overridingDisposition);
-            appendFilenameParameter(fileName, baseType, userAgent, builder);
+            appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : baseType, userAgent, builder);
             return new CheckedDownload(baseType, builder.toString(), in);
         }
 
@@ -249,8 +248,7 @@ public final class DownloadUtility {
             }
         }
         fn = escapeBackslashAndQuote(fn);
-        final BrowserDetector browserDetector = new BrowserDetector(userAgent);
-        if (null != userAgent && browserDetector.isMSIE()) {
+        if (null != userAgent && new BrowserDetector(userAgent).isMSIE()) {
             // InternetExplorer
             appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"');
             return;
@@ -304,8 +302,7 @@ public final class DownloadUtility {
             }
         }
         fn = escapeBackslashAndQuote(fn);
-        final BrowserDetector browserDetector = new BrowserDetector(userAgent);
-        if (null != userAgent && browserDetector.isMSIE()) {
+        if (null != userAgent && new BrowserDetector(userAgent).isMSIE()) {
             // InternetExplorer
             appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"');
             return;
@@ -348,7 +345,7 @@ public final class DownloadUtility {
             preparedFileName).append('"').toString(), inputStream);
     }
 
-    private static final Pattern P = Pattern.compile("^[\\w\\d\\:\\/\\.]+(\\.\\w{3,4})$");
+    // private static final Pattern P = Pattern.compile("^[\\w\\d\\:\\/\\.]+(\\.\\w{3,4})$");
     
     /**
      * Checks if specified file name has a trailing file extension.
@@ -357,11 +354,14 @@ public final class DownloadUtility {
      * @return The extension (e.g. <code>".txt"</code>) or <code>null</code>
      */
     private static String getFileExtension(final String fileName) {
-        if (null == fileName || fileName.indexOf('.') <= 0) {
+        if (null == fileName) {
             return null;
         }
-        final Matcher m = P.matcher(fileName);
-        return m.matches() ? m.group(1).toLowerCase(Locale.ENGLISH) : null;
+        final int pos = fileName.lastIndexOf('.');
+        if ((pos <= 0) || (pos >= fileName.length())) {
+            return null;
+        }
+        return fileName.substring(pos);
     }
 
     private static String addFileExtension(final String fileName, final String ext) {

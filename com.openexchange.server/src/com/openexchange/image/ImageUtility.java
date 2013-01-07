@@ -207,7 +207,7 @@ public final class ImageUtility {
                  */
                 prefix = "";
                 final Props properties = LogProperties.optLogProperties();
-                route = null == properties ? null : properties.<String> get("com.openexchange.ajp13.httpSession");
+                route = null == properties ? null : properties.<String> get(LogProperties.Name.AJP_HTTP_SESSION);
             } else {
                 /*
                  * Compose absolute URL if a relative one is not preferred

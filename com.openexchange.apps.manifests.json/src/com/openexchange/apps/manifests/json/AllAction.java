@@ -50,7 +50,6 @@
 package com.openexchange.apps.manifests.json;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +64,7 @@ import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -77,8 +77,8 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(noSession = true)
 public class AllAction implements AJAXActionService {
 
-	private JSONArray manifests;
-	private ServiceLookup services;
+	private final JSONArray manifests;
+	private final ServiceLookup services;
 
 	public AllAction(ServiceLookup services, JSONArray manifests) {
 		super();
@@ -110,7 +110,7 @@ public class AllAction implements AJAXActionService {
 				for (int i = 0, size = manifests.length(); i < size; i++) {
 					JSONObject definition = manifests.getJSONObject(i);
 					if (hasCapability(capMap, definition)) {
-						result.put(new JSONObject(definition.toString()));
+						result.put(new JSONObject(definition));
 					}
 				}
 			} else {
@@ -119,7 +119,7 @@ public class AllAction implements AJAXActionService {
 				for (int i = 0, size = manifests.length(); i < size; i++) {
 					JSONObject definition = manifests.getJSONObject(i);
 					if (isSigninPlugin(definition)) {
-						result.put(new JSONObject(definition.toString()));
+						result.put(new JSONObject(definition));
 					}
 				}
 
@@ -158,7 +158,7 @@ public class AllAction implements AJAXActionService {
 		}
 
 		for (String c : capDef) {
-			String[] split = c.split("\\s+");
+			String[] split = Strings.splitByWhitespaces(c);
 			String name = split[0];
 			boolean inverse = false;
 			if (name.charAt(0) == '!') {
@@ -182,13 +182,12 @@ public class AllAction implements AJAXActionService {
 			} else {
 				if (capability == null) {
 					return false;
-				} else {
-					if (needsBackend) {
-						if (!capability.isSupportedByBackend()) {
-							return false;
-						}
-					}
 				}
+                if (needsBackend) {
+                	if (!capability.isSupportedByBackend()) {
+                		return false;
+                	}
+                }
 			}
 
 		}

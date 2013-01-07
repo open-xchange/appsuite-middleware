@@ -151,9 +151,11 @@ public class freebusy extends HttpServlet {
             return;
         }
 
+        boolean simple = getSimple(request);
+        
         response.setContentType("text/calendar");
         final PrintWriter printWriter = response.getWriter();
-        writeVCalendar(context, start, end, mailAddress, participant.getIdentifier(), participant.getType(), printWriter);
+        writeVCalendar(context, start, end, mailAddress, participant.getIdentifier(), participant.getType(), printWriter, simple);
     }
 
     private String getMailAddress(final HttpServletRequest request) {
@@ -236,7 +238,16 @@ public class freebusy extends HttpServlet {
         return period;
     }
 
-    private void writeVCalendar(final Context context, final Date start, final Date end, final String mailAddress, final int principalId, final int type, final PrintWriter printWriter) {
+    private boolean getSimple(HttpServletRequest request) {
+        String simple = request.getParameter("simple");
+        if (null != simple && 0 < simple.length()) {
+            return Boolean.parseBoolean(simple);
+        }
+        return false;
+    }
+
+    private void writeVCalendar(final Context context, final Date start, final Date end, final String mailAddress, final int principalId, 
+        final int type, final PrintWriter printWriter, boolean simple) {
         printWriter.println("BEGIN:VCALENDAR");
         printWriter.println("PRODID:-//www.open-xchange.org//");
         printWriter.println("VERSION:2.0");
@@ -259,7 +270,7 @@ public class freebusy extends HttpServlet {
             final SearchIterator<Appointment> it = appointmentInterface.getFreeBusyInformation(principalId, type, start, end);
             try {
                 while (it.hasNext()) {
-                    writeFreeBusy(it.next(), printWriter, outputFormat);
+                    writeFreeBusy(it.next(), printWriter, outputFormat, simple);
                     printWriter.flush();
                 }
             } finally {
@@ -277,27 +288,28 @@ public class freebusy extends HttpServlet {
         printWriter.flush();
     }
 
-    private void writeFreeBusy(final Appointment appointment, final PrintWriter pw, final DateFormat format) {
-        //if (Appointment.FREE == appointment.getShownAs()) {
-        //    return;
-        //}
-        pw.print("FREEBUSY;");
-        switch (appointment.getShownAs()) {
-        case Appointment.ABSENT:
-            pw.print("FBTYPE=BUSY:");
-            break;
-        case Appointment.RESERVED:
-            pw.print("FBTYPE=BUSY-TENTATIVE:");
-            break;
-        case Appointment.TEMPORARY:
-            pw.print("FBTYPE=BUSY-UNAVAILABLE:");
-            break;
-        case Appointment.FREE:
-            pw.print("FBTYPE=FREE:");
-            break;
-        default:
-            pw.print("FBTYPE=BUSY:");
-        }
+    private void writeFreeBusy(final Appointment appointment, final PrintWriter pw, final DateFormat format, boolean simple) {
+        if (simple) {
+            if (Appointment.FREE == appointment.getShownAs()) {
+                return;
+            } 
+            pw.print("FREEBUSY:");
+        } else {
+            pw.print("FREEBUSY;FBTYPE=");
+            switch (appointment.getShownAs()) {
+            case Appointment.FREE:
+                pw.print("FREE:");
+                break;
+            case Appointment.TEMPORARY:
+                pw.print("BUSY-TENTATIVE:");
+                break;
+            case Appointment.ABSENT:
+                pw.print("BUSY-UNAVAILABLE:");
+                break;
+            default:
+                pw.print("BUSY:");
+            }
+        }        
         synchronized (format) {
             pw.print(format.format(appointment.getStartDate()));
             pw.print('/');
