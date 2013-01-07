@@ -200,14 +200,31 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     }
 
     private static final Pattern EXTRACTOR = Pattern.compile("access_token=(.*?)&?");
-
+    
     private OAuthToken parseResponse(final String string) {
         final Matcher matcher = EXTRACTOR.matcher(string);
         String token = null;
         if(matcher.matches()) {
             token = matcher.group(1);
+            token = checkToken(token);
         }
+        
         return new DefaultOAuthToken(token, "");
+    }
+    
+    private static final Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");
+
+    private static String checkToken(final String accessToken) {
+        if (accessToken.indexOf("&expires") < 0) {
+            return accessToken;
+        }
+        final Matcher m = P_EXPIRES.matcher(accessToken);
+        final StringBuffer sb = new StringBuffer(accessToken.length());
+        if (m.find()) {
+            m.appendReplacement(sb, "");
+        }
+        m.appendTail(sb);
+        return sb.toString();
     }
 
 	@Override
