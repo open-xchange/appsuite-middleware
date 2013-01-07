@@ -1,3 +1,7 @@
+* 2013-01-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 20116: Added additional parameter for simple free/busy data requests
+
 * 2013-01-05 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24400: Made LDAP search term converter aware of contact field operators, using contact search object in Halo
