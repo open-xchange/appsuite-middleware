@@ -17,7 +17,7 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/            
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       The Open-Xchange Custom Strato
+Summary:       The Open-Xchange Datamining Tool
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-core >= @OXVERSION@
 
@@ -54,11 +54,8 @@ perl -pi -e 's;%{buildroot};;' %{configfiles}
 %files -f %{configfiles}
 
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
 %dir /opt/open-xchange/lib
 %dir /opt/open-xchange/sbin
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
 
 /opt/open-xchange/lib
 /opt/open-xchange/sbin

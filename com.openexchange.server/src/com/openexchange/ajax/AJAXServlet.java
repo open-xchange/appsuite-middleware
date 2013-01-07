@@ -436,7 +436,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     private static final AtomicLong REQUEST_NUMBER = new AtomicLong(0L);
-    private static final String PROP_REQUEST_NUMBER = "com.openexchange.ajax.requestNumber";
 
     /**
      * Gets the locale for given server session
@@ -476,7 +475,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         incrementRequests();
         final Props props = LogProperties.getLogProperties();
-        props.put(PROP_REQUEST_NUMBER, ForceLog.valueOf(Long.toString(REQUEST_NUMBER.incrementAndGet())));
+        props.put(LogProperties.Name.AJAX_REQUEST_NUMBER, ForceLog.valueOf(Long.toString(REQUEST_NUMBER.incrementAndGet())));
         try {
             // create a new HttpSession if missing
             req.getSession(true);
@@ -493,7 +492,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             throw se;
         } finally {
             decrementRequests();
-            props.remove(PROP_REQUEST_NUMBER);
+            props.remove(LogProperties.Name.AJAX_REQUEST_NUMBER);
         }
     }
 

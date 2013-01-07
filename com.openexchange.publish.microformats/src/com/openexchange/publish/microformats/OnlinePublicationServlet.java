@@ -91,6 +91,11 @@ public class OnlinePublicationServlet extends HttpServlet {
      */
     protected static final Pattern SPLIT = Pattern.compile("/");
 
+    /**
+     * The pattern to split by <code>"+"</code> character.
+     */
+    private static final Pattern SPLIT2 = Pattern.compile("\\+");
+
     protected static ContextService contexts = null;
 
     @Override
@@ -155,7 +160,7 @@ public class OnlinePublicationServlet extends HttpServlet {
 
     // FIXME use server service for this
     private String decode(final String string, final String encoding) throws UnsupportedEncodingException {
-        final String[] chunks = string.split("\\+");
+        final String[] chunks = SPLIT2.split(string, 0);
         final StringBuilder decoded = new StringBuilder(string.length());
         final boolean endsWithPlus = string.endsWith("+");
         for (int i = 0; i < chunks.length; i++) {

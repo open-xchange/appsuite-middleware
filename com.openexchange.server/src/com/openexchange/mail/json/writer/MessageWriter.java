@@ -54,7 +54,7 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEnc
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.util.Collection;
 import java.util.EnumMap;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
@@ -77,7 +77,6 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.Delegatized;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -99,10 +98,6 @@ import com.openexchange.tools.TimeZoneUtils;
 public final class MessageWriter {
 
     // private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageWriter.class));
-
-    private static final String LOG_PROPERTY_MAIL_ID = MailActionConstants.LOG_PROPERTY_MAIL_ID;
-    private static final String LOG_PROPERTY_FULL_NAME = MailActionConstants.LOG_PROPERTY_FULL_NAME;
-    private static final String LOG_PROPERTY_ACCOUNT_ID = MailActionConstants.LOG_PROPERTY_ACCOUNT_ID;
 
     /**
      * No instantiation
@@ -130,17 +125,17 @@ public final class MessageWriter {
      * @throws OXException If writing structure fails
      */
     public static JSONObject writeStructure(final int accountId, final MailMessage mail, final long maxSize) throws OXException {
-        final Set<String> removees = new HashSet<String>(3);
+        final Set<LogProperties.Name> removees = EnumSet.noneOf(LogProperties.Name.class);
         final Props props = LogProperties.getLogProperties();
         {
-            if (!props.put(LOG_PROPERTY_ACCOUNT_ID, Integer.valueOf(accountId))) {
-                removees.add(LOG_PROPERTY_ACCOUNT_ID);
+            if (!props.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.valueOf(accountId))) {
+                removees.add(LogProperties.Name.MAIL_ACCOUNT_ID);
             }
-            if (!props.put(LOG_PROPERTY_FULL_NAME, mail.getFolder())) {
-                removees.add(LOG_PROPERTY_FULL_NAME);
+            if (!props.put(LogProperties.Name.MAIL_FULL_NAME, mail.getFolder())) {
+                removees.add(LogProperties.Name.MAIL_FULL_NAME);
             }
-            if (!props.put(LOG_PROPERTY_MAIL_ID, mail.getMailId())) {
-                removees.add(LOG_PROPERTY_MAIL_ID);
+            if (!props.put(LogProperties.Name.MAIL_MAIL_ID, mail.getMailId())) {
+                removees.add(LogProperties.Name.MAIL_MAIL_ID);
             }
         }
         try {
@@ -148,7 +143,7 @@ public final class MessageWriter {
             new StructureMailMessageParser().setParseTNEFParts(true).parseMailMessage(mail, handler);
             return handler.getJSONMailObject();
         } finally {
-            for (final String name : removees) {
+            for (final LogProperties.Name name : removees) {
                 props.remove(name);
             }
         }
@@ -226,17 +221,17 @@ public final class MessageWriter {
         /*
          * Add log properties
          */
-        final Set<String> removees = new HashSet<String>(3);
+        final Set<LogProperties.Name> removees = EnumSet.noneOf(LogProperties.Name.class);
         final Props props = LogProperties.getLogProperties();
         {
-            if (!props.put(LOG_PROPERTY_ACCOUNT_ID, Integer.valueOf(accountId))) {
-                removees.add(LOG_PROPERTY_ACCOUNT_ID);
+            if (!props.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.valueOf(accountId))) {
+                removees.add(LogProperties.Name.MAIL_ACCOUNT_ID);
             }
-            if (!props.put(LOG_PROPERTY_FULL_NAME, fullName)) {
-                removees.add(LOG_PROPERTY_FULL_NAME);
+            if (!props.put(LogProperties.Name.MAIL_FULL_NAME, fullName)) {
+                removees.add(LogProperties.Name.MAIL_FULL_NAME);
             }
-            if (!props.put(LOG_PROPERTY_MAIL_ID, mail.getMailId())) {
-                removees.add(LOG_PROPERTY_MAIL_ID);
+            if (!props.put(LogProperties.Name.MAIL_MAIL_ID, mail.getMailId())) {
+                removees.add(LogProperties.Name.MAIL_MAIL_ID);
             }
         }
         try {
@@ -283,7 +278,7 @@ public final class MessageWriter {
             }
             throw e;
         } finally {
-            for (final String name : removees) {
+            for (final LogProperties.Name name : removees) {
                 props.remove(name);
             }
         }

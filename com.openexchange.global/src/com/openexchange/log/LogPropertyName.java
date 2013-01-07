@@ -136,7 +136,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 		
     }
 
-    private final String propertyName;
+    private final LogProperties.Name propertyName;
 
     private final LogLevel logLevel;
 
@@ -148,7 +148,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
      * @param propertyName The name
      * @param logLevel The log level when property shall be logged ("ALL","FINE","INFO","WARNING","ERROR")
      */
-    public LogPropertyName(final String propertyName, final LogLevel logLevel) {
+    public LogPropertyName(final LogProperties.Name propertyName, final LogLevel logLevel) {
         super();
         this.propertyName = propertyName;
         this.logLevel = null == logLevel ? LogLevel.ALL : logLevel;
@@ -251,13 +251,13 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
      *
      * @return The property name
      */
-    public String getPropertyName() {
+    public LogProperties.Name getPropertyName() {
         return propertyName;
     }
 
     @Override
     public int compareTo(final LogPropertyName o) {
-        return propertyName.compareToIgnoreCase(o.propertyName);
+        return propertyName.getName().compareToIgnoreCase(o.propertyName.getName());
     }
 
     @Override

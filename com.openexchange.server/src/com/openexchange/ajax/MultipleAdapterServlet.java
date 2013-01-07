@@ -195,7 +195,11 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             final char c = (char) read;
             reader.unread(c);
             if ('[' == c || '{' == c) {
-                return JSONObject.parse(reader);
+                try {
+                    return JSONObject.parse(reader);
+                } catch (final JSONException e) {
+                    return new JSONTokener(AJAXServlet.readFrom(reader)).nextValue();
+                }
             }
             return new JSONTokener(AJAXServlet.readFrom(reader)).nextValue();
         } finally {

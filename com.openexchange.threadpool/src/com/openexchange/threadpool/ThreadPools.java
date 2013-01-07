@@ -534,7 +534,7 @@ public final class ThreadPools {
         TrackableTaskAdapter(final Callable<V> callable) {
             super(callable);
             final Props props = LogProperties.optLogProperties(Thread.currentThread());
-            this.props = null == props ? null : Collections.unmodifiableMap(props.getMap());
+            this.props = null == props ? null : Collections.unmodifiableMap(props.asMap());
         }
 
         @Override
@@ -586,7 +586,7 @@ public final class ThreadPools {
         TrackableRenamingTaskAdapter(final Callable<V> callable, final String prefix) {
             super(callable, prefix);
             final Props props = LogProperties.optLogProperties(Thread.currentThread());
-            this.props = null == props ? null : Collections.unmodifiableMap(props.getMap());
+            this.props = null == props ? null : Collections.unmodifiableMap(props.asMap());
         }
 
         @Override

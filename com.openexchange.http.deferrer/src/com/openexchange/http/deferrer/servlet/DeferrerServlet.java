@@ -81,7 +81,7 @@ public class DeferrerServlet extends HttpServlet {
             return;
         }
         char concat = '?';
-        if (redirectURL.contains("?")) {
+        if (redirectURL.indexOf('?') >= 0) {
             concat = '&';
         }
         Enumeration parameterNames = req.getParameterNames();

@@ -180,7 +180,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             if (LogProperties.isEnabled()) {
                 final Props logProperties = LogProperties.optLogProperties();
                 if (null != logProperties) {
-                    for (final String name : ALL_LOG_PROPERTIES) {
+                    for (final LogProperties.Name name : ALL_LOG_PROPERTIES) {
                         logProperties.remove(name);
                     }
                 }

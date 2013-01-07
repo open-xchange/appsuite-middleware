@@ -98,8 +98,9 @@ public class IndexCLI {
         
         try {
             String action = args[0];
-            if (action.contains("/")) {
-                action = action.substring(action.lastIndexOf('/') + 1);
+            int pos;
+            if ((pos = action.lastIndexOf('/')) >= 0) {
+                action = action.substring(pos + 1);
             }
             
             int retval = 0;

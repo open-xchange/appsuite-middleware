@@ -143,10 +143,11 @@ public class RootPrincipal extends AbstractCollection {
 
     public UserPrincipalResource resolveUser(WebdavPath url) throws WebdavProtocolException {
         String name = url.name();
-        if (name.contains("@")) {
-            name = name.split("@")[0];
-        } else if (name.contains("*")) {
-            name = name.split("\\*")[0];
+        int pos;
+        if ((pos = name.indexOf('@')) >= 0) {
+            name = name.substring(0, pos);
+        } else if ((pos = name.indexOf('*')) >= 0) {
+            name = name.substring(0, pos);
         }
         UserService users = factory.getUserService();
         try {

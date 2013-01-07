@@ -661,9 +661,9 @@ public final class MimeReply {
                  */
                 final String replyTextBody;
                 if (isHtml) {
-                    replyTextBody = quoteHtml(textBuilder.toString());
+                    replyTextBody = citeHtml(textBuilder.toString());
                 } else {
-                    replyTextBody = quoteText(textBuilder.toString());
+                    replyTextBody = citeText(textBuilder.toString());
                 }
                 textBuilder.setLength(0);
                 if (isHtml) {
@@ -680,11 +680,11 @@ public final class MimeReply {
                 final String replyTextBody;
                 if (isHtml) {
                     textBuilder.insert(getBodyTagEndPos(textBuilder), replyPrefix);
-                    replyTextBody = quoteHtml(textBuilder.toString());
+                    replyTextBody = citeHtml(textBuilder.toString());
                 } else {
                     textBuilder.insert(0, replyPrefix);
                     textBuilder.insert(replyPrefix.length(), '\n');
-                    replyTextBody = quoteText(textBuilder.toString());
+                    replyTextBody = citeText(textBuilder.toString());
                 }
                 textBuilder.setLength(0);
                 textBuilder.append(replyTextBody);
@@ -840,9 +840,19 @@ public final class MimeReply {
         return found;
     }
 
-    private static String quoteText(final String textContent) {
-        return textContent.replaceAll("(?m)^", "> ");
+    /*-
+     * ---------------------------------------- Stuff to cite plain text ----------------------------------------
+     */
+
+    private static final Pattern PATTERN_TEXT_CITE = Pattern.compile("^", Pattern.MULTILINE);
+
+    private static String citeText(final String textContent) {
+        return PATTERN_TEXT_CITE.matcher(textContent).replaceAll("> ");
     }
+
+    /*-
+     * ---------------------------------------- Stuff to cite HTML text ----------------------------------------
+     */
 
     private static final Pattern PATTERN_HTML_START = Pattern.compile("<html[^>]*?>", Pattern.CASE_INSENSITIVE);
 
@@ -853,7 +863,7 @@ public final class MimeReply {
 
     private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
 
-    private static String quoteHtml(final String htmlContent) {
+    private static String citeHtml(final String htmlContent) {
         Matcher m = PATTERN_HTML_START.matcher(htmlContent);
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
         final StringBuilder sb = new StringBuilder(htmlContent.length());
@@ -894,17 +904,11 @@ public final class MimeReply {
     private static final class ParameterContainer {
 
         final ContentType retvalContentType;
-
         final StringBuilder textBuilder;
-
         final StringHelper strHelper;
-
         final UserSettingMail usm;
-
         final javax.mail.Session mailSession;
-
         final LocaleAndTimeZone ltz;
-
         final List<String> replyTexts;
 
         ParameterContainer(final ContentType retvalContentType, final StringBuilder textBuilder, final StringHelper strHelper, final UserSettingMail usm, final javax.mail.Session mailSession, final LocaleAndTimeZone ltz, final List<String> replyTexts) {
@@ -917,7 +921,6 @@ public final class MimeReply {
             this.ltz = ltz;
             this.replyTexts = replyTexts;
         }
-
     }
 
     private static boolean isEmpty(final String string) {

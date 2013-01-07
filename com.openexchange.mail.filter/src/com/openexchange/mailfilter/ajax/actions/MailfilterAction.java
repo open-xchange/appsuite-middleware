@@ -77,6 +77,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
@@ -881,7 +882,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 final ArrayList<String> header = new ArrayList<String>();
                 header.add("From");
 
-                final String[] split = vacationdomains.split(",");
+                final String[] split = Strings.splitByComma(vacationdomains);
 
                 argList.add(header);
                 argList.add(Arrays.asList(split));

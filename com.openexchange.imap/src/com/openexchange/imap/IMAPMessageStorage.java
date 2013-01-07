@@ -1551,7 +1551,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
                             @Override
                             public Map<String, Object> optLogProperties() {
-                                return null == props ? null : Collections.unmodifiableMap(props.getMap());
+                                return null == props ? null : Collections.unmodifiableMap(props.asMap());
                             }
                         });
                     }
@@ -1853,7 +1853,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
             @Override
             public Map<String, Object> optLogProperties() {
-                return props == null ? null : props.getMap();
+                return props == null ? null : props.asMap();
             }
 
         };

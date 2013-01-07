@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
@@ -228,13 +227,16 @@ public class DefaultDispatcher implements Dispatcher {
         return result;
     }
 
-    private static final Pattern SPLIT_SLASH = Pattern.compile("/");
+    // private static final Pattern SPLIT_SLASH = Pattern.compile("/");
 
     private AJAXActionServiceFactory lookupFactory(final String module) {
         AJAXActionServiceFactory serviceFactory = actionFactories.get(module);
-        if (serviceFactory == null && module.contains("/")) {
-            // Fallback for backwards compatibility. File Download Actions sometimes append the filename to the module.
-            serviceFactory = actionFactories.get(SPLIT_SLASH.split(module, 0)[0]);
+        if (null == serviceFactory) {
+            final int pos = module.indexOf('/');
+            if (pos > 0) {
+                // Fallback for backwards compatibility. File Download Actions sometimes append the filename to the module.
+                serviceFactory = actionFactories.get(module.substring(0, pos));
+            }
         }
         return serviceFactory;
     }

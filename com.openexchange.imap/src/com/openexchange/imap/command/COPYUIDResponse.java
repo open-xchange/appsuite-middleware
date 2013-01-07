@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.command;
 
+import com.openexchange.java.Strings;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 
@@ -116,7 +117,7 @@ final class COPYUIDResponse {
      */
     private static long[] toLongArray(final String uidSet) {
         final TLongList arr = new TLongArrayList(32);
-        final String[] sa = uidSet.split(" *, *");
+        final String[] sa = Strings.splitByComma(uidSet);
         Next: for (int i = 0; i < sa.length; i++) {
             final int pos = sa[i].indexOf(':');
             if (pos == -1) {
