@@ -49,15 +49,15 @@
 
 package com.openexchange.mail.json;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailServletInterface;
 
 /**
  * {@link MailActionConstants}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MailActionConstants {
@@ -67,41 +67,14 @@ public interface MailActionConstants {
      */
     public static final String PROPERTY_MAIL_IFACE = "com.openexchange.mail.json.mailInterface";
 
-    // ---------------------- Log properties constants -------------------------------
-
-    /**
-     * The log property name for login.
-     */
-    public static final String LOG_PROPERTY_LOGIN = "com.openexchange.mail.login";
-
-    /**
-     * The log property name for host name.
-     */
-    public static final String LOG_PROPERTY_HOST = "com.openexchange.mail.host";
-
-    /**
-     * The log property name for folder full name.
-     */
-    public static final String LOG_PROPERTY_FULL_NAME = "com.openexchange.mail.fullName";
-
-    /**
-     * The log property name for mail identifier.
-     */
-    public static final String LOG_PROPERTY_MAIL_ID = "com.openexchange.mail.mailId";
-
-    /**
-     * The log property name for account identifier.
-     */
-    public static final String LOG_PROPERTY_ACCOUNT_ID = "com.openexchange.mail.accountId";
-
     /**
      * A set containing all log property names.
      */
-    public static final Set<String> ALL_LOG_PROPERTIES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-        LOG_PROPERTY_FULL_NAME,
-        LOG_PROPERTY_HOST,
-        LOG_PROPERTY_LOGIN,
-        LOG_PROPERTY_MAIL_ID,
-        LOG_PROPERTY_ACCOUNT_ID)));
+    public static final Set<LogProperties.Name> ALL_LOG_PROPERTIES = Collections.unmodifiableSet(EnumSet.of(
+        LogProperties.Name.MAIL_ACCOUNT_ID,
+        LogProperties.Name.MAIL_FULL_NAME,
+        LogProperties.Name.MAIL_HOST,
+        LogProperties.Name.MAIL_MAIL_ID,
+        LogProperties.Name.MAIL_LOGIN));
 
 }

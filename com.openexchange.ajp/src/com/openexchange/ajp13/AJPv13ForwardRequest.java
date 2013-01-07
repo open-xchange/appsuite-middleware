@@ -275,12 +275,12 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
             if (null != echoHeaderName) {
                 final String echoValue = servletRequest.getHeader(echoHeaderName);
                 if (null != echoValue) {
-                    LogProperties.putLogProperty("com.openexchange.ajp13.requestId", echoValue);
+                    LogProperties.putLogProperty(LogProperties.Name.AJP_REQUEST_ID, echoValue);
                 }
             }
         }
-        LogProperties.putLogProperty("com.openexchange.ajp13.requestIp", servletRequest.getRemoteAddr());
-        LogProperties.putLogProperty("com.openexchange.ajp13.serverName", servletRequest.getServerName());
+        LogProperties.putLogProperty(LogProperties.Name.AJP_REQUEST_IP, servletRequest.getRemoteAddr());
+        LogProperties.putLogProperty(LogProperties.Name.AJP_SERVER_NAME, servletRequest.getServerName());
         /*
          * Determine if content type indicates form data
          */
@@ -700,7 +700,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             continue nextCookie;
                         }
                         jsessionIDCookie = current;
-                        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
+                        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, id);
                         jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
                         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     } else {
@@ -737,7 +737,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             continue nextCookie;
                         }
                         jsessionIDCookie = current;
-                        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
+                        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, id);
                         jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
                         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     }
@@ -787,7 +787,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
             }
         }
         final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
-        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", jsessionIdVal);
+        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, jsessionIdVal);
         jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, join);
         /*

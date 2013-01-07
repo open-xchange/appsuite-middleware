@@ -92,17 +92,17 @@ public class WrappingFilter implements Filter {
             Props logProperties = LogProperties.getLogProperties();
 
             // Servlet related properties
-            logProperties.put("com.openexchange.http.grizzly.requestURI", httpServletRequest.getRequestURI());
-            logProperties.put("com.openexchange.http.grizzly.servletPath", httpServletRequest.getServletPath());
-            logProperties.put("com.openexchange.http.grizzly.pathInfo", httpServletRequest.getPathInfo());
+            logProperties.put(LogProperties.Name.GRIZZLY_REQUEST_URI, httpServletRequest.getRequestURI());
+            logProperties.put(LogProperties.Name.GRIZZLY_SERVLET_PATH, httpServletRequest.getServletPath());
+            logProperties.put(LogProperties.Name.GRIZZLY_PATH_INFO, httpServletRequest.getPathInfo());
             
             // Remote infos
-            logProperties.put("com.openexchange.http.grizzly.remotePort", httpServletRequest.getRemotePort());
-            logProperties.put("com.openexchange.http.grizzly.requestIp", httpServletRequest.getRemoteAddr());
+            logProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, httpServletRequest.getRemotePort());
+            logProperties.put(LogProperties.Name.GRIZZLY_REQUEST_IP, httpServletRequest.getRemoteAddr());
             
             // Names, addresses
-            logProperties.put("com.openexchange.http.grizzly.threadName", Thread.currentThread().getName());
-            logProperties.put("com.openexchange.http.grizzly.serverName", httpServletRequest.getServerName());
+            logProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, Thread.currentThread().getName());
+            logProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpServletRequest.getServerName());
         }
         
         chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);

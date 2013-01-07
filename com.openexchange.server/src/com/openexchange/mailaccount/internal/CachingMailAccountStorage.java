@@ -439,6 +439,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return delegate.hasAccounts(session);
     }
 
+    @Override
+    public void cleanUp(final String secret, final Session session) throws OXException {
+        delegate.cleanUp(secret, session);
+    }
+
     private static volatile Integer maxWaitMillis;
     private static int maxWaitMillis() {
         Integer i = maxWaitMillis;

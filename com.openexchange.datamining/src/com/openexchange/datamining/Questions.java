@@ -103,6 +103,30 @@ public class Questions {
     public static final String NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR = "numberOfUsersWithEventsInPrivateCalendar";
 
     public static final String NUMBER_OF_USERS = "numberOfUsers";
+    
+    public static final String NUMBER_OF_USERS_CONNECTED_TO_FACEBOOK = "numberOfUsersConnectedToFacebook";
+    
+    public static final String NUMBER_OF_USERS_CONNECTED_TO_LINKEDIN = "numberOfUsersConnectedToLinkedIn";
+    
+    public static final String NUMBER_OF_USERS_CONNECTED_TO_TWITTER = "numberOfUsersConnectedToTwitter";
+    
+    public static final String NUMBER_OF_USERS_CONNECTED_TO_GOOGLE = "numberOfUsersConnectedToGoogle";
+    
+    public static final String NUMBER_OF_USERS_CONNECTED_TO_MSN = "numberOfUsersConnectedToMSN";
+    
+    public static final String NUMBER_OF_USERS_CONNECTED_TO_YAHOO = "numberOfUsersConnectedToYahoo";
+    
+    public static final String NUMBER_OF_USERS_CONNECTED_TO_XING = "numberOfUsersConnectedToXing";
+    
+    public static final String NUMBER_OF_USERS_CONNECTED_TO_TONLINE = "numberOfUsersConnectedToTOnline";
+    
+    public static final String NUMBER_OF_USERS_CONNECTED_TO_WEBDE = "numberOfUsersConnectedToWebDe";
+    
+    public static final String NUMBER_OF_USERS_CONNECTED_TO_GMX = "numberOfUsersConnectedToGMX";
+    
+    public static final String NUMBER_OF_USERS_WITH_TASKS = "numberOfUsersWithTasks";
+    
+    public static final String NUMBER_OF_USERS_WHO_CHANGED_THEIR_TASKS_IN_THE_LAST30_DAYS = "numberOfUsersWhoChangedTheirTasksInTheLast30Days";
 
     protected static void reportNumberOfUsers() {
         try {
@@ -364,6 +388,136 @@ public class Questions {
             String sql = "SELECT count(*) FROM user_setting WHERE value LIKE '%\"minicalendar\":{\"expanded\":true}%';";
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_ACTIVATED_MINI_CALENDAR, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    public static void reportNumberOfUsersConnectedToFacebook() {
+    	String networkName = "facebook";
+        try {
+            Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_FACEBOOK);
+            String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
+            Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_FACEBOOK, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    public static void reportNumberOfUsersConnectedToLinkedIn() {
+    	String networkName = "linkedin";
+        try {
+            Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_LINKEDIN);
+            String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
+            Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_LINKEDIN, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    public static void reportNumberOfUsersConnectedToTwitter() {
+    	String networkName = "twitter";
+        try {
+            Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_TWITTER);
+            String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
+            Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_TWITTER, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    public static void reportNumberOfUsersConnectedToGoogle() {
+    	String networkName = "google";
+        try {
+            Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_GOOGLE);
+            String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
+            Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_GOOGLE, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    public static void reportNumberOfUsersConnectedToMSN() {
+    	String networkName = "msn";
+        try {
+            Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_MSN);
+            String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
+            Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_MSN, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    public static void reportNumberOfUsersConnectedToYahoo() {
+    	String networkName = "yahoo";
+        try {
+            Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_YAHOO);
+            String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
+            Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_YAHOO, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    public static void reportNumberOfUsersConnectedToXing() {
+    	String networkName = "xing";
+        try {
+            Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_XING);
+            String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
+            Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_XING, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    public static void reportNumberOfUsersConnectedToTOnline() {
+    	String networkName = "t-online";
+        try {
+            Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_TONLINE);
+            String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
+            Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_TONLINE, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    public static void reportNumberOfUsersConnectedToGMX() {
+    	String networkName = "gmx";
+        try {
+            Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_GMX);
+            String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
+            Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_GMX, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    public static void reportNumberOfUsersConnectedToWebDe() {
+    	String networkName = "facebook";
+        try {
+            Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_WEBDE);
+            String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
+            Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_WEBDE, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    protected static void reportNumberOfUsersWithTasks() {
+        try {
+            Datamining.allTheQuestions.add(NUMBER_OF_USERS_WITH_TASKS);
+            String sql = "select count(distinct created_from, cid) from task";
+            BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
+            Datamining.report(NUMBER_OF_USERS_WITH_TASKS, numberOfUsers.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    protected static void reportNumberOfUsersWhoChangedTheirTasksInTheLast30Days() {
+        try {
+            Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_CHANGED_THEIR_TASKS_IN_THE_LAST30_DAYS);
+            String sql = "SELECT count(DISTINCT created_from, cid) FROM task WHERE DATE(FROM_UNIXTIME(SUBSTRING(CAST(last_modified AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW()";
+            BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
+            Datamining.report(NUMBER_OF_USERS_WHO_CHANGED_THEIR_TASKS_IN_THE_LAST30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
         }
     }

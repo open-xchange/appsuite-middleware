@@ -253,7 +253,7 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 	 * @return the value reformatted for SQL use (means: with some % in most cases)
 	 */
 	protected String handlePatternMatching(String value) {
-		if(!value.contains("*")) {
+		if(value.indexOf('*') < 0) {
             return value;
         }
 

@@ -148,7 +148,7 @@ public final class AttachAction extends AbstractAttachmentAction {
                         }
                     }
 
-                    final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(json.toString());
+                    final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(json);
                     assureSize(index, attachments, uploadFiles);
 
                     attachments.set(index, attachment);
@@ -174,7 +174,7 @@ public final class AttachAction extends AbstractAttachmentAction {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(DATASOURCE);
             }
 
-            final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(object.toString());
+            final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(object);
             final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
 
             if (conversionService == null) {

@@ -76,6 +76,7 @@ import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 
@@ -171,6 +172,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
                 };
                 registerService(EncryptedItemDetectorService.class, secretHandling);
                 registerService(SecretMigrator.class, secretHandling);
+                registerService(EncryptedItemCleanUpService.class, secretHandling);
             }
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageRdbActivator.class)).error(e.getMessage(), e);

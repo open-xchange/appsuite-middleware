@@ -6,7 +6,7 @@ Bundle-Version: 7.0.0
 Bundle-Activator: com.openexchange.mail.smal.impl.osgi.SmalActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Eclipse-RegisterBuddy: com.openexchange.hazelcast,com.openexchange.service.indexing.impl
+Eclipse-RegisterBuddy: com.hazelcast,com.openexchange.service.indexing.impl
 Import-Package: com.google.common.base,
  com.google.common.collect,
  com.hazelcast.core,

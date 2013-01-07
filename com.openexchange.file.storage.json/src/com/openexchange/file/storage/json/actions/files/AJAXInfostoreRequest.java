@@ -80,6 +80,7 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
+import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -173,7 +174,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if (parameter == null || parameter.length() == 0) {
             return columns = Arrays.asList(File.Field.values());
         }
-        final String[] columnStrings = parameter.split("\\s*,\\s*");
+        final String[] columnStrings = Strings.splitByComma(parameter);
         final List<Field> fields = new ArrayList<Field>(columnStrings.length);
         final List<String> unknownColumns = new ArrayList<String>(columnStrings.length);
 
@@ -271,7 +272,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             return Collections.emptySet();
         }
 
-        return new HashSet<String>(Arrays.asList(parameter.split("\\s*,\\s*")));
+        return new HashSet<String>(Arrays.asList(Strings.splitByComma(parameter)));
     }
 
     @Override

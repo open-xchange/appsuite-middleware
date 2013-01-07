@@ -58,6 +58,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.calendar.RecurringResults;
 import com.openexchange.calendar.Tools;
@@ -316,7 +317,7 @@ public class RecurringCalculation {
         if (null == changeExceptions || changeExceptions.length() == 0) {
             this.changeExceptions = Collections.emptySet();
         } else {
-            final String[] sa = changeExceptions.split(" *, *");
+            final String[] sa = Strings.splitByComma(changeExceptions);
             this.changeExceptions = new HashSet<Long>(sa.length);
             for (final String sLong : sa) {
                 this.changeExceptions.add(Long.valueOf(sLong));
@@ -325,7 +326,7 @@ public class RecurringCalculation {
         if (null == deleteExceptions || deleteExceptions.length() == 0) {
             this.deleteExceptions = Collections.emptySet();
         } else {
-            final String[] sa = deleteExceptions.split(" *, *");
+            final String[] sa = Strings.splitByComma(deleteExceptions);
             this.deleteExceptions = new HashSet<Long>(sa.length);
             for (final String sLong : sa) {
                 this.deleteExceptions.add(Long.valueOf(sLong));

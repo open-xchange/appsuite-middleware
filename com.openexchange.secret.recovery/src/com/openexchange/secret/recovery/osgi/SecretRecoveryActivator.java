@@ -52,17 +52,19 @@ package com.openexchange.secret.recovery.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.Constants;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.SecretUsesPasswordChecker;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
+import com.openexchange.secret.recovery.SecretCleanUpService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.impl.FastSecretInconsistencyDetector;
@@ -81,6 +83,7 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
     private volatile WhiteboardSecretMigrator migrator;
     private volatile WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector;
     private volatile WhiteboardSecretService whiteboardSecretService;
+    private volatile WhiteboardEncryptedCleanUpService whiteboardCleanUpService;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -104,6 +107,8 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
              */
             final WhiteboardSecretMigrator migrator = this.migrator = new WhiteboardSecretMigrator(context);
             final WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector = this.whiteboardEncryptedItemDetector = new WhiteboardEncryptedItemDetector(context);
+            final WhiteboardEncryptedCleanUpService whiteboardCleanUpService = new WhiteboardEncryptedCleanUpService(context);
+            this.whiteboardCleanUpService = whiteboardCleanUpService;
             /*
              * Register SecretInconsistencyDetector
              */
@@ -112,18 +117,26 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
             final SecretService secretService = checker.passwordUsingSecretService();
             final FastSecretInconsistencyDetector detector = new FastSecretInconsistencyDetector(secretService, cryptoService, userService, whiteboardEncryptedItemDetector);
             registerService(SecretInconsistencyDetector.class, detector);
+            registerService(EncryptedItemCleanUpService.class, detector);
             /*
              * Register SecretMigrator
              */
-            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));
             registerService(SecretMigrator.class, migrator, properties);
             registerService(SecretMigrator.class, detector); // Needs Migration as well
+            /*
+             * Register EncryptedCleanUpService
+             */
+            properties = new Hashtable<String, Object>(1);
+            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));
+            registerService(SecretCleanUpService.class, whiteboardCleanUpService, properties);
             /*
              * Open whiteboard services
              */
             migrator.open();
             whiteboardEncryptedItemDetector.open();
+            whiteboardCleanUpService.open();
             /*
              * Register appropriate event handler
              */
@@ -182,6 +195,11 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
         if (whiteboardSecretService != null) {
             whiteboardSecretService.close();
             this.whiteboardSecretService = null;
+        }
+        final WhiteboardEncryptedCleanUpService whiteboardEncryptedCleanUpService = this.whiteboardCleanUpService;
+        if (null != whiteboardEncryptedCleanUpService) {
+            whiteboardEncryptedCleanUpService.close();
+            this.whiteboardCleanUpService = null;
         }
     }
 

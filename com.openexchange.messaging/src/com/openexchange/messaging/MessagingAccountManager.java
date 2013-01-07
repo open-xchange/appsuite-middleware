@@ -114,9 +114,18 @@ public interface MessagingAccountManager {
      * @param oldSecret The old secret for decrypting stored secret strings
      * @param newSecret The new secret used for encrypting the secret strings
      * @param session The session providing needed user data
-     * @throws OXException
+     * @throws OXException If migrate attempt fails
      */
     public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws OXException;
+
+    /**
+     * Cleans-up accounts that could no more be decrypted with given secret
+     *
+     * @param secret The current secret
+     * @param session The session providing user information
+     * @throws OXException If operation fails
+     */
+    public void cleanUp(String secret, Session session) throws OXException;
 
     /**
      * Has the owner of this session an account?

@@ -396,12 +396,22 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     private static final String STR_ERROR_PARAMS = "error_params";
 
-	// JavaScript for substituteJS()
-	public static final String JS_FRAGMENT = "<!DOCTYPE HTML PUBLIC "
-			+ "\"-//W3C//DTD HTML 4.01//EN\" "
-			+ "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
-			+ "<META http-equiv=\"Content-Type\" "
-			+ "content=\"text/html; charset=UTF-8\">"
+	/**
+	 * JavaScript for <code>substituteJS()</code>.
+	 * <pre>
+     *      &lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+     *      &lt;html&gt;
+     *       &lt;head&gt;
+     *        &lt;META http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+     *        &lt;script type="text/javascript"&gt;
+     *          (parent.callback_**action** || window.opener && window.opener.callback_**action**)(**json**)
+     *        &lt;/script&gt;
+     *       &lt;/head&gt;
+     *      &lt;/html&gt;
+	 * </pre>
+	 */
+	public static final String JS_FRAGMENT = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
+			+ "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">"
 			+ "<script type=\"text/javascript\">"
 			+ "(parent.callback_**action** || window.opener && "
 			+ "window.opener.callback_**action**)(**json**)"
@@ -426,7 +436,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     private static final AtomicLong REQUEST_NUMBER = new AtomicLong(0L);
-    private static final String PROP_REQUEST_NUMBER = "com.openexchange.ajax.requestNumber";
 
     /**
      * Gets the locale for given server session
@@ -466,7 +475,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         incrementRequests();
         final Props props = LogProperties.getLogProperties();
-        props.put(PROP_REQUEST_NUMBER, ForceLog.valueOf(Long.toString(REQUEST_NUMBER.incrementAndGet())));
+        props.put(LogProperties.Name.AJAX_REQUEST_NUMBER, ForceLog.valueOf(Long.toString(REQUEST_NUMBER.incrementAndGet())));
         try {
             // create a new HttpSession if missing
             req.getSession(true);
@@ -483,7 +492,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             throw se;
         } finally {
             decrementRequests();
-            props.remove(PROP_REQUEST_NUMBER);
+            props.remove(LogProperties.Name.AJAX_REQUEST_NUMBER);
         }
     }
 

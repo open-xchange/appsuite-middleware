@@ -49,11 +49,11 @@
 
 package com.openexchange.secret.recovery.impl;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
@@ -71,15 +71,14 @@ public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDe
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private final List<SecretConsistencyCheck> checks;
-
-    private SecretService secretService;
+    private volatile SecretService secretService;
 
     /**
      * Initializes a new {@link DefaultSecretInconsistencyDetector}.
      */
     public DefaultSecretInconsistencyDetector() {
         super();
-        checks = new ArrayList<SecretConsistencyCheck>();
+        checks = new CopyOnWriteArrayList<SecretConsistencyCheck>();
     }
 
     @Override
@@ -96,18 +95,38 @@ public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDe
         return null;
     }
 
+    /**
+     * Adds given {@link SecretConsistencyCheck} instance.
+     *
+     * @param check The instance to add
+     */
     public void addCheck(final SecretConsistencyCheck check) {
         checks.add(check);
     }
 
+    /**
+     * Gets available {@link SecretConsistencyCheck} instances.
+     *
+     * @return The instances
+     */
     public List<SecretConsistencyCheck> getChecks() {
         return checks;
     }
 
+    /**
+     * Gets the associated {@link SecretService} instance.
+     *
+     * @return The instance
+     */
     public SecretService getSecretService() {
         return secretService;
     }
 
+    /**
+     * Sets the associated {@link SecretService} instance.
+     *
+     * @param secretService The instance to set
+     */
     public void setSecretService(final SecretService secretService) {
         this.secretService = secretService;
     }

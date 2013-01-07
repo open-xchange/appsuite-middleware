@@ -4,27 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactMerger;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -108,17 +101,14 @@ public class ContactHaloImpl implements ContactHalo {
 			contactsToMerge.add(contact);
 		} else {
 			// Try to find a contact
-			final ContactField[] searchFields = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
-			final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        	for (final ContactField field : searchFields) {        		
-        		final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-        		term.addOperand(new ContactFieldOperand(field));
-        		term.addOperand(new ConstantOperand<String>(contact.getEmail1()));
-        		orTerm.addSearchTerm(term);
-        	}
+		    ContactSearchObject contactSearch = new ContactSearchObject();
+            contactSearch.setEmail1(contact.getEmail1());
+            contactSearch.setEmail2(contact.getEmail1());
+            contactSearch.setEmail3(contact.getEmail1());
+            contactSearch.setOrSearch(true);
         	SearchIterator<Contact> iterator = null;
         	try {
-            	iterator = contactService.searchContacts(session, orTerm);
+            	iterator = contactService.searchContacts(session, contactSearch);
     			while (iterator.hasNext()) {
     				contactsToMerge.add(iterator.next());
     			}

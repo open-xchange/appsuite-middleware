@@ -143,7 +143,7 @@ public abstract class AbstractSubscribeAction extends
 
 	    final List<String> dynamicColumnIdentifiers = new ArrayList<String>();
 	    for (final String paramName : request.keySet()) {
-	        if (!KNOWN_PARAMS.contains(paramName) && paramName.contains(".")) {
+	        if (!KNOWN_PARAMS.contains(paramName) && paramName.indexOf('.') >= 0) {
 	            dynamicColumnIdentifiers.add(paramName);
 	        }
 	    }

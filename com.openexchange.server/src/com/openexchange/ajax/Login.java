@@ -109,6 +109,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -692,7 +693,7 @@ public class Login extends AJAXServlet {
         final List<IPRange> ranges = new LinkedList<IPRange>();
         final String tmp = config.getInitParameter(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName());
         if (tmp != null) {
-            final String[] lines = tmp.split("\n");
+            final String[] lines = Strings.splitByCRLF(tmp);
             for (String line : lines) {
                 line = line.replaceAll("\\s", "");
                 if (!line.equals("") && (line.length() == 0 || line.charAt(0) != '#')) {
@@ -811,11 +812,11 @@ public class Login extends AJAXServlet {
             if (LogProperties.isEnabled()) {
                 final Props properties = LogProperties.optLogProperties();
                 if (null != properties) {
-                    properties.remove("com.openexchange.session.sessionId");
-                    properties.remove("com.openexchange.session.userId");
-                    properties.remove("com.openexchange.session.contextId");
-                    properties.remove("com.openexchange.session.clientId");
-                    properties.remove("com.openexchange.session.session");
+                    properties.remove(LogProperties.Name.SESSION_SESSION_ID);
+                    properties.remove(LogProperties.Name.SESSION_USER_ID);
+                    properties.remove(LogProperties.Name.SESSION_CONTEXT_ID);
+                    properties.remove(LogProperties.Name.SESSION_CLIENT_ID);
+                    properties.remove(LogProperties.Name.SESSION_SESSION);
                 }
             }
         }
@@ -929,7 +930,7 @@ public class Login extends AJAXServlet {
              */
             cookie.setMaxAge(conf.getCookieExpiry());
         }
-        final String domain = getDomainValue(null == serverName ? LogProperties.<String> getLogProperty("com.openexchange.ajp13.serverName") : serverName);
+        final String domain = getDomainValue(null == serverName ? LogProperties.<String> getLogProperty(LogProperties.Name.AJP_SERVER_NAME) : serverName);
         if (null != domain) {
             cookie.setDomain(domain);
         }

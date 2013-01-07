@@ -91,13 +91,13 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
         final AssignmentImpl assign = assignmentService.getAssignment(contextId);
-        LogProperties.putLogProperty("com.openexchange.database.schema", ForceLog.valueOf(assign.getSchema()));
+        LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, ForceLog.valueOf(assign.getSchema()));
         return ReplicationMonitor.checkActualAndFallback(pools, assign, noTimeout, write);
     }
 
     private void back(final Connection con) {
         if (null == con) {
-            LogProperties.putLogProperty("com.openexchange.database.schema", null);
+            LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
             LOG.error(e.getMessage(), e);
             return;
@@ -108,7 +108,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error(e1.getMessage(), e1);
         } finally {
-            LogProperties.putLogProperty("com.openexchange.database.schema", null);
+            LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
         }
     }
 

@@ -21,6 +21,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.init.HazelcastInitializer;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -70,7 +71,7 @@ public class HazelcastActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, TimerService.class };
+        return new Class[] { ConfigurationService.class, TimerService.class, HazelcastConfigurationService.class };
     }
 
     /** Gets the ranking */
@@ -85,8 +86,8 @@ public class HazelcastActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final Log logger = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
-        final ConfigurationService service = getService(ConfigurationService.class);
-        if (null != service && !service.getBoolProperty("com.openexchange.hazelcast.enabled", true)) {
+        final HazelcastConfigurationService service = getService(HazelcastConfigurationService.class);
+        if (!service.isEnabled()) {
             logger.info("\nHazelcast\n\tStartup of Hazelcast clustering and data distribution platform denied per configuration.");
             return;
         }

@@ -83,6 +83,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.SessionHolder;
@@ -610,7 +611,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 				if (null == ignoreFolders || 0 >= ignoreFolders.length()) {
 					this.folderBlacklist = new HashSet<String>(0);
 				} else {
-					this.folderBlacklist = new HashSet<String>(Arrays.asList(ignoreFolders.split("\\s*,\\s*")));
+					this.folderBlacklist = new HashSet<String>(Arrays.asList(Strings.splitByComma(ignoreFolders)));
 				}
 			}
 			return this.folderBlacklist.contains(userizedFolder.getID());

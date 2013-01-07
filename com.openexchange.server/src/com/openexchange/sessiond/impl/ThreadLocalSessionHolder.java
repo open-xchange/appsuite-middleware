@@ -97,12 +97,12 @@ public class ThreadLocalSessionHolder implements SessionHolderExtended {
         session.set(serverSession);
         if (LogProperties.isEnabled() && serverSession != null) {
             final Props properties = LogProperties.getLogProperties();
-            properties.put("com.openexchange.session.sessionId", serverSession.getSessionID());
-            properties.put("com.openexchange.session.userId", Integer.valueOf(serverSession.getUserId()));
-            properties.put("com.openexchange.session.contextId", Integer.valueOf(serverSession.getContextId()));
+            properties.put(LogProperties.Name.SESSION_SESSION_ID, serverSession.getSessionID());
+            properties.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(serverSession.getUserId()));
+            properties.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(serverSession.getContextId()));
             final String client = serverSession.getClient();
-            properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
-            properties.put("com.openexchange.session.session", serverSession);
+            properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : client);
+            properties.put(LogProperties.Name.SESSION_SESSION, serverSession);
         }
     }
 
@@ -119,7 +119,7 @@ public class ThreadLocalSessionHolder implements SessionHolderExtended {
     public Session optSessionObject() {
         final ServerSession serverSession = session.get();
         if (serverSession == null && LogProperties.isEnabled()) {
-            return LogProperties.getLogProperty("com.openexchange.session.session");
+            return LogProperties.getLogProperty(LogProperties.Name.SESSION_SESSION);
         }
         return serverSession;
     }
@@ -129,7 +129,7 @@ public class ThreadLocalSessionHolder implements SessionHolderExtended {
         final ServerSession serverSession = session.get();
         if (serverSession == null) {
         	if (LogProperties.isEnabled()) {
-        		final Session session = LogProperties.getLogProperty("com.openexchange.session.session");
+        		final Session session = LogProperties.getLogProperty(LogProperties.Name.SESSION_SESSION);
         		try {
 					return ServerSessionAdapter.valueOf(session);
 				} catch (final OXException e) {

@@ -68,4 +68,7 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
     /** The following needed service is missing: \"%1$s\" */
     public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
 
+    // Unexpected error: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
+
 }

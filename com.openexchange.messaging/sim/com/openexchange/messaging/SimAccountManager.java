@@ -156,22 +156,20 @@ public class SimAccountManager implements MessagingAccountManager {
         accounts = Arrays.asList(list);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.messaging.MessagingAccountManager#migrateToNewSecret(java.lang.String, java.lang.String, com.openexchange.session.Session)
-     */
     @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.messaging.MessagingAccountManager#hasAccount(com.openexchange.session.Session)
-     */
     @Override
     public boolean hasAccount(final Session session) throws OXException {
         // Nothing to do
         return false;
+    }
+
+    @Override
+    public void cleanUp(String secret, Session session) throws OXException {
+        // Ignore
     }
 
 }

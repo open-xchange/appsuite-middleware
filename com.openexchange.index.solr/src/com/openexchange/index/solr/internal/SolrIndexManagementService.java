@@ -61,6 +61,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexManagementService;
+import com.openexchange.java.Strings;
 import com.openexchange.solr.SolrIndexEventProperties;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -156,11 +157,12 @@ public class SolrIndexManagementService implements IndexManagementService {
             rs = sstmt.executeQuery();
             if (rs.next()) {
                 String value = rs.getString(1);
-                String[] split = value.split(",");
+                String[] split = Strings.splitByComma(value);
+                final String sModule = String.valueOf(module);
                 StringBuilder sb = new StringBuilder();
                 for (String m : split) {
                     m = m.trim();
-                    if (String.valueOf(module).equals(m)) {
+                    if (sModule.equals(m)) {
                         continue;
                     }
                     sb.append(m);

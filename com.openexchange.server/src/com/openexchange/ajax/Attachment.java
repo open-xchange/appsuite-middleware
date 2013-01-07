@@ -313,7 +313,7 @@ public class Attachment extends PermissionServlet {
                             }
                         }
 
-                        final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(json.toString());
+                        final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(json);
                         assureSize(index, attachments, uploadFiles);
 
                         attachments.set(index, attachment);

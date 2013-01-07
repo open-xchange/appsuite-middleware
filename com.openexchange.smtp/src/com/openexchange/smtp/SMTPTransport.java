@@ -886,7 +886,7 @@ public final class SMTPTransport extends MailTransport {
         if (null == logProperties) {
             return getStaticHostName();
         }
-        final String serverName = logProperties.get("com.openexchange.ajp13.serverName");
+        final String serverName = logProperties.get(LogProperties.Name.AJP_SERVER_NAME);
         if (null == serverName) {
             return getStaticHostName();
         }

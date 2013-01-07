@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 
@@ -77,7 +78,7 @@ public final class CheckAction extends AbstractSecretRecoveryAction {
 
     @Override
     protected AJAXRequestResult perform(final SecretRecoveryAJAXRequest req) throws OXException, JSONException {
-        final String diagnosis = detector.isSecretWorking(req.getSession());
+        final String diagnosis = getService(SecretInconsistencyDetector.class).isSecretWorking(req.getSession());
         final JSONObject object = new JSONObject();
         object.put("secretWorks", diagnosis == null);
         if (diagnosis != null) {

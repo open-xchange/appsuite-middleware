@@ -33,7 +33,7 @@ public abstract class TokenPair implements Serializable {
         super();
         if (key == null) {
             throw new IllegalArgumentException("'key' must be non-null");
-        } else if (key.contains("|")) {
+        } else if (key.indexOf('|') >= 0) {
             throw new IllegalArgumentException("'key' must not contain a \"|\" character: \"" + key + "\"");
         }
         if (secret == null) {

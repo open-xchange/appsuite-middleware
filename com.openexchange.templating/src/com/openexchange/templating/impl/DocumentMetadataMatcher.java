@@ -86,7 +86,7 @@ public class DocumentMetadataMatcher {
         if(fileName.equals(name)) {
             newScore = 100;
         }
-        if(fileName.contains(".")) {
+        if(fileName.indexOf('.') >= 0) {
             final String filenameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
             if(filenameWithoutExtension.equals(name)) {
                 newScore = 5;
