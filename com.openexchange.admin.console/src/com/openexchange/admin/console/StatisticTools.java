@@ -227,11 +227,15 @@ public class StatisticTools extends AbstractJMXTools {
                 showSysThreadingData(initConnection);
                 System.out.print(getStats(initConnection, "org.json", "name", "JSONMBean"));
                 showGrizzlyData(initConnection);
-                System.out.print(getStats(
-                    initConnection,
-                    "com.openexchange.usm.session",
-                    "name",
-                    "com.openexchange.usm.session.impl.USMSessionInformation"));
+                try {
+                    System.out.print(getStats(
+                        initConnection,
+                        "com.openexchange.usm.session",
+                        "name",
+                        "com.openexchange.usm.session.impl.USMSessionInformation"));
+                } catch (final IllegalStateException e) {
+                    // Skip it
+                }
             }
             count++;
 

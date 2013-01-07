@@ -2,6 +2,7 @@
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-osgi"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hazelcast-community"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-log4j"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-xerces-sun"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-xerces-ibm"/>

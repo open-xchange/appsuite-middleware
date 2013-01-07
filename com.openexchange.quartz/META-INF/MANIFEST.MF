@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.quartz
 Bundle-Version: 7.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Eclipse-RegisterBuddy: com.openexchange.hazelcast
+Eclipse-RegisterBuddy: com.hazelcast
 Bundle-ClassPath: lib/quartz-2.1.5.jar,
  lib/quartz-backward-compat-2.1.5.jar,
  lib/quartz-commonj-2.1.5.jar,

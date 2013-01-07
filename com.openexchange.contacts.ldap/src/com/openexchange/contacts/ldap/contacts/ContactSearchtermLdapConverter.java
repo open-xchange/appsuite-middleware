@@ -103,19 +103,19 @@ public class ContactSearchtermLdapConverter implements ContactSearchTermConverte
 
         final List<String> ops = new LinkedList<String>();
         for (final Operand<?> o : operands) {
-            String value = (String) o.getValue();
+            String value = ContactField.class.isInstance(o.getValue()) ? ((ContactField)o.getValue()).getAjaxName() : (String)o.getValue();
             if (o.getType() == Operand.Type.COLUMN) {
                 nextIsFolder = FOLDER_AJAXNAME.equals(o.getValue());
                 if (distributionlistActive) {
-                    nextIsDisplayName = DISPLAYNAME_AJAXNAME.equals(o.getValue()) || ContactField.GIVEN_NAME.getAjaxName().equals(
-                        o.getValue()) || ContactField.SUR_NAME.getAjaxName().equals(o.getValue());
+                    nextIsDisplayName = DISPLAYNAME_AJAXNAME.equals(value) || ContactField.GIVEN_NAME.getAjaxName().equals(value) || 
+                        ContactField.SUR_NAME.getAjaxName().equals(value);
                 }
                 value = translateFromJSONtoLDAP(value);
                 if (nextIsFolder) {
                     continue;
                 }
             } else if (nextIsFolder) {
-                folders.add((String) o.getValue());
+                folders.add(value);
                 continue;
             }
             ops.add(LdapContactInterface.escapeLDAPSearchFilter(value));

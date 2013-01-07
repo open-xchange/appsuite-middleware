@@ -49,12 +49,16 @@
 
 package com.openexchange.ajp13.coyote.util;
 
+import java.util.regex.Pattern;
+
 /**
  * {@link IPAddressUtil}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IPAddressUtil {
+
+    private static final Pattern SPLIT = Pattern.compile("\\.");
 
     private final static int INADDR4SZ = 4;
 
@@ -318,7 +322,7 @@ public final class IPAddressUtil {
      * @return The mapped IPv6 or <code>null</code>
      */
     public static byte[] convertIPv4ToMappedIPv6(final String ipv4) {
-        final String[] octets = ipv4.split("\\.");
+        final String[] octets = SPLIT.split(ipv4, 0);
         if (octets.length != INADDR4SZ) {
             return null;
         }

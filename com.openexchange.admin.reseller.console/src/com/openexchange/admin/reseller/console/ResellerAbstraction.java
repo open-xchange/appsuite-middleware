@@ -236,7 +236,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     }
 
     public static Restriction getRestrictionFromString(final String opt) throws InvalidDataException {
-        if( ! opt.contains("=") ) {
+        if( opt.indexOf('=') < 0 ) {
             throw new InvalidDataException("Restriction must be key=value pair");
         }
         final String[] keyval = opt.split("=");

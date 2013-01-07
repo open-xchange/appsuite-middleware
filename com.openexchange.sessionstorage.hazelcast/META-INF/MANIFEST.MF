@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Eclipse-RegisterBuddy: com.openexchange.hazelcast
+Eclipse-RegisterBuddy: com.hazelcast
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange sessionstorage hazelcast bundle
 Bundle-SymbolicName: com.openexchange.sessionstorage.hazelcast
@@ -14,6 +14,8 @@ Import-Package: com.hazelcast.config,
  com.hazelcast.query,
  com.openexchange.config,
  com.openexchange.exception,
+ com.openexchange.hazelcast,
+ com.openexchange.hazelcast.configuration,
  com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.osgi,

@@ -1077,7 +1077,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 if( addguival.length() == 0 ) {
                     throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (empty value)");
                 }
-                if( ! addguival.contains("=") ) {
+                if(addguival.indexOf('=') < 0 ) {
                     throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (not key = value)");
                 }
                 final int idx = addguival.indexOf('=');
@@ -2503,7 +2503,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             if( addguival.length() == 0 ) {
                 throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (empty value)");
             }
-            if( ! addguival.contains("=") ) {
+            if( addguival.indexOf('=') < 0 ) {
                 throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (not key = value)");
             }
             final int idx = addguival.indexOf('=');

@@ -57,8 +57,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
-import com.openexchange.hazelcast.HazelcastMBean;
-import com.openexchange.hazelcast.HazelcastMBeanImpl;
+import com.openexchange.hazelcast.mbean.HazelcastMBean;
+import com.openexchange.hazelcast.mbean.HazelcastMBeanImpl;
 import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 

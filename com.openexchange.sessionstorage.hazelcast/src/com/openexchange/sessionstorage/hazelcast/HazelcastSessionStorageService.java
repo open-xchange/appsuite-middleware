@@ -65,13 +65,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.MapEntry;
 import com.hazelcast.query.Predicate;
 import com.hazelcast.query.SqlPredicate;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
@@ -143,15 +143,16 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
+     * 
+     * @param mapName The name of the distributed sessions map
      */
-    public HazelcastSessionStorageService(final HazelcastSessionStorageConfiguration config, final HazelcastInstance hazelcast) {
+    public HazelcastSessionStorageService(String mapName) {
         super();
-        this.mapName = config.getMapConfig().getName();
-        hazelcast.getConfig().addMapConfig(config.getMapConfig());
+        this.mapName = mapName;
         abortBehavior = AbortBehavior.<IMap<String, HazelcastStoredSession>> getInstance();
         allowFailIfPaused = false;
     }
-
+    
     /**
      * Sets the fail-if-paused behavior.
      *
@@ -648,5 +649,5 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             return Collections.emptyList();    
         }
     }
-    
+
 }

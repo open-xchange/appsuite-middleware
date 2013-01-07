@@ -62,6 +62,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogPropertyName;
@@ -198,28 +199,39 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
     }
 
     private void configureLogProperties() {
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
         final ConfigurationService service = getService(ConfigurationService.class);
         final String property = service.getProperty("com.openexchange.log.propertyNames");
         if (null == property) {
             LogProperties.configuredProperties(Collections.<LogPropertyName> emptyList());
         } else {
-            final List<String> list = Arrays.asList(property.split(" *, *"));
+            final List<String> list = Arrays.asList(Strings.splitByComma(property));
             final List<LogPropertyName> names = new ArrayList<LogPropertyName>(list.size());
             for (final String configuredName : list) {
                 if (!isEmpty(configuredName)) {
                     final int pos = configuredName.indexOf('(');
                     if (pos < 0) {
-                        names.add(new LogPropertyName(configuredName, LogLevel.ALL));
+                        final LogProperties.Name name = LogProperties.Name.nameFor(configuredName);
+                        if (null == name) {
+                            log.warn("Unknown log property: " + configuredName);
+                        } else {
+                            names.add(new LogPropertyName(name, LogLevel.ALL));
+                        }
                     } else {
                         final String propertyName = configuredName.substring(0, pos);
                         if (!isEmpty(propertyName)) {
-                            final int closing = configuredName.indexOf(')', pos + 1);
-                            if (closing < 0) { // No closing parenthesis
-                                names.add(new LogPropertyName(propertyName, LogLevel.ALL));
+                            final LogProperties.Name name = LogProperties.Name.nameFor(propertyName);
+                            if (null == name) {
+                                log.warn("Unknown log property: " + configuredName);
                             } else {
-                                names.add(new LogPropertyName(
-                                    propertyName,
-                                    LogLevel.logLevelFor(configuredName.substring(pos + 1, closing))));
+                                final int closing = configuredName.indexOf(')', pos + 1);
+                                if (closing < 0) { // No closing parenthesis
+                                    names.add(new LogPropertyName(name, LogLevel.ALL));
+                                } else {
+                                    names.add(new LogPropertyName(
+                                        name,
+                                        LogLevel.logLevelFor(configuredName.substring(pos + 1, closing))));
+                                }
                             }
                         }
                     }

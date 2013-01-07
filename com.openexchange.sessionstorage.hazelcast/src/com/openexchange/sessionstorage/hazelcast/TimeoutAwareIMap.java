@@ -61,12 +61,12 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import com.hazelcast.core.EntryListener;
-import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.MapEntry;
 import com.hazelcast.monitor.LocalMapStats;
 import com.hazelcast.query.Expression;
 import com.hazelcast.query.Predicate;
+import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.AbortBehavior;
 

@@ -94,7 +94,6 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -124,10 +123,6 @@ import com.openexchange.tools.tnef.TNEF2ICal;
 public final class MailMessageParser {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailMessageParser.class));
-
-    private static final String LOG_PROPERTY_FULL_NAME = MailActionConstants.LOG_PROPERTY_FULL_NAME;
-    private static final String LOG_PROPERTY_MAIL_ID = MailActionConstants.LOG_PROPERTY_MAIL_ID;
-    private static final String LOG_PROPERTY_ACCOUNT_ID = MailActionConstants.LOG_PROPERTY_ACCOUNT_ID;
 
     private static final String APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
 
@@ -305,15 +300,15 @@ public final class MailMessageParser {
                 final Props properties = LogProperties.getLogProperties();
                 final int accountId = mail.getAccountId();
                 if (accountId >= 0) {
-                    properties.put(LOG_PROPERTY_ACCOUNT_ID, ForceLog.valueOf(Integer.valueOf(accountId)));
+                    properties.put(LogProperties.Name.MAIL_ACCOUNT_ID, ForceLog.valueOf(Integer.valueOf(accountId)));
                 }
                 final String mailId = mail.getMailId();
                 if (null != mailId) {
-                    properties.put(LOG_PROPERTY_MAIL_ID, ForceLog.valueOf(mailId));
+                    properties.put(LogProperties.Name.MAIL_MAIL_ID, ForceLog.valueOf(mailId));
                 }
                 final String folder = mail.getFolder();
                 if (null != folder) {
-                    properties.put(LOG_PROPERTY_FULL_NAME, ForceLog.valueOf(folder));
+                    properties.put(LogProperties.Name.MAIL_FULL_NAME, ForceLog.valueOf(folder));
                 }
             }
             /*
@@ -335,9 +330,9 @@ public final class MailMessageParser {
         } finally {
             if (logPropsEnabled) {
                 final Props properties = LogProperties.getLogProperties();
-                properties.remove(LOG_PROPERTY_ACCOUNT_ID);
-                properties.remove(LOG_PROPERTY_MAIL_ID);
-                properties.remove(LOG_PROPERTY_FULL_NAME);
+                properties.remove(LogProperties.Name.MAIL_ACCOUNT_ID);
+                properties.remove(LogProperties.Name.MAIL_MAIL_ID);
+                properties.remove(LogProperties.Name.MAIL_FULL_NAME);
             }
         }
         handler.handleMessageEnd(mail);

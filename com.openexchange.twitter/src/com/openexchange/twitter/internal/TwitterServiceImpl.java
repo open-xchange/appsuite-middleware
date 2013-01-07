@@ -49,6 +49,7 @@
 
 package com.openexchange.twitter.internal;
 
+import static com.openexchange.twitter.internal.TwitterUtils.handleTwitterException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Iterator;
@@ -133,7 +134,7 @@ public final class TwitterServiceImpl implements TwitterService {
             // Ensure presence of access token in authorization instance
             oAuthAuthorization.getOAuthAccessToken();
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
         return new TwitterAccessImpl(new OXTwitterImpl(configuration, oAuthAuthorization));
     }
@@ -180,7 +181,7 @@ public final class TwitterServiceImpl implements TwitterService {
              */
             return new TwitterAccessTokenImpl(twitter.getOAuthAccessToken(requestToken, pin));
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
     }
 

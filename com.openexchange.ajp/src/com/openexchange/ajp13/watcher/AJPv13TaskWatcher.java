@@ -313,7 +313,7 @@ public class AJPv13TaskWatcher {
                 final Map<String, Object> taskProperties;
                 {
                     final Props taskProps = LogProperties.optLogProperties(task.getThread());
-                    taskProperties = null == taskProps ? null : taskProps.getMap();
+                    taskProperties = null == taskProps ? null : taskProps.asMap();
                 }
                 if (null == taskProperties) {
                     final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(196).append("AJP Listener \"").append(task.getThreadName());

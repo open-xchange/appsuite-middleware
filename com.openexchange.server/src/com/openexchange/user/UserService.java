@@ -57,83 +57,99 @@ import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link UserService} - Offers access method to user module.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface UserService {
 
     /**
+     * Gets the denoted context.
+     * 
+     * @param contextId The context identifier
+     * @return The context
+     * @throws OXException If context cannot be returned
+     */
+    Context getContext(int contextId) throws OXException;
+
+    /**
      * Gets specified user attribute.
-     *
+     * 
      * @param name The attribute name
      * @param userId The user identifier
      * @param context The context
      * @return The attribute value
      * @throws OXException If user attribute cannot be returned
+     * @see #getContext(int)
      */
     String getUserAttribute(String name, int userId, Context context) throws OXException;
 
     /**
      * Sets specified user attribute.
-     *
+     * 
      * @param name The attribute name
      * @param value The attribute value
      * @param userId The user identifier
      * @param context The context
      * @throws OXException If user attribute cannot be set
+     * @see #getContext(int)
      */
     void setUserAttribute(String name, String value, int userId, Context context) throws OXException;
 
     /**
      * Sets specified unscoped user attribute.
-     *
+     * 
      * @param name The attribute name
      * @param value The attribute value
      * @param userId The user identifier
      * @param context The context
      * @throws OXException If user attribute cannot be set
+     * @see #getContext(int)
      */
     void setAttribute(String name, String value, int userId, Context context) throws OXException;
 
     /**
-     * Searches for a user whose login matches the given uid.
-     *
-     * @param loginInfo Login name of the user.
+     * Searches for a user whose login matches the given <code>loginInfo</code>.
+     * 
+     * @param loginInfo The login name of the user.
      * @param context The context.
      * @return The unique identifier of the user.
-     * @throws OXException if an error occurs while searching the user or the user doesn't exist.
+     * @throws OXException If an error occurs while searching the user or the user doesn't exist.
+     * @see #getContext(int)
      */
     int getUserId(String loginInfo, Context context) throws OXException;
 
     /**
      * Reads the data from a user from the underlying persistent data storage.
-     *
-     * @param uid User identifier.
-     * @return a user object.
+     * 
+     * @param uid The user identifier.
+     * @return The user
      * @param context The context.
-     * @throws OXException if an error occurs while reading from the persistent storage or the user doesn't exist.
+     * @throws OXException If an error occurs while reading from the persistent storage or the user doesn't exist.
+     * @see #getContext(int)
      */
     User getUser(int uid, Context context) throws OXException;
-    
+
     /**
      * Reads the data from a user from the underlying persistent data storage.
-     *
-     * @param con The database connection 
-     * @param uid User identifier.
-     * @return a user object.
-     * @param context The context.
-     * @throws OXException if an error occurs while reading from the persistent storage or the user doesn't exist.
+     * 
+     * @param con The database connection
+     * @param uid The user identifier.
+     * @param context The context
+     * @return A user
+     * @throws OXException If an error occurs while reading from the persistent storage or the user doesn't exist.
+     * @see #getContext(int)
      */
     User getUser(Connection con, int uid, Context context) throws OXException;
-    
+
     /**
      * Writes a new user into the database.
      * 
      * @param con The database connection.
      * @param context The context.
-     * @param user The user.
+     * @param user The user
      * @return ID of the new user.
-     * @throws OXException if an error occurrs while creating the user.
+     * @throws OXException If an error occurs while creating the user.
+     * @see #getContext(int)
      */
     int createUser(Connection con, Context context, User user) throws OXException;
 
@@ -143,44 +159,50 @@ public interface UserService {
      * @param context The context.
      * @param user The user.
      * @return ID of the new user.
-     * @throws OXException if an error occurrs while creating the user.
+     * @throws OXException If an error occurs while creating the user.
+     * @see #getContext(int)
      */
     int createUser(Context context, User user) throws OXException;
 
     /**
      * Reads the data for a set of user from the underlying persistent data storage.
-     *
-     * @param userIds User identifier.
-     * @return the users objects.
-     * @param context The context.
-     * @throws OXException if an error occurs while reading from the persistent storage or the user doesn't exist.
+     * 
+     * @param context The context
+     * @param userIds The user identifier
+     * @return The users
+     * @throws OXException If an error occurs while reading from the persistent storage or the user doesn't exist.
+     * @see #getContext(int)
      */
     User[] getUser(Context context, int[] userIds) throws OXException;
 
     /**
-     * Reads all user for the given context. Use this method if you need a lot of users from that context because this method uses
-     * optimized storage loading mechanisms to get all user information from the storage fastly.
-     * @param ctx the context
-     * @return an array with all users from the given context.
+     * Reads all user for the given context. Use this method if you need a lot of users from that context because this method uses optimized
+     * storage loading mechanisms to get all user information from the storage in a fast manner.
+     * 
+     * @param ctx The context
+     * @return An array with all users from the given context
+     * @see #getContext(int)
      */
     User[] getUser(Context ctx) throws OXException;
 
     /**
      * This method updates some values of a user.
-     *
-     * @param user user object with the updated values.
+     * 
+     * @param user The user with the updated values.
      * @param context The context.
-     * @throws OXException if an error occurs.
+     * @throws OXException If an error occurs.
+     * @see #getContext(int)
      */
     void updateUser(User user, Context context) throws OXException;
 
     /**
      * Searches a user by its email address. This is used for converting iCal to appointments.
-     *
-     * @param email the email address of the user.
+     * 
+     * @param email The email address of the user.
      * @param context The context.
-     * @return a User object if the user was found by its email address or <code>null</code> if no user could be found.
-     * @throws OXException if an error occurs.
+     * @return A {@link User} instance if the user was found by its email address or <code>null</code> if no user could be found.
+     * @throws OXException If an error occurs.
+     * @see #getContext(int)
      */
     User searchUser(String email, Context context) throws OXException;
 
@@ -199,61 +221,66 @@ public interface UserService {
      * 
      * @param name The login/display name of the user.
      * @param context The context.
-     * @param searchType The search type; e.g. <code>{@link UserService#SEARCH_DISPLAY_NAME SEARCH_DISPLAY_NAME} | {@link UserService#SEARCH_LOGIN_NAME SEARCH_LOGIN_NAME}</code>
+     * @param searchType The search type; e.g.
+     *            <code>{@link UserService#SEARCH_DISPLAY_NAME SEARCH_DISPLAY_NAME} | {@link UserService#SEARCH_LOGIN_NAME SEARCH_LOGIN_NAME}</code>
      * @return The matching users
      * @throws OXException If an error occurs.
      * @see #SEARCH_DISPLAY_NAME
      * @see #SEARCH_LOGIN_NAME
+     * @see #getContext(int)
      */
     User[] searchUserByName(String name, Context context, int searchType) throws OXException;
 
     /**
      * Returns an array with all user identifier of the context.
-     *
+     * 
      * @param context The context.
      * @return an array with all user identifier of the context.
-     * @throws OXException if generating this list fails.
+     * @throws OXException If generating this list fails.
+     * @see #getContext(int)
      */
     int[] listAllUser(Context context) throws OXException;
 
     /**
      * Searches for users whose IMAP login name matches the given login name.
-     *
+     * 
      * @param imapLogin the IMAP login name to search for
      * @param context The context.
      * @return The unique identifiers of the users.
-     * @throws OXException if an error occurs during the search.
+     * @throws OXException If an error occurs during the search.
+     * @see #getContext(int)
      */
     int[] resolveIMAPLogin(String imapLogin, Context context) throws OXException;
 
     /**
      * Searches users who where modified later than the given date.
-     *
+     * 
      * @param modifiedSince Date after that the returned users are modified.
      * @param context The context.
      * @return a string array with the uids of the matching user.
-     * @throws OXException if an error occurs during the search.
+     * @throws OXException If an error occurs during the search.
+     * @see #getContext(int)
      */
     int[] listModifiedUser(Date modifiedSince, Context context) throws OXException;
 
     /**
      * Removes a user from the cache if caching is used.
-     *
+     * 
      * @param ctx Context.
      * @param userId unique identifier of the user.
-     * @throws OXException if removing gives an exception.
+     * @throws OXException If removing gives an exception.
+     * @see #getContext(int)
      */
     void invalidateUser(Context ctx, int userId) throws OXException;
 
     /**
      * Authenticates the given password against the given user object.
-     *
+     * 
      * @param user user that password is compared with given one.
      * @param password password to check.
      * @return <code>true</code> if the password matches.
-     * @throws OXException if password check mechanism has problems.
+     * @throws OXException If password check mechanism has problems.
      */
     boolean authenticate(User user, String password) throws OXException;
-
 
 }

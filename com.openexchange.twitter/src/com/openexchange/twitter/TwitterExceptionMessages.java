@@ -49,6 +49,7 @@
 
 package com.openexchange.twitter;
 
+import twitter4j.TwitterException;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
@@ -75,6 +76,16 @@ public final class TwitterExceptionMessages implements LocalizableStrings {
 
     // The configured consumer key/consumer secret pair is invalid. Please provide a valid consumer key/consumer secret through configuration.
     public static final String INVALID_CONSUMER_KEY_SECRET_MSG = "The configured consumer key/consumer secret pair is invalid. Please provide a valid consumer key/consumer secret through configuration.";
+
+    // Please (re-)authorize your Twitter accounts.
+    // Twitter responded with: %1$s
+    public static final String REAUTHORIZE_ERROR_MSG = "Please (re-)authorize your Twitter accounts.\nTwitter responded with: %1$s";
+
+    // The request is understood, but it has been refused or access is not allowed: %1$s
+    public static final String DENIED_ERROR_MSG = "The request is understood, but it has been refused or access is not allowed: %1$s";
+
+    // Invalid format in search query.
+    public static final String INVALID_QUERY_MSG = "Invalid format in search query.";
 
     /**
      * Initializes a new {@link TwitterExceptionMessages}.

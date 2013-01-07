@@ -152,7 +152,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     
                     // If we have additional log properties from the ThreadLocal add it to the logBuilder
                     if (logProperties != null) {
-                        Map<String, Object> propertyMap = logProperties.getMap();
+                        Map<String, Object> propertyMap = logProperties.asMap();
                         // Sort the properties for readability
                         Map<String, String> sorted = new TreeMap<String, String>();
                         for (Entry<String, Object> propertyEntry : propertyMap.entrySet()) {

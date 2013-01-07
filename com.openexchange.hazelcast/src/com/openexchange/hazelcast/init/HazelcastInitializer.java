@@ -52,7 +52,6 @@ package com.openexchange.hazelcast.init;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -68,15 +67,14 @@ import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.LifecycleEvent;
 import com.hazelcast.core.LifecycleEvent.LifecycleState;
 import com.hazelcast.core.LifecycleListener;
-import com.hazelcast.impl.GroupProperties;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.hazelcast.HazelcastMBean;
+import com.openexchange.exception.OXException;
+import com.openexchange.hazelcast.Hazelcasts;
+import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.hazelcast.mbean.HazelcastMBean;
 import com.openexchange.hazelcast.osgi.HazelcastActivator;
-import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link HazelcastInitializer}
@@ -199,7 +197,18 @@ public final class HazelcastInitializer {
             /*
              * Create Hazelcast configuration from properties
              */
-            Config config = createConfig();
+            HazelcastConfigurationService configService = activator.getService(HazelcastConfigurationService.class);
+            if (null == configService) {
+                throw new IllegalStateException(
+                    new BundleException("Unable to access configuration service.", BundleException.ACTIVATOR_ERROR));
+            }
+            Config config = null;
+            try {
+                config = configService.getConfig();
+            } catch (OXException e) {
+                throw new IllegalStateException(
+                    new BundleException("Unable to get hazelcast configuration", BundleException.ACTIVATOR_ERROR, e));
+            }
             configureNetworkJoin(nodes, false, config, logger);
             /*
              * Create appropriate Hazelcast instance from configuration
@@ -299,87 +308,7 @@ public final class HazelcastInitializer {
             }
         }
     }
-
-    /**
-     * Creates a new hazelcast configuration, setting the relevant properties as read by the configuration service.
-     * 
-     * @return A new pre-configured hazelcast config object
-     */
-    private Config createConfig() {
-        Config config = new Config();
-        ConfigurationService configService = activator.getService(ConfigurationService.class);
-        if (null == configService) {
-            throw new IllegalStateException(new BundleException("Unable to access configuration service.", 
-                BundleException.ACTIVATOR_ERROR));
-        }
-        /*
-         * cluster group name
-         */
-        String groupName = configService.getProperty("com.openexchange.cluster.name");
-        if (isEmpty(groupName)) {
-            throw new IllegalStateException(new BundleException(
-                "Cluster name is mandatory. Please set a valid identifier through property \"com.openexchange.cluster.name\".", 
-                BundleException.ACTIVATOR_ERROR));
-        } else if ("ox".equalsIgnoreCase(groupName)) {
-            LOG.warn("\n\tThe configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default value "
-                + "\"ox\". Please do so to make this warning disappear.\n");
-        }
-        config.getGroupConfig().setName(groupName).setPassword("YXV0b2JhaG4=");
-        /*
-         * JMX
-         */
-        if (configService.getBoolProperty("com.openexchange.hazelcast.jmx", true)) {
-            config.setProperty(GroupProperties.PROP_ENABLE_JMX, "true").setProperty(GroupProperties.PROP_ENABLE_JMX_DETAILED, "true");
-        }
-        /*
-         * limit number of redos
-         */
-        config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD, "10");
-        /*
-         * configure merge run intervals 
-         */
-        String mergeFirstRunDelay = configService.getProperty("com.openexchange.hazelcast.mergeFirstRunDelay", "120s");
-        config.setProperty(GroupProperties.PROP_MERGE_FIRST_RUN_DELAY_SECONDS, 
-            String.valueOf(TimeSpanParser.parseTimespan(mergeFirstRunDelay).longValue() / 1000));
-        String mergeRunDelay = configService.getProperty("com.openexchange.hazelcast.mergeRunDelay", "120s");
-        config.setProperty(GroupProperties.PROP_MERGE_NEXT_RUN_DELAY_SECONDS, 
-            String.valueOf(TimeSpanParser.parseTimespan(mergeRunDelay).longValue() / 1000));
-        /*
-         * set interfaces
-         */
-        String interfaces = configService.getProperty("com.openexchange.hazelcast.interfaces");
-        if (false == isEmpty(interfaces)) {
-            String[] ips = interfaces.split(" *, *");
-            if (null != ips && 0 < ips.length) {
-                config.getNetworkConfig().getInterfaces().setInterfaces(Arrays.asList(ips)).setEnabled(true);
-            }
-        }
-        /*
-         * Disable: Multicast, AWS and ...
-         */
-        config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
-        config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
-        /*-
-         * ... enable: TCP-IP
-         * 
-         * http://code.google.com/p/hazelcast/wiki/ConfigFullTcpIp
-         */
-        config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true).setConnectionTimeoutSeconds(10);
-        return config;
-    }
-
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
+    
     private static final Pattern SPLIT = Pattern.compile("\\%");
 
     private static Set<String> resolve2Members(final List<InetAddress> nodes) {

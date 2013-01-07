@@ -1,0 +1,5 @@
+open-xchange-hazelcast-community (7.0.0-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Fri, 04 Jan 2013 11:24:35 +0100

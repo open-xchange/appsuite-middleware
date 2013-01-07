@@ -50,7 +50,7 @@
 package com.openexchange.log;
 
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -183,7 +183,7 @@ public class PropertiesAppendingLogWrapper implements Log {
         if (logProps == null) {
             return message;
         }
-        final Map<String, Object> properties = logProps.getMap();
+        final Map<LogProperties.Name, Object> properties = logProps.getMap();
         if (properties == null) {
             return message;
         }
@@ -194,29 +194,29 @@ public class PropertiesAppendingLogWrapper implements Log {
         boolean isEmpty = true;
         {
             final List<LogPropertyName> names = LogProperties.getPropertyNames();
-            final Set<String> alreadyLogged;
+            final Set<LogProperties.Name> alreadyLogged;
             if (names.isEmpty()) {
                 alreadyLogged = Collections.emptySet();
             } else {
-                alreadyLogged = new HashSet<String>(names.size());
+                alreadyLogged = EnumSet.noneOf(LogProperties.Name.class);
                 for (final LogPropertyName name : names) {
                     if (name.implies(logLevel)) {
-                        final String propertyName = name.getPropertyName();
+                        final LogProperties.Name propertyName = name.getPropertyName();
                         alreadyLogged.add(propertyName);
                         final Object value = properties.get(propertyName);
                         if (null != value) {
-                            sorted.put(propertyName, value.toString());
+                            sorted.put(propertyName.getName(), value.toString());
                             isEmpty = false;
                         }
                     }
                 }
             }
-            for (final Entry<String, Object> entry : properties.entrySet()) {
-                final String propertyName = entry.getKey();
+            for (final Entry<LogProperties.Name, Object> entry : properties.entrySet()) {
+                final LogProperties.Name propertyName = entry.getKey();
                 if (!alreadyLogged.contains(propertyName)) {
                     final Object value = entry.getValue();
                     if (value instanceof ForceLog) {
-                        sorted.put(propertyName, value.toString());
+                        sorted.put(propertyName.getName(), value.toString());
                         isEmpty = false;
                     }
                 }

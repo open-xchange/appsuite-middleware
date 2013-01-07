@@ -128,7 +128,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         IFileHolder file = (IFileHolder) result.getResultObject();
         final String fileContentType = file.getContentType();
         final String fileName = file.getName();
-
+        // Check certain parameters
         String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
         if (null == contentType) {
             contentType = fileContentType;
@@ -143,7 +143,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         } else {
             contentDisposition = Utils.encodeUrl(contentDisposition);
         }
-
+        // Write to Servlet's output stream
         InputStream documentData = null;
         try {
             file = transformIfImage(request, file, delivery);
@@ -156,24 +156,20 @@ public class FileResponseRenderer implements ResponseRenderer {
             documentData = new BufferedInputStream(stream);
             final String userAgent = req.getHeader("user-agent");
             if (SAVE_AS_TYPE.equals(contentType) || (delivery != null && delivery.equalsIgnoreCase(DOWNLOAD))) {
-                if (null == contentDisposition) {
-                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32).append("attachment");
-                    DownloadUtility.appendFilenameParameter(fileName, SAVE_AS_TYPE, userAgent, sb);
-                    resp.setHeader("Content-Disposition", sb.toString());
-                } else {
-                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32).append(contentDisposition.trim());
-                    DownloadUtility.appendFilenameParameter(file.getName(), SAVE_AS_TYPE, userAgent, sb);
-                    resp.setHeader("Content-Disposition", sb.toString());
-                    //Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);
-                }
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
+                sb.append(isEmpty(contentDisposition) ? "attachment" : contentDisposition.trim());
+                DownloadUtility.appendFilenameParameter(file.getName(), null, userAgent, sb);
+                resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(contentType);
             } else {
                 final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, fileContentType, contentDisposition, userAgent);
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
-                    if (contentDisposition == null) {
+                    if (isEmpty(contentDisposition)) {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     } else {
-                        if (contentDisposition.indexOf(';') < 0) {
+                        if (contentDisposition.indexOf(';') >= 0) {
+                            resp.setHeader("Content-Disposition", contentDisposition);
+                        } else {
                             final String disposition = checkedDownload.getContentDisposition();
                             final int pos = disposition.indexOf(';');
                             if (pos >= 0) {
@@ -181,8 +177,6 @@ public class FileResponseRenderer implements ResponseRenderer {
                             } else {
                                 resp.setHeader("Content-Disposition", contentDisposition);
                             }
-                        } else {
-                            resp.setHeader("Content-Disposition", contentDisposition);
                         }
                     }
                 }
@@ -289,6 +283,18 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
         }
         return true;
+    }
+
+    private boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

@@ -112,5 +112,5 @@ public interface Loggable {
      *
      * @return The properties
      */
-    public Map<String, Object> properties();
+    public Map<LogProperties.Name, Object> properties();
 }

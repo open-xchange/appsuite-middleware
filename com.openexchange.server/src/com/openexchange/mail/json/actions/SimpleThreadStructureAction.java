@@ -50,7 +50,7 @@
 package com.openexchange.mail.json.actions;
 
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -233,7 +233,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
      */
     protected AJAXRequestResult perform0(final MailRequest req, final MailServletInterface mailInterface, final boolean cache) throws OXException {
         final Props props = LogProperties.getLogProperties();
-        final Set<String> names = new HashSet<String>(3);
+        final Set<LogProperties.Name> names = EnumSet.noneOf(LogProperties.Name.class);
         try {
             /*
              * Read in parameters
@@ -241,11 +241,11 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
             {
                 final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(folderId);
-                if (!props.put(LOG_PROPERTY_FULL_NAME, arg.getFullname())) {
-                    names.add(LOG_PROPERTY_FULL_NAME);
+                if (!props.put(LogProperties.Name.MAIL_FULL_NAME, arg.getFullname())) {
+                    names.add(LogProperties.Name.MAIL_FULL_NAME);
                 }
-                if (!props.put(LOG_PROPERTY_ACCOUNT_ID, Integer.toString(arg.getAccountId()))) {
-                    names.add(LOG_PROPERTY_ACCOUNT_ID);
+                if (!props.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.toString(arg.getAccountId()))) {
+                    names.add(LogProperties.Name.MAIL_ACCOUNT_ID);
                 }
             }
             int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
@@ -398,7 +398,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            for (final String name : names) {
+            for (final LogProperties.Name name : names) {
                 props.remove(name);
             }
         }

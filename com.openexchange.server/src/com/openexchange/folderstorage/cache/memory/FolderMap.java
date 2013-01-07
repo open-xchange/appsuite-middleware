@@ -254,11 +254,11 @@ public final class FolderMap {
             }
             if (LogProperties.isEnabled()) {
                 final Props properties = LogProperties.getLogProperties();
-                properties.put("com.openexchange.session.sessionId", session.getSessionID());
-                properties.put("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
-                properties.put("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
+                properties.put(LogProperties.Name.SESSION_SESSION_ID, session.getSessionID());
+                properties.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(session.getUserId()));
+                properties.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(session.getContextId()));
                 final String client  = session.getClient();
-                properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
+                properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : client);
             }
             ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new LoadSubfolders(folder, treeId, this, session)), AbortBehavior.getInstance());
         } catch (final Exception e) {

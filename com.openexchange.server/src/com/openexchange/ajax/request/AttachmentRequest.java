@@ -168,7 +168,7 @@ public class AttachmentRequest extends CommonRequest {
                     return true;
                 }
 
-                final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(object.toString());
+                final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(object);
                 final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
 
                 if (conversionService == null) {
