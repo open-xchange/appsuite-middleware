@@ -1,1 +1,1 @@
-com.openexchange.apps.manifestPath : @oxgroupwaresysconfdir@/../manifests/
+com.openexchange.apps.manifestPath : @oxgroupwaresysconfdir@/../manifests/:@oxgroupwaresysconfdir@/../../../office/open-xchange-office/manifests/
