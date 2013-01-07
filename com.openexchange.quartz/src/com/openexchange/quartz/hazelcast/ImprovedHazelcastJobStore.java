@@ -159,13 +159,13 @@ public class ImprovedHazelcastJobStore implements JobStore {
         }
         
         this.signaler = signaler;
-        triggersByKey = hazelcast.getMap(instanceName + '/' + "quartzTriggersByKey");
-        jobsByKey = hazelcast.getMap(instanceName + '/' + "quartzJobsByKey");
-        calendarsByName = hazelcast.getMap(instanceName + '/' + "quartzCalendarsByName");
-        triggerGroups = hazelcast.getMap(instanceName + '/' + "quartzTriggerGroups");
-        jobGroups = hazelcast.getMap(instanceName + '/' + "quartzJobGroups");
-        lock = hazelcast.getLock(instanceName + '/' + "quartzJobStoreLock");
-        blockedJobs = hazelcast.getSet(instanceName + '/' + "quartzBlockedJobs");
+        triggersByKey = hazelcast.getMap(instanceName + '/' + "quartzTriggersByKey-0");
+        jobsByKey = hazelcast.getMap(instanceName + '/' + "quartzJobsByKey-0");
+        calendarsByName = hazelcast.getMap(instanceName + '/' + "quartzCalendarsByName-0");
+        triggerGroups = hazelcast.getMap(instanceName + '/' + "quartzTriggerGroups-0");
+        jobGroups = hazelcast.getMap(instanceName + '/' + "quartzJobGroups-0");
+        lock = hazelcast.getLock(instanceName + '/' + "quartzJobStoreLock-0");
+        blockedJobs = hazelcast.getSet(instanceName + '/' + "quartzBlockedJobs-0");
         nodeIp = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
         
         if (triggersByKey.isEmpty()) {
