@@ -52,9 +52,10 @@ GLOBIGNORE='*'
 %config(noreplace) /opt/open-xchange/etc/*.properties
 %config(noreplace) /opt/open-xchange/etc/meta/*
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
-
+%dir /opt/open-xchange/lib/
 /opt/open-xchange/lib
-/opt/open-xchange/sbin
+%dir /opt/open-xchange/sbin/
+/opt/open-xchange/sbin/*
 
 %changelog
 * Fri Dec 21 2012 Karsten Will <karsten.will@open-xchange.com>
