@@ -1,3 +1,7 @@
+* 2013-01-07 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23433: Broken Recurring Appointments.
+
 * 2013-01-07 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 20116: Added additional parameter for simple free/busy data requests
