@@ -71,6 +71,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import com.openexchange.exception.OXException;
@@ -695,14 +696,14 @@ public final class FacebookMessagingUtility {
     public static List<JSONObject> performFQLQuery(final String fqlQuery, final FacebookOAuthAccess facebookOAuthInfo) throws OXException {
         try {
             final String encodedQuery = encode(fqlQuery);
-            final String body =
-                facebookOAuthInfo.executeGETRequest(new StringBuilder(FQL_JSON_START_LEN + encodedQuery.length()).append(FQL_JSON_START).append(
-                    encodedQuery).toString());
-            if (startsWith('{', body, true)) {
+            final JSONValue body =
+                facebookOAuthInfo.executeGETJsonRequest(new StringBuilder(FQL_JSON_START_LEN + encodedQuery.length()).append(FQL_JSON_START).append(
+                    encodedQuery));
+            if (body.isObject()) {
                 /*
                  * Expect the body to be a JSON object
                  */
-                final JSONObject result = new JSONObject(body);
+                final JSONObject result = (JSONObject) body;
                 if (result.has("error")) {
                     final JSONObject error = result.getJSONObject("error");
                     final String type = error.optString("type");
@@ -715,11 +716,11 @@ public final class FacebookMessagingUtility {
                         null == message ? "" : message);
                 }
                 return Collections.singletonList(result);
-            } else if (startsWith('[', body, true)) {
+            } else if (body.isArray()) {
                 /*
                  * Expect the body to be a JSON array
                  */
-                final JSONArray result = new JSONArray(body);
+                final JSONArray result = (JSONArray) body;
                 final int length = result.length();
                 final List<JSONObject> list = new ArrayList<JSONObject>(length);
                 for (int i = 0; i < length; i++) {
@@ -748,12 +749,60 @@ public final class FacebookMessagingUtility {
      * @param facebookOAuthInfo The facebook OAuth information
      * @return The FQL query's results
      * @throws OXException If query cannot be fired
+     * @deprecated Use {@link #fireFQLJsonQuery(CharSequence, FacebookOAuthAccess)} instead
      */
+    @Deprecated
     public static List<Element> fireFQLQuery(final CharSequence fqlQuery, final FacebookOAuthAccess facebookOAuthInfo) throws OXException {
         try {
             final String encodedQuery = encode(fqlQuery.toString());
             return FacebookDOMParser.parseXMLResponse(facebookOAuthInfo.executeGETRequest(new StringBuilder(
                 FQL_XML_START_LEN + encodedQuery.length()).append(FQL_XML_START).append(encodedQuery).toString()));
+        } catch (final Exception e) {
+            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Fires given FQL query using specified facebook REST client.
+     *
+     * @param fqlQuery The FQL query to fire
+     * @param facebookOAuthInfo The facebook OAuth information
+     * @return The FQL query's results
+     * @throws OXException If query cannot be fired
+     */
+    public static List<JSONObject> fireFQLJsonQuery(final CharSequence fqlQuery, final FacebookOAuthAccess facebookOAuthInfo) throws OXException {
+        try {
+            final String encodedQuery = encode(fqlQuery.toString());
+            final JSONValue body = facebookOAuthInfo.executeGETJsonRequest(new StringBuilder(
+                FQL_JSON_START_LEN + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery));
+            if (body.isArray()) {
+                final JSONArray array = body.toArray();
+                final int length = array.length();
+                final List<JSONObject> ret = new ArrayList<JSONObject>(length);
+                for (int i = 0; i < length; i++) {
+                    ret.add(array.getJSONObject(i));
+                }
+                return ret;
+            }
+            if (body.isObject()) {
+                /*
+                 * Expect the body to be a JSON object
+                 */
+                final JSONObject result = (JSONObject) body;
+                if (result.has("error")) {
+                    final JSONObject error = result.getJSONObject("error");
+                    final String type = error.optString("type");
+                    final String message = error.optString("message");
+                    if ("OAuthException".equals(type)) {
+                        throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == message ? "" : message);
+                    }
+                    throw FacebookMessagingExceptionCodes.FQL_ERROR.create(
+                        null == type ? "<unknown>" : type,
+                        null == message ? "" : message);
+                }
+                return Collections.singletonList(result);
+            }
+            throw FacebookMessagingExceptionCodes.INVALID_RESPONSE_BODY.create(body);
         } catch (final Exception e) {
             throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
