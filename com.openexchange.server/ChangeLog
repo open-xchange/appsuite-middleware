@@ -1,6 +1,7 @@
 * 2013-01-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 24428: Ensure Facebook OAuth errors are propagated to user
+ - Fix for bug 24429: Proper processing of body CSS selector
 
 * 2013-01-08 - tobias.friedrich@open-xchange.com
 
