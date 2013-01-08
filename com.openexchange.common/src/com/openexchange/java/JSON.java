@@ -74,8 +74,9 @@ public class JSON {
         if (null == array) {
             return new LinkedList<String>();
         }
-        final List<String> list = new ArrayList<String>(array.length());
-        for (int i = 0, size = array.length(); i < size; i++) {
+        final int length = array.length();
+        final List<String> list = new ArrayList<String>(length);
+        for (int i = 0, size = length; i < size; i++) {
             list.add(array.getString(i));
         }
         return list;
