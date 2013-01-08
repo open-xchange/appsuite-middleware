@@ -328,7 +328,13 @@ public class ICal4JParser implements ICalParser {
             converter.verify(index, appointment, warnings);
         }
 
-        appointment.setTimezone(getTimeZoneID(defaultTZ));
+        /*
+         *  Very difficult to keep overview, which timezone has to be used here.
+         *  Last deciscion was to use the given timezone from the ical as we need to store it with the appointment
+         *  to avoid mix-ups in group-series-appointments passing the DST borders.
+         *  See bug 23586
+         */
+        appointment.setTimezone(tz.getID());
 
         return appointment;
     }
