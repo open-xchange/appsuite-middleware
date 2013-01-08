@@ -7,7 +7,6 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
-BuildRequires: open-xchange-hazelcast
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
 %define        ox_release 4
@@ -20,7 +19,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The essential core of an Open-Xchange backend
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces
-Requires:      open-xchange-hazelcast
 Provides:      open-xchange-cache = %{version}
 Obsoletes:     open-xchange-cache <= %{version}
 Provides:      open-xchange-calendar = %{version}
