@@ -156,6 +156,7 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
     private java.util.Date normalize(java.util.Date date) {
         Calendar cal = Calendar.getInstance(UTC);
         cal.setTime(date);
+        cal.add(Calendar.MINUTE, -date.getTimezoneOffset());
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
