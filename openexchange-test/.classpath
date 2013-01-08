@@ -98,5 +98,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.logging_1.1.1.v201101211721.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201205030909.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201205030909.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.version"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
