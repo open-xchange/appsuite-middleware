@@ -3,6 +3,6 @@ opt/open-xchange/etc/facebookoauth.properties
 opt/open-xchange/etc/linkedinoauth.properties
 opt/open-xchange/etc/msnoauth.properties
 opt/open-xchange/etc/oauth.properties
-opt/open-xchange/etc/tumblroauth.properties
+opt/open-xchange/etc/twitteroauth.properties
 opt/open-xchange/etc/yahoooauth.properties
-opt/open-xchange/etc/settings/twitteroauth.properties
+opt/open-xchange/etc/settings/tumblroauth.properties
