@@ -1,3 +1,7 @@
+* 2013-01-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24428: Ensure Facebook OAuth errors are propagated to user
+
 * 2013-01-08 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24395: Adjusting 'file as' value if display name is set
