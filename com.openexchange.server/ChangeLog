@@ -1,3 +1,7 @@
+* 2013-01-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23586: Bad timezone calculation.
+
 * 2013-01-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 24428: Ensure Facebook OAuth errors are propagated to user
