@@ -55,8 +55,9 @@ import java.util.concurrent.ConcurrentMap;
 import org.quartz.JobPersistenceException;
 import org.quartz.TriggerKey;
 
-import sun.security.jca.GetInstance.Instance;
-
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Instance;
 import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
 
 /**
