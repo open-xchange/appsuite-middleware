@@ -119,7 +119,7 @@ public enum FacebookMessagingExceptionCodes implements OXExceptionCode {
     /**
      * An OAuth error occurred: %1$s.
      */
-    OAUTH_ERROR(FacebookMessagingExceptionMessages.OAUTH_ERROR_MSG, CATEGORY_ERROR, 13),
+    OAUTH_ERROR(FacebookMessagingExceptionMessages.OAUTH_ERROR_MSG, CATEGORY_USER_INPUT, 13),
     /**
      * A FQL error of type %1$s occurred: %2$s.
      */

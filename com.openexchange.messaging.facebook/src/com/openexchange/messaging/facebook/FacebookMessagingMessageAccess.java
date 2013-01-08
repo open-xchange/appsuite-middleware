@@ -64,7 +64,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.model.OAuthRequest;
@@ -72,6 +71,7 @@ import org.scribe.model.Response;
 import org.scribe.model.Verb;
 import org.w3c.dom.Element;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAddressHeader;
@@ -496,7 +496,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                     final JSONObject error = result.getJSONObject("error");
                     final String type = error.optString("type");
                     final String msg = error.optString("message");
-                    if ("OXException".equals(type)) {
+                    if ("OAuthException".equals(type)) {
                         throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == msg ? "" : msg);
                     }
                     throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == msg ? "" : msg);

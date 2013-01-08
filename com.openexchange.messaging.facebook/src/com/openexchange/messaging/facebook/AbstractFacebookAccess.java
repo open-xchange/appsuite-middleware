@@ -170,7 +170,7 @@ public abstract class AbstractFacebookAccess {
                 final JSONObject error = result.getJSONObject("error");
                 final String type = error.optString("type");
                 final String message = error.optString("message");
-                if ("OXException".equals(type)) {
+                if ("OAuthException".equals(type)) {
                     throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == message ? "" : message);
                 }
                 throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == message ? "" : message);
@@ -204,7 +204,7 @@ public abstract class AbstractFacebookAccess {
                     final JSONObject error = result.getJSONObject("error");
                     final String type = error.optString("type");
                     final String message = error.optString("message");
-                    if ("OXException".equals(type)) {
+                    if ("OAuthException".equals(type)) {
                         throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == message ? "" : message);
                     }
                     throw FacebookMessagingExceptionCodes.FQL_ERROR.create(
