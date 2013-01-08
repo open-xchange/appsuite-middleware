@@ -367,6 +367,7 @@ public final class ConfigTree {
             // TODO: Enable per-user spell check switch if needed
             // com.openexchange.groupware.settings.tree.SpellCheck.class,
             com.openexchange.groupware.settings.tree.ServerVersion.class,
+            com.openexchange.groupware.settings.tree.UiWebPath.class,
             com.openexchange.groupware.settings.tree.TaskNotification.class,
             com.openexchange.groupware.settings.tree.TimeZone.class
         };

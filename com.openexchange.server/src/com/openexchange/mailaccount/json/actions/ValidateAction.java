@@ -70,6 +70,7 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.utils.MailPasswordUtil;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -196,6 +197,22 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
 
     static boolean checkMailServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
         // Create a mail access instance
+        final int accountId = accountDescription.getId();
+        if (accountId > 0) { // External account
+            final String password = accountDescription.getPassword();
+            final String login = accountDescription.getLogin();
+            if (isEmpty(password) || isEmpty(login)) {
+                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+                final MailAccount mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+                if (isEmpty(password)) {
+                    accountDescription.setPassword(mailAccount.getPassword());
+                }
+                if (isEmpty(login)) {
+                    accountDescription.setLogin(mailAccount.getLogin());
+                }
+            }
+        }
+        // Proceed
         final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription, session);
         if (null == mailAccess) {
             return false;

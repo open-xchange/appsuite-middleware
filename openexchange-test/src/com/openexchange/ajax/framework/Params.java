@@ -55,9 +55,8 @@ import java.util.List;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 
 /**
- * This is a shortcut to creating a parameter array with losts of parameter arguments, which usually uses a lot of boiler plate code, like
- * creating a list, creating new parameters, adding them, thn converting them to an array. Plus correcting the word "paramter" all the time,
- * which is why this class is called "Params" and not "Parameters".
+ * This is a shortcut to creating a parameter array with lots of parameter arguments, which usually uses a lot of boiler plate code, like
+ * creating a list, creating new parameters, adding them, then converting them to an array.
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -104,7 +103,7 @@ public class Params {
         add(params.toArray());
     }
 
-    public void add(String... items){
+    public void add(String... items) {
         if (items.length % 2 == 1) {
             throw new IllegalArgumentException("The number of arguments should be even: key, value, key, value...");
         }
@@ -126,14 +125,13 @@ public class Params {
     }
 
     @Override
-    public String toString(){
-    	StringBuffer buffy = new StringBuffer();
-    	for(Parameter p: parameters) {
+    public String toString() {
+        StringBuffer buffy = new StringBuffer();
+        for(Parameter p: parameters) {
             buffy.append('&').append(p.toString());
         }
 
-    	buffy.replace(0, 1, "?");
-    	return buffy.toString();
+        buffy.replace(0, 1, "?");
+        return buffy.toString();
     }
-
 }

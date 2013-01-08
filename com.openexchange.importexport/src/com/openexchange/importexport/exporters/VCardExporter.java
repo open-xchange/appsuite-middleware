@@ -51,7 +51,6 @@ package com.openexchange.importexport.exporters;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.contacts.json.mapping.ContactMapper;
@@ -221,7 +220,7 @@ public class VCardExporter implements Exporter {
             perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
         } catch (final OXException e) {
             throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
-        } catch (final SQLException e) {
+        } catch (final RuntimeException e) {
             throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }
         return perm.canReadAllObjects();

@@ -66,8 +66,7 @@ import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 
 /**
- * This class contains the login test. It also contains static methods to made
- * logins from other places.
+ * This class contains the login test. It also contains static methods to made logins from other places.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class LoginTest extends AbstractAJAXTest {

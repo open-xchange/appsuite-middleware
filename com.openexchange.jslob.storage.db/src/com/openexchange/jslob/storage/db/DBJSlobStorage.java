@@ -49,7 +49,9 @@
 
 package com.openexchange.jslob.storage.db;
 
+import java.io.InputStreamReader;
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -62,10 +64,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.json.JSONException;
+import org.json.JSONInputStream;
 import org.json.JSONObject;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.JSlobId;
@@ -352,7 +356,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             if (!rs.next()) {
                 return null;
             }
-            return new JSlob(new JSONObject(rs.getString(1))).setId(id);
+            return new JSlob(new JSONObject(new InputStreamReader(rs.getBinaryStream(1), Charsets.US_ASCII))).setId(id);
         } catch (final SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
@@ -396,7 +400,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             }
             final List<JSlob> list = new LinkedList<JSlob>();
             do {
-                list.add(new JSlob(new JSONObject(rs.getString(1))).setId(new JSlobId(id.getServiceId(), rs.getString(2), id.getUser(), contextId)));
+                list.add(new JSlob(new JSONObject(new InputStreamReader(rs.getBinaryStream(1), Charsets.US_ASCII))).setId(new JSlobId(id.getServiceId(), rs.getString(2), id.getUser(), contextId)));
             } while (rs.next());
             return list;
         } catch (final SQLException e) {
@@ -471,6 +475,27 @@ public final class DBJSlobStorage implements JSlobStorage {
         }
     }
 
+    private boolean exists(final JSlobId id, final int contextId, final Connection con) throws OXException {
+        if (false && checkLocked(id, false, con)) {
+            throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT 1 FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, id.getUser());
+            stmt.setString(3, id.getServiceId());
+            stmt.setString(4, id.getId());
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (final SQLException e) {
+            throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
     private static final String SQL_INSERT = "INSERT INTO jsonStorage (cid, user, serviceId, id, data) VALUES (?, ?, ?, ?, ?)";
 
     private static final String SQL_UPDATE = "UPDATE jsonStorage SET data = ? WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?";
@@ -490,8 +515,21 @@ public final class DBJSlobStorage implements JSlobStorage {
                  */
                 con.setAutoCommit(false);
                 committed = false;
-                final JSlob present = load(id, contextId, con);
-                if (null == present) {
+                if (exists(id, contextId, con)) {
+                    /*
+                     * Update
+                     */
+                    if (false && checkLocked(id, false, con)) {
+                        throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
+                    }
+                    stmt = con.prepareStatement(SQL_UPDATE);
+                    stmt.setBinaryStream(1, new JSONInputStream(jslob.getJsonObject(), "US-ASCII"));
+                    stmt.setLong(2, contextId);
+                    stmt.setLong(3, id.getUser());
+                    stmt.setString(4, id.getServiceId());
+                    stmt.setString(5, id.getId());
+                    stmt.executeUpdate();
+                } else {
                     /*
                      * Insert
                      */
@@ -500,25 +538,13 @@ public final class DBJSlobStorage implements JSlobStorage {
                     stmt.setLong(2, id.getUser());
                     stmt.setString(3, id.getServiceId());
                     stmt.setString(4, id.getId());
-                    stmt.setString(5, jslob.getJsonObject().toString());
-                    stmt.executeUpdate();
-                } else {
-                    /*
-                     * Update
-                     */
-                    if (false && checkLocked(id, false, con)) {
-                        throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
-                    }
-                    stmt = con.prepareStatement(SQL_UPDATE);
-                    stmt.setString(1, jslob.getJsonObject().toString());
-                    stmt.setLong(2, contextId);
-                    stmt.setLong(3, id.getUser());
-                    stmt.setString(4, id.getServiceId());
-                    stmt.setString(5, id.getId());
+                    stmt.setBinaryStream(5, new JSONInputStream(jslob.getJsonObject(), "US-ASCII"));
                     stmt.executeUpdate();
                 }
                 con.commit();
                 committed = true;
+            } catch (final DataTruncation e) {
+                throw JSlobExceptionCodes.JSLOB_TOO_BIG.create(e, id.getId());
             } catch (final SQLException e) {
                 throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
@@ -534,7 +560,7 @@ public final class DBJSlobStorage implements JSlobStorage {
         }
     }
 
-    private DatabaseService getDatabaseService() throws OXException {
+    private DatabaseService getDatabaseService() {
         return services.getService(DatabaseService.class);
     }
 

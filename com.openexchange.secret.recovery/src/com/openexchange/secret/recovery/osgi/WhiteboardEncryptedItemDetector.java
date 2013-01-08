@@ -63,6 +63,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class WhiteboardEncryptedItemDetector extends ServiceTracker<EncryptedItemDetectorService, EncryptedItemDetectorService> implements EncryptedItemDetectorService {
 
+    /**
+     * Initializes a new {@link WhiteboardEncryptedItemDetector}.
+     * 
+     * @param context The bundle context
+     */
     public WhiteboardEncryptedItemDetector(final BundleContext context) {
         super(context, EncryptedItemDetectorService.class, null);
     }

@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 
@@ -60,11 +62,8 @@ import com.openexchange.exception.OXException;
 public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaData {
 
     protected String id;
-
     protected String displayName;
-
     protected String apiKey;
-
     protected String apiSecret;
 
     /**
@@ -131,7 +130,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, Map<String, Object> state) {
+    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) throws OXException {
         // no-op
     }
 
@@ -141,7 +140,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public OAuthInteraction initOAuth(String callbackUrl) throws OXException {
+    public OAuthInteraction initOAuth(final String callbackUrl) throws OXException {
         return null;
     }
 
@@ -161,12 +160,28 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public String modifyCallbackURL(String callbackUrl) {
+    public String processAuthorizationURLCallbackAware(final String authUrl, final String callback) {
+        return authUrl;
+    }
+
+    @Override
+    public String modifyCallbackURL(final String callbackUrl) {
         return callbackUrl;
     }
 
     @Override
     public boolean registerTokenBasedDeferrer() {
     	return false;
+    }
+
+    /**
+     * URL-encodes specified string.
+     */
+    protected static String urlEncode(final String s) {
+        try {
+            return URLEncoder.encode(s, "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return s;
+        }
     }
 }

@@ -174,7 +174,7 @@ public class SimMessageAccess implements MessagingMessageAccess {
      */
     @Override
     public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

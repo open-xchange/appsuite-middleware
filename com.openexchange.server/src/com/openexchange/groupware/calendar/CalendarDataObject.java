@@ -195,6 +195,11 @@ public class CalendarDataObject extends Appointment {
     public final boolean containsRecurrenceString() {
         return b_recurrencestring;
     }
+    
+    public void removeRecurrenceString() {
+        this.rec_string = null;
+        b_recurrencestring = false;
+    }
 
     public final String getRecurrence() {
         return rec_string;

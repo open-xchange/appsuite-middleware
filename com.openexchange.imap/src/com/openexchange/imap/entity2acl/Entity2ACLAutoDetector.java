@@ -59,7 +59,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
@@ -188,7 +188,7 @@ public final class Entity2ACLAutoDetector {
         final IMAPServer imapServer = mapInfo2IMAPServer(greeting, imapConfig);
         final Entity2ACL entity2Acl = imapServer.getImpl();
         if (DEBUG) {
-            LOG.debug(new StringBuilder(256).append("\n\tIMAP server [").append(imapConfig.getServer()).append(
+            LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\tIMAP server [").append(imapConfig.getServer()).append(
                 "] greeting successfully mapped to: ").append(imapServer.getName()));
         }
         return entity2Acl;
@@ -211,8 +211,8 @@ public final class Entity2ACLAutoDetector {
              * Return fallback implementation
              */
             if (LOG.isWarnEnabled()) {
-                final StringBuilder warnBuilder =
-                    new StringBuilder(512).append("No IMAP server found ").append("that corresponds to greeting:\n\"").append(
+                final com.openexchange.java.StringAllocator warnBuilder =
+                    new com.openexchange.java.StringAllocator(512).append("No IMAP server found ").append("that corresponds to greeting:\n\"").append(
                         info.replaceAll("\r?\n", "")).append("\" on ").append(imapConfig.getServer()).append(
                         ".\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"").append(
                         IMAPServer.CYRUS.getName()).append("\" is used as fallback.");

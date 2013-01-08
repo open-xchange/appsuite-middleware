@@ -209,7 +209,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
 
     @Override
     public void writeTo(final OutputStream os) throws IOException, OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
     }
 
     @Override

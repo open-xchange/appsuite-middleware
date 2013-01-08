@@ -191,7 +191,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
 
     private UserConfiguration getUserConfiguration(final Context ctx, final int user) throws OXException {
-        return userConfigs.getUserConfiguration(user, ctx);
+        return userConfigs.getUserConfiguration(user, ctx, false);
     }
 
     @Override

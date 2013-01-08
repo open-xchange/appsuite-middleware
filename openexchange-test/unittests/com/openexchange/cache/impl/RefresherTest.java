@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -246,8 +247,24 @@ public class RefresherTest extends TestCase {
                 }
                 @Override
                 public boolean isLocal() {
-                    // TODO Auto-generated method stub
+                    // Nothing to do
                     return false;
+                }
+                @Override
+                public Set<?> getGroupKeys(String group) {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public Set<String> getGroupNames() {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public Set<?> getAllKeys() throws OXException {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public Set<?> getKeysInRange(int start, int end) throws OXException {
+                    throw new UnsupportedOperationException();
                 }
             };
             @Override
@@ -292,12 +309,12 @@ public class RefresherTest extends TestCase {
             }
             @Override
             public boolean isDistributed() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return false;
             }
             @Override
             public boolean isReplicated() {
-                // TODO Auto-generated method stub
+                // Nothing to do
                 return false;
             }
         });

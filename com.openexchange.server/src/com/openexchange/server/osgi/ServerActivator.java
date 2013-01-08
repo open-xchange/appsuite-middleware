@@ -182,7 +182,6 @@ import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.impl.Starter;
-import com.openexchange.server.impl.Version;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -383,10 +382,6 @@ public final class ServerActivator extends HousekeepingActivator {
             }
         }
         Config.LoggerProvider = LoggerProvider.DISABLED;
-        // get version information from MANIFEST file
-        final Dictionary<?, ?> headers = context.getBundle().getHeaders();
-        Version.buildnumber = "Rev" + (String) headers.get("OXRevision");
-        Version.version = (String) headers.get("OXVersion");
         // (Re-)Initialize server service registry with available services
         {
             final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
@@ -736,6 +731,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
     private void registerServlets(final HttpService http) throws ServletException, NamespaceException {
         http.registerServlet("/infostore", new com.openexchange.webdav.Infostore(), null, null);
+        http.registerServlet("/files", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.ical", new com.openexchange.webdav.ical(), null, null);
         http.registerServlet("/servlet/webdav.vcard", new com.openexchange.webdav.vcard(), null, null);
         http.registerServlet("/servlet/webdav.version", new com.openexchange.webdav.version(), null, null);

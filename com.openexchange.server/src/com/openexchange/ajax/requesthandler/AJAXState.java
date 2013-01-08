@@ -50,11 +50,11 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -65,12 +65,10 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public final class AJAXState {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJAXState.class));
+    private static final Object PRESENT = new Object();
 
-    private final Map<String, Object> properties;
-
-    private final Set<String> initializers;
-
+    private final ConcurrentMap<String, Object> properties;
+    private final ConcurrentMap<String, Object> initializers;
     private final Queue<AJAXStateHandler> handlers;
 
     /**
@@ -79,7 +77,7 @@ public final class AJAXState {
     public AJAXState() {
         super();
         properties = new ConcurrentHashMap<String, Object>();
-        initializers = new HashSet<String>();
+        initializers = new ConcurrentHashMap<String, Object>();
         handlers = new ConcurrentLinkedQueue<AJAXStateHandler>();
     }
 
@@ -121,14 +119,14 @@ public final class AJAXState {
     }
 
     /**
-     * Puts specified property.
+     * Puts specified property (if absent).
      *
      * @param name The property name
      * @param value The property value
-     * @return The value previously associated with given name or <code>null</code> if no such property existed before
+     * @return The previous value associated with the specified name, otherwise <code>null</code>
      */
-    public Object putProperty(final String name, final Object value) {
-        return properties.put(name, value);
+    public <V> V putProperty(final String name, final V value) {
+        return (V) properties.putIfAbsent(name, value);
     }
 
     /**
@@ -167,7 +165,7 @@ public final class AJAXState {
      */
     public boolean addInitializer(final String identifier, final AJAXStateHandler handler) {
         handlers.add(handler);
-        return initializers.add(identifier);
+        return (null == initializers.putIfAbsent(identifier, PRESENT));
     }
 
     /**
@@ -178,8 +176,9 @@ public final class AJAXState {
             final AJAXStateHandler handler = handlers.poll();
             try {
                 handler.cleanUp(this);
-            } catch (final OXException e) {
-                LOG.error("Failed closeing handler: " + handler.getClass().getName(), e);
+            } catch (final Exception e) {
+                final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(AJAXState.class);
+                log.error("Failed closing handler: " + handler.getClass().getName(), e);
             }
         }
         initializers.clear();

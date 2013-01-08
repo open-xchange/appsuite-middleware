@@ -36,7 +36,6 @@
 package com.openexchange.java;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
 /**

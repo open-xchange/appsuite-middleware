@@ -104,48 +104,48 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
 
     @Override
     public void startTransaction() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void commit() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void rollback() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void finish() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void setTransactional(final boolean transactional) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void setRequestTransactional(final boolean transactional) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void setCommitsTransaction(final boolean commits) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
-    public boolean exists(final String folderId, final String id, final int version) throws OXException {
+    public boolean exists(final String folderId, final String id, final String version) throws OXException {
         try {
             /*
              * Check
@@ -174,7 +174,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public File getFileMetadata(final String folderId, final String id, final int version) throws OXException {
+    public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         if (version != CURRENT_VERSION) {
             throw CIFSExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
         }
@@ -320,7 +320,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public InputStream getDocument(final String folderId, final String id, final int version) throws OXException {
+    public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUrl);
             final String url = (fid + id);
@@ -372,7 +372,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             try {
                 final byte[] buf = new byte[8192];
                 int read;
-                while ((read = data.read(buf)) != -1) {
+                while ((read = data.read(buf)) > 0) {
                     outputStream.write(buf, 0, read);
                 }
                 outputStream.flush();
@@ -445,7 +445,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
         try {
-            final List<IDTuple> ret = new ArrayList<FileStorageFileAccess.IDTuple>();
+            final List<IDTuple> ret = new ArrayList<IDTuple>();
             for (final IDTuple id : ids) {
                 final String fid = checkFolderId(id.getFolder(), rootUrl);
                 final String url = (fid + id.getId());
@@ -493,8 +493,8 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public int[] removeVersion(final String folderId, final String id, final int[] versions) throws OXException {
-        for (final int version : versions) {
+    public String[] removeVersion(final String folderId, final String id, final String[] versions) throws OXException {
+        for (final String version : versions) {
             if (version != CURRENT_VERSION) {
                 throw CIFSExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
             }
@@ -510,7 +510,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 /*
                  * NO-OP for us
                  */
-                return new int[0];
+                return new String[0];
             }
             if (!smbFile.isFile()) {
                 throw CIFSExceptionCodes.NOT_A_FILE.create(url);
@@ -526,7 +526,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             /*
              * Return empty array
              */
-            return new int[0];
+            return new String[0];
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
@@ -540,13 +540,13 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
 
     @Override
     public void unlock(final String folderId, final String id) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
     @Override
     public void lock(final String folderId, final String id, final long diff) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -764,7 +764,6 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
          * Consider start/end index
          */
         if (start != NOT_SET && end != NOT_SET && end > start) {
-
             final int fromIndex = start;
             int toIndex = end;
             if ((fromIndex) > results.size()) {

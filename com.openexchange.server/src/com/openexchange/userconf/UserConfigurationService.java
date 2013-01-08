@@ -96,6 +96,18 @@ public interface UserConfigurationService {
     public UserConfiguration getUserConfiguration(final int userId, final Context ctx) throws OXException;
 
     /**
+     * Determines the instance of <code>UserConfiguration</code> that corresponds to given user ID.
+     *
+     * @param userId - the user ID
+     * @param ctx - the context
+     * @param initExtendedPermissions Whether to initialize extended permissions
+     * @return the instance of <code>UserConfiguration</code>
+     * @throws OXException If user's configuration could not be determined
+     * @see #getUserConfiguration(int, int[], Context)
+     */
+    public UserConfiguration getUserConfiguration(int userId, Context ctx, boolean initExtendedPermissions) throws OXException;
+
+    /**
      * Determines the instance of <code>UserConfiguration</code> that corresponds to given user ID. If <code>groups</code> argument is set,
      * user's groups need not to be loaded from user storage
      *

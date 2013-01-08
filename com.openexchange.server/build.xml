@@ -33,7 +33,6 @@
     <target name="patchConfigFiles">
         <antcall target="patchFileLoggingProperties"/>
         <antcall target="patchScriptConf"/>
-        <antcall target="patchPathInProperties"/>
     </target>
 
     <target name="patchFileLoggingProperties">
@@ -51,31 +50,6 @@
             <replacefilter token="@loggingproperties@" value="${confInstallDir}/file-logging.properties"/>
             <replacefilter token="@oxgroupwaresysconfdir@" value="${prefix}"/>
         </replace>
-    </target>
-
-    <target name="patchPathInProperties">
-        <move tofile="${patchConfDir}/import.properties" file="${patchConfDir}/import.properties.in" overwrite="true"/>
-
-        <replace dir="${patchConfDir}" includes="import.properties,system.properties">
-            <replacefilter token="@rootinstalldir@" value="${prefix}"/>
-        </replace>
-    </target>
-
-    <target name="postInstall" description="Install several additional files that are necessary for the backend.">
-        <antcall target="installImportCSV"/>
-    </target>
-
-    <target name="installImportCSV" description="Installs configuration files for importing CSV files.">
-        <mkdir dir="${destDir}/${prefix}/${importCSVDir}"/>
-        <copy todir="${destDir}/${prefix}/${importCSVDir}" overwrite="true">
-            <fileset dir="${importCSVDir}"/>
-        </copy>
-    </target>
-
-    <target name="setVersion">
-        <replaceregexp file="META-INF/MANIFEST.MF" match="OXVersion: .*" replace="OXVersion: ${version}" byline="true"/>
-        <replaceregexp file="META-INF/MANIFEST.MF" match="OXRevision: .*" replace="OXRevision: ${revision}" byline="true"/>
-        <replaceregexp file="META-INF/MANIFEST.MF" match="Bundle-Version: .*" replace="Bundle-Version: ${version}" byline="true"/>
     </target>
 
     <target name="postClean" description="Removes artifacts created by this build script.">

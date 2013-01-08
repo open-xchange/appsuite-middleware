@@ -53,6 +53,7 @@ import static com.openexchange.imap.IMAPCommandsCollection.prepareStringArgument
 import java.util.Arrays;
 import java.util.Locale;
 import javax.mail.MessagingException;
+import com.openexchange.java.Strings;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -141,7 +142,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
         this.fast = fast;
         this.destFolderName = prepareStringArgument(destFolderName);
         length = uids.length;
-        args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(uids[0]).append(':').append(
+        args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new com.openexchange.java.StringAllocator(64).append(uids[0]).append(':').append(
             uids[length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
             uids,
             false,
@@ -190,7 +191,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -231,7 +232,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
         int pos = resp.indexOf(COPYUID);
         if (pos < 0) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(128).append("Missing COPYUID response code: ").append(resp).toString());
+                LOG.warn(new com.openexchange.java.StringAllocator(128).append("Missing COPYUID response code: ").append(resp).toString());
             }
             return true;
         }
@@ -249,7 +250,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
         /*
          * Split by ATOMs
          */
-        final String[] sa = resp.substring(pos).split("\\s+");
+        final String[] sa = Strings.splitByWhitespaces(resp.substring(pos));
         if (sa.length >= 3) {
             /*-
              * Array contains atoms like:

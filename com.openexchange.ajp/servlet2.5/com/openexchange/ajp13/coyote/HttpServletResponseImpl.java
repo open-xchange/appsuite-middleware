@@ -90,7 +90,8 @@ import com.openexchange.ajp13.util.CharsetValidator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.java.Charsets;
-import com.openexchange.server.impl.Version;
+import com.openexchange.java.Streams;
+import com.openexchange.version.Version;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
 
@@ -346,7 +347,8 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
          *        }
          *    }
          */
-        servletOutputStream.flush();
+        Streams.flush(writer);
+        Streams.flush(servletOutputStream);
     }
 
     /**
@@ -976,11 +978,11 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         String errorMsgStr = ERROR_PAGE_TEMPL;
         errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll(
             "#STATUS_MSG#",
-            Matcher.quoteReplacement(this.statusMsg)).replaceFirst("#STATUS_DESC#", desc);
+            com.openexchange.java.Strings.quoteReplacement(this.statusMsg)).replaceFirst("#STATUS_DESC#", com.openexchange.java.Strings.quoteReplacement(desc));
         synchronized (HEADER_DATE_FORMAT) {
             errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
         }
-        errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getVersionString());
+        errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getInstance().getVersionString());
         setContentType(new com.openexchange.java.StringAllocator("text/html; charset=").append(getCharacterEncoding()).toString());
         final byte[] errormessage = errorMsgStr.getBytes(Charsets.forName(getCharacterEncoding()));
         setContentLength(errormessage.length);
@@ -1013,7 +1015,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         synchronized (HEADER_DATE_FORMAT) {
             errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
         }
-        errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getVersionString());
+        errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getInstance().getVersionString());
         String encoding = getCharacterEncoding();
         if (null == encoding) {
             encoding = "UTF-8";

@@ -98,9 +98,7 @@ public class FacebookMessagingResource implements MessagingResource {
 
     @Override
     public void close() {
-        /*
-         * Close is performed when last session gone by FacebookEventHandler
-         */
+        // no-op
     }
 
     @Override

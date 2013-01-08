@@ -82,7 +82,7 @@ import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.server.impl.Version;
+import com.openexchange.version.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -466,7 +466,7 @@ public class MailObject {
             /*
              * Set mailer TODO: Read in mailer from file
              */
-            msg.setHeader(HEADER_X_MAILER, "Open-Xchange Mailer v" + Version.getVersionString());
+            msg.setHeader(HEADER_X_MAILER, "Open-Xchange Mailer v" + Version.getInstance().getVersionString());
             /*
              * Set organization
              */

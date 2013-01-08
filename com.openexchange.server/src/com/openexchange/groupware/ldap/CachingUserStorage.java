@@ -238,11 +238,7 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
     @Override
     public void updateUserInternal(final User user, final Context context) throws OXException {
         delegate.updateUser(user, context);
-        try {
-            invalidateUser(context, user.getId());
-        } catch (final OXException e) {
-            throw e;
-        }
+        invalidateUser(context, user.getId());
     }
 
     @Override
@@ -258,21 +254,13 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
     @Override
     public void setUserAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
         delegate.setUserAttribute(name, value, userId, context);
-        try {
-            invalidateUser(context, userId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        invalidateUser(context, userId);
     }
 
     @Override
     public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
         delegate.setAttribute(name, value, userId, context);
-        try {
-            invalidateUser(context, userId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        invalidateUser(context, userId);
     }
 
     @Override

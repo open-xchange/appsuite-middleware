@@ -130,7 +130,7 @@ public class OXFolderTools {
                     Integer.valueOf(ctx.getContextId()));
             }
             return fo.getType(userId);
-        } catch (final SQLException e) {
+        } catch (final RuntimeException e) {
             throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(Integer.valueOf(folderId),
                 Integer.valueOf(ctx.getContextId()),
                 e);
@@ -167,7 +167,7 @@ public class OXFolderTools {
             if (folderObj != null) {
                 try {
                     return folderObj.getEffectiveUserPermission(userId, userConfig);
-                } catch (final SQLException e) {
+                } catch (final RuntimeException e) {
                     throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e,
                         OXFolderUtility.getFolderName(folderId, ctx),
                         Integer.valueOf(ctx.getContextId()),

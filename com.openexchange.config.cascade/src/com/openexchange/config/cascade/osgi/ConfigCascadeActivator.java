@@ -162,24 +162,22 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
         return null;
     }
 
-    void configure(String scopes, final ConfigCascade cascade) {
-        if(configured) {
+    void configure(final String scopes, final ConfigCascade cascade) {
+        if (configured) {
             return;
         }
-        if (scopes == null) {
-            scopes = "user, context, server";
-        }
+        final String scops = scopes == null ? "user, context, server" : scopes;
         configured = true;
 
-        final String[] searchPath = scopes.split("\\s*,\\s*");
+        final String[] searchPath = scops.split("\\s*,\\s*");
         cascade.setSearchPath(searchPath);
 
         for (final String scope : searchPath) {
-            if(scope.equals("server")) {
+            if ("server".equals(scope)) {
                 continue;
             }
 
-            final ServiceTracker<Object,Object> tracker = track(createFilter(scope));
+            final ServiceTracker<ConfigProviderService, ConfigProviderService> tracker = track(createFilter(scope));
             cascade.setProvider(scope, new TrackingProvider(tracker));
             tracker.open();
         }

@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Solr
 Bundle-SymbolicName: com.openexchange.solr
-Bundle-Version: 6.23.0
+Bundle-Version: 7.0.0
 Bundle-Activator: com.openexchange.solr.osgi.SolrActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Eclipse-RegisterBuddy: com.openexchange.hazelcast
+Eclipse-RegisterBuddy: com.hazelcast
 Import-Package: com.hazelcast.cluster,
  com.hazelcast.config,
  com.hazelcast.core,

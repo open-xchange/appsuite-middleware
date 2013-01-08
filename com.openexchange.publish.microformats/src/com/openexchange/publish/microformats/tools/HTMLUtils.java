@@ -79,7 +79,7 @@ public final class HTMLUtils {
             for (int i = 0; i < spaces.length(); i++) {
                 replacement.append("&#160;");
             }
-            matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement.toString()));
+            matcher.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(replacement.toString()));
         }
         html = matcher.appendTail(sb).toString();
         return html;

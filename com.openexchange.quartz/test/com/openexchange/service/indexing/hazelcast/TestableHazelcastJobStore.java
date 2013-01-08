@@ -50,13 +50,19 @@
 package com.openexchange.service.indexing.hazelcast;
 
 import java.util.Collection;
-import org.quartz.JobPersistenceException;
-import org.quartz.service.internal.HazelcastJobStore;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
+import java.util.concurrent.ConcurrentMap;
 
-public class TestableHazelcastJobStore extends HazelcastJobStore {
+import org.quartz.JobPersistenceException;
+import org.quartz.TriggerKey;
+
+import sun.security.jca.GetInstance.Instance;
+
+import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
+
+/**
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
     
     private HazelcastInstance hazelcast = null;
     
@@ -75,5 +81,13 @@ public class TestableHazelcastJobStore extends HazelcastJobStore {
         }
         
         return hazelcast;
+    }
+    
+    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
+        return locallyAcquiredTriggers;
+    }
+    
+    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
+        return locallyExecutingTriggers;
     }
 }

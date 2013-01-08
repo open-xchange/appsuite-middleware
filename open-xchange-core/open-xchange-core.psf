@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.0.0,com.openexchange.appsuite.config"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.apps.manifests.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.calendar"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.calendar.json"/>
@@ -20,6 +19,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contacts.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.control"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.conversion"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.conversion.simple"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.conversion.engine"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.conversion.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.crypto"/>
@@ -44,6 +44,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.groupware.settings.extensions"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.groupware.tools"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast.configuration"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.html"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.client"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.client.json"/>
@@ -99,9 +100,12 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.threadpool"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.tx"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.user.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.version"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.tika"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.ho.jyaml"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.javasimon"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.xmlpull"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,oxscripts"/>
 </provider>

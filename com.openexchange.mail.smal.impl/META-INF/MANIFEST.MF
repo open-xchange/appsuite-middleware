@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Super-MAL Implementation Bundle
 Bundle-SymbolicName: com.openexchange.mail.smal.impl
-Bundle-Version: 6.23.0
+Bundle-Version: 7.0.0
 Bundle-Activator: com.openexchange.mail.smal.impl.osgi.SmalActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Eclipse-RegisterBuddy: com.openexchange.hazelcast
+Eclipse-RegisterBuddy: com.hazelcast,com.openexchange.service.indexing.impl
 Import-Package: com.google.common.base,
  com.google.common.collect,
  com.hazelcast.core,
@@ -21,10 +21,12 @@ Import-Package: com.google.common.base,
  com.openexchange.database.provider,
  com.openexchange.exception,
  com.openexchange.groupware,
+ com.openexchange.groupware.attach.index,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.delete,
  com.openexchange.groupware.ldap,
+ com.openexchange.groupware.tools.chunk,
  com.openexchange.groupware.update,
  com.openexchange.i18n,
  com.openexchange.index,
@@ -44,12 +46,14 @@ Import-Package: com.google.common.base,
  com.openexchange.mail.mime.converters,
  com.openexchange.mail.mime.filler,
  com.openexchange.mail.mime.utils,
+ com.openexchange.mail.parser,
  com.openexchange.mail.permission,
  com.openexchange.mail.search,
  com.openexchange.mail.smal,
  com.openexchange.mail.text,
  com.openexchange.mail.usersetting,
  com.openexchange.mail.utils,
+ com.openexchange.mail.uuencode,
  com.openexchange.mailaccount,
  com.openexchange.monitoring,
  com.openexchange.osgi,
@@ -60,7 +64,6 @@ Import-Package: com.google.common.base,
  com.openexchange.server.impl,
  com.openexchange.service.indexing,
  com.openexchange.service.indexing.impl.internal,
- com.openexchange.service.indexing.impl.mail,
  com.openexchange.session,
  com.openexchange.sessiond,
  com.openexchange.spamhandler,
@@ -79,6 +82,7 @@ Import-Package: com.google.common.base,
  javax.mail,
  javax.mail.event,
  javax.mail.internet,
+ javax.mail.internet.idn,
  javax.mail.search,
  javax.net,
  javax.net.ssl,

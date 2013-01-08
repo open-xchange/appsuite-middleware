@@ -179,8 +179,8 @@ public final class JsonCaches {
                 if (!b.isArray()) {
                     return false;
                 }
-                final JSONArray aj = (JSONArray) a;
-                final JSONArray bj = (JSONArray) b;
+                final JSONArray aj = a.toArray();
+                final JSONArray bj = b.toArray();
                 boolean bool = true;
                 for (int i = 0; bool && i < aLen; i++) {
                     final Object ao = aj.get(i);
@@ -199,8 +199,8 @@ public final class JsonCaches {
             if (!b.isObject()) {
                 return false;
             }
-            final JSONObject aj = (JSONObject) a;
-            final JSONObject bj = (JSONObject) b;
+            final JSONObject aj = a.toObject();
+            final JSONObject bj = b.toObject();
             for (final Map.Entry<String, Object> entry : aj.entrySet()) {
                 final String name = entry.getKey();
                 if (!bj.has(name)) {

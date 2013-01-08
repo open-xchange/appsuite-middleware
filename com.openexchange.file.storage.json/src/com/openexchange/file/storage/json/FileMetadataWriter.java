@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -166,7 +167,7 @@ public class FileMetadataWriter {
             if (value == null) {
                 return null;
             }
-            final String[] strings = value.split("\\s*,\\s*");
+            final String[] strings = Strings.splitByComma(value);
             final JSONArray array = new JSONArray();
             for (final String string : strings) {
                 array.put(string);

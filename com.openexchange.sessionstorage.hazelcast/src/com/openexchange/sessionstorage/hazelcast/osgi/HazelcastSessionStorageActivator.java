@@ -49,20 +49,20 @@
 
 package com.openexchange.sessionstorage.hazelcast.osgi;
 
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
-import com.hazelcast.config.MapIndexConfig;
-import com.hazelcast.config.MaxSizeConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessionstorage.SessionStorageService;
-import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageConfiguration;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.Services;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -76,40 +76,19 @@ import com.openexchange.threadpool.ThreadPoolService;
 public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
     private static Log LOG = LogFactory.getLog(HazelcastSessionStorageActivator.class);
-
+    
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class };
+        return new Class<?>[] { ThreadPoolService.class, HazelcastConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.sessionstorage.hazelcast");
         Services.setServiceLookup(this);
-        final ConfigurationService configService = getService(ConfigurationService.class);
-        final boolean enabled = configService.getBoolProperty("com.openexchange.sessionstorage.hazelcast.enabled", false);
+        final HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
+        final boolean enabled = configService.isEnabled();
         if (enabled) {
-            final MapConfig mapConfig = new MapConfig();
-            {
-                final String mapName = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.name");
-                final int backupCount = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.backupcount", 1);
-                final int asyncBackup = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.asyncbackup", 0);
-                mapConfig.setName(mapName);
-                mapConfig.setBackupCount(backupCount);
-                mapConfig.setAsyncBackupCount(asyncBackup);
-                mapConfig.setTimeToLiveSeconds(0);
-                mapConfig.setMaxIdleSeconds(0);
-                mapConfig.setEvictionPolicy("NONE");
-                mapConfig.setEvictionPercentage(25);
-                final MaxSizeConfig maxSizeConfig = new MaxSizeConfig();
-                maxSizeConfig.setSize(0);
-                mapConfig.setMaxSizeConfig(maxSizeConfig);
-                mapConfig.setMergePolicy("hz.LATEST_UPDATE");
-                // add indices for context- and user ID
-                mapConfig.addMapIndexConfig(new MapIndexConfig("userId", false));
-                mapConfig.addMapIndexConfig(new MapIndexConfig("contextId", false));
-            }
-            final HazelcastSessionStorageConfiguration config = new HazelcastSessionStorageConfiguration(mapConfig);
             // Track HazelcastInstance
             final BundleContext context = this.context;
             track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
@@ -120,9 +99,8 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                 public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
                     final HazelcastInstance hazelcastInstance = context.getService(reference);
                     HazelcastSessionStorageService.setHazelcastInstance(hazelcastInstance);
-                    sessionStorageRegistration = context.registerService(SessionStorageService.class, new HazelcastSessionStorageService(
-                        config,
-                        hazelcastInstance), null);
+                    sessionStorageRegistration = context.registerService(SessionStorageService.class, 
+                        new HazelcastSessionStorageService(discoverMapName(hazelcastInstance.getConfig())), null);
                     return hazelcastInstance;
                 }
 
@@ -168,4 +146,25 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         Services.setServiceLookup(null);
     }
 
+    /**
+     * Discovers the sessions map name from the supplied hazelcast configuration.
+     * 
+     * @param config The config object
+     * @return The sessions map name
+     * @throws IllegalStateException
+     */
+    private static String discoverMapName(Config config) throws IllegalStateException {
+        Map<String, MapConfig> mapConfigs = config.getMapConfigs();
+        if (null != mapConfigs && 0 < mapConfigs.size()) {
+            for (String mapName : mapConfigs.keySet()) {
+                if (mapName.startsWith("sessions-")) {
+                    LOG.info("Using distributed map '" + mapName + "'.");
+                    return mapName;
+                }
+            }
+        }
+        String msg = "No distributed sessions map found in hazelcast configuration";
+        throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
+    }
+    
 }

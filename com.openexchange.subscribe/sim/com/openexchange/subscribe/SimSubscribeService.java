@@ -154,31 +154,25 @@ public class SimSubscribeService implements SubscribeService {
         this.subscriptionIds = subscriptions;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.subscribe.SubscribeService#loadSubscriptions(com.openexchange.groupware.contexts.Context, int, java.lang.String)
-     */
     @Override
     public Collection<Subscription> loadSubscriptions(final Context context, final int userId, final String secret) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.subscribe.SubscribeService#migrateSecret(com.openexchange.session.Session, java.lang.String, java.lang.String)
-     */
     @Override
     public void migrateSecret(final Session session, final String oldSecret, final String newSecret) throws OXException {
-        // TODO Auto-generated method stub
-        
+        // Nothing to do
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.subscribe.SubscribeService#hasAccounts(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User)
-     */
     @Override
     public boolean hasAccounts(final Context context, final User user) throws OXException {
-        // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public void cleanUp(String secret, Session session) throws OXException {
+        // Ignore
     }
 
 }

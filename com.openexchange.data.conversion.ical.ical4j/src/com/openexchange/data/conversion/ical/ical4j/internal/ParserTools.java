@@ -204,7 +204,7 @@ public final class ParserTools {
     	}
     	//generate name variations of the outlook timezone name
     	List<String> candidates1 = new LinkedList<String>();
-    	if(tzidName.contains(",")){
+    	if(tzidName.indexOf(',') >= 0){
     		String[] split = tzidName.split(",");
     		for(String tmp: split) {
                 candidates1.add(tmp.trim());

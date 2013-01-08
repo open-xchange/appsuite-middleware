@@ -275,12 +275,12 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
             if (null != echoHeaderName) {
                 final String echoValue = servletRequest.getHeader(echoHeaderName);
                 if (null != echoValue) {
-                    LogProperties.putLogProperty("com.openexchange.ajp13.requestId", echoValue);
+                    LogProperties.putLogProperty(LogProperties.Name.AJP_REQUEST_ID, echoValue);
                 }
             }
         }
-        LogProperties.putLogProperty("com.openexchange.ajp13.requestIp", servletRequest.getRemoteAddr());
-        LogProperties.putLogProperty("com.openexchange.ajp13.serverName", servletRequest.getServerName());
+        LogProperties.putLogProperty(LogProperties.Name.AJP_REQUEST_IP, servletRequest.getRemoteAddr());
+        LogProperties.putLogProperty(LogProperties.Name.AJP_SERVER_NAME, servletRequest.getServerName());
         /*
          * Determine if content type indicates form data
          */
@@ -548,7 +548,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
             throw new AJPv13Exception(AJPv13Exception.AJPCode.INVALID_COOKIE_HEADER, true, headerValue);
         }
         if (DEBUG) {
-            final StringBuilder sb = new StringBuilder(256).append("Parsed Cookies:\n");
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256).append("Parsed Cookies:\n");
             for (final Cookie cookie : cookieList) {
                 sb.append('\'').append(cookie.getName()).append("'='").append(cookie.getValue()).append("'\n");
             }
@@ -700,7 +700,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             continue nextCookie;
                         }
                         jsessionIDCookie = current;
-                        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
+                        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, id);
                         jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
                         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     } else {
@@ -737,7 +737,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             continue nextCookie;
                         }
                         jsessionIDCookie = current;
-                        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
+                        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, id);
                         jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
                         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     }
@@ -787,7 +787,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
             }
         }
         final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
-        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", jsessionIdVal);
+        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, jsessionIdVal);
         jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, join);
         /*
@@ -824,7 +824,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
         }
         boolean encoded = false;
         final int strLength = ((firstByte) << 8) + secondByte;
-        final StringBuilder sb = new StringBuilder(strLength);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(strLength);
         for (int strIndex = 0; strIndex < strLength; strIndex++) {
             final int b = nextByte();
             if (b > ASCII_LIMIT) { // non-ascii character

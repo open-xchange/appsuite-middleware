@@ -118,7 +118,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
         try {
             int pid = 0;
-            if( ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin()) ) {
+            final Credentials masterCredentials = ClientAdminThread.cache.getMasterCredentials();
+            if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
             } else {
                 resellerauth.doAuthentication(creds);
@@ -196,7 +197,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
         int pid = 0;
         try {
-            if( ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin()) ) {
+            final Credentials masterCredentials = ClientAdminThread.cache.getMasterCredentials();
+            if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
             } else {
                 resellerauth.doAuthentication(creds);
@@ -269,7 +271,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
         try {
             boolean isMaster = false;
-            if( ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin()) ) {
+            final Credentials masterCredentials = ClientAdminThread.cache.getMasterCredentials();
+            if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
                 isMaster = true;
             } else {
@@ -323,7 +326,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
 
         try {
-            if (ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin())) {
+            final Credentials masterCredentials = ClientAdminThread.cache.getMasterCredentials();
+            if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin())) {
                 basicauth.doAuthentication(creds);
             } else {
                 resellerauth.doAuthentication(creds);
@@ -376,7 +380,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
         try {
             int pid = 0;
-            if( ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin()) ) {
+            final Credentials masterCredentials = ClientAdminThread.cache.getMasterCredentials();
+            if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
             } else {
                 resellerauth.doAuthentication(creds);
@@ -495,7 +500,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
 
         try {
-            if( ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin()) ) {
+            final Credentials masterCredentials = ClientAdminThread.cache.getMasterCredentials();
+            if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
                 return oxresell.list(search_pattern);
             } else {

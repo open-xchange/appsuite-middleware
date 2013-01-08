@@ -49,17 +49,16 @@
 
 package com.openexchange.twitter.internal;
 
+import static com.openexchange.twitter.internal.TwitterUtils.handleTwitterException;
 import java.util.ArrayList;
 import java.util.List;
 import twitter4j.OXTwitter;
 import twitter4j.StatusUpdate;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.twitter.DirectMessage;
 import com.openexchange.twitter.Paging;
 import com.openexchange.twitter.Status;
 import com.openexchange.twitter.TwitterAccess;
-import com.openexchange.twitter.TwitterExceptionCodes;
 import com.openexchange.twitter.User;
 
 /**
@@ -99,7 +98,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
             }
             return ret;
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
     }
 
@@ -114,7 +113,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
             }
             return ret;
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
     }
 
@@ -129,7 +128,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
             }
             return ret;
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
     }
 
@@ -144,7 +143,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
             }
             return ret;
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
     }
 
@@ -159,7 +158,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
             }
             return ret;
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
     }
 
@@ -174,7 +173,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
             }
             return ret;
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
     }
 
@@ -183,7 +182,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         try {
             return new DirectMessageImpl(twitter4jTwitter.sendDirectMessage(id, text));
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
     }
 
@@ -192,7 +191,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         try {
             return new StatusImpl(twitter4jTwitter.updateStatus(status));
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
     }
 
@@ -203,7 +202,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
             statusUpdate.setInReplyToStatusId(inReplyToStatusId);
             return new StatusImpl(twitter4jTwitter.updateStatus(statusUpdate));
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
     }
 
@@ -212,7 +211,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         try {
             return new StatusImpl(twitter4jTwitter.retweetStatus(statusId));
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
     }
 
@@ -221,7 +220,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         try {
             return new StatusImpl(twitter4jTwitter.destroyStatus(statusId));
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
     }
 
@@ -230,7 +229,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         try {
             return new StatusImpl(twitter4jTwitter.showStatusAuthenticated(statusId));
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
     }
 
@@ -242,7 +241,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
             try {
                 user = tmp = new UserImpl(twitter4jTwitter.verifyCredentials());
             } catch (final twitter4j.TwitterException e) {
-                throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw handleTwitterException(e);
             }
         }
         return tmp;
@@ -253,7 +252,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         try {
             return new UserImpl(twitter4jTwitter.showUser(id));
         } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw handleTwitterException(e);
         }
     }
 

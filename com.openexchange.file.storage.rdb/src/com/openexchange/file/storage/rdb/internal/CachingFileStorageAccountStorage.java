@@ -264,12 +264,16 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
         invalidateFileStorageAccount(serviceId, Integer.parseInt(account.getId()), session.getUserId(), session.getContextId());
     }
 
-    public boolean hasEncryptedItems(final FileStorageService service, final Session session) {
+    public boolean hasEncryptedItems(final FileStorageService service, final Session session) throws OXException {
         return delegatee.hasEncryptedItems(service, session);
     }
 
     public void migrateToNewSecret(final FileStorageService parentService, final String oldSecret, final String newSecret, final Session session) throws OXException {
         delegatee.migrateToNewSecret(parentService, oldSecret, newSecret, session);
+    }
+
+    public void cleanUp(final FileStorageService parentService, final String secret, final Session session) throws OXException {
+        delegatee.cleanUp(parentService, secret, session);
     }
 
 }

@@ -54,6 +54,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
@@ -70,8 +72,7 @@ public final class FolderMap {
      */
     public FolderMap(final int maximumCapacity) {
         super();
-        final Lock lock = new ReentrantLock();
-        map = new LockedConcurrentMap<String, MailFolder>(lock, lock, new MaxCapacityLinkedHashMap<String, MailFolder>(maximumCapacity));
+        map = new ConcurrentLinkedHashMap.Builder<String, MailFolder>().maximumWeightedCapacity(maximumCapacity).weigher(Weighers.entrySingleton()).build();
     }
 
     public MailFolder putIfAbsent(final String key, final MailFolder value) {

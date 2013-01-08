@@ -55,9 +55,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Locale;
-
 import javax.activation.MimetypesFileTypeMap;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -176,7 +174,7 @@ public final class UpdateAction extends AbstractUserAction {
 	                }
 	            }
 	        }
-	        contactService.updateContact(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), 
+	        contactService.updateUser(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), 
 	        		parsedUserContact, clientLastModified);
 	        /*
 	         * Update user if necessary, too

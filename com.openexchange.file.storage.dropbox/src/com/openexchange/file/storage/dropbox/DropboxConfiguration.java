@@ -99,10 +99,10 @@ public final class DropboxConfiguration {
      */
     public void configure(final ConfigurationService configurationService) {
         {
-            apiKey = configurationService.getProperty("com.openexchange.file.storage.dropbox.apiKey", DropboxConstants.KEY_API).trim();
+            apiKey = configurationService.getProperty("com.openexchange.oauth.dropbox.apiKey", DropboxConstants.KEY_API).trim();
         }
         {
-            secretKey = configurationService.getProperty("com.openexchange.file.storage.dropbox.secretKey", DropboxConstants.KEY_SECRET).trim();
+            secretKey = configurationService.getProperty("com.openexchange.oauth.dropbox.apiSecret", DropboxConstants.KEY_SECRET).trim();
         }
     }
 

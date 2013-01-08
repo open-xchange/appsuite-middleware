@@ -168,8 +168,7 @@ public abstract class UserConfigurationStorage {
      *             determined
      * @see #getUserConfiguration(int, int[], Context)
      */
-    public final UserConfiguration getUserConfiguration(final int userId, final Context ctx)
-            throws OXException {
+    public final UserConfiguration getUserConfiguration(final int userId, final Context ctx) throws OXException {
         return getUserConfiguration(userId, null, ctx);
     }
 
@@ -199,8 +198,23 @@ public abstract class UserConfigurationStorage {
      * @throws OXException If user's configuration could not be
      *             determined
      */
-    public abstract UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx)
-            throws OXException;
+    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
+        return getUserConfiguration(userId, groups, ctx, true);
+    }
+
+    /**
+     * Determines the instance of <code>UserConfiguration</code> that
+     * corresponds to given user ID. If <code>groups</code> argument is set,
+     * user's groups need not to be loaded from user storage
+     *
+     * @param userId - the user ID
+     * @param groups - user's groups
+     * @param ctx - the context
+     * @param initExtendedPermissions - Whether to initialize extended permissions
+     * @return the instance of <code>UserConfiguration</code>
+     * @throws OXException If user's configuration could not be determined
+     */
+    public abstract UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx, boolean initExtendedPermissions) throws OXException;
 
     public abstract UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException;
 
@@ -252,4 +266,5 @@ public abstract class UserConfigurationStorage {
      */
     public abstract void saveUserConfiguration(int permissionBits, int userId, Context ctx)
             throws OXException;
+
 }

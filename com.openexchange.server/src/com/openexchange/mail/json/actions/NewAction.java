@@ -172,7 +172,7 @@ public final class NewAction extends AbstractMailAction {
             try {
                 accountId = resolveFrom2Account(session, from, true, true);
             } catch (final OXException e) {
-                if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e)) {
+                if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e) || MailExceptionCode.INVALID_SENDER.equals(e)) {
                     // Re-throw
                     throw e;
                 }
@@ -335,6 +335,9 @@ public final class NewAction extends AbstractMailAction {
             } catch (final OXException e) {
                 if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e)) {
                     // Re-throw
+                    throw e;
+                }
+                if (!force && MailExceptionCode.INVALID_SENDER.equals(e)) {
                     throw e;
                 }
                 LOG.warn(new com.openexchange.java.StringAllocator(128).append(e.getMessage()).append(". Using default account's transport.").toString());

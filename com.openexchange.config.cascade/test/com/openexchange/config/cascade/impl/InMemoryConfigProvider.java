@@ -70,7 +70,7 @@ public class InMemoryConfigProvider implements ConfigProviderService{
 
 
     @Override
-    public BasicProperty get(final String property, final int context, final int user) throws OXException {
+    public BasicProperty get(final String property, final int contextId, final int userId) throws OXException {
         return new BasicProperty() {
 
             @Override
@@ -119,7 +119,7 @@ public class InMemoryConfigProvider implements ConfigProviderService{
 
 
     @Override
-    public Collection<String> getAllPropertyNames(int context, int user) throws OXException {
+    public Collection<String> getAllPropertyNames(int contextId, int userId) throws OXException {
         return values.keySet();
     }
 

@@ -182,7 +182,7 @@ public class StreamProvider implements IStreamProvider {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(managedFile.getFile()), "UTF-8"));
-            final StringBuilder sb = new StringBuilder();
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line);

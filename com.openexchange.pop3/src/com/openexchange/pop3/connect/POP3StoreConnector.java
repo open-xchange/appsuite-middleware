@@ -66,7 +66,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;

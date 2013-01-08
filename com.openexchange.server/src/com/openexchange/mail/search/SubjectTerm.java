@@ -53,9 +53,8 @@ import java.util.Collection;
 import java.util.Locale;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 

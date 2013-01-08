@@ -242,8 +242,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             return true;
         }
 
-        final String[] strings = globalWhitelisting.split("\\s*,\\s*");
-        for (final String string : strings) {
+        for (final String string : Strings.splitByComma(globalWhitelisting)) {
             if (templateLevel.name().toLowerCase().equals(string.toLowerCase())) {
                 return true;
             }

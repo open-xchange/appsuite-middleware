@@ -74,6 +74,7 @@ import com.openexchange.messaging.generic.services.MessagingGenericServiceRegist
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 
@@ -162,12 +163,10 @@ public class MessagingGenericActivator extends HousekeepingActivator {
                     }
                 };
 
-
-                registerService(EncryptedItemDetectorService.class.getName(), secretHandling, null);
-                registerService(SecretMigrator.class.getName(), secretHandling, null);
-
+                registerService(EncryptedItemDetectorService.class, secretHandling);
+                registerService(SecretMigrator.class, secretHandling);
+                registerService(EncryptedItemCleanUpService.class, secretHandling);
             }
-
         } catch (final Exception e) {
             com.openexchange.log.Log.loggerFor(MessagingGenericActivator.class).error(e.getMessage(), e);
             throw e;

@@ -1,3 +1,9 @@
+open-xchange-file-storage-cmis (7.0.0-0) unstable; urgency=low
+
+  * prepare for 7.0.0 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 04 Dec 2012 09:29:21 +0100
+
 open-xchange-file-storage-cmis (6.23.0-2) unstable; urgency=low
 
   * First release candidate for EDP drop #6

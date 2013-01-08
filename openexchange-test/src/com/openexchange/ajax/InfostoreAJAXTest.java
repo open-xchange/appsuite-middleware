@@ -366,7 +366,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 
         final WebResponse resp = webConv.getResponse(m);
         try {
-            return new Integer(new JSONObject(resp.getText()).getInt("data"));
+            return (new JSONObject(resp.getText()).getInt("data"));
         } catch (final JSONException x) {
             throw new JSONException("Got unexpected answer: "+resp.getText());
         }

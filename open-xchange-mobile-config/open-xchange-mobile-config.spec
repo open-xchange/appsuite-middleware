@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -46,6 +46,18 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Fri Dec 21 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for public patch 2012-12-21
+* Tue Dec 18 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Third release candidate for 7.0.0
+* Mon Dec 17 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Second release candidate for 7.0.0
+* Wed Dec 12 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for public patch 2012-12-04
+* Tue Dec 04 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+First release candidate for 7.0.0
+* Tue Dec 04 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+prepare for 7.0.0 release
 * Mon Nov 26 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2012-11-28
 * Wed Nov 14 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
@@ -61,13 +73,13 @@ Third release candidate for 6.22.1
 * Wed Oct 31 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Second release candidate for 6.22.1
 * Fri Oct 26 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-First release candidate for 6.22.1
-* Fri Oct 26 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-prepare for 6.22.1
-* Fri Oct 26 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Third release build for EDP drop #5
 * Fri Oct 26 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Second release build for EDP drop #5
+* Fri Oct 26 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+prepare for 6.22.1
 * Thu Oct 11 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Release build for EDP drop #5
 * Wed Oct 10 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>

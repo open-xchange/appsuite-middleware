@@ -51,13 +51,10 @@ package com.openexchange.file.storage.dropbox;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import org.scribe.model.Token;
 import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.session.AccessTokenPair;
-import com.dropbox.client2.session.AppKeyPair;
-import com.dropbox.client2.session.Session.AccessType;
 import com.dropbox.client2.session.WebAuthSession;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.dropbox.session.DropboxOAuthAccess;
 import com.openexchange.session.Session;
 
@@ -73,11 +70,7 @@ public abstract class AbstractDropboxAccess {
     protected final FileStorageAccount account;
     protected final long dropboxUserId;
     protected final String dropboxUserName;
-    protected final org.scribe.oauth.OAuthService dropboxOAuthService;
-    protected final Token dropboxAccessToken;
-
-    protected final WebAuthSession webAuthSession;
-    protected final DropboxAPI<WebAuthSession> mDBApi;
+    protected final DropboxAPI<WebAuthSession> dropboxAPI;
 
     /**
      * Initializes a new {@link AbstractDropboxAccess}.
@@ -90,20 +83,37 @@ public abstract class AbstractDropboxAccess {
         // Other fields
         this.dropboxUserId = dropboxOAuthAccess.getDropboxUserId();
         this.dropboxUserName = dropboxOAuthAccess.getDropboxUserName();
-        this.dropboxOAuthService = dropboxOAuthAccess.getDropboxOAuthService();
-        this.dropboxAccessToken = dropboxOAuthAccess.getDropboxAccessToken();
-        // Initialize Dropbox access
-        AppKeyPair appKeys = new AppKeyPair(DropboxConfiguration.getInstance().getApiKey(), DropboxConfiguration.getInstance().getSecretKey());
-        webAuthSession = new WebAuthSession(appKeys, AccessType.APP_FOLDER);
-        mDBApi = new DropboxAPI<WebAuthSession>(webAuthSession);
-        // re-auth specific stuff
-        AccessTokenPair reAuthTokens = new AccessTokenPair(dropboxAccessToken.getToken(), dropboxAccessToken.getSecret());
-        mDBApi.getSession().setAccessTokenPair(reAuthTokens);
-        // http://aaka.sh/patel/2011/12/20/authenticating-dropbox-java-api/
+        this.dropboxAPI = dropboxOAuthAccess.getDropboxAPI();
     }
 
     public String getDropboxUserName() {
         return dropboxUserName;
+    }
+
+    /**
+     * Gets the path for specified folder identifier.
+     *
+     * @param folderId The folder identifier
+     * @return The associated path
+     */
+    protected static String toPath(final String folderId) {
+        if (null == folderId) {
+            return null;
+        }
+        return FileStorageFolder.ROOT_FULLNAME.equals(folderId) ? "/" : folderId;
+    }
+
+    /**
+     * Gets the identifier for specified path.
+     *
+     * @param path The path
+     * @return The associated identifier
+     */
+    protected static String toId(final String path) {
+        if (null == path) {
+            return null;
+        }
+        return "/".equals(path) ? FileStorageFolder.ROOT_FULLNAME : path;
     }
 
     /**

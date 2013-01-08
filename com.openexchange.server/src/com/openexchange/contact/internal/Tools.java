@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.internal;
 
-import java.sql.SQLException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -258,7 +257,7 @@ public final class Tools {
     public static EffectivePermission getPermission(Session session, FolderObject folder) throws OXException {
         try {
             return folder.getEffectiveUserPermission(session.getUserId(), getUserConfig(session));
-        } catch (SQLException e) {
+        } catch (RuntimeException e) {
             throw ContactExceptionCodes.UNEXPECTED_ERROR.create(e);
         }
     }
@@ -516,6 +515,18 @@ public final class Tools {
 				contact.setAddressOther(null);
 			}
 		}
+	}
+	
+	/**
+	 * Sets the 'file as' attribute to the contact's display name if needed, i.e. the 'display name'-property is set, while the 
+	 * 'file as'-property isn't. 
+	 * 
+	 * @param contact The contact to set the 'file as' for
+	 */
+	public static void setFileAsIfNeeded(final Contact contact) {
+	    if (contact.containsDisplayName() && (false == contact.containsFileAs() || Tools.isEmpty(contact.getFileAs()))) {	        	        
+            contact.setFileAs(contact.getDisplayName());
+	    }
 	}
 
 	/**

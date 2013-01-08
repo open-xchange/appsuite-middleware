@@ -96,7 +96,8 @@ public class RefreshSubscriptionTest extends AbstractSubscriptionTest {
 
         subMgr.refreshAction( subscription.getId() );
 
-        assertTrue("Should have been successful", ((RefreshSubscriptionResponse) subMgr.getLastResponse()).wasSuccessful() );
+        RefreshSubscriptionResponse response = (RefreshSubscriptionResponse) subMgr.getLastResponse();
+        assertFalse("Should have been successful, but got: " + response.getErrorMessage(), response.hasError() );
 
     }
 }

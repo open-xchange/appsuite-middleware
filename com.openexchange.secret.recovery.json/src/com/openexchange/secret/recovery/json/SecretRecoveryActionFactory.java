@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.recovery.json.action.CheckAction;
+import com.openexchange.secret.recovery.json.action.CleanUpAction;
 import com.openexchange.secret.recovery.json.action.MigrateAction;
 import com.openexchange.server.ServiceLookup;
 
@@ -75,9 +76,10 @@ public class SecretRecoveryActionFactory implements AJAXActionServiceFactory {
      */
     public SecretRecoveryActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
+        actions = new ConcurrentHashMap<String, AJAXActionService>(3);
         actions.put("check", new CheckAction(services));
         actions.put("migrate", new MigrateAction(services));
+        actions.put("clean_up", new CleanUpAction(services));
     }
 
     @Override

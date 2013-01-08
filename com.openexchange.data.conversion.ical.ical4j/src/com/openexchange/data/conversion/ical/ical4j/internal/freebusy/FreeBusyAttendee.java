@@ -53,7 +53,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.TimeZone;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.property.Attendee;
 import com.openexchange.data.conversion.ical.ConversionError;

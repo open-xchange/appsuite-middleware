@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage RDB Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.rdb
-Bundle-Version: 6.23.0
+Bundle-Version: 7.0.0
 Bundle-Vendor: Open-Xchange Inc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.cache,
@@ -35,6 +35,8 @@ Import-Package: com.openexchange.cache,
  gnu.trove,
  gnu.trove.list,
  gnu.trove.list.array,
+ gnu.trove.map,
+ gnu.trove.map.hash,
  gnu.trove.procedure,
  org.apache.commons.logging,
  org.osgi.framework,

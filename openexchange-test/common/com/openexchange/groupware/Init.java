@@ -184,6 +184,8 @@ import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
+import com.openexchange.version.Version;
+import com.openexchange.version.internal.Numbers;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.jdom.impl.JDOMParserImpl;
 import com.openexchange.xml.spring.SpringParser;
@@ -336,6 +338,7 @@ public final class Init {
         // we'll have to do the service wiring differently.
         // This method duplicates statically what the OSGi container
         // handles dynamically
+        startVersionBundle();
         startAndInjectIDGeneratorService();
         startAndInjectConfigBundle();
         startAndInjectThreadPoolBundle();
@@ -369,6 +372,11 @@ public final class Init {
         startAndInjectContactCollector();
         startAndInjectImportExportServices();
 
+    }
+
+    private static void startVersionBundle() throws Exception {
+        // Using some static version because access to c.o.version bundle manifest is not possible currently.
+        Version.getInstance().setNumbers(new Numbers("0.0.0", "0"));
     }
 
     public static void startAndInjectConfigBundle() {

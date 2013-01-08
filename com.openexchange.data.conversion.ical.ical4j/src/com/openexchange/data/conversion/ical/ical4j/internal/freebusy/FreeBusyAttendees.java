@@ -52,7 +52,7 @@ package com.openexchange.data.conversion.ical.ical4j.internal.freebusy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VFreeBusy;

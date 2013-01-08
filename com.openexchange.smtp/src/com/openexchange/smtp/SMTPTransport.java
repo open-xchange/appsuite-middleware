@@ -53,7 +53,6 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.converters.MimeMessageConverter.saveChanges;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
-import static java.util.regex.Matcher.quoteReplacement;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -74,11 +73,11 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Transport;
-import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
@@ -91,6 +90,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -886,7 +886,7 @@ public final class SMTPTransport extends MailTransport {
         if (null == logProperties) {
             return getStaticHostName();
         }
-        final String serverName = logProperties.get("com.openexchange.ajp13.serverName");
+        final String serverName = logProperties.get(LogProperties.Name.AJP_SERVER_NAME);
         if (null == serverName) {
             return getStaticHostName();
         }
@@ -899,6 +899,43 @@ public final class SMTPTransport extends MailTransport {
             LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want!", warning);
         }
         return staticHostName;
+    }
+
+    private static String quoteReplacement(final String str) {
+        return isEmpty(str) ? "" : quoteReplacement0(str);
+    }
+
+    private static String quoteReplacement0(final String s) {
+        if ((s.indexOf('\\') == -1) && (s.indexOf('$') == -1)) {
+            return s;
+        }
+        final int length = s.length();
+        final StringAllocator sb = new StringAllocator(length << 1);
+        for (int i = 0; i < length; i++) {
+            final char c = s.charAt(i);
+            if (c == '\\') {
+                sb.append('\\');
+                sb.append('\\');
+            } else if (c == '$') {
+                sb.append('\\');
+                sb.append('$');
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

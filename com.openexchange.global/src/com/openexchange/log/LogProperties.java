@@ -50,6 +50,7 @@
 package com.openexchange.log;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -58,6 +59,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link LogProperties} - Provides thread-local log properties.
@@ -65,6 +67,200 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LogProperties {
+
+    /**
+     * Enumeration of log properties' names.
+     */
+    public static enum Name {
+        /**
+         * com.openexchange.ajax.requestNumber
+         */
+        AJAX_REQUEST_NUMBER("com.openexchange.ajax.requestNumber"),
+        /**
+         * com.openexchange.ajax.action
+         */
+        AJAX_ACTION("com.openexchange.ajax.action"),
+        /**
+         * com.openexchange.ajpv13.requestURI
+         */
+        AJP_REQUEST_URI("com.openexchange.ajpv13.requestURI"),
+        /**
+         * com.openexchange.ajpv13.servletPath
+         */
+        AJP_SERVLET_PATH("com.openexchange.ajpv13.servletPath"),
+        /**
+         * com.openexchange.ajpv13.pathInfo
+         */
+        AJP_PATH_INFO("com.openexchange.ajpv13.pathInfo"),
+        /**
+         * com.openexchange.ajpv13.requestIp
+         */
+        AJP_REQUEST_IP("com.openexchange.ajpv13.requestIp"),
+        /**
+         * com.openexchange.ajpv13.requestId
+         */
+        AJP_REQUEST_ID("com.openexchange.ajpv13.requestId"),
+        /**
+         * com.openexchange.ajpv13.serverName
+         */
+        AJP_SERVER_NAME("com.openexchange.ajpv13.serverName"),
+        /**
+         * com.openexchange.ajpv13.threadName
+         */
+        AJP_THREAD_NAME("com.openexchange.ajpv13.threadName"),
+        /**
+         * com.openexchange.ajpv13.remotePort
+         */
+        AJP_REMOTE_PORT("com.openexchange.ajpv13.remotePort"),
+        /**
+         * com.openexchange.ajpv13.remoteAddres
+         */
+        AJP_REMOTE_ADDRESS("com.openexchange.ajpv13.remoteAddress"),
+        /**
+         * com.openexchange.ajp13.httpSession
+         */
+        AJP_HTTP_SESSION("com.openexchange.ajp13.httpSession"),
+        /**
+         * com.openexchange.session.sessionId
+         */
+        SESSION_SESSION_ID("com.openexchange.session.sessionId"),
+        /**
+         * com.openexchange.session.userId
+         */
+        SESSION_USER_ID("com.openexchange.session.userId"),
+        /**
+         * com.openexchange.session.contextId
+         */
+        SESSION_CONTEXT_ID("com.openexchange.session.contextId"),
+        /**
+         * com.openexchange.session.clientId
+         */
+        SESSION_CLIENT_ID("com.openexchange.session.clientId"),
+        /**
+         * com.openexchange.session.session
+         */
+        SESSION_SESSION("com.openexchange.session.session"),
+        /**
+         * com.openexchange.grizzly.requestURI
+         */
+        GRIZZLY_REQUEST_URI("com.openexchange.grizzly.requestURI"),
+        /**
+         * com.openexchange.grizzly.servletPath
+         */
+        GRIZZLY_SERVLET_PATH("com.openexchange.grizzly.servletPath"),
+        /**
+         * com.openexchange.grizzly.pathInfo
+         */
+        GRIZZLY_PATH_INFO("com.openexchange.grizzly.pathInfo"),
+        /**
+         * com.openexchange.grizzly.requestIp
+         */
+        GRIZZLY_REQUEST_IP("com.openexchange.grizzly.requestIp"),
+        /**
+         * com.openexchange.grizzly.serverName
+         */
+        GRIZZLY_SERVER_NAME("com.openexchange.grizzly.serverName"),
+        /**
+         * com.openexchange.grizzly.threadName
+         */
+        GRIZZLY_THREAD_NAME("com.openexchange.grizzly.threadName"),
+        /**
+         * com.openexchange.grizzly.remotePort
+         */
+        GRIZZLY_REMOTE_PORT("com.openexchange.grizzly.remotePort"),
+        /**
+         * com.openexchange.grizzly.remoteAddres
+         */
+        GRIZZLY_REMOTE_ADDRESS("com.openexchange.grizzly.remoteAddress"),
+        /**
+         * com.openexchange.http.grizzly.session
+         */
+        GRIZZLY_HTTP_SESSION("com.openexchange.http.grizzly.session"),
+        /**
+         * javax.servlet.servletPath
+         */
+        SERVLET_SERVLET_PATH("javax.servlet.servletPath"),
+        /**
+         * javax.servlet.pathInfo
+         */
+        SERVLET_PATH_INFO("javax.servlet.pathInfo"),
+        /**
+         * javax.servlet.queryString
+         */
+        SERVLET_QUERY_STRING("javax.servlet.queryString"),
+        /**
+         * com.openexchange.file.storage.accountId
+         */
+        FILE_STORAGE_ACCOUNT_ID("com.openexchange.file.storage.accountId"),
+        /**
+         * com.openexchange.file.storage.configuration
+         */
+        FILE_STORAGE_CONFIGURATION("com.openexchange.file.storage.configuration"),
+        /**
+         * com.openexchange.file.storage.serviceId
+         */
+        FILE_STORAGE_SERVICE_ID("com.openexchange.file.storage.serviceId"),
+        /**
+         * com.openexchange.mail.host
+         */
+        MAIL_HOST("com.openexchange.mail.host"),
+        /**
+         * com.openexchange.mail.fullName
+         */
+        MAIL_FULL_NAME("com.openexchange.mail.fullName"),
+        /**
+         * com.openexchange.mail.mailId
+         */
+        MAIL_MAIL_ID("com.openexchange.mail.mailId"),
+        /**
+         * com.openexchange.mail.accountId
+         */
+        MAIL_ACCOUNT_ID("com.openexchange.mail.accountId"),
+        /**
+         * com.openexchange.mail.login
+         */
+        MAIL_LOGIN("com.openexchange.mail.login"),
+        /**
+         * com.openexchange.database.schema
+         */
+        DATABASE_SCHEMA("com.openexchange.database.schema"),
+        
+        ;
+
+        private final String name;
+        private Name(final String name) {
+            this.name = name;
+        }
+
+        /**
+         * Gets the name
+         * 
+         * @return The name
+         */
+        public String getName() {
+            return name;
+        }
+
+        private static final Map<String, Name> STRING2NAME;
+        static {
+            final Name[] values = Name.values();
+            final Map<String, Name> m = new HashMap<String, Name>(values.length);
+            for (final Name name : values) {
+                m.put(name.getName(), name);
+            }
+            STRING2NAME = m;
+        }
+
+        /**
+         * Gets the associated {@code Name} enum.
+         * 
+         * @param sName The name string
+         * @return The {@code Name} enum or <code>null</code>
+         */
+        public static Name nameFor(final String sName) {
+            return null == sName ? null : STRING2NAME.get(sName);
+        }
+    }
 
     /**
      * Initializes a new {@link LogProperties}.
@@ -124,7 +320,7 @@ public final class LogProperties {
         if (props == null) {
         	return null;
         }
-        return props.copy();
+        return props;
     }
 
     /**
@@ -142,7 +338,7 @@ public final class LogProperties {
         if (props == null) {
             return null;
         }
-        return props.copy();
+        return props;
     }
 
     /**
@@ -162,7 +358,7 @@ public final class LogProperties {
         final Thread thread = Thread.currentThread();
         Props props = THREAD_LOCAL.get(thread);
         if (null == props) {
-            final Props newprops = new Props(new ConcurrentHashMap<String, Object>(16));
+            final Props newprops = new Props();
             props = THREAD_LOCAL.putIfAbsent(thread, newprops);
             if (null == props) {
                 props = newprops;
@@ -182,7 +378,7 @@ public final class LogProperties {
         if (null == props) {
             return;
         }
-        THREAD_LOCAL.put(other, new Props(new ConcurrentHashMap<String, Object>(props.getMap())));
+        THREAD_LOCAL.put(other, new Props(props));
     }
 
     /**
@@ -191,10 +387,10 @@ public final class LogProperties {
      * @param name The property name
      * @return The log property or <code>null</code> if absent
      */
-    public static <V> V getLogProperty(final String name) {
+    public static <V> V getLogProperty(final LogProperties.Name name) {
         final Thread thread = Thread.currentThread();
         final Props props = THREAD_LOCAL.get(thread);
-        return null == props ? null : props.<V> get(name);
+        return null == props ? null : props.<V>get(name);
     }
 
     /**
@@ -204,7 +400,7 @@ public final class LogProperties {
      * @param value The property value
      * @see #isEnabled()
      */
-    public static void putLogProperty(final String name, final Object value) {
+    public static void putLogProperty(final LogProperties.Name name, final Object value) {
         if (null == value) {
             getLogProperties().remove(name);
         } else {
@@ -213,7 +409,7 @@ public final class LogProperties {
     }
     
     /**
-     * Get the thread local LogProperties and prettyprint them into a Sting.
+     * Get the thread local LogProperties and pretty-prints them into a Sting.
      * The String will contain one ore more lines formatted like:
      * <pre>
      * "propertyName1=propertyValue1"
@@ -224,18 +420,18 @@ public final class LogProperties {
      */
     public static String getAndPrettyPrint() {
         String logString = "";
-        Props logProperties = getLogProperties();
+        final Props logProperties = getLogProperties();
         // If we have additional log properties from the ThreadLocal add it to the logBuilder
         if (logProperties != null) {
-            StringBuilder logBuilder = new StringBuilder(128);
-            Map<String, Object> propertyMap = logProperties.getMap();
+            StringAllocator logBuilder = new StringAllocator(1024);
+            Map<LogProperties.Name, Object> propertyMap = logProperties.getMap();
             // Sort the properties for readability
             Map<String, String> sorted = new TreeMap<String, String>();
-            for (Entry<String, Object> propertyEntry : propertyMap.entrySet()) {
-                String propertyName = propertyEntry.getKey();
+            for (Entry<LogProperties.Name, Object> propertyEntry : propertyMap.entrySet()) {
+                LogProperties.Name propertyName = propertyEntry.getKey();
                 Object value = propertyEntry.getValue();
                 if (null != value) {
-                    sorted.put(propertyName, value.toString());
+                    sorted.put(propertyName.getName(), value.toString());
                 }
             }
             // And add them to the logBuilder
@@ -244,7 +440,6 @@ public final class LogProperties {
             }
             logString=logBuilder.toString();
         }
-        
         return logString;
     }
 

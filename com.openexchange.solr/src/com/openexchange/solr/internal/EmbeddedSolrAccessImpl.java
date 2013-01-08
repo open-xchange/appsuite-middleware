@@ -49,6 +49,9 @@
 
 package com.openexchange.solr.internal;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Properties;
@@ -66,6 +69,7 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrCore;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.openexchange.config.ConfigurationService;
@@ -104,9 +108,15 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
     }
 
     public void startUp() throws OXException {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        final String solrHome = config.getProperty(SolrProperties.SOLR_HOME);
+        ConfigurationService config = Services.getService(ConfigurationService.class);
+        String solrHome = config.getProperty(SolrProperties.SOLR_HOME);
+        String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
         coreContainer = new CoreContainer(solrHome);
+        try {
+            coreContainer.load(solrHome, new InputSource(new FileInputStream(configDir + File.separatorChar + "solr.xml")));
+        } catch (Exception e) {
+            LOG.warn("Error while loading core container. Schema cache will not be available...", e);
+        }
     }
     
     public void startCore(SolrCoreIdentifier identifier) throws OXException {
@@ -118,9 +128,23 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         }
         
         long start = System.currentTimeMillis();
+        boolean createdCoreEnvironment = false;
         try {
             int module = identifier.getModule();
-            com.openexchange.solr.SolrCore solrCore = getCoreOrCreateEnvironment(identifier);
+            com.openexchange.solr.SolrCore solrCore;
+            try {
+                solrCore = indexMysql.getSolrCore(identifier.getContextId(), identifier.getUserId(), identifier.getModule());
+            } catch (final OXException e) {
+                if (e.similarTo(SolrExceptionCodes.CORE_ENTRY_NOT_FOUND)) {
+                    SolrCoreConfigService coreService = Services.getService(SolrCoreConfigService.class);
+                    coreService.createCoreEnvironment(identifier);
+                    createdCoreEnvironment = true;
+                    solrCore = indexMysql.getSolrCore(identifier.getContextId(), identifier.getUserId(), identifier.getModule());
+                } else {
+                    throw e;
+                }
+            }
+            
             ConfigurationService config = Services.getService(ConfigurationService.class);
             String libDir = config.getProperty(SolrProperties.LIB_DIR);
             String schemaFile = getSchemaFileByModule(module);
@@ -147,6 +171,18 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         } catch (final IOException e) {
             throw new OXException(e);
         } catch (final SAXException e) {
+            throw new OXException(e);
+        } catch (final RuntimeException e) {
+            /*
+             * Something really bad happened here. Maybe we ran out of FDs or something like that.
+             * If we created the index directory, we have to delete it again. 
+             */
+            if (createdCoreEnvironment) {
+                LOG.error("RuntimeException during core start. Removing core environment as it might me inconsistent now...", e);
+                SolrCoreConfigService coreService = Services.getService(SolrCoreConfigService.class);
+                coreService.removeCoreEnvironment(identifier);
+            }
+            
             throw new OXException(e);
         } finally {
             if (LOG.isDebugEnabled()) {

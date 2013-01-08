@@ -58,8 +58,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import com.openexchange.imap.cache.util.LockedConcurrentMap;
-import com.openexchange.imap.cache.util.MaxCapacityLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.session.Session;
 
 /**
@@ -150,11 +151,7 @@ public final class ThreadableCache {
         }
         ConcurrentMap<String, ThreadableCacheEntry> map = accountMap.get(accountId);
         if (null == map) {
-            final ReadWriteLock rwl = new ReentrantReadWriteLock();
-            final MaxCapacityLinkedHashMap<String, ThreadableCacheEntry> maxCapacityMap =
-                new MaxCapacityLinkedHashMap<String, ThreadableCacheEntry>(32);
-            final ConcurrentMap<String, ThreadableCacheEntry> newmap =
-                new LockedConcurrentMap<String, ThreadableCacheEntry>(rwl.readLock(), rwl.writeLock(), maxCapacityMap);
+            final ConcurrentMap<String, ThreadableCacheEntry> newmap = new ConcurrentLinkedHashMap.Builder<String, ThreadableCacheEntry>().maximumWeightedCapacity(32).weigher(Weighers.entrySingleton()).build();
             map = accountMap.putIfAbsent(accountId, newmap);
             if (null == map) {
                 map = newmap;

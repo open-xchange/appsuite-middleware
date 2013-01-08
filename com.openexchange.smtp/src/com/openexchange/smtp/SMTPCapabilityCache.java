@@ -65,6 +65,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import com.openexchange.java.Strings;
 import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
@@ -219,7 +220,7 @@ public final class SMTPCapabilityCache {
                 }
                 final InputStream in = s.getInputStream();
                 final OutputStream out = s.getOutputStream();
-                final StringBuilder sb = new StringBuilder(512);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
                 /*
                  * Read IMAP server greeting on connect
                  */
@@ -238,8 +239,10 @@ public final class SMTPCapabilityCache {
                         sb.append(c);
                     }
                 }
-                /*final String greeting = */sb.toString();
-                sb.setLength(0);
+                /*final String greeting = sb.toString();*/
+                if (sb.length() > 0) {
+                    sb.reinitTo(0);
+                }
                 if (skipLF) {
                     /*
                      * Consume final LF
@@ -307,7 +310,7 @@ public final class SMTPCapabilityCache {
         public Capabilities(final String sCapabilities) {
             super();
             final Map<String, String> capabilities = new HashMap<String, String>(8);
-            final String[] strings = sCapabilities.split("\r?\n");
+            final String[] strings = Strings.splitByCRLF(sCapabilities);
             for (String cap : strings) {
                 if (cap.startsWith("250")) {
                     cap = cap.substring(4); // Swallow "250-" or "250 "

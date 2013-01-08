@@ -114,7 +114,7 @@ public class WebdavPostAction extends AbstractAction {
 			inputStream = resource.getBody();
 			outputStream = response.getOutputStream();
 			int length;
-			while (-1 != (length = inputStream.read(buffer))) {
+			while ((length = inputStream.read(buffer)) > 0) {
 				outputStream.write(buffer, 0, length);
 			}
 			response.setStatus(HttpServletResponse.SC_OK);

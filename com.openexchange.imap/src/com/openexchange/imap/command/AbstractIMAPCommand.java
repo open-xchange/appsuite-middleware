@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.command;
 
+import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.util.Locale;
 import javax.mail.MessagingException;
@@ -120,17 +121,8 @@ public abstract class AbstractIMAPCommand<T> {
             Response[] r = null;
             Response response = null;
             for (int argsIndex = 0; argsIndex < args.length; argsIndex++) {
-                final String imapCmd;
-                {
-                    imapCmd = abstractIMAPCommand.getCommand(argsIndex);
-                    final long start = System.currentTimeMillis();
-                    r = protocol.command(imapCmd, null);
-                    if (DEBUG_ENABLED) {
-                        final String debugInfo = abstractIMAPCommand.getDebugInfo(argsIndex);
-                        LOG.debug(new StringBuilder(imapCmd.length() + 32).append("Fired IMAP command in ").append(
-                            System.currentTimeMillis() - start).append("msec:\n").append(debugInfo == null ? imapCmd : debugInfo).toString());
-                    }
-                }
+                final String imapCmd = abstractIMAPCommand.getCommand(argsIndex);
+                r = performCommand(protocol, imapCmd);
                 response = r[r.length - 1];
                 if (response.isOK()) {
                     try {

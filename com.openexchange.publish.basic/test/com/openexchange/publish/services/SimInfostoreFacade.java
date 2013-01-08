@@ -83,7 +83,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public int countDocuments(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return 0;
     }
 
@@ -92,7 +92,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public boolean exists(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -101,7 +101,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException, SearchIteratorException, OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -110,7 +110,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException, SearchIteratorException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -127,7 +127,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public DocumentMetadata getDocumentMetadata(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -136,7 +136,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public TimedResult<DocumentMetadata> getDocuments(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -145,7 +145,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -154,7 +154,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -163,7 +163,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public TimedResult<DocumentMetadata> getDocuments(int[] ids, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws IllegalAccessException, OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -172,7 +172,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public TimedResult<DocumentMetadata> getVersions(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -181,7 +181,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -190,7 +190,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Metadata sort, int order, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -199,7 +199,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public boolean hasFolderForeignObjects(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -208,7 +208,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public boolean isFolderEmpty(long folderId, Context ctx) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return false;
     }
 
@@ -217,7 +217,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void lock(int id, long diff, ServerSession sessionObj) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -226,7 +226,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void removeDocument(long folderId, long date, ServerSession sessionObj) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -235,7 +235,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public int[] removeDocument(int[] id, long date, ServerSession sessionObj) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -244,7 +244,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void removeUser(int id, Context context, ServerSession session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -253,7 +253,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public int[] removeVersion(int id, int[] versionId, ServerSession sessionObj) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -262,7 +262,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession sessionObj) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -271,7 +271,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -280,7 +280,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession sessionObj) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -289,7 +289,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -298,7 +298,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void setSessionHolder(SessionHolder sessionHolder) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -307,7 +307,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void touch(int id, ServerSession session) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -316,7 +316,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void unlock(int id, ServerSession sessionObj) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -325,7 +325,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void commit() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -334,7 +334,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void finish() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -343,7 +343,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void rollback() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -352,7 +352,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void setCommitsTransaction(boolean commits) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -361,7 +361,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void setRequestTransactional(boolean transactional) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -370,7 +370,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void setTransactional(boolean transactional) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -379,7 +379,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     @Override
     public void startTransaction() throws TransactionException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 

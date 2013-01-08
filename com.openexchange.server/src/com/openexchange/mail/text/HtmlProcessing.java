@@ -285,7 +285,7 @@ public final class HtmlProcessing {
         {
             final String rest = bodyMatcher.group(1);
             if (!isEmpty(rest)) {
-                sb.append(' ').append(rest);
+                sb.append(' ').append(cleanUpRest(rest));
             }
         }
         sb.append('>');
@@ -295,7 +295,36 @@ public final class HtmlProcessing {
         }
         sb.append(bodyMatcher.group(2));
         sb.append("</div>");
+        // Is there more behind closing <body> tag?
+        final int end = bodyMatcher.end();
+        if (end < htmlContent.length()) {
+            sb.append(htmlContent.substring(end));
+        }
         return sb.toString();
+    }
+
+    private static final Pattern PAT_ATTR_BGCOLOR = Pattern.compile("bgcolor=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAT_ATTR_STYLE = Pattern.compile("style=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
+
+    private static String cleanUpRest(final String rest) {
+        Matcher m = PAT_ATTR_BGCOLOR.matcher(rest);
+        if (!m.find()) {
+            return rest;
+        }
+        final String color = m.group(1);
+        String ret = rest;
+        final StringBuffer sbuf = new StringBuffer(ret.length());
+        m.appendReplacement(sbuf, "");
+        m.appendTail(sbuf);
+        // Check for script attribute
+        m = PAT_ATTR_STYLE.matcher(sbuf.toString());
+        if (!m.find()) {
+            return sbuf.append(" style=\"background-color: ").append(color).append(";\"").toString();
+        }
+        sbuf.setLength(0);
+        m.appendReplacement(sbuf, "style=\"" + com.openexchange.java.Strings.quoteReplacement(m.group(1)) + " background-color: " + color + ";\"");
+        m.appendTail(sbuf);
+        return sbuf.toString();
     }
 
     private static String replaceBodyPlain(final String htmlContent, final String cssPrefix) {

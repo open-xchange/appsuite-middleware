@@ -216,7 +216,7 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
         final StringBuffer buffer = new StringBuffer(s.length());
         while (m.find()) {
             final char[] chars = Character.toChars(Integer.parseInt(m.group(1), 16));
-            m.appendReplacement(buffer, Matcher.quoteReplacement(new String(chars)));
+            m.appendReplacement(buffer, com.openexchange.java.Strings.quoteReplacement(new String(chars)));
         }
         m.appendTail(buffer);
         return buffer.toString();

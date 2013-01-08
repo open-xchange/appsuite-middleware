@@ -71,7 +71,7 @@ import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import javax.mail.event.FolderEvent;
 import javax.mail.event.FolderListener;
-import javax.mail.internet.IDNA;
+import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
@@ -770,7 +770,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return true;
         } catch (final OXException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("Ping to IMAP server \"").append(config.getServer()).append("\" failed").toString(), e);
+                LOG.debug(new com.openexchange.java.StringAllocator("Ping to IMAP server \"").append(config.getServer()).append("\" failed").toString(), e);
             }
             return false;
         }
@@ -861,11 +861,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 if (!isEmpty(ip)) {
                     clientIp = ip;
                 } else if (DEBUG) {
-                    LOG.debug(new StringBuilder(256).append("\n\n\tMissing client IP in session \"").append(session.getSessionID()).append(
+                    LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\n\tMissing client IP in session \"").append(session.getSessionID()).append(
                         "\" of user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(".\n"));
                 }
             } else if (DEBUG && MailAccount.DEFAULT_ID == accountId) {
-                LOG.debug(new StringBuilder(256).append("\n\n\tPropagating client IP address disabled on Open-Xchange server \"").append(
+                LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\n\tPropagating client IP address disabled on Open-Xchange server \"").append(
                     IMAPServiceRegistry.getService(ConfigurationService.class).getProperty("AJP_JVM_ROUTE")).append("\"\n").toString());
             }
             /*
@@ -908,7 +908,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                  * This call is re-invoked during IMAPNotifierTask's run
                  */
                 if (IMAPNotifierRegistry.getInstance().addTaskFor(accountId, session) && INFO) {
-                    final StringBuilder tmp = new StringBuilder("\n\tStarted IMAP notifier for server \"").append(config.getServer());
+                    final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator("\n\tStarted IMAP notifier for server \"").append(config.getServer());
                     tmp.append("\" with login \"").append(user);
                     tmp.append("\" (user=").append(session.getUserId());
                     tmp.append(", context=").append(session.getContextId()).append(").");
@@ -927,7 +927,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Special check for ACLs
              */
             if (config.isSupportsACLs()) {
-                final String key = new StringBuilder(server).append('@').append(port).toString();
+                final String key = new com.openexchange.java.StringAllocator(server).append('@').append(port).toString();
                 Boolean b = aclCapableServers.get(key);
                 if (null == b) {
                     Boolean nb;

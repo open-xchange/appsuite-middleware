@@ -78,8 +78,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.idn.IDNA;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -733,7 +733,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     max, MailSortField.getField(sortCol), OrderDirection.getOrderDirection(order), mailFields.toArray());
             } catch (final OXException e) {
                 // Check for missing "THREAD=REFERENCES" capability
-                if (2046 != e.getCode() || (!"MSG".equals(e.getPrefix()) && !"IMAP".equals(e.getPrefix()))) {
+                if ((2046 != e.getCode() || (!"MSG".equals(e.getPrefix()) && !"IMAP".equals(e.getPrefix()))) && !MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
                     throw e;
                 }
             }

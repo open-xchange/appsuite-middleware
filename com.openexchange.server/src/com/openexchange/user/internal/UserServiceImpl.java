@@ -57,6 +57,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -75,6 +76,11 @@ public final class UserServiceImpl implements UserService {
      */
     public UserServiceImpl() {
         super();
+    }
+
+    @Override
+    public Context getContext(int contextId) throws OXException {
+        return ContextStorage.getStorageContext(contextId);
     }
 
     @Override

@@ -77,7 +77,6 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
@@ -85,6 +84,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
+import javax.mail.internet.idn.IDNA;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
@@ -136,7 +136,7 @@ import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.impl.Version;
+import com.openexchange.version.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -284,7 +284,7 @@ public class MimeMessageFiller {
         /*
          * Set mailer
          */
-        mimeMessage.setHeader(MessageHeaders.HDR_X_MAILER, "Open-Xchange Mailer v" + Version.getVersionString());
+        mimeMessage.setHeader(MessageHeaders.HDR_X_MAILER, "Open-Xchange Mailer v" + Version.getInstance().getVersionString());
         /*
          * Set organization to context-admin's company field setting
          */
@@ -340,7 +340,7 @@ public class MimeMessageFiller {
                 }
                 // Prefer request's remote address if local IP seems to denote local host
                 final Props logProperties = LogProperties.optLogProperties();
-                final String clientIp = null == logProperties ? null : logProperties.<String> get("com.openexchange.ajp13.requestIp");
+                final String clientIp = null == logProperties ? null : logProperties.<String> get(LogProperties.Name.AJP_REQUEST_IP);
                 mimeMessage.setHeader("X-Originating-IP", clientIp == null ? localIp : clientIp);
             } else {
                 mimeMessage.setHeader("X-Originating-IP", localIp);
@@ -1379,7 +1379,7 @@ public class MimeMessageFiller {
             final InputStream in = mailPart.getInputStream();
             try {
                 int len;
-                while ((len = in.read(bbuf)) != -1) {
+                while ((len = in.read(bbuf)) > 0) {
                     out.write(bbuf, 0, len);
                 }
             } finally {
@@ -1500,7 +1500,7 @@ public class MimeMessageFiller {
         // htmlContent), false, usm.getAutoLinebreak()),
         // MailConfig.getDefaultMimeCharset());
         text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, Matcher.quoteReplacement(charset)));
+        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, com.openexchange.java.Strings.quoteReplacement(charset)));
         return text;
     }
 
@@ -1515,7 +1515,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If a messaging error occurs
      */
     protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException {
-        final String contentType = PAT_HTML_CT.replaceFirst(REPLACE_CS, Matcher.quoteReplacement(charset));
+        final String contentType = PAT_HTML_CT.replaceFirst(REPLACE_CS, com.openexchange.java.Strings.quoteReplacement(charset));
         final MimeBodyPart html = new MimeBodyPart();
         if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
             html.setContent(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType);
@@ -1708,7 +1708,7 @@ public class MimeMessageFiller {
                     /*
                      * Replace "src" attribute
                      */
-                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", Matcher.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\""));
+                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", com.openexchange.java.Strings.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\""));
                     iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + VERSION_NAME + "\"", "");
                     m.appendLiteralReplacement(sb, iTag);
                 } else {
@@ -1738,7 +1738,7 @@ public class MimeMessageFiller {
         final StringBuffer buffer = new StringBuffer(s.length());
         while (m.find()) {
             final char[] chars = Character.toChars(Integer.parseInt(m.group(1), 16));
-            m.appendReplacement(buffer, Matcher.quoteReplacement(new String(chars)));
+            m.appendReplacement(buffer, com.openexchange.java.Strings.quoteReplacement(new String(chars)));
         }
         m.appendTail(buffer);
         return buffer.toString();

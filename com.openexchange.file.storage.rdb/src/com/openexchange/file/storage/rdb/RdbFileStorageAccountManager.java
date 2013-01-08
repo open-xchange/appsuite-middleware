@@ -149,4 +149,9 @@ public class RdbFileStorageAccountManager implements FileStorageAccountManager {
         CACHE.migrateToNewSecret(service, oldSecret, newSecret, session);
     }
 
+    @Override
+    public void cleanUp(final String secret, final Session session) throws OXException {
+        CACHE.cleanUp(service, secret, session);
+    }
+
 }

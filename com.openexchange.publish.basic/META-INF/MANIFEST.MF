@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Basic Publication Implementation Plug-in
 Bundle-SymbolicName: com.openexchange.publish.basic
-Bundle-Version: 6.23.0
+Bundle-Version: 7.0.0
 Bundle-Activator: com.openexchange.publish.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -56,6 +56,17 @@ Import-Package: com.openexchange.ajax.customizer.folder,
  com.openexchange.tx,
  com.openexchange.user,
  com.openexchange.userconf,
+ gnu.trove,
+ gnu.trove.function,
+ gnu.trove.iterator,
+ gnu.trove.iterator.hash,
+ gnu.trove.list,
+ gnu.trove.list.array,
+ gnu.trove.map,
+ gnu.trove.map.hash,
+ gnu.trove.procedure,
+ gnu.trove.set,
+ gnu.trove.set.hash,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event,

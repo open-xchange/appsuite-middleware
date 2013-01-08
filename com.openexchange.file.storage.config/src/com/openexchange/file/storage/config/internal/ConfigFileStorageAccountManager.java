@@ -201,6 +201,11 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
     }
 
     @Override
+    public void cleanUp(final String secret, final Session session) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
     public boolean hasEncryptedItems(final Session session) throws OXException {
         return false;
     }

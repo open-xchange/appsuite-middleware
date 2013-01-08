@@ -277,7 +277,9 @@ public final class GetAction extends AbstractMailAction {
                     req.getRequest().setFormat("file");
                     final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
                     fileHolder.setContentType("application/octet-stream");
-                    fileHolder.setName(new com.openexchange.java.StringAllocator(mail.getSubject()).append(".eml").toString());
+                    // Set file name
+                    final String subject = mail.getSubject();
+                    fileHolder.setName(new com.openexchange.java.StringAllocator(isEmpty(subject) ? "mail" : saneForFileName(subject)).append(".eml").toString());
                     return new AJAXRequestResult(fileHolder, "file");
                 }
                 final ContentType ct = mail.getContentType();
@@ -405,6 +407,38 @@ public final class GetAction extends AbstractMailAction {
         while (iter.hasNext()) {
             final Map.Entry<String, String> entry = iter.next();
             sb.append(entry.getKey()).append(delim).append(entry.getValue()).append(crlf);
+        }
+        return sb.toString();
+    }
+
+    private static String saneForFileName(final String fileName) {
+        if (isEmpty(fileName)) {
+            return fileName;
+        }
+        final int len = fileName.length();
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(len);
+        char prev = '\0';
+        for (int i = 0; i < len; i++) {
+            final char c = fileName.charAt(i);
+            if (Character.isWhitespace(c)) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else if ('/' == c) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else if ('\\' == c) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else {
+                prev = '\0';
+                sb.append(c);
+            }
         }
         return sb.toString();
     }

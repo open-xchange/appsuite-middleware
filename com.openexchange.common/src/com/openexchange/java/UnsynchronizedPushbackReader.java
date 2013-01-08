@@ -125,36 +125,32 @@ public final class UnsynchronizedPushbackReader extends FilterReader {
     @Override
     public int read(char cbuf[], int off, int len) throws IOException {
         ensureOpen();
-        try {
-            if (len <= 0) {
-                if (len < 0) {
-                    throw new IndexOutOfBoundsException();
-                } else if ((off < 0) || (off > cbuf.length)) {
-                    throw new IndexOutOfBoundsException();
-                }
-                return 0;
+        if (len <= 0) {
+            if (len < 0) {
+                throw new IndexOutOfBoundsException();
+            } else if ((off < 0) || (off > cbuf.length)) {
+                throw new IndexOutOfBoundsException();
             }
-            int avail = buf.length - pos;
-            if (avail > 0) {
-                if (len < avail) {
-                    avail = len;
-                }
-                System.arraycopy(buf, pos, cbuf, off, avail);
-                pos += avail;
-                off += avail;
-                len -= avail;
-            }
-            if (len > 0) {
-                len = super.read(cbuf, off, len);
-                if (len == -1) {
-                    return (avail == 0) ? -1 : avail;
-                }
-                return avail + len;
-            }
-            return avail;
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IndexOutOfBoundsException();
+            return 0;
         }
+        int avail = buf.length - pos;
+        if (avail > 0) {
+            if (len < avail) {
+                avail = len;
+            }
+            System.arraycopy(buf, pos, cbuf, off, avail);
+            pos += avail;
+            off += avail;
+            len -= avail;
+        }
+        if (len > 0) {
+            len = super.read(cbuf, off, len);
+            if (len == -1) {
+                return (avail == 0) ? -1 : avail;
+            }
+            return avail + len;
+        }
+        return avail;
     }
 
     /**

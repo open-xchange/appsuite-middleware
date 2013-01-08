@@ -294,4 +294,13 @@ public interface MailAccountStorageService {
      * Finds out whether the user has items that are encrypted
      */
     public boolean hasAccounts(Session session) throws OXException;
+
+    /**
+     * Cleans-up accounts that could no more be decrypted with given secret
+     *
+     * @param secret The current secret
+     * @param session The session providing user information
+     * @throws OXException If operation fails
+     */
+    public void cleanUp(String secret, Session session) throws OXException;
 }

@@ -63,6 +63,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
+import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -154,8 +156,6 @@ public final class CSVLibrary {
     }
 
     public static String transformInputStreamToString(final InputStream is, final String encoding) throws OXException{
-    	boolean isUTF8 = encoding.equalsIgnoreCase("UTF-8");
-
         final InputStreamReader isr;
         try {
             isr = new InputStreamReader(is, encoding);
@@ -163,12 +163,13 @@ public final class CSVLibrary {
             LOG.fatal(e);
             throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
         }
-        final StringBuilder bob = new StringBuilder();
-        boolean firstPartSpecialTreatment = isUTF8;
         try {
-            char[] buf = new char[512];
+            final StringAllocator bob = new StringAllocator(8192);
+            boolean isUTF8 = encoding.equalsIgnoreCase("UTF-8");
+            boolean firstPartSpecialTreatment = isUTF8;
+            final char[] buf = new char[512];
             int length = -1;
-            while ((length = isr.read(buf)) != -1) {
+            while ((length = isr.read(buf)) > 0) {
             	if(firstPartSpecialTreatment){
             		firstPartSpecialTreatment = false;
             		int offset = lengthOfBOM(buf);
@@ -177,16 +178,12 @@ public final class CSVLibrary {
             		bob.append(buf, 0, length);
             	}
             }
+            return bob.toString();
         } catch (final IOException e) {
             throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
         } finally {
-            try {
-                isr.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(isr);
         }
-        return bob.toString();
     }
 
 	private static int lengthOfBOM(char[] buf) {

@@ -193,7 +193,10 @@ public final class CacheActivator extends HousekeepingActivator {
         /*
          * Stop cache
          */
-        JCSCacheServiceInit.getInstance().stop();
+        final JCSCacheServiceInit instance = JCSCacheServiceInit.getInstance();
+        if (null != instance) {
+            instance.stop();
+        }
         JCSCacheServiceInit.releaseInstance();
     }
 

@@ -114,10 +114,10 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                 public void run() {
                     final boolean debugEnabled = LOG.isDebugEnabled();
                     final Iterator<RequestRegistryEntry> descendingEntryIterator = requestRegistry.descendingIterator();
-                    final StringBuilder sb = new StringBuilder(256);
+                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
                     boolean stillOldRequestsLeft = true;
                     while (stillOldRequestsLeft && descendingEntryIterator.hasNext()) {
-                        sb.setLength(0);
+                        sb.reinitTo(0);
                         if (debugEnabled) {
                             for (final RequestRegistryEntry entry : requestRegistry) {
                                 sb.append("RegisteredThreads:\n\tage: ").append(entry.getAge()).append(" ms").append(", thread: ").append(
@@ -130,7 +130,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                         }
                         final RequestRegistryEntry requestRegistryEntry = descendingEntryIterator.next();
                         if (requestRegistryEntry.getAge() > requestMaxAge) {
-                            sb.setLength(0);
+                            sb.reinitTo(0);
                             logRequestRegistryEntry(requestRegistryEntry, sb);
                             try {
                                 requestRegistry.remove(requestRegistryEntry);
@@ -144,7 +144,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     }
                 }
 
-                private void logRequestRegistryEntry(final RequestRegistryEntry entry, final StringBuilder logBuilder) {
+                private void logRequestRegistryEntry(final RequestRegistryEntry entry, final com.openexchange.java.StringAllocator logBuilder) {
                     final Throwable trace = new Throwable();
                     trace.setStackTrace(entry.getStackTrace());
                     Props logProperties = LogProperties.optLogProperties(entry.getThread());
@@ -152,7 +152,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     
                     // If we have additional log properties from the ThreadLocal add it to the logBuilder
                     if (logProperties != null) {
-                        Map<String, Object> propertyMap = logProperties.getMap();
+                        Map<String, Object> propertyMap = logProperties.asMap();
                         // Sort the properties for readability
                         Map<String, String> sorted = new TreeMap<String, String>();
                         for (Entry<String, Object> propertyEntry : propertyMap.entrySet()) {

@@ -59,6 +59,7 @@ import java.util.regex.Pattern;
 import com.openexchange.html.internal.MatcherReplacer;
 import com.openexchange.html.internal.RegexUtility;
 import com.openexchange.html.internal.RegexUtility.GroupType;
+import com.openexchange.java.Strings;
 
 /**
  * {@link CSSMatcher} - Provides several utility methods to check CSS content.
@@ -572,7 +573,7 @@ public final class CSSMatcher {
                         elemBuilder.append(elementValues);
                         hasValues = true;
                     } else {
-                        final String[] tokens = elementValues.split("\\s+");
+                        final String[] tokens = Strings.splitByWhitespaces(elementValues);
                         for (int j = 0; j < tokens.length; j++) {
                             if (matches(tokens[j], allowedValuesSet)) {
                                 if (j > 0) {

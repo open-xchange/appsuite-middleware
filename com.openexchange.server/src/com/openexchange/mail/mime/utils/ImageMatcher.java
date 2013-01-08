@@ -251,7 +251,7 @@ public final class ImageMatcher {
      * Implements a non-terminal append-and-replace step.
      */
     public Matcher appendLiteralReplacement(final StringBuffer sb, final String replacement) {
-        return matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+        return matcher.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(replacement));
     }
 
     /**

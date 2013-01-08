@@ -72,7 +72,8 @@ import com.openexchange.ajp13.servlet.ServletResponseWrapper;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.java.Charsets;
-import com.openexchange.server.impl.Version;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.version.Version;
 import com.openexchange.session.Session;
 
 /**
@@ -257,7 +258,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
             anchor = path.substring(pound);
             path = path.substring(0, pound);
         }
-        final StringBuilder sb = new StringBuilder(path);
+        final StringAllocator sb = new StringAllocator(path);
         if (httpSessionId != null && sb.length() > 0) {
             sb.append('/');
             sb.append(AJPv13RequestHandler.JSESSIONID_URI);
@@ -509,7 +510,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         synchronized (HEADER_DATE_FORMAT) {
             errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
         }
-        errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getVersionString());
+        errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getInstance().getVersionString());
         setContentType(new com.openexchange.java.StringAllocator("text/html; charset=").append(getCharacterEncoding()).toString());
         final byte[] errormessage = errorMsgStr.getBytes(Charsets.forName(getCharacterEncoding()));
         setContentLength(errormessage.length);
@@ -540,7 +541,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         synchronized (HEADER_DATE_FORMAT) {
             errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
         }
-        errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getVersionString());
+        errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getInstance().getVersionString());
         String encoding = getCharacterEncoding();
         if (null == encoding) {
             encoding = "UTF-8";

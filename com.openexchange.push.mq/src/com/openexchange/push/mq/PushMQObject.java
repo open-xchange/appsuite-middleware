@@ -234,31 +234,31 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
 
     public static PushMQObject parseString(String toParse) throws OXException {
         final Pattern regex = Pattern.compile(
-            "FOLDER_ID=(.*?),MODULE=(.*?),CONTEXT_ID=(.*?),USERS=(.*?),IS_REMOTE=(.*?),TIMESTAMP=(.*?),TOPIC=(*?),HOSTNAME=(.*?)",
+            "FOLDER_ID=(.*?),MODULE=(.*?),CONTEXT_ID=(.*?),USERS=(.*?),IS_REMOTE=(.*?),TIMESTAMP=(.*?),TOPIC=(.*?),HOSTNAME=(.*?)",
             Pattern.DOTALL);
         Matcher matcher = regex.matcher(toParse);
         if (!matcher.find()) {
             return null;
-        } else {
-            int folderId = Integer.valueOf(matcher.group(1));
-            int module = Integer.valueOf(matcher.group(2));
-            int contextId = Integer.valueOf(matcher.group(3));
-            int[] users = null;
-            if (matcher.group(4).contains(",")) {
-                String[] user = matcher.group(4).split(",");
-                users = new int[user.length];
-                for (int i = 0; i < user.length; i++) {
-                    users[i] = Integer.valueOf(user[i]);
-                }
-            } else {
-                users = new int[1];
-                users[0] = Integer.valueOf(matcher.group(4));
-            }
-            boolean isRemote = Boolean.valueOf(matcher.group(5));
-            long timestamp = Long.valueOf(matcher.group(6));
-            String topicName = matcher.group(7);
-            String hostname = matcher.group(8);
-            return new PushMQObject(folderId, module, contextId, users, isRemote, timestamp, topicName, hostname);
         }
+        int folderId = Integer.parseInt(matcher.group(1));
+        int module = Integer.parseInt(matcher.group(2));
+        int contextId = Integer.parseInt(matcher.group(3));
+        final Pattern splitter = Pattern.compile(",");
+        int[] users = null;
+        if (matcher.group(4).indexOf(',') >= 0) {
+            String[] user = splitter.split(matcher.group(4), 0);
+            users = new int[user.length];
+            for (int i = 0; i < user.length; i++) {
+                users[i] = Integer.parseInt(user[i]);
+            }
+        } else {
+            users = new int[1];
+            users[0] = Integer.parseInt(matcher.group(4));
+        }
+        boolean isRemote = Boolean.parseBoolean(matcher.group(5));
+        long timestamp = Long.parseLong(matcher.group(6));
+        String topicName = matcher.group(7);
+        String hostname = matcher.group(8);
+        return new PushMQObject(folderId, module, contextId, users, isRemote, timestamp, topicName, hostname);
     }
 }

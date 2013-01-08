@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import org.json.JSONObject;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
@@ -71,7 +72,6 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.userconf.UserConfigurationService;
-import org.json.JSONObject;
 
 /**
  * {@link AbstractSubscribeService}
@@ -250,31 +250,66 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
         final String id = subscriptionSource.getId();
+        final CryptoService cryptoService = CRYPTO_SERVICE.get();
+        final Map<String, Object> update = new HashMap<String, Object>();
         for (final Subscription subscription : allSubscriptions) {
             if (id.equals(getSubscriptionSourceId(subscription))) {
                 final Map<String, Object> configuration = subscription.getConfiguration();
-                final Map<String, Object> update = new HashMap<String, Object>();
-                final CryptoService cryptoService = CRYPTO_SERVICE.get();
+                update.clear();
                 boolean save = false;
                 for (final String passwordField : passwordFields) {
                     final String password = (String) configuration.get(passwordField);
-                    if (password != null) {
+                    if (!isEmpty(password)) {
                         try {
-                            try {
-                                // If we can already decrypt with the new secret, we're done with this entry
-                                cryptoService.decrypt(password, newSecret);
-                            } catch (final OXException x) {
-                                // Alright, this one needs migration
-                                final String transcriptedPassword = cryptoService.encrypt(cryptoService.decrypt(password, oldSecret), newSecret);
-                                update.put(passwordField, transcriptedPassword);
-                                save = true;
-                            }
-                        } catch (final OXException e) {
-                            throw e;
+                            // If we can already decrypt with the new secret, we're done with this entry
+                            cryptoService.decrypt(password, newSecret);
+                        } catch (final OXException x) {
+                            // This one needs migration
+                            final String transcriptedPassword = cryptoService.encrypt(cryptoService.decrypt(password, oldSecret), newSecret);
+                            update.put(passwordField, transcriptedPassword);
+                            save = true;
                         }
                     }
                 }
-                if(save) {
+                if (save) {
+                    subscription.setConfiguration(update);
+                    STORAGE.get().updateSubscription(subscription);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void cleanUp(String secret, Session session) throws OXException {
+        final SubscriptionSource subscriptionSource = getSubscriptionSource();
+        final Set<String> passwordFields = subscriptionSource.getPasswordFields();
+        if (passwordFields.isEmpty()) {
+            return;
+        }
+        final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        final List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
+        final String id = subscriptionSource.getId();
+        final CryptoService cryptoService = CRYPTO_SERVICE.get();
+        final Map<String, Object> update = new HashMap<String, Object>();
+        for (final Subscription subscription : allSubscriptions) {
+            if (id.equals(getSubscriptionSourceId(subscription))) {
+                final Map<String, Object> configuration = subscription.getConfiguration();
+                update.clear();
+                boolean save = false;
+                for (final String passwordField : passwordFields) {
+                    final String password = (String) configuration.get(passwordField);
+                    if (!isEmpty(password)) {
+                        try {
+                            // If we can already decrypt with the new secret, we're done with this entry
+                            cryptoService.decrypt(password, secret);
+                        } catch (final OXException x) {
+                            // This one needs clean-up
+                            update.put(passwordField, "");
+                            save = true;
+                        }
+                    }
+                }
+                if (save) {
                     subscription.setConfiguration(update);
                     STORAGE.get().updateSubscription(subscription);
                 }
@@ -335,5 +370,17 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         
         
         return new OXFolderAccess(ctx).getFolderPermission(folderId, userId, userConfig);
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 }

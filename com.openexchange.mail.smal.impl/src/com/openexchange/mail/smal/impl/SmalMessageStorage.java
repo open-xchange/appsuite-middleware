@@ -71,6 +71,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
+import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -78,7 +79,13 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.index.MailUtility;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.smal.impl.index.FakeSession;
 import com.openexchange.mail.smal.impl.index.IndexDocumentHelper;
+import com.openexchange.mail.smal.impl.index.jobs.AddByIdsJob;
+import com.openexchange.mail.smal.impl.index.jobs.ChangeByIdsJob;
+import com.openexchange.mail.smal.impl.index.jobs.MailJobInfo;
+import com.openexchange.mail.smal.impl.index.jobs.RemoveByIdsJob;
+import com.openexchange.mail.smal.impl.index.jobs.MailJobInfo.Builder;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -86,12 +93,6 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
-import com.openexchange.service.indexing.impl.internal.FakeSession;
-import com.openexchange.service.indexing.impl.mail.AddByIdsJob;
-import com.openexchange.service.indexing.impl.mail.ChangeByIdsJob;
-import com.openexchange.service.indexing.impl.mail.MailJobInfo;
-import com.openexchange.service.indexing.impl.mail.MailJobInfo.Builder;
-import com.openexchange.service.indexing.impl.mail.RemoveByIdsJob;
 import com.openexchange.session.Session;
 
 /**
@@ -100,7 +101,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
+public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure {
 
     private final IMailMessageStorage messageStorage;
 
@@ -122,6 +123,14 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     }
 
     @Override
+    public List<List<MailMessage>> getThreadSortedMessages(String folder, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] fields) throws OXException {
+        if (messageStorage instanceof ISimplifiedThreadStructure) {
+            return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(folder, includeSent, cache, indexRange, max, sortField, order, fields);
+        }
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+    }
+
+    @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
         final String[] newIds = messageStorage.appendMessages(destFolder, msgs);
         /*
@@ -138,8 +147,6 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
         return newIds;
     }
-
-    
 
     @Override
     public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
@@ -182,7 +189,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         IndexFacadeService indexFacade = getIndexFacadeService();
-        if (indexFacade == null || isBlacklisted() || !isIndexingAllowed()) {
+        if (searchTerm == null || indexFacade == null || isBlacklisted() || !isIndexingAllowed()) {
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
         
@@ -191,7 +198,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             MailFields mfs = new MailFields(fields);
             indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
             boolean isIndexed = indexAccess.isIndexed(String.valueOf(accountId), folder);
-            if (isIndexed && searchTerm != null && MailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
+            if (isIndexed && MailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
                 AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
                 QueryParameters.Builder builder = new QueryParameters
                     .Builder()

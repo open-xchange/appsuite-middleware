@@ -199,8 +199,8 @@ public class InfostoreFile extends AbstractFile implements File {
 
 
     @Override
-    public int getVersion() {
-        return document.getVersion();
+    public String getVersion() {
+        return Integer.toString(document.getVersion());
     }
 
 
@@ -331,8 +331,8 @@ public class InfostoreFile extends AbstractFile implements File {
 
 
     @Override
-    public void setVersion(final int version) {
-        document.setVersion(version);
+    public void setVersion(final String version) {
+        document.setVersion(Integer.parseInt(version));
     }
 
 

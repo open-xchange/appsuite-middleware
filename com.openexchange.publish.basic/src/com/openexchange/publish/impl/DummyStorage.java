@@ -72,7 +72,7 @@ public class DummyStorage implements PublicationStorage {
      */
     @Override
     public void forgetPublication(Publication publication) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -81,7 +81,7 @@ public class DummyStorage implements PublicationStorage {
      */
     @Override
     public Publication getPublication(Context ctx, int publicationId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -90,7 +90,7 @@ public class DummyStorage implements PublicationStorage {
      */
     @Override
     public List<Publication> getPublications(Context ctx, String module, String entityId) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -99,7 +99,7 @@ public class DummyStorage implements PublicationStorage {
      */
     @Override
     public List<Publication> getPublications(Context ctx, String publicationTarget) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
@@ -108,7 +108,7 @@ public class DummyStorage implements PublicationStorage {
      */
     @Override
     public void rememberPublication(Publication publication) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -117,13 +117,13 @@ public class DummyStorage implements PublicationStorage {
      */
     @Override
     public Collection<Publication> search(Context ctx, String targetId, Map<String, Object> query) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 
     @Override
     public void updatePublication(Publication publication) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -132,7 +132,7 @@ public class DummyStorage implements PublicationStorage {
      */
     @Override
     public void deletePublicationsOfUser(int userID, Context context) throws OXException {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
@@ -141,27 +141,27 @@ public class DummyStorage implements PublicationStorage {
      */
     @Override
     public void deletePublicationsInContext(int contextId, Context ctx) {
-        // TODO Auto-generated method stub
+        // Nothing to do
 
     }
 
 	@Override
     public List<Publication> getPublicationsOfUser(Context ctx, int userId) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
     public List<Publication> getPublicationsOfUser(Context ctx, int userId,
 			String module) throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 
 	@Override
 	public Map<Entity, Boolean> isPublished(List<Entity> entities, Context ctx)
 			throws OXException {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return null;
 	}
 

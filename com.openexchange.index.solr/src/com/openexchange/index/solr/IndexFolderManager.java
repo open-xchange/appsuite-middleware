@@ -54,7 +54,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -185,17 +187,17 @@ public class IndexFolderManager {
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);                      
+            DBUtils.closeSQLStuff(rs, stmt);
         }
     }
     
     public static boolean lock(int contextId, int userId, int module, String account, String folder) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getWritable(contextId);
-        try {            
+        try {
             return lock(con, contextId, userId, module, account, folder);        
-        } finally {            
-            if (con != null) {                
+        } finally {
+            if (con != null) {
                 dbService.backWritable(contextId, con);
             }
         }
@@ -300,7 +302,38 @@ public class IndexFolderManager {
             DBUtils.closeSQLStuff(ustmt);
             if (con != null) {
                 dbService.backWritable(contextId, con);
-            }   
+            }
+        }
+    }
+    
+    public static Map<String, Boolean> getIndexedFolders(int contextId, int userId, int module, String account) throws OXException {
+        DatabaseService dbService = getDbService();
+        Connection con = dbService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Map<String, Boolean> results = new HashMap<String, Boolean>();
+        try {
+            stmt = con.prepareStatement("SELECT folder, indexed FROM indexedFolders WHERE cid = ? AND uid = ? AND module = ? AND account = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, module);
+            stmt.setString(4, account);
+            
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                String folder = rs.getString(1);
+                boolean indexed = rs.getBoolean(2);
+                results.put(folder, indexed);
+            }
+            
+            return results;
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            if (con != null) {
+                dbService.backReadOnly(contextId, con);
+            }
         }
     }
     

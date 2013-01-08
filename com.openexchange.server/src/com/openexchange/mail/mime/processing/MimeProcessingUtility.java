@@ -229,7 +229,7 @@ public final class MimeProcessingUtility {
             }
             contentType.setBaseType("text/plain");
             final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-            return htmlService.html2text(htmlService.getConformHTML(readContent(textPart, charset), contentType.getCharsetParameter()), false);
+            return htmlService.html2text(readContent(textPart, charset), false);
             // return new Html2TextConverter().convertWithQuotes(MessageUtility.readMimePart(textPart, contentType));
         } else if (contentType.isMimeType(MimeTypes.MIME_TEXT_PLAIN)) {
             final String content = readContent(textPart, charset);
@@ -360,9 +360,7 @@ public final class MimeProcessingUtility {
         } else if (rootType.startsWith(CT_TEXT_HTM)) {
             textBuilder.append(htmlFormat(text));
         } else {
-            final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-            final String plainText = htmlService.html2text(htmlService.getConformHTML(text, contentType.getCharsetParameter()), false);
-            textBuilder.append(plainText);
+            textBuilder.append(ServerServiceRegistry.getInstance().getService(HtmlService.class).html2text(text, false));
             // textBuilder.append(new Html2TextConverter().convertWithQuotes(text));
         }
     }

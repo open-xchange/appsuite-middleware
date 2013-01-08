@@ -97,7 +97,7 @@ public final class FolderMapManagement {
      * @param contextId The context identifier
      */
     public void dropFor(final int contextId) {
-        map.get(Integer.valueOf(contextId));
+        map.remove(Integer.valueOf(contextId));
         if (LOG.isDebugEnabled()) {
             LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive folder cache for context ").append(contextId).toString());
         }

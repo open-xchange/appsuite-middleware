@@ -42,7 +42,7 @@
 
 package com.openexchange.http.grizzly.service.http;
 
-import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.OXHttpServer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
@@ -63,7 +63,7 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
 
     private final OSGiMainHandler mainHttpHandler;
 
-    public HttpServiceFactory(final HttpServer httpServer, final Bundle bundle) {
+    public HttpServiceFactory(final OXHttpServer httpServer, final Bundle bundle) {
         mainHttpHandler = new OSGiMainHandler(bundle);
         httpServer.getServerConfiguration().addHttpHandler(mainHttpHandler, "/");
     }

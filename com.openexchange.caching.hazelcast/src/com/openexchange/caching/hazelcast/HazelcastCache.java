@@ -52,13 +52,13 @@ package com.openexchange.caching.hazelcast;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import org.apache.commons.logging.Log;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.ISet;
 import com.hazelcast.core.MapEntry;
@@ -72,6 +72,7 @@ import com.openexchange.caching.ElementAttributes;
 import com.openexchange.caching.LockAware;
 import com.openexchange.caching.PutIfAbsent;
 import com.openexchange.exception.OXException;
+import com.openexchange.hazelcast.Hazelcasts;
 
 /**
  * {@link HazelcastCache}
@@ -353,4 +354,24 @@ public final class HazelcastCache extends DefaultCacheKeyService implements Cach
         return null;
     }
 
+    @Override
+    public Set<?> getGroupKeys(String group) {
+        IMap<Serializable, Serializable> g = getGroup(group);
+        return g.keySet();
+    }
+
+    @Override
+    public Set<String> getGroupNames() {
+        return groupNames;
+    }
+
+    @Override
+    public Set<?> getAllKeys() throws OXException {
+        return map.keySet();
+    }
+
+    @Override
+    public Set<?> getKeysInRange(int start, int end) throws OXException {
+        return null;
+    }
 }

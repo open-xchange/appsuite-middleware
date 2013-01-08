@@ -84,6 +84,9 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     private final Lock migrateLock;
 
+    /**
+     * Initializes a new {@link SessiondServiceImpl}.
+     */
     public SessiondServiceImpl() {
         super();
         migrateLock = new ReentrantLock();
@@ -91,7 +94,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public boolean hasForContext(final int contextId) {
-        return SessionHandler.hasForContext(contextId);
+        return SessionHandler.hasForContext(contextId, false);
     }
 
     @Override
@@ -104,7 +107,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             final Boolean parameter = parameterized.<Boolean> getParameter(PARAM_VOLATILE);
             isVolatile = null == parameter ? false : parameter.booleanValue();
         }
-        final SessionImpl session = SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext().getContextId(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient(), isVolatile);
+        final SessionImpl session = SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext().getContextId(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient(), isVolatile ? new VolatileParams(parameterized) : null);
         if (null == session) {
             return null;
         }
@@ -208,12 +211,12 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     public Session getAnyActiveSessionForUser(final int userId, final int contextId) {
         final Props logProperties = LogProperties.optLogProperties();
         if (null != logProperties) {
-            final Session session = logProperties.get("com.openexchange.session.session");
+            final Session session = logProperties.get(LogProperties.Name.SESSION_SESSION);
             if (null != session && userId == session.getUserId() && contextId == session.getContextId()) {
                 return session;
             }
         }
-        final SessionControl sessionControl = SessionHandler.getAnyActiveSessionForUser(userId, contextId, false);
+        final SessionControl sessionControl = SessionHandler.getAnyActiveSessionForUser(userId, contextId, false, false);
         return null == sessionControl ? null: sessionControl.getSession();
     }
 

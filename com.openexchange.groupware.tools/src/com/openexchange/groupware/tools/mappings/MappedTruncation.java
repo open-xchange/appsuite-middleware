@@ -169,7 +169,7 @@ public class MappedTruncation<O> implements Truncated {
 	@Override
 	@Deprecated
 	public int getId() {
-		// TODO Auto-generated method stub
+		// Nothing to do
 		return 0;
 	}
 

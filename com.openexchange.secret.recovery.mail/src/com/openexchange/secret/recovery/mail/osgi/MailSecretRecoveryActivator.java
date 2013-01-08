@@ -52,6 +52,7 @@ package com.openexchange.secret.recovery.mail.osgi;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.tools.session.ServerSession;
@@ -88,7 +89,7 @@ public class MailSecretRecoveryActivator extends HousekeepingActivator {
                 return mailAccountStorage.hasAccounts(session);
             }
 
-        }, null);
+        });
         registerService(SecretMigrator.class, new SecretMigrator() {
 
             @Override
@@ -96,7 +97,15 @@ public class MailSecretRecoveryActivator extends HousekeepingActivator {
                 mailAccountStorage.migratePasswords(session.getUserId(), session.getContextId(), oldSecret, newSecret);
             }
 
-        }, null);
+        });
+        registerService(EncryptedItemCleanUpService.class, new EncryptedItemCleanUpService() {
+
+            @Override
+            public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
+                mailAccountStorage.cleanUp(secret, session);
+            }
+
+        });
     }
 
     @Override

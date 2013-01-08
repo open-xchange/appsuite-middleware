@@ -92,8 +92,9 @@ public class FormalFieldParser {
             if (formalFieldMap.containsKey(s)) {
                 b.append(this.parseTerm(t.getTerm(), formalFieldMap.get(s)) + " ");
             } else {
-                if (!(s.equalsIgnoreCase("AND") || s.equalsIgnoreCase("OR") || s.equalsIgnoreCase("NOT")))
+                if (!(s.equalsIgnoreCase("AND") || s.equalsIgnoreCase("OR") || s.equalsIgnoreCase("NOT"))) {
                     log.debug("[parse]: No mapping for field \'" + s + "\'");
+                }
                 b.append(s + " ");
             }
         }
@@ -199,35 +200,49 @@ public class FormalFieldParser {
         log.debug("[parseTerm]: Receiving search string \'" + term + "\'");
         String searchTerm;
 
-        if (term.contains(":")) {
-            searchTerm = term.substring(term.indexOf(":") + 1, term.length());
-        } else
-            throw new RuntimeException();
-
-        StringBuffer b = new StringBuffer();
-        b.append("(");
-        for (String s : replacements) {
-            b.append(s + ":" + searchTerm + " ");
+        int pos;
+        if ((pos = term.indexOf(':')) < 0) {
+            throw new RuntimeException("Term misses ':' (colon) character: " + term);
         }
-        if (log.isDebugEnabled())
-            log.debug("[parseTerm]: result is \'" + b.toString().trim() + ")" + "\'");
-        return b.toString().trim() + ")";
+        searchTerm = term.substring(pos + 1, term.length());
+
+        final StringBuilder b = new StringBuilder(replacements.size() << 4);
+        b.append('(');
+        {
+            boolean first = true;
+            for (final String s : replacements) {
+                if (first) {
+                    first = false;
+                } else {
+                    b.append(' ');
+                }
+                b.append(s).append(':').append(searchTerm);
+            }
+        }
+        b.append(')');
+        if (log.isDebugEnabled()) {
+            log.debug("[parseTerm]: result is \'" + b.toString() + "\'");
+        }
+        
+        return b.toString();
     }
 
     private Map<String, List<String>> createMapping(Map<String, String> rawMap) {
         if (log.isTraceEnabled()) {
-            for (String s : rawMap.keySet())
+            for (String s : rawMap.keySet()) {
                 log.debug("[createMapping]: Received " + s + ":" + rawMap.get(s));
+            }
         }
         Map<String, List<String>> fieldMappings = new HashMap<String, List<String>>();
 
         for (String formalField : rawMap.keySet()) {
             List<String> schemaFields = new ArrayList<String>();
-            String mf = rawMap.get(formalField);
-            if (mf.contains("{")) {
+            final String mf = rawMap.get(formalField);
+            final int pos;
+            if ((pos = mf.indexOf('{')) >= 0) {
                 log.trace("[createMapping]: is multi-field");
-                String prefix = mf.substring(0, mf.indexOf("{"));
-                String[] locales = mf.substring(mf.indexOf("{") + 1, mf.length() - 1).split(",");
+                String prefix = mf.substring(0, pos);
+                String[] locales = mf.substring(pos + 1, mf.length() - 1).split(",");
                 for (String s : locales) {
                     schemaFields.add(prefix + "_" + s.trim());
                 }
@@ -242,8 +257,9 @@ public class FormalFieldParser {
             for (String s : fieldMappings.keySet()) {
                 StringBuffer b = new StringBuffer();
                 b.append(s + ":");
-                for (String t : fieldMappings.get(s))
+                for (String t : fieldMappings.get(s)) {
                     b.append(t + " ");
+                }
                 log.trace("[createMapping]: result is " + b.toString());
             }
         }

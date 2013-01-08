@@ -38,7 +38,7 @@ public class DummySessionHolder implements SessionHolder{
      */
     @Override
     public User getUser() {
-        // TODO Auto-generated method stub
+        // Nothing to do
         return null;
     }
 

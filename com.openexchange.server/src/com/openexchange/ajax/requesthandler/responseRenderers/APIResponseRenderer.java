@@ -50,9 +50,8 @@
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.io.IOException;
-import java.io.Writer;
+import java.io.PrintWriter;
 import java.util.Locale;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -66,8 +65,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.java.AllocatingStringWriter;
-import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.session.ServerSession;
 
@@ -134,6 +132,16 @@ public class APIResponseRenderer implements ResponseRenderer {
     }
 
     /**
+     * Gets the locale for given HTTP request
+     * 
+     * @param req The request
+     * @return The locale
+     */
+    protected static Locale localeFrom(final HttpServletRequest req) {
+        return localeFrom(getSession(req));
+    }
+
+    /**
      * Gets the locale for given server session
      * 
      * @param session The server session
@@ -165,32 +173,69 @@ public class APIResponseRenderer implements ResponseRenderer {
         writeResponse(response, action, req, resp, false);
     }
 
+    /*-
+     *      <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+     *      <html>
+     *       <head>
+     *        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+     *        <script type="text/javascript">
+     *          (parent.callback_**action** || window.opener && window.opener.callback_**action**)(**json**)
+     *        </script>
+     *       </head>
+     *      </html>
+     * 
+     */
+
+    private static final char[] JS_FRAGMENT_PART1 = ("<!DOCTYPE HTML PUBLIC "
+        + "\"-//W3C//DTD HTML 4.01//EN\" "
+        + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
+        + "<META http-equiv=\"Content-Type\" "
+        + "content=\"text/html; charset=UTF-8\">"
+        + "<script type=\"text/javascript\">"
+        + "(parent.callback_").toCharArray();
+
+    private static final char[] JS_FRAGMENT_PART2 = " || window.opener && window.opener.callback_".toCharArray();
+
+    private static final char[] JS_FRAGMENT_PART3 = ")</script></head></html>".toCharArray();
+
     private static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp, final boolean plainJson) {
         try {
-            final ServerSession session = getSession(req);
             if (plainJson) {
-                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(req));
             } else if (isMultipartContent(req) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
                 String callback = req.getParameter(CALLBACK);
                 if (callback == null) {
                     callback = action;
                 }
+                // Write: PART1 + <action> + PART2 + <action> + ")(" + <json> + PART3
+                final PrintWriter writer = resp.getWriter();
+                writer.write(JS_FRAGMENT_PART1);
+                writer.write(callback);
+                writer.write(JS_FRAGMENT_PART2);
+                writer.write(callback);
+                writer.write(")(");
+                ResponseWriter.write(response, writer, localeFrom(req));
+                writer.write(JS_FRAGMENT_PART3);
+                /*-
+                 * Previous code:
+                 * 
                 final Writer w = new AllocatingStringWriter();
-                ResponseWriter.write(response, w, localeFrom(session));
+                ResponseWriter.write(response, w, localeFrom(getSession(req)));
                 resp.getWriter().print(substituteJS(w.toString(), callback));
+                 * 
+                 */
             } else if (req.getParameter(JSONP) != null) {
-                final String call = req.getParameter(JSONP);
-
-                final Writer w = new AllocatingStringWriter();
-                ResponseWriter.write(response, w, localeFrom(session));
-
-                final StringAllocator sb = new StringAllocator(call);
-                sb.append('(').append(w.toString()).append(");");
                 resp.setContentType("text/javascript");
-                resp.getWriter().write(sb.toString());
+                final String call = req.getParameter(JSONP);
+                // Write: <call> + "(" + <json> + ")"
+                final PrintWriter writer = resp.getWriter();
+                writer.write(call);
+                writer.write('(');
+                ResponseWriter.write(response, writer, localeFrom(req));
+                writer.write(')');
             } else {
-                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(req));
             }
         } catch (final JSONException e) {
             LOG.error(e.getMessage(), e);
@@ -237,8 +282,8 @@ public class APIResponseRenderer implements ResponseRenderer {
     private static final Pattern RPL_ACTION = Pattern.compile("**action**", Pattern.LITERAL);
 
     private static String substituteJS(final String json, final String action) {
-        return RPL_ACTION.matcher(RPL_JSON.matcher(JS_FRAGMENT).replaceAll(Matcher.quoteReplacement(json))).replaceAll(
-            Matcher.quoteReplacement(action));
+        return RPL_ACTION.matcher(RPL_JSON.matcher(JS_FRAGMENT).replaceAll(Strings.quoteReplacement(json))).replaceAll(
+            Strings.quoteReplacement(action));
     }
 
 }

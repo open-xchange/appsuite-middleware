@@ -55,9 +55,9 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 

@@ -57,7 +57,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link TwitterExceptionCodes} - Enumeration about all {@link TwitterException}s.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum TwitterExceptionCodes implements OXExceptionCode {
@@ -86,7 +86,22 @@ public enum TwitterExceptionCodes implements OXExceptionCode {
      * The configured consumer key/consumer secret pair is invalid. Please provide a valid consumer key/consumer secret through
      * configuration.
      */
-    INVALID_CONSUMER_KEY_SECRET(TwitterExceptionMessages.INVALID_CONSUMER_KEY_SECRET_MSG, Category.CATEGORY_ERROR, 6);
+    INVALID_CONSUMER_KEY_SECRET(TwitterExceptionMessages.INVALID_CONSUMER_KEY_SECRET_MSG, Category.CATEGORY_ERROR, 6),
+    /**
+     * Please (re-)authorize your Twitter accounts.<br>
+     * Twitter responded with: %1$s
+     */
+    REAUTHORIZE_ERROR(TwitterExceptionMessages.REAUTHORIZE_ERROR_MSG, CATEGORY_USER_INPUT, 7),
+    /**
+     * The request is understood, but it has been refused or access is not allowed: %1$s
+     */
+    DENIED_ERROR(TwitterExceptionMessages.DENIED_ERROR_MSG, CATEGORY_USER_INPUT, 8),
+    /**
+     * Invalid format in search query.
+     */
+    INVALID_QUERY(TwitterExceptionMessages.INVALID_QUERY_MSG, CATEGORY_USER_INPUT, 9),
+
+    ;
 
     private final Category category;
 
@@ -127,7 +142,7 @@ public enum TwitterExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -136,7 +151,7 @@ public enum TwitterExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -146,7 +161,7 @@ public enum TwitterExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
