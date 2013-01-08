@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JSON.org JSON Bundle
+Bundle-SymbolicName: org.json
+Bundle-Version: 2.0.0
+Bundle-Vendor: JSON.org
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: org.json
