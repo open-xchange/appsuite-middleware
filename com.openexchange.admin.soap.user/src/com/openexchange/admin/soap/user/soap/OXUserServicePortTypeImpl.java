@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -504,6 +506,8 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         return credentials;
     }
 
+    private static final Pattern URL_PATTERN = Pattern.compile("^(.*?://)?(.*?)(:(.*?))?$");
+
     private static com.openexchange.admin.rmi.dataobjects.User soap2User(final User soapUser) {
         if (null == soapUser) {
             return null;
@@ -676,6 +680,36 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         tmp = soapUser.getImapServer();
         if (tmp != null) {
             user.setImapServer(tmp);
+        }
+
+        Integer i = soapUser.getImapPort();
+        if (i != null) {
+            final String s = user.getImapServerString();
+            if (!isEmpty(s)) {
+                final Matcher matcher = URL_PATTERN.matcher(s);
+                if (matcher.matches()) {
+                    final StringBuilder sb = new StringBuilder(32);
+                    for (int j = 1; j <= 3; j++) {
+                        switch (j) {
+                        case 1:
+                            {
+                                final String schema = matcher.group(1);
+                                if (null != schema) {
+                                    sb.append(schema);
+                                }
+                            }
+                            break;
+                        case 2:
+                            sb.append(matcher.group(2));
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                    sb.append(':').append(i);
+                    user.setImapServer(sb.toString());
+                }
+            }
         }
 
         tmp = soapUser.getInfo();
