@@ -66,6 +66,8 @@ done
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
 %config(noreplace) /opt/open-xchange/etc/*
+%dir /opt/open-xchange/etc/settings/
+%config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
 * Fri Dec 21 2012 Steffen Templin <marcus.klein@open-xchange.com>
