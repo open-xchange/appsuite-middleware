@@ -59,7 +59,7 @@ import com.openexchange.log.LogProperties.Name;
 
 /**
  * {@link Props} - The log properties associated with a certain {@link Thread thread}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Props {
@@ -78,7 +78,7 @@ public final class Props {
 
     /**
      * Initializes a new {@link Props}.
-     * 
+     *
      * @param other The source properties
      */
     protected Props(final Props other) {
@@ -93,7 +93,7 @@ public final class Props {
 
     /**
      * Gets the backing map
-     * 
+     *
      * @return The backing map
      */
     public Map<LogProperties.Name, Object> getMap() {
@@ -102,7 +102,7 @@ public final class Props {
 
     /**
      * Gets the {@code Map} view on this {@code Props}
-     * 
+     *
      * @return The map
      */
     public Map<String, Object> asMap() {
@@ -111,7 +111,7 @@ public final class Props {
 
     /**
      * Gets the {@code Map} view on this {@code Props}
-     * 
+     *
      * @param sorted Whether returned map shall be sorted.
      * @return The map
      */
@@ -125,7 +125,7 @@ public final class Props {
 
     /**
      * Checks for presence of associated property.
-     * 
+     *
      * @param name The property name
      * @return <code>true</code> if present; otherwise <code>false</code>
      */
@@ -135,21 +135,27 @@ public final class Props {
 
     /**
      * Gets the property associated with given name.
-     * 
+     *
      * @param sName The property name
      * @return The property value or <code>null</code> if absent
      */
+    @SuppressWarnings("unchecked")
     public <V> V get(final String sName) {
         final LogProperties.Name name = LogProperties.Name.nameFor(sName);
         if (null == name) {
             return null;
         }
-        return get(name);
+        try {
+            return (V) get(name);
+        } catch (final ClassCastException e) {
+            LOG.warn("Type mismatch", e);
+            return null;
+        }
     }
 
     /**
      * Gets the property associated with given name.
-     * 
+     *
      * @param name The property name
      * @return The property value or <code>null</code> if absent
      */
@@ -165,7 +171,7 @@ public final class Props {
 
     /**
      * Puts specified mapping. Any existing mapping is overwritten.
-     * 
+     *
      * @param name The property name
      * @param value The property value
      * @return <code>true</code> if there was already a mapping for specified property name (that is now overwritten); otherwise <code>false</code>
@@ -182,7 +188,7 @@ public final class Props {
 
     /**
      * Removes the property associated with given name.
-     * 
+     *
      * @param name The property name
      */
     public void remove(final Name name) {
@@ -193,7 +199,7 @@ public final class Props {
 
 	/**
 	 * Creates a shallow copy of this log properties.
-	 * 
+	 *
 	 * @return The shallow copy
 	 */
 	public Props copy() {

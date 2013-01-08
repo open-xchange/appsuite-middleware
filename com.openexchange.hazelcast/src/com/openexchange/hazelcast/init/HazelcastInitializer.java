@@ -73,6 +73,7 @@ import com.hazelcast.core.LifecycleListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.hazelcast.init.HazelcastInitializer.InitMode;
 import com.openexchange.hazelcast.mbean.HazelcastMBean;
 import com.openexchange.hazelcast.osgi.HazelcastActivator;
 
@@ -123,11 +124,11 @@ public final class HazelcastInitializer {
         if (null == nodes || nodes.isEmpty()) {
             return InitMode.NONE;
         }
+        final HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
+        if (null == hazelcastInstance) {
+            return InitMode.NONE;
+        }
         synchronized (this) {
-            final HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
-            if (null == hazelcastInstance) {
-                return InitMode.NONE;
-            }
             final Config config = hazelcastInstance.getConfig();
             /*
              * Remove from existing network configuration

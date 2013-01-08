@@ -122,5 +122,7 @@ public class ConversionWarningMessage implements LocalizableStrings {
 
     // An error occurred: %1$s
     public final static String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+    
+    public final static String TRUNCATION_WARNING_MSG = "Element truncated: %s";
 
 }

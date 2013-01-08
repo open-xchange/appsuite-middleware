@@ -126,12 +126,14 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
         if (null == property) {
             return new JSONArray(0);
         }
-
-        File file = new File(property);
+        
         JSONArray array = new JSONArray();
-        if (file.exists()) {
-            for (File f : file.listFiles()) {
-                read(f, array);
+        for(String path: property.split(":")) {
+            File file = new File(path);
+            if (file.exists()) {
+                for (File f : file.listFiles()) {
+                    read(f, array);
+                }
             }
         }
         return array;

@@ -564,7 +564,6 @@ done
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*fr_FR*
 %dir /opt/open-xchange/etc/languages/appsuite/
-/opt/open-xchange/etc/languages/appsuite/fr_FR.properties
 
 %files cs-cz
 %defattr(-,root,root)
@@ -611,7 +610,6 @@ done
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*lv_LV*
 %dir /opt/open-xchange/etc/languages/appsuite/
-/opt/open-xchange/etc/languages/appsuite/lv_LV.properties
 
 %files nl-nl
 %defattr(-,root,root)
