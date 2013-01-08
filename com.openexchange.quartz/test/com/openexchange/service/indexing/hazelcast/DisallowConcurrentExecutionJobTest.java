@@ -25,14 +25,17 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.PersistJobDataAfterExecution;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
@@ -43,7 +46,6 @@ import org.quartz.impl.DirectSchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.listeners.JobListenerSupport;
 import org.quartz.service.internal.HazelcastJobStore;
-import org.quartz.simpl.RAMJobStore;
 import org.quartz.simpl.SimpleThreadPool;
 
 /**
@@ -94,6 +96,32 @@ public class DisallowConcurrentExecutionJobTest {
                 Thread.sleep(2000L);
             } catch (InterruptedException e) {
                 throw new JobExecutionException("Failed to pause job for testing.");
+            }
+        }
+    }
+    
+    @DisallowConcurrentExecution
+    @PersistJobDataAfterExecution
+    public static class ChangingDetailJob implements Job {
+
+        @Override
+        public void execute(JobExecutionContext context) throws JobExecutionException {
+            try {
+                System.out.println("Executing job.");
+                JobDetail jobDetail = context.getJobDetail();
+                JobDataMap dataMap = jobDetail.getJobDataMap();
+                CountDownLatch latch = (CountDownLatch) context.getScheduler().getContext().get(BARRIER);
+                if (latch.getCount() == 1L) {
+                    String value = (String) dataMap.get("new");
+                    Assert.assertNotNull("Value was null", value);
+                    Assert.assertEquals("Wrong value", "test", "test");
+                } else {
+                    dataMap.put("new", "test");
+                }
+                
+                latch.countDown();
+            } catch (Throwable e) {
+                throw new JobExecutionException("Error", e);
             }
         }
     }
@@ -196,6 +224,36 @@ public class DisallowConcurrentExecutionJobTest {
         scheduler.start();
         scheduler.standby();
         scheduler.start();
+        scheduler.shutdown();
+    }
+    
+    @Test
+    public void testDataPersistence() throws Exception {
+        HazelcastJobStore jobStore = new TestableHazelcastJobStore();
+//        RAMJobStore jobStore = new RAMJobStore();
+        DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
+        Scheduler scheduler = DirectSchedulerFactory.getInstance().getScheduler("sched1");
+        scheduler.start();
+        
+        
+        CountDownLatch latch = new CountDownLatch(2);
+        scheduler.getContext().put(BARRIER, latch);
+        JobDetail job = JobBuilder.newJob(ChangingDetailJob.class)
+                .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
+                .build();
+        
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .forJob(job)
+                .withIdentity("testTrigger")
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(1000L).withRepeatCount(2))
+                .startNow()
+                .build();
+        
+        scheduler.scheduleJob(job, trigger);
+        
+        latch.await(10, TimeUnit.SECONDS);
+        Assert.assertEquals("Latch was not 0", 0, latch.getCount());
+        
         scheduler.shutdown();
     }
     
