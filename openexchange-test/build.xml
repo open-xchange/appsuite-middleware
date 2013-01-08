@@ -24,6 +24,7 @@
         <fileset dir="${bundlesDir}">
             <include name="**/*.jar"/>
             <exclude name="**/xerces.jar"/>
+            <exclude name="**/lib/json*.jar"/>
         </fileset>
         <fileset dir="${testBundlesDir}">
             <include name="*.jar"/>
