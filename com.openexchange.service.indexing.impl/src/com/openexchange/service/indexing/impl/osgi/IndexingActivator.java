@@ -150,7 +150,7 @@ public class IndexingActivator extends HousekeepingActivator {
     
     private void registerMBean(IndexingServiceImpl indexingService) {
         try {
-            indexingMBeanName = new ObjectName(IndexingServiceMBean.DOMAIN, "name", "Indexing Service");
+            indexingMBeanName = new ObjectName(IndexingServiceMBean.DOMAIN, IndexingServiceMBean.KEY, IndexingServiceMBean.VALUE);
             indexingMBean = new IndexingServiceMBeanImpl(indexingService);
             track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
 

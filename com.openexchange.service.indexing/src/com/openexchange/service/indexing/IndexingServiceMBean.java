@@ -51,16 +51,24 @@ package com.openexchange.service.indexing;
 
 import java.util.List;
 import javax.management.MBeanException;
+import javax.management.ObjectName;
 
 
 /**
- * {@link IndexingServiceMBean}
+ * {@link IndexingServiceMBean} - A MBean for monitoring indexing jobs.
+ * The {@link ObjectName} under that the instance of this MBean is registered is created like this:<br>
+ * <code>new ObjectName(IndexingServiceMBean.DOMAIN, IndexingServiceMBean.KEY, IndexingServiceMBean.VALUE);</code>.
+ * Any JMX client should instantiate it in the same way to avoid naming errors.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface IndexingServiceMBean {
     
     public static final String DOMAIN = "com.openexchange.service.indexing";
+    
+    public static final String KEY = "type";
+    
+    public static final String VALUE = "indexingServiceMonitoring";
     
     
     /**
