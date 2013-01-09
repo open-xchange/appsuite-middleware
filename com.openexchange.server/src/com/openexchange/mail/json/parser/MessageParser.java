@@ -713,11 +713,11 @@ public final class MessageParser {
                          * type.
                          */
                         final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                        final String conformHTML =
-                            htmlService.getConformHTML(attachment.getString(MailJSONField.CONTENT.getKey()), "ISO-8859-1");
                         if (MimeTypes.MIME_TEXT_PLAIN.equals(contentType)) {
-                            content = htmlService.html2text(conformHTML, true).getBytes(charsetName);
+                            content = htmlService.html2text(attachment.getString(MailJSONField.CONTENT.getKey()), true).getBytes(charsetName);
                         } else {
+                            final String conformHTML =
+                                htmlService.getConformHTML(attachment.getString(MailJSONField.CONTENT.getKey()), "ISO-8859-1");
                             content = conformHTML.getBytes(charsetName);
                         }
 

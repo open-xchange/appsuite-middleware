@@ -164,9 +164,7 @@ public class MailAttachment extends AJAXServlet {
                     String htmlContent = MessageUtility.readMailPart(mailPart, cs);
                     htmlContent = MessageUtility.simpleHtmlDuplicateRemoval(htmlContent);
                     final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                    attachmentInputStream =
-                        new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
-                            htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(Charsets.forName(cs)));
+                    attachmentInputStream = new UnsynchronizedByteArrayInputStream(sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs)));
                 } else {
                     attachmentInputStream = mailPart.getInputStream();
                 }
@@ -315,6 +313,10 @@ public class MailAttachment extends AJAXServlet {
             je.initCause(e);
             LOG.error(je.getMessage(), je);
         }
+    }
+
+    private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) {
+        return htmlService.sanitize(htmlContent, null, false, null, null);
     }
 
     @Override

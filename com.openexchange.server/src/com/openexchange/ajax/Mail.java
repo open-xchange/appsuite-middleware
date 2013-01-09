@@ -2177,9 +2177,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         String htmlContent = MessageUtility.readMailPart(mailPart, cs);
                         htmlContent = MessageUtility.simpleHtmlDuplicateRemoval(htmlContent);
                         final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                        attachmentInputStream =
-                            new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
-                                htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(Charsets.forName(cs)));
+                        attachmentInputStream = new UnsynchronizedByteArrayInputStream(sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs)));
                     } else {
                         attachmentInputStream = mailPart.getInputStream();
                     }
@@ -2258,6 +2256,10 @@ public class Mail extends PermissionServlet implements UploadListener {
             LOG.error(exc.getMessage(), exc);
             callbackError(resp, outSelected, saveToDisk, session, exc);
         }
+    }
+
+    private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) {
+        return htmlService.sanitize(htmlContent, null, false, null, null);
     }
 
     private static void callbackError(final HttpServletResponse resp, final boolean outSelected, final boolean saveToDisk, final ServerSession session, final OXException e) {

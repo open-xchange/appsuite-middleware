@@ -136,7 +136,6 @@ import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.version.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -148,6 +147,7 @@ import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.user.UserService;
+import com.openexchange.version.Version;
 
 /**
  * {@link MimeMessageFiller} - Provides basic methods to fills an instance of {@link MimeMessage} with headers/contents given through an
@@ -854,8 +854,8 @@ public class MimeMessageFiller {
                          *
                          * Well-formed HTML
                          */
-                        final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
-                        primaryMultipart.addBodyPart(createTextBodyPart(toArray(wellFormedHTMLContent, content), charset, false, true, type), 0);
+                        // final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
+                        primaryMultipart.addBodyPart(createTextBodyPart(toArray(content, content), charset, false, true, type), 0);
                     } else {
                         primaryMultipart.addBodyPart(createTextBodyPart(toArray(plainText, plainText), charset, false, false, type), 0);
                     }

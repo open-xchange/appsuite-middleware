@@ -51,7 +51,6 @@ package com.openexchange.publish.microformats;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -220,8 +219,8 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             template.process(variables, htmlWriter);
             String html = htmlWriter.toString();
             if (isUsingWhitelisting(template.getLevel())) {
-                html = htmlService.getConformHTML(html, Charset.defaultCharset().toString());
-                html = htmlService.filterWhitelist(html, "microformatWhitelist");
+                //html = htmlService.getConformHTML(html, Charset.defaultCharset().toString());
+                html = htmlService.sanitize(html, "microformatWhitelist", false, null, null);
             }
             resp.getWriter().write(html);
 
