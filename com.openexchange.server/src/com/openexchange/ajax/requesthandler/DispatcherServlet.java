@@ -100,7 +100,7 @@ public class DispatcherServlet extends SessionServlet {
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DispatcherServlet.class));
     
-    private static final Session NO_SESSION = new SessionObject("");
+    private static final Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
 
     /*-
      * /!\ These must be static for our servlet container to work properly. /!\
