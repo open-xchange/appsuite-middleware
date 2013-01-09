@@ -24,12 +24,90 @@ Authors:
 --------
     Open-Xchange
 
+#-------------------------------------------------------------------------------------
+
+%package ca-es
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for ca_ES
+Provides:       open-xchange-lang-community-ca-es = %{version}
+Obsoletes:      open-xchange-lang-community-ca-es <= %{version}
+
+%description ca-es
+Package containing Open-Xchange backend localization for ca_ES
+This localization package are driven by the community.
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package cs-cz
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for cs_CZ
+Provides:       open-xchange-lang-cs-cz = %{version}
+Obsoletes:      open-xchange-lang-cs-cz <= %{version}
+
+%description cs-cz
+Package containing Open-Xchange backend localization for cs_CZ
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package da-dk
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for da_DK
+Provides:       open-xchange-lang-community-da-dk = %{version}
+Obsoletes:      open-xchange-lang-community-da-dk <= %{version}
+
+%description da-dk
+Package containing Open-Xchange backend localization for da_DK
+This localization package are driven by the community.
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package de-ch
+Group:          Applications/Productivity
+Summary:        Package containing Open-Xchange backend localization for de_CH
+
+%description de-ch
+Package containing Open-Xchange backend localization for de_CH
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
 %package de-de
 Group:          Applications/Productivity
 Summary:        Package containing Open-Xchange backend localization for de_DE
 
 %description de-de
 Package containing Open-Xchange backend localization for de_DE
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package el-gr
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for el_GR
+Provides:       open-xchange-lang-community-el-gr = %{version}
+Obsoletes:      open-xchange-lang-community-el-gr <= %{version}
+
+%description el-gr
+Package containing Open-Xchange backend localization for el_GR
+This localization package are driven by the community.
 
 Authors:
 --------
@@ -50,37 +128,9 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
-%package fr-fr
-Group:          Applications/Productivity
-Summary:        Package containing Open-Xchange backend localization for fr_FR
-
-%description fr-fr
-Package containing Open-Xchange backend localization for fr_FR
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-%package cs-cz
-Group:		Applications/Productivity
-Summary:	Package containing Open-Xchange backend localization for cs_CZ
-Provides:       open-xchange-lang-cs-cz = %{version}
-Obsoletes:      open-xchange-lang-cs-cz <= %{version}
-
-%description cs-cz
-Package containing Open-Xchange backend localization for cs_CZ
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
 %package es-es
-Group:		Applications/Productivity
-Summary:	Package containing Open-Xchange backend localization for es_ES
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for es_ES
 Provides:       open-xchange-lang-es-es = %{version}
 Obsoletes:      open-xchange-lang-es-es <= %{version}
 
@@ -106,9 +156,25 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
+%package eu-es
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for eu_ES
+Provides:       open-xchange-lang-community-eu-es = %{version}
+Obsoletes:      open-xchange-lang-community-eu-es <= %{version}
+
+%description eu-es
+Package containing Open-Xchange backend localization for eu_ES
+This localization package are driven by the community.
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
 %package fr-ca
-Group:		Applications/Productivity
-Summary:	Package containing Open-Xchange backend localization for fr_CA
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for fr_CA
 Provides:       open-xchange-lang-fr-ca = %{version}
 Obsoletes:      open-xchange-lang-fr-ca <= %{version}
 
@@ -121,226 +187,12 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
-%package hu-hu
-Group:		Applications/Productivity
-Summary:	Package containing Open-Xchange backend localization for hu_HU
-Provides:       open-xchange-lang-hu-hu = %{version}
-Obsoletes:      open-xchange-lang-hu-hu <= %{version}
-
-%description hu-hu
-Package containing Open-Xchange backend localization for hu_HU
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-%package it-it
-Group:		Applications/Productivity
-Summary:	Package containing Open-Xchange backend localization for it_IT
-Provides:       open-xchange-lang-it-it = %{version}
-Obsoletes:      open-xchange-lang-it-it <= %{version}
-
-%description it-it
-Package containing Open-Xchange backend localization for it_IT
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-%package ja-jp
-Group:		Applications/Productivity
-Summary:	Package containing Open-Xchange backend localization for ja_JP
-Provides:       open-xchange-lang-ja-jp = %{version}
-Obsoletes:      open-xchange-lang-ja-jp <= %{version}
-
-%description ja-jp
-Package containing Open-Xchange backend localization for ja_JP
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-%package lv-lv
-Group:		Applications/Productivity
-Summary:	Package containing Open-Xchange backend localization for lv_LV
-Provides:       open-xchange-lang-lv-lv = %{version}
-Obsoletes:      open-xchange-lang-lv-lv <= %{version}
-
-%description lv-lv
-Package containing Open-Xchange backend localization for lv_LV
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-%package nl-nl
-Group:		Applications/Productivity
-Summary:	Package containing Open-Xchange backend localization for nl_NL
-Provides:       open-xchange-lang-nl-nl = %{version}
-Obsoletes:      open-xchange-lang-nl-nl <= %{version}
-
-%description nl-nl
-Package containing Open-Xchange backend localization for nl_NL
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-%package pl-pl
-Group:		Applications/Productivity
-Summary:	Package containing Open-Xchange backend localization for pl_PL
-Provides:       open-xchange-lang-pl-pl = %{version}
-Obsoletes:      open-xchange-lang-pl-pl <= %{version}
-
-%description pl-pl
-Package containing Open-Xchange backend localization for pl_PL
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-%package ro-ro
-Group:		Applications/Productivity
-Summary:	Package containing Open-Xchange backend localization for ro_RO
-Provides:       open-xchange-lang-ro-ro = %{version}
-Obsoletes:      open-xchange-lang-ro-ro <= %{version}
-
-%description ro-ro
-Package containing Open-Xchange backend localization for ro_RO
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-%package sk-sk
-Group:		Applications/Productivity
-Summary:	Package containing Open-Xchange backend localization for sk_SK
-Provides:       open-xchange-lang-sk-sk = %{version}
-Obsoletes:      open-xchange-lang-sk-sk <= %{version}
-
-%description sk-sk
-Package containing Open-Xchange backend localization for sk_SK
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-%package zh-cn
-Group:		Applications/Productivity
-Summary:	Package containing Open-Xchange backend localization for zh_CN
-Provides:       open-xchange-lang-zh-cn = %{version}
-Obsoletes:      open-xchange-lang-zh-cn <= %{version}
-
-%description zh-cn
-Package containing Open-Xchange backend localization for zh_CN
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-%package zh-tw
-Group:		Applications/Productivity
-Summary:	Package containing Open-Xchange backend localization for zh_TW
-Provides:       open-xchange-lang-zh-tw = %{version}
-Obsoletes:      open-xchange-lang-zh-tw <= %{version}
-
-%description zh-tw
-Package containing Open-Xchange backend localization for zh_TW
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-%package de-ch
+%package fr-fr
 Group:          Applications/Productivity
-Summary:        Package containing Open-Xchange backend localization for de_CH
+Summary:        Package containing Open-Xchange backend localization for fr_FR
 
-%description de-ch
-Package containing Open-Xchange backend localization for de_CH
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-
-%package ca-es
-Group:      Applications/Productivity
-Summary:    Package containing Open-Xchange backend localization for ca_ES
-Provides:       open-xchange-lang-community-ca-es = %{version}
-Obsoletes:      open-xchange-lang-community-ca-es <= %{version}
-
-%description ca-es
-Package containing Open-Xchange backend localization for ca_ES
-This localization package are driven by the community.
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-%package da-dk
-Group:      Applications/Productivity
-Summary:    Package containing Open-Xchange backend localization for da_DK
-Provides:       open-xchange-lang-community-da-dk = %{version}
-Obsoletes:      open-xchange-lang-community-da-dk <= %{version}
-
-%description da-dk
-Package containing Open-Xchange backend localization for da_DK
-This localization package are driven by the community.
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-%package el-gr
-Group:      Applications/Productivity
-Summary:    Package containing Open-Xchange backend localization for el_GR
-Provides:       open-xchange-lang-community-el-gr = %{version}
-Obsoletes:      open-xchange-lang-community-el-gr <= %{version}
-
-%description el-gr
-Package containing Open-Xchange backend localization for el_GR
-This localization package are driven by the community.
-
-Authors:
---------
-    Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-%package eu-es
-Group:      Applications/Productivity
-Summary:    Package containing Open-Xchange backend localization for eu_ES
-Provides:       open-xchange-lang-community-eu-es = %{version}
-Obsoletes:      open-xchange-lang-community-eu-es <= %{version}
-
-%description eu-es
-Package containing Open-Xchange backend localization for eu_ES
-This localization package are driven by the community.
+%description fr-fr
+Package containing Open-Xchange backend localization for fr_FR
 
 Authors:
 --------
@@ -396,6 +248,51 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
+%package hu-hu
+Group:		Applications/Productivity
+Summary:	Package containing Open-Xchange backend localization for hu_HU
+Provides:       open-xchange-lang-hu-hu = %{version}
+Obsoletes:      open-xchange-lang-hu-hu <= %{version}
+
+%description hu-hu
+Package containing Open-Xchange backend localization for hu_HU
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package it-it
+Group:		Applications/Productivity
+Summary:	Package containing Open-Xchange backend localization for it_IT
+Provides:       open-xchange-lang-it-it = %{version}
+Obsoletes:      open-xchange-lang-it-it <= %{version}
+
+%description it-it
+Package containing Open-Xchange backend localization for it_IT
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package ja-jp
+Group:		Applications/Productivity
+Summary:	Package containing Open-Xchange backend localization for ja_JP
+Provides:       open-xchange-lang-ja-jp = %{version}
+Obsoletes:      open-xchange-lang-ja-jp <= %{version}
+
+%description ja-jp
+Package containing Open-Xchange backend localization for ja_JP
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
 %package ko-ko
 Group:      Applications/Productivity
 Summary:    Package containing Open-Xchange backend localization for ko_KO
@@ -405,6 +302,36 @@ Obsoletes:      open-xchange-lang-community-ko-ko <= %{version}
 %description ko-ko
 Package containing Open-Xchange backend localization for ko_KO
 This localization package are driven by the community.
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package lv-lv
+Group:		Applications/Productivity
+Summary:	Package containing Open-Xchange backend localization for lv_LV
+Provides:       open-xchange-lang-lv-lv = %{version}
+Obsoletes:      open-xchange-lang-lv-lv <= %{version}
+
+%description lv-lv
+Package containing Open-Xchange backend localization for lv_LV
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package nl-nl
+Group:		Applications/Productivity
+Summary:	Package containing Open-Xchange backend localization for nl_NL
+Provides:       open-xchange-lang-nl-nl = %{version}
+Obsoletes:      open-xchange-lang-nl-nl <= %{version}
+
+%description nl-nl
+Package containing Open-Xchange backend localization for nl_NL
 
 Authors:
 --------
@@ -425,6 +352,21 @@ Authors:
 #Authors:
 #--------
 #    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package pl-pl
+Group:		Applications/Productivity
+Summary:	Package containing Open-Xchange backend localization for pl_PL
+Provides:       open-xchange-lang-pl-pl = %{version}
+Obsoletes:      open-xchange-lang-pl-pl <= %{version}
+
+%description pl-pl
+Package containing Open-Xchange backend localization for pl_PL
+
+Authors:
+--------
+    Open-Xchange
 
 #-------------------------------------------------------------------------------------
 
@@ -460,6 +402,21 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
+%package ro-ro
+Group:		Applications/Productivity
+Summary:	Package containing Open-Xchange backend localization for ro_RO
+Provides:       open-xchange-lang-ro-ro = %{version}
+Obsoletes:      open-xchange-lang-ro-ro <= %{version}
+
+%description ro-ro
+Package containing Open-Xchange backend localization for ro_RO
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
 %package ru-ru
 Group:      Applications/Productivity
 Summary:    Package containing Open-Xchange backend localization for ru_RU
@@ -469,6 +426,21 @@ Obsoletes:      open-xchange-lang-community-ru-ru <= %{version}
 %description ru-ru
 Package containing Open-Xchange backend localization for ru_RU
 This localization package are driven by the community.
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package sk-sk
+Group:		Applications/Productivity
+Summary:	Package containing Open-Xchange backend localization for sk_SK
+Provides:       open-xchange-lang-sk-sk = %{version}
+Obsoletes:      open-xchange-lang-sk-sk <= %{version}
+
+%description sk-sk
+Package containing Open-Xchange backend localization for sk_SK
 
 Authors:
 --------
@@ -524,6 +496,36 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
+%package zh-cn
+Group:		Applications/Productivity
+Summary:	Package containing Open-Xchange backend localization for zh_CN
+Provides:       open-xchange-lang-zh-cn = %{version}
+Obsoletes:      open-xchange-lang-zh-cn <= %{version}
+
+%description zh-cn
+Package containing Open-Xchange backend localization for zh_CN
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package zh-tw
+Group:		Applications/Productivity
+Summary:	Package containing Open-Xchange backend localization for zh_TW
+Provides:       open-xchange-lang-zh-tw = %{version}
+Obsoletes:      open-xchange-lang-zh-tw <= %{version}
+
+%description zh-tw
+Package containing Open-Xchange backend localization for zh_TW
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
 %prep
 
 %setup -q
@@ -532,7 +534,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-for LANG in ca_ES cs_CZ da_DK de_DE el_GR en_US es_ES es_MX eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO sk_SK sv_SV tr_TR zh_CN zh_TW ru_RU de_CH; do \
+for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_US es_ES es_MX eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SV tr_TR zh_CN zh_TW; do \
     PACKAGE_EXTENSION=$(echo ${LANG} | tr '[:upper:]_' '[:lower:]-'); \
     ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -Dlanguage=${LANG} -f build/build.xml clean build; \
 done
@@ -545,10 +547,21 @@ done
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*ca_ES*
 
+%files cs-cz
+%defattr(-,root,root)
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*cs_CZ*
+/opt/open-xchange/etc/languages/appsuite/cs_CZ.properties
+
 %files da-dk
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*da_DK*
+
+%files de-ch
+%defattr(-,root,root)
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*de_CH*
 
 %files de-de
 %defattr(-,root,root)
@@ -567,24 +580,6 @@ done
 %dir /opt/open-xchange/etc/languages/appsuite/
 /opt/open-xchange/etc/languages/appsuite/en_US.properties
 
-%files eu-es
-%defattr(-,root,root)
-%dir /opt/open-xchange/i18n/
-/opt/open-xchange/i18n/*eu_ES*
-
-%files fr-fr
-%defattr(-,root,root)
-%dir /opt/open-xchange/i18n/
-/opt/open-xchange/i18n/*fr_FR*
-%dir /opt/open-xchange/etc/languages/appsuite/
-/opt/open-xchange/etc/languages/appsuite/fr_FR.properties
-
-%files cs-cz
-%defattr(-,root,root)
-%dir /opt/open-xchange/i18n/
-/opt/open-xchange/i18n/*cs_CZ*
-/opt/open-xchange/etc/languages/appsuite/cs_CZ.properties
-
 %files es-es
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
@@ -597,11 +592,23 @@ done
 /opt/open-xchange/i18n/*es_MX*
 /opt/open-xchange/etc/languages/appsuite/es_MX.properties
 
+%files eu-es
+%defattr(-,root,root)
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*eu_ES*
+
 %files fr-ca
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*fr_CA*
 /opt/open-xchange/etc/languages/appsuite/fr_CA.properties
+
+%files fr-fr
+%defattr(-,root,root)
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*fr_FR*
+%dir /opt/open-xchange/etc/languages/appsuite/
+/opt/open-xchange/etc/languages/appsuite/fr_FR.properties
 
 %files he-he
 %defattr(-,root,root)
@@ -666,6 +673,11 @@ done
 /opt/open-xchange/i18n/*ro_RO*
 /opt/open-xchange/etc/languages/appsuite/ro_RO.properties
 
+%files ru-ru
+%defattr(-,root,root)
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*ru_RU*
+
 %files sk-sk
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
@@ -693,16 +705,6 @@ done
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*zh_TW*
 /opt/open-xchange/etc/languages/appsuite/zh_TW.properties
-
-%files ru-ru
-%defattr(-,root,root)
-%dir /opt/open-xchange/i18n/
-/opt/open-xchange/i18n/*ru_RU*
-
-%files de-ch
-%defattr(-,root,root)
-%dir /opt/open-xchange/i18n/
-/opt/open-xchange/i18n/*de_CH*
 
 %changelog
 * Fri Dec 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
