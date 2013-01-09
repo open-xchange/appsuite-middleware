@@ -70,6 +70,7 @@ public class Activator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
         try {
+            AdminCache.compareAndSetBundleContext(context, context);
             ConfigurationService configurationService = getService(ConfigurationService.class);
             AdminCache.compareAndSetConfigurationService(null, configurationService);
             track(UserCopyService.class, new RMIUserCopyRegisterer(context));

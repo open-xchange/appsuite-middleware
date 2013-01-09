@@ -77,7 +77,9 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceException;
+import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -88,6 +90,9 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
@@ -157,6 +162,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     private static final Log log = LogFactory.getLog(OXUserMySQLStorage.class);
+
+    private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
+
+    private static final String NAME_OXCACHE = "oxcache";
 
     // DEFAULTS FOR USER CREATE; SHOULD BE MOVED TO PROPERTIES FILE
     private static final String DEFAULT_TIMEZONE_CREATE = "Europe/Berlin";
@@ -793,6 +802,30 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // fire up
             con.commit();
+
+            // JCS
+            final BundleContext context = AdminCache.getBundleContext();
+            if (null != context) {
+                final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+                    CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        final CacheKey key = cacheService.newCacheKey(contextId, userId);
+                        Cache cache = cacheService.getCache("User");
+                        cache.remove(key);
+                        cache = cacheService.getCache("UserConfiguration");
+                        cache.remove(key);
+                        cache = cacheService.getCache("UserSettingMail");
+                        cache.remove(key);
+                    } catch (final OXException e) {
+                        log.error(e.getMessage(), e);
+                    } finally {
+                        AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+                    }
+                }
+            }
+            // End of JCS
+
             log.info("User " + userId + " changed!");
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
@@ -2072,6 +2105,30 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     Contacts.deleteContact(getContactIdByUserId(ctx.getId(), user_id, write_ox_con), ctx.getId(), write_ox_con, false);
                 }
 
+                // JCS
+                final BundleContext context = AdminCache.getBundleContext();
+                if (null != context) {
+                    final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+                        CacheService.class);
+                    if (null != cacheService) {
+                        try {
+                            final int contextId = ctx.getId().intValue();
+                            final CacheKey key = cacheService.newCacheKey(contextId, user.getId());
+                            Cache cache = cacheService.getCache("User");
+                            cache.remove(key);
+                            cache = cacheService.getCache("UserConfiguration");
+                            cache.remove(key);
+                            cache = cacheService.getCache("UserSettingMail");
+                            cache.remove(key);
+                        } catch (final OXException e) {
+                            log.error(e.getMessage(), e);
+                        } finally {
+                            AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+                        }
+                    }
+                }
+                // End of JCS
+
                 if (log.isInfoEnabled()) {
                     log.info("Deleted user " + user_id + "(" + ctx.getId() + ") ...");
                 }
@@ -2196,6 +2253,32 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 myChangeInsertModuleAccess(ctx, userId, moduleAccess, false, con, groupsForUser);
             }
             con.commit();
+
+            // JCS
+            final BundleContext context = AdminCache.getBundleContext();
+            if (null != context) {
+                final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+                    CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        final int contextId = ctx.getId().intValue();
+                        for (int userId : userIds) {
+                            final CacheKey key = cacheService.newCacheKey(contextId, userId);
+                            Cache cache = cacheService.getCache("User");
+                            cache.remove(key);
+                            cache = cacheService.getCache("UserConfiguration");
+                            cache.remove(key);
+                            cache = cacheService.getCache("UserSettingMail");
+                            cache.remove(key);
+                        }
+                    } catch (final OXException e) {
+                        log.error(e.getMessage(), e);
+                    } finally {
+                        AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+                    }
+                }
+            }
+            // End of JCS
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             rollback(con);
