@@ -60,6 +60,7 @@ import java.util.Set;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.Differ;
 import com.openexchange.groupware.container.Difference;
@@ -117,7 +118,51 @@ public class AppointmentDiff {
             }
         }
 
+        ensureReccuringInformation(original, update, retval);
+
         return retval;
+    }
+
+    private static void ensureReccuringInformation(Appointment original, Appointment update, AppointmentDiff retval) {
+        if (!containsRecurrenceInformation(retval)) {
+            return;
+        }
+
+        addMissingRecurringInformation(original, retval, Appointment.RECURRENCE_TYPE);
+        addMissingRecurringInformation(original, retval, Appointment.INTERVAL);
+
+        int recurrenceType = update.containsRecurrenceType() ? update.getRecurrenceType() : original.getRecurrenceType();
+
+        switch (recurrenceType) {
+        case Appointment.YEARLY:
+            addMissingRecurringInformation(original, retval, Appointment.MONTH);
+        case Appointment.MONTHLY:
+            addMissingRecurringInformation(original, retval, Appointment.DAY_IN_MONTH);
+        case Appointment.WEEKLY:
+            addMissingRecurringInformation(original, retval, Appointment.DAYS);
+            break;
+        default:
+            break;
+        }
+    }
+
+    private static void addMissingRecurringInformation(Appointment original, AppointmentDiff retval, int column) {
+        if (!retval.anyFieldChangedOf(column) && original.contains(column)) {
+            FieldUpdate u = retval.new FieldUpdate();
+            u.setFieldNumber(column);
+            u.setFieldName(CalendarField.getByColumn(column).getJsonName());
+            u.setOriginalValue(original.get(column));
+            u.setNewValue(original.get(column));
+            retval.addUpdate(u);
+        }
+    }
+
+    /**
+     * @param retval
+     * @return
+     */
+    private static boolean containsRecurrenceInformation(AppointmentDiff retval) {
+        return retval.anyFieldChangedOf(CalendarObject.INTERVAL, CalendarObject.DAYS, CalendarObject.DAY_IN_MONTH, CalendarObject.MONTH, CalendarObject.RECURRENCE_COUNT, CalendarObject.UNTIL);
     }
 
     public AppointmentDiff() {
