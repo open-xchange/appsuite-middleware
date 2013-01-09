@@ -58,7 +58,6 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.net.URLDecoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -74,6 +73,10 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.codec.CharEncoding;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -712,7 +715,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     public static String getServletSpecificURI(final HttpServletRequest req) {
         String uri;
-        try {
+        {
             String characterEncoding = req.getCharacterEncoding();
             if (null == characterEncoding) {
                 characterEncoding = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
@@ -720,10 +723,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                     characterEncoding = "ISO-8859-1";
                 }
             }
-            uri = URLDecoder.decode(req.getRequestURI(), characterEncoding);
-        } catch (final UnsupportedEncodingException e) {
-            LOG.error("Unsupported encoding", e);
-            uri = req.getRequestURI();
+            uri = decodeUrl(req.getRequestURI(), characterEncoding);
         }
         final String path = new com.openexchange.java.StringAllocator(req.getContextPath()).append(req.getServletPath()).toString();
         final int pos = uri.indexOf(path);
@@ -731,6 +731,36 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             uri = uri.substring(pos + path.length());
         }
         return uri;
+    }
+
+    private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.ISO_8859_1);
+
+    /**
+     * URL encodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     */
+    public static String encodeUrl(final String s) {
+        try {
+            return isEmpty(s) ? s : URL_CODEC.encode(s);
+        } catch (final EncoderException e) {
+            return s;
+        }
+    }
+
+    /**
+     * URL decodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     */
+    public static String decodeUrl(final String s, final String charset) {
+        try {
+            return isEmpty(s) ? s : (isEmpty(charset) ? URL_CODEC.decode(s) : URL_CODEC.decode(s, charset));
+        } catch (final DecoderException e) {
+            return s;
+        } catch (final UnsupportedEncodingException e) {
+            return s;
+        }
     }
 
     /**
@@ -1124,7 +1154,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param optSession The optional session; pass <code>null</code> if not appropriate
      * @throws IOException If an I/O error occurs
      */
-    protected void writeResponse(final Response response, final HttpServletResponse servletResponse, Session optSession) throws IOException {
+    protected void writeResponse(final Response response, final HttpServletResponse servletResponse, final Session optSession) throws IOException {
         servletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
             ResponseWriter.write(response, servletResponse.getWriter(), localeFrom(optSession));

@@ -51,8 +51,6 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,6 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -146,8 +145,8 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
                 final String value = matcher.group(2);
                 if (name != null && name.length() > 0 && value != null && value.length() > 0) {
                     try {
-                        retval.props.put(name, URLDecoder.decode(value, "UTF-8"));
-                    } catch (final UnsupportedEncodingException e) {
+                        retval.props.put(name, AJAXServlet.decodeUrl(value, "UTF-8"));
+                    } catch (final RuntimeException e) {
                         throw DBPoolingExceptionCodes.PARAMETER_PROBLEM.create(e, value);
                     }
                 }

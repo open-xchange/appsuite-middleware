@@ -50,7 +50,6 @@
 package com.openexchange.image;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
@@ -167,8 +166,8 @@ public final class ImageUtility {
 
     private static String decodeQueryStringValue(final String queryStringValue) {
         try {
-            return URLDecoder.decode(queryStringValue, UTF_8);
-        } catch (final UnsupportedEncodingException e) {
+            return AJAXServlet.decodeUrl(queryStringValue, UTF_8);
+        } catch (final RuntimeException e) {
             return queryStringValue;
         }
     }

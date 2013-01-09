@@ -54,7 +54,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -88,6 +87,7 @@ import javax.mail.internet.idn.IDNA;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
@@ -1725,8 +1725,8 @@ public class MimeMessageFiller {
 
     private static String urlDecode(final String s) {
         try {
-            return URLDecoder.decode(replaceURLCodePoints(s), "ISO-8859-1");
-        } catch (final UnsupportedEncodingException e) {
+            return AJAXServlet.decodeUrl(replaceURLCodePoints(s), "ISO-8859-1");
+        } catch (final RuntimeException e) {
             return s;
         }
     }
