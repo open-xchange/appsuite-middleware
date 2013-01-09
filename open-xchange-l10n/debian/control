@@ -35,6 +35,11 @@ Replaces: open-xchange-lang-es-es (<< 6.21.0-0)
 Conflicts: open-xchange-lang-es-es (<< 6.21.0-0)
 Description: Package containing Open-Xchange backend localization for es_ES
 
+Package: open-xchange-l10n-es-mx
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Description: Package containing Open-Xchange backend localization for es_MX
+
 Package: open-xchange-l10n-fr-ca
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)

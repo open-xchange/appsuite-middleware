@@ -93,6 +93,19 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
+%package es-mx
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for es_MX
+
+%description es-mx
+Package containing Open-Xchange backend localization for es_MX
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
 %package fr-ca
 Group:		Applications/Productivity
 Summary:	Package containing Open-Xchange backend localization for fr_CA
@@ -519,7 +532,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-for LANG in ca_ES cs_CZ da_DK de_DE el_GR en_US es_ES eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO sk_SK sv_SV tr_TR zh_CN zh_TW ru_RU de_CH; do \
+for LANG in ca_ES cs_CZ da_DK de_DE el_GR en_US es_ES es_MX eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO sk_SK sv_SV tr_TR zh_CN zh_TW ru_RU de_CH; do \
     PACKAGE_EXTENSION=$(echo ${LANG} | tr '[:upper:]_' '[:lower:]-'); \
     ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -Dlanguage=${LANG} -f build/build.xml clean build; \
 done
@@ -564,21 +577,31 @@ done
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*fr_FR*
 %dir /opt/open-xchange/etc/languages/appsuite/
+/opt/open-xchange/etc/languages/appsuite/fr_FR.properties
 
 %files cs-cz
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*cs_CZ*
+/opt/open-xchange/etc/languages/appsuite/cs_CZ.properties
 
 %files es-es
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*es_ES*
+/opt/open-xchange/etc/languages/appsuite/es_ES.properties
+
+%files es-mx
+%defattr(-,root,root)
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*es_MX*
+/opt/open-xchange/etc/languages/appsuite/es_MX.properties
 
 %files fr-ca
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*fr_CA*
+/opt/open-xchange/etc/languages/appsuite/fr_CA.properties
 
 %files he-he
 %defattr(-,root,root)
@@ -589,16 +612,19 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*hu_HU*
+/opt/open-xchange/etc/languages/appsuite/hu_HU.properties
 
 %files it-it
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*it_IT*
+/opt/open-xchange/etc/languages/appsuite/it_IT.properties
 
 %files ja-jp
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*ja_JP*
+/opt/open-xchange/etc/languages/appsuite/ja_JP.properties
 
 %files ko-ko
 %defattr(-,root,root)
@@ -610,16 +636,19 @@ done
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*lv_LV*
 %dir /opt/open-xchange/etc/languages/appsuite/
+/opt/open-xchange/etc/languages/appsuite/lv_LV.properties
 
 %files nl-nl
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*nl_NL*
+/opt/open-xchange/etc/languages/appsuite/nl_NL.properties
 
 %files pl-pl
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*pl_PL*
+/opt/open-xchange/etc/languages/appsuite/pl_PL.properties
 
 %files pt-br
 %defattr(-,root,root)
@@ -635,11 +664,13 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*ro_RO*
+/opt/open-xchange/etc/languages/appsuite/ro_RO.properties
 
 %files sk-sk
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*sk_SK*
+/opt/open-xchange/etc/languages/appsuite/sk_SK.properties
 
 %files sv-sv
 %defattr(-,root,root)
@@ -655,11 +686,13 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*zh_CN*
+/opt/open-xchange/etc/languages/appsuite/zh_CN.properties
 
 %files zh-tw
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*zh_TW*
+/opt/open-xchange/etc/languages/appsuite/zh_TW.properties
 
 %files ru-ru
 %defattr(-,root,root)
