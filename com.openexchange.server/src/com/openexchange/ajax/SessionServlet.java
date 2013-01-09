@@ -665,7 +665,7 @@ public abstract class SessionServlet extends AJAXServlet {
             return hash;
         }
         // Default is calculate
-        return HashCalculator.getHash(req, client);
+        return HashCalculator.getInstance().getHash(req, client);
     }
 
     /**

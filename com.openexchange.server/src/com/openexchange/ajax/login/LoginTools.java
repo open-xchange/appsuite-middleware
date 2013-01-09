@@ -192,7 +192,7 @@ public final class LoginTools {
             authId,
             client,
             version,
-            HashCalculator.getHash(req, userAgent, client),
+            HashCalculator.getInstance().getHash(req, userAgent, client),
             isVolatile,
             HTTP_JSON,
             headers,

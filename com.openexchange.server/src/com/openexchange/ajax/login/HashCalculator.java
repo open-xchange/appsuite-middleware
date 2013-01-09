@@ -59,7 +59,6 @@ import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Charsets;
 import com.openexchange.log.LogFactory;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.encoding.Base64;
 
 /**
@@ -70,24 +69,22 @@ import com.openexchange.tools.encoding.Base64;
 public class HashCalculator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HashCalculator.class));
-
     private static final Pattern PATTERN_NON_WORD_CHAR = Pattern.compile("\\W");
+    private static final HashCalculator SINGLETON = new HashCalculator();
 
-    private static volatile String[] fields;
-    private static String[] fields() {
-        String[] tmp = fields;
-        if (null == tmp) {
-            synchronized (HashCalculator.class) {
-                tmp = fields;
-                if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    final String fieldList = null == service ? "" : service.getProperty("com.openexchange.cookie.hash.fields", "");
-                    tmp = Pattern.compile("\\s*,\\s*").split(fieldList, 0);
-                    fields = tmp;
-                }
-            }
-        }
-        return tmp;
+    private String[] fields = new String[0];
+
+    private HashCalculator() {
+        super();
+    }
+
+    public static HashCalculator getInstance() {
+        return SINGLETON;
+    }
+
+    public void configure(ConfigurationService service) {
+        final String fieldList = service.getProperty("com.openexchange.cookie.hash.fields", "");
+        fields = Pattern.compile("\\s*,\\s*").split(fieldList, 0);
     }
 
     /**
@@ -97,7 +94,7 @@ public class HashCalculator {
      * @param client The optional client identifier
      * @return The calculated hash string
      */
-    public static String getHash(final HttpServletRequest req, final String client) {
+    public String getHash(final HttpServletRequest req, final String client) {
         return getHash(req, getUserAgent(req), client);
     }
 
@@ -109,14 +106,13 @@ public class HashCalculator {
      * @param client The optional client identifier
      * @return The calculated hash string
      */
-    public static String getHash(final HttpServletRequest req, final String userAgent, final String client) {
+    public String getHash(final HttpServletRequest req, final String userAgent, final String client) {
         try {
             final MessageDigest md = MessageDigest.getInstance("MD5");
             md.update((null == userAgent ? parseUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
             if (null != client) {
                 md.update(client.getBytes(Charsets.UTF_8));
             }
-            final String[] fields = fields();
             for (final String field : fields) {
                 final String header = req.getHeader(field);
                 if (!isEmpty(header)) {
@@ -136,7 +132,7 @@ public class HashCalculator {
      * @param req The HTTP Servlet request
      * @return The calculated hash string
      */
-    public static String getHash(final HttpServletRequest req) {
+    public String getHash(final HttpServletRequest req) {
         return getHash(req, getClient(req));
     }
 

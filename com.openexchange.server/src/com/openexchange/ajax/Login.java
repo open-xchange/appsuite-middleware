@@ -356,7 +356,7 @@ public class Login extends AJAXServlet {
                     } else {
                         session.setClient(client);
                     }
-                    hash = HashCalculator.getHash(req, client);
+                    hash = HashCalculator.getInstance().getHash(req, client);
                     session.setHash(hash);
                 }
                 writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
@@ -515,7 +515,7 @@ public class Login extends AJAXServlet {
                     } else {
                         session.setClient(client);
                     }
-                    hash = HashCalculator.getHash(req, client);
+                    hash = HashCalculator.getInstance().getHash(req, client);
                     session.setHash(hash);
                 }
                 writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
@@ -562,7 +562,7 @@ public class Login extends AJAXServlet {
                         return;
                     }
                     String secret = null;
-                    final String hash = HashCalculator.getHash(req);
+                    final String hash = HashCalculator.getInstance().getHash(req);
                     final String sessionCookieName = SESSION_PREFIX + hash;
                     final String secretCookieName = SECRET_PREFIX + hash;
 
@@ -1145,7 +1145,7 @@ public class Login extends AJAXServlet {
             authId,
             client,
             null,
-            HashCalculator.getHash(req, client),
+            HashCalculator.getInstance().getHash(req, client),
             isVolatile,
             HTTP_JSON,
             headers,
@@ -1222,7 +1222,7 @@ public class Login extends AJAXServlet {
             UUIDs.getUnformattedString(UUID.randomUUID()),
             UUIDs.getUnformattedString(UUID.randomUUID()),
             version,
-            HashCalculator.getHash(req, userAgent, client),
+            HashCalculator.getInstance().getHash(req, userAgent, client),
             isVolatile,
             Interface.HTTP_JSON,
             headers,
