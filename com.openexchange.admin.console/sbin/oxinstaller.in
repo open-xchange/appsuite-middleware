@@ -497,7 +497,7 @@ setup()
     echo setting up open-xchange configuration ${CONFDIR}
 
     CUROPTS=$(eval ox_read_property JAVA_XTRAOPTS ${CONFDIR}/ox-scriptconf.sh)
-    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+[Mm][ ]*//')
+    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+[Mm]*[ ]*//')
     SERVEROPTS="$CUROPTS -Xmx${SERVER_MEMORY}m"
 
     v_setprop JAVA_XTRAOPTS "\"$SERVEROPTS\"" ${CONFDIR}/ox-scriptconf.sh
@@ -571,7 +571,7 @@ setup()
     v_setprop SERVER_NAME $SERVER_NAME ${CONFDIR}/AdminDaemon.properties
 
     CUROPTS=$(eval ox_read_property JAVA_OXCMD_OPTS ${CONFDIR}/ox-scriptconf.sh)
-    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+m[ ]*//')
+    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+[Mm]*[ ]*//')
     CLTOPTS="$CUROPTS -Xmx${CLT_MEMORY}m"
 
     v_setprop JAVA_OXCMD_OPTS "\"$CLTOPTS\"" ${CONFDIR}/ox-scriptconf.sh
