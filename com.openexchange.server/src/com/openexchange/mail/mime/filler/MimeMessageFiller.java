@@ -54,7 +54,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -88,6 +87,7 @@ import javax.mail.internet.idn.IDNA;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
@@ -136,7 +136,6 @@ import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.version.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -148,6 +147,7 @@ import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.user.UserService;
+import com.openexchange.version.Version;
 
 /**
  * {@link MimeMessageFiller} - Provides basic methods to fills an instance of {@link MimeMessage} with headers/contents given through an
@@ -854,8 +854,8 @@ public class MimeMessageFiller {
                          *
                          * Well-formed HTML
                          */
-                        final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
-                        primaryMultipart.addBodyPart(createTextBodyPart(toArray(wellFormedHTMLContent, content), charset, false, true, type), 0);
+                        // final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
+                        primaryMultipart.addBodyPart(createTextBodyPart(toArray(content, content), charset, false, true, type), 0);
                     } else {
                         primaryMultipart.addBodyPart(createTextBodyPart(toArray(plainText, plainText), charset, false, false, type), 0);
                     }
@@ -1725,8 +1725,8 @@ public class MimeMessageFiller {
 
     private static String urlDecode(final String s) {
         try {
-            return URLDecoder.decode(replaceURLCodePoints(s), "ISO-8859-1");
-        } catch (final UnsupportedEncodingException e) {
+            return AJAXServlet.decodeUrl(replaceURLCodePoints(s), "ISO-8859-1");
+        } catch (final RuntimeException e) {
             return s;
         }
     }

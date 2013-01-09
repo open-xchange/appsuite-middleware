@@ -74,6 +74,7 @@ public class Activator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         final Log log = LogFactory.getLog(Activator.class);
         try {
+            AdminCache.compareAndSetBundleContext(null, context);
             final ConfigurationService service = getService(ConfigurationService.class);
             AdminCache.compareAndSetConfigurationService(null, service);
             OXContextInterfaceReference.set(new OXContext(context));

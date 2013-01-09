@@ -26,6 +26,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.quartz.JobBuilder;
@@ -45,7 +46,9 @@ import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.listeners.JobListenerSupport;
 import org.quartz.simpl.SimpleThreadPool;
 import org.quartz.spi.JobStore;
+
 import com.openexchange.quartz.hazelcast.ConsistencyTask;
+import com.openexchange.service.indexing.hazelcast.TestJobs.ChangingDetailJob;
 import com.openexchange.service.indexing.hazelcast.TestJobs.LongRunningJob;
 import com.openexchange.service.indexing.hazelcast.TestJobs.ReschedulingTestJob;
 import com.openexchange.service.indexing.hazelcast.TestJobs.SleepingTestJob;
@@ -54,6 +57,7 @@ import com.openexchange.service.indexing.hazelcast.TestJobs.TestJob;
 /**
  * Integration test for using DisallowConcurrentExecution annot.
  * 
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author Zemian Deng <saltnlight5@gmail.com>
  */
 public class DisallowConcurrentExecutionJobTest {
@@ -67,7 +71,6 @@ public class DisallowConcurrentExecutionJobTest {
     public static final String BARRIER = "BARRIER";
 
     public static final String DATE_STAMPS = "DATE_STAMPS";
-
 
 
     public static class TestJobListener extends JobListenerSupport {
@@ -145,6 +148,37 @@ public class DisallowConcurrentExecutionJobTest {
         scheduler.start();
         scheduler.standby();
         scheduler.start();
+        scheduler.shutdown();
+    }
+    
+    @Test
+
+    public void testDataPersistence() throws Exception {
+        JobStore jobStore = new TestableHazelcastJobStore();
+//        RAMJobStore jobStore = new RAMJobStore();
+        DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
+        Scheduler scheduler = DirectSchedulerFactory.getInstance().getScheduler("sched1");
+        scheduler.start();
+        
+        
+        CountDownLatch latch = new CountDownLatch(2);
+        scheduler.getContext().put(BARRIER, latch);
+        JobDetail job = JobBuilder.newJob(ChangingDetailJob.class)
+                .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
+                .build();
+        
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .forJob(job)
+                .withIdentity("testTrigger")
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(1000L).withRepeatCount(2))
+                .startNow()
+                .build();
+        
+        scheduler.scheduleJob(job, trigger);
+        
+        latch.await(10, TimeUnit.SECONDS);
+        Assert.assertEquals("Latch was not 0", 0, latch.getCount());
+        
         scheduler.shutdown();
     }
     

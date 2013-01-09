@@ -77,6 +77,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleContext;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -95,6 +96,37 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
 public class AdminCache {
+
+    private static final AtomicReference<BundleContext> BUNDLE_CONTEXT = new AtomicReference<BundleContext>();
+
+    /**
+     * Gets the <tt>BundleContext</tt>.
+     * 
+     * @return The <tt>BundleContext</tt> or <code>null</code>
+     */
+    public static BundleContext getBundleContext() {
+        return BUNDLE_CONTEXT.get();
+    }
+
+    /**
+     * Atomically sets the <tt>BundleContext</tt> to the given updated <tt>BundleContext</tt> reference if the current value <tt>==</tt> the expected value.
+     * 
+     * @param expect the expected <tt>BundleContext</tt>
+     * @param update the new <tt>BundleContext</tt>
+     * @return <code>true</code> if successful. <code>false</code> return indicates that the actual <tt>ConfigurationService</tt> was not equal to the expected <tt>ConfigurationService</tt>.
+     */
+    public static boolean compareAndSetBundleContext(final BundleContext expect, final BundleContext update) {
+        return BUNDLE_CONTEXT.compareAndSet(expect, update);
+    }
+
+    /**
+     * Sets the <tt>BundleContext</tt>.
+     * 
+     * @param service The <tt>BundleContext</tt> to set
+     */
+    public static void setBundleContext(final BundleContext service) {
+        BUNDLE_CONTEXT.set(service);
+    }
 
     private static final AtomicReference<ConfigurationService> CONF_SERVICE = new AtomicReference<ConfigurationService>();
 

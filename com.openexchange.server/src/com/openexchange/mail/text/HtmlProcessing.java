@@ -50,6 +50,8 @@
 package com.openexchange.mail.text;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -72,6 +74,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
@@ -161,6 +164,9 @@ public final class HtmlProcessing {
             if (DisplayMode.RAW.equals(mode)) {
                 retval = content;
             } else {
+                
+                // dumpToFile(content, "~/Desktop/html-original.html");
+                
                 retval = htmlService.dropScriptTagsInHeader(content);
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
@@ -205,6 +211,8 @@ public final class HtmlProcessing {
                         retval = replaceBody(retval, cssPrefix);
                     }
                 }
+                
+                // dumpToFile(retval, "~/Desktop/html-processed.html");
             }
         } else {
             retval = content;
@@ -312,7 +320,7 @@ public final class HtmlProcessing {
             return rest;
         }
         final String color = m.group(1);
-        String ret = rest;
+        final String ret = rest;
         final StringBuffer sbuf = new StringBuffer(ret.length());
         m.appendReplacement(sbuf, "");
         m.appendTail(sbuf);
@@ -906,6 +914,24 @@ public final class HtmlProcessing {
         } catch (final UnsupportedEncodingException e) {
             LOG.error(e.getMessage(), e);
             return text;
+        }
+    }
+
+    private static void dumpToFile(final String content, final String fileName) {
+        if (isEmpty(content)) {
+            return;
+        }
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(fileName));
+            writer.write(content);
+            writer.flush();
+        } catch (final IOException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final RuntimeException e) {
+            LOG.error(e.getMessage(), e);
+        } finally {
+            Streams.close(writer);
         }
     }
 

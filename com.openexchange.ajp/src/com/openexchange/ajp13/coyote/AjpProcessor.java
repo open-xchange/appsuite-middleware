@@ -50,6 +50,7 @@
 package com.openexchange.ajp13.coyote;
 
 import static com.openexchange.ajp13.AJPv13Response.writeHeaderSafe;
+import static com.openexchange.ajp13.AJPv13Utility.decodeUrl;
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.ByteArrayOutputStream;
@@ -60,7 +61,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
@@ -1388,13 +1388,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             case Constants.SC_A_QUERY_STRING: {
                 final String queryString = requestHeaderMessage.getString(temp);
                 request.setQueryString(queryString);
-                try {
+                {
                     parseQueryString(queryString);
                     if (DEBUG && isEASPingCommand()) {
                         LOG.debug("Incoming long-running EAS ping request.");
                     }
-                } catch (final UnsupportedEncodingException e) {
-                    throw new IllegalStateException(e.getMessage(), e);
                 }
             }
                 break;
@@ -1610,9 +1608,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * Parses a query string and puts resulting parameters into given servlet request.
      *
      * @param queryStr The query string to be parsed
-     * @throws UnsupportedEncodingException If charset provided by servlet request is not supported
      */
-    private void parseQueryString(final String queryStr) throws UnsupportedEncodingException {
+    private void parseQueryString(final String queryStr) {
         final String[] paramsNVPs = PATTERN_SPLIT.split(queryStr, 0);
         String charEnc = request.getCharacterEncoding();
         if (null == charEnc) {
@@ -1624,7 +1621,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 // Look-up character '='
                 final int pos = paramsNVP.indexOf('=');
                 if (pos >= 0) {
-                    request.setParameter(paramsNVP.substring(0, pos), URLDecoder.decode(paramsNVP.substring(pos + 1), charEnc));
+                    request.setParameter(paramsNVP.substring(0, pos), decodeUrl(paramsNVP.substring(pos + 1), charEnc));
                 } else {
                     request.setParameter(paramsNVP, "");
                 }

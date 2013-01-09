@@ -53,7 +53,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -853,8 +852,8 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
         return (nextByte() > 0);
     }
 
-    private static String decodeQueryStringValue(final String charEnc, final String queryStringValue) throws UnsupportedEncodingException {
-        return URLDecoder.decode(queryStringValue, charEnc == null ? AJPv13Config.getServerProperty(Property.DefaultEncoding) : charEnc);
+    private static String decodeQueryStringValue(final String charEnc, final String queryStringValue) {
+        return AJPv13Utility.decodeUrl(queryStringValue, charEnc == null ? AJPv13Config.getServerProperty(Property.DefaultEncoding) : charEnc);
     }
 
 }

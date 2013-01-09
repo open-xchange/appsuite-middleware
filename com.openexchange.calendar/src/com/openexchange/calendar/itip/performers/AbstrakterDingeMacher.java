@@ -93,10 +93,10 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
     
     protected Appointment determineOriginalAppointment(final ITipChange change, final Map<String, CalendarDataObject> processed, final Session session) throws OXException {
         Appointment currentAppointment = change.getCurrentAppointment();
-        if (currentAppointment == null) {
+        if (currentAppointment == null || currentAppointment.getObjectID() <= 0) {
             if (change.isException()) {
                 currentAppointment = change.getMasterAppointment();
-                if (currentAppointment == null) {
+                if (currentAppointment == null || currentAppointment.getObjectID() <= 0) {
                     currentAppointment = processed.get(change.getNewAppointment().getUid());
                     if (currentAppointment == null) {
                     	currentAppointment = util.loadAppointment(change.getNewAppointment(), session);

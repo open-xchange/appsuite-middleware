@@ -189,13 +189,13 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     protected static void checkNeededFields(final MailAccountDescription accountDescription) throws OXException {
         // Check needed fields
-        if (null == accountDescription.getMailServer()) {
+        if (isEmpty(accountDescription.getMailServer())) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.MAIL_URL);
         }
-        if (null == accountDescription.getLogin()) {
+        if (isEmpty(accountDescription.getLogin())) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.LOGIN);
         }
-        if (null == accountDescription.getPassword()) {
+        if (isEmpty(accountDescription.getPassword())) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.PASSWORD);
         }
     }
@@ -330,6 +330,19 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      */
     public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session, final Connection con) throws OXException {
         return Tools.checkFullNames(account, storageService, session, con);
+    }
+
+    /** Checks for an empty string */
+    protected static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

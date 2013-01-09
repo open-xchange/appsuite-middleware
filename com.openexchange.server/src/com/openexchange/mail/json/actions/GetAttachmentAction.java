@@ -76,6 +76,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
@@ -186,9 +187,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
                     final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
                     final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                    attachmentInputStream =
-                        new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
-                            htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(cs));
+                    attachmentInputStream = new UnsynchronizedByteArrayInputStream(sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs)));
                 } else {
                     attachmentInputStream = mailPart.getInputStream();
                 }
@@ -320,6 +319,10 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         } catch (final Exception e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) {
+        return htmlService.sanitize(htmlContent, null, false, null, null);
     }
 
 }

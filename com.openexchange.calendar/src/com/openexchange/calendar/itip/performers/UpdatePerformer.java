@@ -127,6 +127,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
             if (appointment != null && !change.isException()) {
                 processed.put(appointment.getUid(), appointment);
             }
+
             writeMail(action, original, forMail, session, owner);
             result.add(appointment);
         }
@@ -168,6 +169,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         if (write) {
             CalendarDataObject clone = update.clone();
             util.updateAppointment(clone, session, original.getLastModified());
+            original.setLastModified(clone.getLastModified());
         }
         
         saveConfirmations(session, appointmentDiff, update);
