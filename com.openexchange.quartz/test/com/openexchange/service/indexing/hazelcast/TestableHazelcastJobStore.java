@@ -51,13 +51,18 @@ package com.openexchange.service.indexing.hazelcast;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentMap;
+
 import org.quartz.JobPersistenceException;
 import org.quartz.TriggerKey;
+
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Instance;
 import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
 
+/**
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
 public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
     
     private HazelcastInstance hazelcast = null;

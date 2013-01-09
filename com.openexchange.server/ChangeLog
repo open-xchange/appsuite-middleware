@@ -1,3 +1,16 @@
+* 2013-01-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23586: Bad timezone calculation.
+
+* 2013-01-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24428: Ensure Facebook OAuth errors are propagated to user
+ - Fix for bug 24429: Proper processing of body CSS selector
+
+* 2013-01-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24395: Adjusting 'file as' value if display name is set
+
 * 2013-01-07 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23433: Broken Recurring Appointments.

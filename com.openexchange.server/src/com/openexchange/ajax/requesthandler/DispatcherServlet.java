@@ -75,7 +75,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -98,9 +97,9 @@ public class DispatcherServlet extends SessionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DispatcherServlet.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DispatcherServlet.class);
     
-    private static final Session NO_SESSION = new SessionObject("");
+    private static final Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
 
     /*-
      * /!\ These must be static for our servlet container to work properly. /!\
@@ -384,10 +383,12 @@ public class DispatcherServlet extends SessionServlet {
      * @param httpResponse The associated HTTP Servlet response
      */
     protected void sendResponse(final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
-        int highest = Integer.MIN_VALUE;
+        int highest = 0;
+        boolean first = true;
         ResponseRenderer candidate = null;
         for (final ResponseRenderer renderer : RESPONSE_RENDERERS) {
-            if (renderer.handles(requestData, result) && highest <= renderer.getRanking()) {
+            if (renderer.handles(requestData, result) && (first || highest <= renderer.getRanking())) {
+                first = false;
                 highest = renderer.getRanking();
                 candidate = renderer;
             }

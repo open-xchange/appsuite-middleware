@@ -49,12 +49,15 @@
 
 package com.openexchange.messaging.facebook.session;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.model.OAuthRequest;
@@ -62,6 +65,8 @@ import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.facebook.FacebookConfiguration;
 import com.openexchange.messaging.facebook.FacebookConstants;
@@ -281,6 +286,29 @@ public final class FacebookOAuthAccess {
             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Executes GET request for specified URL.
+     *
+     * @param url The URL
+     * @return The response
+     * @throws OXException If request fails
+     */
+    public JSONValue executeGETJsonRequest(final CharSequence url) throws OXException {
+        Reader reader = null;
+        try {
+            final OAuthRequest request = new OAuthRequest(Verb.GET, url.toString());
+            facebookOAuthService.signRequest(facebookAccessToken, request);
+            reader = new InputStreamReader(request.send().getStream(), Charsets.UTF_8);
+            return JSONObject.parse(reader);
+        } catch (final org.scribe.exceptions.OAuthException e) {
+            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(reader);
         }
     }
 

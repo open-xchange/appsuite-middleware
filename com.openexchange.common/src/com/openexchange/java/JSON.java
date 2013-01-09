@@ -49,6 +49,7 @@
 
 package com.openexchange.java;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,8 +71,15 @@ public class JSON {
      * @throws JSONException in case JSON cannot be read
      */
     public static List<String> jsonArray2list(final JSONArray array) throws JSONException {
-        final List<String> list = new LinkedList<String>();
-        for (int i = 0, size = array.length(); i < size; i++) {
+        if (null == array) {
+            return new LinkedList<String>();
+        }
+        final int length = array.length();
+        if (0 == length) {
+            return new LinkedList<String>();
+        }
+        final List<String> list = new ArrayList<String>(length);
+        for (int i = 0, size = length; i < size; i++) {
             list.add(array.getString(i));
         }
         return list;
@@ -84,7 +92,10 @@ public class JSON {
      * @return array that is result of transformation
      */
     public static JSONArray collection2jsonArray(final Collection<? extends Object> coll) {
-        final JSONArray array = new JSONArray();
+        if (null == coll) {
+            return new JSONArray(1);
+        }
+        final JSONArray array = new JSONArray(coll.size());
         for (final Object obj : coll) {
             array.put(obj);
         }

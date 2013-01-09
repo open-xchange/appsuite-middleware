@@ -1488,14 +1488,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 // Sort root elements
                 {
                     final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
-                    final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), null);
-                    final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
-    
-                        @Override
-                        public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
-                            return comparator.compare(o1.get(0), o2.get(0));
-                        }
-                    };
+                    final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
                     Collections.sort(list, listComparator);
                 }
                 // Check for available mapping indicating that sent folder results have to be merged
@@ -1684,16 +1677,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Sort according to order direction
              */
-            final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
-            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
-            final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
-
-                @Override
-                public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
-                    return comparator.compare(o1.get(0), o2.get(0));
-                }
-            };
-            Collections.sort(list, listComparator);
+            {
+                final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+                final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
+                Collections.sort(list, listComparator);
+            }
             if (null != indexRange) {
                 final int fromIndex = indexRange.start;
                 int toIndex = indexRange.end;
@@ -1723,6 +1711,30 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages() for " + fullName + " took " + dur + "msec");
             }
         }
+    }
+
+    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, final Locale locale) {
+        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale);
+        final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
+   
+            @Override
+            public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
+                int result = comparator.compare(o1.get(0), o2.get(0));
+                if ((0 != result) || (MailSortField.RECEIVED_DATE != sortField)) {
+                    return result;
+                }
+                // Zero as comparison result AND primarily sorted by received-date
+                final String inReplyTo1 = o1.get(0).getInReplyTo();
+                final String inReplyTo2 = o2.get(0).getInReplyTo();
+                if (null == inReplyTo1) {
+                    result = null == inReplyTo2 ? 0 : -1;
+                } else {
+                    result = null == inReplyTo2 ? 1 : 0;
+                }
+                return 0 == result ? new MailMessageComparator(MailSortField.SENT_DATE, OrderDirection.DESC.equals(order), null).compare(o1.get(0), o2.get(0)) : result;
+            }
+        };
+        return listComparator;
     }
 
     private List<List<MailMessage>> threadedMessagesWithoutBody(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final IMAPFolder sentFolder, final int messageCount, final boolean mergeWithSent, final boolean merged, final boolean cached, final List<ThreadSortNode> threadList, final FetchProfile fetchProfile, final boolean descending, final int limit) throws MessagingException, OXException {
@@ -1793,16 +1805,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         /*
          * Sort according to order direction
          */
-        final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
-        final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, getLocale());
-        final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
-
-            @Override
-            public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
-                return comparator.compare(o1.get(0), o2.get(0));
-            }
-        };
-        Collections.sort(list, listComparator);
+        {
+            final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+            final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
+            Collections.sort(list, listComparator);
+        }
         /*
          * Check for available mapping indicating that sent folder results have to be merged
          */

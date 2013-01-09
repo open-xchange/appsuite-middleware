@@ -52,11 +52,17 @@ package com.openexchange.service.indexing.hazelcast;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
+
+import org.junit.Assert;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.PersistJobDataAfterExecution;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.TriggerBuilder;
@@ -143,6 +149,32 @@ public class TestJobs {
             } catch (InterruptedException e) {
                 throw new JobExecutionException("Error", e);
             } catch (BrokenBarrierException e) {
+                throw new JobExecutionException("Error", e);
+            }
+        }
+    }
+    
+    @DisallowConcurrentExecution
+    @PersistJobDataAfterExecution
+    public static class ChangingDetailJob implements Job {
+
+        @Override
+        public void execute(JobExecutionContext context) throws JobExecutionException {
+            try {
+                System.out.println("Executing job.");
+                JobDetail jobDetail = context.getJobDetail();
+                JobDataMap dataMap = jobDetail.getJobDataMap();
+                CountDownLatch latch = (CountDownLatch) context.getScheduler().getContext().get(DisallowConcurrentExecutionJobTest.BARRIER);
+                if (latch.getCount() == 1L) {
+                    String value = (String) dataMap.get("new");
+                    Assert.assertNotNull("Value was null", value);
+                    Assert.assertEquals("Wrong value", "test", "test");
+                } else {
+                    dataMap.put("new", "test");
+                }
+                
+                latch.countDown();
+            } catch (Throwable e) {
                 throw new JobExecutionException("Error", e);
             }
         }

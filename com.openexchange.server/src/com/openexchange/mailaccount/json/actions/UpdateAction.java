@@ -170,16 +170,16 @@ public final class UpdateAction extends AbstractMailAccountAction {
             {
                 // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)
                 final boolean pop3 = accountDescription.getMailProtocol().toLowerCase(Locale.ENGLISH).startsWith("pop3");
-                if (fieldsToUpdate.contains(Attribute.MAIL_URL_LITERAL)) {
-                    if(!pop3 && !ValidateAction.checkMailServerURL(accountDescription, session, warnings)) {
+                if (fieldsToUpdate.contains(Attribute.MAIL_URL_LITERAL) && !toUpdate.generateMailServerURL().equals(accountDescription.generateMailServerURL())) {
+                    if (!pop3 && !ValidateAction.checkMailServerURL(accountDescription, session, warnings)) {
                         final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
                         warning.setCategory(Category.CATEGORY_WARNING);
                         warnings.add(0, warning);
                     }
                     clearStamp |= (pop3 && !toUpdate.getMailServer().equals(accountDescription.getMailServer()));
                 }
-                if (fieldsToUpdate.contains(Attribute.TRANSPORT_URL_LITERAL)) {
-                    if(!pop3 && !ValidateAction.checkTransportServerURL(accountDescription, session, warnings)) {
+                if (fieldsToUpdate.contains(Attribute.TRANSPORT_URL_LITERAL) && !toUpdate.generateTransportServerURL().equals(accountDescription.generateTransportServerURL())) {
+                    if (!pop3 && !ValidateAction.checkTransportServerURL(accountDescription, session, warnings)) {
                         final String transportLogin = accountDescription.getTransportLogin();
                         final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getTransportServer(), transportLogin == null ? accountDescription.getLogin() : transportLogin);
                         warning.setCategory(Category.CATEGORY_WARNING);

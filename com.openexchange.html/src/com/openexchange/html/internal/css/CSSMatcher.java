@@ -59,6 +59,7 @@ import java.util.regex.Pattern;
 import com.openexchange.html.internal.MatcherReplacer;
 import com.openexchange.html.internal.RegexUtility;
 import com.openexchange.html.internal.RegexUtility.GroupType;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 
 /**
@@ -366,7 +367,7 @@ public final class CSSMatcher {
 
     private static void handleLine(final String line, final String cssPrefix, final StringBuilder builder, final StringBuilder helper) {
         final String[] words = SPLIT_WORDS.split(line, 0);
-        if (1 == words.length && "body".equalsIgnoreCase(words[0])) {
+        if (1 == words.length && toLowerCase(words[0]).indexOf("body") >= 0) {
             // Special treatment for "body" selector
             builder.append('#').append(cssPrefix).append(' ');
         } else {
@@ -633,6 +634,16 @@ public final class CSSMatcher {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

@@ -163,14 +163,13 @@ public abstract class AbstractFacebookAccess {
         try {
             final String encodedQuery = encode(fqlQuery);
             final JSONObject result =
-                new JSONObject(
-                    facebookOAuthAccess.executeGETRequest(new StringBuilder(FQL_JSON_START.length() + encodedQuery.length()).append(
-                        FQL_JSON_START).append(encodedQuery).toString()));
+                (JSONObject) facebookOAuthAccess.executeGETJsonRequest(new StringBuilder(FQL_JSON_START.length() + encodedQuery.length()).append(
+                    FQL_JSON_START).append(encodedQuery));
             if (result.has("error")) {
                 final JSONObject error = result.getJSONObject("error");
                 final String type = error.optString("type");
                 final String message = error.optString("message");
-                if ("OXException".equals(type)) {
+                if ("OAuthException".equals(type)) {
                     throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == message ? "" : message);
                 }
                 throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == message ? "" : message);
@@ -197,14 +196,13 @@ public abstract class AbstractFacebookAccess {
             final String encodedQuery = encode(fqlQuery);
             if (JSONObject.class.equals(clazz)) {
                 final JSONObject result =
-                    new JSONObject(
-                        facebookOAuthAccess.executeGETRequest(new StringBuilder(FQL_JSON_START.length() + encodedQuery.length()).append(
-                            FQL_JSON_START).append(encodedQuery).toString()));
+                    (JSONObject) facebookOAuthAccess.executeGETJsonRequest(new StringBuilder(
+                        FQL_JSON_START.length() + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery));
                 if (result.has("error")) {
                     final JSONObject error = result.getJSONObject("error");
                     final String type = error.optString("type");
                     final String message = error.optString("message");
-                    if ("OXException".equals(type)) {
+                    if ("OAuthException".equals(type)) {
                         throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == message ? "" : message);
                     }
                     throw FacebookMessagingExceptionCodes.FQL_ERROR.create(
@@ -214,8 +212,8 @@ public abstract class AbstractFacebookAccess {
                 return (V) result;
             }
             if (JSONArray.class.equals(clazz)) {
-                return (V) new JSONArray(facebookOAuthAccess.executeGETRequest(new StringBuilder(
-                    FQL_JSON_START.length() + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery).toString()));
+                return (V) (facebookOAuthAccess.executeGETJsonRequest(new StringBuilder(
+                    FQL_JSON_START.length() + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery)));
             }
             throw new IllegalArgumentException("Unsupported return type: " + clazz.getName());
         } catch (final JSONException e) {

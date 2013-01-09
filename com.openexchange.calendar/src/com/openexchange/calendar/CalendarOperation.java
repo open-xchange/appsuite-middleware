@@ -479,6 +479,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                      * considered as 'shared' to the current user.
                      */
                     cdao.setParentFolderID(inFolder);
+                    OXFolderAccess access = new OXFolderAccess(readcon, cdao.getContext());
+                    cdao.setFolderType(access.getFolderType(inFolder, so.getUserId()));
                 }
                 cdao.setStartDate(setDate(i++, load_resultset));
                 cdao.setEndDate(setDate(i++, load_resultset));
