@@ -384,10 +384,12 @@ public class DispatcherServlet extends SessionServlet {
      * @param httpResponse The associated HTTP Servlet response
      */
     protected void sendResponse(final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
-        int highest = Integer.MIN_VALUE;
+        int highest = 0;
+        boolean first = true;
         ResponseRenderer candidate = null;
         for (final ResponseRenderer renderer : RESPONSE_RENDERERS) {
-            if (renderer.handles(requestData, result) && highest <= renderer.getRanking()) {
+            if (renderer.handles(requestData, result) && (first || highest <= renderer.getRanking())) {
+                first = false;
                 highest = renderer.getRanking();
                 candidate = renderer;
             }
