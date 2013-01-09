@@ -1,3 +1,7 @@
+* 2013-01-09 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23958: Notification mail for appointments partially in the past.
+
 * 2013-01-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 23494: Offer filtered HTML attachment download without converting it to "conform" HTML
