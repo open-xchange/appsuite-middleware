@@ -1,3 +1,7 @@
+* 2013-01-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23494: Offer filtered HTML attachment download without converting it to "conform" HTML
+
 * 2013-01-08 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23586: Bad timezone calculation.
