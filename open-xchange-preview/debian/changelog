@@ -1,3 +1,9 @@
+open-xchange-preview (7.0.1-0) UNRELEASED; urgency=low
+
+  * prepare for 7.0.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 10 Jan 2013 10:09:31 +0100
+
 open-xchange-preview (7.0.0-0) unstable; urgency=low
 
   * prepare for 7.0.0 release

@@ -531,7 +531,22 @@ public final class PropertyNames {
      */
     public static final DavPropertyName DEFAULT_ALARM_VEVENT_DATETIME = DavPropertyName.create("default-alarm-vevent-datetime", NS_CALDAV);
 
-	
+    /**
+     * mkcalendar xmlns="urn:ietf:params:xml:ns:caldav"
+     */
+    public static final DavPropertyName MKCALENDAR = DavPropertyName.create("mkcalendar", NS_CALDAV);
+
+    /**
+     * pre-publish-url xmlns="http://calendarserver.org/ns/"
+     */
+    public static final DavPropertyName PRE_PUBLISH_URL = DavPropertyName.create("pre-publish-url", NS_CALENDARSERVER);
+
+    /**
+     * supported-calendar-component-sets xmlns="urn:ietf:params:xml:ns:caldav"
+     */
+    public static final DavPropertyName SUPPORTED_CALENDAR_COMPONENT_SETS = DavPropertyName.create("supported-calendar-component-sets", NS_CALDAV);
+    
+    
 	private PropertyNames() {
 		// prevent instantiation
 	}	

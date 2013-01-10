@@ -96,8 +96,10 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
         super(factory, url);
         this.factory = factory;
         this.folder = folder;
-        this.folderID = Tools.parse(folder.getID());
-        includeProperties(new CurrentUserPrivilegeSet(folder.getOwnPermission()), new CTag(this), new SyncToken(this), new Owner(this));
+        if (null != folder) {
+            this.folderID = Tools.parse(folder.getID());
+            includeProperties(new CurrentUserPrivilegeSet(folder.getOwnPermission()), new CTag(this), new SyncToken(this), new Owner(this));
+        }
         LOG.debug(getUrl() + ": initialized.");
     }
     
@@ -169,12 +171,12 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
 
     @Override
     public Date getCreationDate() throws WebdavProtocolException {
-        return this.folder.getCreationDateUTC();
+        return null != this.folder ? this.folder.getCreationDateUTC() : null;
     }
 
     @Override
     public String getDisplayName() throws WebdavProtocolException {
-        return this.folder.getName();
+        return null != this.folder ? this.folder.getName() : null;
     }
 
     @Override

@@ -52,13 +52,10 @@ package com.openexchange.admin.rmi.impl;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
@@ -80,6 +77,7 @@ import com.openexchange.admin.storage.interfaces.OXResourceStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.log.LogFactory;
 
 public class OXResource extends OXCommonImpl implements OXResourceInterface{
     
@@ -160,6 +158,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             if (res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail(), res.getId())) {
                 throw new InvalidDataException("Resource with this email address already exists");
             }
+
+            tool.primaryMailExists(ctx, res.getEmail());
 
             if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
                 final String rid = res.getName().toLowerCase();
@@ -252,6 +252,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             if (res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail())) {
                 throw new InvalidDataException("Resource with this email address already exists");
             }
+            
+            tool.primaryMailExists(ctx, res.getEmail());
 
             if (!res.mandatoryCreateMembersSet()) {
                 throw new InvalidDataException("Mandatory fields not set: " + res.getUnsetMembers());

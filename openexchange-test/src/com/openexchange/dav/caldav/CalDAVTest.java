@@ -66,6 +66,7 @@ import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.MoveMethod;
 import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
 import com.openexchange.dav.Headers;
@@ -74,6 +75,7 @@ import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.WebDAVTest;
 import com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException;
+import com.openexchange.dav.caldav.methods.MkCalendarMethod;
 import com.openexchange.dav.caldav.reports.CalendarMultiGetReportInfo;
 import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
@@ -204,24 +206,35 @@ public abstract class CalDAVTest extends WebDAVTest {
         }
 	}
 	
-	protected int move(ICalResource iCalResource, String targetFolderID) throws OXException, HttpException, IOException {
-		MoveMethod move = null;
+    protected int move(ICalResource iCalResource, String targetFolderID) throws OXException, HttpException, IOException {
+        MoveMethod move = null;
         try {
-        	String targetHref = "/caldav/" + targetFolderID + "/" + 
-    				iCalResource.getHref().substring(1 + iCalResource.getHref().lastIndexOf('/'));
-        	move = new MoveMethod(getBaseUri() + iCalResource.getHref(), getBaseUri() + targetHref, false);
-        	if (null != iCalResource.getETag()) {
-        		move.addRequestHeader(Headers.IF_MATCH, iCalResource.getETag());
+            String targetHref = "/caldav/" + targetFolderID + "/" + 
+                    iCalResource.getHref().substring(1 + iCalResource.getHref().lastIndexOf('/'));
+            move = new MoveMethod(getBaseUri() + iCalResource.getHref(), getBaseUri() + targetHref, false);
+            if (null != iCalResource.getETag()) {
+                move.addRequestHeader(Headers.IF_MATCH, iCalResource.getETag());
             }
-        	int status = getWebDAVClient().executeMethod(move);
-        	if (StatusCodes.SC_CREATED == status) {
-        		iCalResource.setHref(targetHref);
-        	}
-        	return status;
+            int status = getWebDAVClient().executeMethod(move);
+            if (StatusCodes.SC_CREATED == status) {
+                iCalResource.setHref(targetHref);
+            }
+            return status;
         } finally {
             release(move);
         }
-	}
+    }
+
+    protected void mkCalendar(String targetResourceName, DavPropertySet setProperties) throws OXException, HttpException, IOException {
+        MkCalendarMethod mkCalendar = null;
+        try {
+            String targetHref = "/caldav/" + targetResourceName + '/';
+            mkCalendar = new MkCalendarMethod(getBaseUri() + targetHref, setProperties);
+            assertEquals("response code wrong", StatusCodes.SC_CREATED, getWebDAVClient().executeMethod(mkCalendar));
+        } finally {
+            release(mkCalendar);
+        }
+    }
 
 	protected ICalResource get(String resourceName, String ifNoneMatchEtag) throws HttpException, IOException, OXException, URISyntaxException, SimpleICalException {
 		return get(getDefaultFolderID(), resourceName, ifNoneMatchEtag);

@@ -63,6 +63,8 @@ public final class CalDAVTestSuite {
         final TestSuite suite = new TestSuite();
         suite.addTestSuite(NewTest.class);
         suite.addTestSuite(FreeBusyTest.class);
+        suite.addTestSuite(MkCalendarTest.class);
         return suite;
     }
+    
 }

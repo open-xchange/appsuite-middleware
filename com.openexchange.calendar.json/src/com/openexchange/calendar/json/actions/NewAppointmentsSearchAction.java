@@ -155,7 +155,7 @@ public final class NewAppointmentsSearchAction extends AppointmentAction {
                     // appointmentobject.calculateRecurrence();
                     RecurringResultsInterface recuResults = null;
                     try {
-                        recuResults = recColl.calculateRecurring(appointmentobject, start.getTime(), end.getTime(), 0);
+                        recuResults = recColl.calculateRecurring(appointmentobject, startUTC.getTime(), endUTC.getTime(), 0);
                         processed = true;
                     } catch (final OXException x) {
                         LOG.error("Can not calculate recurrence " + appointmentobject.getObjectID() + ":" + req.getSession().getContextId(), x);
@@ -167,11 +167,7 @@ public final class NewAppointmentsSearchAction extends AppointmentAction {
                         appointmentobject.setRecurrencePosition(result.getPosition());
 
                         if (appointmentobject.getFullTime()) {
-                            if (recColl.inBetween(
-                                appointmentobject.getStartDate().getTime(),
-                                appointmentobject.getEndDate().getTime(),
-                                startUTC.getTime(),
-                                endUTC.getTime())) {
+                            if (recColl.inBetween(appointmentobject.getStartDate().getTime(), appointmentobject.getEndDate().getTime(), startUTC.getTime(), endUTC.getTime())) {
                                 compareStartDateForList(linkedAppointmentList, appointmentobject, limit);
                             }
                         } else {
@@ -181,11 +177,7 @@ public final class NewAppointmentsSearchAction extends AppointmentAction {
                 }
                 if (!processed) {
                     if (appointmentobject.getFullTime() && (startUTC != null && endUTC != null)) {
-                        if (recColl.inBetween(
-                            appointmentobject.getStartDate().getTime(),
-                            appointmentobject.getEndDate().getTime(),
-                            startUTC.getTime(),
-                            endUTC.getTime())) {
+                        if (recColl.inBetween(appointmentobject.getStartDate().getTime(), appointmentobject.getEndDate().getTime(), startUTC.getTime(), endUTC.getTime())) {
                             compareStartDateForList(linkedAppointmentList, appointmentobject, limit);
                         }
                     } else {

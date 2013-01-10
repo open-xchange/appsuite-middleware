@@ -50,13 +50,10 @@
 package com.openexchange.caldav.servlet;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -168,6 +165,11 @@ public class CalDAV extends OXServlet {
         doIt(req, resp, CaldavPerformer.Action.REPORT);
     }
 
+    @Override
+    protected void doMkCalendar(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, CaldavPerformer.Action.MKCALENDAR);
+    }
+    
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final CaldavPerformer.Action action) throws ServletException, IOException {
         ServerSession session;
         try {
@@ -239,6 +241,5 @@ public class CalDAV extends OXServlet {
     protected LoginCustomizer getLoginCustomizer() {
         return ALLOW_ASTERISK;
     }
-
    
 }

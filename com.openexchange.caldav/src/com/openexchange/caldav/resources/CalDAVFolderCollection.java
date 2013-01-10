@@ -220,7 +220,23 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             throw protocolException(HttpServletResponse.SC_FORBIDDEN);
         }
     }
-
+    
+    @Override
+    protected void internalDelete() throws WebdavProtocolException {
+        if (null == this.folder) {
+            throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+        } else if (this.folder.isDefault()) {
+            throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+        } else {
+            try {
+                factory.getFolderService().deleteFolder(factory.getState().getTreeID(), this.folder.getID(), 
+                    this.folder.getLastModifiedUTC(), factory.getSession());
+            } catch (OXException e) {
+                throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+            }           
+        }        
+    }
+    
     protected abstract List<T> getObjectsInRange(Date from, Date until) throws OXException;
     
     private static FilterAnalyzer VEVENT_RANGE_QUERY_ANALYZER = new FilterAnalyzerBuilder()

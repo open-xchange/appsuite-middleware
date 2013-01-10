@@ -384,8 +384,20 @@ public class NotificationMail {
     
     private boolean endsInPast(final Appointment appointment) {
         final Date now = new Date();
-        final Date endDate = appointment.getEndDate();
-        final Date until = appointment.getUntil();
+        Date endDate;
+        Date until;
+        if (original == null || appointment.getEndDate().after(original.getEndDate())) {
+            endDate = appointment.getEndDate();
+        } else {
+            endDate = original.getEndDate();
+        }
+        
+        if (original == null || appointment.getUntil().after(original.getUntil())) {
+            until = appointment.getUntil();
+        } else {
+            until = original.getUntil();
+        }
+
         if (appointment.isException() || appointment.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
             return endDate.before(now);
         } else {

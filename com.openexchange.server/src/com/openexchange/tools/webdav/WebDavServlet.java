@@ -113,6 +113,8 @@ public abstract class WebDavServlet extends HttpServlet {
                 allow.append("UNLOCK,");
             } else if ("doReport".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass())) {
                 allow.append("REPORT,");
+            } else if ("doMkCalendar".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass())) {
+                allow.append("MKCALENDAR,");
             }
         }
         allow.append("TRACE,OPTIONS");
@@ -154,6 +156,10 @@ public abstract class WebDavServlet extends HttpServlet {
 
     protected void doReport(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"REPORT\" is not supported by this servlet");
+    }
+
+    protected void doMkCalendar(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"MKCALENDAR\" is not supported by this servlet");
     }
 
     protected boolean isDisabledByProperty() {
@@ -211,6 +217,8 @@ public abstract class WebDavServlet extends HttpServlet {
                 doUnLock(req, resp);
             } else if ("REPORT".equals(method)) {
                 doReport(req, resp);
+            } else if ("MKCALENDAR".equals(method)) {
+                doMkCalendar(req, resp);
             } else {
                 super.service(req, resp);
             }
