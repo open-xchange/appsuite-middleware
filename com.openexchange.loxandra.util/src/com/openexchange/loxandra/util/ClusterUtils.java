@@ -52,7 +52,6 @@ package com.openexchange.loxandra.util;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.concurrent.ExecutionException;
-import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.tools.NodeProbe;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -86,8 +85,6 @@ public class ClusterUtils {
                 log.error("Error connection to remote JMX agent!");
                 log.error(e.toString());
             } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ConfigurationException e) {
                 e.printStackTrace();
             }
         }

@@ -49,7 +49,7 @@
 package com.openexchange.nosql.cassandra;
 
 import java.io.IOException;
-import org.apache.cassandra.thrift.CassandraDaemon;
+import org.apache.cassandra.service.CassandraDaemon;
 import org.apache.commons.logging.Log;
 
 /**
