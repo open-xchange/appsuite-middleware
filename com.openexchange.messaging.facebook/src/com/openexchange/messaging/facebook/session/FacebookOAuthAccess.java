@@ -290,7 +290,7 @@ public final class FacebookOAuthAccess {
     }
 
     /**
-     * Executes GET request for specified URL.
+     * Executes GET request for specified URL using JSON format.
      *
      * @param url The URL
      * @return The response
