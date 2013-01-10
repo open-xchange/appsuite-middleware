@@ -209,10 +209,11 @@ public final class FacebookURLConnectionContent implements BinaryContent {
 
     private static void transfer(final InputStream in, final OutputStream out) throws IOException {
         final byte[] buffer = new byte[4096];
-        int length = -1;
-        while ((length = in.read(buffer)) > 0) {
-            out.write(buffer, 0, length);
+        int read;
+        while ((read = in.read(buffer)) > 0) {
+            out.write(buffer, 0, read);
         }
+        out.flush();
     }
 
     private static void closeURLConnection(final URLConnection urlCon) {
