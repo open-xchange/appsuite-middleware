@@ -68,10 +68,15 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Properties;
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
 import com.mysql.jdbc.MySQLConnection;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
 
 /**
  * This is a simple Tool to get an idea how a specific installation of Open-Xchange is used. Operating on the MySQL-database exclusively it
@@ -116,8 +121,6 @@ public class Datamining {
 
     private static String filename = "";
 
-    private static OptionParser optionParser = new OptionParser();
-
     private static StringBuilder reportStringBuilder = new StringBuilder();
 
     public static ArrayList<String> allTheQuestions = new ArrayList<String>();
@@ -125,6 +128,8 @@ public class Datamining {
     private static HashMap<String, String> allTheAnswers = new HashMap<String, String>();
 
     private static ArrayList<Schema> allSchemata;
+    
+    private static Options staticOptions;
 
     public static void main(String[] args) {        
         Calendar rightNow = Calendar.getInstance();
@@ -215,17 +220,21 @@ public class Datamining {
     }
 
     private static void printHelp() {
-        try {
-            System.out.println("---");
-            System.out.println("Usage of the Open-Xchange datamining-tool:\n\n");
-            optionParser.printHelpOn(System.out);
+        //try {
+//            System.out.println("---");
+//            System.out.println("Usage of the Open-Xchange datamining-tool:\n\n");
+            //optionParser.printHelpOn(System.out);
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.setWidth(120);
+            formatter.printHelp( "datamining", staticOptions );
             System.out.println("\nEither specify these parameters manually or use this tool on an Open-Xchange application server where all necessary info\n is automatically found in the file /opt/open-xchange/etc/configdb.properties");
-            System.out.println("\nEven then it is possible to override parameters from configdb.properties by setting them manually.");
-            System.out.println("\nPlease note that if you want to override hostname / dbName / dbPort at least hostname must be given (no default) and defaults will apply for the other 2.");
-            System.out.println("---");
-        } catch (IOException io) {
-            io.printStackTrace();
-        }
+            System.out.println("Even then it is possible to override parameters from configdb.properties by setting them manually.");
+            System.out.println("Please note that if you want to override hostname / dbName / dbPort at least hostname must be given (no default) and defaults will apply for the other 2.");
+            
+            helpPrinted = true;
+//        } catch (IOException io) {
+//            io.printStackTrace();
+//        }
     }
 
     private static void reportNumberOfContexts() {
@@ -254,72 +263,133 @@ public class Datamining {
 
     private static void readParameters(String[] args) { 
     	
+    	boolean mandatoryOptionsSet = !configDBURL.equals("") && !configDBUser.equals("") && !configDBPassword.equals("");
+    	
     	String hostname, dbPort, dbName;
     	
+    	Options options = new Options();
+    	
+//    	options.addOption("n", "hostname", true, "Host where the Open-Xchange MySQL-database is running");
+//    	options.addOption("u", "dbUser", true, "Name of the MySQL-User for configdb");
+//    	options.addOption("p", "dbPassword", true, "Password for the user specified with \"-dbUser\"");
+//    	options.addOption("d", "dbName", true, "Name of the MySQL-database that contains the Open-Xchange configDB");
+//    	options.addOption("r", "reportfilePath", true, "Path where the report-file is saved");
+//    	options.addOption("v", "verbose", false, "With this the tool prints what it is doing live");
+//    	options.addOption("o", "dbPort", true, "Port where MySQL is running on the host specified with \"-hostname\"");
+//    	options.addOption("h", "help", false, "Print this helpfile");
+    	
+    	options.addOption(OptionBuilder.withLongOpt("hostname").isRequired(!mandatoryOptionsSet).hasArg().withDescription("Host where the Open-Xchange MySQL-database is running").create("n"));
+    	options.addOption(OptionBuilder.withLongOpt("dbUser").isRequired(!mandatoryOptionsSet).hasArg().withDescription("Name of the MySQL-User for configdb").create("u"));
+    	options.addOption(OptionBuilder.withLongOpt("dbPassword").isRequired(!mandatoryOptionsSet).hasArg().withDescription("Password for the user specified with \"-dbUser\"").create("p"));
+    	options.addOption(OptionBuilder.withLongOpt("dbName").hasArg().withDescription("Name of the MySQL-database that contains the Open-Xchange configDB (default: \"configdb\")").create("d"));
+    	options.addOption(OptionBuilder.withLongOpt("reportfilePath").hasArg().withDescription("Path where the report-file is saved (default: \"./\")").create("r"));
+    	options.addOption(OptionBuilder.withLongOpt("verbose").withDescription("Print the results to the console as well as into the report file").create("v"));
+    	options.addOption(OptionBuilder.withLongOpt("dbPort").hasArg().withDescription("Port where MySQL is running on the host specified with \"-hostname\" (default: \"3306\")").create("o"));
+    	options.addOption(OptionBuilder.withLongOpt("help").withDescription("Print this helpfile").create("h"));
+    	
+    	staticOptions = options;
+    	
+    	CommandLineParser parser = new PosixParser();
+    	
+    	try {
+			CommandLine cl = parser.parse(options, args);
+			
+			if (cl.hasOption("hostname")){
+				hostname = cl.getOptionValue("hostname");
+				dbName = (cl.hasOption("dbName")) ? cl.getOptionValue("dbName") : "configDB";
+				dbPort = (cl.hasOption("dbPort")) ? cl.getOptionValue("dbPort") : "3306";
+				
+				configDBURL = "jdbc:mysql://" + hostname + ":" + dbPort + "/" + dbName;
+			}
+			
+			if (cl.hasOption("dbUser")){
+				configDBUser = cl.getOptionValue("dbUser");
+			}
+			
+			if (cl.hasOption("dbPassword")){
+				configDBPassword = cl.getOptionValue("dbPassword");
+			}
+			
+			if (cl.hasOption("reportfilePath")){
+				reportfilePath = cl.getOptionValue("reportfilePath");
+			}
+			
+			if (cl.hasOption("verbose")){
+				verbose = true;
+			}
+			
+			if (cl.hasOption("help")){
+				printHelp();
+			}
+			
+			
+		} catch (ParseException e) {
+			System.out.println(e.getMessage());
+		}
+    	
         // mandatory
-        optionParser.acceptsAll(Arrays.asList("hostname", "n"), "Host where the Open-Xchange MySQL-database is running").withRequiredArg().describedAs(
-            "hostname").ofType(String.class);
-        optionParser.acceptsAll(Arrays.asList("dbUser", "u"), "Name of the MySQL-User for configdb").withRequiredArg().describedAs(
-            "dbuser").ofType(String.class);
-        optionParser.acceptsAll(Arrays.asList("dbPassword", "p"), "Password for the user specified with \"-dbUser\"").withRequiredArg().describedAs(
-            "dbpassword").ofType(String.class);
-        // optional
-        optionParser.acceptsAll(Arrays.asList("dbName", "d"), "Name of the MySQL-database that contains the Open-Xchange configDB").withRequiredArg().describedAs(
-            "dbname").ofType(String.class).defaultsTo("configdb");
-        optionParser.acceptsAll(Arrays.asList("reportfilePath"), "Path where the report-file is saved").withRequiredArg().describedAs(
-            "path").ofType(String.class).defaultsTo("./");
-        optionParser.acceptsAll(Arrays.asList("v", "verbose"), "With this the tool prints what it is doing live");
-        optionParser.acceptsAll(Arrays.asList("dbPort"), "Port where MySQL is running on the host specified with \"-hostname\"").withRequiredArg().describedAs(
-            "port").defaultsTo("3306");
-        optionParser.acceptsAll(Arrays.asList("h", "help", "?"), "Print this helpfile");
-
-        boolean helpCalled = false;
-        for (int i = 0; i < args.length; i++) {
-            String string = args[i];
-            if (string.equals("-h") || string.equals("-?") || string.equals("--help")) {
-                helpCalled = true;
-                printHelp();
-                helpPrinted = true;
-                break;
-            }
-        }
-
-        for (int i = 0; i < args.length; i++) {
-            String string = args[i];
-            if (string.equals("-v") || string.equals("--verbose")) {
-                verbose = true;
-                break;
-            }
-        }
-
-        if (!helpCalled) {
-            try {
-                OptionSet options = optionParser.parse(args);
-                hostname = getValueForOption("hostname", options);
-                dbName = getValueForOption("dbName", options);
-                dbPort = (String) options.valueOf("dbPort");
-                
-                if (!getValueForOption("dbUser", options).equals("")){
-                	configDBUser = getValueForOption("dbUser", options);
-                }
-                if (!getValueForOption("dbPassword", options).equals("")){
-                	configDBPassword = getValueForOption("dbPassword", options);
-                }
-                verbose = options.has("verbose");
-                
-                if (!hostname.equals("") && !dbName.equals("") && !dbPort.equals("")){
-                    configDBURL = "jdbc:mysql://" + hostname + ":" + dbPort + "/" + dbName;
-                }
-                reportfilePath = getValueForOption("reportfilePath", options);
-            } catch (OptionException e) {
-                System.out.println(e.getMessage());
-            }
-        }
+//        optionParser.acceptsAll(Arrays.asList("hostname", "n"), "Host where the Open-Xchange MySQL-database is running").withRequiredArg().describedAs(
+//            "hostname").ofType(String.class);
+//        optionParser.acceptsAll(Arrays.asList("dbUser", "u"), "Name of the MySQL-User for configdb").withRequiredArg().describedAs(
+//            "dbuser").ofType(String.class);
+//        optionParser.acceptsAll(Arrays.asList("dbPassword", "p"), "Password for the user specified with \"-dbUser\"").withRequiredArg().describedAs(
+//            "dbpassword").ofType(String.class);
+//        // optional
+//        optionParser.acceptsAll(Arrays.asList("dbName", "d"), "Name of the MySQL-database that contains the Open-Xchange configDB").withRequiredArg().describedAs(
+//            "dbname").ofType(String.class).defaultsTo("configdb");
+//        optionParser.acceptsAll(Arrays.asList("reportfilePath"), "Path where the report-file is saved").withRequiredArg().describedAs(
+//            "path").ofType(String.class).defaultsTo("./");
+//        optionParser.acceptsAll(Arrays.asList("v", "verbose"), "With this the tool prints what it is doing live");
+//        optionParser.acceptsAll(Arrays.asList("dbPort"), "Port where MySQL is running on the host specified with \"-hostname\"").withRequiredArg().describedAs(
+//            "port").defaultsTo("3306");
+//        optionParser.acceptsAll(Arrays.asList("h", "help", "?"), "Print this helpfile");
+//
+//        boolean helpCalled = false;
+//        for (int i = 0; i < args.length; i++) {
+//            String string = args[i];
+//            if (string.equals("-h") || string.equals("-?") || string.equals("--help")) {
+//                helpCalled = true;
+//                printHelp();
+//                helpPrinted = true;
+//                break;
+//            }
+//        }
+//
+//        for (int i = 0; i < args.length; i++) {
+//            String string = args[i];
+//            if (string.equals("-v") || string.equals("--verbose")) {
+//                verbose = true;
+//                break;
+//            }
+//        }
+//
+//        if (!helpCalled) {
+//            try {
+//                OptionSet options = optionParser.parse(args);
+//                hostname = getValueForOption("hostname", options);
+//                dbName = getValueForOption("dbName", options);
+//                dbPort = (String) options.valueOf("dbPort");
+//                
+//                if (!getValueForOption("dbUser", options).equals("")){
+//                	configDBUser = getValueForOption("dbUser", options);
+//                }
+//                if (!getValueForOption("dbPassword", options).equals("")){
+//                	configDBPassword = getValueForOption("dbPassword", options);
+//                }
+//                verbose = options.has("verbose");
+//                
+//                if (!hostname.equals("") && !dbName.equals("") && !dbPort.equals("")){
+//                    configDBURL = "jdbc:mysql://" + hostname + ":" + dbPort + "/" + dbName;
+//                }
+//                reportfilePath = getValueForOption("reportfilePath", options);
+//            } catch (OptionException e) {
+//                System.out.println(e.getMessage());
+//            }
+//        }
     }
 
     private static void readProperties() {
-        // Try to read configdb.properties
-        System.out.println("Trying /opt/open-xchange/etc/configdb.properties");
+        // Try to read configdb.properties        
         Properties configdbProperties = new Properties();
         try {
             configdbProperties.load(new FileInputStream("/opt/open-xchange/etc/configdb.properties"));
@@ -328,12 +398,12 @@ public class Datamining {
             configDBUser = configdbProperties.getProperty("readProperty.1").substring(5);
             configDBPassword = configdbProperties.getProperty("readProperty.2").substring(9);
             if (configDBURL != null && configDBUser != null && configDBPassword != null) {
-                System.out.println("All necessary parameters found in configdb.properties");
+                System.out.println("All necessary parameters were found in /opt/open-xchange/etc/configdb.properties");
             }
         } catch (FileNotFoundException e) {
-            System.out.println("File /opt/open-xchange/etc/configdb.properties not available");
+            System.out.println("File /opt/open-xchange/etc/configdb.properties is not available");
         } catch (IOException e) {
-            System.out.println("File /opt/open-xchange/etc/configdb.properties not available");
+            System.out.println("File /opt/open-xchange/etc/configdb.properties is not available");
         }
     }
 
@@ -370,6 +440,7 @@ public class Datamining {
             Class.forName("com.mysql.jdbc.Driver");
 
             // connect
+            DriverManager.setLoginTimeout(5);
             Connection conn = DriverManager.getConnection(url + "?" + "user=" + user + "&" + "password=" + password);
             return (MySQLConnection) conn;
         } catch (ClassNotFoundException e) {
@@ -538,18 +609,7 @@ public class Datamining {
             }
         }
         return numberOfObjects;
-    }
-    
-    private static String getValueForOption(String parameterName, OptionSet allParameters){
-        String returnString = "";
-        returnString = (String) allParameters.valueOf(parameterName);
-        if (returnString != null) {
-        	return returnString;
-        }
-        else {
-            return "";
-        }
-    }
+    }    
 
     public static String getFilename(){
         return filename;
