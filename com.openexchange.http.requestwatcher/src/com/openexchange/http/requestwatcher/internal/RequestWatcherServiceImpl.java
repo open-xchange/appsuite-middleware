@@ -97,9 +97,9 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
         serviceRegistry = RequestWatcherServiceRegistry.getInstance();
         // Get Configuration
         final ConfigurationService configService = serviceRegistry.getService(ConfigurationService.class);
-        final boolean isWatcherEnabled = configService.getBoolProperty("com.openexchange.http.requestwatcher.isEnabled", true);
-        final int watcherFrequency = configService.getIntProperty("com.openexchange.http.requestwatcher.frequency", 30000);
-        final int requestMaxAge = configService.getIntProperty("com.openexchange.http.requestwatcher.maxRequestAge", 60000);
+        final boolean isWatcherEnabled = configService.getBoolProperty("com.openexchange.server.requestwatcher.isEnabled", true);
+        final int watcherFrequency = configService.getIntProperty("com.openexchange.server.requestwatcher.frequency", 30000);
+        final int requestMaxAge = configService.getIntProperty("com.openexchange.server.requestwatcher.maxRequestAge", 60000);
         if (isWatcherEnabled) {
             // Create ScheduledTimerTask to watch requests
             final TimerService timerService = serviceRegistry.getService(TimerService.class);

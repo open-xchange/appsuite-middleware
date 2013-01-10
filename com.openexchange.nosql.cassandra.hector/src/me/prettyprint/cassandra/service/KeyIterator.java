@@ -35,6 +35,7 @@ public class KeyIterator<K> implements Iterable<K> {
   private K lastReadValue = null;
   private K endKey;
   private boolean firstRun = true;
+  private int rowCount = MAX_ROW_COUNT_DEFAULT;
 
   private Iterator<K> keyIterator = new Iterator<K>() {
     @Override
@@ -72,18 +73,25 @@ public class KeyIterator<K> implements Iterable<K> {
     }
   }
 
+  @Deprecated
   public KeyIterator(Keyspace keyspace, String columnFamily, Serializer<K> serializer) {
     this(keyspace, columnFamily, serializer, null, null, MAX_ROW_COUNT_DEFAULT);
   }
 
+  @Deprecated
   public KeyIterator(Keyspace keyspace, String columnFamily, Serializer<K> serializer, int maxRowCount) {
     this(keyspace, columnFamily, serializer, null, null, maxRowCount);
   }
-  
+
+  @Deprecated
   public KeyIterator(Keyspace keyspace, String columnFamily, Serializer<K> serializer, K start, K end) {
     this(keyspace, columnFamily, serializer, start, end, MAX_ROW_COUNT_DEFAULT);
   }
 
+  @Deprecated
+  /*
+  * When pulling deprecated methods out, do not remove this but change it to private constructor
+  */
   public KeyIterator(Keyspace keyspace, String columnFamily, Serializer<K> serializer, K start, K end, int maxRowCount) {
     query = HFactory
       .createRangeSlicesQuery(keyspace, serializer, stringSerializer, stringSerializer)
@@ -92,12 +100,17 @@ public class KeyIterator<K> implements Iterable<K> {
       .setRowCount(maxRowCount);
 
     endKey = end;
+    if(maxRowCount < Integer.MAX_VALUE) {
+      rowCount = maxRowCount+1; //to compensate the first entry skip (except in first run)
+    }
     runQuery(start, end);
   }
 
   private void runQuery(K start, K end) {
     query.setKeys(start, end);
-
+    if(!firstRun) {
+        query.setRowCount(rowCount);
+    }
     rowsIterator = null;
     QueryResult<OrderedRows<K, String, String>> result = query.execute();
     OrderedRows<K, String, String> rows = (result != null) ? result.get() : null;
@@ -109,7 +122,7 @@ public class KeyIterator<K> implements Iterable<K> {
 
     firstRun = false;
 
-    if (!rowsIterator.hasNext()) {
+    if (rowsIterator != null && !rowsIterator.hasNext()) {
       nextValue = null;    // all done.  our iterator's hasNext() will now return false;
     } else {
       findNext(true);
@@ -119,6 +132,50 @@ public class KeyIterator<K> implements Iterable<K> {
   @Override
   public Iterator<K> iterator() {
     return keyIterator;
+  }
+
+  public static class Builder<K> {
+
+    //required
+    private Keyspace keyspace;
+    private String columnFamily;
+    private Serializer<K> serializer;
+
+    //optional
+    private K start;
+    private K end;
+    private Integer maxRowCount;
+
+    public Builder(Keyspace keyspace, String columnFamily, Serializer<K> serializer) {
+      this.keyspace = keyspace;
+      this.columnFamily = columnFamily;
+      this.serializer = serializer;
+    }
+
+    public Builder<K> start(K start) {
+      this.start = start;
+      return this;
+    }
+
+    public Builder<K> end(K end) {
+      this.end = end;
+      return this;
+    }
+
+    public Builder<K> maxRowCount(int maxRowCount) {
+      this.maxRowCount = maxRowCount;
+      return this;
+    }
+
+    public KeyIterator<K> build() {
+      return new KeyIterator<K>(this);
+    }
+
+  }
+
+  protected KeyIterator(Builder<K> builder) {
+    this(builder.keyspace, builder.columnFamily, builder.serializer, builder.start, builder.end,
+            builder.maxRowCount == null? MAX_ROW_COUNT_DEFAULT : builder.maxRowCount);
   }
 }
 
