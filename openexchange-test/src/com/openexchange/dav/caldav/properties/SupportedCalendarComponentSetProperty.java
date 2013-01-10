@@ -47,24 +47,64 @@
  *
  */
 
-package com.openexchange.dav.caldav.tests;
+package com.openexchange.dav.caldav.properties;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.HashSet;
+import java.util.Set;
+import org.apache.jackrabbit.webdav.property.AbstractDavProperty;
+import org.apache.jackrabbit.webdav.xml.DomUtil;
+import org.apache.jackrabbit.webdav.xml.XmlSerializable;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import com.openexchange.dav.PropertyNames;
 
 /**
- * {@link CalDAVTestSuite} - Testsuite for the CalDAV interface.
+ * {@link SupportedCalendarComponentSetProperty}
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class CalDAVTestSuite {
+public class SupportedCalendarComponentSetProperty extends AbstractDavProperty<Set<SupportedCalendarComponentSetProperty.Comp>> {
+    
+    private final Set<SupportedCalendarComponentSetProperty.Comp> components = new HashSet<SupportedCalendarComponentSetProperty.Comp>();
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(NewTest.class);
-        suite.addTestSuite(FreeBusyTest.class);
-        suite.addTestSuite(MkCalendarTest.class);
-        return suite;
+    /**
+     * Initializes a new {@link SupportedCalendarComponentSetProperty}.
+     * 
+     * @param name
+     * @param isInvisibleInAllprop
+     */
+    public SupportedCalendarComponentSetProperty(SupportedCalendarComponentSetProperty.Comp...components) {
+        super(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SET, true);
+        for (Comp comp : components) {
+            this.components.add(comp);
+        }
+    }
+
+    @Override
+    public Set<Comp> getValue() {
+        return components;
+    }    
+    
+    public static class Comp implements XmlSerializable {
+        
+        public static final Comp VTODO = new Comp("VTODO");
+
+        public static final Comp VEVENT = new Comp("VEVENT");
+        
+        private final String name;
+        
+        private Comp(String name) {
+            super();
+            this.name = name;
+        }        
+
+        @Override
+        public Element toXml(Document document) {
+            Element element = PropertyNames.COMP.toXml(document);
+            DomUtil.setAttribute(element, "name", null, name);
+            return element;
+        }        
+        
     }
     
 }

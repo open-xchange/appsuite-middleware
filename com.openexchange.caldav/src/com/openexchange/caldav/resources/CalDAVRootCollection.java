@@ -52,7 +52,6 @@ package com.openexchange.caldav.resources;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -130,14 +129,28 @@ public class CalDAVRootCollection extends CommonCollection {
         try {
             for (UserizedFolder folder : getSubfolders()) {
                 if (name.equals(folder.getID())) {
+                    LOG.debug(this.getUrl() + ": found child collection by name '" + name + "'");
                     return createCollection(folder);
                 }
             }
+            LOG.debug(this.getUrl() + ": child collection '" + name + "' not found, creating placeholder collection");
+            return new UndecidedFolderCollection(factory, constructPathForChildResource(name));
+
         } catch (OXException e) {
             throw protocolException(e);
         }
-        throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+//        throw protocolException(HttpServletResponse.SC_NOT_FOUND);
     }
+    
+//    private CalDAVFolderCollection<?> createCollection(UserizedFolder folder) throws OXException {
+//        if (TaskContentType.getInstance().equals(folder.getContentType())) {
+//            return new TaskCollection(factory, constructPathForChildResource(folder), folder);            
+//        } else if (CalendarContentType.getInstance().equals(folder.getContentType())) {
+//            return new AppointmentCollection(factory, constructPathForChildResource(folder), folder);            
+//        } else {
+//            throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
+//        }
+//    }
     
     private CalDAVFolderCollection<?> createCollection(UserizedFolder folder) throws OXException {
         if (TaskContentType.getInstance().equals(folder.getContentType())) {

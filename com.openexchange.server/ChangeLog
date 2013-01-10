@@ -1,3 +1,7 @@
+* 2013-01-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24197: Implemented MKCALENDAR method
+
 * 2013-01-09 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23958: Notification mail for appointments partially in the past.
