@@ -1,6 +1,7 @@
 * 2013-01-10 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24197: Implemented MKCALENDAR method
+ - Fix for bug 23117: Check for already existing primary mail when creating resources
 
 * 2013-01-09 - martin.herfurth@open-xchange.com
 
