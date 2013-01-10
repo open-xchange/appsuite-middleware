@@ -693,11 +693,11 @@ public final class FacebookMessagingUtility {
      * @return The queried JSON object
      * @throws OXException If FQL query fails
      */
-    public static List<JSONObject> performFQLQuery(final String fqlQuery, final FacebookOAuthAccess facebookOAuthInfo) throws OXException {
+    public static List<JSONObject> performFQLQuery(final String fqlQuery, final FacebookOAuthAccess facebookOAuthAccess) throws OXException {
         try {
             final String encodedQuery = encode(fqlQuery);
             final JSONValue body =
-                facebookOAuthInfo.executeGETJsonRequest(new StringBuilder(FQL_JSON_START_LEN + encodedQuery.length()).append(FQL_JSON_START).append(
+                facebookOAuthAccess.executeGETJsonRequest(new StringBuilder(FQL_JSON_START_LEN + encodedQuery.length()).append(FQL_JSON_START).append(
                     encodedQuery));
             if (body.isObject()) {
                 /*
@@ -733,7 +733,7 @@ public final class FacebookMessagingUtility {
             throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -746,18 +746,18 @@ public final class FacebookMessagingUtility {
      * Fires given FQL query using specified facebook REST client.
      *
      * @param fqlQuery The FQL query to fire
-     * @param facebookOAuthInfo The facebook OAuth information
+     * @param facebookOAuthAccess The facebook OAuth access
      * @return The FQL query's results
      * @throws OXException If query cannot be fired
      * @deprecated Use {@link #fireFQLJsonQuery(CharSequence, FacebookOAuthAccess)} instead
      */
     @Deprecated
-    public static List<Element> fireFQLQuery(final CharSequence fqlQuery, final FacebookOAuthAccess facebookOAuthInfo) throws OXException {
+    public static List<Element> fireFQLQuery(final CharSequence fqlQuery, final FacebookOAuthAccess facebookOAuthAccess) throws OXException {
         try {
             final String encodedQuery = encode(fqlQuery.toString());
-            return FacebookDOMParser.parseXMLResponse(facebookOAuthInfo.executeGETRequest(new StringBuilder(
+            return FacebookDOMParser.parseXMLResponse(facebookOAuthAccess.executeGETRequest(new StringBuilder(
                 FQL_XML_START_LEN + encodedQuery.length()).append(FQL_XML_START).append(encodedQuery).toString()));
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -766,14 +766,14 @@ public final class FacebookMessagingUtility {
      * Fires given FQL query using specified facebook REST client.
      *
      * @param fqlQuery The FQL query to fire
-     * @param facebookOAuthInfo The facebook OAuth information
+     * @param facebookOAuthAccess The facebook OAuth access
      * @return The FQL query's results
      * @throws OXException If query cannot be fired
      */
-    public static List<JSONObject> fireFQLJsonQuery(final CharSequence fqlQuery, final FacebookOAuthAccess facebookOAuthInfo) throws OXException {
+    public static List<JSONObject> fireFQLJsonQuery(final CharSequence fqlQuery, final FacebookOAuthAccess facebookOAuthAccess) throws OXException {
         try {
             final String encodedQuery = encode(fqlQuery.toString());
-            final JSONValue body = facebookOAuthInfo.executeGETJsonRequest(new StringBuilder(
+            final JSONValue body = facebookOAuthAccess.executeGETJsonRequest(new StringBuilder(
                 FQL_JSON_START_LEN + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery));
             if (body.isArray()) {
                 final JSONArray array = body.toArray();
@@ -803,8 +803,10 @@ public final class FacebookMessagingUtility {
                 return Collections.singletonList(result);
             }
             throw FacebookMessagingExceptionCodes.INVALID_RESPONSE_BODY.create(body);
-        } catch (final Exception e) {
-            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final JSONException e) {
+            throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
