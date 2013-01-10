@@ -50,7 +50,6 @@
 package com.openexchange.messaging.facebook;
 
 import static com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.fireFQLJsonQuery;
-import static com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.fireFQLQuery;
 import gnu.trove.iterator.TLongIterator;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -88,6 +87,7 @@ import com.openexchange.messaging.SearchTerm;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.facebook.parser.group.FacebookFQLGroupJsonParser;
 import com.openexchange.messaging.facebook.parser.page.FacebookFQLPageJsonParser;
+import com.openexchange.messaging.facebook.parser.stream.FacebookFQLStreamJsonParser;
 import com.openexchange.messaging.facebook.parser.stream.FacebookFQLStreamParser;
 import com.openexchange.messaging.facebook.parser.user.FacebookFQLUserJsonParser;
 import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
@@ -214,8 +214,8 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
              */
             final FQLQuery query =
                 FacebookMessagingUtility.composeFQLStreamQueryFor(FQLQueryType.queryTypeFor(folder), SET_FULL, facebookUserId);
-            final List<Element> results = fireFQLQuery(query.getCharSequence(), facebookOAuthAccess);
-            message = FacebookFQLStreamParser.parseStreamDOMElement(results.iterator().next(), getUserLocale(), session);
+            final List<JSONObject> results = fireFQLJsonQuery(query.getCharSequence(), facebookOAuthAccess);
+            message = FacebookFQLStreamJsonParser.parseStreamJsonElement(results.iterator().next(), getUserLocale(), session);
             if (null == message) {
                 throw MessagingExceptionCodes.MESSAGE_NOT_FOUND.create(id, folder);
             }
@@ -297,7 +297,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             final TLongSet safetyCheckUser;
             final TLongSet safetyCheckGroup;
             {
-                final List<Element> results = FacebookMessagingUtility.fireFQLQuery(query.getCharSequence(), facebookOAuthAccess);
+                final List<JSONObject> results = FacebookMessagingUtility.fireFQLJsonQuery(query.getCharSequence(), facebookOAuthAccess);
                 final int size = results.size();
                 if (size != messageIds.length) {
                     final OXException warning =
@@ -306,7 +306,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                             Integer.valueOf(messageIds.length));
                     com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookMessagingMessageAccess.class)).warn(warning.getMessage(), warning);
                 }
-                final Iterator<Element> iterator = results.iterator();
+                final Iterator<JSONObject> iterator = results.iterator();
                 final Map<String, FacebookMessagingMessage> orderMap = new HashMap<String, FacebookMessagingMessage>(size);
                 if (entityFieldSet.isEmpty()) {
                     mUser = new TLongObjectHashMap<List<FacebookMessagingMessage>>(0);
@@ -432,6 +432,16 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
 
     private FacebookMessagingMessage parseFromElement(final List<StaticFiller> staticFillers, final Element element) throws OXException {
         final FacebookMessagingMessage message = FacebookFQLStreamParser.parseStreamDOMElement(element, getUserLocale(), session);
+        if (null != message) {
+            for (final StaticFiller filler : staticFillers) {
+                filler.fill(message);
+            }
+        }
+        return message;
+    }
+
+    private FacebookMessagingMessage parseFromElement(final List<StaticFiller> staticFillers, final JSONObject element) throws OXException {
+        final FacebookMessagingMessage message = FacebookFQLStreamJsonParser.parseStreamJsonElement(element, getUserLocale(), session);
         if (null != message) {
             for (final StaticFiller filler : staticFillers) {
                 filler.fill(message);
@@ -567,12 +577,12 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         final TLongSet safetyCheckGroup;
         long oldestCreatedTime = Long.MAX_VALUE;
         {
-            final List<Element> results = FacebookMessagingUtility.fireFQLQuery(query.getCharSequence(), facebookOAuthAccess);
+            final List<JSONObject> results = FacebookMessagingUtility.fireFQLJsonQuery(query.getCharSequence(), facebookOAuthAccess);
             final int size = results.size();
             if (size <= 0) {
                 return Collections.<MessagingMessage> emptyList();
             }
-            final Iterator<Element> iterator = results.iterator();
+            final Iterator<JSONObject> iterator = results.iterator();
             messages = new ArrayList<MessagingMessage>(size);
             if (entityFieldSet.isEmpty()) {
                 mUser = new TLongObjectHashMap<List<FacebookMessagingMessage>>(0);
