@@ -788,7 +788,7 @@ public final class FacebookMessagingUtility {
                 /*
                  * Expect the body to be a JSON object
                  */
-                final JSONObject result = (JSONObject) body;
+                final JSONObject result = body.toObject();
                 if (result.has("error")) {
                     final JSONObject error = result.getJSONObject("error");
                     final String type = error.optString("type");
