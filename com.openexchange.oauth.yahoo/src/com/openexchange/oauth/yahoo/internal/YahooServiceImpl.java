@@ -374,7 +374,8 @@ public class YahooServiceImpl implements YahooService {
         return displayName;
     }
 
-    JSONObject extractJson(final Response response) throws OXException {
+    /** Extracts JSON out of given response */
+    protected JSONObject extractJson(final Response response) throws OXException {
         Reader reader = null;
         try {
             reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);
