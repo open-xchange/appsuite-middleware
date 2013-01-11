@@ -314,8 +314,6 @@ public class LinkedInXMLParser {
                 }
             }
             return contact;
-        } catch (final NumberFormatException e) {
-            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
             throw OAuthExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
