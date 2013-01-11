@@ -49,14 +49,16 @@
 
 package com.openexchange.oauth.linkedin;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.LinkedInApi;
 import org.scribe.model.OAuthRequest;
@@ -66,7 +68,11 @@ import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.osgi.Activator;
 import com.openexchange.session.Session;
@@ -126,14 +132,19 @@ public class LinkedInServiceImpl implements LinkedInService{
 
 
 	private JSONObject extractJson(final Response response) throws OXException {
-		JSONObject json;
-		try {
-			json = new JSONObject(response.getBody());
-		} catch (final JSONException e) {
-			LOG.error(e);
-			throw OXException.general("Could not parse JSON: " + response.getBody()); //TODO: Different exception - wasn't this supposed to get easier with the rewrite?
-		}
-        return json;
+	    Reader reader = null;
+        try {
+            reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);
+            final JSONValue value = JSONObject.parse(reader);
+            if (value.isObject()) {
+                return value.toObject();
+            }
+            throw OAuthExceptionCodes.JSON_ERROR.create("Not a JSON object, but " + value.getClass().getName());
+        } catch (final JSONException e) {
+            throw OAuthExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(reader);
+        }
 	}
 
 
