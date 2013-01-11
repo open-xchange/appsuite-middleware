@@ -352,9 +352,7 @@ public class LinkedInXMLParser {
         final List<Contact> contacts = new ArrayList<Contact>(length);
         for (int i = 0; i < length; i++) {
             try {
-                final JSONObject person = persons.optJSONObject(i);
-                final Contact contact = parse(person);
-                contacts.add(contact);
+                contacts.add(parse(persons.optJSONObject(i)));
             } catch (final RuntimeException e) {
                 // Ignore
                 LOG.warn("Runtime error occurred: " + e.getMessage(), e);
