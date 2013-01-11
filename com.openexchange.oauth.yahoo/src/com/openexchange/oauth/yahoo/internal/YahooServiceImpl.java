@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
@@ -79,8 +78,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
-import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.yahoo.YahooService;
@@ -158,11 +155,6 @@ public class YahooServiceImpl implements YahooService {
                 return Collections.emptyList();
             }
             final JSONArray allContactsArray = contacts.getJSONArray("contact");
-            final Map<String, Object> props;
-            {
-                final Props p = LogProperties.optLogProperties();
-                props = null == p ? null : p.asMap();
-            }
             final CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool()).setTrackable(true);
             int numTasks = 0;
             final int length = allContactsArray.length();
