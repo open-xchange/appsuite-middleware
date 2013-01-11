@@ -94,7 +94,7 @@ public final class FacebookOAuthAccess {
      * @param messagingAccount The Facebook messaging account providing credentials and settings
      * @param session The user session
      * @return The Facebook OAuth access; either newly created or fetched from underlying registry
-     * @throws OXException If a Facebook session could not be created
+     * @throws OXException If a Facebook OAuth access could not be created
      */
     public static FacebookOAuthAccess accessFor(final MessagingAccount messagingAccount, final Session session) throws OXException {
         final FacebookOAuthAccessRegistry registry = FacebookOAuthAccessRegistry.getInstance();
