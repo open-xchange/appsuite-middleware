@@ -214,13 +214,14 @@ public class LinkedInXMLParser {
 
     public Contact parse(final JSONObject person) {
         final Contact contact = new Contact();
-        contact.setGivenName(person.optString("first-name", null));
-        contact.setSurName(person.optString("last-name", null));
-        if (null != person.optString("main-address", null)) {
-            contact.setNote(person.optString("main-address", null));
+        contact.setGivenName(person.optString("firstName", null));
+        contact.setSurName(person.optString("lastName", null));
+        final String mainAddress = person.optString("mainAddress", null);
+        if (null != mainAddress) {
+            contact.setNote(mainAddress);
         }
         try {
-            final String imageUrl = person.optString("picture-url", null);
+            final String imageUrl = person.optString("pictureUrl", null);
             if (null != imageUrl) {
                 OXContainerConverter.loadImageFromURL(contact, imageUrl);
             }
@@ -230,13 +231,28 @@ public class LinkedInXMLParser {
 
         // get the current job and company
         {
-            final JSONArray positions = person.optJSONArray("positions");
-            if (null != positions) {
-                final int length = positions.length();
+            final JSONObject positions = person.optJSONObject("positions");
+            if (null != positions && positions.optInt("_total", 0) > 0) {
+                final JSONArray ja = positions.optJSONArray("values");
+                final int length = ja.length();
+                JSONObject candidate = null;
                 for (int i = 0; i < length; i++) {
-                    final JSONObject position = positions.optJSONObject(i);
-                    contact.setTitle(position.optString("title", null));
-                    final JSONObject company = position.optJSONObject("company");
+                    final JSONObject position = ja.optJSONObject(i);
+                    if (position.optBoolean("isCurrent", false)) {
+                        contact.setTitle(position.optString("title", null));
+                        final JSONObject company = position.optJSONObject("company");
+                        if (null != company) {
+                            contact.setCompany(company.optString("name", null));
+                            candidate = null;
+                            i = length;
+                        }
+                    } else {
+                        candidate = position;
+                    }
+                }
+                if (null != candidate) {
+                    contact.setTitle(candidate.optString("title", null));
+                    final JSONObject company = candidate.optJSONObject("company");
                     if (null != company) {
                         contact.setCompany(company.optString("name", null));
                     }
@@ -245,47 +261,51 @@ public class LinkedInXMLParser {
         }
         // get the first IM-account
         {
-            final JSONArray imAccounts = person.optJSONArray("im-account");
-            if (null != imAccounts && imAccounts.length() > 0) {
-                final JSONObject imAccount = imAccounts.optJSONObject(0);
-                contact.setInstantMessenger1(imAccount.optString("im-account-name", null) + " (" + imAccount.optString("im-account-type", null) + ")");
+            final JSONObject imAccounts = person.optJSONObject("imAccounts");
+            if (null != imAccounts && imAccounts.optInt("_total", 0) > 0) {
+                final JSONArray ja = imAccounts.optJSONArray("values");
+                final JSONObject imAccount = ja.optJSONObject(0);
+                contact.setInstantMessenger1(imAccount.optString("imAccountName", null) + " (" + imAccount.optString("im-account-type", null) + ")");
             }
         }
         // parse the phone numbers, saving the first occurrence of "home" and "work"
         {
-            final JSONArray phoneNumbers = person.optJSONArray("positions");
-            if (null != phoneNumbers) {
-                final int length = phoneNumbers.length();
+            final JSONObject phoneNumbers = person.optJSONObject("phoneNumbers");
+            if (null != phoneNumbers && phoneNumbers.optInt("_total", 0) > 0) {
+                final JSONArray ja = phoneNumbers.optJSONArray("values");
+                final int length = ja.length();
                 for (int i = 0; i < length; i++) {
-                    final JSONObject phoneNumber = phoneNumbers.optJSONObject(i);
-                    final String phoneType = phoneNumber.optString("phone-type", null);
+                    final JSONObject phoneNumber = ja.optJSONObject(i);
+                    final String phoneType = phoneNumber.optString("phoneType", null);
                     if ("work".equals(phoneType)) {
-                        contact.setTelephoneBusiness1(phoneNumber.optString("phone-number", null));
+                        contact.setTelephoneBusiness1(phoneNumber.optString("phoneNumber", null));
                     } else if ("home".equals(phoneType)) {
-                        contact.setTelephoneHome1(phoneNumber.optString("phone-number", null));
+                        contact.setTelephoneHome1(phoneNumber.optString("phoneNumber", null));
                     }
                 }
             }
         }
         // get the birthdate
         {
-            final JSONObject dateOfBirth = person.optJSONObject("date-of-birth");
-            int year = 0;
-            final String sYear = dateOfBirth.optString("year", null);
-            if (null != sYear) {
-                year = Integer.parseInt(sYear) - 1900;
+            final JSONObject dateOfBirth = person.optJSONObject("dateOfBirth");
+            if (null != dateOfBirth) {
+                int year = 0;
+                final String sYear = dateOfBirth.optString("year", null);
+                if (null != sYear) {
+                    year = Integer.parseInt(sYear) - 1900;
+                }
+                int month = 0;
+                final String sMonth = dateOfBirth.optString("month", null);
+                if (null != sMonth) {
+                    month = Integer.parseInt(sMonth) - 1;
+                }
+                int date = 0;
+                final String sDay = dateOfBirth.optString("day", null);
+                if (null != sDay) {
+                    date = Integer.parseInt(sDay);
+                }
+                contact.setBirthday(new Date(year, month, date));
             }
-            int month = 0;
-            final String sMonth = dateOfBirth.optString("month", null);
-            if (null != sMonth) {
-                month = Integer.parseInt(sMonth) - 1;
-            }
-            int date = 0;
-            final String sDay = dateOfBirth.optString("day", null);
-            if (null != sDay) {
-                date = Integer.parseInt(sDay);
-            }
-            contact.setBirthday(new Date(year, month, date));
         }
         return contact;
     }
