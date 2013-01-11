@@ -56,6 +56,8 @@ import java.util.concurrent.Semaphore;
 
 /**
  * {@link BoundedCompletionService} - Enhances {@link ThreadPoolCompletionService} by a bounded behavior.
+ * <p>
+ * If a proper bound is set - aka <code>concurrencyLevel</code> - it defines the max. number of concurrent threads executing submitted tasks
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
