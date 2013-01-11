@@ -62,10 +62,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.logging.Log;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -75,6 +77,8 @@ import com.openexchange.tools.servlet.http.Tools;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class LoginTools {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginTools.class);
 
     private LoginTools() {
         super();
@@ -228,5 +232,22 @@ public final class LoginTools {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PASSWORD_PARAM);
         }
         return parseLogin(req, login, password, strict, defaultClient, forceHTTPS);
+    }
+
+    /**
+     * Updates session's IP address if different to specified IP address. This is only possible if the server is configured to be IP wise
+     * insecure. @See configuration property com.openexchange.ajax.login.insecure.
+     *
+     * @param newIP The possibly new IP address
+     * @param session The session to update if IP addresses differ
+     */
+    public static void updateIPAddress(LoginConfiguration conf, String newIP, Session session) {
+        if (conf.isInsecure()) {
+            String oldIP = session.getLocalIp();
+            if (null != newIP && !newIP.equals(oldIP)) {
+                LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + ", old ip: " + oldIP + ", new ip: " + newIP);
+                session.setLocalIp(newIP);
+            }
+        }
     }
 }

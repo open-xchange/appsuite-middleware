@@ -52,6 +52,7 @@ package com.openexchange.ajax;
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import static com.openexchange.ajax.SessionServlet.removeJSESSIONID;
 import static com.openexchange.ajax.SessionServlet.removeOXCookies;
+import static com.openexchange.ajax.login.LoginTools.updateIPAddress;
 import static com.openexchange.login.Interface.HTTP_JSON;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
@@ -92,6 +93,7 @@ import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.ajax.login.TokenLogin;
+import com.openexchange.ajax.login.Tokens;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -170,6 +172,7 @@ public class Login extends AJAXServlet {
 
     public static final String ACTION_FORMLOGIN = "formlogin";
     public static final String ACTION_TOKENLOGIN = "tokenLogin";
+    public static final String ACTION_TOKENS = "tokens";
 
     /**
      * <code>"changeip"</code>
@@ -576,12 +579,12 @@ public class Login extends AJAXServlet {
                                 // Insecure check is done in updateIPAddress method.
                                 if (!conf.isIpCheck()) {
                                     // Update IP address if necessary
-                                    updateIPAddress(req.getRemoteAddr(), session);
+                                    updateIPAddress(conf, req.getRemoteAddr(), session);
                                 } else {
                                     final String newIP = req.getRemoteAddr();
                                     SessionServlet.checkIP(true, conf.getRanges(), session, newIP, conf.getIpCheckWhitelist());
                                     // IP check passed: update IP address if necessary
-                                    updateIPAddress(newIP, session);
+                                    updateIPAddress(conf, newIP, session);
                                 }
                                 try {
                                     final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
@@ -723,6 +726,7 @@ public class Login extends AJAXServlet {
         confReference.set(conf);
         handlerMap.put(ACTION_FORMLOGIN, new FormLogin(conf));
         handlerMap.put(ACTION_TOKENLOGIN, new TokenLogin(conf));
+        handlerMap.put(ACTION_TOKENS,  new Tokens(conf));
     }
 
     @Override
@@ -763,23 +767,6 @@ public class Login extends AJAXServlet {
             resp.addHeader("WWW-Authenticate", "NEGOTIATE");
             resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
-        }
-    }
-
-    /**
-     * Updates session's IP address if different to specified IP address.
-     * 
-     * @param newIP The possibly new IP address
-     * @param session The session to update if IP addresses differ
-     */
-    protected void updateIPAddress(final String newIP, final Session session) {
-        if (confReference.get().isInsecure()) {
-            final String oldIP = session.getLocalIp();
-            if (null != newIP && !newIP.equals(oldIP)) { // IPs differ
-                LOG.info(new com.openexchange.java.StringAllocator("Updating sessions IP address. authID: ").append(session.getAuthId()).append(", sessionID: ").append(
-                    session.getSessionID()).append(", old ip: ").append(oldIP).append(", new ip: ").append(newIP).toString());
-                session.setLocalIp(newIP);
-            }
         }
     }
 

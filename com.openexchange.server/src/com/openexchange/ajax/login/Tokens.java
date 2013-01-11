@@ -69,8 +69,11 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class Tokens implements LoginRequestHandler {
 
-    public Tokens() {
+    private LoginConfiguration conf;
+
+    public Tokens(LoginConfiguration conf) {
         super();
+        this.conf = conf;
     }
 
     @Override
@@ -93,7 +96,10 @@ public final class Tokens implements LoginRequestHandler {
         SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
         Session session = sessiondService.getSessionWithTokens(clientToken, serverToken);
 
-        // TODO update IP address with IP check
+        // update IP address with IP check
+        if (!conf.isIpCheck()) {
+            LoginTools.updateIPAddress(conf, newIP, session);
+        }
         // TODO update client, version, userAgent
         // TODO update hash
 
