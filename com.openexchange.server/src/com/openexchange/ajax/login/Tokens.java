@@ -53,10 +53,12 @@ import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.CLIENT_TOKEN;
 import static com.openexchange.ajax.fields.LoginFields.SERVER_TOKEN;
 import static com.openexchange.ajax.fields.LoginFields.VERSION_PARAM;
+import static com.openexchange.ajax.login.LoginTools.updateIPAddress;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.Login;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -96,9 +98,16 @@ public final class Tokens implements LoginRequestHandler {
         SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
         Session session = sessiondService.getSessionWithTokens(clientToken, serverToken);
 
-        // update IP address with IP check
+        // IP check if enabled; otherwise update session's IP address if different to request's IP address. Insecure check is done in
+        // updateIPAddress method.
         if (!conf.isIpCheck()) {
-            LoginTools.updateIPAddress(conf, newIP, session);
+            // Update IP address if necessary
+            updateIPAddress(conf, req.getRemoteAddr(), session);
+        } else {
+            final String newIP = req.getRemoteAddr();
+            SessionServlet.checkIP(true, conf.getRanges(), session, newIP, conf.getIpCheckWhitelist());
+            // IP check passed: update IP address if necessary
+            updateIPAddress(conf, newIP, session);
         }
         // TODO update client, version, userAgent
         // TODO update hash
@@ -122,17 +131,6 @@ public final class Tokens implements LoginRequestHandler {
 //                    final String sessionId = cookie.getValue();
 //                    session = sessiondService.getSession(sessionId);
 //                    if (null != session) {
-//                        // IP check if enabled; otherwise update session's IP address if different to request's IP address
-//                        // Insecure check is done in updateIPAddress method.
-//                        if (!conf.isIpCheck()) {
-//                            // Update IP address if necessary
-//                            updateIPAddress(req.getRemoteAddr(), session);
-//                        } else {
-//                            final String newIP = req.getRemoteAddr();
-//                            SessionServlet.checkIP(true, conf.getRanges(), session, newIP, conf.getIpCheckWhitelist());
-//                            // IP check passed: update IP address if necessary
-//                            updateIPAddress(newIP, session);
-//                        }
 //                        try {
 //                            final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
 //                            final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
