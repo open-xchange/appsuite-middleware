@@ -260,7 +260,7 @@ public class XingAPI<S extends Session> {
     public Contacts getContactsFrom(final String userId, final UserField orderBy, final Collection<UserField> userFields) throws XingException {
         assertAuthenticated();
         try {
-            final List<User> users = new LinkedList<User>();
+            final List<User> users;
             final int maxLimit = MAX_LIMIT;
             final int total;
             int offset = 0;
@@ -274,6 +274,7 @@ public class XingAPI<S extends Session> {
                     return contacts;
                 }
                 total = contacts.getTotal();
+                users = new ArrayList<User>(total);
                 users.addAll(chunk);
                 offset += chunkSize;
             }
