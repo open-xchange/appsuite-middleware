@@ -49,6 +49,11 @@
 
 package com.openexchange.sso.action;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -88,7 +93,7 @@ public final class GetAction implements AJAXActionService {
             /*
              * Ensure a secure connection to not transfer sensitive data in plain text
              */
-            if (!requestData.isSecure()) {
+            if (!requestData.isSecure() && !isLocalHost(requestData.getHostname())) {
                 throw AjaxExceptionCodes.NON_SECURE_DENIED.create( ACTION, SSOServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + SSOConstants.SERVLET_PATH_APPENDIX);
             }
             /*
@@ -109,6 +114,12 @@ public final class GetAction implements AJAXActionService {
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
+    }
+
+    private static final Set<String> LOCAL_HOST = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("127.0.0.1", "localhost", "::1/128", "::1")));
+
+    private boolean isLocalHost(final String hostname) {
+        return null != hostname && LOCAL_HOST.contains(hostname.toLowerCase(Locale.US));
     }
 
 }
