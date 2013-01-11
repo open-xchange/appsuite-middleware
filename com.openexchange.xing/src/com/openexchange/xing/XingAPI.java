@@ -74,11 +74,9 @@ import com.openexchange.xing.session.Session;
 public class XingAPI<S extends Session> {
 
     private static final int MAX_LIMIT = 100;
-
     private static final int DEFAULT_LIMIT = 10;
 
     private static final int MAX_WITH_LATEST_MESSAGES = 100;
-
     private static final int DEFAULT_WITH_LATEST_MESSAGES = 0;
 
     /**
@@ -186,8 +184,8 @@ public class XingAPI<S extends Session> {
      *             catch this exception which signals that some kind of error occurred.
      */
     public Contacts getContactsFrom(final String userId, final int limit, final int offset, final UserField orderBy, final Collection<UserField> userFields) throws XingException {
-        if (limit < 0 || limit > 100) {
-            throw new XingException("Invalid limit: " + limit + ". Must be zero OR less than or equal to 100.");
+        if (limit < 0 || limit > MAX_LIMIT) {
+            throw new XingException("Invalid limit: " + limit + ". Must be zero OR less than or equal to " + MAX_LIMIT);
         }
         if (offset < 0) {
             throw new XingException("Invalid offset: " + offset + ". Must be greater than or equal to zero.");
@@ -307,14 +305,14 @@ public class XingAPI<S extends Session> {
      * @throws XingException
      */
     public Conversations getConversationsFrom(final String userId, final int limit, final int offset, final Collection<UserField> userFields, final int withLatestMessages) throws XingException {
-        if (limit < 0 || limit > 100) {
-            throw new XingException("Invalid limit: " + limit + ". Must be zero OR less than or equal to 100.");
+        if (limit < 0 || limit > MAX_LIMIT) {
+            throw new XingException("Invalid limit: " + limit + ". Must be zero OR less than or equal to " + MAX_LIMIT);
         }
         if (offset < 0) {
             throw new XingException("Invalid offset: " + offset + ". Must be greater than or equal to zero.");
         }
-        if (withLatestMessages < 0 || withLatestMessages > 100) {
-            throw new XingException("Invalid withLatestMessages: " + withLatestMessages + ". Must be zero OR less than or equal to 100.");
+        if (withLatestMessages < 0 || withLatestMessages > MAX_WITH_LATEST_MESSAGES) {
+            throw new XingException("Invalid withLatestMessages: " + withLatestMessages + ". Must be zero OR less than or equal to " + MAX_WITH_LATEST_MESSAGES);
         }
         assertAuthenticated();
         try {
@@ -419,8 +417,8 @@ public class XingAPI<S extends Session> {
      * @throws XingException
      */
     public Conversation getConversationFrom(final String id, final String userId, final Collection<UserField> userFields, final int withLatestMessages) throws XingException {
-        if (withLatestMessages < 0 || withLatestMessages > 100) {
-            throw new XingException("Invalid withLatestMessages: " + withLatestMessages + ". Must be zero OR less than or equal to 100.");
+        if (withLatestMessages < 0 || withLatestMessages > MAX_WITH_LATEST_MESSAGES) {
+            throw new XingException("Invalid withLatestMessages: " + withLatestMessages + ". Must be zero OR less than or equal to " + MAX_WITH_LATEST_MESSAGES);
         }
         assertAuthenticated();
         try {
