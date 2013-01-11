@@ -51,23 +51,23 @@ package com.openexchange.oauth.linkedin;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONValue;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
@@ -209,4 +209,135 @@ public class LinkedInXMLParser {
         }
         return null;
     }
+
+    // ---------------------------------- JSON STUFF --------------------------------- //
+
+    public Contact parse(final JSONObject person) {
+        final Contact contact = new Contact();
+        contact.setGivenName(person.optString("first-name", null));
+        contact.setSurName(person.optString("last-name", null));
+        if (null != person.optString("main-address", null)) {
+            contact.setNote(person.optString("main-address", null));
+        }
+        try {
+            final String imageUrl = person.optString("picture-url", null);
+            if (null != imageUrl) {
+                OXContainerConverter.loadImageFromURL(contact, imageUrl);
+            }
+        } catch (final ConverterException e) {
+            LOG.error(e);
+        }
+
+        // get the current job and company
+        {
+            final JSONArray positions = person.optJSONArray("positions");
+            if (null != positions) {
+                final int length = positions.length();
+                for (int i = 0; i < length; i++) {
+                    final JSONObject position = positions.optJSONObject(i);
+                    contact.setTitle(position.optString("title", null));
+                    final JSONObject company = position.optJSONObject("company");
+                    if (null != company) {
+                        contact.setCompany(company.optString("name", null));
+                    }
+                }
+            }
+        }
+        // get the first IM-account
+        {
+            final JSONArray imAccounts = person.optJSONArray("im-account");
+            if (null != imAccounts && imAccounts.length() > 0) {
+                final JSONObject imAccount = imAccounts.optJSONObject(0);
+                contact.setInstantMessenger1(imAccount.optString("im-account-name", null) + " (" + imAccount.optString("im-account-type", null) + ")");
+            }
+        }
+        // parse the phone numbers, saving the first occurrence of "home" and "work"
+        {
+            final JSONArray phoneNumbers = person.optJSONArray("positions");
+            if (null != phoneNumbers) {
+                final int length = phoneNumbers.length();
+                for (int i = 0; i < length; i++) {
+                    final JSONObject phoneNumber = phoneNumbers.optJSONObject(i);
+                    final String phoneType = phoneNumber.optString("phone-type", null);
+                    if ("work".equals(phoneType)) {
+                        contact.setTelephoneBusiness1(phoneNumber.optString("phone-number", null));
+                    } else if ("home".equals(phoneType)) {
+                        contact.setTelephoneHome1(phoneNumber.optString("phone-number", null));
+                    }
+                }
+            }
+        }
+        // get the birthdate
+        {
+            final JSONObject dateOfBirth = person.optJSONObject("date-of-birth");
+            int year = 0;
+            final String sYear = dateOfBirth.optString("year", null);
+            if (null != sYear) {
+                year = Integer.parseInt(sYear) - 1900;
+            }
+            int month = 0;
+            final String sMonth = dateOfBirth.optString("month", null);
+            if (null != sMonth) {
+                month = Integer.parseInt(sMonth) - 1;
+            }
+            int date = 0;
+            final String sDay = dateOfBirth.optString("day", null);
+            if (null != sDay) {
+                date = Integer.parseInt(sDay);
+            }
+            contact.setBirthday(new Date(year, month, date));
+        }
+        return contact;
+    }
+
+    /**
+     * Parses given connections.
+     * 
+     * <pre>
+     * {
+     *   "values": [
+     *     {
+     *       "_key": "~",
+     *       "connections": {"_total": 129},
+     *       "firstName": "Adam"
+     *     },
+     *     {
+     *       "_key": "hks0NPUMZF",
+     *       "connections": {"_total": 500},
+     *       "firstName": "Brandon"
+     *     }
+     *   ],
+     *   "_total": 2
+     * }
+     * </pre>
+     * 
+     * @param body The received JSON body
+     * @return The parsed contacts
+     * @throws OXException If operation fails
+     */
+    public List<Contact> parseConnections(final JSONValue body) throws OXException {
+        final JSONArray persons;
+        if (body.isObject()) {
+            persons = body.toObject().optJSONArray("values");
+        } else {
+            persons = body.toArray();
+        }
+        if (null == persons) {
+            return Collections.emptyList();
+        }
+        final int length = persons.length();
+        final List<Contact> contacts = new ArrayList<Contact>(length);
+        for (int i = 0; i < length; i++) {
+            try {
+                final JSONObject person = persons.optJSONObject(i);
+                final Contact contact = parse(person);
+                contacts.add(contact);
+            } catch (final RuntimeException e) {
+                // Ignore
+                LOG.warn("Runtime error occurred: " + e.getMessage(), e);
+            }
+        }
+        return contacts;
+    }
+
 }

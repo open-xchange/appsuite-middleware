@@ -88,7 +88,7 @@ public class LinkedInServiceImpl implements LinkedInService{
     private static final String PERSONAL_FIELDS = "id,first-name,last-name,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry,public-profile-url";
     private static final String RELATION_TO_VIEWER = "relation-to-viewer:(connections:(person:(id,first-name,last-name,picture-url,headline)))";
 	private static final String PERSONAL_FIELD_QUERY = ":("+PERSONAL_FIELDS+")";
-	private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
+	private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)?format=json";
     private static final String IN_JSON = "?format=json";
 
     private Activator activator;
@@ -147,6 +147,17 @@ public class LinkedInServiceImpl implements LinkedInService{
         }
 	}
 
+	private JSONValue extractJsonValue(final Response response) throws OXException {
+        Reader reader = null;
+        try {
+            reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);
+            return JSONObject.parse(reader);
+        } catch (final JSONException e) {
+            throw OAuthExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(reader);
+        }
+    }
 
 	protected List<String> extractIds(final Response response) throws OXException{
 		List<String> result = new LinkedList<String>();
@@ -199,7 +210,7 @@ public class LinkedInServiceImpl implements LinkedInService{
             LOG.error(response.getBody());
         }
     	final LinkedInXMLParser parser = new LinkedInXMLParser();
-        final List<Contact> contacts = parser.parseConnections(response.getBody());
+        final List<Contact> contacts = parser.parseConnections(extractJsonValue(response));
         return contacts;
     }
 
