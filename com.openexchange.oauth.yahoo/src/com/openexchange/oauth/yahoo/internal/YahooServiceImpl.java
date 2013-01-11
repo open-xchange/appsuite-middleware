@@ -83,7 +83,7 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.yahoo.YahooService;
 import com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.BoundedCompletionService;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
@@ -155,7 +155,7 @@ public class YahooServiceImpl implements YahooService {
                 return Collections.emptyList();
             }
             final JSONArray allContactsArray = contacts.getJSONArray("contact");
-            final CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool()).setTrackable(true);
+            final CompletionService<Void> completionService = new BoundedCompletionService<Void>(ThreadPools.getThreadPool(), 10).setTrackable(true);
             int numTasks = 0;
             final int length = allContactsArray.length();
             final ConcurrentMap<Integer, Contact> contactMap = new ConcurrentHashMap<Integer, Contact>(length);
