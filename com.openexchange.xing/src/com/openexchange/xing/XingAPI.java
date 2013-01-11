@@ -220,13 +220,13 @@ public class XingAPI<S extends Session> {
                 params.add(fields.toString());
             }
 
-            final JSONObject responseInformation = (JSONObject) RESTUtility.request(
+            final JSONObject responseInformation = RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
                 "/users/" + userId + "/contacts",
                 VERSION,
                 params.toArray(new String[0]),
-                session);
+                session).toObject();
 
             if (serverSort) {
                 return new Contacts(responseInformation.getJSONObject("contacts"));
@@ -338,13 +338,13 @@ public class XingAPI<S extends Session> {
                 params.add(fields.toString());
             }
 
-            final JSONObject responseInformation = (JSONObject) RESTUtility.request(
+            final JSONObject responseInformation = RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
                 "/users/" + userId + "/conversations",
                 VERSION,
                 params.toArray(new String[0]),
-                session);
+                session).toObject();
             return new Conversations(responseInformation.getJSONObject("conversations"));
         } catch (final JSONException e) {
             throw new XingException(e);
@@ -440,13 +440,13 @@ public class XingAPI<S extends Session> {
                 params.add(fields.toString());
             }
 
-            final JSONObject responseInformation = (JSONObject) RESTUtility.request(
+            final JSONObject responseInformation = RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
                 "/users/" + userId + "/conversations/" + id,
                 VERSION,
                 params.toArray(new String[0]),
-                session);
+                session).toObject();
             return new Conversation(responseInformation.getJSONObject("conversation"));
         } catch (final JSONException e) {
             throw new XingException(e);
