@@ -1,3 +1,7 @@
+* 2013-01-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23455: Fixed naming of referenced commons-logging jar
+
 * 2013-01-10 - martin.herfurth@open-xchange.com
 
  - Fix for bug 22009: Full time appointment series not shown in Portal.
