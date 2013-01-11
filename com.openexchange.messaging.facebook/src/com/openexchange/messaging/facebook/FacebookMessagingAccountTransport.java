@@ -89,7 +89,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
     /**
      * Initializes a new {@link FacebookMessagingAccountTransport}.
      *
-     * @param messagingAccount The facebook account
+     * @param messagingAccount The Facebook account
      * @param session The session
      * @throws OXException If initialization fails
      */
@@ -107,8 +107,8 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
      *
      * @param message The message
      * @param recipients The recipients
-     * @param facebookRestClient The facebook REST client
-     * @param facebookUserId The facebook user identifier
+     * @param facebookRestClient The Facebook REST client
+     * @param facebookUserId The Facebook user identifier
      * @throws OXException If transport fails
      */
     public static void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients, final FacebookOAuthAccess facebookOAuthAccess, final String facebookUserId) throws OXException {

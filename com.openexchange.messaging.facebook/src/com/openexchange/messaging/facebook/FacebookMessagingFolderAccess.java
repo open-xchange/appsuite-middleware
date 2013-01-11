@@ -70,7 +70,7 @@ import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.session.Session;
 
 /**
- * {@link FacebookMessagingFolderAccess} - The facebook folder access.
+ * {@link FacebookMessagingFolderAccess} - The Facebook folder access.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16

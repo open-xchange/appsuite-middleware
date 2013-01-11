@@ -74,7 +74,7 @@ public class FacebookMessagingResource implements MessagingResource {
     protected final MessagingAccount messagingAccount;
 
     /**
-     * The facebook session.
+     * The Facebook session.
      */
     protected FacebookOAuthAccess facebookOAuthInfo;
 
@@ -86,7 +86,7 @@ public class FacebookMessagingResource implements MessagingResource {
     /**
      * Initializes a new {@link FacebookMessagingResource}.
      *
-     * @param messagingAccount The facebook account
+     * @param messagingAccount The Facebook account
      * @throws OXException If initialization fails
      */
     public FacebookMessagingResource(final MessagingAccount messagingAccount, final Session session) throws OXException {

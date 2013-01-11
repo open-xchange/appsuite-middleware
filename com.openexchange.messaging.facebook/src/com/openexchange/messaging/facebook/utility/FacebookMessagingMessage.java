@@ -53,7 +53,7 @@ import java.util.Locale;
 import com.openexchange.messaging.generic.internet.MimeMessagingMessage;
 
 /**
- * {@link FacebookMessagingMessage} - Extends {@link MimeMessagingMessage} by facebook user identifier.
+ * {@link FacebookMessagingMessage} - Extends {@link MimeMessagingMessage} by Facebook user identifier.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16

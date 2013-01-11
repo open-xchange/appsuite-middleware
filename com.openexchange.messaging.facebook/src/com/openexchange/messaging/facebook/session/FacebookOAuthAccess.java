@@ -89,11 +89,11 @@ public final class FacebookOAuthAccess {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(FacebookOAuthAccess.class);
 
     /**
-     * Gets the facebook OAuth access for given facebook messaging account.
+     * Gets the Facebook OAuth access for given Facebook messaging account.
      *
-     * @param messagingAccount The facebook messaging account providing credentials and settings
+     * @param messagingAccount The Facebook messaging account providing credentials and settings
      * @param session The user session
-     * @return The facebook OAuth access; either newly created or fetched from underlying registry
+     * @return The Facebook OAuth access; either newly created or fetched from underlying registry
      * @throws OXException If a Facebook session could not be created
      */
     public static FacebookOAuthAccess accessFor(final MessagingAccount messagingAccount, final Session session) throws OXException {
@@ -111,7 +111,7 @@ public final class FacebookOAuthAccess {
     }
 
     /**
-     * The facebook OAuth service.
+     * The Facebook OAuth service.
      */
     private final org.scribe.oauth.OAuthService facebookOAuthService;
 
@@ -121,12 +121,12 @@ public final class FacebookOAuthAccess {
     private final OAuthAccount oauthAccount;
 
     /**
-     * The facebook user identifier.
+     * The Facebook user identifier.
      */
     private final String facebookUserId;
 
     /**
-     * The facebook user's full name
+     * The Facebook user's full name
      */
     private final String facebookUserName;
 
@@ -138,7 +138,7 @@ public final class FacebookOAuthAccess {
     /**
      * Initializes a new {@link FacebookMessagingResource}.
      *
-     * @param messagingAccount The facebook messaging account providing credentials and settings
+     * @param messagingAccount The Facebook messaging account providing credentials and settings
      * @throws OXException
      */
     private FacebookOAuthAccess(final MessagingAccount messagingAccount, final Session session, final int user, final int contextId) throws OXException {
@@ -233,18 +233,18 @@ public final class FacebookOAuthAccess {
     }
 
     /**
-     * Gets the facebook user identifier.
+     * Gets the Facebook user identifier.
      *
-     * @return The facebook user identifier
+     * @return The Facebook user identifier
      */
     public String getFacebookUserId() {
         return facebookUserId;
     }
 
     /**
-     * Gets the facebook user's full name.
+     * Gets the Facebook user's full name.
      *
-     * @return The facebook user's full name.
+     * @return The Facebook user's full name.
      */
     public String getFacebookUserName() {
         return facebookUserName;

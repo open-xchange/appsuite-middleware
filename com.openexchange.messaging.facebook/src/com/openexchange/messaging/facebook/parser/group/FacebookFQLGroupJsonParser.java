@@ -59,7 +59,7 @@ import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.facebook.utility.FacebookGroup;
 
 /**
- * {@link FacebookFQLGroupJsonParser} - Parses a given facebook group element.
+ * {@link FacebookFQLGroupJsonParser} - Parses a given Facebook group element.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -116,9 +116,9 @@ public final class FacebookFQLGroupJsonParser {
     }
 
     /**
-     * Parses given facebook group element into a user.
+     * Parses given Facebook group element into a user.
      *
-     * @param groupElement The facebook group element
+     * @param groupElement The Facebook group element
      * @return The resulting group
      * @throws OXException If parsing fails
      */

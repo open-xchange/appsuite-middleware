@@ -71,9 +71,9 @@ public final class FacebookGroup {
     }
 
     /**
-     * Checks if this facebook group is empty.
+     * Checks if this Facebook group is empty.
      *
-     * @return <code>true</code> if this facebook group is empty; otherwise <code>false</code>
+     * @return <code>true</code> if this Facebook group is empty; otherwise <code>false</code>
      */
     public boolean isEmpty() {
         return (gid <= 0) && (null == name) && (null == picSmall);

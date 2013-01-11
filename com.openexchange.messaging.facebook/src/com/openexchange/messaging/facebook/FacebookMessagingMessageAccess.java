@@ -933,9 +933,9 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
     }
 
     /**
-     * Gets the facebook user identifier.
+     * Gets the Facebook user identifier.
      *
-     * @return The facebook user identifier
+     * @return The Facebook user identifier
      */
     public String getFacebookUserId() {
         return facebookUserId;

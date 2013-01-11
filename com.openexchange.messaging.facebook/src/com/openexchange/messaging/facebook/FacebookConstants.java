@@ -62,12 +62,12 @@ import com.gargoylesoftware.htmlunit.HttpWebConnection;
 public final class FacebookConstants {
 
     /**
-     * The configuration property name for facebook API key.
+     * The configuration property name for Facebook API key.
      */
     public static final String FACEBOOK_API_KEY = "apiKey";
 
     /**
-     * The configuration property name for facebook secret key.
+     * The configuration property name for Facebook secret key.
      */
     public static final String FACEBOOK_SECRET_KEY = "secretKey";
 
@@ -112,7 +112,7 @@ public final class FacebookConstants {
     public static final String FACEBOOK_OAUTH_ACCOUNT = "account";
 
     /**
-     * Initializes facebook constants.
+     * Initializes Facebook constants.
      *
      * @throws Exception
      */
@@ -136,7 +136,7 @@ public final class FacebookConstants {
     }
 
     /**
-     * Drops facebook constants.
+     * Drops Facebook constants.
      */
     public static void drop() {
         HTTP_CLIENT_FIELD = null;

@@ -728,10 +728,10 @@ public final class FacebookMessagingUtility {
     private static final int FQL_XML_START_LEN = FQL_XML_START.length();
 
     /**
-     * Fires given FQL query using specified facebook REST client.
+     * Fires given FQL query using specified Facebook REST client.
      *
      * @param fqlQuery The FQL query to fire
-     * @param facebookOAuthAccess The facebook OAuth access
+     * @param facebookOAuthAccess The Facebook OAuth access
      * @return The FQL query's results
      * @throws OXException If query cannot be fired
      * @deprecated Use {@link #fireFQLJsonQuery(CharSequence, FacebookOAuthAccess)} instead
@@ -751,10 +751,10 @@ public final class FacebookMessagingUtility {
     private static final int FQL_JSON_START_LEN = FQL_JSON_START.length();
 
     /**
-     * Fires given FQL query using specified facebook REST client.
+     * Fires given FQL query using specified Facebook REST client.
      *
      * @param fqlQuery The FQL query to fire
-     * @param facebookOAuthAccess The facebook OAuth access
+     * @param facebookOAuthAccess The Facebook OAuth access
      * @return The FQL query's results
      * @throws OXException If query cannot be fired
      */
@@ -898,7 +898,7 @@ public final class FacebookMessagingUtility {
      *
      * @param fields The fields
      * @param postId The post identifier
-     * @param facebookUserId The facebook user identifier
+     * @param facebookUserId The Facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws OXException If composing query fails
      */
@@ -911,7 +911,7 @@ public final class FacebookMessagingUtility {
      *
      * @param fields The fields
      * @param postIds The post identifiers
-     * @param facebookUserId The facebook user identifier
+     * @param facebookUserId The Facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws OXException If composing query fails
      */
@@ -924,7 +924,7 @@ public final class FacebookMessagingUtility {
      *
      * @param queryType The query type constant
      * @param fields The fields
-     * @param facebookUserId The facebook user identifier
+     * @param facebookUserId The Facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws OXException If composing query fails
      */
@@ -939,7 +939,7 @@ public final class FacebookMessagingUtility {
      * @param fields The fields
      * @param sortField The sort field; may be <code>null</code>
      * @param order The order direction
-     * @param facebookUserId The facebook user identifier
+     * @param facebookUserId The Facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws OXException If composing query fails
      */
@@ -971,7 +971,7 @@ public final class FacebookMessagingUtility {
      * @param fields The fields
      * @param sortField The sort field; may be <code>null</code>
      * @param order The order direction
-     * @param facebookUserId The facebook user identifier
+     * @param facebookUserId The Facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws OXException If composing query fails
      */

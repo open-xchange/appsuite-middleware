@@ -79,11 +79,11 @@ public enum FacebookMessagingExceptionCodes implements OXExceptionCode {
      */
     JSON_ERROR(FacebookMessagingExceptionMessages.JSON_ERROR_MSG, CATEGORY_ERROR, 4),
     /**
-     * Login to facebook failed for login %1$s.
+     * Login to Facebook failed for login %1$s.
      */
     FAILED_LOGIN(FacebookMessagingExceptionMessages.FAILED_LOGIN_MSG, CATEGORY_ERROR, 5),
     /**
-     * Communication error with facebook service: %1$s
+     * Communication error with Facebook service: %1$s
      */
     COMMUNICATION_ERROR(FacebookMessagingExceptionMessages.COMMUNICATION_ERROR_MSG, CATEGORY_SERVICE_DOWN, 6),
     /**
@@ -95,7 +95,7 @@ public enum FacebookMessagingExceptionCodes implements OXExceptionCode {
      */
     ELEMENT_NOT_FOUND(FacebookMessagingExceptionMessages.ELEMENT_NOT_FOUND_MSG, CATEGORY_SERVICE_DOWN, 8),
     /**
-     * Missing permission "%1$s" in facebook login %2$s. Please copy following URL to your browser, login as %2$s (if not done yet) and grant access:<br>
+     * Missing permission "%1$s" in Facebook login %2$s. Please copy following URL to your browser, login as %2$s (if not done yet) and grant access:<br>
      * %3$s
      */
     MISSING_PERMISSION(FacebookMessagingExceptionMessages.MISSING_PERMISSION_MSG, CATEGORY_SERVICE_DOWN, 9),
@@ -134,11 +134,11 @@ public enum FacebookMessagingExceptionCodes implements OXExceptionCode {
      */
     XML_PARSE_ERROR(FacebookMessagingExceptionMessages.XML_PARSE_ERROR_MSG, CATEGORY_ERROR, 16),
     /**
-     * Missing facebook configuration. Please re-create facebook account.
+     * Missing Facebook configuration. Please re-create Facebook account.
      */
     MISSING_CONFIG(FacebookMessagingExceptionMessages.MISSING_CONFIG_MSG, CATEGORY_ERROR, 17),
     /**
-     * Missing facebook configuration parameter "%1$s". Please re-create facebook account.
+     * Missing Facebook configuration parameter "%1$s". Please re-create Facebook account.
      */
     MISSING_CONFIG_PARAM(FacebookMessagingExceptionMessages.MISSING_CONFIG_PARAM_MSG, CATEGORY_ERROR, 18),
     /**

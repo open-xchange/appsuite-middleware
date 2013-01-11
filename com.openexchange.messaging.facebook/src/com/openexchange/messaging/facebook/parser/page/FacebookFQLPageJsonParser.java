@@ -60,7 +60,7 @@ import com.openexchange.messaging.facebook.parser.group.FacebookFQLGroupJsonPars
 import com.openexchange.messaging.facebook.utility.FacebookPage;
 
 /**
- * {@link FacebookFQLPageJsonParser} - Parses a given facebook page element.
+ * {@link FacebookFQLPageJsonParser} - Parses a given Facebook page element.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -118,9 +118,9 @@ public final class FacebookFQLPageJsonParser {
     }
 
     /**
-     * Parses given facebook page element into a user.
+     * Parses given Facebook page element into a user.
      *
-     * @param pageElement The facebook page element
+     * @param pageElement The Facebook page element
      * @return The resulting page
      * @throws OXException If parsing fails
      */

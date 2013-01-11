@@ -85,7 +85,7 @@ import com.openexchange.messaging.generic.internet.MimeStringMessagingHeader;
 import com.openexchange.session.Session;
 
 /**
- * {@link FacebookFQLStreamJsonParser} - Parses a given facebook stream element into a MIME message.
+ * {@link FacebookFQLStreamJsonParser} - Parses a given Facebook stream element into a MIME message.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -561,9 +561,9 @@ public final class FacebookFQLStreamJsonParser {
     }
 
     /**
-     * Parses given facebook stream element into a MIME message.
+     * Parses given Facebook stream element into a MIME message.
      *
-     * @param streamElement The facebook stream element
+     * @param streamElement The Facebook stream element
      * @param locale The user's locale
      * @return The resulting MIME message
      * @throws OXException If parsing fails

@@ -71,9 +71,9 @@ public final class FacebookPage {
     }
 
     /**
-     * Checks if this facebook page is empty.
+     * Checks if this Facebook page is empty.
      *
-     * @return <code>true</code> if this facebook page is empty; otherwise <code>false</code>
+     * @return <code>true</code> if this Facebook page is empty; otherwise <code>false</code>
      */
     public boolean isEmpty() {
         return (pageId <= 0) && (null == name) && (null == picSmall);

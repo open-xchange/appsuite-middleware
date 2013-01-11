@@ -78,7 +78,7 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
     /**
      * Initializes a new {@link FacebookMessagingAccountAccess}.
      *
-     * @param messagingAccount The facebook account
+     * @param messagingAccount The Facebook account
      * @param session The session
      * @throws OXException If initialization fails
      */

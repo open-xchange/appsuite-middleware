@@ -59,7 +59,7 @@ import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.facebook.utility.FacebookUser;
 
 /**
- * {@link FacebookFQLUserJsonParser} - Parses a given facebook user element.
+ * {@link FacebookFQLUserJsonParser} - Parses a given Facebook user element.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -117,9 +117,9 @@ public final class FacebookFQLUserJsonParser {
     }
 
     /**
-     * Parses given facebook user element into a user.
+     * Parses given Facebook user element into a user.
      *
-     * @param userElement The facebook user element
+     * @param userElement The Facebook user element
      * @return The resulting user
      * @throws OXException If parsing fails
      */

@@ -71,9 +71,9 @@ public final class FacebookUser {
     }
 
     /**
-     * Checks if this facebook user is empty.
+     * Checks if this Facebook user is empty.
      *
-     * @return <code>true</code> if this facebook user is empty; otherwise <code>false</code>
+     * @return <code>true</code> if this Facebook user is empty; otherwise <code>false</code>
      */
     public boolean isEmpty() {
         return (uid <= 0) && (null == name) && (null == picSmall);
