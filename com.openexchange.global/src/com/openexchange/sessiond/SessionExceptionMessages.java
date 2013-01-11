@@ -108,6 +108,9 @@ public final class SessionExceptionMessages implements LocalizableStrings {
     // This problem occurs if the session daemon is accessed before it is initialized completely.
     public static final String NOT_INITIALIZED_MSG = "Session daemon is not initialized yet.";
 
+    // This exception is used only internally for tests.
+    public static final String NOT_IMPLEMENTED_MSG = "Method not implemented.";
+
     private SessionExceptionMessages() {
         super();
     }

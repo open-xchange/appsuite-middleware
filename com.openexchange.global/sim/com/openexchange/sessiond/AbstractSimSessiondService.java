@@ -98,8 +98,7 @@ public class AbstractSimSessiondService implements SessiondService {
 
     @Override
     public Session getSessionWithTokens(String clientToken, String serverToken) throws OXException {
-        // FIXME throw some exception.
-        return null;
+        throw SessionExceptionCodes.NOT_IMPLEMENTED.create();
     }
 
     @Override

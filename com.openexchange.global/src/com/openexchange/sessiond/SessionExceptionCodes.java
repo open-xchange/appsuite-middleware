@@ -122,7 +122,12 @@ public enum SessionExceptionCodes implements OXExceptionCode {
      * Session daemon is not initialized yet.
      * TODO Refactoring of the session daemon should make the service public only then, when it is completely initialized.
      */
-    NOT_INITIALIZED(NOT_INITIALIZED_MSG, Category.CATEGORY_ERROR, 208);
+    NOT_INITIALIZED(NOT_INITIALIZED_MSG, Category.CATEGORY_ERROR, 208),
+    /**
+     * Method not implemented.
+     * Use this only internally for testing purposes.
+     */
+    NOT_IMPLEMENTED(NOT_IMPLEMENTED_MSG, Category.CATEGORY_ERROR, 209);
 
     private static final String PREFIX = "SES";
 
