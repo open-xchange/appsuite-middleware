@@ -50,7 +50,6 @@
 package com.openexchange.oauth.yahoo.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
@@ -59,46 +58,48 @@ import com.openexchange.oauth.yahoo.YahooService;
 import com.openexchange.oauth.yahoo.internal.OAuthServiceMetaDataYahooImpl;
 import com.openexchange.oauth.yahoo.internal.YahooServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link YahooOAuthActivator}
- *
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class YahooOAuthActivator extends HousekeepingActivator {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(YahooOAuthActivator.class);
 
     private static final String API_KEY = "com.openexchange.oauth.yahoo.apiKey";
 
     private static final String API_SECRET = "com.openexchange.oauth.yahoo.apiSecret";
 
-    private OAuthService oauthService;
+    private volatile OAuthService oauthService;
+    private volatile OAuthServiceMetaDataYahooImpl oAuthMetaData;
 
-    private OAuthServiceMetaDataYahooImpl oAuthMetaData;
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(YahooOAuthActivator.class));
-
+    /** Gets OAuthService */
     public OAuthService getOauthService() {
         return oauthService;
     }
 
-
+    /** Sets OAuthService */
     public void setOauthService(final OAuthService oauthService) {
         this.oauthService = oauthService;
     }
 
-
+    /** Gets OAuthServiceMetaDataYahooImpl */
     public OAuthServiceMetaDataYahooImpl getOAuthMetaData() {
         return oAuthMetaData;
     }
 
-
+    /** Sets OAuthServiceMetaDataYahooImpl */
     public void setOAuthMetaData(final OAuthServiceMetaDataYahooImpl oauthMetaData) {
         this.oAuthMetaData = oauthMetaData;
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, OAuthService.class, DeferringURLService.class };
+        return new Class<?>[] { ConfigurationService.class, OAuthService.class, DeferringURLService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -106,19 +107,20 @@ public class YahooOAuthActivator extends HousekeepingActivator {
         final ConfigurationService config = getService(ConfigurationService.class);
         oauthService = getService(OAuthService.class);
 
-        oAuthMetaData = new OAuthServiceMetaDataYahooImpl(config.getProperty(API_KEY), config.getProperty(API_SECRET), getService(DeferringURLService.class));
+        oAuthMetaData =
+            new OAuthServiceMetaDataYahooImpl(
+                config.getProperty(API_KEY),
+                config.getProperty(API_SECRET),
+                getService(DeferringURLService.class));
 
         registerService(OAuthServiceMetaData.class, oAuthMetaData);
         LOG.info("OAuthServiceMetaData for Yahoo was started");
-        LOG.info("API-Key for Yahoo : "+config.getProperty(API_KEY)+", API-Secret for Yahoo : "+config.getProperty(API_SECRET));
+        LOG.info("API-Key for Yahoo : " + config.getProperty(API_KEY) + ", API-Secret for Yahoo : " + config.getProperty(API_SECRET));
 
         final YahooService yahooService = new YahooServiceImpl(this);
 
         registerService(YahooService.class, yahooService);
         LOG.info("YahooService was started.");
-
     }
-
-
 
 }

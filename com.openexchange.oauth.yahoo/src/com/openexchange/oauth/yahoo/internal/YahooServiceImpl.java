@@ -49,17 +49,24 @@
 
 package com.openexchange.oauth.yahoo.internal;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.YahooApi;
 import org.scribe.model.OAuthRequest;
@@ -69,10 +76,18 @@ import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.yahoo.YahooService;
 import com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link YahooServiceImpl}
@@ -81,21 +96,21 @@ import com.openexchange.session.Session;
  */
 public class YahooServiceImpl implements YahooService {
 
-    private final YahooOAuthActivator activator;
-
     private static final String ALL_CONTACT_IDS_URL = "http://social.yahooapis.com/v1/user/GUID/contacts?format=json";
 
     private static final String SINGLE_CONTACT_URL = "http://social.yahooapis.com/v1/user/GUID/contact/CONTACT_ID?format=json";
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(YahooServiceImpl.class));
 
+    private final Pattern patternGuid;
+    private final YahooOAuthActivator activator;
+
     public YahooServiceImpl(final YahooOAuthActivator activator) {
+        super();
         this.activator = activator;
+        patternGuid = Pattern.compile("<value>([^<]*)<");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.yahoo.YahooService#getContacts(java.lang.String, int, int, int)
-     */
     @Override
     public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) {
         List<Contact> contacts = new ArrayList<Contact>();
@@ -116,67 +131,102 @@ public class YahooServiceImpl implements YahooService {
     }
 
     private List<Contact> useAccessTokenToAccessData(final Token accessToken) {
-        final List<Contact> contactList = new ArrayList<Contact>();
         final OAuthService service = new ServiceBuilder().provider(YahooApi.class).apiKey(activator.getOAuthMetaData().getAPIKey()).apiSecret(
             activator.getOAuthMetaData().getAPISecret()).build();
         // Get the GUID of the current user from yahoo. This is needed for later requests
-        final OAuthRequest request1 = new OAuthRequest(Verb.GET, "http://social.yahooapis.com/v1/me/guid?format=xml");
-        service.signRequest(accessToken, request1);
-        final Response response1 = request1.send();
+        final String guid;
+        {
+            final OAuthRequest guidRequest = new OAuthRequest(Verb.GET, "http://social.yahooapis.com/v1/me/guid?format=xml");
+            service.signRequest(accessToken, guidRequest);
+            final Response guidResponse = guidRequest.send();
 
-
-        // Extract the Users ID from a response looking like this: <value>ANZAPAEE55TMMWPLYXQCJO7BAM<
-        final Pattern pattern = Pattern.compile("<value>([^<]*)<");
-        final Matcher matcher = pattern.matcher(response1.getBody());
-        String guid = "";
-        if (matcher.find()) {
-            guid = matcher.group(1);
+            final Matcher matcher = patternGuid.matcher(guidResponse.getBody());
+            guid = matcher.find() ? matcher.group(1) : "";
         }
-
         // Now get the ids of all the users contacts
-        final String resource = ALL_CONTACT_IDS_URL.replace("GUID", guid);
-        final OAuthRequest request = new OAuthRequest(Verb.GET, resource);
+        OAuthRequest request = new OAuthRequest(Verb.GET, ALL_CONTACT_IDS_URL.replace("GUID", guid));
         service.signRequest(accessToken, request);
         final Response response = request.send();
-
+        request = null;
         try {
-            final JSONObject allContactsWholeResponse = new JSONObject(response.getBody());
-            if (allContactsWholeResponse.has("contacts")) {
-                final JSONObject contacts = (JSONObject) allContactsWholeResponse.get("contacts");
-                if (contacts.has("contact")) {
-                    final JSONArray allContactsArray = (JSONArray) contacts.get("contact");
-
-                    // get each contact with its own request
-                    for (int i = 0; i < allContactsArray.length(); i++) {
-                        final JSONObject entry = allContactsArray.getJSONObject(i);
-                        if (entry.has("id")) {
+            final JSONObject allContactsWholeResponse = extractJson(response);
+            if (!allContactsWholeResponse.hasAndNotNull("contacts")) {
+                return Collections.emptyList();
+            }
+            final JSONObject contacts = allContactsWholeResponse.getJSONObject("contacts");
+            if (!contacts.hasAndNotNull("contact")) {
+                return Collections.emptyList();
+            }
+            final JSONArray allContactsArray = contacts.getJSONArray("contact");
+            final Map<String, Object> props;
+            {
+                final Props p = LogProperties.optLogProperties();
+                props = null == p ? null : p.asMap();
+            }
+            final CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool()).setTrackable(true);
+            int numTasks = 0;
+            final int length = allContactsArray.length();
+            final TIntObjectMap<Contact> contactMap = new TIntObjectHashMap<Contact>(length);
+            // get each contact with its own request
+            for (int i = 0; i < length; i++) {
+                final JSONObject entry = allContactsArray.getJSONObject(i);
+                if (entry.hasAndNotNull("id")) {
+                    final int index = i;
+                    final Callable<Void> callable = new Callable<Void>() {
+   
+                        @Override
+                        public Void call() throws Exception {
                             final String contactId = entry.getString("id");
                             final String singleContactUrl = SINGLE_CONTACT_URL.replace("GUID", guid).replace("CONTACT_ID", contactId);
+                            // Request
                             final OAuthRequest singleContactRequest = new OAuthRequest(Verb.GET, singleContactUrl);
                             service.signRequest(accessToken, singleContactRequest);
                             final Response singleContactResponse = singleContactRequest.send();
-                            contactList.add(parseSingleContact(singleContactResponse.getBody()));
-
+                            contactMap.put(index, parseSingleContact(extractJson(singleContactResponse)));
+                            return null;
                         }
-                    }
+                    };
+                    completionService.submit(callable);
+                    numTasks++;
                 }
             }
+            for (int i = 0; i < numTasks; i++) {
+                completionService.take();
+            }
+            final List<Contact> contactList = new ArrayList<Contact>(length);
+            for (int i = 0; i < length; i++) {
+                final Contact contact = contactMap.get(i);
+                if (null != contact) {
+                    contactList.add(contact);
+                }
+            }
+            return contactList;
         } catch (final JSONException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOG.error(e.getMessage(), e);
         }
-
-        return contactList;
+        return Collections.emptyList();
     }
 
-    private Contact parseSingleContact(final String singleContact) {
+    /**
+     * Parses given contact.
+     *
+     * @param singleContact
+     * @return
+     */
+    protected Contact parseSingleContact(final JSONObject all) {
         final Contact oxContact = new Contact();
         try {
-            final JSONObject all = new JSONObject(singleContact);
             if (all.has("contact")) {
                 final JSONObject contact = all.getJSONObject("contact");
                 if (contact.has("fields")) {
                     final JSONArray fields = contact.getJSONArray("fields");
-                    for (int i = 0; i < fields.length(); i++) {
+                    final int length = fields.length();
+                    for (int i = 0; i < length; i++) {
                         final JSONObject field = fields.getJSONObject(i);
                         if (field.has("type")) {
                             final String type = field.getString("type");
@@ -331,4 +381,21 @@ public class YahooServiceImpl implements YahooService {
         }
         return displayName;
     }
+
+    JSONObject extractJson(final Response response) throws OXException {
+        Reader reader = null;
+        try {
+            reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);
+            final JSONValue value = JSONObject.parse(reader);
+            if (value.isObject()) {
+                return value.toObject();
+            }
+            throw OAuthExceptionCodes.JSON_ERROR.create("Not a JSON object, but " + value.getClass().getName());
+        } catch (final JSONException e) {
+            throw OAuthExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(reader);
+        }
+    }
+
 }

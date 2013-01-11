@@ -49,8 +49,6 @@
 
 package com.openexchange.oauth.yahoo.internal;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
@@ -64,11 +62,10 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
  */
 public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData{
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceMetaDataYahooImpl.class));
-
     private final DeferringURLService deferrer;
 
     public OAuthServiceMetaDataYahooImpl(String apiKey, String apiSecret, DeferringURLService deferrer) {
+        super();
         setId("com.openexchange.oauth.yahoo");
         setApiKey(apiKey);
         setApiSecret(apiSecret);
