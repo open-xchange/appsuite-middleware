@@ -198,7 +198,7 @@ public class JSONArray extends AbstractJSONValue {
      */
     public JSONArray(final Collection<? extends Object> collection) {
         super();
-        if (collection == null) {
+        if (collection == null || collection.isEmpty()) {
             this.myArrayList = new ArrayList<Object>();
         } else {
             this.myArrayList = new ArrayList<Object>(collection.size());

@@ -309,7 +309,7 @@ public class JSONObject extends AbstractJSONValue {
      */
     public JSONObject(final Map<String, ? extends Object> map) {
         super();
-        if (null == map) {
+        if (null == map || map.isEmpty()) {
             this.myHashMap = new HashKeyMap<Object>();
         } else {
             final int max = MAX_SIZE.get();
