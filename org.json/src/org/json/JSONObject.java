@@ -419,8 +419,6 @@ public class JSONObject extends AbstractJSONValue {
         return this;
     }
 
-    private static final String STR_ERR01 = "JSONObject[";
-
     /**
      * Append values to the array under a key. If the key does not exist in the JSONObject, then the key is put in the JSONObject with its
      * value being a JSONArray containing the value parameter. If the key was already associated with a JSONArray, then the value parameter
@@ -438,7 +436,7 @@ public class JSONObject extends AbstractJSONValue {
         } else if (o instanceof JSONArray) {
             put(key, ((JSONArray) o).put(value));
         } else {
-            throw new JSONException(STR_ERR01 + key + "] is not a JSONArray.");
+            throw new JSONException("JSONObject[" + key + "] is not a JSONArray.");
         }
         return this;
     }
@@ -446,6 +444,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * Resets this JSONObject for re-use
      */
+    @Override
     public void reset() {
         myHashMap.clear();
     }
@@ -485,7 +484,7 @@ public class JSONObject extends AbstractJSONValue {
     public Object get(final String key) throws JSONException {
         final Object o = opt(key);
         if (o == null) {
-            throw new JSONException(STR_ERR01 + quote(key) + "] not found.");
+            throw new JSONException("JSONObject[" + quote(key) + "] not found.");
         }
         return o;
     }
@@ -504,7 +503,7 @@ public class JSONObject extends AbstractJSONValue {
         } else if (o.equals(Boolean.TRUE) || (o instanceof String && ((String) o).equalsIgnoreCase(STR_TRUE))) {
             return true;
         }
-        throw new JSONException(STR_ERR01 + quote(key) + "] is not a Boolean.");
+        throw new JSONException("JSONObject[" + quote(key) + "] is not a Boolean.");
     }
 
     /**
@@ -519,7 +518,7 @@ public class JSONObject extends AbstractJSONValue {
         try {
             return o instanceof Number ? ((Number) o).doubleValue() : Double.parseDouble((String) o);
         } catch (final Exception e) {
-            throw new JSONException(STR_ERR01 + quote(key) + "] is not a number.", e);
+            throw new JSONException("JSONObject[" + quote(key) + "] is not a number.", e);
         }
     }
 
@@ -547,7 +546,7 @@ public class JSONObject extends AbstractJSONValue {
         if (o instanceof JSONArray) {
             return (JSONArray) o;
         }
-        throw new JSONException(STR_ERR01 + quote(key) + "] is not a JSONArray.");
+        throw new JSONException("JSONObject[" + quote(key) + "] is not a JSONArray, but " + o.getClass().getName());
     }
 
     /**
@@ -562,7 +561,7 @@ public class JSONObject extends AbstractJSONValue {
         if (o instanceof JSONObject) {
             return (JSONObject) o;
         }
-        throw new JSONException(STR_ERR01 + quote(key) + "] is not a JSONObject.");
+        throw new JSONException("JSONObject[" + quote(key) + "] is not a JSONObject, but " + o.getClass().getName());
     }
 
     /**
@@ -650,6 +649,7 @@ public class JSONObject extends AbstractJSONValue {
      * 
      * @return The number of keys in the JSONObject.
      */
+    @Override
     public int length() {
         return this.myHashMap.size();
     }
@@ -1203,6 +1203,7 @@ public class JSONObject extends AbstractJSONValue {
      *         brace)</small> and ending with <code>}</code>&nbsp;<small>(right brace)</small>.
      * @throws JSONException If the object contains an invalid number.
      */
+    @Override
     public String toString(final int indentFactor, final int indent) throws JSONException {
         final int n = length();
         if (n == 0) {
@@ -1318,6 +1319,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Writer write(final Writer writer) throws JSONException {
         return write(writer, false);
     }
@@ -1325,6 +1327,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Writer write(final Writer writer, final boolean asciiOnly) throws JSONException {
         JsonGenerator jGenerator = null;
         try {
@@ -1487,6 +1490,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isArray() {
         return false;
     }
@@ -1494,6 +1498,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isObject() {
         return true;
     }
@@ -1501,6 +1506,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * {@inheritDoc}
      */
+    @Override
     public JSONArray toArray() {
         return null;
     }
@@ -1508,6 +1514,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * {@inheritDoc}
      */
+    @Override
     public JSONObject toObject() {
         return this;
     }

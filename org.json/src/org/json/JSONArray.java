@@ -220,11 +220,10 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Resets this JSONArray for re-use
      */
+    @Override
     public void reset() {
         myArrayList.clear();
     }
-
-    private static final String STR_ERR01 = "JSONArray[";
 
     /**
      * Gets this JSON array's iterator.
@@ -245,7 +244,7 @@ public class JSONArray extends AbstractJSONValue {
     public Object get(final int index) throws JSONException {
         final Object o = opt(index);
         if (o == null) {
-            throw new JSONException(STR_ERR01 + index + "] not found.");
+            throw new JSONException("JSONArray[" + index + "] not found.");
         }
         return o;
     }
@@ -264,7 +263,7 @@ public class JSONArray extends AbstractJSONValue {
         } else if (o.equals(Boolean.TRUE) || (o instanceof String && "true".equalsIgnoreCase((String) o))) {
             return true;
         }
-        throw new JSONException(STR_ERR01 + index + "] is not a Boolean.");
+        throw new JSONException("JSONArray[" + index + "] is not a Boolean.");
     }
 
     /**
@@ -279,7 +278,7 @@ public class JSONArray extends AbstractJSONValue {
         try {
             return o instanceof Number ? ((Number) o).doubleValue() : Double.parseDouble((String) o);
         } catch (final Exception e) {
-            throw new JSONException(STR_ERR01 + index + "] is not a number.", e);
+            throw new JSONException("JSONArray[" + index + "] is not a number.", e);
         }
     }
 
@@ -308,7 +307,7 @@ public class JSONArray extends AbstractJSONValue {
         if (o instanceof JSONArray) {
             return (JSONArray) o;
         }
-        throw new JSONException(STR_ERR01 + index + "] is not a JSONArray.");
+        throw new JSONException("JSONArray[" + index + "] is not a JSONArray, but " + o.getClass().getName());
     }
 
     /**
@@ -323,7 +322,7 @@ public class JSONArray extends AbstractJSONValue {
         if (o instanceof JSONObject) {
             return (JSONObject) o;
         }
-        throw new JSONException(STR_ERR01 + index + "] is not a JSONObject.");
+        throw new JSONException("JSONArray[" + index + "] is not a JSONObject, but " + o.getClass().getName());
     }
 
     /**
@@ -384,6 +383,7 @@ public class JSONArray extends AbstractJSONValue {
      * 
      * @return The length (or size).
      */
+    @Override
     public int length() {
         return myArrayList.size();
     }
@@ -727,7 +727,7 @@ public class JSONArray extends AbstractJSONValue {
      */
     public JSONArray put(final int index, final Object value) throws JSONException {
         if (index < 0) {
-            throw new JSONException(STR_ERR01 + index + "] not found.");
+            throw new JSONException("JSONArray[" + index + "] not found.");
         }
         if (index < length()) {
             this.myArrayList.set(index, value);
@@ -850,6 +850,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String toString(final int indentFactor, final int indent) throws JSONException {
         final int len = length();
         if (len == 0) {
@@ -889,6 +890,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Writer write(final Writer writer) throws JSONException {
         return write(writer, false);
     }
@@ -896,6 +898,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Writer write(final Writer writer, final boolean asciiOnly) throws JSONException {
         JsonGenerator jGenerator = null;
         try {
@@ -1025,6 +1028,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isArray() {
         return true;
     }
@@ -1032,6 +1036,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isObject() {
         return false;
     }
@@ -1039,6 +1044,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * {@inheritDoc}
      */
+    @Override
     public JSONArray toArray() {
         return this;
     }
@@ -1046,6 +1052,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * {@inheritDoc}
      */
+    @Override
     public JSONObject toObject() {
         return null;
     }
