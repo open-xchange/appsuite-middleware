@@ -49,20 +49,31 @@
 
 package com.openexchange.ajax.login;
 
+import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_JAVASCRIPT;
 import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.CLIENT_TOKEN;
 import static com.openexchange.ajax.fields.LoginFields.SERVER_TOKEN;
-import static com.openexchange.ajax.fields.LoginFields.VERSION_PARAM;
-import static com.openexchange.ajax.login.LoginTools.updateIPAddress;
 import java.io.IOException;
+import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.SessionServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.writer.LoginWriter;
+import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.user.UserService;
 
 /**
  * Implements the tokens login request taking the client and the server token to activate a previously created session.
@@ -70,6 +81,8 @@ import com.openexchange.sessiond.SessiondService;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class Tokens implements LoginRequestHandler {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Tokens.class);
 
     private LoginConfiguration conf;
 
@@ -91,122 +104,62 @@ public final class Tokens implements LoginRequestHandler {
         String clientToken = LoginTools.parseParameter(req, CLIENT_TOKEN);
         String serverToken = LoginTools.parseParameter(req, SERVER_TOKEN);
         String client = LoginTools.parseParameter(req, CLIENT_PARAM);
-        String version = LoginTools.parseParameter(req, VERSION_PARAM);
         String userAgent = LoginTools.parseUserAgent(req);
 
-        // TODO Register this login action dynamically if the SessiondService gets available.
+        // TODO Register this login action dynamically if SessiondService and UserService gets available.
         SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
+        ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, false);
+        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, false);
         Session session = sessiondService.getSessionWithTokens(clientToken, serverToken);
 
         // IP check if enabled; otherwise update session's IP address if different to request's IP address. Insecure check is done in
         // updateIPAddress method.
         if (!conf.isIpCheck()) {
             // Update IP address if necessary
-            updateIPAddress(conf, req.getRemoteAddr(), session);
+            LoginTools.updateIPAddress(conf, req.getRemoteAddr(), session);
         } else {
             final String newIP = req.getRemoteAddr();
             SessionServlet.checkIP(true, conf.getRanges(), session, newIP, conf.getIpCheckWhitelist());
             // IP check passed: update IP address if necessary
-            updateIPAddress(conf, newIP, session);
+            LoginTools.updateIPAddress(conf, newIP, session);
         }
-        // TODO update client, version, userAgent
-        // TODO update hash
+        // Update client, which is necessary for hash calculation. OXNotifier must not know which client will be used - maybe
+        // com.openexchange.ox.gui.dhtml or open-xchange-appsuite.
+        session.setClient(client);
+        // Update hash if the property com.openexchange.cookie.hash is configured to remember.
+        String hash = HashCalculator.getInstance().getHash(req, userAgent, client);
+        session.setHash(hash);
 
-        // TODO write cookies
-        // TODO write response
-
-//        Tools.disableCaching(resp);
-//        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-//        final Response response = new Response();
-//        Session session = null;
-//        try {
-//            String secret = null;
-//            final String hash = HashCalculator.getHash(req);
-//            final String sessionCookieName = SESSION_PREFIX + hash;
-//            final String secretCookieName = SECRET_PREFIX + hash;
-//
-//            NextCookie: for (final Cookie cookie : cookies) {
-//                final String cookieName = cookie.getName();
-//                if (cookieName.startsWith(sessionCookieName)) {
-//                    final String sessionId = cookie.getValue();
-//                    session = sessiondService.getSession(sessionId);
-//                    if (null != session) {
-//                        try {
-//                            final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
-//                            final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
-//                            if (!ctx.isEnabled() || !user.isMailEnabled()) {
-//                                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-//                            }
-//                        } catch (final UndeclaredThrowableException e) {
-//                            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
-//                        }
-//                        final JSONObject json = new JSONObject();
-//                        LoginWriter.write(session, json);
-//                        // Append "config/modules"
-//                        appendModules(session, json, req);
-//                        response.setData(json);
-//                        /*
-//                         * Secret already found?
-//                         */
-//                        if (null != secret) {
-//                            break NextCookie;
-//                        }
-//                    }
-//                } else if (cookieName.startsWith(secretCookieName)) {
-//                    secret = cookie.getValue();
-//                    /*
-//                     * Session already found?
-//                     */
-//                    if (null != session) {
-//                        break NextCookie;
-//                    }
-//                }
-//            }
-//            if (null == response.getData() || session == null || secret == null || !(session.getSecret().equals(secret))) {
-//                SessionServlet.removeOXCookies(hash, req, resp);
-//                SessionServlet.removeJSESSIONID(req, resp);
-//                if (doAutoLogin(req, resp)) {
-//                    throw OXJSONExceptionCodes.INVALID_COOKIE.create();
-//                }
-//                return;
-//            }
-//        } catch (final OXException e) {
-//            if (AjaxExceptionCodes.DISABLED_ACTION.equals(e)) {
-//                LOG.debug(e.getMessage(), e);
-//            } else {
-//                e.log(LOG);
-//            }
-//            if (SessionServlet.isIpCheckError(e) && null != session) {
-//                try {
-//                    // Drop Open-Xchange cookies
-//                    final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-//                    SessionServlet.removeOXCookies(session.getHash(), req, resp);
-//                    SessionServlet.removeJSESSIONID(req, resp);
-//                    sessiondService.removeSession(session.getSessionID());
-//                } catch (final Exception e2) {
-//                    LOG.error("Cookies could not be removed.", e2);
-//                }
-//            }
-//            response.setException(e);
-//        } catch (final JSONException e) {
-//            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-//            LOG.error(oje.getMessage(), oje);
-//            response.setException(oje);
-//        }
-//        // The magic spell to disable caching
-//        Tools.disableCaching(resp);
-//        resp.setStatus(HttpServletResponse.SC_OK);
-//        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-//        try {
-//            if (response.hasError()) {
-//                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-//            } else {
-//                ((JSONObject) response.getData()).write(resp.getWriter());
-//            }
-//        } catch (final JSONException e) {
-//            log(RESPONSE_ERROR, e);
-//            sendError(resp);
-//        }
+        final Response response = new Response();
+        try {
+            JSONObject json = new JSONObject();
+            LoginWriter.write(session, json);
+            response.setData(json);
+        } catch (JSONException e) {
+            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+            LOG.error(oje.getMessage(), oje);
+            response.setException(oje);
+        }
+        Tools.disableCaching(resp);
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        Login.writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
+        try {
+            if (response.hasError()) {
+                final Locale locale;
+                if (null != contextService && null != userService) {
+                    Context context = contextService.getContext(session.getContextId());
+                    locale = userService.getUser(session.getUserId(), context).getLocale();
+                } else {
+                    locale = Locale.US;
+                }
+                ResponseWriter.write(response, resp.getWriter(), locale);
+            } else {
+                ((JSONObject) response.getData()).write(resp.getWriter());
+            }
+        } catch (JSONException e) {
+            LOG.error(e.getMessage(), e);
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
     }
-
 }

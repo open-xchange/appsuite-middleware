@@ -666,6 +666,11 @@ public final class SessionHandler {
         return sessionControl.getSession();
     }
 
+    static Session getSessionWithTokens(String clientToken, String serverToken) throws OXException {
+        // FIXME implementation
+        return null;
+    }
+
     /**
      * Gets the session associated with given session ID
      * 
