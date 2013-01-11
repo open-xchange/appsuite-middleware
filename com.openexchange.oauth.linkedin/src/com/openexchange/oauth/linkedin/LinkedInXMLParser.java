@@ -214,6 +214,9 @@ public class LinkedInXMLParser {
 
     public Contact parse(final JSONObject person) {
         final Contact contact = new Contact();
+        if (person.hasAndNotNull("id")) {
+            contact.setUserField20(person.optString("id", null));
+        }
         contact.setGivenName(person.optString("firstName", null));
         contact.setSurName(person.optString("lastName", null));
         final String mainAddress = person.optString("mainAddress", null);
