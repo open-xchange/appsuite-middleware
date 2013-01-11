@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,44 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.ajax.session.actions;
 
-
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_ACTION;
+import static com.openexchange.ajax.Login.ACTION_TOKENS;
+import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.CLIENT_TOKEN;
+import static com.openexchange.ajax.fields.LoginFields.SERVER_TOKEN;
+import com.openexchange.ajax.framework.AJAXClient;
 
 /**
- * {@link SessionRemoverTimerTask} - A one-shot timer task to remove a session after its expiry.
+ * {@link TokensRequest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class SessionRemoverTimerTask implements Runnable {
+public final class TokensRequest extends AbstractRequest<TokensResponse> {
 
-    private final String sessionId;
-    private final SessionData sessionData;
+    private final boolean failOnError;
 
-    /**
-     * Initializes a new {@link SessionRemoverTimerTask}.
-     */
-    public SessionRemoverTimerTask(final String sessionId, final SessionData sessionData) {
-        super();
-        this.sessionId = sessionId;
-        this.sessionData = sessionData;
+    public TokensRequest(String clientToken, String serverToken, String client, boolean failOnError) {
+        super(new Parameter[] {
+            new URLParameter(PARAMETER_ACTION, ACTION_TOKENS),
+            new FieldParameter(CLIENT_TOKEN, clientToken),
+            new FieldParameter(SERVER_TOKEN, serverToken),
+            new FieldParameter(CLIENT_PARAM, client)
+        });
+        this.failOnError = failOnError;
+    }
+
+    public TokensRequest(String clientToken, String serverToken, boolean failOnError) {
+        this(clientToken, serverToken, AJAXClient.class.getName(), failOnError);
+    }
+
+    public TokensRequest(String clientToken, String serverToken) {
+        this(clientToken, serverToken, true);
     }
 
     @Override
-    public void run() {
-        sessionData.dropVolatileSession(sessionId);
+    public TokensParser getParser() {
+        return new TokensParser(failOnError);
     }
 }

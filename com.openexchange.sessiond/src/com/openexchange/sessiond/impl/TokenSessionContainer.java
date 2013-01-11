@@ -51,9 +51,14 @@ package com.openexchange.sessiond.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import com.openexchange.exception.OXException;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * This container stores the sessions created by the token login. These sessions either die after 60 seconds or they are moved over to the
@@ -67,14 +72,25 @@ public final class TokenSessionContainer {
     private static final TokenSessionContainer SINGLETON = new TokenSessionContainer();
 
     private final Map<String, TokenSessionControl> serverTokenMap = new HashMap<String, TokenSessionControl>();
+    private final Map<String, ScheduledTimerTask> removerMap = new ConcurrentHashMap<String, ScheduledTimerTask>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
+
+    private TimerService timerService;
 
     private TokenSessionContainer() {
         super();
     }
 
-    static TokenSessionContainer getInstance() {
+    public static TokenSessionContainer getInstance() {
         return SINGLETON;
+    }
+
+    public void addTimerService(TimerService service) {
+        timerService = service;
+    }
+
+    public void removeTimerService() {
+        timerService = null;
     }
 
     TokenSessionControl addSession(SessionImpl session, String clientToken, String serverToken) {
@@ -83,11 +99,67 @@ public final class TokenSessionContainer {
         wLock.lock();
         try {
             control = new TokenSessionControl(session, clientToken, serverToken);
-            TokenSessionControl previous = serverTokenMap.put(serverToken, control);
-            // TODO What to do with overwrite?
+            serverTokenMap.put(serverToken, control);
         } finally {
             wLock.unlock();
         }
+        scheduleRemover(control);
         return control;
+    }
+
+    TokenSessionControl getSession(String clientToken, String serverToken) throws OXException {
+        Lock rLock = lock.readLock();
+        final TokenSessionControl control;
+        rLock.lock();
+        try {
+            control = serverTokenMap.get(serverToken);
+        } finally {
+            rLock.unlock();
+        }
+        if (null == control) {
+            throw com.openexchange.sessiond.SessionExceptionCodes.NO_SESSION_FOR_SERVER_TOKEN.create(serverToken, clientToken);
+        }
+        if (!control.getServerToken().equals(serverToken)) {
+            throw com.openexchange.sessiond.SessionExceptionCodes.NO_SESSION_FOR_SERVER_TOKEN.create(serverToken, clientToken);
+        }
+        if (!control.getClientToken().equals(clientToken)) {
+            throw com.openexchange.sessiond.SessionExceptionCodes.NO_SESSION_FOR_CLIENT_TOKEN.create(serverToken, clientToken);
+        }
+        Lock wLock = lock.writeLock();
+        wLock.lock();
+        try {
+            serverTokenMap.remove(control.getServerToken());
+        } finally {
+            wLock.unlock();
+        }
+        unscheduleRemover(control);
+        return control;
+    }
+
+    TokenSessionControl removeSession(TokenSessionControl control) {
+        Lock wLock = lock.writeLock();
+        final TokenSessionControl removed;
+        wLock.lock();
+        try {
+            removed = serverTokenMap.remove(control.getServerToken());
+        } finally {
+            wLock.unlock();
+        }
+        return removed;
+    }
+
+    private void scheduleRemover(TokenSessionControl control) {
+        if (null == timerService) {
+            return;
+        }
+        ScheduledTimerTask task = timerService.schedule(new TokenSessionTimerRemover(control), 60, TimeUnit.SECONDS);
+        removerMap.put(control.getSession().getSessionID(), task);
+    }
+
+    private void unscheduleRemover(TokenSessionControl control) {
+        ScheduledTimerTask task = removerMap.get(control.getSession().getSessionID());
+        if (null != task) {
+            task.cancel();
+        }
     }
 }

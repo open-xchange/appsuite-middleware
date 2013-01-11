@@ -111,6 +111,12 @@ public final class SessionExceptionMessages implements LocalizableStrings {
     // This exception is used only internally for tests.
     public static final String NOT_IMPLEMENTED_MSG = "Method not implemented.";
 
+    // This exception is thrown if no session can be found for given server and/or client tokens. Internally 2 different codes indicate,
+    // which of both tokens did not work.
+    // %1$s is replaced with the server side token.
+    // %2$s is replaced with the client side token.
+    public static final String NO_SESSION_FOR_TOKENS_MSG = "Can not find a session for server token %1$s and client token %2$s.";
+
     private SessionExceptionMessages() {
         super();
     }

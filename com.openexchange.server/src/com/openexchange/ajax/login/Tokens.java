@@ -145,18 +145,14 @@ public final class Tokens implements LoginRequestHandler {
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         Login.writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
         try {
-            if (response.hasError()) {
-                final Locale locale;
-                if (null != contextService && null != userService) {
-                    Context context = contextService.getContext(session.getContextId());
-                    locale = userService.getUser(session.getUserId(), context).getLocale();
-                } else {
-                    locale = Locale.US;
-                }
-                ResponseWriter.write(response, resp.getWriter(), locale);
+            final Locale locale;
+            if (null != contextService && null != userService) {
+                Context context = contextService.getContext(session.getContextId());
+                locale = userService.getUser(session.getUserId(), context).getLocale();
             } else {
-                ((JSONObject) response.getData()).write(resp.getWriter());
+                locale = Locale.US;
             }
+            ResponseWriter.write(response, resp.getWriter(), locale);
         } catch (JSONException e) {
             LOG.error(e.getMessage(), e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

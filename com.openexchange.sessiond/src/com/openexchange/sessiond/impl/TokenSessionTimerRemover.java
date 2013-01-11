@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,29 +49,22 @@
 
 package com.openexchange.sessiond.impl;
 
-
-
 /**
- * {@link SessionRemoverTimerTask} - A one-shot timer task to remove a session after its expiry.
+ * {@link TokenSessionTimerRemover}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class SessionRemoverTimerTask implements Runnable {
+public class TokenSessionTimerRemover implements Runnable {
 
-    private final String sessionId;
-    private final SessionData sessionData;
+    private final TokenSessionControl control;
 
-    /**
-     * Initializes a new {@link SessionRemoverTimerTask}.
-     */
-    public SessionRemoverTimerTask(final String sessionId, final SessionData sessionData) {
+    public TokenSessionTimerRemover(TokenSessionControl control) {
         super();
-        this.sessionId = sessionId;
-        this.sessionData = sessionData;
+        this.control = control;
     }
 
     @Override
     public void run() {
-        sessionData.dropVolatileSession(sessionId);
+        TokenSessionContainer.getInstance().removeSession(control);
     }
 }

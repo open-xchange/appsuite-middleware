@@ -667,8 +667,25 @@ public final class SessionHandler {
     }
 
     static Session getSessionWithTokens(String clientToken, String serverToken) throws OXException {
-        // FIXME implementation
-        return null;
+        final SessionData sessionData = sessionDataRef.get();
+        if (null == sessionData) {
+            throw SessionExceptionCodes.NOT_INITIALIZED.create();
+        }
+        // find session matching to tokens
+        TokenSessionControl tokenControl = TokenSessionContainer.getInstance().getSession(clientToken, serverToken);
+        SessionImpl activatedSession = tokenControl.getSession();
+
+        // Put this session into the normal session container
+        SessionControl sessionControl = sessionData.addSession(activatedSession, noLimit, null);
+        SessionImpl addedSession = sessionControl.getSession();
+        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+        if (sessionStorageService != null) {
+            storeSession(addedSession, sessionStorageService, false);
+        }
+        // Post event for created session
+        postSessionCreation(addedSession);
+
+        return activatedSession;
     }
 
     /**

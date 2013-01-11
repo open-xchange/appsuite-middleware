@@ -127,7 +127,9 @@ public enum SessionExceptionCodes implements OXExceptionCode {
      * Method not implemented.
      * Use this only internally for testing purposes.
      */
-    NOT_IMPLEMENTED(NOT_IMPLEMENTED_MSG, Category.CATEGORY_ERROR, 209);
+    NOT_IMPLEMENTED(NOT_IMPLEMENTED_MSG, Category.CATEGORY_ERROR, 209),
+    NO_SESSION_FOR_SERVER_TOKEN(NO_SESSION_FOR_TOKENS_MSG, Category.CATEGORY_USER_INPUT, 210),
+    NO_SESSION_FOR_CLIENT_TOKEN(NO_SESSION_FOR_TOKENS_MSG, Category.CATEGORY_USER_INPUT, 211);
 
     private static final String PREFIX = "SES";
 

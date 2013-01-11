@@ -50,13 +50,20 @@
 package com.openexchange.ajax.session;
 
 import static com.openexchange.java.Autoboxing.I;
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.TokenLoginRequest;
 import com.openexchange.ajax.session.actions.TokenLoginResponse;
+import com.openexchange.ajax.session.actions.TokensRequest;
+import com.openexchange.ajax.session.actions.TokensResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.sessiond.SessionExceptionCodes;
 
 /**
  * Tests the action tokenLogin of the login servlet.
@@ -96,9 +103,12 @@ public class TokenLoginTest extends AbstractAJAXSession {
             assertNotNull("Login string was not found as fragment.", response.getLogin());
             assertNotSame("", I(-1), I(response.getUserId()));
             assertNotNull("Language string was not found as fragment.", response.getLanguage());
-            // TODO make next request testing client and server token.
-            fail("Second request not implemented.");
-            //session.setId(response.getSessionId());
+            // Activate session with tokens.
+            TokensResponse response2 = myClient.execute(new TokensRequest(response.getClientToken(), response.getServerToken()));
+            session.setId(response2.getSessionId());
+            // Test if session really works
+            int userId = myClient.execute(new GetRequest(Tree.Identifier)).getInteger();
+            assertTrue("Users identifier is somehow wrong. Check if session is correctly activated.", userId > 2);
         } finally {
             myClient.logout();
         }
@@ -114,9 +124,14 @@ public class TokenLoginTest extends AbstractAJAXSession {
             assertNotNull("Login string was not found as fragment.", response.getLogin());
             assertNotSame("", I(-1), I(response.getUserId()));
             assertNotNull("Language string was not found as fragment.", response.getLanguage());
-            // TODO make next request testing client and server token after too long time.
-            fail("Second request not implemented.");
-            //session.setId(response.getSessionId());
+            Thread.sleep(60000);
+            // Tokened session should be timed out.
+            TokensResponse response2 = myClient.execute(new TokensRequest(response.getClientToken(), response.getServerToken(), false));
+            assertTrue("Tokened session should be expired.", response2.hasError());
+            // Check for correct exception
+            OXException expected = OXExceptionFactory.getInstance().create(SessionExceptionCodes.NO_SESSION_FOR_SERVER_TOKEN);
+            OXException actual = response2.getException();
+            assertTrue("Wrong exception", actual.similarTo(expected));
         } finally {
             myClient.logout();
         }

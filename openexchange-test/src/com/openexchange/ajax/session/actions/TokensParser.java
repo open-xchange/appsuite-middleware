@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,38 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.ajax.session.actions;
 
-
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.Login;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link SessionRemoverTimerTask} - A one-shot timer task to remove a session after its expiry.
+ * {@link TokensParser}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class SessionRemoverTimerTask implements Runnable {
+public final class TokensParser extends AbstractAJAXParser<TokensResponse> {
 
-    private final String sessionId;
-    private final SessionData sessionData;
-
-    /**
-     * Initializes a new {@link SessionRemoverTimerTask}.
-     */
-    public SessionRemoverTimerTask(final String sessionId, final SessionData sessionData) {
-        super();
-        this.sessionId = sessionId;
-        this.sessionData = sessionData;
+    TokensParser(boolean failOnError) {
+        super(failOnError);
     }
 
     @Override
-    public void run() {
-        sessionData.dropVolatileSession(sessionId);
+    protected TokensResponse createResponse(Response response) throws JSONException {
+        TokensResponse retval = new TokensResponse(response);
+        final JSONObject json = (JSONObject) response.getData();
+        if (isFailOnError()) {
+            assertFalse(response.getErrorMessage(), response.hasError());
+            assertTrue("Session ID is missing.", json.has(Login.PARAMETER_SESSION));
+            assertTrue("Random is missing.", json.has(LoginFields.RANDOM_PARAM));
+        }
+        if (!response.hasError()) {
+            retval.setSessionId(json.getString(Login.PARAMETER_SESSION));
+        }
+        return retval;
     }
 }
