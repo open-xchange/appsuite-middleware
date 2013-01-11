@@ -49,8 +49,6 @@
 
 package com.openexchange.oauth.yahoo.internal;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -60,6 +58,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -166,7 +166,7 @@ public class YahooServiceImpl implements YahooService {
             final CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool()).setTrackable(true);
             int numTasks = 0;
             final int length = allContactsArray.length();
-            final TIntObjectMap<Contact> contactMap = new TIntObjectHashMap<Contact>(length);
+            final ConcurrentMap<Integer, Contact> contactMap = new ConcurrentHashMap<Integer, Contact>(length);
             // get each contact with its own request
             for (int i = 0; i < length; i++) {
                 final JSONObject entry = allContactsArray.getJSONObject(i);
@@ -182,7 +182,7 @@ public class YahooServiceImpl implements YahooService {
                             final OAuthRequest singleContactRequest = new OAuthRequest(Verb.GET, singleContactUrl);
                             service.signRequest(accessToken, singleContactRequest);
                             final Response singleContactResponse = singleContactRequest.send();
-                            contactMap.put(index, parseSingleContact(extractJson(singleContactResponse)));
+                            contactMap.put(Integer.valueOf(index), parseSingleContact(extractJson(singleContactResponse)));
                             return null;
                         }
                     };
@@ -195,7 +195,7 @@ public class YahooServiceImpl implements YahooService {
             }
             final List<Contact> contactList = new ArrayList<Contact>(length);
             for (int i = 0; i < length; i++) {
-                final Contact contact = contactMap.get(i);
+                final Contact contact = contactMap.get(Integer.valueOf(i));
                 if (null != contact) {
                     contactList.add(contact);
                 }
