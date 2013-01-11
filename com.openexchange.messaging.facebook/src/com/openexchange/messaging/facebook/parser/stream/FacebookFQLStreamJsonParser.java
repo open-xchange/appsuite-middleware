@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Node;
@@ -319,14 +320,15 @@ public final class FacebookFQLStreamJsonParser {
                 /*
                  * "media" node
                  */
-                final JSONObject media = attachmentInformation.optJSONObject("media");
-                if (null != media) {
-                    final JSONObject streamMedia = media.optJSONObject("stream_media");
-                    if (null != streamMedia) {
+                final JSONArray media = attachmentInformation.optJSONArray("media");
+                final int length = media.length();
+                for (int i = 0; i < length; i++) {
+                    final JSONObject mediaInformation = media.optJSONObject(i);
+                    if (null != mediaInformation) {
                         /*
                          * "video" node
                          */
-                        final JSONObject video = streamMedia.optJSONObject("video");
+                        final JSONObject video = mediaInformation.optJSONObject("video");
                         if (null != video) {
                             sourceURL = video.optString("source_url", null);
                             if (null != sourceURL) {
@@ -342,7 +344,6 @@ public final class FacebookFQLStreamJsonParser {
                                 }
                             }
                         }
-
                     }
                 }
                 /*
@@ -406,12 +407,12 @@ public final class FacebookFQLStreamJsonParser {
                 /*
                  * "media" node
                  */
-                final JSONObject media = attachmentInformation.optJSONObject("media");
-                // System.out.println(FacebookMessagingUtility.toString(media));
-                if (null != media) {
-                    final JSONObject streamMedia = media.optJSONObject("stream_media");
-                    if (null != streamMedia) {
-                        sourceUrlBig = streamMedia.optString("src_big", null);
+                final JSONArray media = attachmentInformation.optJSONArray("media");
+                final int length = media.length();
+                for (int i = 0; i < length; i++) {
+                    final JSONObject mediaInformation = media.optJSONObject(i);
+                    if (null != mediaInformation) {
+                        sourceUrlBig = mediaInformation.optString("src_big", null);
                         if (null != sourceUrlBig) {
                             final int pos = sourceUrlBig.lastIndexOf('.');
                             if (pos >= 0) {
@@ -427,7 +428,7 @@ public final class FacebookFQLStreamJsonParser {
                             /*
                              * "src" node
                              */
-                            sourceUrl = streamMedia.optString("src", null);
+                            sourceUrl = mediaInformation.optString("src", null);
                             if (null != sourceUrl) {
                                 final int pos = sourceUrl.lastIndexOf('.');
                                 if (pos >= 0) {
@@ -479,11 +480,12 @@ public final class FacebookFQLStreamJsonParser {
                 /*
                  * "media" node
                  */
-                final JSONObject media = attachmentInformation.optJSONObject("media");
-                if (null != media) {
-                    final JSONObject streamMedia = media.optJSONObject("stream_media");
-                    if (null != streamMedia) {
-                        final JSONObject swf = streamMedia.optJSONObject("swf");
+                final JSONArray media = attachmentInformation.optJSONArray("media");
+                final int length = media.length();
+                for (int i = 0; i < length; i++) {
+                    final JSONObject mediaInformation = media.optJSONObject(i);
+                    if (null != mediaInformation) {
+                        final JSONObject swf = mediaInformation.optJSONObject("swf");
                         if (null != swf) {
                             /*
                              * "source_url" node
@@ -630,21 +632,23 @@ public final class FacebookFQLStreamJsonParser {
                     }
                 }
                 if (!attachmentHandlerFound && attachmentNode.hasAndNotNull("media")) {
-                    final JSONObject mediaInformation = attachmentNode.getJSONObject("media");
-                    if (mediaInformation.hasAndNotNull("stream_media")) {
-                        final JSONObject streamMediaInformation = mediaInformation.getJSONObject("stream_media");
-                        if (streamMediaInformation.hasAndNotNull("type")) {
-                            final String sType = streamMediaInformation.getString("type");
-                            final AttachmentHandler attachmentHandler = ATTACH_HANDLERS.get(sType);
-                            if (null == attachmentHandler) {
-                                final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamJsonParser.class));
-                                logger.warn("Unknown attachment type: " + sType);
-                                logger.debug("Stream element:\n" + streamElement.toString(2));
-                            } else {
-                                attachmentHandler.handleAttachment(attachmentNode, message, multipartProvider);
+                    final JSONArray media = attachmentNode.getJSONArray("media");
+                    final int length = media.length();
+                    for (int i = 0; i < length; i++) {
+                        final JSONObject mediaInformation = media.optJSONObject(i);
+                        if (null != mediaInformation) {
+                            final String sType = mediaInformation.optString("type", null);
+                            if (null != sType) {
+                                final AttachmentHandler attachmentHandler = ATTACH_HANDLERS.get(sType);
+                                if (null == attachmentHandler) {
+                                    final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamJsonParser.class));
+                                    logger.warn("Unknown attachment type: " + sType);
+                                    logger.debug("Stream element:\n" + streamElement.toString(2));
+                                } else {
+                                    attachmentHandler.handleAttachment(attachmentNode, message, multipartProvider);
+                                }
+                                attachmentHandlerFound = true;
                             }
-                            attachmentHandlerFound = true;
-                            
                         }
                     }
                 }
@@ -691,7 +695,13 @@ public final class FacebookFQLStreamJsonParser {
              */
             return message;
         } catch (final JSONException e) {
-            throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            String sJson;
+            try {
+                sJson = streamElement.toString(2);
+            } catch (final JSONException x) {
+                sJson = null;
+            }
+            throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage() + (null == sJson ? "" : "\nJSON data:\n" + sJson));
         } catch (final RuntimeException e) {
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

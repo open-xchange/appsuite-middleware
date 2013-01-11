@@ -766,6 +766,9 @@ public final class FacebookMessagingUtility {
             if (body.isArray()) {
                 final JSONArray array = body.toArray();
                 final int length = array.length();
+                if (length <= 0) {
+                    return Collections.emptyList();
+                }
                 final List<JSONObject> ret = new ArrayList<JSONObject>(length);
                 for (int i = 0; i < length; i++) {
                     ret.add(array.getJSONObject(i));
