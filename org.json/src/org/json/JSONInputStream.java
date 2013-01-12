@@ -79,6 +79,7 @@ public final class JSONInputStream extends InputStream {
             super();
         }
 
+        @Override
         public boolean writeMoreBytes() throws IOException {
             out.reset();
             if (!hasNext()) {
@@ -105,19 +106,34 @@ public final class JSONInputStream extends InputStream {
                 nested = new JSONInputStream((JSONValue) value, charset);
             } else if (value instanceof String) {
                 out.write('"');
-                out.write(toAscii(value.toString()).getBytes(charset));
+                out.write(toAsciiBytes(toAscii(value.toString())));
                 out.write('"');
             } else {
                 out.write((null == value ? "null" : value.toString()).getBytes(charset));
             }
         }
 
-        private String toAscii(final String str) {
+        /** Writes specified String's ASCII bytes */
+        protected byte[] toAsciiBytes(final String str) {
+            if (null == str) {
+                return null;
+            }
+            final int length = str.length();
+            if (0 == length) {
+                return new byte[0];
+            }
+            final byte[] ret = new byte[length];
+            str.getBytes(0, length, ret, 0);
+            return ret;
+        }
+
+        /** Converts specified String to JSON's ASCII notation */
+        protected String toAscii(final String str) {
             if (null == str) {
                 return str;
             }
             final int length = str.length();
-            if (0 == length || isAscii(str)) {
+            if (0 == length || isAscii(str, length)) {
                 return str;
             }
             final StringAllocator sa = new StringAllocator((length * 3) / 2 + 1);
@@ -141,14 +157,7 @@ public final class JSONInputStream extends InputStream {
             sa.append(hex);
         }
 
-        private boolean isAscii(final String s) {
-            if (null == s) {
-                return true;
-            }
-            final int length = s.length();
-            if (0 == length) {
-                return true;
-            }
+        private boolean isAscii(final String s, final int length) {
             boolean isAscci = true;
             for (int i = 0; (i < length) && isAscci; i++) {
                 isAscci = (s.charAt(i) < 128);
@@ -166,14 +175,17 @@ public final class JSONInputStream extends InputStream {
             this.arrIterator = arrIterator;
         }
 
+        @Override
         public char getClosing() {
             return ']';
         }
 
+        @Override
         public boolean hasNext() {
             return arrIterator.hasNext();
         }
 
+        @Override
         public Object next() {
             return arrIterator.next();
         }
@@ -189,18 +201,21 @@ public final class JSONInputStream extends InputStream {
             this.objIterator = objIterator;
         }
 
+        @Override
         public char getClosing() {
             return '}';
         }
 
+        @Override
         public boolean hasNext() {
             return objIterator.hasNext();
         }
 
+        @Override
         public Object next() throws IOException {
             final Entry<String, Object> entry = objIterator.next();
             out.write('"');
-            out.write(entry.getKey().getBytes(charset));
+            out.write(toAsciiBytes(entry.getKey()));
             out.write('"');
             out.write(':');
             return entry.getValue();

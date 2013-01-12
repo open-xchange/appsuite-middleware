@@ -72,6 +72,16 @@ public class Strings {
         super();
     }
 
+    /**
+     * Writes specified string's ASCII bytes
+     * 
+     * @param str The string
+     * @return The ASCII bytes
+     */
+    public static byte[] toAsciiBytes(final String str) {
+        return Charsets.toAsciiBytes(str);
+    }
+
     private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
     /**
      * Splits given string by comma separator.

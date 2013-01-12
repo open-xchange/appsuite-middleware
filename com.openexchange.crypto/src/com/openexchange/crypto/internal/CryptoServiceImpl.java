@@ -64,6 +64,7 @@ import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.crypto.EncryptedData;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import de.rtner.security.auth.spi.PBKDF2Engine;
 import de.rtner.security.auth.spi.PBKDF2Parameters;
 
@@ -230,7 +231,7 @@ public class CryptoServiceImpl implements CryptoService {
              * requirements a binary transport encoding for mail must meet.
              *
              */
-            encrypted = Base64.decodeBase64(encryptedData.getBytes(com.openexchange.java.Charsets.US_ASCII));
+            encrypted = Base64.decodeBase64(Charsets.toAsciiBytes(encryptedData));
 
             cipher = Cipher.getInstance(CIPHER_TYPE);
             cipher.init(Cipher.DECRYPT_MODE, key, IV);

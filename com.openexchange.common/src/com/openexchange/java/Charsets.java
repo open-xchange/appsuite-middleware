@@ -97,6 +97,35 @@ public final class Charsets {
     }
 
     /**
+     * Writes specified string's ASCII bytes
+     * 
+     * @param str The string
+     * @return The ASCII bytes
+     */
+    public static byte[] toAsciiBytes(final CharSequence cs) {
+        return toAsciiBytes(cs.toString());
+    }
+
+    /**
+     * Writes specified string's ASCII bytes
+     * 
+     * @param str The string
+     * @return The ASCII bytes
+     */
+    public static byte[] toAsciiBytes(final String str) {
+        if (null == str) {
+            return null;
+        }
+        final int length = str.length();
+        if (0 == length) {
+            return new byte[0];
+        }
+        final byte[] ret = new byte[length];
+        str.getBytes(0, length, ret, 0);
+        return ret;
+    }
+
+    /**
      * Gets a {@link Charset charset} object for the named charset.
      *
      * @param charsetName The name of the requested charset; may be either a canonical name or an alias
