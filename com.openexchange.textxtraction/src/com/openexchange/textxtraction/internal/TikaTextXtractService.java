@@ -87,7 +87,7 @@ public class TikaTextXtractService extends AbstractTextXtractService {
     
     private final ConcurrentMap<DelegateTextXtraction, Object> delegatees;
     
-    private Tika tika = null;
+    private final Tika tika;
 
 
     /**
@@ -97,6 +97,7 @@ public class TikaTextXtractService extends AbstractTextXtractService {
     public TikaTextXtractService(ConfigurationService service) {
         super();
         delegatees = new ConcurrentHashMap<DelegateTextXtraction, Object>(4);
+        Tika tika = null;
         try {
         	final TikaConfig config;
         	if (service == null) {
@@ -117,7 +118,8 @@ public class TikaTextXtractService extends AbstractTextXtractService {
             LOG.error(e.getMessage(), e);
         } catch (SAXException e) {
             LOG.error(e.getMessage(), e);
-        }        
+        }
+        this.tika = tika;
     }
     
     /**
