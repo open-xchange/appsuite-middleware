@@ -72,6 +72,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.Metadata;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.Serializer;
@@ -561,7 +562,7 @@ public final class HtmlServiceImpl implements HtmlService {
             return text;
         } catch (final StackOverflowError soe) {
             // Unfortunately it may happen...
-            LOG.error("Stack-overflow during processing HTML content.", soe);
+            LOG.warn("Stack-overflow during processing HTML content.", soe);
             // Retry with Tika framework
             try {
                 return extractFrom(new UnsynchronizedByteArrayInputStream(htmlContent.getBytes(Charsets.ISO_8859_1)));
@@ -573,18 +574,18 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private String extractFrom(final InputStream inputStream) throws OXException {  
-        /*
-         * None of the delegates could extract some text.
-         */
         try {
-            return tika.parseToString(inputStream);
+            final Metadata metadata = new Metadata();
+            metadata.set(Metadata.CONTENT_ENCODING, "ISO-8859-1");
+            metadata.set(Metadata.CONTENT_TYPE, "text/html");
+            return tika.parseToString(inputStream, metadata);
         } catch (final IOException e) {
             throw new OXException(e);
         } catch (final TikaException e) {
             throw new OXException(e);
         } finally {
             IOUtils.closeQuietly(inputStream);
-        }    
+        }
     }
 
     private static final Pattern PATTERN_HR = Pattern.compile("<hr[^>]*>(.*?</hr>)?", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
