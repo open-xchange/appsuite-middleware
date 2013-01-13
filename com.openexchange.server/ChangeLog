@@ -1,3 +1,7 @@
+* 2013-01-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24469: Added alternative html2text conversion utilizing Tika framework
+
 * 2013-01-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 23455: Fixed naming of referenced commons-logging jar
