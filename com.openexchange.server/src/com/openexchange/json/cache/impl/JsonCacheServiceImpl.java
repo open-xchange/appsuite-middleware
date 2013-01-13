@@ -50,8 +50,6 @@
 package com.openexchange.json.cache.impl;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -64,7 +62,7 @@ import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
+import com.openexchange.java.AsciiReader;
 import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
@@ -78,10 +76,6 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JsonCacheServiceImpl implements JsonCacheService {
-
-    private static final Charset US_ASCII = Charsets.US_ASCII;
-
-    private static final Charset UTF8 = Charsets.UTF_8;
 
     private final ServiceLookup services;
 
@@ -202,7 +196,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             //final String asciiOnly = toJavaNotation(jsonValue.toString());
             if (update) {
                 stmt = con.prepareStatement("UPDATE jsonCache SET json=?, size=?, lastUpdate=?, took=? WHERE cid=? AND user=? AND id=?");
-                stmt.setNCharacterStream(1, new InputStreamReader(new JSONInputStream(jsonValue, "US-ASCII"), Charsets.US_ASCII));
+                stmt.setNCharacterStream(1, new AsciiReader(new JSONInputStream(jsonValue, "US-ASCII")));
                 stmt.setLong(2, jsonValue.length());
                 stmt.setLong(3, now);
                 if (duration < 0) {
@@ -218,7 +212,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setString(3, id);
-                stmt.setNCharacterStream(4, new InputStreamReader(new JSONInputStream(jsonValue, "US-ASCII"), Charsets.US_ASCII));
+                stmt.setNCharacterStream(4, new AsciiReader(new JSONInputStream(jsonValue, "US-ASCII")));
                 stmt.setLong(5, jsonValue.length());
                 stmt.setLong(6, now);
                 if (duration < 0) {
@@ -305,7 +299,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             final long now = System.currentTimeMillis();
             if (update) {
                 stmt = con.prepareStatement("UPDATE jsonCache SET json=?, size=?, lastUpdate=?, took=? WHERE cid=? AND user=? AND id=?");
-                stmt.setNCharacterStream(1, new InputStreamReader(new JSONInputStream(jsonValue, "US-ASCII"), Charsets.US_ASCII));
+                stmt.setNCharacterStream(1, new AsciiReader(new JSONInputStream(jsonValue, "US-ASCII")));
                 stmt.setLong(2, jsonValue.length());
                 stmt.setLong(3, now);
                 if (duration < 0) {
@@ -321,7 +315,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setString(3, id);
-                stmt.setNCharacterStream(4, new InputStreamReader(new JSONInputStream(jsonValue, "US-ASCII"), Charsets.US_ASCII));
+                stmt.setNCharacterStream(4, new AsciiReader(new JSONInputStream(jsonValue, "US-ASCII")));
                 stmt.setLong(5, jsonValue.length());
                 stmt.setLong(6, now);
                 if (duration < 0) {

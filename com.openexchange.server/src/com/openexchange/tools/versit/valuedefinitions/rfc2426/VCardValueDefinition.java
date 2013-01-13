@@ -52,6 +52,7 @@ package com.openexchange.tools.versit.valuedefinitions.rfc2426;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import com.openexchange.java.Charsets;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.ReaderScanner;
@@ -75,7 +76,7 @@ public class VCardValueDefinition extends TextValueDefinition {
         try {
             final ByteArrayOutputStream stream = new UnsynchronizedByteArrayOutputStream();
             VCard.definition.write(VCard.definition.getWriter(stream, "US-ASCII"), (VersitObject) value);
-            return new String(stream.toByteArray(), com.openexchange.java.Charsets.US_ASCII);
+            return Charsets.toAsciiString(stream.toByteArray());
         } catch (final IOException e) {
             return "";
         }

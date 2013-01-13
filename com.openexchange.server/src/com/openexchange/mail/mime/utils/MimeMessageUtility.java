@@ -735,7 +735,7 @@ public final class MimeMessageUtility {
             final String transferEncoding = m.group(2);
             if ("Q".equalsIgnoreCase(transferEncoding)) {
                 try {
-                    rawBytes = QuotedPrintableCodec.decodeQuotedPrintable(asciiText.getBytes(com.openexchange.java.Charsets.US_ASCII));
+                    rawBytes = QuotedPrintableCodec.decodeQuotedPrintable(Charsets.toAsciiBytes(asciiText));
                 } catch (final DecoderException e) {
                     /*
                      * Invalid quoted-printable
@@ -744,7 +744,7 @@ public final class MimeMessageUtility {
                     return asciiText;
                 }
             } else if ("B".equalsIgnoreCase(transferEncoding)) {
-                rawBytes = Base64.decodeBase64(asciiText.getBytes(com.openexchange.java.Charsets.US_ASCII));
+                rawBytes = Base64.decodeBase64(Charsets.toAsciiBytes(asciiText));
             } else {
                 /*
                  * Unknown transfer-encoding; just return current match
@@ -844,9 +844,7 @@ public final class MimeMessageUtility {
                             /*
                              * Retry with another library
                              */
-                            sb.append(new String(
-                                Base64.decodeBase64(m.group(3).getBytes(com.openexchange.java.Charsets.US_ASCII)),
-                                Charsets.forName(m.group(1))));
+                            sb.append(new String(Base64.decodeBase64(Charsets.toAsciiBytes(m.group(3))), Charsets.forName(m.group(1))));
                         }
                     } else {
                         sb.append(MimeUtility.decodeWord(m.group()));
@@ -1465,8 +1463,7 @@ public final class MimeMessageUtility {
                                 /*
                                  * All read
                                  */
-                                return new String(buffer.toByteArray(), com.openexchange.java.Charsets.US_ASCII);
-
+                                return Charsets.toAsciiString(buffer.toByteArray());
                             }
                             /*
                              * Write previously ignored CRLF
@@ -1502,7 +1499,7 @@ public final class MimeMessageUtility {
                      * Found the first delimiting colon in header line
                      */
                     firstColonFound = true;
-                    if ((new String(buffer.toByteArray(start, buffer.size() - start - 1), com.openexchange.java.Charsets.US_ASCII).equalsIgnoreCase(headerName))) {
+                    if ((Charsets.toAsciiString(buffer.toByteArray(start, buffer.size() - start - 1)).equalsIgnoreCase(headerName))) {
                         /*
                          * Matching header
                          */

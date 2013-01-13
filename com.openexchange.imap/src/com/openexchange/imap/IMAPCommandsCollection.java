@@ -95,6 +95,7 @@ import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
 import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.util.IMAPUpdateableData;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -2943,7 +2944,7 @@ public final class IMAPCommandsCollection {
             if (null == byteArray) {
                 return null;
             }
-            return new String(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount(), com.openexchange.java.Charsets.US_ASCII);
+            return Charsets.toAsciiString(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount());
         }
     };
 
@@ -2955,7 +2956,7 @@ public final class IMAPCommandsCollection {
             if (null == byteArray) {
                 return null;
             }
-            return new String(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount(), com.openexchange.java.Charsets.US_ASCII);
+            return Charsets.toAsciiString(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount());
         }
     };
 

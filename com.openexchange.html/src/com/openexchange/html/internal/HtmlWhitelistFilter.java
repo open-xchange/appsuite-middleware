@@ -55,7 +55,6 @@ import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -79,11 +78,11 @@ import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.Tag;
 import org.apache.commons.logging.Log;
-import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.AsciiReader;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link HtmlWhitelistFilter}
@@ -547,7 +546,7 @@ public final class HtmlWhitelistFilter {
                     } else {
                         BufferedReader reader = null;
                         try {
-                            reader = new BufferedReader(new InputStreamReader(new FileInputStream(whitelist), Charsets.US_ASCII));
+                            reader = new BufferedReader(new AsciiReader(new FileInputStream(whitelist)));
                             final StringBuilder sb = new StringBuilder();
                             String line = null;
                             while ((line = reader.readLine()) != null) {

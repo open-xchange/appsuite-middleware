@@ -192,7 +192,7 @@ public class CryptoServiceImpl implements CryptoService {
              * requirements a binary transport encoding for mail must meet.
              *
              */
-            retval = new String(Base64.encodeBase64(outputBytes), com.openexchange.java.Charsets.US_ASCII);
+            retval = Charsets.toAsciiString(Base64.encodeBase64(outputBytes));
         } catch (final GeneralSecurityException e) {
             throw SecurityException.create(e);
         }

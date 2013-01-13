@@ -3,8 +3,6 @@ package com.openexchange.control.console;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
@@ -22,6 +20,7 @@ import javax.management.remote.JMXServiceURL;
 import javax.security.auth.Subject;
 import org.apache.commons.codec.binary.Base64;
 import com.openexchange.control.console.internal.ConsoleException;
+import com.openexchange.java.Charsets;
 
 /**
  * {@link AbstractJMXHandler} - This class contains the JMX stuff for the command line tools
@@ -35,25 +34,17 @@ public abstract class AbstractJMXHandler {
 
         private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractConsoleJMXAuthenticator.class));
 
-        private static volatile Charset US_ASCII;
-
         private final String[] credentials;
 
-        public AbstractConsoleJMXAuthenticator(final String[] credentials) {
+        /**
+         * Initializes a new {@link AbstractConsoleJMXAuthenticator}.
+         * 
+         * @param credentials The credentials
+         */
+        protected AbstractConsoleJMXAuthenticator(final String[] credentials) {
             super();
             this.credentials = new String[credentials.length];
             System.arraycopy(credentials, 0, this.credentials, 0, credentials.length);
-        }
-
-        private static Charset getUSASCII() {
-            if (US_ASCII == null) {
-                synchronized (AbstractConsoleJMXAuthenticator.class) {
-                    if (US_ASCII == null) {
-                        US_ASCII = Charset.forName("US-ASCII");
-                    }
-                }
-            }
-            return US_ASCII;
         }
 
         private static String makeSHAPasswd(final String raw) {
@@ -79,9 +70,7 @@ public abstract class AbstractJMXHandler {
             }
             md.update(salt);
 
-            final String ret = getUSASCII().decode(ByteBuffer.wrap(Base64.encodeBase64(md.digest()))).toString();
-
-            return ret;
+            return Charsets.toAsciiString(Base64.encodeBase64(md.digest()));
         }
 
         @Override

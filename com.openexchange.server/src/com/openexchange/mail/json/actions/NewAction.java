@@ -71,6 +71,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
@@ -264,7 +265,7 @@ public final class NewAction extends AbstractMailAction {
         final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
         final PutNewMailData data;
         {
-            final MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(((String) req.getRequest().getData()).getBytes(com.openexchange.java.Charsets.US_ASCII)));
+            final MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().getData())));
             message.removeHeader("x-original-headers");
             final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
             final InternetAddress fromAddress;

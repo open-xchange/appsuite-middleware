@@ -2320,7 +2320,7 @@ public class OXContainerConverter {
 
     private static String encodeQP(final String string) throws ConverterException {
         try {
-            return new String(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8)),com.openexchange.java.Charsets.US_ASCII).replaceAll("=", "%");
+            return Charsets.toAsciiString(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8))).replaceAll("=", "%");
         } catch (final UnsupportedCharsetException e) {
             // Cannot occur
             throw new ConverterException(e);
@@ -2329,7 +2329,7 @@ public class OXContainerConverter {
 
     private static String decodeQP(final String string) throws ConverterException {
         try {
-            return new String(QuotedPrintableCodec.decodeQuotedPrintable(string.replaceAll("%", "=").getBytes(com.openexchange.java.Charsets.US_ASCII)), com.openexchange.java.Charsets.UTF_8);
+            return new String(QuotedPrintableCodec.decodeQuotedPrintable(Charsets.toAsciiBytes(string.replaceAll("%", "="))), com.openexchange.java.Charsets.UTF_8);
         } catch (final DecoderException e) {
             throw new ConverterException(e);
         }

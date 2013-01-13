@@ -109,7 +109,7 @@ public final class JSONInputStream extends InputStream {
                 out.write(toAsciiBytes(toAscii(value.toString())));
                 out.write('"');
             } else {
-                out.write((null == value ? "null" : value.toString()).getBytes(charset));
+                out.write(toAsciiBytes(null == value ? "null" : value.toString()));
             }
         }
 

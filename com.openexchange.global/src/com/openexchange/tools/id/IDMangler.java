@@ -55,6 +55,7 @@ import java.util.BitSet;
 import java.util.List;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import com.openexchange.java.Charsets;
 
 /**
  * {@link IDMangler} - Utility class for generating & parsing a mangled/composite identifier.
@@ -256,7 +257,7 @@ public class IDMangler {
 
     private static String encodeQP(final String string) {
         try {
-            return new String(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8)),com.openexchange.java.Charsets.US_ASCII);
+            return Charsets.toAsciiString(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8)));
         } catch (final UnsupportedCharsetException e) {
             // Cannot occur
             return string;
@@ -265,7 +266,7 @@ public class IDMangler {
 
     private static String decodeQP(final String string) {
         try {
-            return new String(QuotedPrintableCodec.decodeQuotedPrintable(string.getBytes(com.openexchange.java.Charsets.US_ASCII)), com.openexchange.java.Charsets.UTF_8);
+            return new String(QuotedPrintableCodec.decodeQuotedPrintable(Charsets.toAsciiBytes(string)), com.openexchange.java.Charsets.UTF_8);
         } catch (final DecoderException e) {
             return string;
         }

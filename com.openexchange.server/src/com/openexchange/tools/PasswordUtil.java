@@ -59,6 +59,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
+import com.openexchange.java.Charsets;
 
 /**
  * {@link PasswordUtil} - Utility class to encrypt/decrypt passwords with a key aka password based encryption (PBE).
@@ -146,7 +147,7 @@ public class PasswordUtil {
          * requirements a binary transport encoding for mail must meet.
          *
          */
-        return new String(Base64.encodeBase64(outputBytes), com.openexchange.java.Charsets.US_ASCII);
+        return Charsets.toAsciiString(Base64.encodeBase64(outputBytes));
     }
 
     /**
@@ -178,7 +179,7 @@ public class PasswordUtil {
              * requirements a binary transport encoding for mail must meet.
              *
              */
-            encrypted = Base64.decodeBase64(encryptedPassword.getBytes(com.openexchange.java.Charsets.US_ASCII));
+            encrypted = Base64.decodeBase64(Charsets.toAsciiBytes(encryptedPassword));
         }
 
         final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);

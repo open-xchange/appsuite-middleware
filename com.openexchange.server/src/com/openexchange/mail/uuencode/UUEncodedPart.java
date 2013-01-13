@@ -59,6 +59,7 @@ import java.io.OutputStream;
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeUtility;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
@@ -85,7 +86,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
         super();
         this.startIndex = startIndex;
         this.endIndex = endIndex;
-        this.bodyPart = bodyPart.getBytes(com.openexchange.java.Charsets.US_ASCII);
+        this.bodyPart = Charsets.toAsciiBytes(bodyPart);
         sPossibleFileName = filename;
     }
 
