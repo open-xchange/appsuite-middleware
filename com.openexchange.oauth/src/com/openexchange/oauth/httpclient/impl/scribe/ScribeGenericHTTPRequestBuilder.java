@@ -111,7 +111,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 		case DROPBOX: return DropBoxApi.class;
 		case XING: return XingApi.class;
 		case VKONTAKTE: return VkontakteApi.class;
-		// Add new API enums here
+		// Add new API enums above
 		
 		case OTHER: // fall-through
 		default:
