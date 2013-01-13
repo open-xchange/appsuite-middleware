@@ -47,48 +47,21 @@
  *
  */
 
-package com.openexchange.oauth.yahoo.internal;
+package com.openexchange.oauth;
 
-import org.scribe.builder.api.Api;
-import org.scribe.builder.api.YahooApi;
-import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 
 /**
- * {@link OAuthServiceMetaDataYahooImpl}
- * 
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * {@link ScribeAware} - Extends {@code OAuthServiceMetaData} by {@link #getScribeService()} method.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
+public interface ScribeAware extends OAuthServiceMetaData {
 
-    private final DeferringURLService deferrer;
+    /**
+     * Gets the associated Scribe service.
+     * 
+     * @return The Scribe service
+     */
+    Class<? extends org.scribe.builder.api.Api> getScribeService();
 
-    public OAuthServiceMetaDataYahooImpl(String apiKey, String apiSecret, DeferringURLService deferrer) {
-        super();
-        setId("com.openexchange.oauth.yahoo");
-        setApiKey(apiKey);
-        setApiSecret(apiSecret);
-        setDisplayName("Yahoo");
-        this.deferrer = deferrer;
-    }
-
-    @Override
-    public String modifyCallbackURL(String callbackUrl) {
-        if (deferrer == null) {
-            return callbackUrl;
-        }
-        return deferrer.getDeferredURL(callbackUrl);
-    }
-
-    @Override
-    public API getAPI() {
-        return API.YAHOO;
-    }
-
-    @Override
-    public Class<? extends Api> getScribeService() {
-        return YahooApi.class;
-    }
 }

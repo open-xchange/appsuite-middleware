@@ -78,6 +78,7 @@ import org.scribe.builder.api.GoogleApi;
 import org.scribe.builder.api.LinkedInApi;
 import org.scribe.builder.api.TumblrApi;
 import org.scribe.builder.api.TwitterApi;
+import org.scribe.builder.api.VkontakteApi;
 import org.scribe.builder.api.XingApi;
 import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
@@ -723,30 +724,36 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     // Helper Methods
 
     private static org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl) throws OXException {
-        final String serviceId = metaData.getId().toLowerCase(Locale.ENGLISH);
         final Class<? extends Api> apiClass;
-        if (serviceId.indexOf("twitter") >= 0) {
-            apiClass = TwitterApi.class;
-        } else if (serviceId.indexOf("linkedin") >= 0) {
-            apiClass = LinkedInApi.class;
-        } else if (serviceId.indexOf("google") >= 0) {
-            apiClass = GoogleApi.class;
-        } else if (serviceId.indexOf("yahoo") >= 0) {
-            apiClass = YahooApi.class;
-        } else if (serviceId.indexOf("foursquare") >= 0) {
-            apiClass = FoursquareApi.class;
-        } else if (serviceId.indexOf("facebook") >= 0) {
-            apiClass = FacebookApi.class;
-        } else if (serviceId.indexOf("tumblr") >= 0) {
-            apiClass = TumblrApi.class;
-        } else if (serviceId.indexOf("flickr") >= 0) {
-            apiClass = FlickrApi.class;
-        } else if (serviceId.indexOf("dropbox") >= 0) {
-            apiClass = DropBoxApi.class;
-        } else if (serviceId.indexOf("xing") >= 0) {
-            apiClass = XingApi.class;
+        if (metaData instanceof com.openexchange.oauth.ScribeAware) {
+            apiClass = ((com.openexchange.oauth.ScribeAware) metaData).getScribeService();
         } else {
-            throw OAuthExceptionCodes.UNSUPPORTED_SERVICE.create(serviceId);
+            final String serviceId = metaData.getId().toLowerCase(Locale.ENGLISH);
+            if (serviceId.indexOf("twitter") >= 0) {
+                apiClass = TwitterApi.class;
+            } else if (serviceId.indexOf("linkedin") >= 0) {
+                apiClass = LinkedInApi.class;
+            } else if (serviceId.indexOf("google") >= 0) {
+                apiClass = GoogleApi.class;
+            } else if (serviceId.indexOf("yahoo") >= 0) {
+                apiClass = YahooApi.class;
+            } else if (serviceId.indexOf("foursquare") >= 0) {
+                apiClass = FoursquareApi.class;
+            } else if (serviceId.indexOf("facebook") >= 0) {
+                apiClass = FacebookApi.class;
+            } else if (serviceId.indexOf("tumblr") >= 0) {
+                apiClass = TumblrApi.class;
+            } else if (serviceId.indexOf("flickr") >= 0) {
+                apiClass = FlickrApi.class;
+            } else if (serviceId.indexOf("dropbox") >= 0) {
+                apiClass = DropBoxApi.class;
+            } else if (serviceId.indexOf("xing") >= 0) {
+                apiClass = XingApi.class;
+            } else if (serviceId.indexOf("vkontakte") >= 0) {
+                apiClass = VkontakteApi.class;
+            } else {
+                throw OAuthExceptionCodes.UNSUPPORTED_SERVICE.create(serviceId);
+            }
         }
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(apiClass);
         serviceBuilder.apiKey(metaData.getAPIKey()).apiSecret(metaData.getAPISecret());

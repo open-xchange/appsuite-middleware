@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.xing;
 
+import org.scribe.builder.api.Api;
+import org.scribe.builder.api.XingApi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
@@ -60,7 +62,7 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData {
+public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
 
     /**
      * Initializes a new {@link XingOAuthServiceMetaData}.
@@ -88,6 +90,11 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
     @Override
     public API getAPI() {
         return API.XING;
+    }
+
+    @Override
+    public Class<? extends Api> getScribeService() {
+        return XingApi.class;
     }
 
 }
