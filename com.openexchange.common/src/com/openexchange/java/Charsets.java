@@ -56,6 +56,10 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -189,6 +193,21 @@ public final class Charsets {
             str.getBytes(0, length, ret, 0);
             out.write(ret, 0, length);
         }
+    }
+
+    private static final Set<String> SET_ASCII_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("US-ASCII", "ASCII")));
+
+    /**
+     * Checks if specified charset name denotes ASCII charset.
+     * 
+     * @param charset The charset name to check
+     * @return <code>true</code> if specified charset name denotes ASCII charset; otherwise <code>false</code>
+     */
+    public static boolean isAsciiCharset(final String charset) {
+        if (null == charset) {
+            return false;
+        }
+        return SET_ASCII_NAMES.contains(charset.toUpperCase());
     }
 
     /**
