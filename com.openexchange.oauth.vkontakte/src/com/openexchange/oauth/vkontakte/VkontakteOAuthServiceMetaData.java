@@ -58,7 +58,7 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 
 
 /**
- * {@link VkontakteOAuthServiceMetaData}
+ * {@link VkontakteOAuthServiceMetaData} - See <a href="http://vk.com/developers.php#devstep2">Vkontakte API</a>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
