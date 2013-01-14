@@ -80,11 +80,7 @@ public class UWAWidgetServiceFactoryImpl implements UWAWidgetServiceFactory {
 
     @Override
     public UWAWidgetService getService(int userId, int ctxId) throws OXException {
-        try {
-            return new CompositeUWAService(dbService, configViews, config, idGenerator, userId, ctxId);
-        } catch (OXException e) {
-            throw new OXException(e);
-        }
+        return new CompositeUWAService(dbService, configViews, config, idGenerator, userId, ctxId);
     }
 
     @Override

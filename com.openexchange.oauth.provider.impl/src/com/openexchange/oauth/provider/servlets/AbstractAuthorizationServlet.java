@@ -119,19 +119,13 @@ public abstract class AbstractAuthorizationServlet extends HttpServlet {
     private User findUser(final Context ctx, final String userInfo) throws OXException {
         final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
         final UserService userService = OAuthProviderServiceLookup.getService(UserService.class);
-        final User u;
-        try {
-            int userId = 0;
-            if (null != proxyDelimiter && userInfo.contains(proxyDelimiter)) {
-                userId = userService.getUserId(userInfo.substring(userInfo.indexOf(proxyDelimiter) + proxyDelimiter.length(), userInfo.length()), ctx);
-            } else {
-                userId = userService.getUserId(userInfo, ctx);
-            }
-            u = userService.getUser(userId, ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
+        int userId = 0;
+        if (null != proxyDelimiter && userInfo.contains(proxyDelimiter)) {
+            userId = userService.getUserId(userInfo.substring(userInfo.indexOf(proxyDelimiter) + proxyDelimiter.length(), userInfo.length()), ctx);
+        } else {
+            userId = userService.getUserId(userInfo, ctx);
         }
-        return u;
+        return userService.getUser(userId, ctx);
     }
 
     /**

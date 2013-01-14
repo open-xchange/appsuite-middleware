@@ -195,10 +195,6 @@ public final class Create {
      */
     private void propagate() throws OXException {
         final UserStorage storage = UserStorage.getInstance();
-        try {
-            storage.invalidateUser(ctx, group.getMember());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        storage.invalidateUser(ctx, group.getMember());
     }
 }

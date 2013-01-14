@@ -257,8 +257,7 @@ public final class MessageParser {
                         }
                         final DataSource dataSource = conversionService.getDataSource(dataSourceObject.getString(JSON_IDENTIFIER));
                         if (dataSource == null) {
-                            throw new OXException(
-                                DataExceptionCodes.UNKNOWN_DATA_SOURCE.create(dataSourceObject.getString(JSON_IDENTIFIER)));
+                            throw DataExceptionCodes.UNKNOWN_DATA_SOURCE.create(dataSourceObject.getString(JSON_IDENTIFIER));
                         }
                         if (!types.isEmpty()) {
                             types.clear();
@@ -266,17 +265,9 @@ public final class MessageParser {
                         types.addAll(Arrays.asList(dataSource.getTypes()));
                         final Data<?> data;
                         if (types.contains(InputStream.class)) {
-                            try {
-                                data = dataSource.getData(InputStream.class, parseDataSourceArguments(dataSourceObject), session);
-                            } catch (final OXException e) {
-                                throw new OXException(e);
-                            }
+                            data = dataSource.getData(InputStream.class, parseDataSourceArguments(dataSourceObject), session);
                         } else if (types.contains(byte[].class)) {
-                            try {
-                                data = dataSource.getData(byte[].class, parseDataSourceArguments(dataSourceObject), session);
-                            } catch (final OXException e) {
-                                throw new OXException(e);
-                            }
+                            data = dataSource.getData(byte[].class, parseDataSourceArguments(dataSourceObject), session);
                         } else {
                             throw MailExceptionCode.UNSUPPORTED_DATASOURCE.create();
                         }
@@ -309,8 +300,6 @@ public final class MessageParser {
             return ret;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 
@@ -378,18 +367,14 @@ public final class MessageParser {
      * @throws OXException If parsing fails
      */
     public static void parse(final JSONObject jsonObj, final MailMessage mail, final Session session, final int accountId) throws OXException {
-        try {
-            parse(
-                jsonObj,
-                mail,
-                TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(
-                    session.getUserId(),
-                    ContextStorage.getStorageContext(session.getContextId())).getTimeZone()),
-                session,
-                accountId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        parse(
+            jsonObj,
+            mail,
+            TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(
+                session.getUserId(),
+                ContextStorage.getStorageContext(session.getContextId())).getTimeZone()),
+            session,
+            accountId);
     }
 
     /**
@@ -1045,36 +1030,32 @@ public final class MessageParser {
     }
 
     private static MailPath prepareMsgRef(final Session session, final MailPath msgref) throws OXException {
-        try {
-            final UnifiedInboxManagement unifiedINBOXManagement =
-                ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
-            if (null != unifiedINBOXManagement && msgref.getAccountId() == unifiedINBOXManagement.getUnifiedINBOXAccountID(
-                session.getUserId(),
-                session.getContextId())) {
-                // Something like: INBOX/default6/INBOX
-                final String nestedFullname = msgref.getFolder();
-                final int pos = nestedFullname.indexOf(MailFolder.DEFAULT_FOLDER_ID);
-                if (-1 == pos) {
-                    // Return unchanged
-                    return msgref;
-                }
-                int check = pos + MailFolder.DEFAULT_FOLDER_ID.length();
-                while (Character.isDigit(nestedFullname.charAt(check))) {
-                    check++;
-                }
-                if (MailProperties.getInstance().getDefaultSeparator() != nestedFullname.charAt(check)) {
-                    // Unexpected pattern
-                    return msgref;
-                }
-                // Create fullname argument from sub-path
-                final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(nestedFullname.substring(pos));
-                // Adjust msgref
-                return new MailPath(arg.getAccountId(), arg.getFullname(), msgref.getMailID());
+        final UnifiedInboxManagement unifiedINBOXManagement =
+            ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
+        if (null != unifiedINBOXManagement && msgref.getAccountId() == unifiedINBOXManagement.getUnifiedINBOXAccountID(
+            session.getUserId(),
+            session.getContextId())) {
+            // Something like: INBOX/default6/INBOX
+            final String nestedFullname = msgref.getFolder();
+            final int pos = nestedFullname.indexOf(MailFolder.DEFAULT_FOLDER_ID);
+            if (-1 == pos) {
+                // Return unchanged
+                return msgref;
             }
-            return msgref;
-        } catch (final OXException e) {
-            throw new OXException(e);
+            int check = pos + MailFolder.DEFAULT_FOLDER_ID.length();
+            while (Character.isDigit(nestedFullname.charAt(check))) {
+                check++;
+            }
+            if (MailProperties.getInstance().getDefaultSeparator() != nestedFullname.charAt(check)) {
+                // Unexpected pattern
+                return msgref;
+            }
+            // Create fullname argument from sub-path
+            final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(nestedFullname.substring(pos));
+            // Adjust msgref
+            return new MailPath(arg.getAccountId(), arg.getFullname(), msgref.getMailID());
         }
+        return msgref;
     }
 
 }

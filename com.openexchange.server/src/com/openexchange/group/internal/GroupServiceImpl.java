@@ -99,10 +99,6 @@ public final class GroupServiceImpl implements GroupService {
 
     @Override
     public Group getGroup(Context ctx, int groupId) throws OXException {
-        try {
-            return GroupStorage.getInstance().getGroup(groupId, ctx);
-        } catch (OXException e) {
-            throw new OXException(e);
-        }
+        return GroupStorage.getInstance().getGroup(groupId, ctx);
     }
 }

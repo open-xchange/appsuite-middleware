@@ -282,8 +282,6 @@ public final class MimeForward {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

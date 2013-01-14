@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.settings.tree;
 
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
@@ -97,11 +96,7 @@ public final class MinimumSearchCharacters implements PreferencesItemService {
             }
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                try {
                     setting.setSingleValue(ServerConfig.getInteger(Property.MINIMUM_SEARCH_CHARACTERS));
-                } catch (ConfigurationException e) {
-                    throw new OXException(e);
-                }
             }
         };
     }

@@ -713,15 +713,11 @@ public final class ConfigJSlobService implements JSlobService {
                 }
                 final Object value = jsonUpdate.getValue();
                 if (null != value) {
-                    try {
-                        final ConfigView view = getConfigViewFactory().getView(userId, contextId);
-                        final String oldValue = view.get(attributedProperty.propertyName, String.class);
-                        // Clients have a habit of dumping the config back at us, so we only save differing values.
-                        if (!value.equals(oldValue)) {
-                            view.set("user", attributedProperty.propertyName, value);
-                        }
-                    } catch (final OXException e) {
-                        throw new OXException(e);
+                    final ConfigView view = getConfigViewFactory().getView(userId, contextId);
+                    final String oldValue = view.get(attributedProperty.propertyName, String.class);
+                    // Clients have a habit of dumping the config back at us, so we only save differing values.
+                    if (!value.equals(oldValue)) {
+                        view.set("user", attributedProperty.propertyName, value);
                     }
                 }
             }

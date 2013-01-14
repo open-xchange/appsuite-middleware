@@ -109,14 +109,8 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
 
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
-        Connection con = null;
-
         final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        try {
-            con = ds.getForUpdateTask(contextId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = ds.getForUpdateTask(contextId);
 
         PreparedStatement stmt = null;
         try {

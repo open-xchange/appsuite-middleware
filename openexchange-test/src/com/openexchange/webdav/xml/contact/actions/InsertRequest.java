@@ -93,9 +93,7 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
         final ContactWriter contactWriter = new ContactWriter();
         try {
             contactWriter.addContent2PropElement(eProp, contact, false, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (AddressException e) {
+        } catch (final AddressException e) {
             throw new OXException(e);
         }
         return eProp;

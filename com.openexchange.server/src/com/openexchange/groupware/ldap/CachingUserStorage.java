@@ -404,11 +404,7 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
         }
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService != null) {
-            try {
-                cacheService.freeCache(REGION_NAME);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            cacheService.freeCache(REGION_NAME);
         }
     }
 

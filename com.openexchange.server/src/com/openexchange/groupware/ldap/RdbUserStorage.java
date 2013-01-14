@@ -270,16 +270,9 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public User getUser(final int userId, final Context context) throws OXException {
-        final Connection con;
-        try {
-            con = DBPool.pickup(context);
-        } catch (final OXException e) {
-            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
-        }
+        final Connection con = DBPool.pickup(context);
         try {
             return getUser(context, con, new int[] { userId })[0];
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             DBPool.closeReaderSilent(context, con);
         }
@@ -355,12 +348,7 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public User[] getUser(final Context ctx) throws OXException {
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = DBPool.pickup(ctx);
         try {
             return getUser(ctx, con, listAllUser(ctx, con));
         } finally {
@@ -373,12 +361,7 @@ public class RdbUserStorage extends UserStorage {
         if (0 == userIds.length) {
             return new User[0];
         }
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = DBPool.pickup(ctx);
         try {
             return getUser(ctx, con, userIds);
         } finally {
@@ -616,7 +599,7 @@ public class RdbUserStorage extends UserStorage {
                     }
                 } catch (final OXException e) {
                     rollback(con);
-                    throw new OXException(e);
+                    throw e;
                 } finally {
                     autocommit(con);
                     DBPool.closeWriterSilent(context, con);

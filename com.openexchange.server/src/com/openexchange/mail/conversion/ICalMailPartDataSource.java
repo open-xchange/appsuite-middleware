@@ -112,23 +112,15 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
             }
             properties.put(DataProperties.PROPERTY_SIZE, Long.toString(mailPart.getSize()));
             properties.put(DataProperties.PROPERTY_NAME, mailPart.getFileName());
-            try {
-                return new SimpleData<D>((D) mailPart.getInputStream(), properties);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            return new SimpleData<D>((D) mailPart.getInputStream(), properties);
         }
     }
 
     private MailPart getMailPart(final int accountId, final String fullname, final String mailId, final String sequenceId, final Session session, DataProperties properties) throws OXException {
-        final MailAccess<?, ?> mailAccess;
+        MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
-        try {
             MailFolder folder = mailAccess.getFolderStorage().getFolder(fullname);
             if (folder.isShared()) {
                 MailPermission[] permissions = folder.getPermissions();
@@ -151,10 +143,10 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
             final MailPart mailPart = mailAccess.getMessageStorage().getAttachment(fullname, mailId, sequenceId);
             mailPart.loadContent();
             return mailPart;
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
-            mailAccess.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
         }
     }
 

@@ -73,7 +73,6 @@ import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
@@ -148,18 +147,14 @@ public final class SharedPrefixFolder {
         } catch (final NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
-        try {
-            return OXFolderIteratorSQL.hasVisibleSharedFolders(
-                user.getId(),
-                user.getGroups(),
-                userConfiguration.getAccessibleModules(),
-                sharedOwner,
-                ctx,
-                null,
-                con);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return OXFolderIteratorSQL.hasVisibleSharedFolders(
+            user.getId(),
+            user.getGroups(),
+            userConfiguration.getAccessibleModules(),
+            sharedOwner,
+            ctx,
+            null,
+            con);
     }
 
     /**
@@ -183,7 +178,7 @@ public final class SharedPrefixFolder {
             creatorDisplayName = UserStorage.getInstance().getUser(sharedOwner, ctx).getDisplayName();
         } catch (final OXException e) {
             if (sharedOwner != OCLPermission.ALL_GROUPS_AND_USERS) {
-                throw new OXException(e);
+                throw e;
             }
             creatorDisplayName = StringHelper.valueOf(user.getLocale()).getString(Groups.ALL_USERS);
         }
@@ -218,9 +213,7 @@ public final class SharedPrefixFolder {
         } catch (final NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
-        final Queue<FolderObject> q;
-        try {
-            q =
+        final Queue<FolderObject> q =
                 ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(
                     user.getId(),
                     user.getGroups(),
@@ -229,11 +222,6 @@ public final class SharedPrefixFolder {
                     ctx,
                     null,
                     con)).asQueue();
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
         if (q.isEmpty()) {
             return new int[0];
         }
@@ -273,9 +261,7 @@ public final class SharedPrefixFolder {
         } catch (final NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
-        final Queue<FolderObject> q;
-        try {
-            q =
+        final Queue<FolderObject> q =
                 ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(
                     user.getId(),
                     user.getGroups(),
@@ -284,11 +270,6 @@ public final class SharedPrefixFolder {
                     ctx,
                     null,
                     con)).asQueue();
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
         if (q.isEmpty()) {
             return Collections.<FolderIdNamePair> emptyList();
         }

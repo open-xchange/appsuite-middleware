@@ -97,12 +97,8 @@ public final class Tasks implements PreferencesItemService {
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws OXException {
                 final OXFolderAccess acc = new OXFolderAccess(ctx);
-                try {
                     setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
                         user.getId(), FolderObject.TASK).getObjectID()));
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
             }
         };
     }

@@ -88,12 +88,8 @@ public class VoipNowFaxAddress implements PreferencesItemService {
 
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                try {
                     setting.setSingleValue(ServiceRegistry.getInstance().getService(ConfigurationService.class, true).getProperty(
                         "com.4psa.voipnow.faxaddress"));
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
             }
 
             /**

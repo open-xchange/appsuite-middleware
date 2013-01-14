@@ -231,7 +231,7 @@ public class CSVContactImporter extends AbstractImporter {
             }
             folderUpdater.save(contacts, target);
         } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         }
 
 

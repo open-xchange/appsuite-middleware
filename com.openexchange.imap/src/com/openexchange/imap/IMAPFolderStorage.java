@@ -1178,11 +1178,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (null == mass) {
                     name = MailFolder.DEFAULT_FOLDER_NAME;
                 } else {
-                    try {
-                        name = mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
-                    } catch (final OXException e) {
-                        throw new OXException(e);
-                    }
+                    name = mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
                 }
 
             }

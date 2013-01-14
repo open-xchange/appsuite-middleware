@@ -101,12 +101,7 @@ public class GetArisingReminder {
     }
 
     public ReminderObject[] removeAppointments(final ReminderObject[] reminders) throws OXException {
-        AppointmentSqlFactoryService factoryService;
-        try {
-            factoryService = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        AppointmentSqlFactoryService factoryService = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class, true);
         final AppointmentSQLInterface appointmentSql = factoryService.createAppointmentSql(session);
         final List<ReminderObject> retval = new ArrayList<ReminderObject>(reminders.length);
         final Date now = new Date();
@@ -120,8 +115,7 @@ public class GetArisingReminder {
                         STORAGE.deleteReminder(ctx, reminder);
                         continue;
                     }
-                    final OXException re = new OXException(e);
-                    LOG.debug(re.getMessage(), re);
+                    LOG.debug(e.getMessage(), e);
                     continue;
                 } catch (final SQLException e) {
                     final OXException re = ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());

@@ -104,11 +104,7 @@ public final class ResourceDelete {
 
     private Resource getOrig() throws OXException {
         if (null == orig) {
-            try {
-                orig = storage.getResource(resource.getIdentifier(), ctx);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            orig = storage.getResource(resource.getIdentifier(), ctx);
         }
         return orig;
     }
@@ -226,11 +222,7 @@ public final class ResourceDelete {
          * Delete all references to resource
          */
         final DeleteEvent event = new DeleteEvent(getOrig(), resource.getIdentifier(), DeleteEvent.TYPE_RESOURCE, ctx);
-        try {
-            DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
     }
 
     /**

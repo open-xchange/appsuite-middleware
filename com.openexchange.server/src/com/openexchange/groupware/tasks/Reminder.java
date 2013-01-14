@@ -234,7 +234,7 @@ final class Reminder {
             reminder.deleteReminder(task.getObjectID(), Types.TASK);
         } catch (final OXException e) {
             if (!ReminderExceptionCode.NOT_FOUND.equals(e)) {
-                throw new OXException(e);
+                throw e;
             }
         }
     }

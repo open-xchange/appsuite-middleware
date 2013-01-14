@@ -162,7 +162,6 @@ public class Activator extends HousekeepingActivator {
 
                     @Override
                     public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                        try {
                             Object value = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
                             if (UNDEFINED_STRING.equals(value)) {
                                 //setting.setSingleValue(UNDEFINED);
@@ -177,9 +176,6 @@ public class Activator extends HousekeepingActivator {
                             }
 
                             setting.setSingleValue(value);
-                        } catch (final OXException e) {
-                            throw new OXException(e);
-                        }
                     }
 
                     @Override
@@ -215,19 +211,14 @@ public class Activator extends HousekeepingActivator {
                                 value = "[]";
                             }
                         }
-                        try {
-                            final String oldValue = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
-                            if (value != null) {
-                                // Clients have a habit of dumping the config back at us, so we only save differing values.
-                                if (!value.equals(oldValue)) {
-                                    viewFactory.getView(user.getId(), ctx.getContextId()).set("user", propertyName, value);
-                                }
-
+                        final String oldValue = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
+                        if (value != null) {
+                            // Clients have a habit of dumping the config back at us, so we only save differing values.
+                            if (!value.equals(oldValue)) {
+                                viewFactory.getView(user.getId(), ctx.getContextId()).set("user", propertyName, value);
                             }
-                        } catch (final OXException e) {
-                            throw new OXException(e);
-                        }
 
+                        }
                     }
 
                 };
@@ -264,7 +255,6 @@ public class Activator extends HousekeepingActivator {
 
                         @Override
                         public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                            try {
                                 final ComposedConfigProperty<String> prop = viewFactory.getView(user.getId(), ctx.getContextId()).property(propertyName, String.class);
                                 Object value = prop.get(metadataName);
                                 try {
@@ -274,9 +264,6 @@ public class Activator extends HousekeepingActivator {
                                     // Ah well, let's pretend it's a string.
                                 }
                                 setting.setSingleValue(value);
-                            } catch (final OXException e) {
-                                throw new OXException(e);
-                            }
                         }
 
                         @Override

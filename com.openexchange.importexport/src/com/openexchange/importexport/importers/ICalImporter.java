@@ -259,12 +259,7 @@ public class ICalImporter extends AbstractImporter {
 			final List<ImportResult> list, final List<ConversionError> errors,
 			final List<ConversionWarning> warnings)
 			throws OXException {
-		List<Task> tasks;
-		try {
-			tasks = parser.parseTasks(is, defaultTz, ctx, errors, warnings);
-		} catch (final ConversionError conversionError) {
-			throw new OXException(conversionError);
-		}
+		List<Task> tasks = parser.parseTasks(is, defaultTz, ctx, errors, warnings);
 		final TIntObjectMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
 
 		for (final ConversionError error : errors) {
@@ -290,7 +285,7 @@ public class ICalImporter extends AbstractImporter {
 			final ConversionError error = errorMap.get(index);
 			if (error != null) {
 				errorMap.remove(index);
-				importResult.setException(new OXException(error));
+				importResult.setException(error);
 			} else {
 				// IGNORE WARNINGS. Protocol doesn't allow for warnings.
 				// TODO: Verify This
@@ -327,8 +322,7 @@ public class ICalImporter extends AbstractImporter {
                 public boolean execute(final ConversionError error) {
 					final ImportResult importResult = new ImportResult();
 					importResult.setEntryNumber(error.getIndex());
-					importResult.setException(new OXException(
-							error));
+					importResult.setException(error);
 					list.add(importResult);
 					return true;
 				}
@@ -345,13 +339,7 @@ public class ICalImporter extends AbstractImporter {
 			final List<ConversionError> errors,
 			final List<ConversionWarning> warnings)
 			throws OXException {
-		List<CalendarDataObject> appointments;
-		try {
-			appointments = parser.parseAppointments(is, defaultTz, ctx,
-					errors, warnings);
-		} catch (final ConversionError conversionError) {
-			throw new OXException(conversionError);
-		}
+		List<CalendarDataObject> appointments = parser.parseAppointments(is, defaultTz, ctx, errors, warnings);
 		final TIntObjectMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
 
 		for (final ConversionError error : errors) {
@@ -384,7 +372,7 @@ public class ICalImporter extends AbstractImporter {
 			final ConversionError error = errorMap.get(index);
 			if (error != null) {
 				errorMap.remove(index);
-				importResult.setException(new OXException(error));
+				importResult.setException(error);
 			} else {
 				final CalendarDataObject appointmentObj = iter.next();
 				appointmentObj.setContext(session.getContext());
@@ -455,8 +443,7 @@ public class ICalImporter extends AbstractImporter {
                 public boolean execute(final ConversionError error) {
 					final ImportResult importResult = new ImportResult();
 					importResult.setEntryNumber(error.getIndex());
-					importResult.setException(new OXException(
-							error));
+					importResult.setException(error);
 					list.add(importResult);
 					return true;
 				}

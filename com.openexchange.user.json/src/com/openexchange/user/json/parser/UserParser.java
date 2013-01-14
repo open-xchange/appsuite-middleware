@@ -175,8 +175,6 @@ public final class UserParser {
             return contact;
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

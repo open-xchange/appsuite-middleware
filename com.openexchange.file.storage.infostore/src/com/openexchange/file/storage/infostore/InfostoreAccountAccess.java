@@ -67,18 +67,14 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class InfostoreAccountAccess implements FileStorageAccountAccess {
 
-    private ServerSession session;
-    private InfostoreFileStorageService service;
+    private final ServerSession session;
+    private final InfostoreFileStorageService service;
     private InfostoreFolderAccess folders;
     private InfostoreAdapterFileAccess files;
 
     public InfostoreAccountAccess(final Session session, final InfostoreFileStorageService service) throws OXException {
-        try {
-            this.session = ServerSessionAdapter.valueOf(session);
-            this.service = service;
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        this.session = ServerSessionAdapter.valueOf(session);
+        this.service = service;
     }
 
     @Override

@@ -89,12 +89,7 @@ public final class UnifiedINBOXRenamerTask extends UpdateTaskAdapter {
         /*
          * Obtain connection
          */
-        final Connection con;
-        try {
-            con = Database.getNoTimeout(contextId, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = Database.getNoTimeout(contextId, true);
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE user_mail_account SET name = ? WHERE user_mail_account.url LIKE 'unifiedinbox%'");

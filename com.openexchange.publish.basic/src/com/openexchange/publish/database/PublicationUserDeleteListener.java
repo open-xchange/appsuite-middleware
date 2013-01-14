@@ -80,12 +80,8 @@ public class PublicationUserDeleteListener implements DeleteListener {
         }
         final int userID = event.getId();
         final Context context = event.getContext();
-        try {
-            final PublicationStorage store = getStorage(writeCon);
-            store.deletePublicationsOfUser(userID, context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final PublicationStorage store = getStorage(writeCon);
+        store.deletePublicationsOfUser(userID, context);
     }
 
     protected PublicationStorage getStorage(Connection writeCon) {

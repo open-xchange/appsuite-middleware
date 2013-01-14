@@ -113,11 +113,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     }
 
     private static com.openexchange.mail.mime.ContentType toContentType(final String contentType) throws OXException {
-        try {
-            return new com.openexchange.mail.mime.ContentType(contentType);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return new com.openexchange.mail.mime.ContentType(contentType);
     }
 
     @Override
@@ -259,11 +255,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      */
     @Override
     public void setBaseType(final String baseType) throws OXException {
-        try {
-            cto.setBaseType(baseType);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        cto.setBaseType(baseType);
     }
 
     /**
@@ -321,11 +313,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      */
     @Override
     public void setContentType(final String contentType) throws OXException {
-        try {
-            cto.setContentType(contentType);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        cto.setContentType(contentType);
     }
 
     /**
@@ -358,11 +346,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @throws OXException If parsing content-type string fails
      */
     public static String prepareContentTypeString(final String contentType) throws OXException {
-        try {
-            return com.openexchange.mail.mime.ContentType.prepareContentTypeString(contentType);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return com.openexchange.mail.mime.ContentType.prepareContentTypeString(contentType);
     }
 
     /**
@@ -375,11 +359,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @throws OXException If parsing content-type string fails
      */
     public static String prepareContentTypeString(final String contentType, final String name) throws OXException {
-        try {
-            return com.openexchange.mail.mime.ContentType.prepareContentTypeString(contentType, name);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return com.openexchange.mail.mime.ContentType.prepareContentTypeString(contentType, name);
     }
 
     /**
@@ -391,11 +371,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @throws OXException If an invalid MIME type is detected
      */
     public static boolean isMimeType(final String mimeType, final String pattern) throws OXException {
-        try {
-            return com.openexchange.mail.mime.ContentType.isMimeType(mimeType, pattern);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return com.openexchange.mail.mime.ContentType.isMimeType(mimeType, pattern);
     }
 
     /**
@@ -406,11 +382,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @throws OXException If an invalid MIME type is detected
      */
     public static String getBaseType(final String mimeType) throws OXException {
-        try {
-            return com.openexchange.mail.mime.ContentType.getBaseType(mimeType);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return com.openexchange.mail.mime.ContentType.getBaseType(mimeType);
     }
 
     @Override

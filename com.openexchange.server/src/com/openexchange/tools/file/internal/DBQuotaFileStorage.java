@@ -237,17 +237,12 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         final SortedSet<String> set = new TreeSet<String>();
         for (final String identifier : identifiers) {
             boolean deleted;
-            try {
-                final Long size = L(getFileSize(identifier)); // Get size before attempting delete. File is not found afterwards
-                deleted = fileStorage.deleteFile(identifier);
-                fileSizes.put(identifier, size);
-                if (!deleted) {
-                    set.add(identifier);
-                }
-            } catch (final OXException e) {
-                throw new OXException(e);
+            final Long size = L(getFileSize(identifier)); // Get size before attempting delete. File is not found afterwards
+            deleted = fileStorage.deleteFile(identifier);
+            fileSizes.put(identifier, size);
+            if (!deleted) {
+                set.add(identifier);
             }
-
         }
         fileSizes.keySet().removeAll(set);
         long sum = 0;
@@ -301,14 +296,10 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
                 fileStorage.deleteFile(file);
             }
         } catch (final OXException q) {
-            try {
-            	if (file != null) {
-                    fileStorage.deleteFile(file);
-            	}
-            } catch (final OXException f) {
-                throw new OXException(f);
-            }
-            throw new OXException(q);
+        	if (file != null) {
+                fileStorage.deleteFile(file);
+        	}
+            throw q;
         }
         if (full) {
             throw QuotaFileStorageExceptionCodes.STORE_FULL.create();

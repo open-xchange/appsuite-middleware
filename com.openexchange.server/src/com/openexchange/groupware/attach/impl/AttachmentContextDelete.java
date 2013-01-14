@@ -62,10 +62,6 @@ public class AttachmentContextDelete extends ContextDelete {
         if (!isContextDelete(deleteEvent)) {
             return;
         }
-        try {
-            new AttachmentBaseImpl(new SimpleDBProvider(readCon, writeCon)).deleteAll(deleteEvent.getContext());
-        } catch (OXException e) {
-            throw new OXException(e);
-        }
+        new AttachmentBaseImpl(new SimpleDBProvider(readCon, writeCon)).deleteAll(deleteEvent.getContext());
     }
 }

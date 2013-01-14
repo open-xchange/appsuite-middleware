@@ -50,7 +50,6 @@
 package com.openexchange.calendar;
 
 import static com.openexchange.java.Autoboxing.I;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -70,11 +69,7 @@ public class Search {
     }
 
     private static int getMinimumSearchCharacters() throws OXException {
-        try {
-            return ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        } catch (ConfigurationException e) {
-            throw new OXException(e);
-        }
+        return ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
     }
 
     public static void checkPatternLength(AppointmentSearchObject searchData) throws OXException {

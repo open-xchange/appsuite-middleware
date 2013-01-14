@@ -347,8 +347,6 @@ public final class FolderWriter {
                     putter.put(FolderFields.OWN_RIGHTS, Integer.valueOf(permissionBits));
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-                } catch (final OXException e) {
-                    throw new OXException(e);
                 }
             }
         });
@@ -372,8 +370,6 @@ public final class FolderWriter {
                     putter.put(FolderFields.PERMISSIONS, ja);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-                } catch (final OXException e) {
-                    throw new OXException(e);
                 }
             }
         });

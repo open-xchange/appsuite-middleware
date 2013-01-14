@@ -92,20 +92,16 @@ public final class ContactDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
-        try {
-            if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
-                /*
-                 * Drop affected distribution list entries
-                 */
-                dropDListEntries("prg_dlist", "prg_contacts", deleteEvent.getId(), deleteEvent.getContext().getContextId(), writeCon);
-                dropDListEntries("del_dlist", "del_contacts", deleteEvent.getId(), deleteEvent.getContext().getContextId(), writeCon);
-                /*
-                 * Proceed
-                 */
-                trashAllUserContacts(deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), readCon, writeCon);
-            }
-        } catch (final OXException ox) {
-            throw new OXException(ox);
+        if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
+            /*
+             * Drop affected distribution list entries
+             */
+            dropDListEntries("prg_dlist", "prg_contacts", deleteEvent.getId(), deleteEvent.getContext().getContextId(), writeCon);
+            dropDListEntries("del_dlist", "del_contacts", deleteEvent.getId(), deleteEvent.getContext().getContextId(), writeCon);
+            /*
+             * Proceed
+             */
+            trashAllUserContacts(deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), readCon, writeCon);
         }
     }
 

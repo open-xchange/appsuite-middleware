@@ -206,14 +206,8 @@ public class ICalExporter implements Exporter {
 
     @Override
     public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws OXException {
-        final Context ctx;
-        final User user;
-        try {
-            ctx = ContextStorage.getInstance().getContext(sessObj.getContextId());
-            user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Context ctx = ContextStorage.getInstance().getContext(sessObj.getContextId());
+        final User user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
         String icalText;
         try {
             final ICalEmitter emitter = ImportExportServices.getICalEmitter();
@@ -289,8 +283,6 @@ public class ICalExporter implements Exporter {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
         } catch (final ConversionError e) {
             throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
         final byte[] bytes = Charsets.getBytes(icalText, Charsets.UTF_8);
         return new SizedInputStream(
@@ -354,8 +346,6 @@ public class ICalExporter implements Exporter {
             versitWriter.flush();
         } catch (final NumberFormatException e) {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final IOException e) {
             throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
         } catch (final ConverterException e) {

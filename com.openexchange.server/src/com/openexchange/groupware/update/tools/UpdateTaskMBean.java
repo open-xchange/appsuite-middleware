@@ -377,8 +377,6 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 final CompositeDataSupport data = new CompositeDataSupport(taskType, taskTypeNames, new Object[] { task.getTaskName(), B(task.isSuccessful()), task.getLastModified() });
                 retval.put(data);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final OpenDataException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         }

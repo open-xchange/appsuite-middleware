@@ -520,7 +520,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
             wc.commit(); // COMMIT
         } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new OXException(e);
+            throw e;
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());

@@ -200,12 +200,7 @@ public final class UpdateTaskToolkit {
      * @throws OXException If an error occurs
      */
     private static Map<String, Set<Integer>> getSchemasAndContexts() throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(false);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = Database.get(false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -305,13 +300,7 @@ public final class UpdateTaskToolkit {
     private static final String SQL_UPDATE_VERSION = "UPDATE version SET version = ?";
 
     private static void setVersionNumber(final int versionNumber, final Schema schema, final int contextId) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(contextId, true);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            throw new OXException(e);
-        }
+        final Connection con = Database.get(contextId, true);
         try {
             PreparedStatement stmt = null;
             ResultSet result = null;
@@ -331,7 +320,7 @@ public final class UpdateTaskToolkit {
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             } catch (final OXException e) {
                 rollback(con);
-                throw new OXException(e);
+                throw e;
             } finally {
                 closeSQLStuff(result, stmt);
             }
@@ -350,7 +339,7 @@ public final class UpdateTaskToolkit {
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             } catch (final OXException e) {
                 rollback(con);
-                throw new OXException(e);
+                throw e;
             } finally {
                 closeSQLStuff(result, stmt);
             }
@@ -365,29 +354,17 @@ public final class UpdateTaskToolkit {
      */
 
     private static SchemaUpdateState getSchema(final int contextId) throws OXException {
-        try {
-            return SchemaStore.getInstance().getSchema(contextId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return SchemaStore.getInstance().getSchema(contextId);
     }
 
     private static final String SQL_SELECT_LOCKED_FOR_UPDATE = "SELECT locked FROM version FOR UPDATE";
 
     private static void lockSchema(final Schema schema, final int contextId) throws OXException {
-        try {
-            SchemaStore.getInstance().lockSchema(schema, contextId, false);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        SchemaStore.getInstance().lockSchema(schema, contextId, false);
     }
 
     private static void unlockSchema(final Schema schema, final int contextId) throws OXException {
-        try {
-            SchemaStore.getInstance().unlockSchema(schema, contextId, false);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        SchemaStore.getInstance().unlockSchema(schema, contextId, false);
     }
 
     private static void removeContexts(final int contextId) throws OXException, OXException {

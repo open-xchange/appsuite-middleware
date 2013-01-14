@@ -171,12 +171,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     private final void preFill() throws OXException {
         try {
             while (myhasNext()) {
-                final CalendarDataObject o;
-                try {
-                    o = mynext();
-                } catch (final SearchIteratorException sie) {
-                    throw new OXException(sie);
-                }
+                final CalendarDataObject o = mynext();
                 if (o != null) {
                     al.add(o);
                 }

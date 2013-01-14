@@ -228,8 +228,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             }
         } catch (final SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             close(stmt, rs);
             releaseReadConnection(ctx, readCon);
@@ -403,13 +401,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         fireAttached.setUserConfiguration(userConfig);
         fireAttached.setProvider(this);
         fireAttached.setAttachmentListeners(getListeners(m.getModuleId()));
-        try {
-            perform(fireAttached, false);
-            return fireAttached.getTimestamp();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
-
+        perform(fireAttached, false);
+        return fireAttached.getTimestamp();
     }
 
     private long fireDetached(final List<AttachmentMetadata> deleted, final int module, final User user, final UserConfiguration userConfig, final Session session, final Context ctx) throws OXException {
@@ -422,12 +415,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         fireDetached.setUserConfiguration(userConfig);
         fireDetached.setProvider(this);
         fireDetached.setAttachmentListeners(getListeners(module));
-        try {
-            perform(fireDetached, false);
-            return fireDetached.getTimestamp();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        perform(fireDetached, false);
+        return fireDetached.getTimestamp();
     }
 
     @Override
@@ -452,8 +441,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         } catch (final SQLException e) {
             LOG.error("SQL Exception: ", e);
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
 
     }
@@ -1189,12 +1176,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     @Override
     public Map<Integer, Date> getNewestCreationDates(final Context ctx, final int moduleId, final int[] attachedIds) throws OXException {
-        final Connection con;
-        try {
-            con = getReadConnection(ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = getReadConnection(ctx);
         PreparedStatement stmt = null;
         ResultSet result = null;
         final Map<Integer, Date> retval = new HashMap<Integer, Date>();

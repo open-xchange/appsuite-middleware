@@ -527,11 +527,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     throw InfostoreExceptionCodes.NEW_ID_FAILED.create(e);
                 } finally {
                     releaseWriteConnection(sessionObj.getContext(), writeCon);
-                    try {
-                        finishDBTransaction();
-                    } catch (final OXException e) {
-                        throw new OXException(e);
-                    }
+                    finishDBTransaction();
                 }
 
                 document.setCreationDate(new Date(System.currentTimeMillis()));
@@ -920,21 +916,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     @Override
     public void removeDocument(final long folderId, final long date, final ServerSession sessionObj) throws OXException {
         final DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
-        try {
-            final List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(
-                "infostore.folder_id = " + folderId,
-                Metadata.VALUES_ARRAY,
-                reuseProvider,
-                sessionObj.getContext()).asList();
-            final List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(
-                "infostore.folder_id = " + folderId,
-                Metadata.VALUES_ARRAY,
-                reuseProvider,
-                sessionObj.getContext()).asList();
-            removeDocuments(allDocuments, allVersions, date, sessionObj, null);
-        } catch (final OXException x) {
-            throw new OXException(x);
-        }
+        final List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(
+            "infostore.folder_id = " + folderId,
+            Metadata.VALUES_ARRAY,
+            reuseProvider,
+            sessionObj.getContext()).asList();
+        final List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(
+            "infostore.folder_id = " + folderId,
+            Metadata.VALUES_ARRAY,
+            reuseProvider,
+            sessionObj.getContext()).asList();
+        removeDocuments(allDocuments, allVersions, date, sessionObj, null);
     }
 
     private void removeDocuments(final List<DocumentMetadata> allDocuments, final List<DocumentMetadata> allVersions, final long date, final ServerSession sessionObj, final List<DocumentMetadata> rejected) throws OXException {
@@ -1011,12 +1003,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             fileIdRemoveList.get().add(filestoreLocation);
             ctxHolder.set(context);
         } else {
-            try {
-                final QuotaFileStorage qfs = getFileStorage(context);
-                qfs.deleteFile(filestoreLocation);
-            } catch (final OXException x) {
-                throw new OXException(x);
-            }
+            final QuotaFileStorage qfs = getFileStorage(context);
+            qfs.deleteFile(filestoreLocation);
         }
     }
 
@@ -1045,7 +1033,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 reuseProvider,
                 sessionObj.getContext()).asList();
         } catch (final OXException x) {
-            throw new OXException(x);
+            throw x;
         } catch (final Throwable t) {
             LOG.error("Unexpected Error:", t);
         }

@@ -116,19 +116,11 @@ public final class Tools {
     }
 
     public static Context getContext(final Session so) throws OXException {
-        try {
-            return ContextStorage.getInstance().getContext(so.getContextId());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return ContextStorage.getInstance().getContext(so.getContextId());
     }
 
     public static User getUser(final Session so, final Context ctx) throws OXException {
-        try {
-            return UserStorage.getInstance().getUser(so.getUserId(), ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return UserStorage.getInstance().getUser(so.getUserId(), ctx);
     }
 
     static UserConfiguration getUserConfiguration(final Context ctx, final int userId) throws OXException {

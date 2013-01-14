@@ -299,17 +299,13 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
 
     @Override
     public InputStream getInputStream() throws OXException {
-        try {
-            if (bytes != null) {
-                return new UnsynchronizedByteArrayInputStream(bytes);
-            }
-            if (file != null) {
-                return file.getInputStream();
-            }
-            throw MailExceptionCode.NO_CONTENT.create();
-        } catch (final OXException e) {
-            throw new OXException(e);
+        if (bytes != null) {
+            return new UnsynchronizedByteArrayInputStream(bytes);
         }
+        if (file != null) {
+            return file.getInputStream();
+        }
+        throw MailExceptionCode.NO_CONTENT.create();
     }
 
     @Override

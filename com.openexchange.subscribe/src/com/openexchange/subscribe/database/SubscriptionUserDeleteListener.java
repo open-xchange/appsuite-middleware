@@ -77,11 +77,7 @@ public class SubscriptionUserDeleteListener implements DeleteListener {
         if(event.getType() != DeleteEvent.TYPE_USER) {
             return;
         }
-        try {
-            getStorage(writeCon).deleteAllSubscriptionsForUser(event.getId(), event.getContext());
-        } catch (OXException e) {
-            throw new OXException(e);
-        }
+        getStorage(writeCon).deleteAllSubscriptionsForUser(event.getId(), event.getContext());
     }
 
     protected SubscriptionStorage getStorage(Connection writeCon) {

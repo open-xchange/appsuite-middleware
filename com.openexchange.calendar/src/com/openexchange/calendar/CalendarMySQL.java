@@ -1676,16 +1676,18 @@ public class CalendarMySQL implements CalendarSqlImp {
                 int descMaxLength = DBUtils.getColumnSize(writecon, CAL_TABLE_NAME, "field01");
                 int locMaxLength = DBUtils.getColumnSize(writecon, CAL_TABLE_NAME, "field02");
                 
-                if (cdao.getTitle().length() > descMaxLength)
+                if (cdao.getTitle().length() > descMaxLength) {
                     pst.setString(i++, cdao.getTitle().substring(0, descMaxLength));
-                else
+                } else {
                     pst.setString(i++, cdao.getTitle());
+                }
                 
                 if (cdao.containsLocation()) {
-                    if (cdao.getLocation().length() > locMaxLength)
+                    if (cdao.getLocation().length() > locMaxLength) {
                         pst.setString(i++, cdao.getLocation().substring(0, locMaxLength));
-                    else
+                    } else {
                         pst.setString(i++, cdao.getLocation());
+                    }
                 } else {
                     pst.setNull(i++, java.sql.Types.VARCHAR);
                 }
@@ -4664,8 +4666,6 @@ public class CalendarMySQL implements CalendarSqlImp {
                         edao.removeObjectID();
                         try {
                             insertAppointment0(edao, writecon, so, false);
-                        } catch (final OXException le) {
-                            throw new OXException(le);
                         } catch (final RuntimeException e) {
                             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(8));
                         }
@@ -4713,8 +4713,6 @@ public class CalendarMySQL implements CalendarSqlImp {
                             update.setDeleteExceptions(collection.addException(ldao.getDeleteException(), edao.getRecurrenceDatePosition()));
                             updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // MAIN
                             // OBJECT
-                        } catch (final OXException le) {
-                            throw new OXException(le);
                         } catch (final RuntimeException e) {
                             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(11));
                         }
@@ -4744,8 +4742,6 @@ public class CalendarMySQL implements CalendarSqlImp {
                             // OBJECT
                             updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // MAIN
                             // OBJECT
-                        } catch (final OXException le) {
-                            throw new OXException(le);
                         } catch (final RuntimeException e) {
                             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(10));
                         }
@@ -4814,7 +4810,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                     triggerDeleteEvent(writecon, oid, fid, so, ctx, edao);
                                 }
                             } else {
-                                throw new OXException(le);
+                                throw le;
                             }
                         } catch (final RuntimeException e) {
                             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(11));
@@ -4845,8 +4841,6 @@ public class CalendarMySQL implements CalendarSqlImp {
                             // OBJECT
                             updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // MAIN
                             // OBJECT
-                        } catch (final OXException le) {
-                            throw new OXException(le);
                         } catch (final RuntimeException e) {
                             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(10));
                         }

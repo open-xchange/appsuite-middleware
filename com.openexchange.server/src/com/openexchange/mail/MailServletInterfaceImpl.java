@@ -231,28 +231,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         super();
         warnings = new ArrayList<OXException>(2);
         mailImportResults = new ArrayList<MailImportResult>();
-        try {
-            if (session instanceof ServerSession) {
-                final ServerSession serverSession = (ServerSession) session;
-                ctx = serverSession.getContext();
-                usm = serverSession.getUserSettingMail();
-                if (!serverSession.getUserConfiguration().hasWebMail()) {
-                    throw MailExceptionCode.NO_MAIL_ACCESS.create();
-                }
-                user = serverSession.getUser();
-            } else {
-                ctx = ContextStorage.getInstance().getContext(session.getContextId());
-                usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
-                try {
-                    if (!UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
-                        throw MailExceptionCode.NO_MAIL_ACCESS.create();
-                    }
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+        if (session instanceof ServerSession) {
+            final ServerSession serverSession = (ServerSession) session;
+            ctx = serverSession.getContext();
+            usm = serverSession.getUserSettingMail();
+            if (!serverSession.getUserConfiguration().hasWebMail()) {
+                throw MailExceptionCode.NO_MAIL_ACCESS.create();
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
+            user = serverSession.getUser();
+        } else {
+            ctx = ContextStorage.getInstance().getContext(session.getContextId());
+            usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+            if (!UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
+                throw MailExceptionCode.NO_MAIL_ACCESS.create();
+            }
         }
         this.session = session;
         contextId = session.getContextId();
@@ -1347,12 +1339,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Store them temporary to files
          */
-        final ManagedFileManagement mfm;
-        try {
-            mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class, true);
         final ManagedFile[] files = new ManagedFile[parts.length];
         try {
             for (int i = 0; i < files.length; i++) {
@@ -1447,8 +1434,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             } catch (final IOException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             for (int i = 0; i < files.length; i++) {
                 final ManagedFile file = files[i];

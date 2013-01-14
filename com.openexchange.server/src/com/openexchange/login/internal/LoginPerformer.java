@@ -276,19 +276,13 @@ public final class LoginPerformer {
     private User findUser(final Context ctx, final String userInfo) throws OXException {
         final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
         final UserStorage us = UserStorage.getInstance();
-        final User u;
-        try {
-            int userId = 0;
-            if (null != proxyDelimiter && userInfo.contains(proxyDelimiter)) {
-                userId = us.getUserId(userInfo.substring(userInfo.indexOf(proxyDelimiter) + proxyDelimiter.length(), userInfo.length()), ctx);
-            } else {
-                userId = us.getUserId(userInfo, ctx);
-            }
-            u = us.getUser(userId, ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
+        int userId = 0;
+        if (null != proxyDelimiter && userInfo.contains(proxyDelimiter)) {
+            userId = us.getUserId(userInfo.substring(userInfo.indexOf(proxyDelimiter) + proxyDelimiter.length(), userInfo.length()), ctx);
+        } else {
+            userId = us.getUserId(userInfo, ctx);
         }
-        return u;
+        return us.getUser(userId, ctx);
     }
 
     /**

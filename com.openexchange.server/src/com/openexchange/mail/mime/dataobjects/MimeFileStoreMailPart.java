@@ -160,7 +160,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
                             throw x;
                         }
                         if (441 != x.getCode()) {
-                            throw new OXException(x);
+                            throw x;
                         }
                         /*
                          * Duplicate document name, thus retry with a new name

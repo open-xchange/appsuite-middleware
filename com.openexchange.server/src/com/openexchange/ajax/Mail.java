@@ -5022,13 +5022,9 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private static String getDefaultSendAddress(final ServerSession session) throws OXException {
-        try {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
     }
 
     private static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport, final boolean checkFrom) throws OXException, OXException {
@@ -5036,7 +5032,7 @@ public class Mail extends PermissionServlet implements UploadListener {
          * Resolve "From" to proper mail account to select right transport server
          */
         int accountId;
-        try {
+        {
             final MailAccountStorageService storageService =
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             final int user = session.getUserId();
@@ -5063,8 +5059,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                 }
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
         if (accountId == -1) {
             if (checkFrom && null != from) {

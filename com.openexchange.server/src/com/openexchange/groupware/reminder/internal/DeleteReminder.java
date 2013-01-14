@@ -97,11 +97,7 @@ public class DeleteReminder {
     }
 
     private void delete(final Connection con) throws OXException {
-        try {
-            STORAGE.deleteReminder(con, ctx.getContextId(), reminder.getObjectId());
-            TargetRegistry.getInstance().getService(reminder.getModule()).updateTargetObject(ctx, con, reminder.getTargetId(), reminder.getUser());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        STORAGE.deleteReminder(con, ctx.getContextId(), reminder.getObjectId());
+        TargetRegistry.getInstance().getService(reminder.getModule()).updateTargetObject(ctx, con, reminder.getTargetId(), reminder.getUser());
     }
 }

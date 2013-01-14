@@ -221,7 +221,7 @@ public class CopyAction extends ContactAction {
                 } catch (final OXException e1) {
                     LOG.error("Attachment transaction rollback failed", e);
                 }
-                throw new OXException(e);
+                throw e;
             } catch (final OXException e) {
                 try {
                     attachmentBase.rollback();

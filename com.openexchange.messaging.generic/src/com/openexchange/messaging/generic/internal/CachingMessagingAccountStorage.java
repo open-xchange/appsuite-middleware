@@ -109,12 +109,8 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
     private static void invalidateMessagingAccount(final String serviceId, final int id, final int user, final int cid) throws OXException {
         final CacheService cacheService = MessagingGenericServiceRegistry.getService(CacheService.class);
         if (null != cacheService) {
-            try {
-                final Cache cache = cacheService.getCache(REGION_NAME);
-                cache.remove(newCacheKey(cacheService, serviceId, id, user, cid));
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            final Cache cache = cacheService.getCache(REGION_NAME);
+            cache.remove(newCacheKey(cacheService, serviceId, id, user, cid));
         }
     }
 

@@ -192,12 +192,7 @@ public final class MALPollPushListener implements PushListener {
             /*
              * This listener gets its own timer task and is not considered during global run
              */
-            final TimerService timerService;
-            try {
-                timerService = MALPollServiceRegistry.getServiceRegistry().getService(TimerService.class, true);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            final TimerService timerService = MALPollServiceRegistry.getServiceRegistry().getService(TimerService.class, true);
             timerTask = timerService.scheduleWithFixedDelay(new MALPollPushListenerRunnable(this), 1000, periodMillis);
         }
     }
@@ -261,8 +256,6 @@ public final class MALPollPushListener implements PushListener {
                 firstRun(mailService);
                 started = true;
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             running.set(false);
         }

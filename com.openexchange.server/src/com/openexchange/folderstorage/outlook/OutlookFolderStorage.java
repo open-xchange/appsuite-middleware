@@ -2108,11 +2108,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             if (s instanceof ServerSession) {
                 userConfiguration = ((ServerSession) s).getUserConfiguration();
             } else {
-                try {
-                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), parameters.getContext());
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+                userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), parameters.getContext());
             }
         }
         /*
@@ -2125,18 +2121,8 @@ public final class OutlookFolderStorage implements FolderStorage {
             if (null == mass) {
                 accountSubfolderIDs = Collections.emptyList();
             } else {
-                final List<MailAccount> accounts;
-                try {
-
-                    // final MailAccount[] mailAccounts = mass.getUserMailAccounts(user.getId(), contextId);
-                    // accounts = new ArrayList<MailAccount>(mailAccounts.length);
-                    // accounts.addAll(Arrays.asList(mailAccounts));
-
-                    accounts = Arrays.asList(mass.getUserMailAccounts(user.getId(), contextId));
-                    Collections.sort(accounts, new MailAccountComparator(locale));
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+                final List<MailAccount> accounts = Arrays.asList(mass.getUserMailAccounts(user.getId(), contextId));
+                Collections.sort(accounts, new MailAccountComparator(locale));
                 if (accounts.isEmpty()) {
                     accountSubfolderIDs = Collections.emptyList();
                 } else {
