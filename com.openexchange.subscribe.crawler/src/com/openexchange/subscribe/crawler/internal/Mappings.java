@@ -77,202 +77,202 @@ public class Mappings {
 
         {
             final String fn = map.get("first_name");
-            if (null != fn) {
+            if (!isEmpty(fn)) {
                 contact.setGivenName(fn);
                 contact.setDisplayName(fn);
             }
     
             final String ln = map.get("last_name");
-            if (null != ln) {
+            if (!isEmpty(ln)) {
                 contact.setSurName(ln);
                 contact.setDisplayName(ln);
             }
     
-            if (null != fn && null != ln) {
+            if (!isEmpty(fn) && !isEmpty(ln)) {
                 contact.setDisplayName(fn + " " + ln);
             }
         }
 
         String tmp = map.get("display_name");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setDisplayName(tmp);
         }
 
         tmp = map.get("middle_name");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setMiddleName(tmp);
         }
 
         tmp = map.get("title");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setTitle(tmp);
         }
 
         tmp = map.get("street_home");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setStreetHome(tmp);
         }
 
         tmp = map.get("postal_code_home");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setPostalCodeHome(tmp);
         }
 
         tmp = map.get("city_home");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setCityHome(tmp);
         }
 
-        tmp = map.get("street_home");
-        if (null != tmp) {
+        tmp = map.get("state_home");
+        if (!isEmpty(tmp)) {
             contact.setStateHome(tmp);
         }
 
-        tmp = map.get("street_home");
-        if (null != tmp) {
+        tmp = map.get("country_home");
+        if (!isEmpty(tmp)) {
             contact.setCountryHome(tmp);
         }
 
-        tmp = map.get("street_home");
-        if (null != tmp) {
+        tmp = map.get("street_business");
+        if (!isEmpty(tmp)) {
             contact.setStreetBusiness(tmp);
         }
 
         tmp = map.get("postal_code_business");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setPostalCodeBusiness(tmp);
         }
 
         tmp = map.get("city_business");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setCityBusiness(tmp);
         }
 
         tmp = map.get("state_business");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setStateBusiness(tmp);
         }
 
         tmp = map.get("country_business");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setCountryBusiness(tmp);
         }
 
         tmp = map.get("street_other");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setStreetOther(tmp);
         }
 
         tmp = map.get("postal_code_other");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setPostalCodeOther(tmp);
         }
 
         tmp = map.get("city_other");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setCityOther(tmp);
         }
 
         tmp = map.get("state_other");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setStateOther(tmp);
         }
 
         tmp = map.get("country_other");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setCountryOther(tmp);
         }
 
         tmp = map.get("email1");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setEmail1(tmp);
         }
 
         tmp = map.get("email2");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setEmail2(tmp);
         }
 
         tmp = map.get("email3");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setEmail3(tmp);
         }
 
         tmp = map.get("telephone_home1");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setTelephoneHome1(tmp);
         }
 
         tmp = map.get("telephone_business1");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setTelephoneBusiness1(tmp);
         }
 
         tmp = map.get("cellular_telephone1");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setCellularTelephone1(tmp);
         }
 
         tmp = map.get("cellular_telephone2");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setCellularTelephone2(tmp);
         }
 
         tmp = map.get("fax_home");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setFaxHome(tmp);
         }
 
         tmp = map.get("fax_business");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setFaxBusiness(tmp);
         }
 
         tmp = map.get("company");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setCompany(tmp);
         }
 
         tmp = map.get("position");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setPosition(tmp);
         }
 
         tmp = map.get("employee_type");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setEmployeeType(tmp);
         }
 
         tmp = map.get("department");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setDepartment(tmp);
         }
 
         tmp = map.get("note");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setNote(tmp);
         }
         // a special kind of note containing the address of the contact (used if the address is only available as one String)
 
         tmp = map.get("address_note");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             final String htmlString = tmp;
             final String noHTMLString = htmlString.replaceAll("<br[ \t]*/?[ \t]*>", "\n").replaceAll("<.*?>", "");
             contact.setNote(noHTMLString);
         }
 
         tmp = map.get("profession");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setProfession(tmp);
         }
 
         tmp = map.get("url");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             contact.setURL(map.get("url"));
         }
 
         tmp = map.get("instant_messenger1");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             final String tmp2 = map.get("instant_messenger1_type");
             if (null == tmp2) {
                 contact.setInstantMessenger1(tmp);
@@ -282,7 +282,7 @@ public class Mappings {
         }
 
         tmp = map.get("instant_messenger2");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             final String tmp2 = map.get("instant_messenger2_type");
             if (null == tmp2) {
                 contact.setInstantMessenger1(tmp);
@@ -293,12 +293,12 @@ public class Mappings {
         // handle birthdays
 
         tmp = map.get("birthday_month_real");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             map.put("birthday_month", Integer.toString(Integer.parseInt(tmp) - 1));
         }
 
         tmp = map.get("birthday_month_string");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             final String month = tmp;
             if (month.matches("(Januar|January|janvier|enero)")) {
                 map.put("birthday_month", "0");
@@ -354,7 +354,7 @@ public class Mappings {
 
         // add the image from a url to the contact
         tmp = map.get("image");
-        if (null != tmp) {
+        if (!isEmpty(tmp)) {
             OXContainerConverter.loadImageFromURL(contact, tmp);
         }
 
@@ -367,19 +367,19 @@ public class Mappings {
 
         {
             final String title = map.get("title");
-            if (null != title) {
+            if (!isEmpty(title)) {
                 oxEvent.setTitle(title);
             }
         }
         {
             final String note = map.get("note");
-            if (null != note) {
+            if (!isEmpty(note)) {
                 oxEvent.setNote(note);
             }
         }
         {
             final String tz = map.get("timezone");
-            if (null != tz) {
+            if (!isEmpty(tz)) {
                 oxEvent.setTimezone(tz);
             }
         }
@@ -403,4 +403,39 @@ public class Mappings {
         }
         return oxEvent;
     }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        boolean isSNull = true;
+        for (int i = 0; (isWhitespace || isSNull) && i < len; i++) {
+            final char c = string.charAt(i);
+            isWhitespace = Character.isWhitespace(c);
+            if (isSNull) {
+                switch (i) {
+                case 0:
+                    isSNull = ('n' == c || 'N' == c);
+                    break;
+                case 1:
+                    isSNull = ('u' == c || 'U' == c);
+                    break;
+                case 2:
+                    isSNull = ('l' == c || 'L' == c);
+                    break;
+                case 3:
+                    isSNull = ('l' == c || 'L' == c);
+                    break;
+                default:
+                    isSNull = false;
+                    break;
+                }
+            }
+        }
+        return isWhitespace || isSNull;
+    }
+
 }
