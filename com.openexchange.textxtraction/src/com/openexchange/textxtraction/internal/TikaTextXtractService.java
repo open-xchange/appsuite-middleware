@@ -55,7 +55,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import net.htmlparser.jericho.Renderer;
@@ -66,8 +68,8 @@ import org.apache.commons.logging.Log;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
-import org.xml.sax.SAXException;
-import com.openexchange.config.ConfigurationService;
+import org.joox.JOOX;
+import org.joox.Match;
 import com.openexchange.exception.OXException;
 import com.openexchange.textxtraction.AbstractTextXtractService;
 import com.openexchange.textxtraction.DelegateTextXtraction;
@@ -81,43 +83,49 @@ import com.openexchange.textxtraction.TextXtractExceptionCodes;
  */
 public class TikaTextXtractService extends AbstractTextXtractService {
     
+    static final Set<String> PARSERS = new HashSet<String>();
+    
     private static final Log LOG = com.openexchange.log.Log.loggerFor(TikaTextXtractService.class);
     
     private static final Object PRESENT = new Object();
     
     private final ConcurrentMap<DelegateTextXtraction, Object> delegatees;
     
-    private Tika tika = null;
+    Tika tika = null;
+    
+    static {
+        PARSERS.add("org.apache.tika.parser.html.HtmlParser");
+        PARSERS.add("org.apache.tika.parser.microsoft.OfficeParser");
+        PARSERS.add("org.apache.tika.parser.microsoft.ooxml.OOXMLParser");
+        PARSERS.add("org.apache.tika.parser.odf.OpenDocumentParser");
+        PARSERS.add("org.apache.tika.parser.pdf.PDFParser");
+        PARSERS.add("org.apache.tika.parser.rtf.RTFParser");
+        PARSERS.add("org.apache.tika.parser.txt.TXTParser");
+        PARSERS.add("org.apache.tika.parser.xml.DcXMLParser");
+    }
 
 
     /**
      * Initializes a new {@link TikaTextXtractService}.
      * @param service
      */
-    public TikaTextXtractService(ConfigurationService service) {
+    public TikaTextXtractService() {
         super();
         delegatees = new ConcurrentHashMap<DelegateTextXtraction, Object>(4);
+
+        Match configMatch = JOOX.$("config");
+        for (String parser : PARSERS) {
+            configMatch.append(JOOX.$("parser").attr("class", parser));
+        }        
+        
         try {
-        	final TikaConfig config;
-        	if (service == null) {
-        	    config = new TikaConfig();
-        	} else {
-        	    final String tikaConfigPathFileName = service.getProperty(TextXtractionProperties.TIKA_CONFIG_FILE_NAME);
-                if (tikaConfigPathFileName == null) {
-                    throw new IllegalStateException("Property " + TextXtractionProperties.TIKA_CONFIG_FILE_NAME + " must not be null.");
-                }
-        	    final File tikaConfigFile = service.getFileByName(tikaConfigPathFileName);
-        	    config = new TikaConfig(tikaConfigFile);
-        	}           
-            
+            TikaConfig config = new TikaConfig(configMatch.document());            
             tika = new Tika(config);        
         } catch (TikaException e) {
             LOG.error(e.getMessage(), e);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-        } catch (SAXException e) {
-            LOG.error(e.getMessage(), e);
-        }        
+        }      
     }
     
     /**

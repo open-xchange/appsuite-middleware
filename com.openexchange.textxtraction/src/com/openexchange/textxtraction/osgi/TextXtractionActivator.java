@@ -53,7 +53,6 @@ import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.textxtraction.DelegateTextXtraction;
 import com.openexchange.textxtraction.TextXtractService;
@@ -79,7 +78,7 @@ public class TextXtractionActivator extends HousekeepingActivator {
         final String name = "com.openexchange.textxtraction";
         log.info("Starting bundle: " + name);
         try {
-            final TikaTextXtractService tikaTextXtractService = new TikaTextXtractService(getService(ConfigurationService.class));
+            final TikaTextXtractService tikaTextXtractService = new TikaTextXtractService();
             final BundleContext context = this.context;
             track(DelegateTextXtraction.class, new ServiceTrackerCustomizer<DelegateTextXtraction, DelegateTextXtraction>() {
 
@@ -129,7 +128,7 @@ public class TextXtractionActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[0];
     }
 
 }
