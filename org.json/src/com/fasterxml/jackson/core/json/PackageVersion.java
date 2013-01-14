@@ -1,4 +1,4 @@
-package @package@;
+package com.fasterxml.jackson.core.json;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.Versioned;
@@ -10,8 +10,9 @@ import com.fasterxml.jackson.core.util.VersionUtil;
  * pom.xml.
  */
 public final class PackageVersion implements Versioned {
+
     public final static Version VERSION = VersionUtil.parseVersion(
-        "@projectversion@", "@projectgroupid@", "@projectartifactid@");
+        "v2.1.2", "jackson-core", "v1.0");
 
     @Override
     public Version version() {
