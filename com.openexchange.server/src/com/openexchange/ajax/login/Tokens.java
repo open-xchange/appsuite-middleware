@@ -68,9 +68,9 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.user.UserService;
@@ -106,11 +106,10 @@ public final class Tokens implements LoginRequestHandler {
         String client = LoginTools.parseParameter(req, CLIENT_PARAM);
         String userAgent = LoginTools.parseUserAgent(req);
 
-        // TODO Register this login action dynamically if SessiondService and UserService gets available.
-        SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
+        // TODO Register this login action dynamically if LoginPerformer and UserService gets available.
         ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, false);
         UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, false);
-        Session session = sessiondService.getSessionWithTokens(clientToken, serverToken);
+        Session session = LoginPerformer.getInstance().lookupSessionWithTokens(clientToken, serverToken);
 
         // IP check if enabled; otherwise update session's IP address if different to request's IP address. Insecure check is done in
         // updateIPAddress method.
