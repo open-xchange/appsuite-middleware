@@ -49,6 +49,7 @@
 
 package com.openexchange.http.grizzly;
 
+import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
@@ -113,6 +114,18 @@ public class GrizzlyConfig implements Initialization {
 
     /** Default encoding for incoming Http Requests, this value must be equal to the web server's default encoding */
     private String defaultEncoding = "UTF-8";
+    
+    /** The name of the protocolHeader used to decide if we are dealing with a in-/secure Request */
+    private String protocolHeader = "X-Forwarded-Proto";
+    
+    /** The value indicating secure http communication */ 
+    private String httpsProtoValue = "https";
+    
+    /** The port used for http communication */
+    private int httpProtoPort = 80;
+    
+    /** The port used for https communication */
+    private int httpsProtoPort = 443;
 
     // sessiond properties
 
@@ -143,13 +156,9 @@ public class GrizzlyConfig implements Initialization {
         }
 
         // grizzly properties
-        this.httpHost = configService.getProperty("com.openexchange.http.grizzly.httpNetworkListenerHost", "0.0.0.0");
-        this.httpPort = configService.getIntProperty("com.openexchange.http.grizzly.httpNetworkListenerPort", 8080);
         this.isJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", false);
         this.isWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
         this.isCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
-        this.maxRequestParameters = configService.getIntProperty("com.openexchange.http.grizzly.maxRequestParameters", 30);
-        this.backendRoute = configService.getProperty("com.openexchange.http.grizzly.backendRoute", "OX0");
 
         // server properties
         this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W")));
@@ -157,6 +166,19 @@ public class GrizzlyConfig implements Initialization {
         this.isCookieForceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", false);
         this.isCookieHttpOnly = configService.getBoolProperty("com.openexchange.cookie.httpOnly", true);
         this.defaultEncoding = configService.getProperty("DefaultEncoding", "UTF-8");
+        this.protocolHeader = configService.getProperty("com.openexchange.server.protocolHeader", "X-Forwarded-Proto");
+        this.httpsProtoValue = configService.getProperty("com.openexchange.server.httpsProtoValue", "https");
+        this.httpProtoPort = configService.getIntProperty("com.openexchange.server.httpProtoPort", 80);
+        this.httpsProtoPort = configService.getIntProperty("com.openexchange.server.httpsProtoPort", 443);
+        
+        this.httpHost = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
+        // keep backwards compatibility with ajp config
+        if(httpHost.equals("*")) {
+            this.httpHost="0.0.0.0";
+        }
+        this.httpPort = configService.getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
+        this.maxRequestParameters = configService.getIntProperty("com.openexchange.connector.maxRequestParameters", 30);
+        this.backendRoute = configService.getProperty("com.openexchange.server.backendRoute", "OX0");
 
         // sessiond properties
         this.isSessionAutologin = configService.getBoolProperty("com.openexchange.sessiond.autologin", false);
@@ -287,6 +309,56 @@ public class GrizzlyConfig implements Initialization {
      */
     public boolean isSessionAutologin() {
         return instance.isSessionAutologin;
+    }
+
+    
+    /**
+     * Gets the log
+     *
+     * @return The log
+     */
+    public static Log getLog() {
+        return LOG;
+    }
+
+    
+    /**
+     * Gets the protocolHeader
+     *
+     * @return The protocolHeader
+     */
+    public String getProtocolHeader() {
+        return protocolHeader;
+    }
+
+    
+    /**
+     * Gets the httpsProtoValue
+     *
+     * @return The httpsProtoValue
+     */
+    public String getHttpsProtoValue() {
+        return httpsProtoValue;
+    }
+
+    
+    /**
+     * Gets the httpProtoPort
+     *
+     * @return The httpProtoPort
+     */
+    public int getHttpProtoPort() {
+        return httpProtoPort;
+    }
+
+    
+    /**
+     * Gets the httpsProtoPort
+     *
+     * @return The httpsProtoPort
+     */
+    public int getHttpsProtoPort() {
+        return httpsProtoPort;
     }
 
 }

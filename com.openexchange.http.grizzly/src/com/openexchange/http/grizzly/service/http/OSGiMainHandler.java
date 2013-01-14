@@ -99,8 +99,6 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
     private final OSGiCleanMapper mapper;
 
-    private final boolean isRequestWatcherEnabled;
-
     /**
      * Constructor.
      * 
@@ -110,17 +108,6 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     public OSGiMainHandler(Bundle bundle) {
         this.bundle = bundle;
         this.mapper = new OSGiCleanMapper();
-
-        /*
-         * Get configparams from configService and add Filters to ServletHandler.
-         */
-        ConfigurationService configService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if (configService == null) {
-            throw new IllegalStateException(String.format(
-                GrizzlyExceptionMessage.NEEDED_SERVICE_MISSING_MSG,
-                ConfigurationService.class.getName()));
-        }
-        isRequestWatcherEnabled = configService.getBoolProperty("com.openexchange.http.requestwatcher.isEnabled", true);
     }
 
     /**
@@ -264,18 +251,21 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * Add our default set of Filters to the ServletHandler.
      * 
      * @param servletHandler The ServletHandler with the FilterChain
+     * @throws ServletException 
      */
-    private void addServletFilters(OSGiServletHandler servletHandler) {
+    private void addServletFilters(OSGiServletHandler servletHandler) throws ServletException {
         // wrap it
         servletHandler.addFilter(new WrappingFilter(), WrappingFilter.class.getName(), null);
 
         // watch it
-        if (isRequestWatcherEnabled) {
-            servletHandler.addFilter(
-                new RequestReportingFilter(GrizzlyServiceRegistry.getInstance()),
-                RequestReportingFilter.class.getName(),
-                null);
-        }
+            try {
+                servletHandler.addFilter(
+                    new RequestReportingFilter(),
+                    RequestReportingFilter.class.getName(),
+                    null);
+            } catch (OXException e) {
+                throw new ServletException(e);
+            }
 
     }
 

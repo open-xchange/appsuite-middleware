@@ -59,6 +59,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.http.grizzly.GrizzlyExceptionCode;
+import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.osgi.ServiceRegistry;
@@ -80,10 +84,18 @@ public class RequestReportingFilter implements Filter {
 
     private static final String EAS_PING = "Ping";
 
-    private final ServiceRegistry serviceRegistry;
+    RequestWatcherService requestWatcherService = null;
 
-    public RequestReportingFilter(ServiceRegistry serviceRegistry) {
-        this.serviceRegistry = serviceRegistry;
+    private boolean isFilterEnabled;
+
+    public RequestReportingFilter() throws OXException {
+        GrizzlyServiceRegistry serviceRegistry = GrizzlyServiceRegistry.getInstance();
+        ConfigurationService configService = serviceRegistry.getService(ConfigurationService.class);
+        if (configService == null) {
+            throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
+        }
+        this.isFilterEnabled = configService.getBoolProperty("com.openexchange.server.requestwatcher.isEnabled", true);
+        this.requestWatcherService = serviceRegistry.getService(RequestWatcherService.class);
     }
 
     @Override
@@ -93,34 +105,36 @@ public class RequestReportingFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-        HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-        boolean longRunning = EAS_URI.equals(httpServletRequest.getRequestURI()) && EAS_PING.equals(request.getParameter(EAS_CMD));
-        if (longRunning) { // don't track long running requests
-            chain.doFilter(request, response);
-        } else {
-            // register request
-            RequestWatcherService requestWatcherService = serviceRegistry.getService(RequestWatcherService.class);
-            // requestwatcher is enabled but service is missing, bundle not started etc ..
-            if (requestWatcherService == null) {
-                writeToErrorLog("The required RequestWatcherService isn't available. Not able to watch this request.");
-                chain.doFilter(httpServletRequest, httpServletResponse);
-            } else {
-                RequestRegistryEntry requestRegistryEntry = requestWatcherService.registerRequest(
-                    httpServletRequest,
-                    httpServletResponse,
-                    Thread.currentThread());
-
-                // proceed processing
+        if (isFilterEnabled) {
+            HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+            HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+            boolean longRunning = EAS_URI.equals(httpServletRequest.getRequestURI()) && EAS_PING.equals(request.getParameter(EAS_CMD));
+            if (longRunning) { // don't track long running requests
                 chain.doFilter(request, response);
+            } else {
+                // requestwatcher is enabled but service is missing, bundle not started etc ..
+                if (requestWatcherService == null) {
+                    writeToErrorLog("The required RequestWatcherService isn't available. Not able to watch this request.");
+                    chain.doFilter(httpServletRequest, httpServletResponse);
+                } else {
+                    RequestRegistryEntry requestRegistryEntry = requestWatcherService.registerRequest(
+                        httpServletRequest,
+                        httpServletResponse,
+                        Thread.currentThread());
 
-                // debug duration
-                writeToDebugLog(new StringBuilder("Request took ").append(requestRegistryEntry.getAge()).append(" ms").append(" for url: ").append(
-                    httpServletRequest.getRequestURL()).toString());
+                    // proceed processing
+                    chain.doFilter(request, response);
 
-                // remove request from registry after processing finished
-                requestWatcherService.unregisterRequest(requestRegistryEntry);
+                    // debug duration
+                    writeToDebugLog(new StringBuilder("Request took ").append(requestRegistryEntry.getAge()).append(" ms").append(
+                        " for url: ").append(httpServletRequest.getRequestURL()).toString());
+
+                    // remove request from registry after processing finished
+                    requestWatcherService.unregisterRequest(requestRegistryEntry);
+                }
             }
+        } else { // filter isn't enabled
+            chain.doFilter(request, response);
         }
     }
 
