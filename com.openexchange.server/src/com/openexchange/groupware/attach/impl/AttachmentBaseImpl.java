@@ -1015,15 +1015,30 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
         @Override
         public boolean hasNext() throws OXException {
-            if (delegate != null) {
-                return delegate.hasNext();
+            {
+                final SearchIteratorAdapter<AttachmentMetadata> delegate = this.delegate;
+                if (delegate != null) {
+                    return delegate.hasNext();
+                }
             }
             try {
                 if (!queried) {
                     queried = true;
                     query();
-                    if (delegate != null) {
-                        return delegate.hasNext();
+                    {
+                        final Exception exception = this.exception;
+                        if (exception != null) {
+                            if (exception instanceof OXException) {
+                                throw (OXException) exception;
+                            }
+                            throw AttachmentExceptionCodes.SEARCH_PROBLEM.create(exception);
+                        }
+                    }
+                    {
+                        final SearchIteratorAdapter<AttachmentMetadata> delegate = this.delegate;
+                        if (delegate != null) {
+                            return delegate.hasNext();
+                        }
                     }
                     initNext = true;
                 }
@@ -1040,15 +1055,21 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
         @Override
         public AttachmentMetadata next() throws OXException {
-            if (delegate != null) {
-                return delegate.next();
+            {
+                final SearchIteratorAdapter<AttachmentMetadata> delegate = this.delegate;
+                if (delegate != null) {
+                    return delegate.next();
+                }
             }
             hasNext();
-            if (exception != null) {
-                if (exception instanceof OXException) {
-                    throw (OXException) exception;
+            {
+                final Exception exception = this.exception;
+                if (exception != null) {
+                    if (exception instanceof OXException) {
+                        throw (OXException) exception;
+                    }
+                    throw AttachmentExceptionCodes.SEARCH_PROBLEM.create(exception);
                 }
-                throw AttachmentExceptionCodes.SEARCH_PROBLEM.create(exception);
             }
 
             final AttachmentMetadata m = nextFromResult(rs);
