@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.textxtraction;
+package com.openexchange.textxtraction.internal;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

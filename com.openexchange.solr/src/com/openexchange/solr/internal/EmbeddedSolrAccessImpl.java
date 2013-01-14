@@ -51,13 +51,10 @@ package com.openexchange.solr.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Properties;
-
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -71,7 +68,6 @@ import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrCore;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -114,6 +110,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         coreContainer = new CoreContainer(solrHome);
         try {
             coreContainer.load(solrHome, new InputSource(new FileInputStream(configDir + File.separatorChar + "solr.xml")));
+            coreContainer.setAdminPath("admin");
         } catch (Exception e) {
             LOG.warn("Error while loading core container. Schema cache will not be available...", e);
         }
@@ -507,6 +504,10 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         }
 
         stopCore(identifier);
+    }
+    
+    public CoreContainer getCoreContainer() {
+        return coreContainer;
     }
 
     private String getConfigFileByModule(final int module) throws OXException {

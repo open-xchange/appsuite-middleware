@@ -47,15 +47,26 @@
  *
  */
 
-package com.openexchange.textxtraction;
+package com.openexchange.textxtraction.internal;
 
 import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.io.IOUtils;
+import org.apache.tika.Tika;
+import org.apache.tika.mime.MediaType;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.parser.CompositeParser;
+import org.apache.tika.parser.Parser;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
+import com.openexchange.textxtraction.DelegateTextXtraction;
+import com.openexchange.textxtraction.TestData;
 import com.openexchange.textxtraction.internal.TikaTextXtractService;
 
 
@@ -72,7 +83,7 @@ public class TikaTextXtractServiceTest {
 
     @Before
     public void setUp() {
-        textXtraction = new TikaTextXtractService(null);
+        textXtraction = new TikaTextXtractService();
         delegate = new DelegateTextXtraction() {            
             @Override
             public String extractFromResource(String resource, String optMimeType) throws OXException {
@@ -116,6 +127,23 @@ public class TikaTextXtractServiceTest {
                 return true;
             }
         };
+    }
+    
+    @Test
+    public void testParserConfig() throws Exception {
+        Assert.assertNotNull("Tika was null", textXtraction.tika);
+        Tika tika = textXtraction.tika;
+        AutoDetectParser autoDetectParser = (AutoDetectParser) tika.getParser();
+        Map<MediaType, Parser> wrappedParser = autoDetectParser.getParsers();
+        CompositeParser compositeParser = (CompositeParser) wrappedParser.values().iterator().next();
+        Map<MediaType, Parser> parserMap = compositeParser.getParsers();
+        Set<Parser> allParsers = new HashSet<Parser>(parserMap.values());
+        Assert.assertEquals("Wrong number of parsers.", TikaTextXtractService.PARSERS.size(), allParsers.size());
+        
+        for (Parser parser : allParsers) {
+            String className = parser.getClass().getName();
+            Assert.assertTrue("Missing parser " + className, TikaTextXtractService.PARSERS.contains(className));
+        }
     }
     
     @Test
