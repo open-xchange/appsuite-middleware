@@ -1207,7 +1207,7 @@ public class Login extends AJAXServlet {
             clientIP,
             userAgent,
             UUIDs.getUnformattedString(UUID.randomUUID()),
-            UUIDs.getUnformattedString(UUID.randomUUID()),
+            client,
             version,
             HashCalculator.getInstance().getHash(req, userAgent, client),
             isVolatile,

@@ -518,4 +518,8 @@ public final class LoginPerformer {
     public Session lookupSession(final String sessionId) throws OXException {
         return ServerServiceRegistry.getInstance().getService(SessiondService.class, true).getSession(sessionId);
     }
+
+    public Session lookupSessionWithTokens(String clientToken, String serverToken) throws OXException {
+        return ServerServiceRegistry.getInstance().getService(SessiondService.class, true).getSessionWithTokens(clientToken, serverToken);
+    }
 }
