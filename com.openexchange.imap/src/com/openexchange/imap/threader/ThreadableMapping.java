@@ -145,6 +145,12 @@ public final class ThreadableMapping {
      */
     public boolean checkFor(final Iterable<MailMessage> toCheck, final List<MailMessage> thread) {
         boolean changed = false;
+        // Set for existing Message-Ids
+        final Set<String> existingMessageIds = new HashSet<String>(thread.size());
+        for (MailMessage mailMessage : thread) {
+            existingMessageIds.add(mailMessage.getMessageId());
+        }
+        // Set for already processed ones
         final Set<MessageKey> processed = new HashSet<MessageKey>(thread.size());
         for (final MailMessage mail : toCheck) {
             final String messageId = mail.getMessageId();
@@ -153,7 +159,7 @@ public final class ThreadableMapping {
                 final List<MailMessage> referencees = refsMap.get(messageId);
                 if (null != referencees) {
                     for (final MailMessage candidate : referencees) {
-                        if (processed.add(keyFor(candidate))) {
+                        if (!existingMessageIds.contains(candidate.getMessageId()) && processed.add(keyFor(candidate))) {
                             thread.add(candidate);
                             changed = true;
                         }
@@ -182,7 +188,7 @@ public final class ThreadableMapping {
                     final List<MailMessage> references = messageIdMap.get(sReference);
                     if (null != references) {
                         for (final MailMessage candidate : references) {
-                            if (processed.add(keyFor(candidate))) {
+                            if (!existingMessageIds.contains(candidate.getMessageId()) && processed.add(keyFor(candidate))) {
                                 thread.add(candidate);
                                 changed = true;
                             }
