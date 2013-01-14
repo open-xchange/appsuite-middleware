@@ -165,7 +165,7 @@ public final class UpdateAction extends AbstractUserAction {
                 }
             }
         }
-        contactService.updateContact(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), 
+        contactService.updateUser(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), 
         		parsedUserContact, clientLastModified);
         /*
          * Update user if necessary, too

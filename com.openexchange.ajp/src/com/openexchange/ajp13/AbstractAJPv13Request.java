@@ -84,6 +84,15 @@ public abstract class AbstractAJPv13Request implements AJPv13Request {
     }
 
     /**
+     * Gets the name of the echo header.
+     * 
+     * @return The name or <code>null</code> if not set
+     */
+    public static String getEchoHeaderName() {
+        return ECHO_HEADER_NAME.get();
+    }
+
+    /**
      * The payload data.
      */
     protected final byte[] payloadData;

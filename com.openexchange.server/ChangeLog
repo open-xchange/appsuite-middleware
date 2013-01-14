@@ -1,3 +1,84 @@
+* 2013-01-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24362: Support AJP echo header with Coyote AJP handler
+
+* 2012-12-22 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24168: Skip censorship restrictions when reading 'own' contact data
+
+* 2012-12-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24280: The task identifier generator is used to exclude all concurrent deleting processes from each other to prevent
+   deadlocks on the database.
+
+* 2012-12-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24334: Check for an empty String prior to parseInt attempt
+ - Fix for bug 24323: Fixed typo in help output
+ - Fix for bug 23524: Dropped unnecessary warning for en_US locale
+ - Fix for bug 22204: Transform MessageRemovedException to an appropriate error code
+ - Fix for bug 24309: Proper parsing of version string
+ - Fix for bug 24307: Disable session checks for request marked as no-session capable
+
+* 2012-12-20 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22389: Using more dedicated mechanism to apply version from bundle manifest into Java code. Added explicit exception path if
+   that mechanism fails somehow.
+
+* 2012-12-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24333: Reverted wrong "charat(0)" replacement
+
+* 2012-12-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24230: Using proper class
+
+* 2012-12-17 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23892: Added package open-xchange-appsuite-backend which has a dependency on package open-xchange-appsuite-manifest.
+ - Fix for bug 24206: Added App Suite language properties files to open-xchange-l10n packages.
+
+* 2012-12-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23791: Proper URL-decoding of RSS feed's URL
+ - Fix for bug 23803: Logging appropriate to error's category
+
+* 2012-12-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24208: Ignore JSlob core properties on config save-back operation
+ - Fix for bug 24051: Retry loading with a read-write connection
+
+* 2012-12-15 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24215: Move an (no longer private) appointment to a public folder.
+
+* 2012-12-15 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24213: Reworked delete- and move-logic  
+
+* 2012-12-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24052: Sanitize script tags
+ - Fix for bug 23857: Keep background color when replacing <body> tag with <div> tag
+
+* 2012-12-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23750: Extended the fragments of the formLogin action redirect URL with values needed by the App Suite frontend.
+ - Fix for bug 23957: Checking if old configuration directory exists before trying to find files there.
+
+* 2012-12-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24193: Mix-up of ids.
+
+* 2012-12-13 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24168: Added special handling for user contact updates  
+ - Fix for bug 24196: Fixed delete multiple 
+
+* 2012-12-13 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23733: Possible fix for slow sql queries..
+
 * 2012-12-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 23881: Backport to previous JCS library
