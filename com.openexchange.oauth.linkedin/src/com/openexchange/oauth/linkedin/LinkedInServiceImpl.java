@@ -167,6 +167,7 @@ public class LinkedInServiceImpl implements LinkedInService{
                 // Expect JSON content
                 return JSONObject.parse(reader);
             }
+            LOG.warn("No JSON format in LinkedIn response. Assume XML format.");
             final String body = Streams.reader2string(reader);
             fallback.add(body);
             return null;
