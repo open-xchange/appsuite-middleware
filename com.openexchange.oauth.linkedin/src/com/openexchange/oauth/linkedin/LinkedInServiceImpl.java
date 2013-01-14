@@ -49,8 +49,11 @@
 
 package com.openexchange.oauth.linkedin;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,6 +73,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -88,7 +92,7 @@ public class LinkedInServiceImpl implements LinkedInService{
     private static final String PERSONAL_FIELDS = "id,first-name,last-name,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry,public-profile-url";
     private static final String RELATION_TO_VIEWER = "relation-to-viewer:(connections:(person:(id,first-name,last-name,picture-url,headline)))";
 	private static final String PERSONAL_FIELD_QUERY = ":("+PERSONAL_FIELDS+")";
-	private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)?format=json";
+	private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
     private static final String IN_JSON = "?format=json";
 
     private Activator activator;
@@ -147,13 +151,30 @@ public class LinkedInServiceImpl implements LinkedInService{
         }
 	}
 
-	private JSONValue extractJsonValue(final Response response) throws OXException {
-        Reader reader = null;
+	private JSONValue extractJsonValue(final Response response, final Collection<Object> fallback) throws OXException {
+        UnsynchronizedPushbackReader reader = null;
         try {
-            reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);
-            return JSONObject.parse(reader);
+            reader = new UnsynchronizedPushbackReader(new InputStreamReader(response.getStream(), Charsets.UTF_8));
+            // Read first character...
+            final int read = reader.read();
+            if (read < 0) {
+                return null;
+            }
+            final char c = (char) read;
+            // ... and push it back to reader
+            reader.unread(c);
+            if ('[' == c || '{' == c) {
+                // Expect JSON content
+                return JSONObject.parse(reader);
+            }
+            LOG.warn("No JSON format in LinkedIn response. Assume XML format.");
+            final String body = Streams.reader2string(reader);
+            fallback.add(body);
+            return null;
         } catch (final JSONException e) {
             throw OAuthExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(reader);
         }
@@ -200,7 +221,7 @@ public class LinkedInServiceImpl implements LinkedInService{
 
     @Override
     public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) throws OXException {
-    	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, CONNECTIONS_URL);
+    	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, CONNECTIONS_URL + IN_JSON);
     	if (response == null) {
     		return Collections.emptyList();
     	}
@@ -209,8 +230,19 @@ public class LinkedInServiceImpl implements LinkedInService{
         if( response.getCode() != 200 ) {
             LOG.error(response.getBody());
         }
+        final List<Object> fallback = new ArrayList<Object>(1);
+        final JSONValue jsonValue = extractJsonValue(response, fallback);
+        if (null != jsonValue) {
+            final LinkedInXMLParser parser = new LinkedInXMLParser();
+            final List<Contact> contacts = parser.parseConnections(jsonValue);
+            return contacts;
+        }
+        // No JSON format
+        if (fallback.isEmpty()) {
+            return Collections.emptyList();
+        }
     	final LinkedInXMLParser parser = new LinkedInXMLParser();
-        final List<Contact> contacts = parser.parseConnections(extractJsonValue(response));
+        final List<Contact> contacts = parser.parseConnections(fallback.get(0).toString());
         return contacts;
     }
 
