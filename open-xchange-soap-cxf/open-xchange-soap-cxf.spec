@@ -46,59 +46,59 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
-* Fri Dec 21 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Fri Dec 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2012-12-21
-* Tue Dec 18 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Dec 18 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release candidate for 7.0.0
-* Mon Dec 17 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Mon Dec 17 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.0.0
-* Wed Dec 12 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Wed Dec 12 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2012-12-04
-* Tue Dec 04 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Dec 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.0.0
-* Tue Dec 04 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Dec 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.0.0 release
-* Mon Nov 26 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Mon Nov 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2012-11-28
-* Wed Nov 14 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth release candidate for 6.22.1
-* Tue Nov 13 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 6.22.1
-* Tue Nov 13 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for EDP drop #6
-* Tue Nov 06 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Nov 06 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth release candidate for 6.22.1
-* Fri Nov 02 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Fri Nov 02 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release candidate for 6.22.1
-* Wed Oct 31 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.1
-* Fri Oct 26 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release build for EDP drop #5
-* Fri Oct 26 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.1
-* Fri Oct 26 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release build for EDP drop #5
-* Fri Oct 26 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 6.22.1
-* Thu Oct 11 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Thu Oct 11 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Release build for EDP drop #5
-* Wed Oct 10 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 6.22.0
-* Tue Oct 09 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth release candidate for 6.22.0
-* Fri Oct 05 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Fri Oct 05 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release candidate for 6.22.0
-* Thu Oct 04 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.0
-* Tue Sep 04 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.23.0
-* Mon Sep 03 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for next EDP drop
-* Tue Aug 21 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
-* Mon Aug 20 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 6.22.0
-* Tue Jul 03 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Release build for EDP drop #2
-* Tue Jun 26 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Jun 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Initial release
