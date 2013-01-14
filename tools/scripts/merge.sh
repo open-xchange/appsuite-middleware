@@ -71,6 +71,8 @@ mergeRPMSpec() {
         sed '0,/=======/{/<<<<<<< HEAD/,/=======/ d;}' $FILE >$TEMPFILE
         sed -i '/>>>>>>> release-/ d' $TEMPFILE
 
+        # TODO solving problem in changelog entries is complex because it must be sorted by date
+
         diff -y $FILE $TEMPFILE | less
         echo "Merged correctly?"
         select YN in "Yes" "No"

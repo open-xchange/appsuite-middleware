@@ -845,7 +845,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * limit queried fields when necessary due to permissions
 		 */
-		EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
+		final EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
 		QueryFields queryFields;
 		if (permission.canReadAllObjects() || 1 == userIDs.length && currentUserID == userIDs[0]) {
 			// no limitation
