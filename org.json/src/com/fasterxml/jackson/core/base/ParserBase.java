@@ -1,13 +1,10 @@
 package com.fasterxml.jackson.core.base;
 
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import com.fasterxml.jackson.core.Base64Variant;
-import com.fasterxml.jackson.core.JsonLocation;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
+
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.io.NumberInput;
 import com.fasterxml.jackson.core.json.JsonReadContext;
@@ -207,16 +204,16 @@ public abstract class ParserBase
     final static BigDecimal BD_MIN_INT = new BigDecimal(BI_MIN_INT);
     final static BigDecimal BD_MAX_INT = new BigDecimal(BI_MAX_INT);
 
-    final static long MIN_INT_L = Integer.MIN_VALUE;
-    final static long MAX_INT_L = Integer.MAX_VALUE;
+    final static long MIN_INT_L = (long) Integer.MIN_VALUE;
+    final static long MAX_INT_L = (long) Integer.MAX_VALUE;
 
     // These are not very accurate, but have to do... (for bounds checks)
 
-    final static double MIN_LONG_D = Long.MIN_VALUE;
-    final static double MAX_LONG_D = Long.MAX_VALUE;
+    final static double MIN_LONG_D = (double) Long.MIN_VALUE;
+    final static double MAX_LONG_D = (double) Long.MAX_VALUE;
 
-    final static double MIN_INT_D = Integer.MIN_VALUE;
-    final static double MAX_INT_D = Integer.MAX_VALUE;
+    final static double MIN_INT_D = (double) Integer.MIN_VALUE;
+    final static double MAX_INT_D = (double) Integer.MAX_VALUE;
     
     
     // Digits, numeric
@@ -561,7 +558,7 @@ public abstract class ParserBase
         _textBuffer.resetWithString(valueStr);
         return JsonToken.VALUE_STRING;
     }
-    
+
     /*
     /**********************************************************
     /* Numeric accessors of public API
@@ -840,7 +837,7 @@ public abstract class ParserBase
         if ((_numTypesValid & NR_LONG) != 0) {
             // Let's verify it's lossless conversion by simple roundtrip
             int result = (int) _numberLong;
-            if ((result) != _numberLong) {
+            if (((long) result) != _numberLong) {
                 _reportError("Numeric value ("+getText()+") out of range of int");
             }
             _numberInt = result;
@@ -873,7 +870,7 @@ public abstract class ParserBase
         throws IOException, JsonParseException
     {
         if ((_numTypesValid & NR_INT) != 0) {
-            _numberLong = _numberInt;
+            _numberLong = (long) _numberInt;
         } else if ((_numTypesValid & NR_BIGINT) != 0) {
             if (BI_MIN_LONG.compareTo(_numberBigInt) > 0 
                     || BI_MAX_LONG.compareTo(_numberBigInt) < 0) {
@@ -931,9 +928,9 @@ public abstract class ParserBase
         } else if ((_numTypesValid & NR_BIGINT) != 0) {
             _numberDouble = _numberBigInt.doubleValue();
         } else if ((_numTypesValid & NR_LONG) != 0) {
-            _numberDouble = _numberLong;
+            _numberDouble = (double) _numberLong;
         } else if ((_numTypesValid & NR_INT) != 0) {
-            _numberDouble = _numberInt;
+            _numberDouble = (double) _numberInt;
         } else {
             _throwInternal(); // should never get here
         }
@@ -961,7 +958,7 @@ public abstract class ParserBase
         } else if ((_numTypesValid & NR_LONG) != 0) {
             _numberBigDecimal = BigDecimal.valueOf(_numberLong);
         } else if ((_numTypesValid & NR_INT) != 0) {
-            _numberBigDecimal = BigDecimal.valueOf(_numberInt);
+            _numberBigDecimal = BigDecimal.valueOf((long) _numberInt);
         } else {
             _throwInternal(); // should never get here
         }

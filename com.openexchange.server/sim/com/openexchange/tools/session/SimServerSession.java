@@ -153,10 +153,7 @@ public class SimServerSession implements ServerSession {
 
     @Override
     public int getUserId() {
-        if (null == user) {
-            throw new IllegalStateException("User not set in SimServerSession instance.");
-        }
-        return user.getId();
+        return null == user ? 0 : user.getId();
     }
 
     @Override

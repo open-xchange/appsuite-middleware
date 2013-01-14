@@ -104,7 +104,7 @@ public final class HTMLDetector {
         // lower-case
         if (indexOf(
             sequence,
-            tmp.append('<').append(tag.toLowerCase()).append('>').toString().getBytes(Charsets.US_ASCII),
+            Charsets.toAsciiBytes(tmp.append('<').append(tag.toLowerCase()).append('>')),
             0,
             sequence.length,
             null) != -1) {
@@ -114,7 +114,7 @@ public final class HTMLDetector {
         // upper-case
         return (indexOf(
             sequence,
-            tmp.append('<').append(tag.toUpperCase()).append('>').toString().getBytes(Charsets.US_ASCII),
+            Charsets.toAsciiBytes(tmp.append('<').append(tag.toUpperCase()).append('>')),
             0,
             sequence.length,
             null) != -1);

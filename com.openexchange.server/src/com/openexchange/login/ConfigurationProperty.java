@@ -110,7 +110,8 @@ public enum ConfigurationProperty {
      * false to have an IP check during this request. Additionally you can white list IP addresses from that an IP change is still allowed.
      * This is useful if other systems in the infrastructure around OX want to create the session.
      */
-    REDIRECT_IP_CHANGE_ALLOWED("com.openexchange.ajax.login.redirect.changeIPAllowed", Boolean.TRUE.toString());
+    REDIRECT_IP_CHANGE_ALLOWED("com.openexchange.ajax.login.redirect.changeIPAllowed", Boolean.TRUE.toString()),
+    DISABLE_TRIM_LOGIN("com.openexchange.login.disableTrimLogin", Boolean.FALSE.toString());
 
     private final String propertyName;
 

@@ -50,9 +50,26 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
-import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
-import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
+import static com.openexchange.ajax.fields.LoginFields.AUTHID_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.CLIENT_IP_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.PASSWORD_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.VERSION_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.VOLATILE;
+import static com.openexchange.login.Interface.HTTP_JSON;
+import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.logging.Log;
+import com.openexchange.ajax.fields.Header;
+import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * Shared methods for login operations.
@@ -60,6 +77,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class LoginTools {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginTools.class);
 
     private LoginTools() {
         super();
@@ -73,24 +92,6 @@ public final class LoginTools {
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");
         retval = addFragmentParameter(retval, PARAMETER_SESSION, sessionId);
-        if (shouldStore != null) {
-            retval = addFragmentParameter(retval, "store", shouldStore);
-        }
-        return retval;
-    }
-
-    public static String generateRedirectURL(String uiWebPathParam, String shouldStore, Session session, String language, String uiWebPath) {
-        String retval = uiWebPathParam;
-        if (null == retval) {
-            retval = uiWebPath;
-        }
-        // Prevent HTTP response splitting.
-        retval = retval.replaceAll("[\n\r]", "");
-        retval = addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
-        // App Suite UI requires some additional values.
-        retval = addFragmentParameter(retval, PARAMETER_USER, session.getLogin());
-        retval = addFragmentParameter(retval, PARAMETER_USER_ID, Integer.toString(session.getUserId()));
-        retval = addFragmentParameter(retval, "language", language);
         if (shouldStore != null) {
             retval = addFragmentParameter(retval, "store", shouldStore);
         }
@@ -111,10 +112,142 @@ public final class LoginTools {
         // Now let's see, if this url already contains a fragment
         if (retval.indexOf('#') < 0) {
             // Apparently it didn't, so we can append our own
-            return retval + "#" + param + "=" + value + query;
+            return retval + '#' + param + '=' + value + query;
         }
         // Alright, we already have a fragment, let's append a new parameter
 
-        return retval + "&" + param + "=" + value + query;
+        return retval + '&' + param + '=' + value + query;
+    }
+
+    public static String parseAuthId(HttpServletRequest req, boolean strict) throws OXException {
+        return parseParameter(req, AUTHID_PARAM, strict, UUIDs.getUnformattedString(UUID.randomUUID()));
+    }
+
+    public static String parseClient(HttpServletRequest req, boolean strict, String defaultClient) throws OXException {
+        return parseParameter(req, CLIENT_PARAM, strict, defaultClient);
+    }
+
+    public static String parseParameter(HttpServletRequest req, String paramName, boolean strict, String fallback) throws OXException {
+        final String value = req.getParameter(paramName);
+        if (null == value) {
+            if (strict) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(paramName);
+            }
+            return fallback;
+        }
+        return value;
+    }
+
+    public static String parseParameter(HttpServletRequest req, String paramName, String fallback) {
+        final String value = req.getParameter(paramName);
+        if (null == value) {
+            return fallback;
+        }
+        return value;
+    }
+
+    public static String parseParameter(HttpServletRequest req, String paramName) throws OXException {
+        final String value = req.getParameter(paramName);
+        if (null == value) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(paramName);
+        }
+        return value;
+    }
+
+    public static String parseClientIP(HttpServletRequest req) {
+        return parseParameter(req, CLIENT_IP_PARAM, req.getRemoteAddr());
+    }
+
+    public static String parseUserAgent(HttpServletRequest req) {
+        return parseParameter(req, LoginFields.USER_AGENT, req.getHeader(Header.USER_AGENT));
+    }
+
+    public static boolean parseVolatile(HttpServletRequest req) {
+        final String parameter = req.getParameter(VOLATILE);
+        if (isEmpty(parameter)) {
+            return false;
+        }
+        return Boolean.parseBoolean(parameter.trim());
+    }
+
+    public static LoginRequestImpl parseLogin(HttpServletRequest req, String login, String password, boolean strict, String defaultClient, boolean forceHTTPS) throws OXException {
+        final String authId = parseAuthId(req, strict);
+        final String client = parseClient(req, strict, defaultClient);
+        final String version;
+        if (null == req.getParameter(VERSION_PARAM)) {
+            if (strict) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(VERSION_PARAM);
+            }
+            version = null;
+        } else {
+            version = req.getParameter(VERSION_PARAM);
+        }
+        final String clientIP = parseClientIP(req);
+        final String userAgent = parseUserAgent(req);
+        final boolean isVolatile = parseVolatile(req);
+        final Map<String, List<String>> headers = copyHeaders(req);
+        final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
+        final String httpSessionId = req.getSession(true).getId();
+        return new LoginRequestImpl(
+            login,
+            password,
+            clientIP,
+            userAgent,
+            authId,
+            client,
+            version,
+            HashCalculator.getInstance().getHash(req, userAgent, client),
+            isVolatile,
+            HTTP_JSON,
+            headers,
+            cookies,
+            Tools.considerSecure(req, forceHTTPS),
+            req.getServerName(),
+            req.getServerPort(),
+            httpSessionId);
+    }
+
+    public static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    public static LoginRequestImpl parseLogin(HttpServletRequest req, String loginParamName, boolean strict, String defaultClient, boolean forceHTTPS, boolean disableTrimLogin) throws OXException {
+        String login = req.getParameter(loginParamName);
+        if (null == login) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(loginParamName);
+        }
+        if (!disableTrimLogin) {
+            login = login.trim();
+        }
+        String password = req.getParameter(PASSWORD_PARAM);
+        if (null == password) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PASSWORD_PARAM);
+        }
+        return parseLogin(req, login, password, strict, defaultClient, forceHTTPS);
+    }
+
+    /**
+     * Updates session's IP address if different to specified IP address. This is only possible if the server is configured to be IP wise
+     * insecure. @See configuration property com.openexchange.ajax.login.insecure.
+     *
+     * @param newIP The possibly new IP address
+     * @param session The session to update if IP addresses differ
+     */
+    public static void updateIPAddress(LoginConfiguration conf, String newIP, Session session) {
+        if (conf.isInsecure()) {
+            String oldIP = session.getLocalIp();
+            if (null != newIP && !newIP.equals(oldIP)) {
+                LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + ", old ip: " + oldIP + ", new ip: " + newIP);
+                session.setLocalIp(newIP);
+            }
+        }
     }
 }

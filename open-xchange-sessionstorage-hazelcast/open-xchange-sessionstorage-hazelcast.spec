@@ -83,17 +83,17 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
-* Fri Dec 21 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Fri Dec 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2012-12-21
-* Tue Dec 18 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Dec 18 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release candidate for 7.0.0
-* Mon Dec 17 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Mon Dec 17 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.0.0
-* Tue Dec 04 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Dec 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.0.0
-* Tue Dec 04 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Dec 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.0.0 release
-* Tue Nov 20 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Nov 20 2012 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for next EDP drop
 * Tue Nov 13 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 First release candidate for EDP drop #6

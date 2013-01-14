@@ -98,7 +98,9 @@ public enum LoginExceptionCodes implements OXExceptionCode {
      * Message: %s does not support an auto login authentication.
      * Add class name as parameter when creating the exception.
      */
-    NOT_SUPPORTED(NOT_SUPPORTED_MSG, Category.CATEGORY_SERVICE_DOWN, 19);
+    NOT_SUPPORTED(NOT_SUPPORTED_MSG, Category.CATEGORY_SERVICE_DOWN, 19),
+    /** Server side token for token login was not created. */
+    SERVER_TOKEN_NOT_CREATED(SERVER_TOKEN_NOT_CREATED_MSG, Category.CATEGORY_ERROR, 20);
 
     private final String message;
 

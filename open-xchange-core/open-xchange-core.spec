@@ -210,6 +210,17 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1275
+pfile=/opt/open-xchange/etc/server.properties
+if grep -E "com.openexchange.log.propertyNames.*.ajp13." $pfile > /dev/null; then
+   ptmp=${pfile}.$$
+   sed -e 's;\.ajp13\.;.ajpv13.;g' $pfile > $ptmp
+   if [ -s $ptmp ]; then
+      cp $ptmp $pfile
+   fi
+   rm -f $ptmp
+fi
+
 # SoftwareChange_Request-1252
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/whitelist.properties
@@ -443,8 +454,14 @@ ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 %config(noreplace) /opt/open-xchange/etc/requestwatcher.properties
 
 %changelog
+* Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-01-10
+* Fri Dec 28 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Build for public patch 2012-12-31
 * Fri Dec 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2012-12-21
+* Tue Dec 18 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2012-12-27
 * Tue Dec 18 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release candidate for 7.0.0
 * Mon Dec 17 2012 Marcus Klein <marcus.klein@open-xchange.com>

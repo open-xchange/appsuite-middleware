@@ -1,0 +1,158 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.java;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
+
+/**
+ * {@link AsciiWriter} - A simple ASCII byte writer.
+ * <p>
+ * This is an optimized writer for writing only 7-bit ASCII characters to byte streams.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class AsciiWriter extends Writer {
+
+    private final OutputStream out;
+
+    /**
+     * Initializes a new {@link AsciiWriter}.
+     */
+    public AsciiWriter(final OutputStream out) {
+        super();
+        this.out = out;
+    }
+
+    @Override
+    public void write(final int c) throws IOException {
+        out.write((byte) c);
+    }
+
+    @Override
+    public void write(final char[] cbuf) throws IOException {
+        if (null == cbuf) {
+            throw new NullPointerException("cbuf is null.");
+        }
+        final int len = cbuf.length;
+        if (len == 0) {
+            return;
+        }
+        final byte[] bytes = new byte[len];
+        for (int i = 0; i < len; i++) {
+            bytes[i] = (byte) cbuf[i];
+        }
+        out.write(bytes, 0, len);
+    }
+
+    @Override
+    public void write(final char[] cbuf, final int off, final int len) throws IOException {
+        if (null == cbuf) {
+            throw new NullPointerException("cbuf is null.");
+        }
+        if ((off < 0) || (off > cbuf.length) || (len < 0) || ((off + len) > cbuf.length) || ((off + len) < 0)) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (len == 0) {
+            return;
+        }
+        final byte[] bytes = new byte[len];
+        for (int i = 0; i < len; i++) {
+            bytes[i] = (byte) cbuf[off + i];
+        }
+        out.write(bytes, 0, len);
+    }
+
+    @Override
+    public void write(final String str) throws IOException {
+        if (null == str) {
+            throw new NullPointerException("str is null.");
+        }
+        final int len = str.length();
+        if (len == 0) {
+            return;
+        }
+        final byte[] bytes = new byte[len];
+        for (int i = 0; i < len; i++) {
+            bytes[i] = (byte) str.charAt(i);
+        }
+        out.write(bytes, 0, len);
+    }
+
+    @Override
+    public void write(final String str, final int off, final int len) throws IOException {
+        if (null == str) {
+            throw new NullPointerException("str is null.");
+        }
+        if ((off < 0) || (off > str.length()) || (len < 0) || ((off + len) > str.length()) || ((off + len) < 0)) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (len == 0) {
+            return;
+        }
+        final byte[] bytes = new byte[len];
+        for (int i = 0; i < len; i++) {
+            bytes[i] = (byte) str.charAt(off + i);
+        }
+        out.write(bytes, 0, len);
+    }
+
+    @Override
+    public void flush() throws IOException {
+        out.flush();
+    }
+
+    @Override
+    public void close() throws IOException {
+        out.close();
+    }
+
+}

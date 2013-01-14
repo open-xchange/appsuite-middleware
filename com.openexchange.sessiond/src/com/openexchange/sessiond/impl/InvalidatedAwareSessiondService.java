@@ -113,7 +113,7 @@ public final class InvalidatedAwareSessiondService implements SessiondServiceExt
     }
 
     @Override
-    public String addSession(final AddSessionParameter param) throws OXException {
+    public Session addSession(final AddSessionParameter param) throws OXException {
         checkInvalidatedAndRemoveIfPresent(param.getContext().getContextId());
         return impl.addSession(param);
     }
@@ -218,6 +218,11 @@ public final class InvalidatedAwareSessiondService implements SessiondServiceExt
             return null;
         }
         return session;
+    }
+
+    @Override
+    public Session getSessionWithTokens(String clientToken, String serverToken) throws OXException {
+        return impl.getSessionWithTokens(clientToken, serverToken);
     }
 
     @Override

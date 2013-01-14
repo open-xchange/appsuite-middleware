@@ -120,6 +120,10 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // %s is replaced with the implementations name.
     public static final String NOT_SUPPORTED_MSG = "%s does not support an auto login authentication.";
 
+    // This exception is an internal exception. It must not appear outside otherwise its token login is broken. This is covered by automatic
+    // tests. Therefore this message does not need to be translated.
+    public static final String SERVER_TOKEN_NOT_CREATED_MSG = "Server side token for token login was not created.";
+
     private LoginExceptionMessages() {
         super();
     }

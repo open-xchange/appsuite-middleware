@@ -49,6 +49,8 @@
 
 package com.openexchange.java;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
@@ -70,6 +72,37 @@ public class Strings {
 
     private Strings() {
         super();
+    }
+
+    /**
+     * Gets specified string's ASCII bytes
+     * 
+     * @param str The string
+     * @return The ASCII bytes
+     */
+    public static byte[] toAsciiBytes(final CharSequence cs) {
+        return Charsets.toAsciiBytes(cs);
+    }
+
+    /**
+     * Gets specified string's ASCII bytes
+     * 
+     * @param str The string
+     * @return The ASCII bytes
+     */
+    public static byte[] toAsciiBytes(final String str) {
+        return Charsets.toAsciiBytes(str);
+    }
+
+    /**
+     * Writes specified string's ASCII bytes to given stream.
+     * 
+     * @param str The string
+     * @param out The stream to write to
+     * @throws IOException If an I/O error occurs
+     */
+    public static void writeAsciiBytes(final String str, final OutputStream out) throws IOException {
+        Charsets.writeAsciiBytes(str, out);
     }
 
     private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");

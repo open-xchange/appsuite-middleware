@@ -67,6 +67,36 @@ import java.io.Writer;
 public class Streams {
 
     /**
+     * No initialization.
+     */
+    private Streams() {
+        super();
+    }
+
+    /**
+     * Reads the content from given reader.
+     * 
+     * @param reader The reader
+     * @return The reader's content
+     * @throws IOException If an I/O error occurs
+     */
+    public static String reader2string(final Reader reader) throws IOException {
+        if (null == reader) {
+            return null;
+        }
+        final int buflen = 2048;
+        final char[] cbuf = new char[buflen];
+        final StringAllocator builder = new StringAllocator(8192);
+        for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
+            builder.append(cbuf, 0, read);
+        }
+        if (0 == builder.length()) {
+            return null;
+        }
+        return builder.toString();
+    }
+
+    /**
      * Converts specified input stream to a <code>byte</code> array.
      * 
      * @param is The input stream to read from

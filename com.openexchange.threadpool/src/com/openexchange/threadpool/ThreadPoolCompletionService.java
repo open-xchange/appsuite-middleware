@@ -66,42 +66,36 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ThreadPoolCompletionService<V> implements CancelableCompletionService<V> {
+public class ThreadPoolCompletionService<V> implements CancelableCompletionService<V> {
 
     /**
      * FutureTask extension to enqueue upon completion
      */
-    private static final class QueueingFuture<V> extends FutureTask<V> {
+    private final class QueueingFuture extends FutureTask<V> {
 
-        private final BlockingQueue<Future<V>> queue;
-
-        QueueingFuture(final Callable<V> c, final BlockingQueue<Future<V>> queue) {
+        QueueingFuture(final Callable<V> c) {
             super(c);
-            this.queue = queue;
         }
 
-        QueueingFuture(final Runnable t, final V r, final BlockingQueue<Future<V>> queue) {
+        QueueingFuture(final Runnable t, final V r) {
             super(t, r);
-            this.queue = queue;
         }
 
         @Override
         protected void done() {
-            queue.add(this);
+            taskDone(this);
         }
     }
 
     /**
      * FutureTask extension to enqueue upon completion
      */
-    private static final class QueueingTaskFuture<V> extends FutureTask<V> {
+    private final class QueueingTaskFuture extends FutureTask<V> {
 
-        private final BlockingQueue<Future<V>> queue;
         private final Task<V> t;
 
-        QueueingTaskFuture(final Task<V> t, final BlockingQueue<Future<V>> queue) {
+        QueueingTaskFuture(final Task<V> t) {
             super(t);
-            this.queue = queue;
             this.t = t;
         }
 
@@ -125,7 +119,7 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
 
         @Override
         protected void done() {
-            queue.add(this);
+            taskDone(this);
         }
     }
 
@@ -183,7 +177,7 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
      * @param trackable <code>true</code> if trackable; otherwise <code>false</code>
      * @return This completion service with new behavior applied
      */
-    public ThreadPoolCompletionService<V> setTrackable(boolean trackable) {
+    public ThreadPoolCompletionService<V> setTrackable(final boolean trackable) {
         this.trackable = trackable;
         return this;
     }
@@ -198,8 +192,8 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
         if (task == null) {
             throw new NullPointerException();
         }
-        final QueueingTaskFuture<V> f = new QueueingTaskFuture<V>(task, completionQueue);
-        submittedFutures.add(threadPoolService.submit(ThreadPools.task(f, (V) null, trackable), behavior));
+        final QueueingTaskFuture f = new QueueingTaskFuture(task);
+        submitFutureTask(f);
         return f;
     }
 
@@ -208,8 +202,8 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
         if (task == null) {
             throw new NullPointerException();
         }
-        final QueueingFuture<V> f = new QueueingFuture<V>(task, completionQueue);
-        submittedFutures.add(threadPoolService.submit(ThreadPools.task(f, (V) null, trackable), behavior));
+        final QueueingFuture f = new QueueingFuture(task);
+        submitFutureTask(f);
         return f;
     }
 
@@ -218,9 +212,25 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
         if (task == null) {
             throw new NullPointerException();
         }
-        final QueueingFuture<V> f = new QueueingFuture<V>(task, result, completionQueue);
-        submittedFutures.add(threadPoolService.submit(ThreadPools.task(f, (V) null, trackable), behavior));
+        final QueueingFuture f = new QueueingFuture(task, result);
+        submitFutureTask(f);
         return f;
+    }
+
+    /**
+     * Submits specified queueing future task.
+     * 
+     * @param f The queueing future task
+     */
+    protected void submitFutureTask(final FutureTask<V> f) {
+        submittedFutures.add(threadPoolService.submit(ThreadPools.task(f, (V) null, trackable), behavior));
+    }
+
+    /**
+     * Invoked if a task has been executed.
+     */
+    protected void taskDone(final Future<V> task) {
+        completionQueue.add(task);
     }
 
     @Override

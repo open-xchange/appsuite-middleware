@@ -49,7 +49,6 @@
 
 package com.openexchange.jslob.storage.db;
 
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -69,7 +68,7 @@ import org.json.JSONObject;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
+import com.openexchange.java.AsciiReader;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.JSlobId;
@@ -356,7 +355,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             if (!rs.next()) {
                 return null;
             }
-            return new JSlob(new JSONObject(new InputStreamReader(rs.getBinaryStream(1), Charsets.US_ASCII))).setId(id);
+            return new JSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(id);
         } catch (final SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
@@ -400,7 +399,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             }
             final List<JSlob> list = new LinkedList<JSlob>();
             do {
-                list.add(new JSlob(new JSONObject(new InputStreamReader(rs.getBinaryStream(1), Charsets.US_ASCII))).setId(new JSlobId(id.getServiceId(), rs.getString(2), id.getUser(), contextId)));
+                list.add(new JSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(new JSlobId(id.getServiceId(), rs.getString(2), id.getUser(), contextId)));
             } while (rs.next());
             return list;
         } catch (final SQLException e) {

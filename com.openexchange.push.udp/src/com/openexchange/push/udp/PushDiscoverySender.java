@@ -89,7 +89,7 @@ public class PushDiscoverySender implements Runnable {
         discoveryData = String.valueOf(PushRequest.REMOTE_HOST_REGISTER) + '\1' + hostname.getCanonicalHostName()
             + '\1' + String.valueOf(pushConfigInterface.getRegisterPort());
         packetData = String.valueOf(PushRequest.MAGIC) + '\1' + String.valueOf(discoveryData.length()) + '\1' + discoveryData;
-        packetBytes = Charsets.getBytes(packetData, Charsets.US_ASCII);
+        packetBytes = Charsets.toAsciiBytes(packetData);
 
         multicastPort = pushConfigInterface.getMultiCastPort();
         multicastAddress = pushConfigInterface.getMultiCastAddress();

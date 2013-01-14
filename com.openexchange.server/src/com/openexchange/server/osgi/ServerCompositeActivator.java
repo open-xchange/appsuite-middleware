@@ -77,6 +77,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.groupware.update.osgi.Activator(),
         new com.openexchange.groupware.reminder.osgi.ReminderActivator(),
         new com.openexchange.systemname.osgi.SystemNameActivator(),
+        new com.openexchange.groupware.notify.hostname.osgi.HostDataActivator(),
         new com.openexchange.server.osgi.ServerActivator(),
         new com.openexchange.groupware.attach.osgi.AttachmentActivator(),
         new com.openexchange.groupware.contact.osgi.ContactActivator(),

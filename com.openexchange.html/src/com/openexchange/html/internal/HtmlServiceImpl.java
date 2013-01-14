@@ -51,6 +51,7 @@ package com.openexchange.html.internal;
 
 import gnu.inet.encoding.IDNAException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -68,6 +69,10 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.io.IOUtils;
+import org.apache.tika.Tika;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.Metadata;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.Serializer;
@@ -87,6 +92,7 @@ import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
@@ -115,8 +121,8 @@ public final class HtmlServiceImpl implements HtmlService {
      */
 
     private final Map<Character, String> htmlCharMap;
-
     private final Map<String, Character> htmlEntityMap;
+    private final Tika tika;
 
     /**
      * Initializes a new {@link HtmlServiceImpl}.
@@ -129,6 +135,7 @@ public final class HtmlServiceImpl implements HtmlService {
         super();
         this.htmlCharMap = htmlCharMap;
         this.htmlEntityMap = htmlEntityMap;
+        tika = new Tika();
     }
 
     private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -542,16 +549,43 @@ public final class HtmlServiceImpl implements HtmlService {
 //        HTMLParser.parse(htmlContent, handler);
 //        return handler.getText();
 
-        String prepared = prepareSignatureStart(htmlContent);
-        prepared = prepareHrTag(prepared);
-        prepared = insertBlockquoteMarker(prepared);
-        prepared = insertSpaceMarker(prepared);
-        String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
-        // Drop heading whitespaces
-        text = PATTERN_HEADING_WS.matcher(text).replaceAll("$1");
-        // ... but keep enforced ones
-        text = whitespaceText(text);
-        return text;
+        try {
+            String prepared = prepareSignatureStart(htmlContent);
+            prepared = prepareHrTag(prepared);
+            prepared = insertBlockquoteMarker(prepared);
+            prepared = insertSpaceMarker(prepared);
+            String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
+            // Drop heading whitespaces
+            text = PATTERN_HEADING_WS.matcher(text).replaceAll("$1");
+            // ... but keep enforced ones
+            text = whitespaceText(text);
+            return text;
+        } catch (final StackOverflowError soe) {
+            // Unfortunately it may happen...
+            LOG.warn("Stack-overflow during processing HTML content.", soe);
+            // Retry with Tika framework
+            try {
+                return extractFrom(new UnsynchronizedByteArrayInputStream(htmlContent.getBytes(Charsets.ISO_8859_1)));
+            } catch (final OXException e) {
+                LOG.error("Error during processing HTML content.", e);
+                return "";
+            }
+        }
+    }
+
+    private String extractFrom(final InputStream inputStream) throws OXException {  
+        try {
+            final Metadata metadata = new Metadata();
+            metadata.set(Metadata.CONTENT_ENCODING, "ISO-8859-1");
+            metadata.set(Metadata.CONTENT_TYPE, "text/html");
+            return tika.parseToString(inputStream, metadata);
+        } catch (final IOException e) {
+            throw new OXException(e);
+        } catch (final TikaException e) {
+            throw new OXException(e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
     }
 
     private static final Pattern PATTERN_HR = Pattern.compile("<hr[^>]*>(.*?</hr>)?", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -977,7 +1011,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 final int epos;
                 if (pos >= 0) {
                     String href;
-                    char c = imgTag.charAt(pos+4);
+                    final char c = imgTag.charAt(pos+4);
                     if ('"' == c) {
                         epos = imgTag.indexOf('"', pos+5);
                         href = imgTag.substring(pos+5, epos);

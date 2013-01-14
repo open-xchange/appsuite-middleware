@@ -125,7 +125,7 @@ public class TikaTextXtractService extends AbstractTextXtractService {
             LOG.error(e.getMessage(), e);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-        }      
+        }
     }
     
     /**

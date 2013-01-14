@@ -51,23 +51,25 @@ package com.openexchange.oauth.linkedin;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONValue;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.log.LogFactory;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
@@ -75,11 +77,11 @@ public class LinkedInXMLParser {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInXMLParser.class));
 
-    private String getTextValue(Element ele, String tagName) {
+    private String getTextValue(final Element ele, final String tagName) {
         String textVal = null;
-        NodeList nl = ele.getElementsByTagName(tagName);
+        final NodeList nl = ele.getElementsByTagName(tagName);
         if (nl != null && nl.getLength() > 0) {
-            Element el = (Element) nl.item(0);
+            final Element el = (Element) nl.item(0);
             if (null != el.getFirstChild()){
                 textVal = el.getFirstChild().getNodeValue();
             }
@@ -87,46 +89,46 @@ public class LinkedInXMLParser {
         return textVal;
     }
 
-	public Contact parse(Element person){
-        Contact contact = new Contact();
+	public Contact parse(final Element person){
+        final Contact contact = new Contact();
         contact.setGivenName(getTextValue(person, "first-name"));
         contact.setSurName(getTextValue(person, "last-name"));
         if (null != getTextValue(person, "main-address")) {
             contact.setNote(getTextValue(person, "main-address"));
         }
         try {
-            String imageUrl = getTextValue(person, "picture-url");
+            final String imageUrl = getTextValue(person, "picture-url");
             if (null != imageUrl) {
                 OXContainerConverter.loadImageFromURL(contact, imageUrl);
             }
-        } catch (ConverterException e) {
+        } catch (final ConverterException e) {
             LOG.error(e);
         }
 
         // get the current job and company
-        NodeList positions = person.getElementsByTagName("positions");
+        final NodeList positions = person.getElementsByTagName("positions");
         if (null != positions && positions.getLength() > 0) {
-            Element position = (Element) positions.item(0);
+            final Element position = (Element) positions.item(0);
             contact.setTitle(getTextValue(position, "title"));
-            NodeList companies = position.getElementsByTagName("company");
+            final NodeList companies = position.getElementsByTagName("company");
             if (companies != null && companies.getLength() > 0) {
-                Element company = (Element) companies.item(0);
+                final Element company = (Element) companies.item(0);
                 contact.setCompany(getTextValue(company, "name"));
             }
         }
 
         // get the first IM-account
-        NodeList imAccounts = person.getElementsByTagName("im-account");
+        final NodeList imAccounts = person.getElementsByTagName("im-account");
         if (null != imAccounts && imAccounts.getLength() > 0 ){
-            Element imAccount = (Element) imAccounts.item(0);
+            final Element imAccount = (Element) imAccounts.item(0);
             contact.setInstantMessenger1(getTextValue(imAccount, "im-account-name") + " ("+getTextValue(imAccount, "im-account-type")+")");
         }
 
         // parse the phone numbers, saving the first occurrence of "home" and "work"
-        NodeList phoneNumbers = person.getElementsByTagName("phone-number");
+        final NodeList phoneNumbers = person.getElementsByTagName("phone-number");
         if (null != phoneNumbers && phoneNumbers.getLength() > 0 ){
             for (int p = 0; p < phoneNumbers.getLength(); p++){
-                Element phoneNumber = (Element) phoneNumbers.item(p);
+                final Element phoneNumber = (Element) phoneNumbers.item(p);
                 if (null != getTextValue(phoneNumber, "phone-type")){
                     if (getTextValue(phoneNumber, "phone-type").equals("work")) {
                         contact.setTelephoneBusiness1(getTextValue(phoneNumber, "phone-number"));
@@ -139,9 +141,9 @@ public class LinkedInXMLParser {
         }
 
         // get the birthdate
-        NodeList dateOfBirths = person.getElementsByTagName("date-of-birth");
+        final NodeList dateOfBirths = person.getElementsByTagName("date-of-birth");
         if (null != dateOfBirths && dateOfBirths.getLength() > 0){
-            Element dateOfBirth = (Element) dateOfBirths.item(0);
+            final Element dateOfBirth = (Element) dateOfBirths.item(0);
             int year = 0;
             if (null != getTextValue(dateOfBirth, "year")){
                 year = Integer.parseInt(getTextValue(dateOfBirth, "year")) - 1900;
@@ -159,54 +161,210 @@ public class LinkedInXMLParser {
         return contact;
     }
 
-    public List<Contact> parseConnections(String body) throws OXException {
+    public List<Contact> parseConnections(final String body) throws OXException {
         final List<Contact> contacts = new ArrayList<Contact>();
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
         try {
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new ByteArrayInputStream(body.getBytes(com.openexchange.java.Charsets.UTF_8)));
-            Element root = doc.getDocumentElement();
-            NodeList connections = root.getElementsByTagName("person");
+            final DocumentBuilder db = dbf.newDocumentBuilder();
+            final Document doc = db.parse(new ByteArrayInputStream(body.getBytes(com.openexchange.java.Charsets.UTF_8)));
+            final Element root = doc.getDocumentElement();
+            final NodeList connections = root.getElementsByTagName("person");
             if (connections != null && connections.getLength() > 0) {
                 for (int i = 0; i < connections.getLength(); i++) {
-                    Element person = (Element) connections.item(i);
-                    Contact contact = parse(person);
+                    final Element person = (Element) connections.item(i);
+                    final Contact contact = parse(person);
                     contacts.add(contact);
                 }
             }
             
-            NodeList errors = root.getElementsByTagName("error");
+            final NodeList errors = root.getElementsByTagName("error");
             if (errors.getLength() > 0) {
-            	Element error = (Element) errors.item(0);
-            	String message = error.getElementsByTagName("message").item(0).getTextContent();
+            	final Element error = (Element) errors.item(0);
+            	final String message = error.getElementsByTagName("message").item(0).getTextContent();
             	throw OXException.general(message);
             }
-        } catch (ParserConfigurationException pce) {
+        } catch (final ParserConfigurationException pce) {
             LOG.error(pce);
-        } catch (SAXException se) {
+        } catch (final SAXException se) {
             LOG.error(se);
-        } catch (IOException ioe) {
+        } catch (final IOException ioe) {
             LOG.error(ioe);
         }
         return contacts;
     }
 
-    public Contact parseProfile(String body) {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    public Contact parseProfile(final String body) {
+        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new ByteArrayInputStream(body.getBytes(com.openexchange.java.Charsets.UTF_8)));
-            Element root = doc.getDocumentElement();
-            Contact contact = parse(root);
+            final DocumentBuilder db = dbf.newDocumentBuilder();
+            final Document doc = db.parse(new ByteArrayInputStream(body.getBytes(com.openexchange.java.Charsets.UTF_8)));
+            final Element root = doc.getDocumentElement();
+            final Contact contact = parse(root);
             return contact;
-        } catch (ParserConfigurationException pce) {
+        } catch (final ParserConfigurationException pce) {
             LOG.error(pce);
-        } catch (SAXException se) {
+        } catch (final SAXException se) {
             LOG.error(se);
-        } catch (IOException ioe) {
+        } catch (final IOException ioe) {
             LOG.error(ioe);
         }
         return null;
     }
+
+    // ---------------------------------- JSON STUFF --------------------------------- //
+
+    public Contact parse(final JSONObject person) throws OXException {
+        try {
+            final Contact contact = new Contact();
+            if (person.hasAndNotNull("id")) {
+                contact.setUserField20(person.getString("id"));
+            }
+            contact.setGivenName(person.optString("firstName", null));
+            contact.setSurName(person.optString("lastName", null));
+            final String mainAddress = person.optString("mainAddress", null);
+            if (null != mainAddress) {
+                contact.setNote(mainAddress);
+            }
+            try {
+                final String imageUrl = person.optString("pictureUrl", null);
+                if (null != imageUrl) {
+                    OXContainerConverter.loadImageFromURL(contact, imageUrl);
+                }
+            } catch (final ConverterException e) {
+                LOG.error(e);
+            }
+
+            // get the current job and company
+            {
+                final JSONObject positions = person.optJSONObject("positions");
+                if (null != positions && positions.optInt("_total", 0) > 0) {
+                    final JSONArray ja = positions.optJSONArray("values");
+                    final int length = ja.length();
+                    JSONObject candidate = null;
+                    for (int i = 0; i < length; i++) {
+                        final JSONObject position = ja.optJSONObject(i);
+                        if (position.optBoolean("isCurrent", false)) {
+                            contact.setTitle(position.optString("title", null));
+                            final JSONObject company = position.optJSONObject("company");
+                            if (null != company) {
+                                contact.setCompany(company.optString("name", null));
+                                candidate = null;
+                                i = length;
+                            }
+                        } else {
+                            candidate = position;
+                        }
+                    }
+                    if (null != candidate) {
+                        contact.setTitle(candidate.optString("title", null));
+                        final JSONObject company = candidate.optJSONObject("company");
+                        if (null != company) {
+                            contact.setCompany(company.optString("name", null));
+                        }
+                    }
+                }
+            }
+            // get the first IM-account
+            {
+                final JSONObject imAccounts = person.optJSONObject("imAccounts");
+                if (null != imAccounts && imAccounts.optInt("_total", 0) > 0) {
+                    final JSONArray ja = imAccounts.optJSONArray("values");
+                    final JSONObject imAccount = ja.optJSONObject(0);
+                    contact.setInstantMessenger1(imAccount.optString("imAccountName", null) + " (" + imAccount.optString("im-account-type", null) + ")");
+                }
+            }
+            // parse the phone numbers, saving the first occurrence of "home" and "work"
+            {
+                final JSONObject phoneNumbers = person.optJSONObject("phoneNumbers");
+                if (null != phoneNumbers && phoneNumbers.optInt("_total", 0) > 0) {
+                    final JSONArray ja = phoneNumbers.optJSONArray("values");
+                    final int length = ja.length();
+                    for (int i = 0; i < length; i++) {
+                        final JSONObject phoneNumber = ja.optJSONObject(i);
+                        final String phoneType = phoneNumber.optString("phoneType", null);
+                        if ("work".equals(phoneType)) {
+                            contact.setTelephoneBusiness1(phoneNumber.optString("phoneNumber", null));
+                        } else if ("home".equals(phoneType)) {
+                            contact.setTelephoneHome1(phoneNumber.optString("phoneNumber", null));
+                        }
+                    }
+                }
+            }
+            // get the birthdate
+            {
+                final JSONObject dateOfBirth = person.optJSONObject("dateOfBirth");
+                if (null != dateOfBirth) {
+                    int year = 0;
+                    final String sYear = dateOfBirth.optString("year", null);
+                    if (null != sYear) {
+                        year = Integer.parseInt(sYear) - 1900;
+                    }
+                    int month = 0;
+                    final String sMonth = dateOfBirth.optString("month", null);
+                    if (null != sMonth) {
+                        month = Integer.parseInt(sMonth) - 1;
+                    }
+                    int date = 0;
+                    final String sDay = dateOfBirth.optString("day", null);
+                    if (null != sDay) {
+                        date = Integer.parseInt(sDay);
+                    }
+                    contact.setBirthday(new Date(year, month, date));
+                }
+            }
+            return contact;
+        } catch (final JSONException e) {
+            throw OAuthExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Parses given connections.
+     * 
+     * <pre>
+     * {
+     *   "values": [
+     *     {
+     *       "_key": "~",
+     *       "connections": {"_total": 129},
+     *       "firstName": "Adam"
+     *     },
+     *     {
+     *       "_key": "hks0NPUMZF",
+     *       "connections": {"_total": 500},
+     *       "firstName": "Brandon"
+     *     }
+     *   ],
+     *   "_total": 2
+     * }
+     * </pre>
+     * 
+     * @param body The received JSON body
+     * @return The parsed contacts
+     * @throws OXException If operation fails
+     */
+    public List<Contact> parseConnections(final JSONValue body) throws OXException {
+        final JSONArray persons;
+        if (body.isObject()) {
+            persons = body.toObject().optJSONArray("values");
+        } else {
+            persons = body.toArray();
+        }
+        if (null == persons) {
+            return Collections.emptyList();
+        }
+        final int length = persons.length();
+        final List<Contact> contacts = new ArrayList<Contact>(length);
+        for (int i = 0; i < length; i++) {
+            try {
+                contacts.add(parse(persons.optJSONObject(i)));
+            } catch (final RuntimeException e) {
+                // Ignore
+                LOG.warn("Runtime error occurred: " + e.getMessage(), e);
+            }
+        }
+        return contacts;
+    }
+
 }

@@ -80,6 +80,10 @@ public class LoginFields {
 
     public static final String VOLATILE = "volatile";
 
+    public static final String CLIENT_TOKEN = "clientToken";
+
+    public static final String SERVER_TOKEN = "serverToken";
+
     private LoginFields() {
         super();
     }

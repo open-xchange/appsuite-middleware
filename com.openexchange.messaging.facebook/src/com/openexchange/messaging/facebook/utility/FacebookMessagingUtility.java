@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging.facebook.utility;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -75,10 +77,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import org.scribe.model.Response;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
@@ -93,6 +98,7 @@ import com.openexchange.messaging.facebook.FacebookMessagingMessageAccess;
 import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeStringMessagingHeader;
+import com.openexchange.oauth.OAuthExceptionCodes;
 
 /**
  * {@link FacebookMessagingUtility}
@@ -711,6 +717,29 @@ public final class FacebookMessagingUtility {
             return false;
         }
         return startingChar == toCheck.charAt(i);
+    }
+
+    /**
+     * Extracts JSON from given response.
+     *
+     * @param response The response
+     * @return The extracted JSON
+     * @throws OXException If operation fails
+     */
+    public static JSONObject extractJson(final Response response) throws OXException {
+        Reader reader = null;
+        try {
+            reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);
+            final JSONValue value = JSONObject.parse(reader);
+            if (value.isObject()) {
+                return value.toObject();
+            }
+            throw OAuthExceptionCodes.JSON_ERROR.create("Not a JSON object, but " + value.getClass().getName());
+        } catch (final JSONException e) {
+            throw OAuthExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(reader);
+        }
     }
 
     /**

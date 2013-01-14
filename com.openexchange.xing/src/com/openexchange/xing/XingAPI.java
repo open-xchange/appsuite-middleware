@@ -74,11 +74,9 @@ import com.openexchange.xing.session.Session;
 public class XingAPI<S extends Session> {
 
     private static final int MAX_LIMIT = 100;
-
     private static final int DEFAULT_LIMIT = 10;
 
     private static final int MAX_WITH_LATEST_MESSAGES = 100;
-
     private static final int DEFAULT_WITH_LATEST_MESSAGES = 0;
 
     /**
@@ -186,8 +184,8 @@ public class XingAPI<S extends Session> {
      *             catch this exception which signals that some kind of error occurred.
      */
     public Contacts getContactsFrom(final String userId, final int limit, final int offset, final UserField orderBy, final Collection<UserField> userFields) throws XingException {
-        if (limit < 0 || limit > 100) {
-            throw new XingException("Invalid limit: " + limit + ". Must be zero OR less than or equal to 100.");
+        if (limit < 0 || limit > MAX_LIMIT) {
+            throw new XingException("Invalid limit: " + limit + ". Must be zero OR less than or equal to " + MAX_LIMIT);
         }
         if (offset < 0) {
             throw new XingException("Invalid offset: " + offset + ". Must be greater than or equal to zero.");
@@ -220,13 +218,13 @@ public class XingAPI<S extends Session> {
                 params.add(fields.toString());
             }
 
-            final JSONObject responseInformation = (JSONObject) RESTUtility.request(
+            final JSONObject responseInformation = RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
                 "/users/" + userId + "/contacts",
                 VERSION,
                 params.toArray(new String[0]),
-                session);
+                session).toObject();
 
             if (serverSort) {
                 return new Contacts(responseInformation.getJSONObject("contacts"));
@@ -260,7 +258,7 @@ public class XingAPI<S extends Session> {
     public Contacts getContactsFrom(final String userId, final UserField orderBy, final Collection<UserField> userFields) throws XingException {
         assertAuthenticated();
         try {
-            final List<User> users = new LinkedList<User>();
+            final List<User> users;
             final int maxLimit = MAX_LIMIT;
             final int total;
             int offset = 0;
@@ -274,6 +272,7 @@ public class XingAPI<S extends Session> {
                     return contacts;
                 }
                 total = contacts.getTotal();
+                users = new ArrayList<User>(total);
                 users.addAll(chunk);
                 offset += chunkSize;
             }
@@ -306,14 +305,14 @@ public class XingAPI<S extends Session> {
      * @throws XingException
      */
     public Conversations getConversationsFrom(final String userId, final int limit, final int offset, final Collection<UserField> userFields, final int withLatestMessages) throws XingException {
-        if (limit < 0 || limit > 100) {
-            throw new XingException("Invalid limit: " + limit + ". Must be zero OR less than or equal to 100.");
+        if (limit < 0 || limit > MAX_LIMIT) {
+            throw new XingException("Invalid limit: " + limit + ". Must be zero OR less than or equal to " + MAX_LIMIT);
         }
         if (offset < 0) {
             throw new XingException("Invalid offset: " + offset + ". Must be greater than or equal to zero.");
         }
-        if (withLatestMessages < 0 || withLatestMessages > 100) {
-            throw new XingException("Invalid withLatestMessages: " + withLatestMessages + ". Must be zero OR less than or equal to 100.");
+        if (withLatestMessages < 0 || withLatestMessages > MAX_WITH_LATEST_MESSAGES) {
+            throw new XingException("Invalid withLatestMessages: " + withLatestMessages + ". Must be zero OR less than or equal to " + MAX_WITH_LATEST_MESSAGES);
         }
         assertAuthenticated();
         try {
@@ -337,13 +336,13 @@ public class XingAPI<S extends Session> {
                 params.add(fields.toString());
             }
 
-            final JSONObject responseInformation = (JSONObject) RESTUtility.request(
+            final JSONObject responseInformation = RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
                 "/users/" + userId + "/conversations",
                 VERSION,
                 params.toArray(new String[0]),
-                session);
+                session).toObject();
             return new Conversations(responseInformation.getJSONObject("conversations"));
         } catch (final JSONException e) {
             throw new XingException(e);
@@ -418,8 +417,8 @@ public class XingAPI<S extends Session> {
      * @throws XingException
      */
     public Conversation getConversationFrom(final String id, final String userId, final Collection<UserField> userFields, final int withLatestMessages) throws XingException {
-        if (withLatestMessages < 0 || withLatestMessages > 100) {
-            throw new XingException("Invalid withLatestMessages: " + withLatestMessages + ". Must be zero OR less than or equal to 100.");
+        if (withLatestMessages < 0 || withLatestMessages > MAX_WITH_LATEST_MESSAGES) {
+            throw new XingException("Invalid withLatestMessages: " + withLatestMessages + ". Must be zero OR less than or equal to " + MAX_WITH_LATEST_MESSAGES);
         }
         assertAuthenticated();
         try {
@@ -439,13 +438,13 @@ public class XingAPI<S extends Session> {
                 params.add(fields.toString());
             }
 
-            final JSONObject responseInformation = (JSONObject) RESTUtility.request(
+            final JSONObject responseInformation = RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
                 "/users/" + userId + "/conversations/" + id,
                 VERSION,
                 params.toArray(new String[0]),
-                session);
+                session).toObject();
             return new Conversation(responseInformation.getJSONObject("conversation"));
         } catch (final JSONException e) {
             throw new XingException(e);

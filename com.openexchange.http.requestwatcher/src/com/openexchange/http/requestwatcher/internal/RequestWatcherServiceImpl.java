@@ -97,9 +97,9 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
         serviceRegistry = RequestWatcherServiceRegistry.getInstance();
         // Get Configuration
         final ConfigurationService configService = serviceRegistry.getService(ConfigurationService.class);
-        final boolean isWatcherEnabled = configService.getBoolProperty("com.openexchange.server.requestwatcher.isEnabled", true);
-        final int watcherFrequency = configService.getIntProperty("com.openexchange.server.requestwatcher.frequency", 30000);
-        final int requestMaxAge = configService.getIntProperty("com.openexchange.server.requestwatcher.maxRequestAge", 60000);
+        final boolean isWatcherEnabled = configService.getBoolProperty("com.openexchange.requestwatcher.isEnabled", true);
+        final int watcherFrequency = configService.getIntProperty("com.openexchange.requestwatcher.frequency", 30000);
+        final int requestMaxAge = configService.getIntProperty("com.openexchange.requestwatcher.maxRequestAge", 60000);
         if (isWatcherEnabled) {
             // Create ScheduledTimerTask to watch requests
             final TimerService timerService = serviceRegistry.getService(TimerService.class);
@@ -134,7 +134,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                             logRequestRegistryEntry(requestRegistryEntry, sb);
                             try {
                                 requestRegistry.remove(requestRegistryEntry);
-                                requestRegistryEntry.stopProcessing();
+                                requestRegistryEntry.sendError();
                             } catch (final IOException e) {
                                 LOG.error(RequestWatcherExceptionMessage.ERROR_WHILE_SENDING_SERVLET_STATUS_CODE_MSG, e.getCause());
                             }

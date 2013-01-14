@@ -49,8 +49,7 @@
 
 package com.openexchange.subscribe.yahoo.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
 import com.openexchange.oauth.OAuthService;
@@ -62,63 +61,70 @@ import com.openexchange.subscribe.yahoo.YahooSubscribeService;
 
 /**
  * {@link Activator}
- *
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Activator extends HousekeepingActivator {
 
     private volatile OAuthServiceMetaData oAuthServiceMetaData;
-
-    private YahooService yahooService;
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    private volatile YahooService yahooService;
+    private ServiceRegistration<SubscribeService> serviceRegistration;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { OAuthService.class, ContextService.class, YahooService.class};
+        return new Class[] { OAuthService.class, ContextService.class, YahooService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-     // react dynamically to the appearance/disappearance of OAuthMetaDataService for MSN
-        final ServiceTracker<OAuthServiceMetaData,OAuthServiceMetaData> metaDataTracker = new ServiceTracker<OAuthServiceMetaData,OAuthServiceMetaData>(context, OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this));
+        // react dynamically to the appearance/disappearance of OAuthMetaDataService for MSN
+        final ServiceTracker<OAuthServiceMetaData, OAuthServiceMetaData> metaDataTracker =
+            new ServiceTracker<OAuthServiceMetaData, OAuthServiceMetaData>(
+                context,
+                OAuthServiceMetaData.class,
+                new OAuthServiceMetaDataRegisterer(context, this));
         rememberTracker(metaDataTracker);
         openTrackers();
         yahooService = getService(YahooService.class);
-        registerSubscribeService();
+        //registerSubscribeService();
     }
 
-
-    public void registerSubscribeService() {
-        final YahooSubscribeService yahooSubscribeService = new YahooSubscribeService(this);
-        registerService(SubscribeService.class, yahooSubscribeService);
-        LOG.info("YahooSubscribeService was started");
+    /**
+     * Registers the subscribe service.
+     */
+    public synchronized void registerSubscribeService() {
+        if (null == serviceRegistration) {
+            serviceRegistration = context.registerService(SubscribeService.class, new YahooSubscribeService(this), null);
+            com.openexchange.log.Log.loggerFor(Activator.class).info("YahooSubscribeService was started");
+        }
     }
 
-    public void unregisterSubscribeService() {
-        unregisterServices();
-        LOG.info("YahooSubscribeService was stopped");
+    /**
+     * Un-registers the subscribe service.
+     */
+    public synchronized void unregisterSubscribeService() {
+        final ServiceRegistration<SubscribeService> serviceRegistration = this.serviceRegistration;
+        if (null != serviceRegistration) {
+            serviceRegistration.unregister();
+            this.serviceRegistration = null;
+            com.openexchange.log.Log.loggerFor(Activator.class).info("YahooSubscribeService was stopped");
+        }
     }
 
     public OAuthServiceMetaData getOAuthServiceMetaData() {
         return oAuthServiceMetaData;
     }
 
-
     public void setOAuthServiceMetaData(final OAuthServiceMetaData authServiceMetaData) {
         oAuthServiceMetaData = authServiceMetaData;
     }
-
 
     public YahooService getYahooService() {
         return yahooService;
     }
 
-
     public void setYahooService(final YahooService yahooService) {
         this.yahooService = yahooService;
     }
-
-
 
 }

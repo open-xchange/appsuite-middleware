@@ -61,6 +61,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.dataretention.DataRetentionExceptionMessages;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.dataretention.csv.CSVFile;
@@ -252,7 +253,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
             if (DEBUG_ENABLED) {
                 LOG.debug(new StringBuilder("Writing CSV line: ").append(csvLine).toString());
             }
-            fos.write(csvLine.getBytes(com.openexchange.java.Charsets.US_ASCII));
+            fos.write(Charsets.toAsciiBytes(csvLine));
             fos.flush();
         } finally {
             try {

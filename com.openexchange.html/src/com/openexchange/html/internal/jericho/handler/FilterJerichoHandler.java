@@ -56,7 +56,6 @@ import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -83,7 +82,7 @@ import com.openexchange.html.internal.jericho.JerichoHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
-import com.openexchange.java.Charsets;
+import com.openexchange.java.AsciiReader;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -1057,7 +1056,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     } else {
                         BufferedReader reader = null;
                         try {
-                            reader = new BufferedReader(new InputStreamReader(new FileInputStream(whitelist), Charsets.US_ASCII));
+                            reader = new BufferedReader(new AsciiReader(new FileInputStream(whitelist)));
                             final StringBuilder sb = new StringBuilder();
                             String line = null;
                             while ((line = reader.readLine()) != null) {

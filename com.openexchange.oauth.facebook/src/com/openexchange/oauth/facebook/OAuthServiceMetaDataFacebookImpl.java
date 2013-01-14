@@ -59,6 +59,8 @@ import java.net.URLEncoder;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.scribe.builder.api.Api;
+import org.scribe.builder.api.FacebookApi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
@@ -74,7 +76,7 @@ import com.openexchange.oauth.OAuthToken;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData {
+public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
 
     private final ConfigurationService configurationService;
     private final DeferringURLService deferrer;
@@ -231,5 +233,10 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
 	public API getAPI() {
 		return API.FACEBOOK;
 	}
+
+    @Override
+    public Class<? extends Api> getScribeService() {
+        return FacebookApi.class;
+    }
 
 }

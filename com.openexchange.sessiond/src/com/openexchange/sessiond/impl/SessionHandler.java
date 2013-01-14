@@ -405,14 +405,13 @@ public final class SessionHandler {
      * @param contextId The context identifier
      * @param clientHost The client host name or IP address
      * @param login The full user's login; e.g. <i>test@foo.bar</i>
-     * @return The session ID associated with newly created session
+     * @return The created session
      * @throws OXException If creating a new session fails
      */
-    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, final VolatileParams volatileParams) throws OXException {
+    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, final VolatileParams volatileParams, String clientToken) throws OXException {
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
-            LOG.warn("\tSessionData instance is null.");
-            return null;
+            throw SessionExceptionCodes.NOT_INITIALIZED.create();
         }
         checkMaxSessPerUser(userId, contextId);
         checkMaxSessPerClient(client, userId, contextId);
@@ -422,15 +421,23 @@ public final class SessionHandler {
         final SessionImpl session = new SessionImpl(userId, loginName, password, contextId, sessionId, sessionIdGenerator.createSecretId(
             loginName,
             Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash, client);
-        session.setVolatile(null != volatileParams);
         // Add session
-        final SessionImpl addedSession = sessionData.addSession(session, noLimit, volatileParams).getSession();
-        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-        if (sessionStorageService != null) {
-            storeSession(addedSession, sessionStorageService, false);
+        final SessionImpl addedSession;
+        if (null == clientToken) {
+            addedSession = sessionData.addSession(session, noLimit, volatileParams).getSession();
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (sessionStorageService != null) {
+                storeSession(addedSession, sessionStorageService, false);
+            }
+            // Post event for created session
+            postSessionCreation(addedSession);
+        } else {
+            String serverToken = sessionIdGenerator.createRandomId();
+            // TODO change return type and return an interface that allows to dynamically add additional return values.
+            session.setParameter("serverToken", serverToken);
+            TokenSessionControl control = TokenSessionContainer.getInstance().addSession(session, clientToken, serverToken);
+            addedSession = control.getSession();
         }
-        // Post event for created session
-        postSessionCreation(addedSession);
         // Return session ID
         return addedSession;
     }
@@ -657,6 +664,28 @@ public final class SessionHandler {
             }
         }
         return sessionControl.getSession();
+    }
+
+    static Session getSessionWithTokens(String clientToken, String serverToken) throws OXException {
+        final SessionData sessionData = sessionDataRef.get();
+        if (null == sessionData) {
+            throw SessionExceptionCodes.NOT_INITIALIZED.create();
+        }
+        // find session matching to tokens
+        TokenSessionControl tokenControl = TokenSessionContainer.getInstance().getSession(clientToken, serverToken);
+        SessionImpl activatedSession = tokenControl.getSession();
+
+        // Put this session into the normal session container
+        SessionControl sessionControl = sessionData.addSession(activatedSession, noLimit, null);
+        SessionImpl addedSession = sessionControl.getSession();
+        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+        if (sessionStorageService != null) {
+            storeSession(addedSession, sessionStorageService, false);
+        }
+        // Post event for created session
+        postSessionCreation(addedSession);
+
+        return activatedSession;
     }
 
     /**

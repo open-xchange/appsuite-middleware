@@ -53,6 +53,7 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -529,10 +530,18 @@ public final class MessageUtility {
             }
             if (null == charset) {
                 final byte[] bytes = tmp.toByteArray();
-                return new String(bytes, Charsets.forName(detectCharset(bytes)));
+                final Charset detectedCharset = Charsets.forName(detectCharset(bytes));
+                if ("US-ASCII".equals(detectedCharset.name())) {
+                    return Charsets.toAsciiString(tmp.toByteArray());
+                }
+                return new String(bytes, detectedCharset);
             }
             try {
-                return new String(tmp.toByteArray(), Charsets.forName(charset));
+                final Charset cs = Charsets.forName(charset);
+                if ("US-ASCII".equals(cs.name())) {
+                    return Charsets.toAsciiString(tmp.toByteArray());
+                }
+                return new String(tmp.toByteArray(), cs);
             } catch (final UnsupportedCharsetException e) {
                 LOG.error("Unsupported encoding in a message detected and monitored: \"" + charset + '"', e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(charset);

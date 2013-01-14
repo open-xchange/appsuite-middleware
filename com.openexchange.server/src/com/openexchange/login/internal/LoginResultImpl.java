@@ -79,6 +79,7 @@ final class LoginResultImpl implements LoginResult {
     private String redirect;
     private Cookie[] cookies;
     private Header[] headers;
+    private String serverToken;
 
     LoginResultImpl() {
         super();
@@ -229,4 +230,12 @@ final class LoginResultImpl implements LoginResult {
         this.warnings.addAll(warnings);
     }
 
+    @Override
+    public String getServerToken() {
+        return serverToken;
+    }
+
+    public void setServerToken(String serverToken) {
+        this.serverToken = serverToken;
+    }
 }

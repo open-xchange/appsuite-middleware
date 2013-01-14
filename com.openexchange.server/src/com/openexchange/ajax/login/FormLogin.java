@@ -50,6 +50,9 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -91,9 +94,14 @@ public class FormLogin implements LoginRequestHandler {
     }
 
     private void doFormLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
-        LoginRequest request = Login.parseLogin(req, LoginFields.LOGIN_PARAM, true, conf.getDefaultClient());
+        LoginRequest request = LoginTools.parseLogin(
+            req,
+            LoginFields.LOGIN_PARAM,
+            true,
+            conf.getDefaultClient(),
+            conf.isCookieForceHTTPS(),
+            conf.isDisableTrimLogin());
         Map<String, Object> properties = new HashMap<String, Object>(1);
-        properties.put("http.request", req);
         {
             String capabilities = req.getParameter("capabilities");
             if (null != capabilities) {
@@ -106,9 +114,27 @@ public class FormLogin implements LoginRequestHandler {
 
         Tools.disableCaching(resp);
         Login.writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
-        resp.sendRedirect(LoginTools.generateRedirectURL(
+        resp.sendRedirect(generateRedirectURL(
             req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
             req.getParameter(LoginFields.AUTOLOGIN_PARAM),
             session, user.getPreferredLanguage(), conf.getUiWebPath()));
+    }
+
+    private static String generateRedirectURL(String uiWebPathParam, String shouldStore, Session session, String language, String uiWebPath) {
+        String retval = uiWebPathParam;
+        if (null == retval) {
+            retval = uiWebPath;
+        }
+        // Prevent HTTP response splitting.
+        retval = retval.replaceAll("[\n\r]", "");
+        retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
+        // App Suite UI requires some additional values.
+        retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER, session.getLogin());
+        retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER_ID, Integer.toString(session.getUserId()));
+        retval = LoginTools.addFragmentParameter(retval, "language", language);
+        if (shouldStore != null) {
+            retval = LoginTools.addFragmentParameter(retval, "store", shouldStore);
+        }
+        return retval;
     }
 }

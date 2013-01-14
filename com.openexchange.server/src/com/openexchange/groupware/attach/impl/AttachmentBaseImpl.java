@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -111,7 +112,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     private static final FetchMode fetchMode = FetchMode.PREFETCH;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentBaseImpl.class));
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentBaseImpl.class));
 
     private static final AttachmentQueryCatalog QUERIES = new AttachmentQueryCatalog();
 
@@ -917,12 +918,13 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return b.toString();
     }
 
-    Object patchValue(Object value, final AttachmentField field) {
+    Object patchValue(final Object value, final AttachmentField field) {
         if (value instanceof Long) {
             if (isDateField(field)) {
-                value = new Date(((Long) value).longValue());
-            } else if (!field.equals(AttachmentField.FILE_SIZE_LITERAL)) {
-                value = Integer.valueOf(((Long) value).intValue());
+                return new Date(((Long) value).longValue());
+            }
+            if (!field.equals(AttachmentField.FILE_SIZE_LITERAL)) {
+                return Integer.valueOf(((Long) value).intValue());
             }
         }
         return value;
@@ -1013,20 +1015,35 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
         @Override
         public boolean hasNext() throws OXException {
-            if (delegate != null) {
-                return delegate.hasNext();
+            {
+                final SearchIteratorAdapter<AttachmentMetadata> delegate = this.delegate;
+                if (delegate != null) {
+                    return delegate.hasNext();
+                }
             }
             try {
                 if (!queried) {
                     queried = true;
                     query();
-                    if (delegate != null) {
-                        return delegate.hasNext();
+                    {
+                        final Exception exception = this.exception;
+                        if (exception != null) {
+                            if (exception instanceof OXException) {
+                                throw (OXException) exception;
+                            }
+                            throw AttachmentExceptionCodes.SEARCH_PROBLEM.create(exception);
+                        }
+                    }
+                    {
+                        final SearchIteratorAdapter<AttachmentMetadata> delegate = this.delegate;
+                        if (delegate != null) {
+                            return delegate.hasNext();
+                        }
                     }
                     initNext = true;
                 }
                 if (initNext) {
-                    hasNext = rs.next();
+                    hasNext = null == rs ? false : rs.next();
                 }
                 initNext = false;
                 return hasNext;
@@ -1038,15 +1055,21 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
         @Override
         public AttachmentMetadata next() throws OXException {
-            if (delegate != null) {
-                return delegate.next();
+            {
+                final SearchIteratorAdapter<AttachmentMetadata> delegate = this.delegate;
+                if (delegate != null) {
+                    return delegate.next();
+                }
             }
             hasNext();
-            if (exception != null) {
-                if (exception instanceof OXException) {
-                    throw (OXException) exception;
+            {
+                final Exception exception = this.exception;
+                if (exception != null) {
+                    if (exception instanceof OXException) {
+                        throw (OXException) exception;
+                    }
+                    throw AttachmentExceptionCodes.SEARCH_PROBLEM.create(exception);
                 }
-                throw AttachmentExceptionCodes.SEARCH_PROBLEM.create(exception);
             }
 
             final AttachmentMetadata m = nextFromResult(rs);
@@ -1135,7 +1158,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                     stmt = null;
                     readCon = null;
                 } else if (mode.equals(FetchMode.PREFETCH)) {
-                    final List<Object> values = new ArrayList<Object>();
+                    final List<AttachmentMetadata> values = new LinkedList<AttachmentMetadata>();
                     while (rs.next()) {
                         values.add(nextFromResult(rs));
                     }
@@ -1144,7 +1167,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                     stmt = null;
                     readCon = null;
                     rs = null;
-                    delegate = new SearchIteratorAdapter(values.iterator());
+                    delegate = new SearchIteratorAdapter<AttachmentMetadata>(values.iterator());
                 }
             } catch (final SearchIteratorException e) {
                 LOG.error(e);

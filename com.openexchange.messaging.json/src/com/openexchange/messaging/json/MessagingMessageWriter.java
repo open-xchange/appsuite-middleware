@@ -64,6 +64,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.log.Log;
 import com.openexchange.mail.text.HtmlProcessing;
@@ -279,7 +280,7 @@ public class MessagingMessageWriter {
             /*
              * Return as base64-encoded string
              */
-            return new String(Base64.encodeBase64(baos.toByteArray(), false), com.openexchange.java.Charsets.US_ASCII);
+            return Charsets.toAsciiString(Base64.encodeBase64(baos.toByteArray(), false));
         }
 
         @Override

@@ -22,4 +22,6 @@ Export-Package: sun.security,
  javax.sound.sampled.spi,
  javax.swing,
  javax.swing.text,
+ javax.swing.text.html,
+ javax.swing.text.html.parser,
  javax.swing.tree

@@ -51,6 +51,8 @@ package com.openexchange.oauth.dropbox;
 
 import java.util.Map;
 import org.apache.commons.logging.Log;
+import org.scribe.builder.api.Api;
+import org.scribe.builder.api.DropBoxApi;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.DropboxAPI.Account;
 import com.dropbox.client2.exception.DropboxException;
@@ -78,7 +80,7 @@ import com.openexchange.oauth.OAuthToken;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaData {
+public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(DropboxOAuthServiceMetaData.class);
 
@@ -191,6 +193,11 @@ public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaD
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    @Override
+    public Class<? extends Api> getScribeService() {
+        return DropBoxApi.class;
     }
 
 }

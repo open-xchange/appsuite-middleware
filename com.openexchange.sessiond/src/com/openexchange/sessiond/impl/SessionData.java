@@ -1087,7 +1087,7 @@ final class SessionData {
     protected void dropVolatileSession(final String sessionId) {
         final SessionControl control = volatileSessions.remove(sessionId);
         if (null != control) {
-            SessionData.dropSession(control, volatileUserSessions);            
+            SessionData.dropSession(control, volatileUserSessions);
         }
     }
 

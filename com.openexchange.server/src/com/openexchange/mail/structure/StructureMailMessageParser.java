@@ -76,6 +76,7 @@ import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -453,11 +454,11 @@ public final class StructureMailMessageParser {
                 }
                 {
                     final String version = mailPart.getFirstHeader("MIME-Version");
-                    buf.write(("MIME-Version: " + (null == version ? "1.0" : version) + "\r\n").getBytes(com.openexchange.java.Charsets.US_ASCII));
+                    buf.write(Charsets.toAsciiBytes("MIME-Version: " + (null == version ? "1.0" : version) + "\r\n"));
                 }
                 {
                     final String ct = MimeMessageUtility.extractHeader("Content-Type", new UnsynchronizedByteArrayInputStream(bytes), false);
-                    buf.write(("Content-Type:" + ct + "\r\n").getBytes(com.openexchange.java.Charsets.US_ASCII));
+                    buf.write(Charsets.toAsciiBytes("Content-Type:" + ct + "\r\n"));
                 }
                 buf.write(extractBodyFrom(bytes));
                 if (!handler.handleSMIMEBodyData(buf.toByteArray())) {

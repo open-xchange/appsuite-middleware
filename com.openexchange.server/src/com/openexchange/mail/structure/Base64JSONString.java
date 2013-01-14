@@ -56,6 +56,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import org.json.JSONString;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -101,7 +102,7 @@ public final class Base64JSONString implements JSONString {
                 com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Base64JSONString.class)).error(e.getMessage(), e);
             }
         }
-        value = JSONObject.quote(new String(Base64.encodeBase64(out.toByteArray(), false), com.openexchange.java.Charsets.US_ASCII));
+        value = JSONObject.quote(Charsets.toAsciiString(Base64.encodeBase64(out.toByteArray(), false)));
     }
 
     @Override

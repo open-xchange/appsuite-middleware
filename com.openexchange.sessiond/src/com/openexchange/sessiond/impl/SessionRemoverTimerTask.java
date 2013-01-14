@@ -74,5 +74,4 @@ public final class SessionRemoverTimerTask implements Runnable {
     public void run() {
         sessionData.dropVolatileSession(sessionId);
     }
-
 }

@@ -57,8 +57,6 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -87,6 +85,7 @@ import javax.management.remote.JMXServiceURL;
 import javax.security.auth.Subject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Charsets;
 import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementExceptionCode;
@@ -142,19 +141,6 @@ public abstract class AbstractAgent {
 
     protected static final class AbstractAgentJMXAuthenticator implements JMXAuthenticator {
 
-        private static volatile Charset US_ASCII;
-
-        private static Charset getUSASCII() {
-            if (US_ASCII == null) {
-                synchronized (AbstractAgentJMXAuthenticator.class) {
-                    if (US_ASCII == null) {
-                        US_ASCII = Charset.forName("US-ASCII");
-                    }
-                }
-            }
-            return US_ASCII;
-        }
-
         private final String[] credentials;
 
         public AbstractAgentJMXAuthenticator(final String[] credentials) {
@@ -202,9 +188,7 @@ public abstract class AbstractAgent {
             md.update(raw.getBytes(com.openexchange.java.Charsets.UTF_8));
             md.update(salt);
 
-            final String ret = getUSASCII().decode(ByteBuffer.wrap(Base64.encodeBase64(md.digest()))).toString();
-
-            return ret;
+            return Charsets.toAsciiString(Base64.encodeBase64(md.digest()));
         }
 
     }

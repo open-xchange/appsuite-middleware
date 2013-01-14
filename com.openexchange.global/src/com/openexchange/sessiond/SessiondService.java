@@ -76,10 +76,10 @@ public interface SessiondService {
      * with {@link Parameterized#PARAM_SESSION} name.
      * 
      * @param parameterObject The parameter object describing the session to create
-     * @return The session identifier of the newly created session as a <code>String</code>
+     * @return The session object interface of the newly created session.
      * @throws OXException If creating the session fails
      */
-    public String addSession(AddSessionParameter parameterObject) throws OXException;
+    public Session addSession(AddSessionParameter parameterObject) throws OXException;
 
     /**
      * Replaces the currently stored password in session identified through given session identifier with specified <code>newPassword</code>.
@@ -171,6 +171,17 @@ public interface SessiondService {
      * @return The session object or <code>null</code> if no session exists for the given random token or if the random token is already expired
      */
     public Session getSessionByRandomToken(final String randomToken);
+
+    /**
+     * Picks up the session associated with the given client and server token. If a session exists for the given tokens and both tokens
+     * match, the session object is put into the normal session container and into the session storage. It is removed from the session
+     * container with tokens so a second request with the same tokens will fail.
+     * @param clientToken Client side token passed within the {@link #addSession(AddSessionParameter)} call.
+     * @param serverToken Server side token returned inside the session from the {@link #addSession(AddSessionParameter)} call.
+     * @return the matching session
+     * @throws OXException if one of the tokens does not match.
+     */
+    Session getSessionWithTokens(String clientToken, String serverToken) throws OXException;
 
     /**
      * Gets the number of active sessions.

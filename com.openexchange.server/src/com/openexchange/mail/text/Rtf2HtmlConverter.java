@@ -59,6 +59,7 @@ import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.rtf.RTFEditorKit;
+import com.openexchange.java.Charsets;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
@@ -397,8 +398,7 @@ public final class Rtf2HtmlConverter {
 
     private static void readString(final String s, final Document document, final RTFEditorKit rtfeditorkit) {
         try {
-            final ByteArrayInputStream bytearrayinputstream = new UnsynchronizedByteArrayInputStream(s.getBytes(com.openexchange.java.Charsets.US_ASCII));
-            rtfeditorkit.read(bytearrayinputstream, document, 0);
+            rtfeditorkit.read(new UnsynchronizedByteArrayInputStream(Charsets.toAsciiBytes(s)), document, 0);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
             return;

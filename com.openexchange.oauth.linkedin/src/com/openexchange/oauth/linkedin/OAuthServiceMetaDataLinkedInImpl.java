@@ -49,21 +49,23 @@
 
 package com.openexchange.oauth.linkedin;
 
+import org.scribe.builder.api.Api;
+import org.scribe.builder.api.LinkedInApi;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.osgi.Activator;
 
-
 /**
  * {@link OAuthServiceMetaDataLinkedInImpl}
- *
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaData{
+public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
 
     private final Activator activator;
 
-    public OAuthServiceMetaDataLinkedInImpl(Activator activator){
+    public OAuthServiceMetaDataLinkedInImpl(Activator activator) {
         super();
         this.activator = activator;
     }
@@ -103,9 +105,14 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
         return authUrl;
     }
 
-	@Override
-	public API getAPI() {
-		return API.LINKEDIN;
-	}
+    @Override
+    public API getAPI() {
+        return API.LINKEDIN;
+    }
+
+    @Override
+    public Class<? extends Api> getScribeService() {
+        return LinkedInApi.class;
+    }
 
 }

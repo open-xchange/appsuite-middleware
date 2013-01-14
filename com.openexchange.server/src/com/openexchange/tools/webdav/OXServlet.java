@@ -181,6 +181,31 @@ public abstract class OXServlet extends WebDavServlet {
         public com.openexchange.authentication.Cookie[] getCookies() {
             return Tools.getCookieFromHeader(req);
         }
+
+        @Override
+        public boolean isSecure() {
+            return Tools.considerSecure(req);
+        }
+
+        @Override
+        public String getServerName() {
+            return req.getServerName();
+        }
+
+        @Override
+        public int getServerPort() {
+            return req.getServerPort();
+        }
+
+        @Override
+        public String getHttpSessionID() {
+            return req.getSession(true).getId();
+        }
+
+        @Override
+        public String getClientToken() {
+            return null;
+        }
     }
 
     /**
@@ -286,7 +311,6 @@ public abstract class OXServlet extends WebDavServlet {
             }
             try {
                 final Map<String, Object> properties = new HashMap<String, Object>(1);
-                properties.put("http.request", req);
                 session = addSession(loginRequest, properties);
             } catch (final OXException e) {
                 if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
@@ -306,7 +330,7 @@ public abstract class OXServlet extends WebDavServlet {
             final String address = req.getRemoteAddr();
             if (null == address || !address.equals(session.getLocalIp())) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("Request to server denied for session: " + session.getSessionID() + ". in WebDAV XML interface. Client login IP changed from " + session.getLocalIp() + " to " + address + ".");
+                    LOG.info("Request to server denied for session: " + session.getSessionID() + ". in WebDAV XML interface. Client login IP changed from " + session.getLocalIp() + " to " + address + '.');
                 }
                 addUnauthorizedHeader(req, resp);
                 removeSession(session.getSessionID());

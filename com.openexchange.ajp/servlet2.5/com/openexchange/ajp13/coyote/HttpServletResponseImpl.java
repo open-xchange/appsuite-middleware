@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -89,6 +90,7 @@ import com.openexchange.ajp13.servlet.http.HttpDateFormatRegistry;
 import com.openexchange.ajp13.util.CharsetValidator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.java.AsciiWriter;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.version.Version;
@@ -454,9 +456,11 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
             outputSelection = OUTPUT_WRITER;
         }
         if (bufferSize > 0) {
-            writer = new PrintWriter(new OutputStreamWriter(servletOutputStream, characterEncoding), false);
+            final Writer w = Charsets.isAsciiCharset(characterEncoding) ? new AsciiWriter(servletOutputStream) : new OutputStreamWriter(servletOutputStream, characterEncoding);
+            writer = new PrintWriter(w, false);
         } else {
-            writer = new PrintWriter(new OutputStreamWriter(servletOutputStream, characterEncoding), false);
+            final Writer w = Charsets.isAsciiCharset(characterEncoding) ? new AsciiWriter(servletOutputStream) : new OutputStreamWriter(servletOutputStream, characterEncoding);
+            writer = new PrintWriter(w, false);
         }
         return writer;
     }

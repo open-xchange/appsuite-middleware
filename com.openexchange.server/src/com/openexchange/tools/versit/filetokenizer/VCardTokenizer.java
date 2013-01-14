@@ -179,7 +179,7 @@ public class VCardTokenizer {
             if ('\n' == buf[0]) {
                 final byte[] ret = baos.toByteArray();
                 streamAsBytes.write(ret);
-                return new String(ret, Charsets.US_ASCII);
+                return Charsets.toAsciiString(ret);
             }
         }
         streamEnded = true;
@@ -189,7 +189,7 @@ public class VCardTokenizer {
             baos.write((byte) 10); // add final newline
             final byte[] ret = baos.toByteArray();
             streamAsBytes.write(ret);
-            return new String(ret, Charsets.US_ASCII);
+            return Charsets.toAsciiString(ret);
         }
         return null;
     }

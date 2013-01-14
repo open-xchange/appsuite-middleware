@@ -1254,7 +1254,7 @@ public class MimeMessageFiller {
             } else {
                 final DataSource dataSource;
                 if ("base64".equalsIgnoreCase(image.getTransferEncoding())) {
-                    dataSource = new MessageDataSource(Base64.decodeBase64(image.getData().getBytes(com.openexchange.java.Charsets.US_ASCII)), image.getContentType());
+                    dataSource = new MessageDataSource(Base64.decodeBase64(Charsets.toAsciiBytes(image.getData())), image.getContentType());
                 } else {
                     /*
                      * Expect quoted-printable instead

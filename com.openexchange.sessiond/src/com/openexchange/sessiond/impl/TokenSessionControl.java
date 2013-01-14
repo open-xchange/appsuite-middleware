@@ -49,61 +49,33 @@
 
 package com.openexchange.sessiond.impl;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.UUID;
-import com.openexchange.exception.OXException;
-import com.openexchange.sessiond.SessionExceptionCodes;
-
 /**
- * {@link DefaultSessionIdGenerator} - The default session ID generator.
+ * Stores the additional values necessary for a session created using the token login mechanism.
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class DefaultSessionIdGenerator extends SessionIdGenerator {
+public final class TokenSessionControl {
 
-    @Override
-    public String createSessionId(final String userId, final String data) throws OXException {
-        return getUniqueId(userId, data);
+    private final SessionImpl session;
+    private final String clientToken;
+    private final String serverToken;
+
+    public TokenSessionControl(SessionImpl session, String clientToken, String serverToken) {
+        super();
+        this.session = session;
+        this.clientToken = clientToken;
+        this.serverToken = serverToken;
     }
 
-    @Override
-    public String createSecretId(final String userId, final String data) throws OXException {
-        return getUniqueId(userId, data);
+    public SessionImpl getSession() {
+        return session;
     }
 
-    @Override
-    public String createRandomId() {
-        return UUID.randomUUID().toString();
+    public String getClientToken() {
+        return clientToken;
     }
 
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-
-    private static String getUniqueId(final String userId, final String data) throws OXException {
-        try {
-            final StringBuilder builder = new StringBuilder(32);
-            final byte[] digest;
-            {
-                final byte[] buf = builder.append(System.currentTimeMillis()).append(SECURE_RANDOM.nextLong()).append(userId).append('.').append(
-                    data).toString().getBytes();
-                builder.setLength(0);
-                final MessageDigest algorithm = MessageDigest.getInstance("MD5");
-                algorithm.reset();
-                algorithm.update(buf);
-                digest = algorithm.digest();
-            }
-            for (final byte element : digest) {
-                final String hex = Integer.toHexString(element & 0xff);
-                if (hex.length() < 2) {
-                    builder.append('0');
-                }
-                builder.append(hex);
-            }
-            return builder.toString();
-        } catch (final NoSuchAlgorithmException e) {
-            throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e);
-        }
+    public String getServerToken() {
+        return serverToken;
     }
 }
