@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
  * {@link ConfigView} - A configuration view.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added JavaDoc
  */
 public interface ConfigView {
 
