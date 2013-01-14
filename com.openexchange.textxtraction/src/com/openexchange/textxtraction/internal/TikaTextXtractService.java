@@ -193,7 +193,6 @@ public class TikaTextXtractService extends AbstractTextXtractService {
                 return text;
             }
         }
-        
         /*
          * None of the delegates could extract some text.
          */
@@ -204,7 +203,6 @@ public class TikaTextXtractService extends AbstractTextXtractService {
             } else {
                 tikaInputStream = new BufferedInputStream(new FileInputStream(tempFile));
             }
-            
             return tika.parseToString(tikaInputStream);
         } catch (IOException e) {
             throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
