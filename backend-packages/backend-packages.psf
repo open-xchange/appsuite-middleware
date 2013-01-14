@@ -22,6 +22,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ucs"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authorization-standard"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-aws"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-blackwhitelist"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-calendar-printing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-discovery-mdns"/>
