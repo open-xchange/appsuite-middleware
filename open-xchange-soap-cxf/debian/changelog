@@ -74,7 +74,7 @@ open-xchange-soap-cxf (6.22.1-9) unstable; urgency=low
 
   * Build for public patch 2012-12-31
 
- -- Marcus Klein <marcus.kleni@open-xchange.com>  Fri, 28 Dec 2012 11:01:41 +0100
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 28 Dec 2012 11:01:41 +0100
 
 open-xchange-soap-cxf (6.22.1-8) unstable; urgency=low
 
