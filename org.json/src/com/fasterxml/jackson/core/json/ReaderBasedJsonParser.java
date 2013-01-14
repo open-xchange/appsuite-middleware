@@ -1,22 +1,13 @@
 package com.fasterxml.jackson.core.json;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Writer;
-import org.json.helpers.StringAllocator;
-import com.fasterxml.jackson.core.Base64Variant;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.Version;
+import java.io.*;
+
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserBase;
 import com.fasterxml.jackson.core.io.CharTypes;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer;
-import com.fasterxml.jackson.core.util.ByteArrayBuilder;
-import com.fasterxml.jackson.core.util.TextBuffer;
+import com.fasterxml.jackson.core.util.*;
 
 /**
  * This is a concrete implementation of {@link JsonParser}, which is
@@ -89,7 +80,7 @@ public final class ReaderBasedJsonParser
 
     @Override
     public Version version() {
-        return CoreVersion.instance.version();
+        return PackageVersion.VERSION;
     }
     
     /*
@@ -903,7 +894,7 @@ public final class ReaderBasedJsonParser
                 if (ptr >= _inputEnd) {
                     break dummy_loop;
                 }
-                ch = _inputBuffer[ptr++];
+                ch = (int) _inputBuffer[ptr++];
                 if (ch < INT_0 || ch > INT_9) {
                     break int_loop;
                 }
@@ -919,7 +910,7 @@ public final class ReaderBasedJsonParser
                     if (ptr >= inputLen) {
                         break dummy_loop;
                     }
-                    ch = _inputBuffer[ptr++];
+                    ch = (int) _inputBuffer[ptr++];
                     if (ch < INT_0 || ch > INT_9) {
                         break fract_loop;
                     }
@@ -937,19 +928,19 @@ public final class ReaderBasedJsonParser
                     break dummy_loop;
                 }
                 // Sign indicator?
-                ch = _inputBuffer[ptr++];
+                ch = (int) _inputBuffer[ptr++];
                 if (ch == INT_MINUS || ch == INT_PLUS) { // yup, skip for now
                     if (ptr >= inputLen) {
                         break dummy_loop;
                     }
-                    ch = _inputBuffer[ptr++];
+                    ch = (int) _inputBuffer[ptr++];
                 }
                 while (ch <= INT_9 && ch >= INT_0) {
                     ++expLen;
                     if (ptr >= inputLen) {
                         break dummy_loop;
                     }
-                    ch = _inputBuffer[ptr++];
+                    ch = (int) _inputBuffer[ptr++];
                 }
                 // must be followed by sequence of ints, one minimum
                 if (expLen == 0) {
@@ -1228,7 +1219,7 @@ public final class ReaderBasedJsonParser
                 }
             }
             char c = _inputBuffer[_inputPtr++];
-            int i = c;
+            int i = (int) c;
             if (i <= INT_BACKSLASH) {
                 if (i == INT_BACKSLASH) {
                     /* Although chars outside of BMP are to be escaped as
@@ -1404,7 +1395,7 @@ public final class ReaderBasedJsonParser
                 _reportInvalidEOFInValue();
             }
         }
-        final StringAllocator sb = new StringAllocator(32);
+        final StringBuilder sb = new StringBuilder(32);
         sb.append((char) i);
         char c;
         while (((c = _inputBuffer[_inputPtr]) >= ' ') && !isDelim(c)) {
@@ -1437,7 +1428,7 @@ public final class ReaderBasedJsonParser
                 }
             }
             char c = _inputBuffer[_inputPtr++];
-            int i = c;
+            int i = (int) c;
             if (i <= INT_BACKSLASH) {
                 if (i == INT_BACKSLASH) {
                     /* Although chars outside of BMP are to be escaped as
@@ -1481,7 +1472,7 @@ public final class ReaderBasedJsonParser
                 }
             }
             char c = _inputBuffer[_inputPtr];
-            int i = c;
+            int i = (int) c;
             if (i <= maxCode) {
                 if (codes[i] != 0) {
                     break;
@@ -1562,7 +1553,7 @@ public final class ReaderBasedJsonParser
                 }
             }
             char c = _inputBuffer[_inputPtr++];
-            int i = c;
+            int i = (int) c;
             if (i <= INT_BACKSLASH) {
                 if (i == INT_BACKSLASH) {
                     /* Although chars outside of BMP are to be escaped as
@@ -1614,7 +1605,7 @@ public final class ReaderBasedJsonParser
                 inputLen = _inputEnd;
             }
             char c = inputBuffer[inputPtr++];
-            int i = c;
+            int i = (int) c;
             if (i <= INT_BACKSLASH) {
                 if (i == INT_BACKSLASH) {
                     /* Although chars outside of BMP are to be escaped as
@@ -1670,7 +1661,7 @@ public final class ReaderBasedJsonParser
         throws IOException, JsonParseException
     {
         while (_inputPtr < _inputEnd || loadMore()) {
-            int i = _inputBuffer[_inputPtr++];
+            int i = (int) _inputBuffer[_inputPtr++];
             if (i > INT_SPACE) {
                 if (i != INT_SLASH) {
                     return i;
@@ -1693,7 +1684,7 @@ public final class ReaderBasedJsonParser
         throws IOException, JsonParseException
     {
         while ((_inputPtr < _inputEnd) || loadMore()) {
-            int i = _inputBuffer[_inputPtr++];
+            int i = (int) _inputBuffer[_inputPtr++];
             if (i > INT_SPACE) {
                  if (i == INT_SLASH) {
                      _skipComment();
@@ -1742,7 +1733,7 @@ public final class ReaderBasedJsonParser
         // Ok: need the matching '*/'
         main_loop:
         while ((_inputPtr < _inputEnd) || loadMore()) {
-            int i = _inputBuffer[_inputPtr++];
+            int i = (int) _inputBuffer[_inputPtr++];
             if (i <= INT_ASTERISK) {
                 if (i == INT_ASTERISK) { // end?
                     if ((_inputPtr >= _inputEnd) && !loadMore()) {
@@ -1773,7 +1764,7 @@ public final class ReaderBasedJsonParser
     {
         // Ok: need to find EOF or linefeed
         while ((_inputPtr < _inputEnd) || loadMore()) {
-            int i = _inputBuffer[_inputPtr++];
+            int i = (int) _inputBuffer[_inputPtr++];
             if (i < INT_SPACE) {
                 if (i == INT_LF) {
                     _skipLF();
@@ -1799,7 +1790,7 @@ public final class ReaderBasedJsonParser
         }
         char c = _inputBuffer[_inputPtr++];
 
-        switch (c) {
+        switch ((int) c) {
             // First, ones that are mapped
         case INT_b:
             return '\b';
@@ -1833,7 +1824,7 @@ public final class ReaderBasedJsonParser
                     _reportInvalidEOF(" in character escape sequence");
                 }
             }
-            int ch = _inputBuffer[_inputPtr++];
+            int ch = (int) _inputBuffer[_inputPtr++];
             int digit = CharTypes.charToHex(ch);
             if (digit < 0) {
                 _reportUnexpectedChar(ch, "expected a hex-digit for character escape sequence");
