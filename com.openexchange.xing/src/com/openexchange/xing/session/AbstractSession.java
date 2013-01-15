@@ -99,6 +99,7 @@ public abstract class AbstractSession implements Session {
 
     private final AppKeyPair appKeyPair;
     private AccessTokenPair accessTokenPair = null;
+    private CommonsHttpOAuthConsumer signer = null;
 
     protected final AtomicReference<HttpClient> client = new AtomicReference<HttpClient>();
 
@@ -106,7 +107,7 @@ public abstract class AbstractSession implements Session {
      * Creates a new session with the given app key and secret, and access
      * type. The session will not be linked because it has no access token pair.
      */
-    public AbstractSession(final AppKeyPair appKeyPair) {
+    protected AbstractSession(final AppKeyPair appKeyPair) {
         this(appKeyPair, null);
     }
 
@@ -115,7 +116,8 @@ public abstract class AbstractSession implements Session {
      * type. The session will be linked to the account corresponding to the
      * given access token pair.
      */
-    public AbstractSession(final AppKeyPair appKeyPair, final AccessTokenPair accessTokenPair) {
+    protected AbstractSession(final AppKeyPair appKeyPair, final AccessTokenPair accessTokenPair) {
+        super();
         if (appKeyPair == null) {
             throw new IllegalArgumentException("'appKeyPair' must be non-null");
         }
@@ -131,6 +133,19 @@ public abstract class AbstractSession implements Session {
             throw new IllegalArgumentException("'accessTokenPair' must be non-null");
         }
         this.accessTokenPair = accessTokenPair;
+        this.signer = null;
+    }
+
+    private CommonsHttpOAuthConsumer getSigner() {
+        CommonsHttpOAuthConsumer tmp = signer;
+        if (null == tmp) {
+            tmp = new CommonsHttpOAuthConsumer(appKeyPair.key, appKeyPair.secret);
+            if (null != accessTokenPair) {
+                tmp.setTokenWithSecret(accessTokenPair.key, accessTokenPair.secret);
+            }
+            signer = tmp;
+        }
+        return tmp;
     }
 
     @Override
@@ -180,9 +195,7 @@ public abstract class AbstractSession implements Session {
     @Override
     public void sign(final HttpRequestBase request) throws XingException {
         try {
-            final CommonsHttpOAuthConsumer signer = new CommonsHttpOAuthConsumer(appKeyPair.key, appKeyPair.secret);
-            signer.setTokenWithSecret(accessTokenPair.key, accessTokenPair.secret);
-            signer.sign(request);
+            getSigner().sign(request);
         } catch (final OAuthCommunicationException e) {
             throw new XingException(e);
         } catch (final OAuthMessageSignerException e) {
