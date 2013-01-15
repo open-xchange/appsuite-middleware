@@ -70,6 +70,8 @@ import com.openexchange.mail.dataobjects.MailPart;
  */
 public class MimeFilter {
 
+    private static final String MESSAGE_ID = MessageHeaders.HDR_MESSAGE_ID;
+
     /**
      * Gets the MIME filter for specified alias.
      *
@@ -134,7 +136,11 @@ public class MimeFilter {
      * @throws OXException If filter operation fails
      */
     public MimeMessage filter(final MimeMessage mimeMessage) throws OXException {
+        if (null == mimeMessage) {
+            return null;
+        }
         try {
+            final String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
             final String contentType = LocaleTools.toLowerCase(mimeMessage.getContentType());
             if (!contentType.startsWith("multipart/")) {
                 // Nothing to filter
@@ -144,6 +150,12 @@ public class MimeFilter {
             handlePart((Multipart) mimeMessage.getContent(), newMultipart);
             mimeMessage.setContent(newMultipart);
             mimeMessage.saveChanges();
+            // Restore original Message-Id header
+            if (null == messageId) {
+                mimeMessage.removeHeader(MESSAGE_ID);
+            } else {
+                mimeMessage.setHeader(MESSAGE_ID, messageId);
+            }
             return mimeMessage;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
