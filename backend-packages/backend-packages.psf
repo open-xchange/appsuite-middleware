@@ -28,6 +28,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-discovery-static"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-configjump-generic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-contacts-ldap"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-datamining"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-dataretrieval"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-dav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning"/>
