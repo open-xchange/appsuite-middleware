@@ -198,6 +198,8 @@ public final class VCardAttachMailDataHandler implements DataHandler {
             }
             mimeMessage.setContent(mimeMultipart);
             mimeMessage.saveChanges();
+            // Remove generated Message-Id for template message
+            mimeMessage.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
             /*
              * Return mail's JSON object
              */

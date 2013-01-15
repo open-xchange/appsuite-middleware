@@ -53,6 +53,8 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressLi
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
 import javax.activation.DataHandler;
@@ -69,6 +71,9 @@ import javax.mail.internet.MimeMultipart;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -78,14 +83,15 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.version.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.version.Version;
 
 /**
  * MailObject
@@ -97,6 +103,19 @@ public class MailObject {
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailObject.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private static volatile String staticHostName;
+
+    private static volatile UnknownHostException warnSpam;
+
+    static {
+        try {
+            staticHostName = InetAddress.getLocalHost().getCanonicalHostName();
+        } catch (final UnknownHostException e) {
+            staticHostName = "localhost";
+            warnSpam = e;
+        }
+    }
 
     public static final int DONT_SET = -2;
 
@@ -541,6 +560,40 @@ public class MailObject {
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private void saveChangesSafe(final MimeMessage mimeMessage) throws OXException {
+        final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
+        String hostName;
+        if (null == hostnameService) {
+            hostName = getHostName();
+        } else {
+            hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
+        }
+        if (null == hostName) {
+            hostName = getHostName();
+        }
+        MimeMessageConverter.saveChanges(mimeMessage, hostName);
+    }
+
+    private static String getHostName() {
+        final Props logProperties = LogProperties.optLogProperties();
+        if (null == logProperties) {
+            return getStaticHostName();
+        }
+        final String serverName = logProperties.get(LogProperties.Name.AJP_SERVER_NAME);
+        if (null == serverName) {
+            return getStaticHostName();
+        }
+        return serverName;
+    }
+
+    private static String getStaticHostName() {
+        final UnknownHostException warning = warnSpam;
+        if (warning != null) {
+            LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want!", warning);
+        }
+        return staticHostName;
     }
 
     public void addBccAddr(final String addr) {

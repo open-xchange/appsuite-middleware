@@ -3188,6 +3188,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW);
                 mimeMessage.setFlag(DRAFT, true);
                 mimeMessage.saveChanges();
+                // Remove generated Message-Id for template message
+                mimeMessage.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
                 /*
                  * Append message to draft folder
                  */
