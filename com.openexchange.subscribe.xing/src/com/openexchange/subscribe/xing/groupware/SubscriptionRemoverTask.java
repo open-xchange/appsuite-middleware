@@ -47,13 +47,13 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.subscribe.xing.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.tablesExist;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -63,23 +63,25 @@ import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.subscribe.xing.Services;
 
 
 /**
  * {@link SubscriptionRemoverTask}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SubscriptionRemoverTask implements UpdateTaskV2 {
+public abstract class SubscriptionRemoverTask implements UpdateTaskV2 {
 
-    private final String subscriptionSourceId;
+    /** The subscription source identifier */
+    protected final String subscriptionSourceId;
 
-    private static final String DELETE = "DELETE subscriptions, genconf_attributes_strings, genconf_attributes_bools FROM subscriptions, genconf_attributes_strings, genconf_attributes_bools WHERE subscriptions.source_id = ? AND genconf_attributes_strings.id = subscriptions.configuration_id AND genconf_attributes_bools.id = subscriptions.configuration_id AND genconf_attributes_strings.cid = subscriptions.cid AND genconf_attributes_bools.cid = subscriptions.cid;";
-
-
-    public SubscriptionRemoverTask(final String subscriptionSourceId) {
+    /**
+     * Initializes a new {@link SubscriptionRemoverTask}.
+     * @param subscriptionSourceId
+     */
+    protected SubscriptionRemoverTask(final String subscriptionSourceId) {
+        super();
         this.subscriptionSourceId = subscriptionSourceId;
     }
 
@@ -110,27 +112,29 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
 
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
-        final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        final DatabaseService ds = Services.getService(DatabaseService.class);
         final Connection con = ds.getForUpdateTask(contextId);
-
         PreparedStatement stmt = null;
         try {
-            if (!tablesExist(con, "subscriptions", "genconf_attributes_strings", "genconf_attributes_bools")) {
+            if(!Databases.tablesExist(con, "subscriptions", "genconf_attributes_strings", "genconf_attributes_bools")) {
                 return;
             }
 
-            stmt = con.prepareStatement(DELETE);
+            stmt = con.prepareStatement("DELETE subscriptions, genconf_attributes_strings, genconf_attributes_bools FROM subscriptions, genconf_attributes_strings, genconf_attributes_bools WHERE subscriptions.source_id = ? AND genconf_attributes_strings.id = subscriptions.configuration_id AND genconf_attributes_bools.id = subscriptions.configuration_id AND genconf_attributes_strings.cid = subscriptions.cid AND genconf_attributes_bools.cid = subscriptions.cid;");
             stmt.setString(1, subscriptionSourceId);
             stmt.executeUpdate();
         } catch (final SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x, x.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             if (con != null) {
                 ds.backForUpdateTask(contextId, con);
             }
         }
     }
+
+
+
 
     /* This is a SQL Test Case for the poor. Do this in an empty database to check the validity of the sql statement */
     /*
