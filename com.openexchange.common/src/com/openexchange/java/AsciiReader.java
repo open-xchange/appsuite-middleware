@@ -17,8 +17,8 @@
 
 package com.openexchange.java;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 
 /**
@@ -46,6 +46,9 @@ public class AsciiReader extends Reader {
 
     /** Byte buffer. */
     protected final byte[] fBuffer;
+
+    /** Strict ASCII check */
+    protected boolean errorOnAsciiFault;
 
     //
     // Constructors
@@ -87,6 +90,17 @@ public class AsciiReader extends Reader {
         fBuffer = buffer;
     }
 
+    /**
+     * Sets the error-on-ASCII-fault flag.
+     *
+     * @param errorOnAsciiFault The error-on-ASCII-fault flag
+     * @return This reader with new behavior applied.
+     */
+    public AsciiReader setErrorOnAsciiFault(final boolean errorOnAsciiFault) {
+        this.errorOnAsciiFault = errorOnAsciiFault;
+        return this;
+    }
+
     //
     // Reader methods
     //
@@ -103,7 +117,7 @@ public class AsciiReader extends Reader {
     @Override
     public int read() throws IOException {
         final int b0 = fInputStream.read();
-        if (b0 >= 0x80) {
+        if (errorOnAsciiFault && b0 >= 0x80) {
             throw new IOException("Invalid ASCII: " + Integer.toString(b0));
         }
         return b0;
@@ -127,7 +141,7 @@ public class AsciiReader extends Reader {
         final int count = fInputStream.read(fBuffer, 0, length);
         for (int i = 0; i < count; i++) {
             final int b0 = fBuffer[i];
-            if (b0 < 0) {
+            if (errorOnAsciiFault && b0 < 0) {
                 throw new IOException("Invalid ASCII: " + Integer.toString(b0 & 0x0FF));
             }
             ch[offset + i] = (char) b0;
