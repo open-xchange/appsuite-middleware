@@ -53,6 +53,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -400,7 +402,17 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         attachment.setFolderId(folderId);
         attachment.setAttachedId(attachedId);
         attachment.setModuleId(moduleId);
-        attachment.setId((Integer)res.getData());
+        {
+            final OXException exception = res.getException();
+            if (null != exception) {
+                final StringWriter writer = new StringWriter(512);
+                exception.printStackTrace(new PrintWriter(writer));
+                assertNull("An exception occurred: " + writer.toString(), exception);                
+            }
+        }
+        final Integer data = (Integer) res.getData();
+        assertNotNull("Response's data is null.", data);
+        attachment.setId(data.intValue());
         clean.add(attachment);
 
 	    res = get(getWebConversation(),sessionId,folderId,attachedId,moduleId, clean.get(0).getId());
