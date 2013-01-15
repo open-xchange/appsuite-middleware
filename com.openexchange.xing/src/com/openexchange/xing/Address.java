@@ -60,7 +60,7 @@ import org.json.JSONObject;
  *       "city": "Hamburg",
  *       "country": "DE",
  *       "zip_code": "20357",
- *       "street": "Privatstra§e 1",
+ *       "street": "Privatstra\u00dfe 1",
  *       "phone": "49|40|1234560",
  *       "fax": "||",
  *       "province": "Hamburg",
