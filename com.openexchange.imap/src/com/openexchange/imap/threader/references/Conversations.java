@@ -114,7 +114,7 @@ public final class Conversations {
 
     /**
      * Checks specified {@link FetchProfile} to contain needed items/headers for building up conversations.
-     * 
+     *
      * @param fetchProfile The fetch profile to check
      * @param byEnvelope <code>true</code> to use ENVELOPE fetch item; other <code>false</code> to use single headers (<i>"References"</i>, <i>"In-Reply-To"</i>, and <i>"Message-Id"</i>)
      * @return The fetch profile ready for building up conversations
@@ -221,7 +221,7 @@ public final class Conversations {
 
     /**
      * Retrieves <b><small>UNFOLDED</small></b> conversations for specified IMAP folder.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param limit The limit
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
@@ -234,7 +234,7 @@ public final class Conversations {
 
     /**
      * Retrieves <b><small>UNFOLDED</small></b> conversations for specified IMAP folder.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param limit The limit
      * @param fetchProfile The fetch profile
@@ -340,7 +340,7 @@ public final class Conversations {
 
     /**
      * Transforms conversations to list of <tt>ThreadSortNode</tt>s.
-     * 
+     *
      * @param conversations The conversations to transform
      * @return The resulting list of <tt>ThreadSortNode</tt>s
      */
@@ -372,7 +372,7 @@ public final class Conversations {
 
     /**
      * Folds specified conversations.
-     * 
+     *
      * @param toFold The conversations to fold
      * @return The folded conversations
      */

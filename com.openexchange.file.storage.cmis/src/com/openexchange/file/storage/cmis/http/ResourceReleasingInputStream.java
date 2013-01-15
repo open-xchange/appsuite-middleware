@@ -71,7 +71,7 @@ public final class ResourceReleasingInputStream extends BufferedInputStream {
 
     /**
      * Initializes a new {@link ResourceReleasingInputStream}.
-     * 
+     *
      * @param in The input stream
      * @param httpRequest The associated HTTP request
      * @param httpClient The associated HTTP client
@@ -82,7 +82,7 @@ public final class ResourceReleasingInputStream extends BufferedInputStream {
 
     /**
      * Initializes a new {@link ResourceReleasingInputStream}.
-     * 
+     *
      * @param in The input stream
      * @param size The initial buffer size (greater than zero)
      * @param httpRequest The associated HTTP request

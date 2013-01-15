@@ -93,7 +93,7 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
     private final String password;
 
     private final String repository;
-    
+
     private final String binding;
 
     private final String authType;
@@ -210,7 +210,7 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
                 rootUrl = url;
                 /*-
                  * Create CMIS session
-                 * 
+                 *
                  * Default factory implementation
                  */
                 final Map<String, String> parameters = new HashMap<String, String>(6);
@@ -238,19 +238,19 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
                     parameters.put(SessionParameter.ATOMPUB_URL, url);
                     /*-
                      * If NTLM is enabled on SharePoint, you have to activate the OpenCMIS NTLM authentication provider.
-                     * 
+                     *
                      * See: http://chemistry.apache.org/java/developing/dev-repository-specific-notes.html
                      * See: http://stackoverflow.com/questions/1168526/authenticate-with-ntlm-or-kerberos-using-java-urlconnection
                      * See: http://www.intersult.com/wiki/page/Intersult%20HTTP
                      * See: http://technet.microsoft.com/en-us/library/ff934619.aspx
-                     * 
+                     *
                      * Something like:
                      * org.apache.chemistry.opencmis.user=xyz
                      * org.apache.chemistry.opencmis.password=xyz
                      * org.apache.chemistry.opencmis.binding.spi.type=atompub
                      * org.apache.chemistry.opencmis.binding.atompub.url=http://spserver/_vti_bin/cmis/rest/60dae9c3-b9b0-4cc7-90e4-3af5b6ff25f6?getrepositoryinfo
                      * org.apache.chemistry.opencmis.session.repository.id=60dae9c3-b9b0-4cc7-90e4-3af5b6ff25f6
-                     * 
+                     *
                      * http://spserver/_vti_bin/CMISSoapwsdl.aspx
                      */
                 }
@@ -277,7 +277,7 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
                 parameters.put(SessionParameter.READ_TIMEOUT, Integer.toString(readTimeout));
                 /*-
                  * Check if repository is specified
-                 * 
+                 *
                  * Either create session by listed repositories or by directly referencing repository
                  */
                 final SessionFactory factory = SessionFactoryImpl.newInstance();

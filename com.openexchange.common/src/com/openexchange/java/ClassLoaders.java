@@ -51,7 +51,7 @@ package com.openexchange.java;
 
 /**
  * {@link ClassLoaders} - Utility class for {@link ClassLoader}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ClassLoaders {
@@ -61,7 +61,7 @@ public final class ClassLoaders {
      * bundle. Inspired by <a href="https://groups.google.com/forum/?fromgroups#!topic/hazelcast/zJavJ1ouMnk">OSGi support of Hazelcast</a>
      * <p>
      * <b>Usage:</b>
-     * 
+     *
      * <pre>
      * // Switch current thread's class loader
      * ClassLoaderModifier modifier = new ClassLoaderModifier();
@@ -90,7 +90,7 @@ public final class ClassLoaders {
          * Hazelcast</a>
          * <p>
          * <b>Usage:</b>
-         * 
+         *
          * <pre>
          * // Switch current thread's class loader
          * ClassLoaderModifier modifier = new ClassLoaderModifier();
@@ -101,7 +101,7 @@ public final class ClassLoaders {
          *     modifier.restoreClassLoader();
          * }
          * </pre>
-         * 
+         *
          * @param clazz A class from target bundle; e.g. the activator
          */
         public void setClassLoader(final Class<?> clazz) {
@@ -146,7 +146,7 @@ public final class ClassLoaders {
      * bundle.
      * <p>
      * <b>Usage:</b>
-     * 
+     *
      * <pre>
      * // Switch current thread's class loader
      * Hazelcasts.setClassLoader(this.getClass());
@@ -156,7 +156,7 @@ public final class ClassLoaders {
      *     Hazelcasts.restoreClassLoader();
      * }
      * </pre>
-     * 
+     *
      * @param clazz A class from target bundle; e.g. the activator
      * @throws IllegalStateException If current thread's class loader has already been modified (and not yet {@link #restoreClassLoader()
      *             restored})
@@ -179,7 +179,7 @@ public final class ClassLoaders {
 
     /**
      * Restores the previously removed class loader in current thread.
-     * 
+     *
      * @see #setClassLoader(Class)
      */
     public static void restoreClassLoader() {

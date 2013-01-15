@@ -53,28 +53,28 @@ import java.util.List;
 
 /**
  * A {@link ServiceState} object details which service constraints have been satisfied and which are not satisfied.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ServiceState {
 
     /**
      * Retrieves a list of service class names that have not been satisfied.
-     * 
+     *
      * @return A list of service class names that have not been satisfied.
      */
     public List<String> getMissingServices();
 
     /**
      * Retrieves a list of service class names that have been satisfied.
-     * 
+     *
      * @return A list of service class names that have been satisfied.
      */
     public List<String> getPresentServices();
 
     /**
      * Retrieves the name of the bundle this state describes.
-     * 
+     *
      * @return The name of the bundle this state describes.
      */
     public String getName();

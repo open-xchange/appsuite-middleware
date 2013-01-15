@@ -56,9 +56,9 @@ package com.openexchange.solr.rmi;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class RMISolrException extends Exception {
-    
+
     private int errorCode;
-    
+
     private String message;
 
     /**
@@ -72,26 +72,26 @@ public class RMISolrException extends Exception {
         this.message = message;
     }
 
-    
+
     public final int getErrorCode() {
         return errorCode;
     }
 
-    
+
     public final void setErrorCode(int errorCode) {
         this.errorCode = errorCode;
     }
 
-    
+
     @Override
     public final String getMessage() {
         return message;
     }
 
-    
+
     public final void setMessage(String message) {
         this.message = message;
     }
-    
+
 
 }

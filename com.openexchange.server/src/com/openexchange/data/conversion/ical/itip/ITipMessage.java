@@ -55,7 +55,7 @@ import java.util.Set;
 
 /**
  * {@link ITipMessage}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ITipMessage extends AppointmentWithExceptions {
@@ -63,9 +63,9 @@ public class ITipMessage extends AppointmentWithExceptions {
     private ITipMethod method;
 
     private String comment;
-    
+
     private final Set<Object> features = new HashSet<Object>();
-    
+
     private int owner;
 
     public ITipMethod getMethod() {
@@ -78,7 +78,7 @@ public class ITipMessage extends AppointmentWithExceptions {
 
     /**
      * Gets the comment
-     * 
+     *
      * @return The comment
      */
     public String getComment() {
@@ -87,7 +87,7 @@ public class ITipMessage extends AppointmentWithExceptions {
 
     /**
      * Sets the comment
-     * 
+     *
      * @param comment The comment to set
      */
     public void setComment(String comment) {
@@ -97,7 +97,7 @@ public class ITipMessage extends AppointmentWithExceptions {
 	public void addFeature(Object feature) {
 		features.add(feature);
 	}
-	
+
 	public boolean hasFeature(Object feature) {
 		return features.contains(feature);
 	}

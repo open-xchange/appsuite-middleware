@@ -56,21 +56,21 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link StanzaHandler} Interface for StanzaHandlers.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public interface StanzaHandler {
 
     /**
      * Get the Stanza class that this StanzaHandler is able to handle.
-     * 
+     *
      * @return The Stanza class that this StanzaHandler is able to handle.
      */
     public Class<? extends Stanza> getStanzaClass();
 
     /**
-     * Handle an incoming Stanza. Transform the Payloads, initialize the Stanza and handle it. 
-     * 
+     * Handle an incoming Stanza. Transform the Payloads, initialize the Stanza and handle it.
+     *
      * @param stanza The incoming Stanza
      * @param session The associated ServerSession
      * @throws OXException If handling fails
@@ -79,7 +79,7 @@ public interface StanzaHandler {
 
     /**
      * Handle an outgoing Stanza. Transform the payloads and hand it over to the StanzaSender.
-     * 
+     *
      * @param stanza    The outgoing Stanza
      * @param session   The associated ServerSession
      * @param sender    A Sender to to transport the handled and transformed Stanza

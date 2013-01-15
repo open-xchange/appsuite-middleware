@@ -61,7 +61,7 @@ import com.openexchange.sessionstorage.StoredSession;
 
 /**
  * {@link HazelcastStoredSession}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class HazelcastStoredSession extends StoredSession implements DataSerializable {
@@ -77,13 +77,13 @@ public class HazelcastStoredSession extends StoredSession implements DataSeriali
 
     /**
      * Initializes a new {@link HazelcastStoredSession}.
-     * 
+     *
      * @param session
      */
     public HazelcastStoredSession(final Session session) {
         super(session);
     }
-    
+
     @Override
     public void writeData(DataOutput out) throws IOException {
         /*
@@ -106,19 +106,19 @@ public class HazelcastStoredSession extends StoredSession implements DataSeriali
          * special handling for parameters map
          */
         Object alternativeID = parameters.get(PARAM_ALTERNATIVE_ID);
-        writeString(out, null != alternativeID && String.class.isInstance(alternativeID) ? (String)alternativeID : null); 
+        writeString(out, null != alternativeID && String.class.isInstance(alternativeID) ? (String)alternativeID : null);
         Object capabilitiesValue = parameters.get(PARAM_CAPABILITIES);
         if (null != capabilitiesValue && java.util.Collection.class.isInstance(capabilitiesValue)) {
             Collection<?> capabilities = (Collection<?>)capabilitiesValue;
             out.writeInt(capabilities.size());
             for (Object capability : capabilities) {
                 writeString(out, null != capability && String.class.isInstance(capability) ? (String)capability : null);
-            }                
+            }
         } else {
             out.writeInt(0);
         }
     }
-    
+
     @Override
     public void readData(DataInput in) throws IOException {
         /*
@@ -153,7 +153,7 @@ public class HazelcastStoredSession extends StoredSession implements DataSeriali
             parameters.put(PARAM_CAPABILITIES, capabilities);
         }
     }
-    
+
     private static void writeString(final DataOutput out, final String str) throws IOException {
         if (null == str) {
             out.writeBoolean(true);

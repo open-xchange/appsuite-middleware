@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link JSONUpdate} - A JSON update.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONUpdate {
@@ -65,7 +65,7 @@ public final class JSONUpdate {
 
     /**
      * Initializes a new {@link JSONUpdate}.
-     * 
+     *
      * @param path The path of the value to update in JSlob
      * @param value The value to set in JSlob
      * @throws OXException If parsing specified path fails
@@ -78,7 +78,7 @@ public final class JSONUpdate {
 
     /**
      * Initializes a new {@link JSONUpdate}.
-     * 
+     *
      * @param path The path of the value to update in JSlob
      * @param value The value to set in JSlob
      */
@@ -90,7 +90,7 @@ public final class JSONUpdate {
 
     /**
      * Gets the path.
-     * 
+     *
      * @return The path
      */
     public List<JSONPathElement> getPath() {
@@ -99,7 +99,7 @@ public final class JSONUpdate {
 
     /**
      * Gets the value.
-     * 
+     *
      * @return The value
      */
     public Object getValue() {

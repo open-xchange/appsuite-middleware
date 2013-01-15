@@ -73,7 +73,7 @@ import com.openexchange.tools.Collections;
 public final class ImapIdlePushListenerRegistry {
 
     private static volatile Boolean DEBUG_ENABLED;
-    
+
     /**
      * @param debugEnabled the debugEnabled to set
      */
@@ -189,10 +189,10 @@ public final class ImapIdlePushListenerRegistry {
     /**
      * Removes specified session identifier associated with given user-context-pair and the push listener as well, if no more
      * user-associated session identifiers are present.
-     * 
+     *
      * @param session The session
      * @return <code>true</code> if a push listener for given user-context-pair was found and removed; otherwise <code>false</code>
-     * @throws OXException 
+     * @throws OXException
      */
     public boolean removePushListener(final Session session) throws OXException {
         final int contextId = session.getContextId();

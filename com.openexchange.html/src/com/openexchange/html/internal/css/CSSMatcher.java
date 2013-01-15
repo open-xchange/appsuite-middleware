@@ -170,7 +170,7 @@ public final class CSSMatcher {
         PAT_t = Pattern.compile(strTIME, Pattern.CASE_INSENSITIVE);
 
         PATTERN_IS_PATTERN = Pattern.compile("[unNcd*t]+");
-        
+
         PATTERN_COLOR_RGB = Pattern.compile(strCOLOR_RGB_FUNC, Pattern.CASE_INSENSITIVE);
     }
 
@@ -338,17 +338,17 @@ public final class CSSMatcher {
         final StringBuilder helper = new StringBuilder(length << 1);
         /*-
          * SIMPLE SELECTORS
-         * 
+         *
          * #id -> #prefix #prefix-id
          * .class -> #prefix .prefix-class
          * element -> #prefix element
-         * 
+         *
          * GROUPS (set of simple selectors; comma separated)
-         * 
+         *
          * #id, .class -> #prefix #prefix-id, #prefix .prefix-class
          * #id, element -> #prefix #prefix-id, #prefix element
          * .class-A, .class-B -> #prefix .prefix-class-A, #prefix .prefix-class-B
-         * 
+         *
          * Escape every ID, escape every class name, prefix every SIMPLE SELECTOR with #prefix,
          * every time when occurring within a line
          */

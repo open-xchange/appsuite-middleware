@@ -64,14 +64,14 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ListAction}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "list", description = "Get a list of free/busy information.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "from", description = "The lower (inclusive) limit of the requested time-range."),
     @Parameter(name = "until", description = "The upper (exclusive) limit of the requested time-range."),
-    @Parameter(name = "merged", type = Type.BOOLEAN, optional = true, description = "Whether to pre-process the free/busy data on the " + 
+    @Parameter(name = "merged", type = Type.BOOLEAN, optional = true, description = "Whether to pre-process the free/busy data on the " +
     "server or not. This includes sorting as well as merging overlapping free/busy intervals.")
 }, requestBody = "An array of participants to get the free/busy data for. Each participant may be either an internal user-, group- or " +
     "resource-ID, or an e-mail address for external participants.",
@@ -82,7 +82,7 @@ public class ListAction extends FreeBusyAction {
 
     /**
      * Initializes a new {@link ListAction}.
-     * 
+     *
      * @param serviceLookup The service lookup to use
      */
     public ListAction(ServiceLookup serviceLookup) {
@@ -99,7 +99,7 @@ public class ListAction extends FreeBusyAction {
             freeBusyData = getFreeBusyService().getFreeBusy(
                 request.getSession(), request.getParticipants(), request.getFrom(), request.getUntil());
         }
-        return new AJAXRequestResult(null != freeBusyData ? 
+        return new AJAXRequestResult(null != freeBusyData ?
             serialize(freeBusyData, request.getTimeZone(), request.getSession().getUser().getLocale()) : JSONObject.NULL, "json");
     }
 

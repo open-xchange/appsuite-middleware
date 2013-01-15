@@ -51,9 +51,9 @@ package com.openexchange.admin.rmi.exceptions;
 
 /**
  * Is thrown when user want to do an action in a context which doesn't exists in the system.
- * 
- * @author cutmasta 
- * 
+ *
+ * @author cutmasta
+ *
  */
 public class NoSuchContextException extends Exception {
 
@@ -63,7 +63,7 @@ public class NoSuchContextException extends Exception {
     private static final long serialVersionUID = 1991615694615324164L;
 
     /**
-     * 
+     *
      */
     public NoSuchContextException() {
         super("Context does not exist");

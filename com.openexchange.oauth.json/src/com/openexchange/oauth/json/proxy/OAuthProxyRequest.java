@@ -79,7 +79,7 @@ public class OAuthProxyRequest {
 	private String url;
 	private String body;
 	private final ServerSession session;
-	
+
 	protected Map<API, List<Pattern>> whitelist = new HashMap<API,List<Pattern>>(){{
 		put(API.FACEBOOK, 	Arrays.asList(Pattern.compile("^https:\\/\\/graph\\.facebook\\.com")));
 		put(API.LINKEDIN, 	Arrays.asList(Pattern.compile("^http:\\/\\/api\\.linkedin\\.com")));
@@ -88,37 +88,37 @@ public class OAuthProxyRequest {
 		put(API.TUMBLR, Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.tumblr\\.com")));
 		put(API.FLICKR, Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.flickr\\.com")));
 	}};
-	
+
 	public static enum HTTPMethod {
 		GET, PUT, POST, DELETE
 	}
-	
+
 	public OAuthProxyRequest(AJAXRequestData req, ServerSession session, OAuthService oauthService) {
 		this.req = req;
 		this.oauthService = oauthService;
 		this.session = session;
 	}
-	
+
 	private void analyzeBody() throws OXException {
 		if (analyzed) {
 			return;
 		}
 		analyzed = true;
-		
+
 		JSONObject proxyRequest = (JSONObject) req.getData();
 		if(proxyRequest == null){
 			throw OAuthExceptionCodes.MISSING_BODY.create();
 		}
-		
+
 		String methodName = proxyRequest.optString("type");
 		if (methodName == null || 0 == methodName.length()) {
 			methodName = "GET";
 		} else {
 			methodName = methodName.toUpperCase();
 		}
-		
+
 		method = HTTPMethod.valueOf(methodName);
-		
+
 		JSONObject paramsObj = proxyRequest.optJSONObject("params");
 		parameters = new TreeMap<String,String>();
 		if(paramsObj != null){
@@ -126,7 +126,7 @@ public class OAuthProxyRequest {
 				parameters.put(entry.getKey(), String.valueOf(entry.getValue()));
 			}
 		}
-		
+
 		JSONObject headerObj = proxyRequest.optJSONObject("header");
 		headers = new TreeMap<String,String>();
 		if(headerObj != null){
@@ -134,70 +134,70 @@ public class OAuthProxyRequest {
 				headers.put(entry.getKey(), String.valueOf(entry.getValue()));
 			}
 		}
-		
+
 		if(proxyRequest.hasAndNotNull("content-type")){
 			headers.put("Content-Type", String.valueOf(proxyRequest.opt("content-type")));
 		}
-		
+
 		if (!headers.containsKey("Content-Type")) {
 			headers.put("Content-Type", "application/x-www-form-urlencoded");
 		}
-		
+
 		if(proxyRequest.hasAndNotNull("accepts")){
 			headers.put("Accepts", String.valueOf(proxyRequest.opt("accepts")));
 		}
-		
+
 		try {
 			url = proxyRequest.getString("url");
 		} catch (JSONException e) {
 			throw AjaxExceptionCodes.MISSING_PARAMETER.create("url");
 		}
-		
+
 		body = proxyRequest.optString("data");
-		
+
 	}
-	
+
 	public OAuthAccount getAccount() throws OXException {
 		if (req.isSet("id")) {
 			int id = req.getParameter("id", int.class);
-			
+
 			return oauthService.getAccount(id, session, session.getUserId(), session.getContextId());
 		}
-		
+
 		if (req.isSet("api")){
 			API api = API.valueOf(req.getParameter("api").toUpperCase());
-			
+
 			return oauthService.getDefaultAccount(api, session);
 		}
 		req.require("id");
 		return null; //should not be reached
 	}
-	
+
 	public API getAPI() throws OXException {
 		analyzeBody();
 		return getAccount().getAPI();
 	}
-	
+
 	public HTTPMethod getMethod() throws OXException {
 		analyzeBody();
 		return method;
 	}
-	
+
 	public Map<String, String> getParameters() throws OXException {
 		analyzeBody();
 		return parameters;
 	}
-	
+
 	public Map<String, String> getHeaders() throws OXException {
 		analyzeBody();
 		return headers;
 	}
-	
+
 	public String getBody() throws OXException {
 		analyzeBody();
 		return body;
 	}
-	
+
 	public String getUrl() throws OXException {
 		whitelist(url);
 		analyzeBody();

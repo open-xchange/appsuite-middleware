@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link GenericProperty}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GenericProperty implements Decrypter {

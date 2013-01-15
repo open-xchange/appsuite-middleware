@@ -32,10 +32,10 @@ public class NameGenerator {
 	}
 
 	/**
-	 * 
+	 *
 	 * The names will look like this
 	 * (v=vocal,c=startConsonsonant,d=endConsonants): vd, cvdvd, cvd, vdvd
-	 * 
+	 *
 	 * @param vocals
 	 *            pass something like {"a","e","ou",..}
 	 * @param startConsonants
@@ -52,7 +52,7 @@ public class NameGenerator {
 
 	/**
 	 * see {@link NameGenerator#NameGenerator(String[], String[], String[])}
-	 * 
+	 *
 	 * @param vocals
 	 * @param startConsonants
 	 * @param endConsonants

@@ -69,7 +69,7 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link ICal4JITipEmitter}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ICal4JITipEmitter extends ICal4JEmitter implements ITipEmitter {
@@ -80,7 +80,7 @@ public class ICal4JITipEmitter extends ICal4JEmitter implements ITipEmitter {
         initCalendar(calendar);
         Mode mode = new SimpleMode(ZoneInfo.OUTLOOK);
         boolean consumedComment = false;
-        
+
         Appointment appt = null;
         VEvent event = null;
         if (message.getAppointment() != null) {

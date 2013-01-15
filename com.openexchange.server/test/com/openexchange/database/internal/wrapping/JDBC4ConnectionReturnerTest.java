@@ -68,13 +68,13 @@ public class JDBC4ConnectionReturnerTest {
     /**
      * The delegate is null if a connection is returned 2 times to the pool. The second return should give an SQLException to detect coding
      * problems.
-     * @throws NoSuchMethodException 
-     * @throws ClassNotFoundException 
-     * @throws InvocationTargetException 
-     * @throws IllegalAccessException 
-     * @throws InstantiationException 
-     * @throws SecurityException 
-     * @throws IllegalArgumentException 
+     * @throws NoSuchMethodException
+     * @throws ClassNotFoundException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws SecurityException
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("static-method")
     @Test(expected = SQLException.class)

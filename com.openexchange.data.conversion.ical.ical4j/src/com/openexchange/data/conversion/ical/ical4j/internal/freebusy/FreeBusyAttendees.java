@@ -66,9 +66,9 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link FreeBusyAttendees}
- * 
- * Parses the attendees for a {@link FreeBusyInformation}s attendee. 
- * 
+ *
+ * Parses the attendees for a {@link FreeBusyInformation}s attendee.
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class FreeBusyAttendees extends AbstractVerifyingAttributeConverter<VFreeBusy, FreeBusyInformation> {
@@ -86,7 +86,7 @@ public class FreeBusyAttendees extends AbstractVerifyingAttributeConverter<VFree
     }
 
     @Override
-    public void emit(Mode mode, int index, FreeBusyInformation freeBusyInformation, VFreeBusy vFreeBusy, List<ConversionWarning> warnings, 
+    public void emit(Mode mode, int index, FreeBusyInformation freeBusyInformation, VFreeBusy vFreeBusy, List<ConversionWarning> warnings,
         Context ctx, Object... args) throws ConversionError {
         throw new UnsupportedOperationException("not implemented");
     }
@@ -98,14 +98,14 @@ public class FreeBusyAttendees extends AbstractVerifyingAttributeConverter<VFree
     }
 
     @Override
-    public void parse(int index, VFreeBusy vFreeBusy, FreeBusyInformation freeBusyInformation, TimeZone timeZone, Context ctx, 
+    public void parse(int index, VFreeBusy vFreeBusy, FreeBusyInformation freeBusyInformation, TimeZone timeZone, Context ctx,
         List<ConversionWarning> warnings) throws ConversionError {
         List<String> attendees = new ArrayList<String>();
         PropertyList properties = vFreeBusy.getProperties(Property.ATTENDEE);
         if (null != properties && 0 < properties.size()) {
             for (int i = 0; i < properties.size(); i++) {
                 Attendee attendee = (Attendee)properties.get(i);
-                if (null != attendee && null != attendee.getCalAddress() && 
+                if (null != attendee && null != attendee.getCalAddress() &&
                     "mailto".equalsIgnoreCase(attendee.getCalAddress().getScheme())) {
                     String mail = attendee.getCalAddress().getSchemeSpecificPart();
                     attendees.add(IDNA.toIDN(mail));
@@ -114,5 +114,5 @@ public class FreeBusyAttendees extends AbstractVerifyingAttributeConverter<VFree
         }
         freeBusyInformation.setAttendees(attendees.toArray(new String[attendees.size()]));
     }
-    
+
 }

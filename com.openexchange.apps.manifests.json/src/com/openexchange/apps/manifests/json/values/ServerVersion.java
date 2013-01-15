@@ -68,11 +68,11 @@ public class ServerVersion implements ComputedServerConfigValueService {
 	@Override
 	public void addValue(JSONObject serverConfig, AJAXRequestData request,
 			ServerSession session) throws OXException, JSONException {
-		
+
 		if (!serverConfig.has("serverVersion")) {
 			serverConfig.put("serverVersion", Version.getInstance().getVersionString());
 		}
-		
+
 	}
 
 }

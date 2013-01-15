@@ -78,7 +78,7 @@ public class SolrMailMessageConverter implements SolrResultConverter<MailMessage
         MailIndexResult result = new MailIndexResult(documents.size());
         result.setResults(documents);
         result.setFacetCounts(facetCounts);
-        
+
         return result;
     }
 

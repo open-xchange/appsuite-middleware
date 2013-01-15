@@ -50,7 +50,7 @@ package com.openexchange.admin.rmi.exceptions;
 
 
 /**
- * 
+ *
  * @author cutmasta
  */
 public class PoolException extends Exception {

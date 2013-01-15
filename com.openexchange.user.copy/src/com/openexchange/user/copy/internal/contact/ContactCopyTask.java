@@ -90,9 +90,9 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ContactCopyTask implements CopyUserTaskService {     
-    
-    private static final String SELECT_DLIST = 
+public class ContactCopyTask implements CopyUserTaskService {
+
+    private static final String SELECT_DLIST =
         "SELECT " +
             "intfield01, intfield02, intfield03, intfield04, field01, " +
             "field02, field03, field04 " +
@@ -100,9 +100,9 @@ public class ContactCopyTask implements CopyUserTaskService {
             "prg_dlist " +
         "WHERE " +
             "cid = ? " +
-        "AND " +            
+        "AND " +
             "intfield01 IN (#IDS#)";
-    
+
     private static final String SELECT_IMAGE =
         "SELECT " +
             "image1, changing_date, mime_type " +
@@ -110,21 +110,21 @@ public class ContactCopyTask implements CopyUserTaskService {
             "prg_contacts_image " +
         "WHERE " +
             "cid = ? AND intfield01 = ?";
-    
+
     private static final String INSERT_IMAGE =
         "INSERT INTO " +
             "prg_contacts_image " +
             "(intfield01, image1, changing_date, mime_type, cid) " +
         "VALUES " +
             "(?, ?, ?, ?, ?)";
-    
+
     private static final String INSERT_DLIST =
         "INSERT INTO " +
             "prg_dlist " +
             "(intfield01, intfield02, intfield03, intfield04, field01, field02, field03, field04, cid) " +
         "VALUES " +
-            "(?, ?, ?, ?, ?, ?, ?, ?, ?)";    
-    
+            "(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
 
     public ContactCopyTask() {
         super();
@@ -162,30 +162,30 @@ public class ContactCopyTask implements CopyUserTaskService {
         final Connection dstCon = copyTools.getDestinationConnection();
         final ObjectMapping<FolderObject> folderMapping = copyTools.getFolderMapping();
         final List<Integer> folderIds = new ArrayList<Integer>(folderMapping.getSourceKeys());
-        final List<ContactField> contactFields = getCleanedContactFields();        
+        final List<ContactField> contactFields = getCleanedContactFields();
         final Map<Integer, Contact> contacts = loadContactsFromDB(contactFields, folderIds, srcCon, i(srcCtxId), i(srcUsrId));
         final IntegerMapping mapping = new IntegerMapping();
-        
+
         if (!contacts.isEmpty()) {
-            loadAdditionalContentsFromDB(contacts, srcCon, srcCtxId);        
+            loadAdditionalContentsFromDB(contacts, srcCon, srcCtxId);
             exchangeIds(contacts, folderMapping, dstCon, i(dstCtxId), i(srcUsrId), i(dstUsrId));
             writeContactsToDB(contacts, contactFields, dstCon, i(dstCtxId), i(dstUsrId));
-            writeAdditionalContentsToDB(contacts, dstCon, i(dstCtxId));        
-            
+            writeAdditionalContentsToDB(contacts, dstCon, i(dstCtxId));
+
             for (final Integer contactId : contacts.keySet()) {
                 final Contact contact = contacts.get(contactId);
                 mapping.addMapping(contactId, contact.getObjectID());
-            }  
-        }              
-        
+            }
+        }
+
         return mapping;
     }
-    
+
     private void writeAdditionalContentsToDB(final Map<Integer, Contact> contacts, final Connection con, final int cid) throws OXException {
         writeImagesToDB(contacts, con, cid);
         writeDistributionListsToDB(contacts, con, cid);
     }
-    
+
     private void writeDistributionListsToDB(final Map<Integer, Contact> contacts, final Connection con, final int cid) throws OXException {
         /*
          * intfield01 = contactId
@@ -214,12 +214,12 @@ public class ContactCopyTask implements CopyUserTaskService {
                         setStringOrNull(i++, stmt, entry.getFirstname());
                         setStringOrNull(i++, stmt, entry.getEmailaddress());
                         stmt.setInt(i++, cid);
-                        
+
                         stmt.addBatch();
                     }
                 }
             }
-            
+
             stmt.executeBatch();
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
@@ -227,7 +227,7 @@ public class ContactCopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(stmt);
         }
     }
-    
+
     private void writeImagesToDB(final Map<Integer, Contact> contacts, final Connection con, final int cid) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -239,11 +239,11 @@ public class ContactCopyTask implements CopyUserTaskService {
                     stmt.setLong(3, contact.getImageLastModified().getTime());
                     stmt.setString(4, contact.getImageContentType());
                     stmt.setInt(5, cid);
-                    
+
                     stmt.addBatch();
                 }
             }
-            
+
             stmt.executeBatch();
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
@@ -251,7 +251,7 @@ public class ContactCopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(stmt);
         }
     }
-    
+
     private void writeContactsToDB(final Map<Integer, Contact> contacts, final List<ContactField> contactFields, final Connection con, final int cid, final int uid) throws OXException {
         final String insertSql = buildInsertContactsSql(contactFields);
         PreparedStatement stmt = null;
@@ -264,7 +264,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                 for (final ContactField field : contactFields) {
                     if (field.isDBField()) {
                         if (contact.contains(field.getNumber())) {
-                            final Object value = field.doSwitch(getter, contact);                           
+                            final Object value = field.doSwitch(getter, contact);
                             stmt.setObject(i++, value, field.getSQLType());
                         } else {
                             stmt.setNull(i++, field.getSQLType());
@@ -280,25 +280,25 @@ public class ContactCopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(stmt);
         }
     }
-    
+
     private void exchangeIds(final Map<Integer, Contact> contacts, final ObjectMapping<FolderObject> folderMapping, final Connection con, final int cid, final int oldUid, final int newUid) throws OXException {
         for (final Integer contactId : contacts.keySet()) {
             final Contact contact = contacts.get(contactId);
             try {
                 final int newContactId = IDGenerator.getId(cid, com.openexchange.groupware.Types.CONTACT, con);
                 contact.setObjectID(newContactId);
-                
+
                 final int oldParentFolder = contact.getParentFolderID();
                 if (oldParentFolder == 6) {
                     /*
                      * Global address book - this is the users contact.
-                     */                    
+                     */
                 } else {
                     final FolderObject oldFolder = folderMapping.getSource(oldParentFolder);
                     final FolderObject newFolder = folderMapping.getDestination(oldFolder);
                     contact.setParentFolderID(newFolder.getObjectID());
                 }
-                
+
                 final int contactUid = contact.getInternalUserId();
                 if (contactUid > 0) {
                     /*
@@ -309,19 +309,19 @@ public class ContactCopyTask implements CopyUserTaskService {
                         contact.setInternalUserId(newUid);
                     } else {
                         contact.setInternalUserId(0);
-                    }                    
-                } 
-                
+                    }
+                }
+
                 contact.setCreatedBy(newUid);
-                contact.setModifiedBy(newUid);                       
+                contact.setModifiedBy(newUid);
                 contact.setContextId(cid);
             } catch (final SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             }
         }
-        
+
         for (final Integer contactId : contacts.keySet()) {
-            final Contact contact = contacts.get(contactId);            
+            final Contact contact = contacts.get(contactId);
             if (contact.containsDistributionLists()) {
                 final DistributionListEntryObject[] distributionList = contact.getDistributionList();
                 for (final DistributionListEntryObject entry : distributionList) {
@@ -344,12 +344,12 @@ public class ContactCopyTask implements CopyUserTaskService {
             }
         }
     }
-    
+
     void loadAdditionalContentsFromDB(final Map<Integer, Contact> contacts, final Connection con, final int cid) throws OXException {
         loadDistributionListsFromDB(contacts, con, cid);
         loadImagesFromDB(contacts, con, cid);
     }
-    
+
     void loadImagesFromDB(final Map<Integer, Contact> contacts, final Connection con, final int cid) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -359,7 +359,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                 stmt = con.prepareStatement(SELECT_IMAGE);
                 stmt.setInt(1, cid);
                 stmt.setInt(2, i(contactId));
-                
+
                 rs = stmt.executeQuery();
                 if (rs.next()) {
                     final int numberOfImages = contact.getNumberOfImages();
@@ -378,7 +378,7 @@ public class ContactCopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(rs, stmt);
         }
     }
-    
+
     void loadDistributionListsFromDB(final Map<Integer, Contact> contacts, final Connection con, final int cid) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -387,7 +387,7 @@ public class ContactCopyTask implements CopyUserTaskService {
         try {
             stmt = con.prepareStatement(query);
             stmt.setInt(1, cid);
-            
+
             rs = stmt.executeQuery();
             while (rs.next()) {
                 int i = 1;
@@ -400,30 +400,30 @@ public class ContactCopyTask implements CopyUserTaskService {
                 entry.setLastname(rs.getString(i++));
                 entry.setFirstname(rs.getString(i++));
                 entry.setEmailaddress(rs.getString(i++));
-                
+
                 List<DistributionListEntryObject> list = dlistMap.get(contactId);
                 if (list == null) {
                     list = new ArrayList<DistributionListEntryObject>();
                     dlistMap.put(contactId, list);
                 }
-                
-                list.add(entry);                
+
+                list.add(entry);
             }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
-        
+
         for (final Integer contactId : dlistMap.keySet()) {
             final List<DistributionListEntryObject> list = dlistMap.get(contactId);
             final DistributionListEntryObject[] entryArray = list.toArray(new DistributionListEntryObject[list.size()]);
-            
+
             final Contact contact = contacts.get(contactId);
             contact.setDistributionList(entryArray);
         }
     }
-    
+
     Map<Integer, Contact> loadContactsFromDB(final List<ContactField> contactFields, final List<Integer> folderIds, final Connection con, final int cid, final int uid) throws OXException {
         final Map<Integer, Contact> contacts = new HashMap<Integer, Contact>();
         final String selectSql = buildSelectContactsSql(contactFields, folderIds);
@@ -453,8 +453,8 @@ public class ContactCopyTask implements CopyUserTaskService {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
-        }        
-        
+        }
+
         return contacts;
     }
 
@@ -463,7 +463,7 @@ public class ContactCopyTask implements CopyUserTaskService {
      */
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
     }
-    
+
     private String buildSelectContactsSql(final List<ContactField> contactFields, final List<Integer> folderIds) {
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("SELECT ");
         boolean first = true;
@@ -476,15 +476,15 @@ public class ContactCopyTask implements CopyUserTaskService {
                 } else {
                     sb.append(", ");
                     sb.append(dbName);
-                }                
+                }
             }
         }
         sb.append(" FROM prg_contacts WHERE cid = ? AND ((fid = 6 AND userid = ?) OR fid IN (#IDS#))");
         final String query = CopyTools.replaceIdsInQuery("#IDS#", sb.toString(), folderIds);
-        
-        return query;        
+
+        return query;
     }
-    
+
     private String buildInsertContactsSql(final List<ContactField> contactFields) {
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("INSERT INTO prg_contacts (");
         boolean first = true;
@@ -499,7 +499,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                 } else {
                     sb.append(", ");
                     sb.append(dbName);
-                }                
+                }
             }
         }
         sb.append(") VALUES (");
@@ -508,13 +508,13 @@ public class ContactCopyTask implements CopyUserTaskService {
                 sb.append('?');
             } else {
                 sb.append(", ?");
-            } 
+            }
         }
         sb.append(')');
-        
+
         return sb.toString();
     }
-    
+
     List<ContactField> getCleanedContactFields() {
         final List<ContactField> fields = new ArrayList<ContactField>();
         final List<String> dbFields = new ArrayList<String>();
@@ -527,7 +527,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                 }
             }
         }
-        
+
         return fields;
     }
 

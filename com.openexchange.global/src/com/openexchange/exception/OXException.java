@@ -49,7 +49,6 @@
 
 package com.openexchange.exception;
 
-import java.io.Serializable;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,7 +70,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link OXException} - The (super) exception class for all kinds of <a href="http://www.open-xchange.com">Open-Xchange</a> exceptions.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OXException extends Exception implements OXExceptionConstants {
@@ -98,7 +97,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets the server identifier.
-     * 
+     *
      * @return The server identifier
      */
     public static int getServerId() {
@@ -133,7 +132,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Creates a general exception.
-     * 
+     *
      * @param logMessage The log message
      * @return A general exception.
      */
@@ -144,7 +143,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Creates a not-found exception.
-     * 
+     *
      * @param id The identifier of the missing object
      * @return A not-found exception.
      */
@@ -155,7 +154,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Creates a module-denied exception.
-     * 
+     *
      * @param module The identifier of the module
      * @return A module-denied exception.
      */
@@ -166,7 +165,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Creates a folder-denied exception.
-     * 
+     *
      * @return A folder-denied exception.
      */
     public static OXException noPermissionForFolder() {
@@ -176,7 +175,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Creates a missing-field exception.
-     * 
+     *
      * @param name The field name
      * @return A missing-field exception.
      */
@@ -187,7 +186,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Creates a missing-field exception.
-     * 
+     *
      * @param code The code number
      * @param name The field name
      * @return A missing-field exception.
@@ -199,7 +198,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Creates a general conflict exception.
-     * 
+     *
      * @return A general conflict exception.
      */
     public static OXException conflict() {
@@ -256,7 +255,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Initializes a default {@link OXException}.
-     * 
+     *
      * @param cause The cause
      */
     public OXException(final Throwable cause) {
@@ -274,7 +273,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Initializes a {@link OXException} cloned from specified {@link OXException} including stack trace.
-     * 
+     *
      * @param cloneMe The <code>OXException</code> instance to clone
      */
     public OXException(final OXException cloneMe) {
@@ -297,7 +296,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Initializes a new {@link OXException}.
-     * 
+     *
      * @param code The numeric error code
      */
     public OXException(final int code) {
@@ -314,7 +313,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Initializes a new {@link OXException}.
-     * 
+     *
      * @param code The numeric error code
      * @param displayMessage The printf-style display message (usually a constant from a class implementing {@link LocalizableStrings})
      * @param displayArgs The arguments for display message
@@ -333,7 +332,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Initializes a new {@link OXException}.
-     * 
+     *
      * @param code The numeric error code
      * @param displayMessage The printf-style display message (usually a constant from a class implementing {@link LocalizableStrings})
      * @param cause The optional cause for this {@link OXException}
@@ -353,7 +352,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Copies from specified {@link OXException}.
-     * 
+     *
      * @param e The {@link OXException} to copy from
      */
     public void copyFrom(final OXException e) {
@@ -376,7 +375,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets the numeric code.
-     * 
+     *
      * @return The code
      */
     public int getCode() {
@@ -385,7 +384,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets the generic
-     * 
+     *
      * @return The generic
      */
     public Generic getGeneric() {
@@ -394,7 +393,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Checks generic equality.
-     * 
+     *
      * @param generic The generic
      * @return <code>true</code> if equal; otherwise <code>false</code>
      */
@@ -404,7 +403,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Checks if generic is set to {@link Generic#NOT_FOUND}.
-     * 
+     *
      * @return <code>true</code> for {@link Generic#NOT_FOUND}; otherwise <code>false</code>
      */
     public boolean isNotFound() {
@@ -413,7 +412,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Checks if generic is set to {@link Generic#NO_PERMISSION}.
-     * 
+     *
      * @return <code>true</code> for {@link Generic#NO_PERMISSION}; otherwise <code>false</code>
      */
     public boolean isNoPermission() {
@@ -422,7 +421,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Checks if generic is set to {@link Generic#MANDATORY_FIELD}.
-     * 
+     *
      * @return <code>true</code> for {@link Generic#MANDATORY_FIELD}; otherwise <code>false</code>
      */
     public boolean isMandatory() {
@@ -431,7 +430,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Checks if generic is set to {@link Generic#CONFLICT}.
-     * 
+     *
      * @return <code>true</code> for {@link Generic#CONFLICT}; otherwise <code>false</code>
      */
     public boolean isConflict() {
@@ -440,7 +439,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Sets the generic
-     * 
+     *
      * @param generic The generic to set
      * @return This {@link OXException} with generic applied
      */
@@ -451,7 +450,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Sets the error message which appears in log and is <b>not</b> shown to user.
-     * 
+     *
      * @param logMessage The log error message
      * @return This exception with log error message applied (for chained invocations)
      */
@@ -462,7 +461,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Sets the error message which appears in log and is <b>not</b> shown to user.
-     * 
+     *
      * @param displayFormat The printf-style log error message
      * @param args The printf arguments
      * @return This exception with log error message applied (for chained invocations)
@@ -501,7 +500,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets the plain log message.
-     * 
+     *
      * @return The plain log message.
      */
     public String getPlainLogMessage() {
@@ -510,7 +509,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets the arguments used to compose log message.
-     * 
+     *
      * @return The log arguments
      * @see #getPlainLogMessage()
      */
@@ -520,7 +519,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets the arguments for display message.
-     * 
+     *
      * @return The display arguments
      */
     public Object[] getDisplayArgs() {
@@ -529,7 +528,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Logs this exception - if allowed - in best-fitting log level using specified logger.
-     * 
+     *
      * @param log The logger
      */
     public void log(final Log log) {
@@ -548,7 +547,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * Gets the log message appropriate for specified log level.
      * <p>
      * This is a convenience method that invokes {@link #getLogMessage(LogLevel, String)} with latter argument set to <code>null</code>.
-     * 
+     *
      * @param logLevel The log level
      * @return The log message for specified log level or <code>null</code> if not loggable.
      * @see #getLogMessage(LogLevel, String)
@@ -559,7 +558,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets the log message appropriate for specified log level.
-     * 
+     *
      * @param logLevel The log level
      * @param defaultLog The default logging to return if this exception is not loggable for specified log level
      * @return The log message for specified log level or <code>defaultLog</code> if not loggable.
@@ -573,7 +572,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets the composed log message.
-     * 
+     *
      * @return The log message
      */
     public String getLogMessage() {
@@ -627,7 +626,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets the sole message.
-     * 
+     *
      * @return The sole message
      */
     public String getSoleMessage() {
@@ -656,7 +655,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Checks if this {@link OXException} is loggable for specified log level.
-     * 
+     *
      * @param logLevel The log level
      * @return <code>true</code> if this {@link OXException} is loggable for specified log level; otherwise <code>false</code>
      */
@@ -666,7 +665,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets the first category.
-     * 
+     *
      * @return The first category.
      */
     public Category getCategory() {
@@ -675,7 +674,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets the (sorted) categories.
-     * 
+     *
      * @return The (sorted) categories
      */
     public List<Category> getCategories() {
@@ -695,7 +694,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Sorts specified categories.
-     * 
+     *
      * @param categories The categories to sort
      */
     public static void sortCategories(final List<Category> categories) {
@@ -733,7 +732,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Adds specified category.
-     * 
+     *
      * @param category The category to add
      * @return This exception with category added (for chained invocations)
      */
@@ -749,7 +748,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Sets specified category and drops all existing categories.
-     * 
+     *
      * @param category The category to set
      * @return This exception with category set (for chained invocations)
      */
@@ -766,7 +765,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Removes specified category.
-     * 
+     *
      * @param category The category to remove
      */
     public void removeCategory(final Category category) {
@@ -775,7 +774,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets this exception's identifier.
-     * 
+     *
      * @return The exception identifier
      */
     public String getExceptionId() {
@@ -790,7 +789,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * <p>
      * <b>Note</b>: The identifier is calculated when invoking {@link #getExceptionId()}. When setting the identifier, the calculated value
      * is overridden.
-     * 
+     *
      * @param exceptionId The identifier
      */
     public void setExceptionId(final String exceptionId) {
@@ -801,7 +800,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * Gets the prefix for the compound error code: &lt;prefix&gt; + "-" + &lt;code&gt;
      * <p>
      * This method is intended for being overridden by subclasses.
-     * 
+     *
      * @return The prefix
      * @see #getErrorCode()
      */
@@ -811,7 +810,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Checks if this {@link OXException}'s prefix equals specified expected prefix.
-     * 
+     *
      * @param expected The expected prefix to check against
      * @return <code>true</code> if prefix equals specified expected prefix; otherwise <code>false</code>
      */
@@ -821,7 +820,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Sets the prefix for the compound error code: &lt;prefix&gt; + "-" + &lt;code&gt;
-     * 
+     *
      * @param prefix The prefix
      * @return This {@link OXException} with new prefix applied (for chained invocations)
      */
@@ -832,7 +831,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets the compound error code: &lt;prefix&gt; + "-" + &lt;code&gt;
-     * 
+     *
      * @return The compound error code
      */
     public final String getErrorCode() {
@@ -841,7 +840,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets the internationalized message intended for being displayed to user.
-     * 
+     *
      * @param locale The locale providing the language to which the message shall be translated
      * @return The internationalized message
      */
@@ -869,7 +868,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Checks if this exception is similar to specified exception code regarding category and code number.
-     * 
+     *
      * @param exceptionCode The exception code to check against
      * @return <code>true</code> if this exception is similar to specified exception code; otherwise <code>false</code>
      */
@@ -879,7 +878,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Checks if this exception is similar to specified exception regarding category and code number.
-     * 
+     *
      * @param other The exception to check against
      * @return <code>true</code> if this exception is similar to specified exception; otherwise <code>false</code>
      */
@@ -951,7 +950,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Adds an attribute identifier that has been truncated.
-     * 
+     *
      * @param truncatedId identifier of the truncated attribute.
      * @deprecated use {@link #addProblematic(com.openexchange.groupware.AbstractOXException.Truncated)}
      */
@@ -987,7 +986,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Gets the problematic attributes.
-     * 
+     *
      * @return The problematic attributes
      */
     public final ProblematicAttribute[] getProblematics() {
@@ -1002,7 +1001,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * Checks for existence of specified property.
      * <p>
      * See {@link OXExceptionConstants} for property name constants; e.g. {@link OXExceptionConstants#PROPERTY_SESSION}.
-     * 
+     *
      * @param name The property name
      * @return <code>true</code> if such a property exists; otherwise <code>false</code>
      * @see OXExceptionConstants
@@ -1015,7 +1014,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * Gets the value of the denoted property.
      * <p>
      * See {@link OXExceptionConstants} for property name constants; e.g. {@link OXExceptionConstants#PROPERTY_SESSION}.
-     * 
+     *
      * @param name The property name
      * @return The property value or <code>null</code> if absent
      * @see OXExceptionConstants
@@ -1028,7 +1027,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * Sets the value of denoted property.
      * <p>
      * See {@link OXExceptionConstants} for property name constants; e.g. {@link OXExceptionConstants#PROPERTY_SESSION}.
-     * 
+     *
      * @param name The property name
      * @param value The property value
      * @return The value previously associated with property name or <code>null</code> if not present before
@@ -1051,7 +1050,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * <li> {@link OXExceptionConstants#PROPERTY_USER}</li>
      * <li> {@link OXExceptionConstants#PROPERTY_CONTEXT}</li>
      * </ul>
-     * 
+     *
      * @param session The session
      * @return The exception with session properties applide (for chained invocations)
      */
@@ -1069,7 +1068,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * Removes the value of the denoted property.
      * <p>
      * See {@link OXExceptionConstants} for property name constants; e.g. {@link OXExceptionConstants#PROPERTY_SESSION}.
-     * 
+     *
      * @param name The property name
      * @return The removed property value or <code>null</code> if absent
      * @see OXExceptionConstants
@@ -1083,7 +1082,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * <b>Note</b>: Changes in returned set do not affect original properties!
      * <p>
      * See {@link OXExceptionConstants} for property name constants; e.g. {@link OXExceptionConstants#PROPERTY_SESSION}.
-     * 
+     *
      * @return The property name
      * @see OXExceptionConstants
      */

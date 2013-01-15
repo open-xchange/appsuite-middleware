@@ -99,7 +99,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link Mp3ImageDataSource}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Mp3ImageDataSource implements ImageDataSource {
@@ -110,7 +110,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static Mp3ImageDataSource getInstance() {

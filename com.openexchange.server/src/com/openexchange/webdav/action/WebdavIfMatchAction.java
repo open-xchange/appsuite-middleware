@@ -66,7 +66,7 @@ public class WebdavIfMatchAction extends AbstractAction {
 	}
 
 	private void check(WebdavRequest req, boolean mustMatch) throws WebdavProtocolException {
-		String header = req.getHeader(mustMatch ? "If-Match" : "If-None-Match"); 
+		String header = req.getHeader(mustMatch ? "If-Match" : "If-None-Match");
 		if (null != header) {
 			WebdavResource res = req.getResource();
 			if (res.exists() && res.isCollection()) {
@@ -78,8 +78,8 @@ public class WebdavIfMatchAction extends AbstractAction {
 				String eTag = res.getETag();
 				for (String tag : header.split("\\s*,\\s*")) {
 					if (null != tag && 0 < tag.length()) {
-						if ("*".equals(tag) || eTag.equals(tag) || 
-								(tag.startsWith("\"") && tag.endsWith("\"") && 2 < tag.length() && 
+						if ("*".equals(tag) || eTag.equals(tag) ||
+								(tag.startsWith("\"") && tag.endsWith("\"") && 2 < tag.length() &&
 										eTag.equals( tag.substring(1, tag.length() - 1)))) {
 							foundMatch = true;
 							break;

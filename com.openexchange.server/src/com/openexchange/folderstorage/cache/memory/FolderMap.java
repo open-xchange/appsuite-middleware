@@ -91,7 +91,7 @@ public final class FolderMap {
 
     /**
      * Initializes a new {@link FolderMap}.
-     * 
+     *
      * @param maxCapacity the max capacity
      * @param maxLifeUnits the max life units
      * @param unit the unit
@@ -106,7 +106,7 @@ public final class FolderMap {
 
     /**
      * Initializes a new {@link FolderMap}.
-     * 
+     *
      * @param maxCapacity the max capacity
      * @param maxLifeMillis the max life milliseconds
      */
@@ -131,7 +131,7 @@ public final class FolderMap {
 
     /**
      * Put if absent.
-     * 
+     *
      * @param treeId the tree id
      * @param folder the folder
      * @return The folder
@@ -142,7 +142,7 @@ public final class FolderMap {
 
     /**
      * Put if absent.
-     * 
+     *
      * @param folderId the folder id
      * @param treeId the tree id
      * @param folder the folder
@@ -173,7 +173,7 @@ public final class FolderMap {
 
     /**
      * Gets the size.
-     * 
+     *
      * @return The size
      */
     public int size() {
@@ -182,7 +182,7 @@ public final class FolderMap {
 
     /**
      * Checks if empty flag is set.
-     * 
+     *
      * @return <code>true</code> if empty flag is set; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -191,7 +191,7 @@ public final class FolderMap {
 
     /**
      * Contains.
-     * 
+     *
      * @param folderId the folder id
      * @param treeId the tree id
      * @return <code>true</code> if successful; otherwise <code>false</code>
@@ -202,7 +202,7 @@ public final class FolderMap {
 
     /**
      * Gets the folder.
-     * 
+     *
      * @param folderId the folder id
      * @param treeId the tree id
      * @return The folder
@@ -269,7 +269,7 @@ public final class FolderMap {
 
     /**
      * Puts specified folder.
-     * 
+     *
      * @param treeId the tree id
      * @param folder the folder
      * @return The folder
@@ -280,7 +280,7 @@ public final class FolderMap {
 
     /**
      * Puts specified folder.
-     * 
+     *
      * @param folderId the folder id
      * @param treeId the tree id
      * @param folder the folder
@@ -302,7 +302,7 @@ public final class FolderMap {
 
     /**
      * Removes the folder.
-     * 
+     *
      * @param folderId the folder id
      * @param treeId the tree id
      */
@@ -312,7 +312,7 @@ public final class FolderMap {
 
     /**
      * Removes the folder.
-     * 
+     *
      * @param folderId the folder id
      * @param treeId the tree id
      * @param session The session
@@ -514,7 +514,7 @@ public final class FolderMap {
                     lock.unlock();
                 }
             } catch (final Exception e) {
-                LOG.debug(e.getMessage(), e); 
+                LOG.debug(e.getMessage(), e);
             }
         }
     }
@@ -563,7 +563,7 @@ public final class FolderMap {
                     lock.unlock();
                 }
             } catch (final Exception e) {
-                LOG.debug(e.getMessage(), e); 
+                LOG.debug(e.getMessage(), e);
             }
         }
     }

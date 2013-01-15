@@ -71,7 +71,7 @@ final class MailAccountData extends GenericAccountData {
     private String spamFullname;
     private String confirmedSpamFullname;
     private String confirmedHamFullname;
-    
+
     public MailAccountData() {
         super();
     }

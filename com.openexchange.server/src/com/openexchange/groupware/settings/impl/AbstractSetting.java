@@ -107,7 +107,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
         this.shared = shared;
         this.id = id;
     }
-    
+
     /**
      * @return Returns the name.
      */

@@ -53,17 +53,17 @@ import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePor
 
 /**
  * {@link ExchangeWebService}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface ExchangeWebService {
-    
+
     ExchangeServicePortType getServicePort();
 
     Config getConfig();
-    
+
     Folders getFolders();
-    
+
     Items getItems();
 
     Availability getAvailability();

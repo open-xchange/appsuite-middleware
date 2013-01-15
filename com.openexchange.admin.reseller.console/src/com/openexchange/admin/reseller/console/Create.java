@@ -66,7 +66,7 @@ public class Create extends ResellerAbstraction {
     }
 
     /**
-     * 
+     *
      */
     public Create() {
     }
@@ -80,11 +80,11 @@ public class Create extends ResellerAbstraction {
     }
 
     public void start(final String[] args) {
-        final AdminParser parser = new AdminParser("createadmin");    
-        
+        final AdminParser parser = new AdminParser("createadmin");
+
         setOptions(parser);
 
-        
+
         // parse the command line
         try {
             parser.ownparse(args);

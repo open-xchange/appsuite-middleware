@@ -56,7 +56,7 @@ public class TaskManagerException extends Exception {
     private static final long serialVersionUID = -1523044898153023473L;
 
     /**
-     * 
+     *
      */
     public TaskManagerException() {
 

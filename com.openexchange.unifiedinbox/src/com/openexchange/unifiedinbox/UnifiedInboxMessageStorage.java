@@ -460,13 +460,13 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             }
                             /*-
                              * 1. Send 'all' request with id, folder_id, level, and received_date - you need all that data.
-                             * 
+                             *
                              * 2. Whenever level equals 0, a new thread starts (new array)
-                             * 
+                             *
                              * 3. Add all objects (id, folder_id, received_date) to that list until level !== 0.
-                             * 
+                             *
                              * 4. Order by received_date (ignore the internal level structure), so that the newest mails show up first.
-                             * 
+                             *
                              * 5. Generate the real list of all threads. This must be again ordered by received_date, so that the most recent threads show up
                              *    first. id and folder_id refer to the most recent mail.
                              */
@@ -625,13 +625,13 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
             /*-
              * 1. Send 'all' request with id, folder_id, level, and received_date - you need all that data.
-             * 
+             *
              * 2. Whenever level equals 0, a new thread starts (new array)
-             * 
+             *
              * 3. Add all objects (id, folder_id, received_date) to that list until level !== 0.
-             * 
+             *
              * 4. Order by received_date (ignore the internal level structure), so that the newest mails show up first.
-             * 
+             *
              * 5. Generate the real list of all threads. This must be again ordered by received_date, so that the most recent threads show up
              *    first. id and folder_id refer to the most recent mail.
              */
@@ -828,7 +828,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
             } catch (final ExecutionException e) {
                 throw ThreadPools.launderThrowable(e, OXException.class);
-            } 
+            }
         }
         final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(fullName);
         MailAccess<?, ?> mailAccess = null;

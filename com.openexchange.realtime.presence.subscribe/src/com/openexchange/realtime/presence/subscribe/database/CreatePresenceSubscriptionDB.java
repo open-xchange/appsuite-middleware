@@ -55,7 +55,7 @@ import com.openexchange.groupware.update.Schema;
 
 /**
  * {@link CreatePresenceSubscriptionDB}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class CreatePresenceSubscriptionDB extends CreateTableUpdateTask {

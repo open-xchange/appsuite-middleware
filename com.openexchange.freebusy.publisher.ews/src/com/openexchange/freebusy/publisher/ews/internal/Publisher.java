@@ -88,11 +88,11 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link Publisher}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Publisher implements Runnable {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(Publisher.class);
 
     private final Map<String, FolderIdType> freeBusySubfolders;
@@ -102,10 +102,10 @@ public class Publisher implements Runnable {
 
     /**
      * Initializes a new {@link Publisher}.
-     * 
+     *
      * @param session The session to use when retrieving the free/busy data
      * @param lookup The lookup
-     * @param ews The Exchange web service 
+     * @param ews The Exchange web service
      */
     public Publisher(Session session, Lookup lookup, ExchangeWebService ews) {
         super();
@@ -117,13 +117,13 @@ public class Publisher implements Runnable {
 
     /**
      * Initializes a new {@link Publisher}.
-     * 
+     *
      * @throws OXException
      */
     public Publisher() throws OXException {
-        this(createSession(), createLookup(), createWebService());        
+        this(createSession(), createLookup(), createWebService());
     }
-    
+
     @Override
     public void run() {
         long start = new Date().getTime();
@@ -148,13 +148,13 @@ public class Publisher implements Runnable {
             LOG.error("Unexpected error publising free/busy data", e);
         }
         LOG.info("Publication cycle finished, " + ((new Date().getTime() - start) / 1000) + "s elapsed.");
-    }    
-    
+    }
+
     /**
      * Publishes the free/busy data of the supplied users.
-     * 
+     *
      * @param users The users whose data should be published
-     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param from The lower (inclusive) limit of the requested time-range
      * @param until The upper (exclusive) limit of the requested time-range
      * @throws OXException
      */
@@ -173,7 +173,7 @@ public class Publisher implements Runnable {
         /*
          * generate updated messages
          */
-        Map<FolderIdType, List<PostItemType>> messagesPerFolder = new HashMap<FolderIdType, List<PostItemType>>();                
+        Map<FolderIdType, List<PostItemType>> messagesPerFolder = new HashMap<FolderIdType, List<PostItemType>>();
         for (int i = 0; i < users.length; i++) {
             String legacyExchangeDN = legacyExchangeDNs[i];
             if (null == legacyExchangeDN) {
@@ -182,7 +182,7 @@ public class Publisher implements Runnable {
             } else if (LOG.isTraceEnabled()) {
                 LOG.trace("Using " + legacyExchangeDN + " as legacyExchangeDN for user " + users[i].getLoginInfo() + ".");
             }
-            FreeBusyData freeBusyData = getFreeBusyInformation(users[i], from, until); 
+            FreeBusyData freeBusyData = getFreeBusyInformation(users[i], from, until);
             if (null == freeBusyData) {
                 LOG.debug("No free/busy data for user " + users[i].getLoginInfo() + ", skipping.");
                 continue;
@@ -210,19 +210,19 @@ public class Publisher implements Runnable {
             LOG.debug("Successfully published " + entry.getValue().size() + " free/busy messages.");
         }
     }
-    
+
     private void deleteFreeBusyMessages(String[] legacyExchangeDNs) throws OXException {
         List<ItemIdType> freeBusyMessages = getFreeBusyMessages(legacyExchangeDNs);
         if (null != freeBusyMessages && 0 < freeBusyMessages.size()) {
             ews.getItems().deleteItems(freeBusyMessages, DisposalType.HARD_DELETE);
         }
     }
-    
+
     private List<ItemIdType> getFreeBusyMessages(String[] legacyExchangeDNs) throws OXException {
         Map<FolderIdType, List<String>> subjectsPerFolder = getSubjectsPerFolder(legacyExchangeDNs);
         List<ItemIdType> freeBusyMessages = new ArrayList<ItemIdType>();
         for (Entry<FolderIdType, List<String>> entry : subjectsPerFolder.entrySet()) {
-            List<ItemType> items = ews.getItems().findItemsBySubject(entry.getKey(), entry.getValue(), 
+            List<ItemType> items = ews.getItems().findItemsBySubject(entry.getKey(), entry.getValue(),
                 ItemQueryTraversalType.SHALLOW, DefaultShapeNamesType.ID_ONLY);
             if (null != items && 0 < items.size()) {
                 for (ItemType item : items) {
@@ -247,14 +247,14 @@ public class Publisher implements Runnable {
         }
         return subjectsPerFolder;
     }
-    
+
     private FreeBusyData getFreeBusyInformation(User user, Date from, Date until) throws OXException {
         return EWSFreeBusyPublisherLookup.getService(InternalFreeBusyProvider.class).getUserFreeBusy(
             this.session, user.getId(), from, until);
     }
-        
+
     private FolderIdType getFreeBusySubfolderId(String legacyExchangeDN) throws OXException {
-        String ex = getEX(legacyExchangeDN);        
+        String ex = getEX(legacyExchangeDN);
         if (this.freeBusySubfolders.containsKey(ex)) {
             return freeBusySubfolders.get(ex);
         } else {
@@ -263,7 +263,7 @@ public class Publisher implements Runnable {
             return subfolder;
         }
     }
-    
+
     private FolderIdType discoverFreeBusySubfolder(String folderName) throws OXException {
         BaseFolderType publicFoldersRoot = ews.getFolders().getFolder(
             DistinguishedFolderIdNameType.PUBLICFOLDERSROOT, DefaultShapeNamesType.ALL_PROPERTIES);
@@ -275,25 +275,25 @@ public class Publisher implements Runnable {
             schedulePlusFreeBusy.getFolderId(), folderName, FolderQueryTraversalType.SHALLOW, DefaultShapeNamesType.ID_ONLY);
         return subfolder.getFolderId();
     }
-    
+
     private int[] getUserIDs() throws OXException {
         return EWSFreeBusyPublisherLookup.getService(UserService.class).listAllUser(getContext());
-    }        
-    
+    }
+
     private User[] getUsers(int[] userIDs) throws OXException {
         return EWSFreeBusyPublisherLookup.getService(UserService.class).getUser(getContext(), userIDs);
-    }        
+    }
 
     private Context getContext() throws OXException {
         return EWSFreeBusyPublisherLookup.getService(ContextService.class).getContext(session.getContextId());
-    }        
+    }
 
     private static String getEX(String legacyExchangeDN) {
         int idx = legacyExchangeDN.toLowerCase().indexOf("/cn");
         String administrativeGroup = legacyExchangeDN.substring(0, idx);
         return "EX:" + administrativeGroup;
     }
-    
+
     private static String getUSER(String legacyExchangeDN) {
         int idx = legacyExchangeDN.toLowerCase().indexOf("/cn");
         String recipient = legacyExchangeDN.substring(idx);
@@ -302,10 +302,10 @@ public class Publisher implements Runnable {
 
     private static ExchangeWebService createWebService() throws OXException {
         ExchangeWebService ews = EWSFreeBusyPublisherLookup.getService(EWSFactoryService.class).create(
-            Tools.getConfigProperty("com.openexchange.freebusy.publisher.ews.url"), 
-            Tools.getConfigProperty("com.openexchange.freebusy.publisher.ews.userName"), 
+            Tools.getConfigProperty("com.openexchange.freebusy.publisher.ews.url"),
+            Tools.getConfigProperty("com.openexchange.freebusy.publisher.ews.userName"),
             Tools.getConfigProperty("com.openexchange.freebusy.publisher.ews.password"));
-        ews.getConfig().setExchangeVersion(ExchangeVersionType.valueOf(ExchangeVersionType.class, 
+        ews.getConfig().setExchangeVersion(ExchangeVersionType.valueOf(ExchangeVersionType.class,
             Tools.getConfigProperty("com.openexchange.freebusy.publisher.ews.exchangeVersion", "EXCHANGE_2010").toUpperCase()));
         ews.getConfig().setIgnoreHostnameValidation(Tools.getConfigPropertyBool(
             "com.openexchange.freebusy.publisher.ews.skipHostVerification", false));
@@ -314,10 +314,10 @@ public class Publisher implements Runnable {
     }
 
     private static Session createSession() throws OXException {
-        return new PublishSession(Tools.getConfigPropertyInt("com.openexchange.freebusy.publisher.ews.contextID"), 
+        return new PublishSession(Tools.getConfigPropertyInt("com.openexchange.freebusy.publisher.ews.contextID"),
             Tools.getConfigPropertyInt("com.openexchange.freebusy.publisher.ews.userID"));
     }
-    
+
     private static Lookup createLookup() throws OXException {
         if ("ldap".equalsIgnoreCase(Tools.getConfigProperty("com.openexchange.freebusy.publisher.ews.lookup"))) {
             return new LdapLookup(

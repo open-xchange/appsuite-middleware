@@ -77,98 +77,98 @@ public class RefreshITipAnalyzerTest extends AbstractITipAnalyzerTest {
         final List<ITipMethod> methods = new RefreshITipAnalyzer(null, null).getMethods();
         assertEquals(Arrays.asList(ITipMethod.REFRESH), methods);
     }
-    
+
     @Test
     public void testRefresh() throws OXException {
         final ITipMessage message = new ITipMessage();
         message.setAppointment(appointment("123-123-123-123"));
-        
+
         final CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setObjectID(12);
-        
+
         final SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(appointment);
-        
+
         final ITipAnalysis analysis = new RefreshITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
-        
+
         final List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
         assertEquals(12, annotations.get(0).getAppointment().getObjectID());
-        
+
         assertActions(analysis, ITipAction.SEND_APPOINTMENT);
     }
-    
+
     @Test
     public void testRefreshException() throws OXException {
         final ITipMessage message = new ITipMessage();
         final CalendarDataObject requestedAppointment = appointment("123-123-123-123");
         requestedAppointment.setRecurrenceDatePosition(new Date(12345));
         message.addException(requestedAppointment);
-        
+
         final CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setObjectID(12);
-        
+
         final CalendarDataObject exception = appointment("123-123-123-123");
         exception.setObjectID(13);
         exception.setRecurrenceDatePosition(new Date(12345));
-        
+
         final SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(appointment);
         integrationBuilder.expectCall("getExceptions",appointment, session).andReturn(new ArrayList<CalendarDataObject>(Arrays.asList(exception)));
-        
+
         final ITipAnalysis analysis = new RefreshITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
-        
+
         final List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
         assertEquals(13, annotations.get(0).getAppointment().getObjectID());
-        
+
         assertActions(analysis, ITipAction.SEND_APPOINTMENT);
     }
-    
+
     @Test
     public void testRefreshUnknown() throws OXException {
         final ITipMessage message = new ITipMessage();
         message.setAppointment(appointment("123-123-123-123"));
-        
-        
+
+
         final SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(null);
-        
+
         final ITipAnalysis analysis = new RefreshITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
-        
+
         final List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
         assertEquals("An attendee wants to be brought up to date about an appointment that could not be found. It was probably deleted at some point. Best ignore this message.", annotations.get(0).getMessage());
-        
+
         assertActions(analysis, ITipAction.IGNORE);
     }
-    
+
     @Test
     public void testRefreshUnknownException() throws OXException {
         final ITipMessage message = new ITipMessage();
         final CalendarDataObject requestedAppointment = appointment("123-123-123-123");
         requestedAppointment.setRecurrenceDatePosition(new Date(12345));
         message.addException(requestedAppointment);
-        
+
         final CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setObjectID(12);
-        
+
         final CalendarDataObject exception = appointment("123-123-123-123");
         exception.setObjectID(13);
         exception.setRecurrenceDatePosition(new Date(5432100000L));
-        
+
         final SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(appointment);
         integrationBuilder.expectCall("getExceptions",appointment, session).andReturn(new ArrayList<CalendarDataObject>(Arrays.asList(exception)));
-        
+
         final ITipAnalysis analysis = new RefreshITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
-        
+
         final List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
         assertEquals("An attendee wants to be brought up to date about an appointment that could not be found. It was probably deleted at some point. Best ignore this message.", annotations.get(0).getMessage());
-        
+
         assertActions(analysis, ITipAction.IGNORE);
     }
-    
-    
+
+
 }

@@ -67,7 +67,7 @@ public abstract class DefaultJsonMapping<T, O> extends DefaultMapping<T, O> impl
 
 	private final String ajaxName;
 	private final int columnID;
-	
+
 	public DefaultJsonMapping(String ajaxName, int columnID) {
 		this.ajaxName = ajaxName;
 		this.columnID = columnID;
@@ -82,7 +82,7 @@ public abstract class DefaultJsonMapping<T, O> extends DefaultMapping<T, O> impl
 	public int getColumnID() {
 		return this.columnID;
 	}
-	
+
     @Override
     public void deserialize(JSONObject from, O to, TimeZone timeZone) throws JSONException, OXException {
         this.deserialize(from, to);
@@ -111,5 +111,5 @@ public abstract class DefaultJsonMapping<T, O> extends DefaultMapping<T, O> impl
 		final T value = this.get(from);
 		return null != value ? value : JSONObject.NULL;
 	}
-	
+
 }

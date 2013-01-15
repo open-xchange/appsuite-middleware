@@ -53,7 +53,7 @@ import java.io.Serializable;
 
 /**
  * {@link InvalidatedMarker} - A simple marker for an invalidated entity.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class InvalidatedMarker<T extends Serializable> implements Serializable {
@@ -62,7 +62,7 @@ public final class InvalidatedMarker<T extends Serializable> implements Serializ
 
     /**
      * Creates a new invalidated marker.
-     * 
+     *
      * @param identifier The identifier
      * @return A new invalidated marker
      */
@@ -74,7 +74,7 @@ public final class InvalidatedMarker<T extends Serializable> implements Serializ
 
     /**
      * Initializes a new {@link InvalidatedMarker}.
-     * 
+     *
      * @param identifier The identifier
      */
     private InvalidatedMarker(final T identifier) {
@@ -84,7 +84,7 @@ public final class InvalidatedMarker<T extends Serializable> implements Serializ
 
     /**
      * Gets the identifier
-     * 
+     *
      * @return The identifier
      */
     public T getIdentifier() {

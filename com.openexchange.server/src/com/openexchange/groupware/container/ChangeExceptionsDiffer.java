@@ -54,7 +54,7 @@ import java.util.Arrays;
 
 /**
  * {@link ChangeExceptionsDiffer}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ChangeExceptionsDiffer extends Differ<CalendarObject> {
@@ -84,7 +84,7 @@ public class ChangeExceptionsDiffer extends Differ<CalendarObject> {
             difference.getAdded().addAll(Arrays.asList(update.getChangeException()));
             return difference;
         }
-        
+
         if (update.getChangeException() == null) {
             Difference difference = new Difference(CalendarObject.CHANGE_EXCEPTIONS);
             difference.getRemoved().addAll(Arrays.asList(original.getChangeException()));

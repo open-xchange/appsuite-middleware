@@ -147,9 +147,9 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
             if (!iter.hasNext()) {
                 return; // Shortcut
             }
-            while (iter.hasNext()) {
+            do {
                 ids.add(iter.next().getId());
-            }
+            } while (iter.hasNext());
 
             ATTACHMENT_BASE.detachFromObject(
                 parentFolderID,

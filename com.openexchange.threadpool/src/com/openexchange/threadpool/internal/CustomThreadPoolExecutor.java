@@ -1443,7 +1443,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Starts to monitor active threads for elapsed ones.
-     * 
+     *
      * @param maxRunningMillis The max. allowed number if milliseconds a thread is allowed to be active
      * @param delayMillis The frequency in milliseconds when to check for possible elapsed threads
      */
@@ -1451,7 +1451,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (monitorThreads) {
             final Set<Worker> workerSet = this.workerSet;
             final Runnable monitorThread = new Runnable() {
-                
+
                 @Override
                 public void run() {
                     final long stamp = System.currentTimeMillis() - maxRunningMillis;

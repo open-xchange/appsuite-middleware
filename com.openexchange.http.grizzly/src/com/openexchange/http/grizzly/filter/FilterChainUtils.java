@@ -9,10 +9,10 @@ import org.glassfish.grizzly.filterchain.FilterChain;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class FilterChainUtils {
-	
+
     /**
      * Prettyprint a chain of filters.
-     * @param filterChain The  FilterChain to print 
+     * @param filterChain The  FilterChain to print
      * @return The chain of filters as formatted String
      */
 	public static synchronized String formatFilterChainString(FilterChain filterChain) {
@@ -23,5 +23,5 @@ public class FilterChainUtils {
 		}
     	return sb.toString();
 	}
-	
+
 }

@@ -63,7 +63,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * {@link SharedJSlobServiceTracker}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class SharedJSlobServiceTracker implements ServiceTrackerCustomizer<SharedJSlobService, SharedJSlobService> {

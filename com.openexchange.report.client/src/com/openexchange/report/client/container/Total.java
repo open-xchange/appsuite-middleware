@@ -52,9 +52,9 @@ package com.openexchange.report.client.container;
 public class Total {
 
 	private String contexts;
-	
+
 	private String users;
-	
+
 	public Total(String contexts, String users) {
 		this.contexts = contexts;
 		this.users = users;
@@ -80,5 +80,5 @@ public class Total {
 	public String toString() {
 		return "TotalObject [contexts=" + contexts + ", users=" + users + "]";
 	}
-	
+
 }

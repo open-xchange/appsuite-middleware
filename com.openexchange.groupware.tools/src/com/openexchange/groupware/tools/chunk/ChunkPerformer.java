@@ -58,10 +58,10 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ChunkPerformer {
-    
+
     /**
      * Performs an operation in chunks.
-     * 
+     *
      * @param performable The {@link Performable}.
      * @throws OXException The rethrown {@link OXException} thrown by {@link Performable#perform(int, int)}.
      */
@@ -74,7 +74,7 @@ public class ChunkPerformer {
             if ((off + len) > sum) {
                 len = sum - off;
             }
-            
+
             off += performable.perform(off, (len + off));
         } while (off < sum);
     }

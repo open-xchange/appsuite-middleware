@@ -84,7 +84,7 @@ import com.openexchange.threadpool.behavior.DiscardBehavior;
 
 /**
  * {@link Processor} - Processes a given mail folder for its content being indexed.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Processor {
@@ -101,7 +101,7 @@ public class Processor {
 
     /**
      * Gets the default instance.
-     * 
+     *
      * @return The default instance
      */
     public static Processor getInstance() {
@@ -122,7 +122,7 @@ public class Processor {
 
     /**
      * Initializes a new {@link Processor}.
-     * 
+     *
      * @param strategy The strategy to lookup high attention folders
      */
     public Processor(final ProcessorStrategy strategy) {
@@ -141,12 +141,12 @@ public class Processor {
      * DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL
      */
     protected static final MailField[] FIELDS_LOW_COST = MailField.FIELDS_LOW_COST;
-    
+
     public void processFolderAsync(final MailFolderInfo folderInfo, final int accountId, final Session session, final Map<String, Object> params) throws OXException {
         final Performer performer = new Performer(folderInfo, accountId, session, params, strategy);
         ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(performer), DiscardBehavior.getInstance());
     }
-    
+
     public void processFolderAsync(final MailFolder mailFolder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Map<String, Object> params) throws OXException {
         if (mailFolder.isHoldsMessages() && mailFolder.getMessageCount() < 0) {
             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
@@ -160,22 +160,22 @@ public class Processor {
                     params);
             }
         }
-        
+
         processFolderAsync(mailFolder, mailAccess.getAccountId(), mailAccess.getSession(), params);
     }
-    
+
     public void processFolderAsync(final MailFolder folder, final int accountId, final Session session, final Map<String, Object> params) throws OXException {
         processFolderAsync(new MailFolderInfo(folder), accountId, session, params);
     }
-    
+
     private static final class Performer implements Runnable {
-        
+
         private final MailFolderInfo folderInfo;
         private final int accountId;
         private final Session session;
         private final Map<String, Object> params;
         private final ProcessorStrategy strategy;
-               
+
 
         public Performer(final MailFolderInfo folderInfo, final int accountId, final Session session, final Map<String, Object> params, final ProcessorStrategy strategy) {
             super();
@@ -192,7 +192,7 @@ public class Processor {
             if (messageCount <= 0) {
                 return;
             }
-            
+
             final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
             if (null == facade) {
                 return;
@@ -204,11 +204,11 @@ public class Processor {
                 indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
                 mailAccess = SmalMailAccess.getUnwrappedInstance(session, accountId);
                 mailAccess.connect(false);
-                if (indexAccess.isIndexed(String.valueOf(accountId), folderInfo.getFullName())) {                    
+                if (indexAccess.isIndexed(String.valueOf(accountId), folderInfo.getFullName())) {
                     process(mailAccess, indexAccess);
                 } else {
                     submitJob(mailAccess);
-                }                
+                }
             } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
             } finally {
@@ -216,7 +216,7 @@ public class Processor {
                 MailUtility.releaseAccess(facade, indexAccess);
             }
         }
-        
+
         private void process(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final IndexAccess<MailMessage> indexAccess) throws OXException {
             final int accountId = mailAccess.getAccountId();
             final int messageCount = folderInfo.getMessageCount();
@@ -287,10 +287,10 @@ public class Processor {
                     indexAccess.addDocuments(documents);
                 }
             } else {
-                 submitJob(mailAccess);           
+                 submitJob(mailAccess);
             }
         }
-        
+
         private void submitJob(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
             // FIXME:
 //            final Collection<MailMessage> storageMails = getParameter("processor.storageMails", params);
@@ -347,7 +347,7 @@ public class Processor {
          * Get the mails from index
          */
         final Map<String, MailMessage> indexMap;
-        {            
+        {
             final List<MailMessage> indexedMails = IndexAccessAdapter.getInstance().getMessages(mailAccess.getAccountId(), fullName, mailAccess.getSession(), MailSortField.RECEIVED_DATE, OrderDirection.DESC);
             if (indexedMails.isEmpty()) {
                 indexMap = Collections.emptyMap();

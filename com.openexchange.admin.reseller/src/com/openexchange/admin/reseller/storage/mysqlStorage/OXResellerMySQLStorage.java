@@ -411,7 +411,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         prep.close();
         return admin;
     }
-    
+
     @Override
     public ResellerAdmin[] getData(final ResellerAdmin[] admins) throws StorageException {
         return getData(admins, 0);
@@ -465,7 +465,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 prep.close();
 
                 newadm = getRestrictionDataForAdmin(newadm, con);
-                
+
                 ret.add(newadm);
             }
             return ret.toArray(new ResellerAdmin[ret.size()]);
@@ -823,7 +823,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /**
      * Check whether maxvalue of {@link Restriction.MAX_CONTEXT} has been reached
-     * 
+     *
      * @param con
      * @param adm
      * @param maxvalue
@@ -859,7 +859,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /**
      * Check whether maxvalue of {@link Restriction.MAX_CONTEXT_QUOTA} has been reached
-     * 
+     *
      * @param con
      * @param adm
      * @param maxvalue
@@ -910,7 +910,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             cache.closeConfigDBSqlStuff(null, prep2, rs2);
         }
     }
-    
+
     private void checkMaxOverallUserRestriction(final Connection con, final ResellerAdmin adm, final int maxvalue, final boolean contextMode) throws StorageException, OXResellerException, SQLException, PoolException {
         PreparedStatement prep = null;
         PreparedStatement prep2 = null;
@@ -1026,7 +1026,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw new StorageException(e);
         }
     }
-    
+
     private void checkMaxOverallUserRestrictionByModuleAccess(final Connection con, final int admid, final Restriction res, final UserModuleAccess newaccess, final boolean contextMode) throws StorageException, OXResellerException, SQLException, PoolException, ClassNotFoundException, OXGenericException {
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -1036,8 +1036,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 throw new OXResellerException(Code.MODULE_ACCESS_NOT_NULL);
             }
             cache.initAccessCombinations();
-            final String name = res.getName(); 
-            final UserModuleAccess namedaccess = 
+            final String name = res.getName();
+            final UserModuleAccess namedaccess =
                 cache.getNamedAccessCombination(
                     name.substring(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX.length()));
             if(isSameModuleAccess(newaccess, namedaccess)) {
@@ -1054,7 +1054,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     final Context ctx = new Context(cid);
                     count += countUsersByModuleAccess(ctx, namedaccess);
                     if (count > maxvalue) {
-                        throw new OXResellerException(Code.MAXIMUM_OVERALL_NUMBER_OF_USERS_BY_MODULEACCESS_REACHED, 
+                        throw new OXResellerException(Code.MAXIMUM_OVERALL_NUMBER_OF_USERS_BY_MODULEACCESS_REACHED,
                             name + ":" + String.valueOf(maxvalue));
                     }
                 }
@@ -1126,17 +1126,17 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     private void checkMaxUserRestrictionByModuleAccess(final Context ctx, final Restriction res, final UserModuleAccess newaccess) throws StorageException, OXResellerException, SQLException, PoolException, ClassNotFoundException, OXGenericException {
         try {
             cache.initAccessCombinations();
-            final String name = res.getName(); 
-            final UserModuleAccess namedaccess = 
+            final String name = res.getName();
+            final UserModuleAccess namedaccess =
                 cache.getNamedAccessCombination(
                     name.substring(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX.length()));
             if(isSameModuleAccess(newaccess, namedaccess)) {
                 final int maxvalue = Integer.parseInt(res.getValue());
                 if(countUsersByModuleAccess(ctx, namedaccess) > maxvalue) {
-                    throw new OXResellerException(Code.MAXIMUM_OVERALL_NUMBER_OF_USERS_BY_MODULEACCESS_REACHED, 
+                    throw new OXResellerException(Code.MAXIMUM_OVERALL_NUMBER_OF_USERS_BY_MODULEACCESS_REACHED,
                         name + ":" + String.valueOf(maxvalue));
                 }
-                
+
             }
         } catch (final ClassNotFoundException e) {
             log.error(e.getMessage(), e);
@@ -1681,7 +1681,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         prep.executeUpdate();
         prep.close();
     }
-    
+
     private void addRestriction(final Connection con, final String name) throws SQLException {
         final int rid = IDGenerator.getId(con);
         final PreparedStatement prep = con.prepareStatement("INSERT INTO restrictions (rid,name) VALUES (?,?)");
@@ -1718,7 +1718,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 prep.close();
                 rs.close();
             }
-            
+
             // if referenced restrictions are going to be removed, throw exception
             final StringBuffer sb = new StringBuffer();
             final HashMap<String, UserModuleAccess> newCombinations = cache.getAccessCombinationNames();
@@ -1738,7 +1738,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 sb.deleteCharAt(sb.length()-1);
                 throw new OXResellerException(Code.MODULE_ACCESS_RESTRICTIONS_IN_USE, sb.toString());
             }
-            
+
             // find out which restrictions to remove/add
             final Map<String, Restriction> curCombinations = listRestrictions("*");
 
@@ -1764,7 +1764,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     removeRestriction(con, fullname);
                 }
             }
-            
+
             con.commit();
         } catch (final PoolException e) {
             log.error(e.getMessage(), e);

@@ -61,21 +61,21 @@ public interface MQTopicListener extends MQCloseable {
 
     /**
      * Passes published text to the listener.
-     * 
+     *
      * @param text The text passed to the listener
      */
     void onText(String text);
 
     /**
      * Passes sent Java object wrapped by an {@link ObjectMessage} to the listener.
-     * 
+     *
      * @param objectMessage The object message passed to the listener
      */
     void onObjectMessage(ObjectMessage objectMessage);
 
     /**
      * Passes published bytes to the listener.
-     * 
+     *
      * @param bytes The bytes passed to the listener
      */
     void onBytes(byte[] bytes);

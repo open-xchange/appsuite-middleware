@@ -61,7 +61,7 @@ import com.openexchange.push.mq.registry.PushMQServiceRegistry;
 
 /**
  * {@link PushMQInit}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class PushMQInit {

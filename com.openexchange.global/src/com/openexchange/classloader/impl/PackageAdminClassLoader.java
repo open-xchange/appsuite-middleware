@@ -66,7 +66,7 @@ class PackageAdminClassLoader extends ClassLoader {
 
     /**
      * Find the bundle for a given package.
-     * 
+     *
      * @param pckName The package name.
      * @return The bundle or <code>null</code>
      */
@@ -78,7 +78,7 @@ class PackageAdminClassLoader extends ClassLoader {
 
     /**
      * Return the package from a resource.
-     * 
+     *
      * @param resource The resource path.
      * @return The package name.
      */
@@ -90,7 +90,7 @@ class PackageAdminClassLoader extends ClassLoader {
 
     /**
      * Return the package from a class.
-     * 
+     *
      * @param resource The class name.
      * @return The package name.
      */

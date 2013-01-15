@@ -57,7 +57,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link DropboxOAuthAccessRegistry}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DropboxOAuthAccessRegistry {
@@ -66,7 +66,7 @@ public final class DropboxOAuthAccessRegistry {
 
     /**
      * Gets the registry instance.
-     * 
+     *
      * @return The registry instance
      */
     public static DropboxOAuthAccessRegistry getInstance() {
@@ -85,7 +85,7 @@ public final class DropboxOAuthAccessRegistry {
 
     /**
      * Adds specified Dropbox OAuth access.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -107,7 +107,7 @@ public final class DropboxOAuthAccessRegistry {
 
     /**
      * Check presence of the Dropbox OAuth access associated with given user-context-pair.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -120,7 +120,7 @@ public final class DropboxOAuthAccessRegistry {
 
     /**
      * Gets the Dropbox OAuth access associated with given user-context-pair.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -133,7 +133,7 @@ public final class DropboxOAuthAccessRegistry {
 
     /**
      * Removes the OAuth access associated with given user-context-pair, if no more user-associated accesses are present.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return <code>true</code> if a Dropbox OAuth access for given user-context-pair was found and removed; otherwise <code>false</code>
@@ -158,7 +158,7 @@ public final class DropboxOAuthAccessRegistry {
 
     /**
      * Purges specified user's Dropbox OAuth access.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -182,7 +182,7 @@ public final class DropboxOAuthAccessRegistry {
 
     /**
      * Gets a {@link Iterator iterator} over the Dropbox OAuth access instances in this registry.
-     * 
+     *
      * @return A {@link Iterator iterator} over the Dropbox OAuth access instances in this registry.
      */
     Iterator<ConcurrentMap<String, DropboxOAuthAccess>> iterator() {

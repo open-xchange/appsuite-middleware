@@ -62,13 +62,13 @@ import com.openexchange.groupware.container.Contact;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ContactDatabaseSetter extends AbstractContactSwitcherWithDelegate {
-    
+
     public ContactDatabaseSetter() {
         super();
         final ContactSwitcher setter = new ContactSetter();
         super.setDelegate(setter);
     }
-    
+
     /**
      * @see com.openexchange.groupware.contact.helpers.AbstractContactSwitcherWithDelegate#markasdistributionlist(java.lang.Object[])
      */
@@ -81,13 +81,13 @@ public class ContactDatabaseSetter extends AbstractContactSwitcherWithDelegate {
         if(objects[1] == null) {
             return conObj;
         }
-        
-        
-        final boolean value = castIntegerToBoolean(objects[1]);        
+
+
+        final boolean value = castIntegerToBoolean(objects[1]);
         conObj.setMarkAsDistributionlist(value);
         return conObj;
     }
-    
+
     /**
      * @see com.openexchange.groupware.contact.helpers.AbstractContactSwitcherWithDelegate#privateflag(java.lang.Object[])
      */
@@ -100,12 +100,12 @@ public class ContactDatabaseSetter extends AbstractContactSwitcherWithDelegate {
         if(objects[1] == null) {
             return conObj;
         }
-        
-        final boolean value = castIntegerToBoolean(objects[1]);    
+
+        final boolean value = castIntegerToBoolean(objects[1]);
         conObj.setPrivateFlag(value);
         return conObj;
     }
-    
+
     @Override
     public Object creationdate(final Object... objects) throws OXException {
         if (objects.length < 2) {
@@ -137,7 +137,7 @@ public class ContactDatabaseSetter extends AbstractContactSwitcherWithDelegate {
         conObj.setLastModified(value);
         return conObj;
     }
-    
+
     private boolean castIntegerToBoolean(Object object) throws OXException {
         if (object instanceof Integer) {
             final int value = i((Integer) object);
@@ -147,10 +147,10 @@ public class ContactDatabaseSetter extends AbstractContactSwitcherWithDelegate {
             } else {
                 boolValue = true;
             }
-            
+
             return boolValue;
         }
-        
+
        throw ContactExceptionCodes.UNEXPECTED_ERROR.create("Could not cast to boolean. Object was not an integer.");
     }
 }

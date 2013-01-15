@@ -67,7 +67,7 @@ import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 
 /**
  * Request token request handler
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RequestTokenServlet extends HttpServlet {

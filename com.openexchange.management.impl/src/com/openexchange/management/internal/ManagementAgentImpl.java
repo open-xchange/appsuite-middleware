@@ -77,7 +77,7 @@ import com.openexchange.management.ManagementService;
 
 /**
  * {@link ManagementAgentImpl} - A JMX agent implementation
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagementAgentImpl extends AbstractAgent implements ManagementService {
@@ -86,7 +86,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Gets the singleton instance
-     * 
+     *
      * @return The singleton instance
      */
     public static ManagementAgentImpl getInstance() {
@@ -294,10 +294,10 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                  * The RMI registry tells the JMX clients where to find the JMX RMI port, specified via the server key
                  * The RMI port is generally known and can be set via properties.
                  * The JMX RMI server port is normally chosen by the jvm at random
-                 * 
+                 *
                  * To obtain the target machine connect to service:jmx:rmi:///jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/server
                  * To obtain the JMX RMI server port connect to service:jmx:rmi/<TARGET_MACHINE>/jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/server
-                 *  
+                 *
                  *  Our URL service:jmx:rmi:///jndi/rmi://localhost:9999/server
                  */
                 final JMXServiceURL jmxServiceURL = jmxServiceUrlFor(ip, jmxServerPort, jmxPort);
@@ -323,7 +323,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Creates the appropriate {@link JMXServiceURL} instance for specified arguments.
-     * 
+     *
      * @param hostName The host name; <code>null</code> to determine by <code>InetAddress.getLocalHost().getHostName()</code>
      * @param jmxServerPort The JMX server port
      * @param jmxRmiPort The JMX RMI port
@@ -424,7 +424,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets whether to use a single JMX port; meaning RMI registry port and the one used to export JMX RMI connection objects are the same.
-     * 
+     *
      * @param jmxSinglePort <code>true</code> to use a single JMX port; otherwise <code>false</code>
      */
     public void setJmxSinglePort(final boolean jmxSinglePort) {
@@ -433,7 +433,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets the JMX server port.
-     * 
+     *
      * @param jmxServerPort The JMX server port to set
      */
     public void setJmxServerPort(final int jmxServerPort) {
@@ -442,7 +442,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets the JMX port
-     * 
+     *
      * @param jmxPort The JMX port
      */
     public void setJmxPort(final int jmxPort) {
@@ -451,7 +451,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets the JMX bind address
-     * 
+     *
      * @param jmxBindAddr The JMX bind address or <code>"*"</code>
      */
     public void setJmxBindAddr(final String jmxBindAddr) {
@@ -460,7 +460,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets the JMX login
-     * 
+     *
      * @param jmxLogin The JMX login to set
      */
     public void setJmxLogin(final String jmxLogin) {
@@ -469,7 +469,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets the JMX password
-     * 
+     *
      * @param jmxPassword the JMX password
      */
     public void setJmxPassword(final String jmxPassword) {

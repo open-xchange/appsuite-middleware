@@ -104,47 +104,27 @@ public final class ResourceServiceImpl implements ResourceService {
 
     @Override
     public Resource getResource(final int resourceId, final Context context) throws OXException {
-        try {
-            return ResourceStorage.getInstance().getResource(resourceId, context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return ResourceStorage.getInstance().getResource(resourceId, context);
     }
 
     @Override
     public Resource[] listModified(final Date modifiedSince, final Context context) throws OXException {
-        try {
-            return ResourceStorage.getInstance().listModified(modifiedSince, context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return ResourceStorage.getInstance().listModified(modifiedSince, context);
     }
 
     @Override
     public Resource[] listDeleted(final Date modifiedSince, final Context context) throws OXException {
-        try {
-            return ResourceStorage.getInstance().listDeleted(modifiedSince, context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return ResourceStorage.getInstance().listDeleted(modifiedSince, context);
     }
 
     @Override
     public Resource[] searchResources(final String pattern, final Context context) throws OXException {
-        try {
-            return ResourceStorage.getInstance().searchResources(pattern, context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return ResourceStorage.getInstance().searchResources(pattern, context);
     }
 
     @Override
     public Resource[] searchResourcesByMail(final String pattern, final Context context) throws OXException {
-        try {
-            return ResourceStorage.getInstance().searchResourcesByMail(pattern, context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return ResourceStorage.getInstance().searchResourcesByMail(pattern, context);
     }
 
 }

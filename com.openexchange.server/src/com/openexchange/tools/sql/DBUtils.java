@@ -392,7 +392,7 @@ public final class DBUtils {
      * Disable MySQL foreign key checks on this connection.<br>
      * For certain cases, you must disable foreign key checks before truncate or delete all table data. Remember that you must use this
      * connection to perform the delete all or the truncate.
-     * 
+     *
      * @param connection {@link Connection}.
      * @throws SQLException If any error occurs during disable.
      * @see #enableMysqlForeignKeyChecks(java.sql.Connection)
@@ -406,7 +406,7 @@ public final class DBUtils {
 
     /**
      * Enable MySQL foreign key checks on this connection.<br>
-     * 
+     *
      * @param connection {@link Connection}.
      * @throws SQLException If any error occurs during enable.
      */
@@ -422,11 +422,11 @@ public final class DBUtils {
 
     /**
      * Checks if passed <tt>SQLException</tt> (or any of chained <tt>SQLException</tt>s) indicates a failed transaction roll-back.
-     * 
+     *
      * <pre>
      * Deadlock found when trying to get lock; try restarting transaction
      * </pre>
-     * 
+     *
      * @param sqlException The SQL exception to check
      * @return <code>true</code> if a failed transaction roll-back is indicated; otherwise <code>false</code>
      */
@@ -449,11 +449,11 @@ public final class DBUtils {
 
     /**
      * Checks if passed <tt>SQLException</tt> (or any of chained <tt>SQLException</tt>s) indicates a failed transaction roll-back.
-     * 
+     *
      * <pre>
      * Deadlock found when trying to get lock; try restarting transaction
      * </pre>
-     * 
+     *
      * @param exception The exception to check
      * @return <code>true</code> if a failed transaction roll-back is indicated; otherwise <code>false</code>
      */
@@ -473,7 +473,7 @@ public final class DBUtils {
 
     /**
      * Extracts possibly nested <tt>SQLException</tt> reference.
-     * 
+     *
      * @param exception The parental exception to extract from
      * @return The <tt>SQLException</tt> reference or <code>null</code>
      */
@@ -504,7 +504,7 @@ public final class DBUtils {
 
         /**
          * Initializes a new {@link TransactionRollbackCondition}.
-         * 
+         *
          * @param max The max. retry count
          */
         public TransactionRollbackCondition(final int max) {
@@ -515,7 +515,7 @@ public final class DBUtils {
 
         /**
          * Check for a failed transaction roll-back.
-         * 
+         *
          * @param e The SQL exception to check for a failed transaction roll-back
          * @return <code>true</code> a failed transaction roll-back; otherwise <code>false</code>
          */
@@ -529,7 +529,7 @@ public final class DBUtils {
 
         /**
          * Check for a failed transaction roll-back.
-         * 
+         *
          * @param e The exception to check for a failed transaction roll-back
          * @return <code>true</code> a failed transaction roll-back; otherwise <code>false</code>
          */
@@ -541,10 +541,10 @@ public final class DBUtils {
             }
             return false;
         }
-        
+
         /**
          * Gets the recently checked <tt>SQLException</tt> reference that indicates a failed transaction roll-back.
-         * 
+         *
          * @return The recently checked <tt>SQLException</tt> reference
          */
         public SQLException getTransactionRollbackException() {
@@ -564,7 +564,7 @@ public final class DBUtils {
          * <b>Note</b>: {@link #isFailedTransactionRollback(SQLException)} is expected to be called prior to invoking this method.
          * <p>
          * If check returns <code>true</code>, <tt>SQLException</tt> reference is set to <code>null</code>.
-         * 
+         *
          * @return <code>true</code> if retry condition is met; otherwise <code>false</code>
          * @throws SQLException If retry-count is exceeded and previously checked <tt>SQLException</tt> indicated a failed transaction roll-back
          */

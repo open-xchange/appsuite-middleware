@@ -89,7 +89,7 @@ public class HashCalculator {
 
     /**
      * Gets the calculated hash string for specified request and client identifier.
-     * 
+     *
      * @param req The HTTP Servlet request
      * @param client The optional client identifier
      * @return The calculated hash string
@@ -100,7 +100,7 @@ public class HashCalculator {
 
     /**
      * Gets the calculated hash string for specified arguments.
-     * 
+     *
      * @param req The HTTP Servlet request
      * @param userAgent The optional <code>User-Agent</code> identifier
      * @param client The optional client identifier
@@ -128,7 +128,7 @@ public class HashCalculator {
 
     /**
      * Gets the calculated hash string for specified request.
-     * 
+     *
      * @param req The HTTP Servlet request
      * @return The calculated hash string
      */
@@ -138,7 +138,7 @@ public class HashCalculator {
 
     /**
      * Gets the client identifier associated with specified request.
-     * 
+     *
      * @param req The HTTP Servlet request
      * @return The client identifier or <code>"default"</code> if none available
      */

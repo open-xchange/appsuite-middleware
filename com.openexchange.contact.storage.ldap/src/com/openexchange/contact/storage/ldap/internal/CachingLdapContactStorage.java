@@ -67,21 +67,21 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link CachingLdapContactStorage} 
- * 
+ * {@link CachingLdapContactStorage}
+ *
  * LDAP storage for contacts.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CachingLdapContactStorage extends LdapContactStorage {
-    
+
     private final LdapContactCache cache;
-    
+
     /**
      * Initializes a new {@link CachingLdapContactStorage}.
-     * 
+     *
      * @param delegate
-     * @throws OXException 
+     * @throws OXException
      */
     public CachingLdapContactStorage(LdapConfig config) throws OXException {
         super(config);
@@ -129,7 +129,7 @@ public class CachingLdapContactStorage extends LdapContactStorage {
             return mergeCacheData(session, searchIterator, fields);
         }
     }
-    
+
     @Override
     public SearchIterator<Contact> modified(Session session, String folderID, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
         check(session.getContextId(), folderID);
@@ -159,7 +159,7 @@ public class CachingLdapContactStorage extends LdapContactStorage {
             return mergeCacheData(session, searchIterator, fields);
         }
     }
-    
+
     private SearchIterator<Contact> mergeCacheData(Session session, SearchIterator<Contact> searchIterator, ContactField[] originalRequestedFields) throws OXException {
         Collection<Contact> contacts = 0 < searchIterator.size() ? new ArrayList<Contact>(searchIterator.size()) : new ArrayList<Contact>();
         try {
@@ -168,7 +168,7 @@ public class CachingLdapContactStorage extends LdapContactStorage {
                 Contact cachedContact = cache.get(loadedContact.getObjectID());
                 if (null == cachedContact) {
                     // not cached, load completely
-                    contacts.add(super.get(session, Integer.toString(getFolderID()), 
+                    contacts.add(super.get(session, Integer.toString(getFolderID()),
                         Integer.toString(loadedContact.getObjectID()), originalRequestedFields));
                 } else {
                     // merge information from cache
@@ -189,16 +189,16 @@ public class CachingLdapContactStorage extends LdapContactStorage {
             return contacts;
         }
     }
-    
+
     private static SearchIterator<Contact> sort(List<Contact> contacts, SortOptions sortOptions) {
-        if (null != contacts && 1 < contacts.size() && 
-            null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions) && 
+        if (null != contacts && 1 < contacts.size() &&
+            null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions) &&
             null != sortOptions.getOrder() && 0 < sortOptions.getOrder().length) {
             Comparator<Contact> comparator = LdapMapper.GENERIC.getComparator(sortOptions);
             if (null != comparator) {
-                Collections.sort(contacts, LdapMapper.GENERIC.getComparator(sortOptions));  
+                Collections.sort(contacts, LdapMapper.GENERIC.getComparator(sortOptions));
             }
-        } 
+        }
         return getSearchIterator(contacts);
     }
 
@@ -211,5 +211,5 @@ public class CachingLdapContactStorage extends LdapContactStorage {
             return sort(new ArrayList<Contact>(contacts), sortOptions);
         }
     }
-    
+
 }

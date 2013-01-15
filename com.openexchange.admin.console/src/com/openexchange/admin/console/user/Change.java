@@ -88,7 +88,7 @@ public class Change extends ChangeCore {
         final String accesscombinationname = parseAndSetAccessCombinationName(parser);
         if (null != accesscombinationname) {
             // Change user with access rights combination name
-            oxusr.changeModuleAccess(ctx, usr, accesscombinationname, auth);        	
+            oxusr.changeModuleAccess(ctx, usr, accesscombinationname, auth);
         }
     }
 

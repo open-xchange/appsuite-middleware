@@ -70,7 +70,7 @@ public class FileStorageAccountParser {
 
     /**
      * Initializes a new {@link FileStorageAccountParser}.
-     * 
+     *
      * @param serviceRegistry The service registry
      */
     public FileStorageAccountParser(final FileStorageServiceRegistry serviceRegistry) {
@@ -80,7 +80,7 @@ public class FileStorageAccountParser {
 
     /**
      * Parses specified account's JSON representation to a {@code FileStorageAccount}.
-     * 
+     *
      * @param accountJSON
      * @return
      * @throws OXException

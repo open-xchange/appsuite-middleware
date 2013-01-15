@@ -62,13 +62,13 @@ import com.openexchange.index.solr.internal.querybuilder.TranslationException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class CustomTranslator implements QueryTranslator {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CustomTranslator.class);
-    
+
     private Configuration config;
-    
+
     private String name;
-    
+
 
     @Override
     public void init(String name, Configuration config) throws TranslationException {
@@ -81,7 +81,7 @@ public class CustomTranslator implements QueryTranslator {
         if (o instanceof SearchTerm<?>) {
             return SolrAttachmentSearchTermVisitor.toQuery(name, config, (SearchTerm<?>) o);
         }
-        
+
         throw new TranslationException("The given object must be of type '" + SearchTerm.class.getName() + "'.");
     }
 

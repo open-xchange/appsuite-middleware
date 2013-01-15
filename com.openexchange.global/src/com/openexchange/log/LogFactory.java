@@ -54,7 +54,7 @@ import org.apache.commons.logging.LogConfigurationException;
 
 /**
  * {@link LogFactory} - The <code>org.apache.commons.logging.LogFactory</code> using {@link LogService}.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc annotations
  */
@@ -67,7 +67,7 @@ public class LogFactory {
 
 	/**
      * Convenience method to return a named logger, without the application having to care about factories.
-     * 
+     *
      * @param clazz The class from which a log name will be derived
      * @throws LogConfigurationException If a suitable <code>Log</code> instance cannot be returned
      */
@@ -83,7 +83,7 @@ public class LogFactory {
 
     /**
      * Convenience method to return a named logger, without the application having to care about factories.
-     * 
+     *
      * @param name The logical name of the <code>Log</code> instance to be returned (the meaning of this name is only known to the
      *            underlying logging implementation that is being wrapped)
      * @throws LogConfigurationException If a suitable <code>Log</code> instance cannot be returned
@@ -96,8 +96,8 @@ public class LogFactory {
 		}
 		return new PropertiesAppendingLogWrapper(com.openexchange.exception.Log.valueOf(log));
     }
-	
-	
+
+
 
 
 }

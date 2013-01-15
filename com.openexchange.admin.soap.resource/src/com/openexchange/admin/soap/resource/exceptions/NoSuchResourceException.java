@@ -9,9 +9,9 @@ import com.openexchange.admin.soap.resource.soap.Exception;
 
 /**
  * <p>Java-Klasse f\u00fcr NoSuchResourceException complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="NoSuchResourceException">
  *   &lt;complexContent>
@@ -22,8 +22,8 @@ import com.openexchange.admin.soap.resource.soap.Exception;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "NoSuchResourceException")

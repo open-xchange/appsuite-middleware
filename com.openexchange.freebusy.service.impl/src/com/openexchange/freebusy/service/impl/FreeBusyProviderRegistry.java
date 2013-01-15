@@ -56,18 +56,18 @@ import com.openexchange.freebusy.provider.FreeBusyProvider;
 import com.openexchange.log.LogFactory;
 
 /**
- * {@link FreeBusyProviderRegistry} 
- * 
+ * {@link FreeBusyProviderRegistry}
+ *
  * Holds references to registered {@link FreeBusyProvider}s
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class FreeBusyProviderRegistry {
-	
+
     private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyProviderRegistry.class));
-    
+
     private final List<FreeBusyProvider> providers;
-    
+
     /**
      * Initializes a new {@link FreeBusyProviderRegistry}.
      */
@@ -76,10 +76,10 @@ public class FreeBusyProviderRegistry {
         this.providers = new ArrayList<FreeBusyProvider>();
         LOG.debug("initialized.");
     }
-    
+
     /**
      * Adds a {@link FreeBusyProvider} service.
-     * 
+     *
      * @param service The service to add
      */
     public void add(FreeBusyProvider service) {
@@ -89,7 +89,7 @@ public class FreeBusyProviderRegistry {
 
     /**
      * Removes a {@link FreeBusyProvider} service.
-     * 
+     *
      * @param service The service to remove
      */
     public void remove(FreeBusyProvider service) {
@@ -99,11 +99,11 @@ public class FreeBusyProviderRegistry {
 
     /**
      * Gets all registered free/busy provider services.
-     * 
+     *
      * @return The free/busy providers
      */
     public List<FreeBusyProvider> getProviders() {
         return this.providers;
     }
-    
+
 }

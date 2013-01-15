@@ -159,7 +159,7 @@ public interface UploadFile {
 
     /**
      * Gets the {@link InputStream} to the file held on disk.
-     * 
+     *
      * @return The <tt>InputStream</tt> instance
      * @throws IOException If opening stream fails
      */

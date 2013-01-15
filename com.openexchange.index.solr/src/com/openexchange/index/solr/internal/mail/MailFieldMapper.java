@@ -64,14 +64,14 @@ import com.openexchange.mail.index.MailIndexField;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MailFieldMapper implements FieldMapper {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(MailFieldMapper.class);
-    
+
     private static final MailFieldMapper INSTANCE = new MailFieldMapper();
-    
+
     private final Map<MailIndexField, SolrMailField> fieldMapping;
-    
-    
+
+
     private MailFieldMapper() {
         super();
         fieldMapping = new EnumMap<MailIndexField, SolrMailField>(MailIndexField.class);
@@ -82,7 +82,7 @@ public class MailFieldMapper implements FieldMapper {
             }
         }
     }
-    
+
     public static MailFieldMapper getInstance() {
         return INSTANCE;
     }
@@ -92,12 +92,12 @@ public class MailFieldMapper implements FieldMapper {
         if (indexField == null) {
             return null;
         }
-        
+
         if (!(indexField instanceof MailIndexField)) {
             LOG.warn("Parameter 'indexField' must be of type " + MailIndexField.class.getName() + "!");
             return null;
         }
-        
+
         MailIndexField mailIndexField = (MailIndexField) indexField;
         return fieldMapping.get(mailIndexField);
     }

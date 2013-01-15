@@ -78,7 +78,7 @@ public class PresenceBuilderTest {
 
     private String presenceRequest = null;
     private JSONObject presenceJSON = null;
-    
+
     private final static String readFile(String file) throws IOException, URISyntaxException {
         URL path = PresenceBuilderTest.class.getResource(file);
         FileChannel channel = new FileInputStream(new File(path.toURI())).getChannel();
@@ -99,7 +99,7 @@ public class PresenceBuilderTest {
 
     /**
      * Test method for {@link com.openexchange.realtime.atmosphere.impl.parser.PresenceParser#parseStanza(org.json.JSONObject)}.
-     * @throws OXException 
+     * @throws OXException
      */
     @Test
     public void testBuildPresence() throws OXException {

@@ -70,7 +70,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 
 public class JobControl extends BasicCommandlineOptions {
-    
+
     private static final char OPT_LIST_SHORT = 'l';
 
     private static final String OPT_LIST_LONG = "list";
@@ -86,7 +86,7 @@ public class JobControl extends BasicCommandlineOptions {
     private static final String OPT_FLUSH_LONG = "flush";
 
     private static final char OPT_FLUSH_SHORT = 'f';
-    
+
     private CLIOption list = null;
 
     private CLIOption delete = null;
@@ -94,23 +94,23 @@ public class JobControl extends BasicCommandlineOptions {
     private CLIOption details = null;
 
     private CLIOption flush = null;
-    
+
     public static void main(final String[] args) {
         new JobControl(args);
     }
 
-    
+
     public JobControl(final String[] args2) {
 
         final AdminParser parser = new AdminParser("jobControl");
 
         setOptions(parser);
-        
+
         try {
             parser.ownparse(args2);
 
             Context ctx = null;
-            
+
             if (parser.getOptionValue(this.contextOption) != null) {
                 ctx = new Context();
                 ctx.setId(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));

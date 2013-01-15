@@ -4,7 +4,7 @@ package com.openexchange.admin.console.exception;
 public class OXConsolePluginException extends Exception {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 5743756641717340398L;
 
@@ -40,5 +40,5 @@ public class OXConsolePluginException extends Exception {
         super(cause);
     }
 
-    
+
 }

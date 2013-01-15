@@ -190,7 +190,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Removes denoted folder from global cache.
-     * 
+     *
      * @param folderId The folder identifier
      * @param treeId The tree identifier
      * @param contextId The context identifier
@@ -480,11 +480,7 @@ public final class CacheFolderStorage implements FolderStorage {
         if (null == session) {
             return new PathPerformer(storageParameters.getUser(), storageParameters.getContext(), null, registry);
         }
-        try {
-            return new PathPerformer(ServerSessionAdapter.valueOf(session), null, registry);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return new PathPerformer(ServerSessionAdapter.valueOf(session), null, registry);
     }
 
     @Override
@@ -595,7 +591,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Puts specified folder into appropriate cache.
-     * 
+     *
      * @param folder The folder
      * @param treeId The tree identifier
      * @param storageParameters The storage parameters
@@ -807,11 +803,7 @@ public final class CacheFolderStorage implements FolderStorage {
             if (null == session) {
                 new ClearPerformer(storageParameters.getUser(), storageParameters.getContext(), registry).doClear(treeId, folderId);
             } else {
-                try {
-                    new ClearPerformer(ServerSessionAdapter.valueOf(session), registry).doClear(treeId, folderId);
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+                new ClearPerformer(ServerSessionAdapter.valueOf(session), registry).doClear(treeId, folderId);
             }
         } finally {
             lock.unlock();
@@ -936,14 +928,10 @@ public final class CacheFolderStorage implements FolderStorage {
                     folderId,
                     storageParameters.getTimeStamp());
             } else {
-                try {
-                    new DeletePerformer(ServerSessionAdapter.valueOf(session), registry).doDelete(
-                        treeId,
-                        folderId,
-                        storageParameters.getTimeStamp());
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+                new DeletePerformer(ServerSessionAdapter.valueOf(session), registry).doDelete(
+                    treeId,
+                    folderId,
+                    storageParameters.getTimeStamp());
             }
             /*
              * Refresh
@@ -1199,7 +1187,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Gets the folder reference from cache.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param params The storage parameters
@@ -1625,16 +1613,12 @@ public final class CacheFolderStorage implements FolderStorage {
                         storageParameters.getDecorator(),
                         registry).doUpdates(treeId, timeStamp, ignoreDelete, includeContentTypes)[index];
             } else {
-                try {
-                    folders =
-                        new UpdatesPerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry).doUpdates(
-                            treeId,
-                            timeStamp,
-                            ignoreDelete,
-                            includeContentTypes)[index];
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+                folders =
+                    new UpdatesPerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry).doUpdates(
+                        treeId,
+                        timeStamp,
+                        ignoreDelete,
+                        includeContentTypes)[index];
             }
             if (null == folders || folders.length == 0) {
                 return new String[0];
@@ -1730,7 +1714,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Loads denoted folder from un-cached storage.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param storageType The storage type

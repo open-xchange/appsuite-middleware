@@ -74,7 +74,7 @@ import com.openexchange.mail.text.TextFinder;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailMessageStorage implements IMailMessageStorage {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(MailMessageStorage.class);
 
     /**
@@ -169,7 +169,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
             } catch (Throwable t) {
                 LOG.warn("Error while getting primary content for mail '" + mailIds[i] + "' in folder '" + folder + "'. Returning null.", t);
             }
-            
+
             retval[i] = text;
         }
         return retval;

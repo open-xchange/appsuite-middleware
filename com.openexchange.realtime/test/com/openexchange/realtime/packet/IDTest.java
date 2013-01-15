@@ -79,7 +79,7 @@ public class IDTest {
         assertEquals("context",newID.getContext());
         assertEquals("resource",newID.getResource());
     }
-    
+
     @Test
     public void testIDStringObligatory() {
         ID newID = new ID("user@context");
@@ -88,9 +88,9 @@ public class IDTest {
         assertEquals("context",newID.getContext());
         assertNull(newID.getResource());
     }
-    
+
     /**
-     * ID creation has to fail with an IllegalArgumentException if user or context are missing from the String constructor. 
+     * ID creation has to fail with an IllegalArgumentException if user or context are missing from the String constructor.
      */
     @Test(expected = IllegalArgumentException.class)
     public void testIDWithDefaultContext() {

@@ -60,7 +60,7 @@ import java.util.Scanner;
 
 /**
  * {@link LzwCompression} - Performs LZW compression/decompression.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LzwCompression {
@@ -531,7 +531,7 @@ public final class LzwCompression {
 
     /**
      * Compresses given input to specified output stream.
-     * 
+     *
      * @param in The input stream to compress
      * @param out The compressed output stream
      * @throws IOException If an I/O error occurs
@@ -563,7 +563,7 @@ public final class LzwCompression {
 
     /**
      * Decompresses given input to specified output stream.
-     * 
+     *
      * @param in The input stream to decompress
      * @param out The decompressed output stream
      * @throws IOException If an I/O error occurs

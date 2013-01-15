@@ -68,7 +68,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link MDNSClusterDiscoveryActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {

@@ -71,5 +71,5 @@ public interface SearchTermVisitor {
     public void visit(SizeTerm term);
     public void visit(SubjectTerm term);
     public void visit(ToTerm term);
-    
+
 }

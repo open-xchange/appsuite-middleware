@@ -75,20 +75,12 @@ public abstract class AbstractMailFuncs implements IValueHandler {
      * {@inheritDoc}
      */
     @Override
-    public void getValue(final Session session, final Context ctx,
-        final User user, final UserConfiguration userConfig,
-        final Setting setting) throws OXException {
-        final UserSettingMail settings;
-        try {
-            settings = UserSettingMailStorage.getInstance().loadUserSettingMail(
-                user.getId(), ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
+    public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
+        final UserSettingMail settings = UserSettingMailStorage.getInstance().loadUserSettingMail(user.getId(), ctx);
+        if (userConfig.hasWebMail()) {
+            setting.setSingleValue(isSet(settings));
         }
-		if (userConfig.hasWebMail()) {
-			setting.setSingleValue(isSet(settings));
-		}
-	}
+    }
 
     /**
 	 * @param settings

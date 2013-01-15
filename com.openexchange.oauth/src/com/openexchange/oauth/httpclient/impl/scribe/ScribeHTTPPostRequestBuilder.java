@@ -67,7 +67,7 @@ public class ScribeHTTPPostRequestBuilder extends ScribeGenericHTTPRequestBuilde
 	public Verb getVerb() {
 		return Verb.POST;
 	}
-	
+
 	@Override
 	protected void setParameters(Map<String, String> params,
 			OAuthRequest request) {

@@ -69,7 +69,7 @@ import com.openexchange.userconf.UserConfigurationService;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ContactServiceActivator extends HousekeepingActivator {
-    
+
     private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactServiceActivator.class));
 
     /**
@@ -81,10 +81,10 @@ public class ContactServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class, ConfigurationService.class, 
+        return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class, ConfigurationService.class,
             UserConfigurationService.class, ThreadPoolService.class };
     }
-    
+
     @Override
     protected void startBundle() throws Exception {
         try {
@@ -95,15 +95,15 @@ public class ContactServiceActivator extends HousekeepingActivator {
             ServerServiceRegistry.getInstance().addService(ContactService.class, contactService);
         } catch (final Exception e) {
             LOG.error("error starting \"com.openexchange.contact.service\"", e);
-            throw e;            
+            throw e;
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.contact.service");
-        ContactServiceLookup.set(null);            
+        ContactServiceLookup.set(null);
         super.stopBundle();
     }
-    
+
 }

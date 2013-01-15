@@ -62,7 +62,7 @@ import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link PropertyMap} - An in-memory property map with LRU eviction policy.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PropertyMap {
@@ -72,7 +72,7 @@ public final class PropertyMap {
 
     /**
      * Initializes a new {@link PropertyMap}.
-     * 
+     *
      * @param maxCapacity the max capacity
      * @param maxLifeUnits the max life units
      * @param unit the unit
@@ -85,7 +85,7 @@ public final class PropertyMap {
 
     /**
      * Initializes a new {@link PropertyMap}.
-     * 
+     *
      * @param maxCapacity the max capacity
      * @param maxLifeMillis the max life milliseconds
      */
@@ -110,7 +110,7 @@ public final class PropertyMap {
 
     /**
      * Put if absent.
-     * 
+     *
      * @param propertyName the property name
      * @param property the property
      * @return The property
@@ -139,7 +139,7 @@ public final class PropertyMap {
 
     /**
      * Gets the size.
-     * 
+     *
      * @return The size
      */
     public int size() {
@@ -148,7 +148,7 @@ public final class PropertyMap {
 
     /**
      * Checks if empty flag is set.
-     * 
+     *
      * @return <code>true</code> if empty flag is set; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -157,7 +157,7 @@ public final class PropertyMap {
 
     /**
      * Contains.
-     * 
+     *
      * @param propertyName the property name
      * @return <code>true</code> if successful; otherwise <code>false</code>
      */
@@ -167,7 +167,7 @@ public final class PropertyMap {
 
     /**
      * Gets the property.
-     * 
+     *
      * @param propertyName the property name
      * @return The property or <code>null</code> if absent
      */
@@ -186,7 +186,7 @@ public final class PropertyMap {
 
     /**
      * Puts specified property.
-     * 
+     *
      * @param propertyName the property name
      * @param property the property
      * @return The previous property or <code>null</code>
@@ -206,7 +206,7 @@ public final class PropertyMap {
 
     /**
      * Removes the property.
-     * 
+     *
      * @param propertyName the property name
      * @return The removed property or <code>null</code>
      */

@@ -56,10 +56,10 @@ package com.openexchange.groupware.attach.index;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ObjectIdTerm extends SearchTerm<String> {
-    
+
     private final String pattern;
-    
-    
+
+
     public ObjectIdTerm(String pattern) {
         super();
         this.pattern = pattern;

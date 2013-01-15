@@ -63,6 +63,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -363,6 +364,42 @@ public final class MimeMessageUtility {
     }
 
     /**
+     * Checks if given Content-Id value is contained in specified collection.
+     *
+     * @param contentId The Content-Id value
+     * @param contentIds The collection
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public static boolean containsContentId(final String contentId, final Collection<String> contentIds) {
+        boolean contains = false;
+        for (Iterator<String> iterator = contentIds.iterator(); !contains && iterator.hasNext();) {
+            contains = equalsCID(contentId, iterator.next());
+        }
+        return contains;
+    }
+
+    /**
+     * Gets the plain Content-Id value; meaning possible starting <code>'&lt;'</code> and trailing <code>'&gt;'</code> stripped off.
+     * 
+     * @param contentId The Content-Id value to process
+     * @return The plain Content-Id value
+     */
+    public static String getPlainContentId(final String contentId) {
+        if ((null == contentId) || (0 >= contentId.length())) {
+            return contentId;
+        }
+        String ret = contentId;
+        if ('<' == ret.charAt(0)) {
+            ret = ret.substring(1);
+        }
+        final int mlen = ret.length() - 1;
+        if (mlen > 0 && '>' == ret.charAt(mlen)) {
+            ret = ret.substring(0, mlen);
+        }
+        return ret;
+    }
+
+    /**
      * Compares (case insensitive) the given values of message header "Content-ID". The leading/trailing characters '<code>&lt;</code>' and
      * ' <code>&gt;</code>' are ignored during comparison
      * 
@@ -405,7 +442,7 @@ public final class MimeMessageUtility {
         if (prefix.charAt(0) == '/') {
             prefix = prefix.substring(1);
         }
-        return tmp.indexOf(prefix+IMAGE_ALIAS_APPENDIX, fromIndex) >= 0 || tmp.indexOf(prefix+FILE_ALIAS_APPENDIX, fromIndex) >= 0;
+        return tmp.indexOf(prefix + IMAGE_ALIAS_APPENDIX, fromIndex) >= 0 || tmp.indexOf(prefix + FILE_ALIAS_APPENDIX, fromIndex) >= 0;
     }
 
     /**
@@ -1200,7 +1237,8 @@ public final class MimeMessageUtility {
                 return encode ? MimeUtility.encodeWord(phrase) : phrase;
             }
             final String replaced = phrase.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\\\"");
-            return new com.openexchange.java.StringAllocator(len + 2).append('"').append(encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
+            return new com.openexchange.java.StringAllocator(len + 2).append('"').append(
+                encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
@@ -1397,8 +1435,8 @@ public final class MimeMessageUtility {
     static {
         final String regex = "(\\?=)" + "(?:\r?\n(?:\t| +))" + "(=\\?)";
         PAT_ENC_WORDS = Pattern.compile(regex);
-        //final String regexEncodedWord = "(=\\?\\S+?\\?\\S+?\\?.+?\\?=)";
-        //PAT_ENC_WORDS = Pattern.compile(regexEncodedWord + "(?:\r?\n(?:\t| +))" + regexEncodedWord);
+        // final String regexEncodedWord = "(=\\?\\S+?\\?\\S+?\\?.+?\\?=)";
+        // PAT_ENC_WORDS = Pattern.compile(regexEncodedWord + "(?:\r?\n(?:\t| +))" + regexEncodedWord);
     }
 
     /**
@@ -1590,9 +1628,7 @@ public final class MimeMessageUtility {
             /*
              * Write headers
              */
-            @SuppressWarnings("unchecked")
-            final
-            Enumeration<Header> headers = p.getAllHeaders();
+            @SuppressWarnings("unchecked") final Enumeration<Header> headers = p.getAllHeaders();
             final StringBuilder sb = new StringBuilder(256);
             while (headers.hasMoreElements()) {
                 final Header header = headers.nextElement();
@@ -1692,8 +1728,7 @@ public final class MimeMessageUtility {
             in = new BufferedInputStream(new FileInputStream(file));
             out = new BufferedOutputStream(new FileOutputStream(newTempFile));
             {
-                @SuppressWarnings("resource")
-				final LineReaderInputStream instream = new LineReaderInputStreamAdaptor(in, -1);
+                @SuppressWarnings("resource") final LineReaderInputStream instream = new LineReaderInputStreamAdaptor(in, -1);
                 int lineCount = 0;
                 final ByteArrayBuffer linebuf = new ByteArrayBuffer(64);
                 final FieldBuilder fieldBuilder = new DefaultFieldBuilder(-1);

@@ -27,9 +27,9 @@ public class ShownAs implements ChangeDescriptionGenerator {
     public List<Sentence> getDescriptions(Context ctx, Appointment original,
 			Appointment updated, AppointmentDiff diff, Locale locale,
 			TimeZone timezone) throws OXException {
-		
+
 		Sentence sentence = new Sentence(Messages.HAS_CHANGED_SHOWN_AS).add(string(updated.getShownAs()), ArgumentType.SHOWN_AS, updated.getShownAs());
-		
+
 		return Arrays.asList(sentence);
 	}
 

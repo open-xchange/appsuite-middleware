@@ -72,7 +72,7 @@ import com.openexchange.tools.servlet.http.Cookies;
 
 /**
  * {@link OXRequest}
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class OXRequest extends Request {
@@ -210,7 +210,7 @@ public class OXRequest extends Request {
 
     /**
      * Register a new Session in the list of sessions, add it as Cookie to the Response and add the string value to the LogProperties.
-     * 
+     *
      * @param sessionId The new SessionId that has to be registered
      */
     private void registerNewSession(String sessionId) {
@@ -227,7 +227,7 @@ public class OXRequest extends Request {
 
     /**
      * Remove invalid JSession cookie used in the Request. Cookies are invalid when:
-     * 
+     *
      * @param invalidSessionId The invalid sessionId requested by the browser/cookie
      */
     private void removeInvalidSessionCookie(String invalidSessionId) {
@@ -250,7 +250,7 @@ public class OXRequest extends Request {
 
     /**
      * Generate a invalidation Cookie that can be added to the response to prompt the browser to remove that cookie.
-     * 
+     *
      * @param invalidCookie The invalid Cookie from the incoming request
      * @return an invalidation Cookie that can be added to the response to prompt the browser to remove that cookie.
      */
@@ -264,7 +264,7 @@ public class OXRequest extends Request {
     /**
      * Generate a invalidation Cookie with domain that can be added to the response to prompt the browser to remove that cookie. The domain
      * is needed for IE to change/remove cookies.
-     * 
+     *
      * @param invalidCookie The invalid Cookie from the incoming request
      * @param domain The domain to set in the invalidation cookie
      * @return an invalidation Cookie that can be added to the response to prompt the browser to remove that cookie.
@@ -278,7 +278,7 @@ public class OXRequest extends Request {
     /**
      * Create a new JSessioID String that consists of a (random)-(the urlencoded domain of this server with dots and dashes
      * encoded).(backendRoute).
-     * 
+     *
      * @return A new JSessionId value as String
      */
     private String createSessionID() {
@@ -297,7 +297,7 @@ public class OXRequest extends Request {
 
     /**
      * Creates a new JSessionIdCookie based on a sessionID and the server configuration.
-     * 
+     *
      * @param sessionID The sessionId to use for cookie generation
      * @return The new JSessionId Cookie
      */

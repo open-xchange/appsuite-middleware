@@ -894,11 +894,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             cdao.setTimezone(timezone);
         }
         simpleDataCheck(cdao, edao, uid);
-        try {
-            fillUserParticipants(cdao);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        fillUserParticipants(cdao);
         recColl.updateDefaultStatus(cdao, cdao.getContext(), uid, inFolder);
         return isInsert;
     }

@@ -68,7 +68,7 @@ public final class RFC2616Regex {
     }
 
     private static final String tokenCharRegex = "[[\\p{L}\\p{ASCII}]&&[^\\p{Cntrl}()<>@,;:\\\"/\\[\\]?={}\\p{Blank}]]";
-    
+
     /**
      * Regular expression that satisfies a <i>token</i> as per <a href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616</a>:
      *

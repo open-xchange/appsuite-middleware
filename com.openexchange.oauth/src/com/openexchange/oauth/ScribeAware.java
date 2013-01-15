@@ -59,7 +59,7 @@ public interface ScribeAware extends OAuthServiceMetaData {
 
     /**
      * Gets the associated Scribe service.
-     * 
+     *
      * @return The Scribe service
      */
     Class<? extends org.scribe.builder.api.Api> getScribeService();

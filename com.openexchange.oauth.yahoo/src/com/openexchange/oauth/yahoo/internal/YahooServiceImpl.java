@@ -165,7 +165,7 @@ public class YahooServiceImpl implements YahooService {
                 if (entry.hasAndNotNull("id")) {
                     final int index = i;
                     final Callable<Void> callable = new Callable<Void>() {
-   
+
                         @Override
                         public Void call() throws Exception {
                             final String contactId = entry.getString("id");

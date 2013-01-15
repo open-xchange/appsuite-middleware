@@ -95,7 +95,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailConverter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailConverter implements ResultConverter, MailActionConstants {
@@ -107,7 +107,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     public static MailConverter getInstance() {
@@ -154,7 +154,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
 
     /**
      * Converts to JSON output format.
-     * 
+     *
      * @param requestData The AJAX request data
      * @param result The AJAX result
      * @param session The associated session
@@ -199,7 +199,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
     private void convertThreadStructure(final ThreadedStructure structure, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
         /*-
          * The data UI needs looks like this:
-         * 
+         *
          * [{ id: 1234, folder_id: 'default0/INBOX', thread: [{ id: 1234, folder_id: 'default0/INBOX'}, {id: 4711, folder_id: 'default0/INBOX' }, ...]
          */
         /*
@@ -309,11 +309,11 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                     }
                 }
                 /*-
-                 * 
+                 *
                 for (final MailFieldWriter w : WRITER_IDS) {
                     w.writeField(jChild, child, 0, true, accountID, userId, contextId);
                 }
-                 * 
+                 *
                  */
                 jChildMessages.put(jChild);
                 /*

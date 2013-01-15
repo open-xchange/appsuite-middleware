@@ -71,7 +71,7 @@ public class ScribeHTTPClientFactoryImpl implements OAuthHTTPClientFactory {
 		client.setProcessors(processors);
 		return client;
 	}
-	
+
 	public void registerProcessor(HTTPResponseProcessor processor) {
 		Class<?>[] types = processor.getTypes();
 		List<HTTPResponseProcessor> list = processors.get(types[0]);
@@ -88,9 +88,9 @@ public class ScribeHTTPClientFactoryImpl implements OAuthHTTPClientFactory {
 		if (list == null) {
 			return;
 		}
-		
+
 		list.remove(processor);
-		
+
 	}
 
 }

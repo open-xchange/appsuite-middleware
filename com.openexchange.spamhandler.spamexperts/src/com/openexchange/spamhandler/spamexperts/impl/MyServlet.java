@@ -65,20 +65,20 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * Servlet which returns needed Data for the Spamexperts Iframe Plugin to redirect
  * and authenticate to an external GUI.
- * 
+ *
  * Also does jobs for the other GUI Plugin
- * 
- * 
+ *
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
- * 
+ *
  */
 public final class MyServlet extends DataServlet {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -8914926421736440078L;
 	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MyServlet.class);
@@ -99,9 +99,9 @@ public final class MyServlet extends DataServlet {
 
 		final Response response = new Response();
 		final Session session = getSessionObject(req);
-		
+
 		try {
-			
+
 			final String action = parseMandatoryStringParameter(req,PARAMETER_ACTION);
 			JSONObject jsonObj;
 

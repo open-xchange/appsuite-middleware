@@ -56,7 +56,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * A {@link Dispatcher} is marked as a top level dispatcher for the entire framework.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface Dispatcher {
@@ -70,7 +70,7 @@ public interface Dispatcher {
 
     /**
      * Performs given request.
-     * 
+     *
      * @param requestData The request data to perform
      * @param state The state
      * @param session The session providing needed user data
@@ -90,7 +90,7 @@ public interface Dispatcher {
      *   dispatcher.end();
      *  }
      * </pre>
-     * 
+     *
      * @return The state
      * @throws OXException If start-up fails
      * @see #end(AJAXState)
@@ -107,7 +107,7 @@ public interface Dispatcher {
      *   dispatcher.end();
      *  }
      * </pre>
-     * 
+     *
      * @param state The state
      * @see #begin()
      */
@@ -115,7 +115,7 @@ public interface Dispatcher {
 
     /**
      * Checks whether the dispatcher knows about the given module.
-     * 
+     *
      * @param module The module identifier to check
      * @return <code>true</code> if it can handle the module request, <code>false</code> otherwise
      * @see AJAXRequestDataTools#getModule(String, javax.servlet.http.HttpServletRequest)
@@ -124,7 +124,7 @@ public interface Dispatcher {
 
     /**
      * Indicates whether the fall-back session may be used for this action.
-     * 
+     *
      * @param module The module identifier
      * @param action The action identifier
      * @return <code>true</code> if the fall-back session may be used for this action; otherwise <code>false</code>
@@ -133,10 +133,10 @@ public interface Dispatcher {
      * @see AJAXRequestDataTools#getAction(javax.servlet.http.HttpServletRequest)
      */
     boolean mayUseFallbackSession(String module, String action) throws OXException;
-    
+
     /**
      * Indicates that given action can be used without a session.
-     * 
+     *
      * @param module The module identifier
      * @param action The action identifier
      * @return <code>true</code> if given action can be used without a session; otherwise <code>false</code>

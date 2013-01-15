@@ -60,12 +60,11 @@ import com.openexchange.sessionstorage.exceptions.OXSessionStorageExceptionCodes
 import com.openexchange.sessionstorage.nosql.NoSQLSessionStorageConfiguration;
 import com.openexchange.sessionstorage.nosql.NoSQLSessionStorageService;
 import com.openexchange.sessionstorage.nosql.Services;
-import com.openexchange.sessionstorage.nosql.exceptions.OXNoSQLSessionStorageExceptionCodes;
 import com.openexchange.timer.TimerService;
 
 /**
  * {@link NoSQLSessionStorageActivator}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class NoSQLSessionStorageActivator extends HousekeepingActivator {

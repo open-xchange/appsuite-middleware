@@ -89,9 +89,9 @@ public class CSVParser {
         currentLineNumber = 0;
         currentCell = new StringBuilder();
         currentLine = new LinkedList<String>();
-        structure = new LinkedList<List<String>>();	
+        structure = new LinkedList<List<String>>();
     }
-    
+
     public CSVParser() {
         isTolerant = false;
         reset();

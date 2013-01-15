@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -111,7 +112,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     private static final FetchMode fetchMode = FetchMode.PREFETCH;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentBaseImpl.class));
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentBaseImpl.class));
 
     private static final AttachmentQueryCatalog QUERIES = new AttachmentQueryCatalog();
 
@@ -134,7 +135,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     @Override
     public long attachToObject(final AttachmentMetadata attachment, final InputStream data, final Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 
-        checkMayAttach(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), 
+        checkMayAttach(ServerSessionAdapter.valueOf(session, ctx, user, userConfig),
             attachment.getModuleId(), attachment.getFolderId(), attachment.getAttachedId());
 //        checkMayAttach(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), ctx, user, userConfig);
 
@@ -227,8 +228,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             }
         } catch (final SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             close(stmt, rs);
             releaseReadConnection(ctx, readCon);
@@ -402,13 +401,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         fireAttached.setUserConfiguration(userConfig);
         fireAttached.setProvider(this);
         fireAttached.setAttachmentListeners(getListeners(m.getModuleId()));
-        try {
-            perform(fireAttached, false);
-            return fireAttached.getTimestamp();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
-
+        perform(fireAttached, false);
+        return fireAttached.getTimestamp();
     }
 
     private long fireDetached(final List<AttachmentMetadata> deleted, final int module, final User user, final UserConfiguration userConfig, final Session session, final Context ctx) throws OXException {
@@ -421,12 +415,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         fireDetached.setUserConfiguration(userConfig);
         fireDetached.setProvider(this);
         fireDetached.setAttachmentListeners(getListeners(module));
-        try {
-            perform(fireDetached, false);
-            return fireDetached.getTimestamp();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        perform(fireDetached, false);
+        return fireDetached.getTimestamp();
     }
 
     @Override
@@ -451,8 +441,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         } catch (final SQLException e) {
             LOG.error("SQL Exception: ", e);
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
 
     }
@@ -917,12 +905,13 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return b.toString();
     }
 
-    Object patchValue(Object value, final AttachmentField field) {
+    Object patchValue(final Object value, final AttachmentField field) {
         if (value instanceof Long) {
             if (isDateField(field)) {
-                value = new Date(((Long) value).longValue());
-            } else if (!field.equals(AttachmentField.FILE_SIZE_LITERAL)) {
-                value = Integer.valueOf(((Long) value).intValue());
+                return new Date(((Long) value).longValue());
+            }
+            if (!field.equals(AttachmentField.FILE_SIZE_LITERAL)) {
+                return Integer.valueOf(((Long) value).intValue());
             }
         }
         return value;
@@ -1013,20 +1002,35 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
         @Override
         public boolean hasNext() throws OXException {
-            if (delegate != null) {
-                return delegate.hasNext();
+            {
+                final SearchIteratorAdapter<AttachmentMetadata> delegate = this.delegate;
+                if (delegate != null) {
+                    return delegate.hasNext();
+                }
             }
             try {
                 if (!queried) {
                     queried = true;
                     query();
-                    if (delegate != null) {
-                        return delegate.hasNext();
+                    {
+                        final Exception exception = this.exception;
+                        if (exception != null) {
+                            if (exception instanceof OXException) {
+                                throw (OXException) exception;
+                            }
+                            throw AttachmentExceptionCodes.SEARCH_PROBLEM.create(exception);
+                        }
+                    }
+                    {
+                        final SearchIteratorAdapter<AttachmentMetadata> delegate = this.delegate;
+                        if (delegate != null) {
+                            return delegate.hasNext();
+                        }
                     }
                     initNext = true;
                 }
                 if (initNext) {
-                    hasNext = rs.next();
+                    hasNext = null == rs ? false : rs.next();
                 }
                 initNext = false;
                 return hasNext;
@@ -1038,15 +1042,21 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
         @Override
         public AttachmentMetadata next() throws OXException {
-            if (delegate != null) {
-                return delegate.next();
+            {
+                final SearchIteratorAdapter<AttachmentMetadata> delegate = this.delegate;
+                if (delegate != null) {
+                    return delegate.next();
+                }
             }
             hasNext();
-            if (exception != null) {
-                if (exception instanceof OXException) {
-                    throw (OXException) exception;
+            {
+                final Exception exception = this.exception;
+                if (exception != null) {
+                    if (exception instanceof OXException) {
+                        throw (OXException) exception;
+                    }
+                    throw AttachmentExceptionCodes.SEARCH_PROBLEM.create(exception);
                 }
-                throw AttachmentExceptionCodes.SEARCH_PROBLEM.create(exception);
             }
 
             final AttachmentMetadata m = nextFromResult(rs);
@@ -1135,7 +1145,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                     stmt = null;
                     readCon = null;
                 } else if (mode.equals(FetchMode.PREFETCH)) {
-                    final List<Object> values = new ArrayList<Object>();
+                    final List<AttachmentMetadata> values = new LinkedList<AttachmentMetadata>();
                     while (rs.next()) {
                         values.add(nextFromResult(rs));
                     }
@@ -1144,7 +1154,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                     stmt = null;
                     readCon = null;
                     rs = null;
-                    delegate = new SearchIteratorAdapter(values.iterator());
+                    delegate = new SearchIteratorAdapter<AttachmentMetadata>(values.iterator());
                 }
             } catch (final SearchIteratorException e) {
                 LOG.error(e);
@@ -1166,12 +1176,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     @Override
     public Map<Integer, Date> getNewestCreationDates(final Context ctx, final int moduleId, final int[] attachedIds) throws OXException {
-        final Connection con;
-        try {
-            con = getReadConnection(ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = getReadConnection(ctx);
         PreparedStatement stmt = null;
         ResultSet result = null;
         final Map<Integer, Date> retval = new HashMap<Integer, Date>();

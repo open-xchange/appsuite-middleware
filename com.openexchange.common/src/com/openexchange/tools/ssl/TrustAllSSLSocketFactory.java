@@ -65,7 +65,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This ssl socket factory creates a ssl context that trusts all certificates and uses then this context to create a ssl socket factory that
  * will trust all certificates.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
@@ -97,7 +97,7 @@ public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
 
     /**
      * Gets a new trust-all SSL socket factory.
-     * 
+     *
      * @return A new trust-all SSL socket factory
      */
     public static SSLSocketFactory getDefault() {

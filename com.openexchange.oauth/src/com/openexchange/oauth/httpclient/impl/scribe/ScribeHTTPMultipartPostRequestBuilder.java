@@ -103,10 +103,10 @@ public class ScribeHTTPMultipartPostRequestBuilder extends
 		// Nothing to do
 		return null;
 	}
-	
+
 	@Override
 	protected void modify(OAuthRequest request) {
-		
+
 	}
 
 	@Override

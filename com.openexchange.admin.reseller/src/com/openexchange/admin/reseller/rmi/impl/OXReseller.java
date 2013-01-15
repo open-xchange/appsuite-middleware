@@ -231,7 +231,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                     throw new OXResellerException(Code.SUBSUBADMIN_NOT_ALLOWED_TO_CHANGE_RESTRICTIONS);
                 }
             }
-            
+
             adm.setParentId(pid);
 
             checkRestrictionsPerSubadmin(adm);
@@ -288,7 +288,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 ResellerAdmin sadmdata = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0];
                 ResellerAdmin dadmdata = oxresell.getData(new ResellerAdmin[] { adm })[0];
                 if( !dadmdata.getParentId().equals(sadmdata.getId()) ) {
-                    throw new OXResellerException(Code.SUBADMIN_DOES_NOT_BELONG_TO_SUBADMIN, dadmdata.getName(), sadmdata.getName());   
+                    throw new OXResellerException(Code.SUBADMIN_DOES_NOT_BELONG_TO_SUBADMIN, dadmdata.getName(), sadmdata.getName());
                 }
             }
             if (adm.getName() == null) {
@@ -584,7 +584,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
     /**
      * throws {@link InvalidDataException} when neither id nor name supplied
-     * 
+     *
      * @param admins
      * @throws InvalidDataException
      */
@@ -603,7 +603,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
     /**
      * Checks whether either id or name is specified
-     * 
+     *
      * @param adm
      * @throws InvalidDataException
      */
@@ -618,7 +618,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * Restriction id. Check whether Restrictions can be applied to subadmin. If not, throw {@link InvalidDataException} or
      * {@link StorageException} if there are no Restrictions defined within the database. Check whether Restrictions contain duplicate
      * Restriction entries and throws {@link InvalidDataException} if that is the case.
-     * 
+     *
      * @throws StorageException
      * @throws InvalidDataException
      * @throws OXResellerException

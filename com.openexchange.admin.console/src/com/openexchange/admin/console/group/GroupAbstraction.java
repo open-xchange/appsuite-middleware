@@ -67,7 +67,7 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
     protected CLIOption nameOption = null;
     protected CLIOption displayNameOption = null;
     protected CLIOption mailOption = null;
-    
+
     protected static final String OPT_NAME_GROUPNAME_LONG = "name";
     protected static final char OPT_NAME_GROUPNAME = 'n';
 
@@ -79,21 +79,21 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
 
     protected static final String OPT_NAME_ADDMEMBERS_LONG = "addmembers";
     protected static final char OPT_NAME_ADDMEMBERS = 'a';
-    
+
     protected static final String OPT_NAME_REMOVEMEMBERS_LONG = "removemembers";
     protected static final char OPT_NAME_REMOVEMEMBERS = 'r';
-    
+
     protected static final String OPT_MAILADDRESS_LONG = "mailaddress";
     protected static final char OPT_MAILADDRESS_SHORT = 'm';
-    
+
     // For right error output
     protected String groupid = null;
     protected String groupName = null;
-    
+
     protected void setAddMembersOption(final AdminParser admp,final boolean required) {
         addMemberOption = setShortLongOpt(admp,OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "userid(s)", "List of members to add to group, separated by comma", required);
 //        retval.setArgName(OPT_NAME_ADDMEMBERS_LONG);
-        
+
     }
 
     protected void setRemoveMembersOption(final AdminParser admp,final boolean required) {
@@ -103,23 +103,23 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
     protected void setGroupIdOption(final AdminParser admp, final NeededQuadState required) {
         IdOption = setShortLongOpt(admp,OPT_NAME_GROUPID, OPT_NAME_GROUPID_LONG, "The id of the group", true, required);
     }
-    
+
     protected void setGroupNameOption(final AdminParser admp, final NeededQuadState required) {
         nameOption= setShortLongOpt(admp,OPT_NAME_GROUPNAME, OPT_NAME_GROUPNAME_LONG, "The group name", true, required);
     }
-    
+
     protected void setGroupDisplayNameOption(final AdminParser admp,final boolean required) {
         displayNameOption = setShortLongOpt(admp,OPT_NAME_GROUPDISPLAYNAME, OPT_NAME_GROUPDISPLAYNAME_LONG, "The displayname for the Group", true, convertBooleantoTriState(required));
     }
-    
+
     protected void setMailOption(final AdminParser admp,final boolean required) {
         mailOption = setShortLongOpt(admp,OPT_MAILADDRESS_SHORT, OPT_MAILADDRESS_LONG, "email address if the group should receive mail", true, convertBooleantoTriState(required));
     }
-    
+
     protected final OXGroupInterface getGroupInterface() throws NotBoundException, MalformedURLException, RemoteException {
         return (OXGroupInterface) Naming.lookup(RMI_HOSTNAME + OXGroupInterface.RMI_NAME);
     }
-    
+
     @Override
     protected String getObjectName() {
         return "group";

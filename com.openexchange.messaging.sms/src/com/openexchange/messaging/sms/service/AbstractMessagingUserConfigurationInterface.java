@@ -51,7 +51,7 @@ package com.openexchange.messaging.sms.service;
 
 /**
  * {@link AbstractMessagingUserConfigurationInterface}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public abstract class AbstractMessagingUserConfigurationInterface implements MessagingUserConfigurationInterface {
@@ -75,12 +75,12 @@ public abstract class AbstractMessagingUserConfigurationInterface implements Mes
     public int getRecipientLimit() {
         return 0;
     }
-    
+
     @Override
     public int getSmsLimit() {
         return 0;
     }
-    
+
     @Override
     public String getNumCleanRegEx() {
         return null;

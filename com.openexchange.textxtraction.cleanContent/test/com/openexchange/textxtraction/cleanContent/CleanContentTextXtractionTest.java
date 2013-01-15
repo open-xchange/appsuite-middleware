@@ -69,60 +69,60 @@ import com.openexchange.textxtraction.TestData;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class CleanContentTextXtractionTest {
-    
+
     private static CleanContentTextXtraction textXtraction;
 
     @BeforeClass
     public static void setUp() throws IOException {
-        textXtraction = new CleanContentTextXtraction();        
+        textXtraction = new CleanContentTextXtraction();
     }
-    
+
     @Test
     public void testFileInputStream() throws IOException, OXException {
         File tmp = File.createTempFile("oxfile", "tmp");
         FileOutputStream fos = null;
         ByteArrayInputStream bais = null;
         try {
-            fos = new FileOutputStream(tmp);            
+            fos = new FileOutputStream(tmp);
             bais = new ByteArrayInputStream(TestData.TEST_PDF);
             IOUtils.copy(bais, fos);
         } finally {
             IOUtils.closeQuietly(bais);
             IOUtils.closeQuietly(fos);
         }
-        
+
         InputStream is = new FileInputStream(tmp);
         try {
             String text = textXtraction.extractFrom(is, null);
             assertTrue(text.contains(TestData.PLAIN_TEXT));
         } finally {
             IOUtils.closeQuietly(is);
-        }   
+        }
     }
-    
+
     @Test
     public void testFileInputStreamWithMimeType() throws IOException, OXException {
         File tmp = File.createTempFile("oxfile", "tmp");
         FileOutputStream fos = null;
         ByteArrayInputStream bais = null;
         try {
-            fos = new FileOutputStream(tmp);            
+            fos = new FileOutputStream(tmp);
             bais = new ByteArrayInputStream(TestData.TEST_PDF);
             IOUtils.copy(bais, fos);
         } finally {
             IOUtils.closeQuietly(bais);
             IOUtils.closeQuietly(fos);
         }
-        
+
         InputStream is = new FileInputStream(tmp);
         try {
             String text = textXtraction.extractFrom(is, TestData.MIME_TYPE);
             assertTrue(text.contains(TestData.PLAIN_TEXT));
         } finally {
             IOUtils.closeQuietly(is);
-        }   
+        }
     }
-    
+
     @Test
     public void testByteArrayInputStream() throws OXException {
         InputStream is = new ByteArrayInputStream(TestData.TEST_PDF);
@@ -131,9 +131,9 @@ public class CleanContentTextXtractionTest {
             assertTrue(text.contains(TestData.PLAIN_TEXT));
         } finally {
             IOUtils.closeQuietly(is);
-        } 
+        }
     }
-    
+
     @Test
     public void testByteArrayInputStreamWithMimeType() throws OXException {
         InputStream is = new ByteArrayInputStream(TestData.TEST_PDF);
@@ -142,6 +142,6 @@ public class CleanContentTextXtractionTest {
             assertTrue(text.contains(TestData.PLAIN_TEXT));
         } finally {
             IOUtils.closeQuietly(is);
-        } 
+        }
     }
 }

@@ -51,7 +51,7 @@ package com.openexchange.tools.images.impl;
 
 /**
  * {@link ImageInformation}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ImageInformation {

@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link DocumentationExceptionCode} - Exceptions for the documentation module.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public enum DocumentationExceptionCode implements OXExceptionCode {
@@ -73,7 +73,7 @@ public enum DocumentationExceptionCode implements OXExceptionCode {
     /** The container '%s' is not known in the registry. */
     CONTAINER_NOT_REGISTERED(DocumentationExceptionMessage.CONTAINER_NOT_REGISTERED_MSG, Category.CATEGORY_ERROR, 6),
     ;
-    
+
     private final String message;
     private final Category category;
     private final int number;
@@ -108,7 +108,7 @@ public enum DocumentationExceptionCode implements OXExceptionCode {
     public String getMessage() {
         return this.message;
     }
-    
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *
@@ -138,5 +138,5 @@ public enum DocumentationExceptionCode implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
-    
+
 }

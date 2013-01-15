@@ -56,9 +56,9 @@ package com.openexchange.user.copy.internal;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Constants {
-    
+
     public static final String CONTEXT_ID_KEY = "contextId";
-    
+
     public static final String USER_ID_KEY = "userId";
 
 }

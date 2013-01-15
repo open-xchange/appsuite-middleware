@@ -167,18 +167,14 @@ public final class UpdateExecutor {
             }
             LOG.info("Finished " + (blocking ? "blocking" : "background") + " updates on schema " + state.getSchema());
         } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         } catch (final Throwable t) {
             throw UpdateExceptionCodes.UPDATE_FAILED.create(t, state.getSchema(), t.getMessage());
         } finally {
-            try {
-                unlockSchema(blocking);
-                // Remove contexts from cache if they are cached during update process.
-                if (blocking) {
-                    removeContexts();
-                }
-            } catch (final OXException e) {
-                throw new OXException(e);
+            unlockSchema(blocking);
+            // Remove contexts from cache if they are cached during update process.
+            if (blocking) {
+                removeContexts();
             }
         }
     }
@@ -197,13 +193,9 @@ public final class UpdateExecutor {
 
     private final void removeContexts() throws OXException {
         final ContextStorage contextStorage = ContextStorage.getInstance();
-        try {
-            final int[] contextIds = Database.getContextsInSameSchema(contextId);
-            for (final int cid : contextIds) {
-                contextStorage.invalidateContext(cid);
-            }
-        } catch (final OXException e) {
-            throw new OXException(e);
+        final int[] contextIds = Database.getContextsInSameSchema(contextId);
+        for (final int cid : contextIds) {
+            contextStorage.invalidateContext(cid);
         }
     }
 }

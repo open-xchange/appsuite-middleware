@@ -61,7 +61,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link DropboxAccountAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DropboxAccountAccess implements FileStorageAccountAccess {
@@ -73,7 +73,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess {
 
     /**
      * Initializes a new {@link DropboxAccountAccess}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public DropboxAccountAccess(final FileStorageService service, final FileStorageAccount account, final Session session) throws OXException {

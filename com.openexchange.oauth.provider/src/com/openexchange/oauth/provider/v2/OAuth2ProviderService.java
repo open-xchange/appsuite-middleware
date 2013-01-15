@@ -61,7 +61,7 @@ import com.openexchange.oauth.provider.OAuthProviderConstants;
 /**
  * {@link OAuth2ProviderService} - The OAuth provider service in addition to <a href="http://oauth.googlecode.com/">Google's OAuth Java
  * library</a>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface OAuth2ProviderService extends OAuthProviderConstants {
@@ -72,21 +72,21 @@ public interface OAuth2ProviderService extends OAuthProviderConstants {
 
     /**
      * Gets the associated validator instance.
-     * 
+     *
      * @return The validator instance
      */
     public OAuth2Validator getValidator();
 
     /**
      * Loads clients from database
-     * 
+     *
      * @throws OXException If loading clients fails
      */
     public void loadClients() throws OXException;
 
     /**
      * Gets the client for specified OAuth request message.
-     * 
+     *
      * @param requestMessage The request message
      * @return The associated client
      * @throws IOException If an I/O error occurs
@@ -96,7 +96,7 @@ public interface OAuth2ProviderService extends OAuthProviderConstants {
 
     /**
      * Gets the client for specified OAuth request message's <code>'Authorization'</code> header
-     * 
+     *
      * @param requestMessage The request message
      * @return The associated client
      * @throws IOException If an I/O error occurs
@@ -106,7 +106,7 @@ public interface OAuth2ProviderService extends OAuthProviderConstants {
 
     /**
      * Get the accessor for the given request message's code.
-     * 
+     *
      * @param requestMessage The request message
      * @return The associated accessor
      * @throws IOException If an I/O error occurs
@@ -116,7 +116,7 @@ public interface OAuth2ProviderService extends OAuthProviderConstants {
 
     /**
      * Get the accessor for the given request message's refresh token.
-     * 
+     *
      * @param requestMessage The request message
      * @return The associated accessor
      * @throws IOException If an I/O error occurs
@@ -126,7 +126,7 @@ public interface OAuth2ProviderService extends OAuthProviderConstants {
 
     /**
      * Generates an access token and fresh token.
-     * 
+     *
      * @param accessor The accessor
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -136,7 +136,7 @@ public interface OAuth2ProviderService extends OAuthProviderConstants {
 
     /**
      * Generates code.
-     * 
+     *
      * @param accessor The accessor
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -146,7 +146,7 @@ public interface OAuth2ProviderService extends OAuthProviderConstants {
 
     /**
      * Marks specified access token as authorized.
-     * 
+     *
      * @throws OXException If token cannot be marked as authorized
      */
     public void markAsAuthorized(OAuth2Accessor accessor, int userId, int contextId) throws OXException;

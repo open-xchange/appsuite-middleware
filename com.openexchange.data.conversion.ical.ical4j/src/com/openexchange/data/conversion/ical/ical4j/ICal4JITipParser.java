@@ -83,7 +83,7 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link ICal4JITipParser}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ICal4JITipParser extends ICal4JParser implements ITipParser {
@@ -109,12 +109,12 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
             reader = new BufferedReader(new InputStreamReader(ical, Charsets.UTF_8));
 
             net.fortuna.ical4j.model.Calendar calendar = parse(reader);
-            
+
             boolean microsoft = looksLikeMicrosoft(calendar);
-            
+
             Method method = (Method) calendar.getProperty(Property.METHOD);
             ITipMethod methodValue = (method == null) ? ITipMethod.NO_METHOD : ITipMethod.get(method.getValue());
-            
+
             List<AttributeConverter<VEvent, Appointment>> converters = AppointmentConverters.getConverters(methodValue);
 
             int i = 0;
@@ -143,7 +143,7 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
                     if (vevent.getProperty(Property.COMMENT) != null ) {
                         message.setComment(vevent.getProperty(Property.COMMENT).getValue());
                     }
-                    
+
                 } catch (ConversionError conversionError) {
                     conversionError.printStackTrace();
                     errors.add(conversionError);

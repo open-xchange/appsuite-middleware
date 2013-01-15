@@ -67,7 +67,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link SubscriptionServiceImpl}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class SubscriptionServiceImpl implements PresenceSubscriptionService {

@@ -66,10 +66,10 @@ import com.openexchange.log.LogFactory;
 /**
  * This interface provides an abstraction to the storage of the group
  * information
- * 
+ *
  * @author d7
  * @author cutmasta
- * 
+ *
  */
 public abstract class OXGroupStorageInterface {
 
@@ -77,7 +77,7 @@ public abstract class OXGroupStorageInterface {
      * Proxy attribute for the class implementing this interface.
      */
     private static Class<? extends OXGroupStorageInterface> implementingClass;
-    
+
     private static final Log log = LogFactory.getLog(OXGroupStorageInterface.class);
 
     protected static AdminCache cache = null;
@@ -137,17 +137,17 @@ public abstract class OXGroupStorageInterface {
         }
     }
 
-    
+
     /**
      * Create new group in given context
-     * 
+     *
      * @return int with the id of the created group
      */
     public abstract int create(final Context ctx, final Group grp) throws StorageException;
 
     /**
      * List all groups mathcing pattern in context ctx
-     * 
+     *
      */
     public abstract Group[] list(final Context ctx, final String pattern) throws StorageException;
 
@@ -155,10 +155,10 @@ public abstract class OXGroupStorageInterface {
      * Get group by context and id
      */
     public abstract Group get(final Context ctx, final Group grp) throws StorageException;
-    
+
     /**
-     * Get groups for a specified user! 
-     * 
+     * Get groups for a specified user!
+     *
      */
     public abstract Group[] getGroupsForUser(final Context ctx, final User usr) throws StorageException;
 
@@ -179,7 +179,7 @@ public abstract class OXGroupStorageInterface {
 
     /**
      * Delete group from context
-     * 
+     *
      * @param ctx
      * @param grps
      * @throws StorageException

@@ -65,7 +65,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * This class defines the Open-Xchange API for restoring OX Contexts.<br><br>
- * 
+ *
  * At the moment this API defines only one call
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
@@ -80,7 +80,7 @@ public interface OXContextRestoreInterface extends Remote {
 
     /**
      * This method is used to restore one single context
-     * 
+     *
      * @param ctx Context object
      * @param filenames The filenames of the mysqldump files which contain the backup of the context. Note that these files
      *                  have to be available to the admin daemon, so they must reside on the machine on which the admin
@@ -89,15 +89,15 @@ public interface OXContextRestoreInterface extends Remote {
      * @param dryrun TODO
      * @return TODO
      * @throws RemoteException General RMI Exception
-     * @throws InvalidDataException 
-     * @throws StorageException 
-     * @throws InvalidCredentialsException 
-     * @throws OXContextRestoreException 
-     * @throws DatabaseUpdateException 
-     * @throws PoolException 
-     * @throws NoSuchContextException 
-     * @throws  
+     * @throws InvalidDataException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws OXContextRestoreException
+     * @throws DatabaseUpdateException
+     * @throws PoolException
+     * @throws NoSuchContextException
+     * @throws
      */
     public String restore(final Context ctx, final String[] filenames, final Credentials auth, boolean dryrun) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException;
-    
+
 }

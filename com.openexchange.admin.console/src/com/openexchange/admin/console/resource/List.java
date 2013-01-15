@@ -81,7 +81,7 @@ public class List extends ListCore {
     protected void extendscvscolumns(final ArrayList<String> columns) {
         // Nothing to do here
     }
-    
+
     @Override
     protected void extendmakeCSVData(final Resource my_res, final ArrayList<String> res_data) {
         // Nothing to do here

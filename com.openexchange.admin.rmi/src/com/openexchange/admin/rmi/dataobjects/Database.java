@@ -53,7 +53,7 @@ import java.lang.reflect.Field;
 
 /**
  * This class represents a database.
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
@@ -66,67 +66,67 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     private static final long serialVersionUID = -3068828009821317094L;
 
     private Integer id;
-    
+
     private boolean idset;
 
     private Integer read_id;
-    
+
     private boolean read_idset;
 
     private String url;
-    
+
     private boolean urlset;
 
     private String login;
-    
+
     private boolean loginset;
 
     private String password;
-    
+
     private boolean passwordset;
 
     private String name;
-    
+
     private boolean nameset;
 
     private String driver;
-    
+
     private boolean driverset;
 
     private String scheme;
-    
+
     private boolean schemeset;
 
     private Integer clusterWeight;
-    
+
     private boolean clusterWeightset;
 
     private Integer maxUnits;
-    
+
     private boolean maxUnitsset;
 
     private Integer poolHardLimit;
-    
+
     private boolean poolHardLimitset;
 
     private Integer poolInitial;
-    
+
     private boolean poolInitialset;
 
     private Integer poolMax;
-    
+
     private boolean poolMaxset;
 
     private Integer masterId;
-    
+
     private boolean masterIdset;
 
     private Integer currentUnits;
-    
+
     private boolean currentUnitsset;
 
     private Boolean master;
-    
+
     private boolean masterset;
 
     /**
@@ -168,7 +168,7 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     }
 
     /**
-     * 
+     *
      */
     public Database() {
         super();

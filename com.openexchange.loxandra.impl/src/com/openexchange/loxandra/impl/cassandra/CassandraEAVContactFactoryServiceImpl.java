@@ -56,8 +56,6 @@ import java.util.Properties;
 
 import org.apache.cassandra.db.KeyspaceNotDefinedException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.loxandra.EAVContactFactoryService;
 import com.openexchange.loxandra.EAVContactService;
 
@@ -73,33 +71,33 @@ import me.prettyprint.hector.api.factory.HFactory;
  *
  */
 public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFactoryService {
-	
+
 	private static final Log log = com.openexchange.log.Log.loggerFor(CassandraEAVContactFactoryServiceImpl.class);
-	
+
 	private final static String DEFAULT_CONFIGURATION = "loxandra.properties";
-	
+
 	private static Cluster cluster;
 	private static volatile Keyspace keyspace;
 	private static String node;
 	private static String keyspaceName;
-	
+
 	private static volatile ConfigurableConsistencyLevel configurableConsistencyLevel;
-	
+
 	public CassandraEAVContactFactoryServiceImpl() {
 		readProperties();
 	}
-	
+
 	/**
 	 * Read the .properties file
 	 */
 	private void readProperties() {
 		Properties prop = new Properties();
 		String configUrl = System.getProperty("loxandra.config");
-        
+
 		if (configUrl == null) {
             configUrl = DEFAULT_CONFIGURATION;
         }
-		
+
         try {
 			prop.load(new FileInputStream(configUrl));
 			node = prop.getProperty("node");
@@ -109,22 +107,22 @@ public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFa
 			log.error("Properties file does not exist.");
 		}
 	}
-	
+
 	/**
 	 * Create a connection to the local cluster and initialize all resources.
-	 * 
+	 *
 	 * @return keyspace
 	 * @throws
 	 * KeyspaceNotDefinedException will be thrown if the keyspace does not exist
 	 */
 	public final static Keyspace getKeyspace() {
-		
+
 		if (cluster == null) {
             cluster = HFactory.getOrCreateCluster("Local Cluster", node);
         }
-		
+
 		KeyspaceDefinition kDef = cluster.describeKeyspace(keyspaceName);
-		
+
 		if (kDef == null) {
 			log.fatal("Keyspace '" + keyspaceName + "' does not exist. Use the 'schema.cql' file to create a schema.", new KeyspaceNotDefinedException("'" + keyspaceName + "' does not exist." ));
 			return null;
@@ -132,13 +130,13 @@ public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFa
 
 		defineConsistencyLevels();
 		keyspace = HFactory.createKeyspace(keyspaceName, cluster, configurableConsistencyLevel);
-		
+
 		return keyspace;
 	}
-	
+
 	/**
 	 * Define consistency levels for each column family.
-	 * 
+	 *
 	 * <li><b>ANY</b>: Wait until some replica has responded.</li>
 	 * <li><b>ONE</b>: Wait until one replica has responded.
 	 * <li><b>TWO</b>: Wait until two replicas have responded.
@@ -150,24 +148,24 @@ public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFa
 	 */
 	private final static void defineConsistencyLevels() {
 		configurableConsistencyLevel = new ConfigurableConsistencyLevel();
-		
+
 		Map<String, HConsistencyLevel> readCLMap = new HashMap<String, HConsistencyLevel>();
 		Map<String, HConsistencyLevel> writeCLMap = new HashMap<String, HConsistencyLevel>();
-		
+
 		readCLMap.put("Person", HConsistencyLevel.ONE);
 		readCLMap.put("PersonFolder", HConsistencyLevel.ONE);
 		readCLMap.put("Counters", HConsistencyLevel.ONE);
 		readCLMap.put("TransactionLog", HConsistencyLevel.QUORUM);
-		
+
 		writeCLMap.put("Person", HConsistencyLevel.ONE);
 		writeCLMap.put("PersonFolder", HConsistencyLevel.ONE);
 		writeCLMap.put("Counters", HConsistencyLevel.ONE);
 		writeCLMap.put("TransactionLog", HConsistencyLevel.QUORUM);
-		
+
 		configurableConsistencyLevel.setReadCfConsistencyLevels(readCLMap);
 		configurableConsistencyLevel.setWriteCfConsistencyLevels(writeCLMap);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see loxandra.dao.DAOFactory#getContactDAO()

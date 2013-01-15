@@ -79,24 +79,24 @@ import com.openexchange.solr.SolrMBean;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class CoreStoreCLI {
-    
+
     private static final String JMX_URL = "service:jmx:rmi:///jndi/rmi://localhost:9999/server";
-    
+
     private static final String ACTION_REGISTER = "registercorestore";
-    
+
     private static final String ACTION_UNREGISTER = "unregistercorestore";
-    
+
     private static final String ACTION_LIST = "listcorestore";
-    
+
     private static final String ACTION_CHANGE = "changecorestore";
-    
-    
+
+
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
             System.out.println("Missing argument 'action'.");
             System.exit(1);
         }
-        
+
         String[] actionArgs;
         if (args.length > 1) {
             actionArgs = new String[args.length - 1];
@@ -104,13 +104,13 @@ public class CoreStoreCLI {
         } else {
             actionArgs = new String[0];
         }
-        
+
         try {
             String action = args[0];
             if (action.indexOf('/') >= 0) {
                 action = action.substring(action.lastIndexOf('/') + 1);
             }
-            
+
             int retval = 0;
             if (action.equals(ACTION_REGISTER)) {
                 retval = register(actionArgs);
@@ -124,7 +124,7 @@ public class CoreStoreCLI {
                 System.out.println("Unknown action '" + action + "'.");
                 System.exit(1);
             }
-            
+
             System.exit(retval);
         } catch (MalformedObjectNameException e) {
             System.out.println("An internal error occurred: " + e.getMessage());
@@ -137,19 +137,19 @@ public class CoreStoreCLI {
             System.exit(1);
         }
     }
-    
+
     private static int change(String[] args) throws IOException, MalformedObjectNameException, MBeanException {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
         options.addOption(createOption("i", "id", true, "The core store id.", true));
         options.addOption(createOption("c", "cores", true, "The maximal number of cores that this core store can handle.", false));
         options.addOption(createOption("u", "uri", true, "An absolute URI (rfc2396 compliant) that points to the directory where the core store is mounted. E.g. file:/path/to/mount/point", false));
-        
+
         if (args == null) {
             printHelp(ACTION_CHANGE, options);
             return 1;
         }
-        
+
         CommandLineParser parser = new PosixParser();
         try {
             CommandLine cmd = parser.parse(options, args, true);
@@ -157,7 +157,7 @@ public class CoreStoreCLI {
                 printHelp(ACTION_CHANGE, options);
                 return 0;
             }
-            
+
             int id = Integer.parseInt(cmd.getOptionValue('i'));
             String cmdUri = cmd.getOptionValue('u');
             URI uri = null;
@@ -179,10 +179,10 @@ public class CoreStoreCLI {
                 modified.setUri(uri == null ? coreStore.getUri() : uri);
                 modified.setMaxCores(maxCores < 0 ? coreStore.getMaxCores() : maxCores);
                 modified.setNumCores(coreStore.getNumCores());
-                
+
                 solrMBean.modifyCoreStore(id, modified.getUri(), modified.getMaxCores());
                 System.out.println("Core store '" + id + "' was successfully modified.");
-                
+
                 return 0;
             } finally {
                 try {
@@ -211,7 +211,7 @@ public class CoreStoreCLI {
             printHelp(ACTION_UNREGISTER, options);
             return 1;
         }
-        
+
         CommandLineParser parser = new PosixParser();
         try {
             CommandLine cmd = parser.parse(options, args, true);
@@ -219,7 +219,7 @@ public class CoreStoreCLI {
                 printHelp(ACTION_UNREGISTER, options);
                 return 0;
             }
-            
+
             int id = Integer.parseInt(cmd.getOptionValue('i'));
             JMXServiceURL url = new JMXServiceURL(JMX_URL);
             JMXConnector jmxConnector = JMXConnectorFactory.connect(url);
@@ -227,7 +227,7 @@ public class CoreStoreCLI {
                 MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
                 SolrMBean solrMBean = solrMBeanProxy(mbsc);
                 solrMBean.unregisterCoreStore(id);
-                
+
                 System.out.println("Core store '" + id + "' was successfully unregistered.");
                 return 0;
             } finally {
@@ -245,7 +245,7 @@ public class CoreStoreCLI {
             return 1;
         }
     }
-    
+
     private static int list(String[] args) throws IOException, MalformedObjectNameException, MBeanException {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
@@ -260,7 +260,7 @@ public class CoreStoreCLI {
             printHelp(ACTION_LIST, options);
             System.exit(1);
         }
-        
+
         JMXServiceURL url = new JMXServiceURL(JMX_URL);
         JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
         try {
@@ -277,13 +277,13 @@ public class CoreStoreCLI {
                 int maxCores = store.getMaxCores();
                 int numCores = store.getNumCores();
                 String uri = store.getUri().toString();
-                
+
                 formatter = new Formatter();
                 formatter.format("%1$8d | %2$64s | %3$10d | %4$10d", id, uri, maxCores, numCores);
                 formatter.flush();
                 System.out.println(formatter.toString());
             }
-            
+
             return 0;
         } finally {
             try {
@@ -293,7 +293,7 @@ public class CoreStoreCLI {
             }
         }
     }
-    
+
     private static int register(String[] args) throws IOException, MalformedObjectNameException, MBeanException {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
@@ -303,7 +303,7 @@ public class CoreStoreCLI {
             printHelp(ACTION_REGISTER, options);
             return 1;
         }
-        
+
         CommandLineParser parser = new PosixParser();
         try {
             CommandLine cmd = parser.parse(options, args, true);
@@ -311,7 +311,7 @@ public class CoreStoreCLI {
                 printHelp(ACTION_REGISTER, options);
                 return 0;
             }
-            
+
             String cmdUri = cmd.getOptionValue('u');
             URI uri = new URI(cmdUri);
             int maxCores = Integer.parseInt(cmd.getOptionValue('c'));
@@ -322,7 +322,7 @@ public class CoreStoreCLI {
                 SolrMBean solrMBean = solrMBeanProxy(mbsc);
                 int id = solrMBean.registerCoreStore(uri, maxCores);
                 System.out.println("Core store '" + id + "' was successfully registered.");
-                
+
                 return 0;
             } finally {
                 try {
@@ -347,18 +347,18 @@ public class CoreStoreCLI {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp(action, options, false);
     }
-    
+
     private static Option createOption(String shortArg, String longArg, boolean hasArg, String description, boolean required) {
         Option option = new Option(shortArg, longArg, hasArg, description);
         option.setRequired(required);
         return option;
     }
-    
+
     private static SolrMBean solrMBeanProxy(MBeanServerConnection mbsc) throws MalformedObjectNameException {
         SolrMBean solrMBean = MBeanServerInvocationHandler.newProxyInstance(
-            mbsc, 
-            new ObjectName(SolrMBean.DOMAIN, SolrMBean.KEY, SolrMBean.VALUE), 
-            SolrMBean.class, 
+            mbsc,
+            new ObjectName(SolrMBean.DOMAIN, SolrMBean.KEY, SolrMBean.VALUE),
+            SolrMBean.class,
             false);
 
         return solrMBean;

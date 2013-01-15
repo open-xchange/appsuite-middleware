@@ -52,7 +52,7 @@ package com.openexchange.admin.rmi.exceptions;
 
 /**
  * Is thrown when user sends invalid credentials.
- * 
+ *
  * @author cutmasta
  *
  */
@@ -62,12 +62,12 @@ public class InvalidCredentialsException extends Exception {
          * For serialization
          */
         private static final long serialVersionUID = -3112851238972935356L;
-    
+
         /**
-	 * 
+	 *
 	 */
 	public InvalidCredentialsException() {
-		
+
 	}
 
 	/**
@@ -75,7 +75,7 @@ public class InvalidCredentialsException extends Exception {
 	 */
 	public InvalidCredentialsException(String message) {
 		super(message);
-		
+
 	}
 
 	/**
@@ -83,7 +83,7 @@ public class InvalidCredentialsException extends Exception {
 	 */
 	public InvalidCredentialsException(Throwable cause) {
 		super(cause);
-		
+
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class InvalidCredentialsException extends Exception {
 	 * @param cause
 	 */
 	public InvalidCredentialsException(String message, Throwable cause) {
-		super(message, cause);		
+		super(message, cause);
 	}
 
 }

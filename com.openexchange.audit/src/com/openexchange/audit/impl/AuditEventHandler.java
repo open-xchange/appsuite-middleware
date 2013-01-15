@@ -255,7 +255,7 @@ public class AuditEventHandler implements EventHandler {
 
     /**
      * This method will return the full folder path as String.
-     * 
+     *
      * @param folderId
      * @param sessionObj
      * @return String fullFolderPath

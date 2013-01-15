@@ -92,12 +92,7 @@ public final class MailAccountAddPersonalTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
-        final Connection con;
-        try {
-            con = Database.getNoTimeout(contextId, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = Database.getNoTimeout(contextId, true);
         PreparedStatement stmt = null;
         try {
             if (!columnExists(con, "user_mail_account", "personal")) {

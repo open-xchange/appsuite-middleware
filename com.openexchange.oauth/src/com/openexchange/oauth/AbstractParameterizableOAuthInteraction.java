@@ -57,7 +57,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * {@link AbstractParameterizableOAuthInteraction} - Enhances {@link OAuthInteraction} by carrying parameters.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractParameterizableOAuthInteraction implements Parameterizable, OAuthInteraction {

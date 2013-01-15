@@ -61,21 +61,21 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
  *
  */
 public interface ContextConsoleCommonInterface {
-    
+
     /**
      * This method adds the extension options which are provided by this plugin to the given
      * parser object
-     * 
+     *
      * @param parser
      * @throws OXConsolePluginException TODO
      */
     public void addExtensionOptions(final AdminParser parser) throws OXConsolePluginException;
-    
+
     /**
      * This method read the options which were set with the {@link #addExtensionOptions(AdminParser)}
      * method and fills them into an extension object which is used by this class. The extension
      * object is then returned
-     * 
+     *
      * @param parser
      * @param ctx TODO
      * @param auth TODO

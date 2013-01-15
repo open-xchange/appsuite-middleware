@@ -56,7 +56,7 @@ import com.openexchange.realtime.util.ElementPath;
  * {@link PayloadElement} - Represents a stanza's payload element that is any (POJO) object linked with its format identifier. Namespace and
  * elementName are used for unique identification (@see ElementPath) of payload elements and determine which
  * {@link PayloadElementTransformer} to use.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
@@ -77,7 +77,7 @@ public class PayloadElement implements VisitablePayload {
 
     /**
      * Initializes a new {@link PayloadElement}.
-     * 
+     *
      * @param data The payload's data object
      * @param format The data object's format
      * @param namespace The namespace of this Payload element
@@ -100,12 +100,12 @@ public class PayloadElement implements VisitablePayload {
         this.elementName = otherPayloadElement.elementName;
         this.format = otherPayloadElement.format;
         this.namespace = otherPayloadElement.namespace;
-        
+
     }
 
     /**
      * Gets the data object.
-     * 
+     *
      * @return The data object
      */
     public Object getData() {
@@ -114,7 +114,7 @@ public class PayloadElement implements VisitablePayload {
 
     /**
      * Sets the payload data object and its format.
-     * 
+     *
      * @param data The data object
      * @param format The data object's format
      */
@@ -125,13 +125,13 @@ public class PayloadElement implements VisitablePayload {
 
     /**
      * Gets the unique element name within the namespace
-     * 
+     *
      * @return the unique element name within the namespace
      */
     public String getElementName() {
         return elementName;
     }
-    
+
     /**
      * Get the unique elementPath identifying the PayloadElement.
      * @return The unique elementPath identifying the PayloadElement
@@ -142,7 +142,7 @@ public class PayloadElement implements VisitablePayload {
 
     /**
      * Gets the data object's format identifier.
-     * 
+     *
      * @return The format identifier.
      */
     public String getFormat() {
@@ -151,7 +151,7 @@ public class PayloadElement implements VisitablePayload {
 
     /**
      * Gets the namespace of the payload element
-     * 
+     *
      * @return null if the element is from the the default namespace, otherwise the namespace of the payload element
      */
     public String getNamespace() {
@@ -171,33 +171,44 @@ public class PayloadElement implements VisitablePayload {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (!(obj instanceof PayloadElement))
+        }
+        if (!(obj instanceof PayloadElement)) {
             return false;
+        }
         PayloadElement other = (PayloadElement) obj;
         if (data == null) {
-            if (other.data != null)
+            if (other.data != null) {
                 return false;
-        } else if (!data.equals(other.data))
+            }
+        } else if (!data.equals(other.data)) {
             return false;
+        }
         if (elementName == null) {
-            if (other.elementName != null)
+            if (other.elementName != null) {
                 return false;
-        } else if (!elementName.equals(other.elementName))
+            }
+        } else if (!elementName.equals(other.elementName)) {
             return false;
+        }
         if (format == null) {
-            if (other.format != null)
+            if (other.format != null) {
                 return false;
-        } else if (!format.equals(other.format))
+            }
+        } else if (!format.equals(other.format)) {
             return false;
+        }
         if (namespace == null) {
-            if (other.namespace != null)
+            if (other.namespace != null) {
                 return false;
-        } else if (!namespace.equals(other.namespace))
+            }
+        } else if (!namespace.equals(other.namespace)) {
             return false;
+        }
         return true;
     }
 

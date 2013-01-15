@@ -444,7 +444,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     /**
      * Gets the locale for given server session
-     * 
+     *
      * @param session The server session
      * @return The locale
      */
@@ -457,7 +457,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     /**
      * Gets the locale for given session
-     * 
+     *
      * @param session The session
      * @return The locale
      */
@@ -543,7 +543,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     /**
      * Gets the reader for HTTP Servlet request's input stream.
-     * 
+     *
      * @param req The HTTP Servlet request
      * @return The reader
      * @throws IOException If an I/O error occurs
@@ -558,8 +558,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     /**
      * Parses specified HTTP Servlet request's input stream content to a JSON value.
-     * 
-     * @param req The HTTP Servlet request to read from 
+     *
+     * @param req The HTTP Servlet request to read from
      * @return The parsed JSON value
      * @throws IOException If an I/O error occurs
      * @throws JSONException If a JSON error occurs
@@ -597,7 +597,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     /**
      * Reads the content from given reader.
-     * 
+     *
      * @param reader The reader
      * @return The reader's content
      * @throws IOException If an I/O error occurs
@@ -914,7 +914,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * The file cleaning tracker.
      */
     private static volatile DeleteOnExitFileCleaningTracker tracker;
-    
+
     /**
      * Exits the file cleaning tracker.
      */

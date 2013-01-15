@@ -78,17 +78,17 @@ public abstract class CreateCore extends ContextAbstraction {
         setDefaultCommandLineOptions(parser);
         setContextNameOption(parser, NeededQuadState.notneeded);
         setMandatoryOptions(parser);
-        
+
         setLanguageOption(parser);
         setTimezoneOption(parser);
 
         setContextQuotaOption(parser, true);
-        
+
         setFurtherOptions(parser);
-        
+
         parser.allowDynamicOptions();
     }
-    
+
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
         setExtensionOptions(parser, ContextConsoleCreateInterface.class);
@@ -100,15 +100,15 @@ public abstract class CreateCore extends ContextAbstraction {
             User usr = null;
             try {
                 parser.ownparse(args);
-                
+
                 ctx = contextparsing(parser);
-                
+
                 parseAndSetContextName(parser, ctx);
-                
+
                 auth = credentialsparsing(parser);
-                
+
                 usr = new User();
-                
+
                 // fill user obj with mandatory values from console
                 parseAndSetMandatoryOptionsinUser(parser, usr);
                 // fill user obj with mandatory values from console
@@ -116,16 +116,16 @@ public abstract class CreateCore extends ContextAbstraction {
                 if (null != tz) {
                     usr.setTimezone(tz);
                 }
-                
+
                 final String languageoptionvalue = (String) parser.getOptionValue(this.languageOption);
                 if (languageoptionvalue != null) {
                     usr.setLanguage(languageoptionvalue);
                 }
-                
+
                 parseAndSetContextQuota(parser, ctx);
-                
+
                 parseAndSetExtensions(parser, ctx, auth);
-                
+
                 // Dynamic Options
                 applyDynamicOptionsToContext(parser, ctx);
             } catch (final RuntimeException e) {
@@ -156,7 +156,7 @@ public abstract class CreateCore extends ContextAbstraction {
         // First check if we can login with the given credentials. Otherwise there's no need to continue
         final OXLoginInterface oxlgn = (OXLoginInterface) Naming.lookup(RMI_HOSTNAME +OXLoginInterface.RMI_NAME);
         oxlgn.login(auth);
-        
+
         final CSVReader reader = new CSVReader(new FileReader(filename), ',', '"');
         int[] idarray = csvParsingCommon(reader);
         int linenumber = 2;
@@ -230,14 +230,14 @@ public abstract class CreateCore extends ContextAbstraction {
         }
     }
 
-    protected abstract Context simpleMainCall(final Context ctx, final User usr, final String accessCombiName, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
-    
-    protected abstract Context simpleMainCall(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
-    
-    protected abstract Context simpleMainCall(final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException; 
-    
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final String accessCombiName, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
+
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
+
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
+
     protected abstract Context maincall(final AdminParser parser, Context ctx, User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException;
-        
+
     protected abstract void setFurtherOptions(final AdminParser parser);
 
     @Override
@@ -252,5 +252,5 @@ public abstract class CreateCore extends ContextAbstraction {
         }
 
     }
-    
+
 }

@@ -67,7 +67,7 @@ public class Change extends ResellerAbstraction {
     }
 
     /**
-     * 
+     *
      */
     public Change() {
     }

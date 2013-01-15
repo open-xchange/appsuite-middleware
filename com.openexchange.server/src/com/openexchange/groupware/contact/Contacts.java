@@ -118,7 +118,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link Contacts}
- * 
+ *
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
 public final class Contacts {
@@ -150,7 +150,7 @@ public final class Contacts {
 
     /**
      * Gets the SQL statement from specified {@link Statement} instance.
-     * 
+     *
      * @param statement The statement
      * @return The extracted SQL string
      */
@@ -188,7 +188,7 @@ public final class Contacts {
 
 		String tempHeight = ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGE_HEIGHT);
         final int scaledHeight = tempHeight == null ? 90 : Integer.parseInt(tempHeight);
-        
+
         String tempSize = ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE);
 		final long max_size = tempSize == null ? 4 * 1024 * 1024 : Long.parseLong(tempSize);
 
@@ -2739,7 +2739,7 @@ public final class Contacts {
 
     /**
      * Checks if specified strings are equal
-     * 
+     *
      * @param string The first string
      * @param other The second string
      * @return <code>true</code> if both strings are considered equal; otherwise <code>false</code>

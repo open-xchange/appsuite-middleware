@@ -61,7 +61,7 @@ import com.openexchange.log.LogPropertyName.LogLevel;
 
 /**
  * {@link PropertiesAppendingLogWrapper}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -71,7 +71,7 @@ public class PropertiesAppendingLogWrapper implements Log {
 
     /**
      * Initializes a new {@link PropertiesAppendingLogWrapper}.
-     * 
+     *
      * @param delegate The delegate logger
      */
     protected PropertiesAppendingLogWrapper(final org.apache.commons.logging.Log delegate) {
@@ -170,7 +170,7 @@ public class PropertiesAppendingLogWrapper implements Log {
 
     /**
      * Append properties to specified message (if available).
-     * 
+     *
      * @param message The message to append to
      * @param logLevel The log level
      * @return The message with properties appended

@@ -77,7 +77,7 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
 
 /**
  * {@link ReminderCopyTask}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class ReminderCopyTask implements CopyUserTaskService {

@@ -53,7 +53,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
  * {@link CalendarHomeSet}
- * 
+ *
  * Identifies the URL of any WebDAV collections that contain calendar collections owned by the associated principal resource.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>

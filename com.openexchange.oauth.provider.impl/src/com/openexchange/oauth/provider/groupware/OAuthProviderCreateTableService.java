@@ -62,26 +62,26 @@ public final class OAuthProviderCreateTableService extends AbstractCreateTableIm
     private static final String TABLE_ACCESSOR = "oauthAccessor";
     private static final String TABLE_ACCESSOR_PROPERTY = "oauthAccessorProperty";
 
-    private static final String CREATE_ACCESSOR = "CREATE TABLE `"+TABLE_ACCESSOR+"` (" + 
-        " `cid` INT4 unsigned NOT NULL," + 
-        " `user` INT4 unsigned NOT NULL," + 
-        " `consumerId` INT4 unsigned NOT NULL," + 
-        " `providerId` INT4 unsigned NOT NULL," + 
-        " `requestToken` varchar(255) DEFAULT NULL," + 
-        " `accessToken` varchar(255) DEFAULT NULL," + 
-        " `tokenSecret` varchar(255) NOT NULL," + 
-        " PRIMARY KEY (`cid`,`user`,`consumerId`)," + 
-        " KEY `userIndex` (`cid`,`user`)," + 
-        " KEY `consumerIndex` (`consumerId`,`providerId`)" + 
+    private static final String CREATE_ACCESSOR = "CREATE TABLE `"+TABLE_ACCESSOR+"` (" +
+        " `cid` INT4 unsigned NOT NULL," +
+        " `user` INT4 unsigned NOT NULL," +
+        " `consumerId` INT4 unsigned NOT NULL," +
+        " `providerId` INT4 unsigned NOT NULL," +
+        " `requestToken` varchar(255) DEFAULT NULL," +
+        " `accessToken` varchar(255) DEFAULT NULL," +
+        " `tokenSecret` varchar(255) NOT NULL," +
+        " PRIMARY KEY (`cid`,`user`,`consumerId`)," +
+        " KEY `userIndex` (`cid`,`user`)," +
+        " KEY `consumerIndex` (`consumerId`,`providerId`)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
-    private static final String CREATE_ACCESSOR_PROPERTY = "CREATE TABLE `"+TABLE_ACCESSOR_PROPERTY+"` (" + 
-        " `cid` INT4 unsigned NOT NULL," + 
-        " `user` INT4 unsigned NOT NULL," + 
-        " `consumerId` INT4 unsigned NOT NULL," + 
-        " `name` varchar(32) NOT NULL," + 
-        " `value` varchar(255) NOT NULL," + 
-        " PRIMARY KEY (`cid`,`user`,`consumerId`,`name`)" + 
+    private static final String CREATE_ACCESSOR_PROPERTY = "CREATE TABLE `"+TABLE_ACCESSOR_PROPERTY+"` (" +
+        " `cid` INT4 unsigned NOT NULL," +
+        " `user` INT4 unsigned NOT NULL," +
+        " `consumerId` INT4 unsigned NOT NULL," +
+        " `name` varchar(32) NOT NULL," +
+        " `value` varchar(255) NOT NULL," +
+        " PRIMARY KEY (`cid`,`user`,`consumerId`,`name`)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     /**

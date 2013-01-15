@@ -56,14 +56,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link AppointmentNotificationPoolService}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public interface AppointmentNotificationPoolService {
 
 	public void enqueue(Appointment original, Appointment newAppointment, Session session, int sharedFolderOwner) throws OXException;
-	
+
     public void fasttrack(Appointment appointment, Session session) throws OXException;
-    
+
     public void drop(Appointment appointment, Session session) throws OXException;
 }

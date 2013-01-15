@@ -58,7 +58,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * {@link LockableQueue} - Delegates to specified {@link Queue queue} with a wrapping (read-write) lock.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LockableQueue<E> implements Queue<E> {
@@ -114,7 +114,7 @@ public final class LockableQueue<E> implements Queue<E> {
 
     /**
      * Initializes a new {@link LockableQueue}.
-     * 
+     *
      * @param queue The queue
      */
     public LockableQueue(Queue<E> queue) {
@@ -127,7 +127,7 @@ public final class LockableQueue<E> implements Queue<E> {
 
     /**
      * Initializes a new {@link LockableQueue}.
-     * 
+     *
      * @param queue The queue
      * @param lock The lock
      */

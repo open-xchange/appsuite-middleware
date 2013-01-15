@@ -137,6 +137,6 @@ public class AbstractSimSessiondService implements SessiondService {
     @Override
     public void removeContextSessions(final int contextId) {
         // Nothing to do
-        
+
     }
 }

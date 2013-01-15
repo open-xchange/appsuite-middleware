@@ -94,7 +94,7 @@ import com.openexchange.service.indexing.impl.internal.Services;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MailFolderJob extends AbstractMailJob {
-    
+
     public MailFolderJob() {
         super();
     }
@@ -105,13 +105,13 @@ public class MailFolderJob extends AbstractMailJob {
             if (!(jobInfo instanceof MailJobInfo)) {
                 throw new IllegalArgumentException("Job info must be an instance of MailJobInfo.");
             }
-            
+
             MailJobInfo info = (MailJobInfo) jobInfo;
             long start = System.currentTimeMillis();
             if (LOG.isDebugEnabled()) {
                 LOG.debug(this.getClass().getSimpleName() + " started performing. " + info.toString());
             }
-            
+
             checkJobInfo();
             MailField[] fields = new MailField[] {
                 MailField.ID,
@@ -131,7 +131,7 @@ public class MailFolderJob extends AbstractMailJob {
                     .setSortField(MailIndexField.RECEIVED_DATE)
                     .setOrder(Order.DESC)
                     .build();
-                        
+
                 IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
                 if (folderStorage.exists(info.folder)) {
                     IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
@@ -141,27 +141,27 @@ public class MailFolderJob extends AbstractMailJob {
                         MailSortField.RECEIVED_DATE,
                         OrderDirection.DESC,
                         null,
-                        fields);  
-                    
+                        fields);
+
                     Map<String, MailMessage> storageMails = new HashMap<String, MailMessage>();
                     for (MailMessage msg : storageResult) {
                         storageMails.put(msg.getMailId(), msg);
                     }
-                    
+
                     if (!info.force && IndexFolderManager.isIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder)) {
                         long lastCompletion = IndexFolderManager.getTimestamp(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
                         if (System.currentTimeMillis() - lastCompletion < 60000L * 15) {
                             LOG.debug("Skipping job because it already ran in the last 15 minutes.");
                             return;
                         }
-                        
+
                         IndexResult<MailMessage> indexResult = mailIndex.query(mailAllQuery, MailIndexField.getFor(fields));
                         Map<String, MailMessage> indexMails = new HashMap<String, MailMessage>();
                         for (IndexDocument<MailMessage> document : indexResult.getResults()) {
                             MailMessage msg = document.getObject();
                             indexMails.put(msg.getMailId(), msg);
                         }
-                        
+
                         if (LOG.isDebugEnabled()) {
                             long diff = System.currentTimeMillis() - start;
                             LOG.debug(info.toString() + " Preparation lasted " + diff + "ms.");
@@ -183,7 +183,7 @@ public class MailFolderJob extends AbstractMailJob {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Deleting folder from index: " + info.toString());
                     }
-                    
+
                     IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
                     mailIndex.deleteByQuery(mailAllQuery);
                     QueryParameters attachmentAllQuery = new Builder()
@@ -191,12 +191,12 @@ public class MailFolderJob extends AbstractMailJob {
                         .setAccountFolders(Collections.singleton(accountFolders))
                         .setModule(Types.EMAIL)
                         .build();
-                    attachmentIndex.deleteByQuery(attachmentAllQuery); 
+                    attachmentIndex.deleteByQuery(attachmentAllQuery);
                 }
             } catch (OXException e) {
                 /*
                  * If connect to mail access failed, reschedule this job
-                 * FIXME: This is just a workaround! We need to fix the mail implementation for this. 
+                 * FIXME: This is just a workaround! We need to fix the mail implementation for this.
                  * The priority for acquiring a mail connection must be lower than for interactive connections.
                  * Jobs should not fail because of missing connections and jobs must not block connections
                  * for interactive uses (user activities).
@@ -208,13 +208,13 @@ public class MailFolderJob extends AbstractMailJob {
                     indexingService.scheduleJob(false, info, new Date(System.currentTimeMillis() + 60000), -1L, IndexingService.DEFAULT_PRIORITY);
                     return;
                 }
-                
+
                 throw e;
             } finally {
                 SmalMailAccess.closeUnwrappedInstance(mailAccess);
                 closeIndexAccess(mailIndex);
                 closeIndexAccess(attachmentIndex);
-                
+
                 if (LOG.isDebugEnabled()) {
                     long diff = System.currentTimeMillis() - start;
                     LOG.debug(this.getClass().getSimpleName() + " lasted " + diff + "ms. " + info.toString());
@@ -224,7 +224,7 @@ public class MailFolderJob extends AbstractMailJob {
             throw new OXException(e);
         }
     }
-    
+
     private void addMails(MailJobInfo info, Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final IMailMessageStorage messageStorage) throws OXException {
         final List<String> toAdd = new ArrayList<String>(storageIds);
         toAdd.removeAll(indexIds);
@@ -236,14 +236,14 @@ public class MailFolderJob extends AbstractMailJob {
         toDelete.removeAll(storageIds);
         deleteMails(info, toDelete, mailIndex, attachmentIndex);
     }
-    
+
     private void changeMails(MailJobInfo info, Map<String, MailMessage> indexMails, Map<String, MailMessage> storageMails, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final IMailMessageStorage messageStorage) throws OXException {
         Set<String> toRemove = new HashSet<String>(indexMails.keySet());
         toRemove.removeAll(storageMails.keySet());
-        
+
         Set<String> toCompare = new HashSet<String>(indexMails.keySet());
         toCompare.removeAll(toRemove);
-        
+
         final List<String> changedMails = new ArrayList<String>();
         for (String id : toCompare) {
             MailMessage storageMail = storageMails.get(id);
@@ -252,10 +252,10 @@ public class MailFolderJob extends AbstractMailJob {
                 changedMails.add(storageMail.getMailId());
             }
         }
-        
+
         changeMails(info, changedMails, messageStorage, mailIndex, attachmentIndex);
     }
-    
+
     private boolean isDifferent(final MailMessage storageMail, final MailMessage indexMail) {
         if (null == storageMail || null == indexMail) {
             return false;
@@ -290,7 +290,7 @@ public class MailFolderJob extends AbstractMailJob {
 
     private void checkJobInfo() {
         // Nothing to do
-        
+
     }
-    
+
 }

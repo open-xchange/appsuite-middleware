@@ -57,7 +57,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
-    
+
     @Override
     public void addExtensionOptions(final AdminParser parser) {
         parser.removeOption("c", "contextid");

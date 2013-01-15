@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ResultConverters}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResultConverters {
@@ -92,7 +92,7 @@ public final class ResultConverters {
 
     /**
      * Starts-up registry.
-     * 
+     *
      * @param context The bundle context
      */
     public void start(final BundleContext context) {
@@ -145,7 +145,7 @@ public final class ResultConverters {
 
     /**
      * Adds given {@link ResultConverter converter}
-     * 
+     *
      * @param rc The converter to add
      */
     public boolean add(final ResultConverter rc) {
@@ -167,7 +167,7 @@ public final class ResultConverters {
 
     /**
      * Removes given {@link ResultConverter converter}
-     * 
+     *
      * @param rc The converter to remove
      * @return <code>true</code> if removed; otherwise <code>false</code> if there was no such converter
      */
@@ -181,7 +181,7 @@ public final class ResultConverters {
 
     /**
      * Gets the {@link ResultConverter converter} for specified input format.
-     * 
+     *
      * @param inputFormat The input format
      * @return THe converter or <code>null</code>
      */

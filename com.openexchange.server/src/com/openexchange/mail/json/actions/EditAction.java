@@ -96,7 +96,7 @@ public final class EditAction extends AbstractMailAction {
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         final AJAXRequestData request = req.getRequest();
         final List<OXException> warnings = new ArrayList<OXException>();
-        
+
         try {
             if (!request.hasUploads()) {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create("edit");

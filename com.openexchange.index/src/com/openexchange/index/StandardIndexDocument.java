@@ -52,14 +52,14 @@ package com.openexchange.index;
 
 /**
  * {@link StandardIndexDocument}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class StandardIndexDocument<V> implements IndexDocument<V> {
 
     private final V object;
-    
-    
+
+
     /**
      * Initializes a new {@link StandardIndexDocument}.
      */

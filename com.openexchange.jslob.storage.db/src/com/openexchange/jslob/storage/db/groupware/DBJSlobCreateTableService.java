@@ -61,19 +61,19 @@ public final class DBJSlobCreateTableService extends AbstractCreateTableImpl {
 
     private static final String TABLE = "jsonStorage";
 
-    private static final String CREATE = "CREATE TABLE " + TABLE + " (\n" + 
-        "  cid INT4 unsigned NOT NULL,\n" + 
-        "  user INT4 unsigned NOT NULL,\n" + 
-        "  serviceId varchar(128) collate utf8_unicode_ci NOT NULL,\n" + 
-        "  id varchar(128) collate utf8_unicode_ci NOT NULL,\n" + 
-        "  locked tinyint(3) unsigned default '0',\n" + 
-        "  data blob,\n" + 
-        "  PRIMARY KEY  (cid,user,serviceId,id)\n" + 
+    private static final String CREATE = "CREATE TABLE " + TABLE + " (\n" +
+        "  cid INT4 unsigned NOT NULL,\n" +
+        "  user INT4 unsigned NOT NULL,\n" +
+        "  serviceId varchar(128) collate utf8_unicode_ci NOT NULL,\n" +
+        "  id varchar(128) collate utf8_unicode_ci NOT NULL,\n" +
+        "  locked tinyint(3) unsigned default '0',\n" +
+        "  data blob,\n" +
+        "  PRIMARY KEY  (cid,user,serviceId,id)\n" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     /**
      * Gets the table names.
-     * 
+     *
      * @return The table names.
      */
     public static String[] getTablesToCreate() {
@@ -82,7 +82,7 @@ public final class DBJSlobCreateTableService extends AbstractCreateTableImpl {
 
     /**
      * Gets the CREATE-TABLE statements.
-     * 
+     *
      * @return The CREATE statements
      */
     public static String[] getCreateStmts() {

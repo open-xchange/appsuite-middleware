@@ -96,8 +96,8 @@ public final class CheckForPublicInfostoreFolderTask extends SimpleUpdateTask {
         for (final int contextId : contextIds.toArray()) {
             PreparedStatement stmt = null;
             try {
-                stmt = con.prepareStatement("INSERT INTO oxfolder_tree " + 
-                		"(fuid,cid,parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag,default_flag) " + 
+                stmt = con.prepareStatement("INSERT INTO oxfolder_tree " +
+                		"(fuid,cid,parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag,default_flag) " +
                 		"VALUES (15,?,9,'public_infostore',8,5,1220981203760,2,1220981203760,2,2,1,0)");
                 stmt.setInt(1, contextId);
                 stmt.executeUpdate();

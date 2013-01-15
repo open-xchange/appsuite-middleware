@@ -59,14 +59,14 @@ public interface ServiceProvider<S> {
 
     /**
      * Gets the highest-ranked service available in this provider
-     * 
+     *
      * @return The highest-ranked service
      */
     S getService();
 
     /**
      * Adds specified service to this service provider
-     * 
+     *
      * @param service The service
      * @param ranking The service's ranking
      */

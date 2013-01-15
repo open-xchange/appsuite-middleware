@@ -54,7 +54,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link EncryptedItemDetectorService} - Checks for available encrypted items.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface EncryptedItemDetectorService {

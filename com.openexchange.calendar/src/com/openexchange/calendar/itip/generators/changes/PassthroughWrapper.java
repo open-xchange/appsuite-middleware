@@ -92,7 +92,7 @@ public class PassthroughWrapper implements TypeWrapper {
     public String emphasiszed(final Object argument) {
 		return none(argument);
 	}
-	
+
 	@Override
     public String reference(final Object argument) {
 		return none(argument);

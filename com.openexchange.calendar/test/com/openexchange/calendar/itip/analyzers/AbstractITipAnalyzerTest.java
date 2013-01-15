@@ -69,7 +69,7 @@ import static org.junit.Assert.*;
 public class AbstractITipAnalyzerTest {
     protected Session session = new SimSession(12,1337);
     protected  UserParticipant theUser = new UserParticipant(session.getUserId());
-    
+
     // Test Data
 
     protected CalendarDataObject appointment(String uid) {
@@ -78,25 +78,25 @@ public class AbstractITipAnalyzerTest {
         cdao.setStartDate(D("tomorrow at 12:00"));
         cdao.setEndDate(D("tomorrow at 13:00"));
         cdao.setTitle("A new title!");
-       
+
         theUser.setConfirm(ConfirmStatus.ACCEPT.getId());
         cdao.setParticipants(Arrays.asList(theUser));
         cdao.setUsers(Arrays.asList(theUser));
-        
-        
+
+
         return cdao;
     }
-    
+
     public static void assertActions(ITipAnalysis analysis, ITipAction...actions) {
         String expected = Arrays.asList(actions).toString();
         String got = analysis.getActions().toString();
-        
+
         Set<ITipAction> recommendedActions = analysis.getActions();
         for (ITipAction action : actions) {
             assertTrue(expected+" != "+got, recommendedActions.remove(action));
         }
         assertTrue(expected+" != "+got, recommendedActions.isEmpty());
-        
+
     }
 
 }

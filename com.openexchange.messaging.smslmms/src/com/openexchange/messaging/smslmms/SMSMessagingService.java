@@ -73,7 +73,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SMSMessagingService} - The messaging service for SMS/MMS.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SMSMessagingService implements ConfigProvidingMessagingService, SMSService {
@@ -90,7 +90,7 @@ public class SMSMessagingService implements ConfigProvidingMessagingService, SMS
 
     /**
      * Initializes a new {@link SMSMessagingService}.
-     * 
+     *
      * @param smsService The SMS/MMS service
      */
     public SMSMessagingService(final SMSService smsService) {

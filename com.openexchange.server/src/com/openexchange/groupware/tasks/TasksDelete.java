@@ -105,26 +105,22 @@ public class TasksDelete implements DeleteListener {
      * @throws OXException if the delete gives an error.
      */
     private void deleteUser(final DeleteEvent event, final Connection con) throws OXException {
-        try {
-            // First remove the user from the participants of tasks. Then only
-            // tasks exist that have other users as participants or no one.
-            removeUserFromParticipants(event, con);
-            // Check now the folder mappings. Find all folder mappings for the
-            // user to delete. If tasks has participants and several folder
-            // mappings(delegated in private folder) the folder mapping can be
-            // deleted. A single folder mapping for a task with participants
-            // must be a public folder and the
-            // folder mapping must be changed to mailadmin.
-            // All other single folder mappings in a public folder are also
-            // changed to mailadmin. Remaining task with single folder mappings
-            // must be private tasks that can be deleted.
-            // Remove private task in private folders.
-            assignToAdmin(event, con);
-            // Change createdFrom and modifiedBy attributes of left over tasks.
-            changeCFMB(event, con);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        // First remove the user from the participants of tasks. Then only
+        // tasks exist that have other users as participants or no one.
+        removeUserFromParticipants(event, con);
+        // Check now the folder mappings. Find all folder mappings for the
+        // user to delete. If tasks has participants and several folder
+        // mappings(delegated in private folder) the folder mapping can be
+        // deleted. A single folder mapping for a task with participants
+        // must be a public folder and the
+        // folder mapping must be changed to mailadmin.
+        // All other single folder mappings in a public folder are also
+        // changed to mailadmin. Remaining task with single folder mappings
+        // must be private tasks that can be deleted.
+        // Remove private task in private folders.
+        assignToAdmin(event, con);
+        // Change createdFrom and modifiedBy attributes of left over tasks.
+        changeCFMB(event, con);
     }
 
     /**
@@ -232,18 +228,14 @@ public class TasksDelete implements DeleteListener {
         final Context ctx = event.getContext();
         final int groupId = event.getId();
         final ParticipantStorage partStor = ParticipantStorage.getInstance();
-        try {
-            for (final StorageType type : StorageType.values()) {
-                final int[] tasks = partStor.findTasksWithGroup(ctx, readCon, groupId, type);
-                for (final int task : tasks) {
-                    Set<InternalParticipant> participants = partStor.selectInternal(ctx, readCon, task, type);
-                    participants = TaskLogic.extractWithGroup(participants, groupId);
-                    removeGroup(participants);
-                    partStor.updateInternal(ctx, writeCon, task, participants, type);
-                }
+        for (final StorageType type : StorageType.values()) {
+            final int[] tasks = partStor.findTasksWithGroup(ctx, readCon, groupId, type);
+            for (final int task : tasks) {
+                Set<InternalParticipant> participants = partStor.selectInternal(ctx, readCon, task, type);
+                participants = TaskLogic.extractWithGroup(participants, groupId);
+                removeGroup(participants);
+                partStor.updateInternal(ctx, writeCon, task, participants, type);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

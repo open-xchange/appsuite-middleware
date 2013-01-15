@@ -66,7 +66,7 @@ public class CallbackRegistry implements CustomRedirectURLDetermination, Runnabl
 
 	private final ConcurrentHashMap<String, String> tokenMap = new ConcurrentHashMap<String, String>();
 	private final ConcurrentHashMap<String, Long> timestamps = new ConcurrentHashMap<String, Long>();
-	
+
 	public void add(String callbackUrl, String token) {
 		timestamps.put(token, System.currentTimeMillis());
 		tokenMap.put(token, callbackUrl);
@@ -88,7 +88,7 @@ public class CallbackRegistry implements CustomRedirectURLDetermination, Runnabl
 	@Override
 	public void run() {
 		long threshhold = System.currentTimeMillis() - 600000;
-		
+
 		for(Map.Entry<String, Long> timestamped: new HashMap<String, Long>(timestamps).entrySet()) {
 			if (threshhold < timestamped.getValue()) {
 				tokenMap.remove(timestamped.getKey());
@@ -96,7 +96,7 @@ public class CallbackRegistry implements CustomRedirectURLDetermination, Runnabl
 			}
 		}
 	}
-	
-	
+
+
 
 }

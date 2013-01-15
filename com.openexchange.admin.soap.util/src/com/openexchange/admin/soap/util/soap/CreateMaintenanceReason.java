@@ -12,9 +12,9 @@ import com.openexchange.admin.soap.util.dataobjects.MaintenanceReason;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -27,8 +27,8 @@ import com.openexchange.admin.soap.util.dataobjects.MaintenanceReason;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -45,11 +45,11 @@ public class CreateMaintenanceReason {
 
     /**
      * Ruft den Wert der reason-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link MaintenanceReason }
-     *     
+     *
      */
     public MaintenanceReason getReason() {
         return reason;
@@ -57,11 +57,11 @@ public class CreateMaintenanceReason {
 
     /**
      * Legt den Wert der reason-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link MaintenanceReason }
-     *     
+     *
      */
     public void setReason(MaintenanceReason value) {
         this.reason = value;
@@ -69,11 +69,11 @@ public class CreateMaintenanceReason {
 
     /**
      * Ruft den Wert der auth-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Credentials }
-     *     
+     *
      */
     public Credentials getAuth() {
         return auth;
@@ -81,11 +81,11 @@ public class CreateMaintenanceReason {
 
     /**
      * Legt den Wert der auth-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Credentials }
-     *     
+     *
      */
     public void setAuth(Credentials value) {
         this.auth = value;

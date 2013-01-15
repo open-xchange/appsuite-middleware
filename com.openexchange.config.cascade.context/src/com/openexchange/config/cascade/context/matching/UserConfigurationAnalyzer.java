@@ -65,9 +65,9 @@ public class UserConfigurationAnalyzer {
 
 	public Set<String> getTags(UserConfiguration configuration) {
         Set<String> retval = new HashSet<String>();
-        
+
         int permissionBits = configuration.getPermissionBits();
-        
+
         for (Permission p : Permission.values()) {
         	if ( (permissionBits & p.getBit()) == p.getBit()) {
         		retval.add("uc" + p.getTagName());

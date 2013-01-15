@@ -57,7 +57,7 @@ import com.openexchange.messaging.smslmms.api.SMSMessageAccess;
 
 /**
  * {@link EmptySMSAccess} - The SMS/MMS service providing an empty message/folder storage access.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EmptySMSAccess implements SMSAccess {

@@ -55,7 +55,7 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 
 /**
  * {@link ServiceStateCommandProvider}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ServiceStateCommandProvider implements CommandProvider {
@@ -64,7 +64,7 @@ public final class ServiceStateCommandProvider implements CommandProvider {
 
     /**
      * Initializes a new {@link ServiceStateCommandProvider}.
-     * 
+     *
      * @param stateLookup The service state lookup
      */
     public ServiceStateCommandProvider(final ServiceStateLookup stateLookup) {

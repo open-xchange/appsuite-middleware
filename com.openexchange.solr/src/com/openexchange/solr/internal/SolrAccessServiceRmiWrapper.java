@@ -65,7 +65,7 @@ import com.openexchange.solr.rmi.RMISolrException;
 
 /**
  * {@link SolrAccessServiceRmiWrapper}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SolrAccessServiceRmiWrapper implements SolrAccessService {

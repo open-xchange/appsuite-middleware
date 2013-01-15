@@ -70,9 +70,9 @@ public class DeleteInvisible extends ContextAbstraction {
             final Context ctx = contextparsing(parser);
 
             parseAndSetContextName(parser, ctx);
-            
+
             successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
-            
+
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref

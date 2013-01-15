@@ -88,7 +88,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
         }
 
     }
-    
+
     private static Map<String, String> overriddenProperties = null;
 
     private static NotificationConfig INSTANCE = new NotificationConfig();
@@ -136,14 +136,14 @@ public class NotificationConfig extends AbstractConfig implements Initialization
         }
         return Boolean.parseBoolean(boolVal);
     }
-    
+
     public static void override(NotificationProperty prop, String value) {
     	if (overriddenProperties == null) {
     		overriddenProperties = new HashMap<String, String>();
     	}
     	overriddenProperties.put(prop.name, value);
     }
-    
+
     public static void forgetOverrides() {
     	overriddenProperties = null;
     }

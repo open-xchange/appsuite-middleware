@@ -51,10 +51,10 @@ package com.openexchange.admin.rmi.extensions;
 import java.io.Serializable;
 
 /**
- * 
- * 
+ *
+ *
  * @author d7
- * @deprecated 
+ * @deprecated
  */
 @Deprecated
 public interface OXCommonExtensionInterface extends Serializable {

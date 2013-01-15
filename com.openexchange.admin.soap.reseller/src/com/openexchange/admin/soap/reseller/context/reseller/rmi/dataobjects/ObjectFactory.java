@@ -8,18 +8,18 @@ import javax.xml.namespace.QName;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the com.openexchange.admin.soap.reseller.context.reseller.rmi.dataobjects package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the com.openexchange.admin.soap.reseller.context.reseller.rmi.dataobjects package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
+ *
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -46,14 +46,14 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com.openexchange.admin.soap.reseller.context.reseller.rmi.dataobjects
-     * 
+     *
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link ResellerAdmin }
-     * 
+     *
      */
     public ResellerAdmin createResellerAdmin() {
         return new ResellerAdmin();
@@ -61,7 +61,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Restriction }
-     * 
+     *
      */
     public Restriction createRestriction() {
         return new Restriction();
@@ -69,7 +69,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "mandatoryMembersRegister", scope = Restriction.class)
     public JAXBElement<String> createRestrictionMandatoryMembersRegister(String value) {
@@ -78,7 +78,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "mandatoryMembersCreate", scope = Restriction.class)
     public JAXBElement<String> createRestrictionMandatoryMembersCreate(String value) {
@@ -87,7 +87,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "id", scope = Restriction.class)
     public JAXBElement<Integer> createRestrictionId(Integer value) {
@@ -96,7 +96,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "mandatoryMembersChange", scope = Restriction.class)
     public JAXBElement<String> createRestrictionMandatoryMembersChange(String value) {
@@ -105,7 +105,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "name", scope = Restriction.class)
     public JAXBElement<String> createRestrictionName(String value) {
@@ -114,7 +114,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "value", scope = Restriction.class)
     public JAXBElement<String> createRestrictionValue(String value) {
@@ -123,7 +123,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "mandatoryMembersDelete", scope = Restriction.class)
     public JAXBElement<String> createRestrictionMandatoryMembersDelete(String value) {
@@ -132,7 +132,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "mandatoryMembersCreate", scope = ResellerAdmin.class)
     public JAXBElement<String> createResellerAdminMandatoryMembersCreate(String value) {
@@ -141,7 +141,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "mandatoryMembersRegister", scope = ResellerAdmin.class)
     public JAXBElement<String> createResellerAdminMandatoryMembersRegister(String value) {
@@ -150,7 +150,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "id", scope = ResellerAdmin.class)
     public JAXBElement<Integer> createResellerAdminId(Integer value) {
@@ -159,7 +159,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "parentId", scope = ResellerAdmin.class)
     public JAXBElement<Integer> createResellerAdminParentId(Integer value) {
@@ -168,7 +168,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "mandatoryMembersChange", scope = ResellerAdmin.class)
     public JAXBElement<String> createResellerAdminMandatoryMembersChange(String value) {
@@ -177,7 +177,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "name", scope = ResellerAdmin.class)
     public JAXBElement<String> createResellerAdminName(String value) {
@@ -186,7 +186,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "passwordMechset", scope = ResellerAdmin.class)
     public JAXBElement<Boolean> createResellerAdminPasswordMechset(Boolean value) {
@@ -195,7 +195,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "displayname", scope = ResellerAdmin.class)
     public JAXBElement<String> createResellerAdminDisplayname(String value) {
@@ -204,7 +204,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "mandatoryMembersDelete", scope = ResellerAdmin.class)
     public JAXBElement<String> createResellerAdminMandatoryMembersDelete(String value) {
@@ -213,7 +213,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "restrictionsset", scope = ResellerAdmin.class)
     public JAXBElement<Boolean> createResellerAdminRestrictionsset(Boolean value) {
@@ -222,7 +222,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "parentIdset", scope = ResellerAdmin.class)
     public JAXBElement<Boolean> createResellerAdminParentIdset(Boolean value) {
@@ -231,7 +231,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Restriction }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "restrictions", scope = ResellerAdmin.class)
     public JAXBElement<Restriction> createResellerAdminRestrictions(Restriction value) {
@@ -240,7 +240,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "displaynameset", scope = ResellerAdmin.class)
     public JAXBElement<Boolean> createResellerAdminDisplaynameset(Boolean value) {
@@ -249,7 +249,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "idset", scope = ResellerAdmin.class)
     public JAXBElement<Boolean> createResellerAdminIdset(Boolean value) {
@@ -258,7 +258,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "passwordset", scope = ResellerAdmin.class)
     public JAXBElement<Boolean> createResellerAdminPasswordset(Boolean value) {
@@ -267,7 +267,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "passwordMech", scope = ResellerAdmin.class)
     public JAXBElement<String> createResellerAdminPasswordMech(String value) {
@@ -276,7 +276,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "nameset", scope = ResellerAdmin.class)
     public JAXBElement<Boolean> createResellerAdminNameset(Boolean value) {
@@ -285,7 +285,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", name = "password", scope = ResellerAdmin.class)
     public JAXBElement<String> createResellerAdminPassword(String value) {

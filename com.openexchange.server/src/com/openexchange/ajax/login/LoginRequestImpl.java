@@ -64,7 +64,6 @@ public class LoginRequestImpl implements LoginRequest {
 
     private final String login, password, clientIP, userAgent, authId, client, version, hash;
     private String clientToken;
-    private final boolean fluechtig;
     private final Interface iface;
     private final Map<String, List<String>> headers;
     private final Cookie[] cookies;
@@ -73,7 +72,7 @@ public class LoginRequestImpl implements LoginRequest {
     private final int serverPort;
     private final String httpSessionID;
 
-    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, boolean fluechtig, Interface iface, Map<String, List<String>> headers, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID) {
+    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID) {
         super();
         this.login = login;
         this.password = password;
@@ -83,7 +82,6 @@ public class LoginRequestImpl implements LoginRequest {
         this.client = client;
         this.version = version;
         this.hash = hash;
-        this.fluechtig = fluechtig;
         this.iface = iface;
         this.headers = headers;
         this.cookies = cookies;
@@ -140,11 +138,6 @@ public class LoginRequestImpl implements LoginRequest {
 
     public void setClientToken(String clientToken) {
         this.clientToken = clientToken;
-    }
-
-    @Override
-    public boolean isVolatile() {
-        return fluechtig;
     }
 
     @Override

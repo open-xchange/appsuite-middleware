@@ -75,7 +75,7 @@ import com.openexchange.server.ServiceLookup;
  */
 @Module(name = "eavcontact", description = "Provides access to eav contact information.")
 public class EAVContactActionFactory implements AJAXActionServiceFactory {
-	
+
 	private static final Map<String, AbstractAction> actions = new ConcurrentHashMap<String, AbstractAction>(11);
 
 	/**

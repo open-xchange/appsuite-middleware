@@ -73,7 +73,7 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 	 * Map containing all available mappings.
 	 */
 	protected final EnumMap<E, ? extends DbMapping<? extends Object, O>> mappings;
-	
+
 	/**
 	 * Initializes a new {@link DefaultDbMapper}.
 	 */
@@ -84,20 +84,20 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 
 	@Override
 	public O fromResultSet(final ResultSet resultSet, final E[] fields) throws OXException, SQLException {
-		final O object = this.newInstance();   	
+		final O object = this.newInstance();
 	    for (final E field : fields) {
 	    	get(field).set(resultSet, object);
 	    }
 	    return object;
 	}
-	
+
 	@Override
 	public void setParameters(final PreparedStatement stmt, final O object, final E[] fields) throws SQLException, OXException {
 	    for (int i = 0; i < fields.length; i++) {
 	    	this.get(fields[i]).set(stmt, i + 1, object);
 	    }
 	}
-	
+
 	@Override
 	public DbMapping<? extends Object, O> get(final E field) throws OXException {
 		if (null == field) {
@@ -109,7 +109,7 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 		}
 		return mapping;
 	}
-	
+
 	@Override
 	public E getMappedField(final String columnLabel) {
 		if (null == columnLabel) {
@@ -122,13 +122,13 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 		}
 		return null;
 	}
-	
+
 	@Override
 	public String getAssignments(final E[] fields) throws OXException {
 		if (null == fields) {
 			throw new IllegalArgumentException("fields");
 		}
-		final StringBuilder columnsParamsBuilder = new StringBuilder(10 * fields.length); 
+		final StringBuilder columnsParamsBuilder = new StringBuilder(10 * fields.length);
 		if (null != fields && 0 < fields.length) {
 			columnsParamsBuilder.append(get(fields[0]).getColumnLabel()).append("=?");
 			for (int i = 1; i < fields.length; i++) {
@@ -143,7 +143,7 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 		if (null == fields) {
 			throw new IllegalArgumentException("fields");
 		}
-		final StringBuilder columnsBuilder = new StringBuilder(10 * fields.length);                
+		final StringBuilder columnsBuilder = new StringBuilder(10 * fields.length);
 		if (null != fields && 0 < fields.length) {
 			columnsBuilder.append(get(fields[0]).getColumnLabel());
 			for (int i = 1; i < fields.length; i++) {
@@ -157,10 +157,10 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 	protected EnumMap<E, ? extends Mapping<? extends Object, O>> getMappings() {
 		return this.mappings;
 	}
-	
+
 	/**
-	 * Creates the mappings for all possible values of the underlying enum. 
-	 * 
+	 * Creates the mappings for all possible values of the underlying enum.
+	 *
 	 * @return the mappings
 	 */
 	protected abstract EnumMap<E, ? extends DbMapping<? extends Object, O>> createMappings();

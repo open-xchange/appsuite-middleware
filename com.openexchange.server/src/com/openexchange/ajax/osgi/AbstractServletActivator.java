@@ -62,7 +62,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link AbstractServletActivator}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public abstract class AbstractServletActivator extends HousekeepingActivator {
@@ -100,7 +100,7 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
             }
         }
     }
-    
+
     protected void unregisterServlet(final String alias) {
         final HttpService httpService = getService(HttpService.class);
         if (null != httpService) {

@@ -65,7 +65,7 @@ import com.openexchange.mq.queue.MQQueueReceiver;
 
 /**
  * {@link MQQueueReceiverImpl} - A queue receiver intended to be re-used. Invoke {@link #close()} method when done.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueReceiver {
@@ -74,7 +74,7 @@ public class MQQueueReceiverImpl extends MQQueueResource implements MQQueueRecei
 
     /**
      * Initializes a new {@link MQQueueReceiverImpl}.
-     * 
+     *
      * @param queueName The name of the queue to receive from
      * @throws OXException If initialization fails
      */

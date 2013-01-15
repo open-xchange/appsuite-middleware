@@ -75,7 +75,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class FormLogin implements LoginRequestHandler {
 
-    private LoginConfiguration conf;
+    private final LoginConfiguration conf;
 
     public FormLogin(LoginConfiguration conf) {
         super();

@@ -56,13 +56,13 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link FreeBusyExceptionCodes}
- * 
+ *
  * Exception codes for the free/busy subsystem.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public enum FreeBusyExceptionCodes implements OXExceptionCode {
-    
+
     NO_PROVIDERS_AVAILABLE(FreeBusyExceptionMessages.NO_PROVIDERS_AVAILABLE_MSG, Category.CATEGORY_SERVICE_DOWN, 1),
     AMBIGUOUS_PARTICIPANT(FreeBusyExceptionMessages.AMBIGUOUS_PARTICIPANT_MSG, Category.CATEGORY_CONFLICT, 2),
     PARTICIPANT_NOT_FOUND(FreeBusyExceptionMessages.PARTICIPANT_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 3),
@@ -140,5 +140,5 @@ public enum FreeBusyExceptionCodes implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
-    
+
 }

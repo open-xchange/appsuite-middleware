@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 /**
  * {@link OAuthProviderService} - The OAuth provider service in addition to <a href="http://oauth.googlecode.com/">Google's OAuth Java
  * library</a>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface OAuthProviderService extends OAuthProviderConstants {
@@ -71,21 +71,21 @@ public interface OAuthProviderService extends OAuthProviderConstants {
 
     /**
      * Gets the associated validator instance.
-     * 
+     *
      * @return The validator instance
      */
     public OAuthValidator getValidator();
 
     /**
      * Loads consumers from database
-     * 
+     *
      * @throws OXException If loading consumers fails
      */
     public void loadConsumers() throws OXException;
 
     /**
      * Gets the consumer for specified OAuth request message.
-     * 
+     *
      * @param requestMessage The request message
      * @return The associated consumer
      * @throws IOException If an I/O error occurs
@@ -95,21 +95,21 @@ public interface OAuthProviderService extends OAuthProviderConstants {
 
     /**
      * Get the access token and token secret for the given oauth_token.
-     * 
+     *
      * @param requestMessage The OAuth message providing oauth_token
      */
     public OAuthAccessor getAccessor(OAuthMessage requestMessage) throws IOException, OAuthProblemException;
 
     /**
      * Marks specified access token as authorized.
-     * 
+     *
      * @throws OXException If token cannot be marked as authorized
      */
     public void markAsAuthorized(OAuthAccessor accessor, int userId, int contextId) throws OXException;
 
     /**
      * Generate a fresh request token and secret for a consumer.
-     * 
+     *
      * @param accessor The <b><small>VALIDATED</small></b> <tt>OAuthAccessor</tt> instance
      * @throws OXException If generation fails
      */
@@ -117,7 +117,7 @@ public interface OAuthProviderService extends OAuthProviderConstants {
 
     /**
      * Generate an access token for a consumer.
-     * 
+     *
      * @param accessor The user-associated <tt>OAuthAccessor</tt> instance
      * @throws OXException If generation fails
      */

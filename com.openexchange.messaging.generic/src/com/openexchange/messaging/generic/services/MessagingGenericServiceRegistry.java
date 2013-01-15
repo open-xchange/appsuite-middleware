@@ -75,10 +75,10 @@ public final class MessagingGenericServiceRegistry {
         final ServiceLookup services = REF.get();
         return null == services ? null : services.getService(clazz);
     }
-    
+
     /**
      * Gets the optional service  of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      */

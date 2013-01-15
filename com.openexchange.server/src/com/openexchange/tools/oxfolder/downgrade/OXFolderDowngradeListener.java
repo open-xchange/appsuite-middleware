@@ -394,8 +394,6 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             try {
                 wc = DBPool.pickupWriteable(event.getContext());
                 tasks.deleteTasksInFolder(event.getSession(), wc, folderID);
-            } catch (final OXException e) {
-                throw new OXException(e);
             } finally {
                 if (null != wc) {
                     DBPool.closeWriterSilent(event.getContext(), wc);
@@ -435,18 +433,10 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             db.removeDocument(folderID, System.currentTimeMillis(), ServerSessionAdapter.valueOf(event.getSession(), event.getContext()));
             db.commit();
         } catch (final OXException x) {
-            try {
-                db.rollback();
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            db.rollback();
             throw x;
         } finally {
-            try {
-                db.finish();
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            db.finish();
         }
     }
 

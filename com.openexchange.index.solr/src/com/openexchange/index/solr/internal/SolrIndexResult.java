@@ -64,12 +64,12 @@ import com.openexchange.index.IndexResult;
 public class SolrIndexResult<T> implements IndexResult<T> {
 
     private final int numFound;
-    
+
     private final List<IndexDocument<T>> results;
 
     private final Map<IndexField, Map<String, Long>> facetCounts;
 
-    
+
     /**
      * Initializes a new {@link SolrIndexResult}.
      */

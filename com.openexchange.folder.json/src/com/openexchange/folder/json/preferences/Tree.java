@@ -98,12 +98,7 @@ public class Tree implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 Integer tree = ServerUserSetting.getInstance().getFolderTree(ctx.getContextId(), user.getId());
                 if (null == tree) {
-                    final ConfigurationService configurationService;
-                    try {
-                        configurationService = ServiceRegistry.getInstance().getService(ConfigurationService.class, true);
-                    } catch (final OXException e) {
-                        throw new OXException(e);
-                    }
+                    final ConfigurationService configurationService = ServiceRegistry.getInstance().getService(ConfigurationService.class, true);
                     final String value = configurationService.getProperty(PROPERTY_NAME, "0");
                     try {
                         tree = Integer.valueOf(value);

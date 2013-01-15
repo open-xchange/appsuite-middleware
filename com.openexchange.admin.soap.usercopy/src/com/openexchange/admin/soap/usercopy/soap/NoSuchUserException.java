@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -39,11 +39,11 @@ public class NoSuchUserException {
 
     /**
      * Ruft den Wert der noSuchUserException-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link com.openexchange.admin.soap.usercopy.exceptions.NoSuchUserException }
-     *     
+     *
      */
     public com.openexchange.admin.soap.usercopy.exceptions.NoSuchUserException getNoSuchUserException() {
         return noSuchUserException;
@@ -51,11 +51,11 @@ public class NoSuchUserException {
 
     /**
      * Legt den Wert der noSuchUserException-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link com.openexchange.admin.soap.usercopy.exceptions.NoSuchUserException }
-     *     
+     *
      */
     public void setNoSuchUserException(com.openexchange.admin.soap.usercopy.exceptions.NoSuchUserException value) {
         this.noSuchUserException = value;

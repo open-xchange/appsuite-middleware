@@ -57,7 +57,7 @@ import com.openexchange.datatypes.genericonf.FormElement;
 
 /**
  * {@link FormContentParser}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FormContentParser {
@@ -66,7 +66,7 @@ public class FormContentParser {
 
     /**
      * Parses specified JSON object to a configuration map.
-     * 
+     *
      * @param object The JSON object
      * @param form The form description
      * @return The configuration map

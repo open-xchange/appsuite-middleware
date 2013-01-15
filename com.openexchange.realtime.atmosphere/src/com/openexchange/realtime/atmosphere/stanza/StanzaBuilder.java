@@ -67,13 +67,13 @@ import com.openexchange.realtime.payload.PayloadTreeNode;
  * appropriate Stanza Objects from them. Tis includes filling the Stanza with basic attributes from the JSONObject transported in the
  * AtmosphereRequest and transforming payload arrays found in the JSON Object into PayloadTrees without actually transforming any Payload
  * data.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class StanzaBuilder<T extends Stanza> {
 
     private static Log LOG = com.openexchange.log.Log.loggerFor(StanzaBuilder.class);
-    
+
     private final static String JSON = "json";
 
     protected ID from;
@@ -84,7 +84,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
 
     /**
      * Set the obligatory {@link Stanza} elements.
-     * 
+     *
      * @throws OXException for errors happening while building the Stanza
      */
     protected void basics() throws OXException {
@@ -126,20 +126,20 @@ public abstract class StanzaBuilder<T extends Stanza> {
 
     /**
      * Generate a hierarchy of PayloadTreeNodes from a nested JSON payload. Each incoming payload has the form of:
-     * 
+     *
      * <pre>
      *  {
      *      "namespace" : "this is the namespace of the payload element"
      *      "element" : "this is the name of the payload element"
-     *      "data" : 
+     *      "data" :
      *  }
      * </pre>
-     * 
+     *
      * The namespace has to be provided only if the element isn't part of the default namespace or if the hierarchie doesn't carry a
      * namespace already. Data is a JSON value. It can either be one of the two container types (JSONObject, JSONArray) or one of the simple
      * types (String, Number, Boolean, Null). Nested Container objects of JSONObject or JSONArray must follow the payload for above,
      * containing namespace, elementname and data.
-     * 
+     *
      * @param payload The payload to transform
      * @return A hierarchy of PayloadTreeNodes
      * @throws OXException if building of the Stanza fails
@@ -170,7 +170,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
      * their own PayloadElements PEj, PEk and so on. If a JSONObject contains a nested array container it is attached as seperate
      * PayloadTreeNode (PTNi) but the contained PayloadElement (PEi) doesn't contain any data. Instead the Elements of the array are
      * attached as children to the PayloadTreeNode.
-     * 
+     *
      * @param payload The payload data
      * @return the PayloadTreeNode with the filled PayloadElement and possible children attached.
      * @throws OXException For payloads with broken syntax
@@ -244,7 +244,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
 
     /**
      * Build a validated Stanza of type T
-     * 
+     *
      * @return a validated Stanza of type T
      * @throws OXException if the Stanza couldn't be build due to validation or other errors
      */

@@ -54,7 +54,7 @@ import com.openexchange.user.copy.internal.genconf.ConfAttribute;
 
 /**
  * {@link Subscription}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Subscription {
@@ -78,7 +78,7 @@ public class Subscription {
     private List<ConfAttribute> boolAttributes;
 
     private List<ConfAttribute> stringAttributes;
-    
+
 
     public Subscription() {
         super();

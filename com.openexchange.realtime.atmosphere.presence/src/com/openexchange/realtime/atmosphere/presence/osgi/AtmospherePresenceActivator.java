@@ -72,7 +72,7 @@ import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 /**
  * {@link AtmospherePresenceActivator} - Register the presence specific PayloadTransformers and Mappings from ElementPath to Class<?> and
  * add a new OXRTHandler that can handle incoming and outgoing Presence Stanzas.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AtmospherePresenceActivator extends HousekeepingActivator {
@@ -96,7 +96,7 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
     protected void handleAvailability(Class<?> clazz) {
         //make sure the PresenceChangeListeners always have the proper service reference
         if(PresenceStatusService.class.equals(clazz)) {
-            
+
         }
     }
 
@@ -104,14 +104,14 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
     protected void handleUnavailability(Class<?> clazz) {
       //make sure the PresenceChangeListeners always have the proper service reference
         if(PresenceStatusService.class.equals(clazz)) {
-            
+
         }
     }
 
     @Override
     protected void startBundle() throws Exception {
         AtmospherePresenceServiceRegistry.SERVICES.set(this);
-        
+
         track(PresenceStatusService.class, new SimpleRegistryListener<PresenceStatusService>() {
 
             @Override

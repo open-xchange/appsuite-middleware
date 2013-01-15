@@ -36,7 +36,7 @@
  * and therefore, elected the GPL Version 2 license, then the option applies
  * only if the new code is made subject to such option by the copyright
  * holder.
- * 
+ *
  * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
  */
 
@@ -77,7 +77,7 @@ import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * OSGi customized {@link ServletHandler}.
- * 
+ *
  * @author Hubert Iwaniuk
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -97,7 +97,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     /**
      * Initializes a new {@link OSGiServletHandler}.
-     * 
+     *
      * @param servlet
      * @param httpContext
      * @param servletInitParams
@@ -128,7 +128,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     /**
      * Starts {@link Servlet} instance of this {@link OSGiServletHandler}.
-     * 
+     *
      * @throws ServletException If {@link Servlet} startup failed.
      */
     public void startServlet() throws ServletException {
@@ -179,7 +179,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     /**
      * Append a filter to the chain of Filters this ServletHandler manages.
-     * 
+     *
      * @param filter Instance of the Filter to add
      * @param name Name of this Filter to add
      * @param initParams Initparameters needed to create a FilterConfig
@@ -254,7 +254,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         /**
          * Initializes a new {@link FilterChainFactory}.
-         * 
+         *
          * @param servlet
          * @param servletContext
          */
@@ -267,7 +267,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
         /**
          * Construct and return a FilterChain implementation that will wrap the execution of the specified servlet instance. If we should
          * not execute a filter chain at all, return <code>null</code>.
-         * 
+         *
          * @param request The servlet request we are processing
          * @param servlet The servlet instance to be wrapped
          */
@@ -331,7 +331,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
         /**
          * Invoke the next filter in this chain, passing the specified request and response. If there are no more filters in this chain,
          * invoke the <code>service()</code> method of the servlet itself.
-         * 
+         *
          * @param request The servlet request we are processing
          * @param response The servlet response we are creating
          * @throws java.io.IOException if an input/output error occurs
@@ -363,7 +363,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         /**
          * Let the ExceptionUtils handle the Throwable for us and set a proper HttpStatus on the response.
-         * 
+         *
          * @param throwable The Throwable that needs to be handled.
          * @param request The request that couldn't be serviced because of throwable
          * @param response The associated Response
@@ -373,7 +373,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
             StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
             if (LogProperties.isEnabled()) {
-                logBuilder.append(LogProperties.getAndPrettyPrint());
+                logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));
             }
 
             if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
@@ -419,7 +419,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
         // --------------------------------------------------------- Private Methods
         /**
          * Add ServletName and Parameters of the request to the log string allocator.
-         * 
+         *
          * @param logBuilder The existing StringBuilder user for building the log message
          * @param request The Request that couldn't be executed successfully.
          */
@@ -450,7 +450,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         /**
          * Add Uri and QueryString of the httpServletRequest to the log string allocator
-         * 
+         *
          * @param logBuilder The existing StringBuilder user for building the log message
          * @param httpServletRequest The HttpServletRequest that couldn't be executed successfully
          */

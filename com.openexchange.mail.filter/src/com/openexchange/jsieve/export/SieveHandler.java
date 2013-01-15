@@ -160,7 +160,7 @@ public class SieveHandler {
     protected final int sieve_host_port;
 
     private Capabilities capa = null;
-    
+
     private boolean punycode = false;
 
     private Socket s_sieve = null;
@@ -172,7 +172,7 @@ public class SieveHandler {
     private long mStart;
 
     private long mEnd;
-    
+
     private boolean useSIEVEResponseCodes = false;
 
     /**
@@ -267,7 +267,7 @@ public class SieveHandler {
         final boolean tlsenabled = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.TLS.property));
 
         final boolean issueTLS = tlsenabled && capa.getStarttls().booleanValue();
-        
+
         punycode = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.PUNYCODE.property));
 
 
@@ -661,11 +661,11 @@ public class SieveHandler {
         }
     }
 
-    
+
     private boolean authGSSAPI(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
         final String user = getRightEncodedString(sieve_user, "username");
         final String authname = getRightEncodedString(sieve_auth, "authname");
-        
+
         final HashMap<String, String> saslProps = new HashMap<String, String>();
 
         // Mutual authentication
@@ -682,7 +682,7 @@ public class SieveHandler {
             sc = Sasl.createSaslClient(new String[]{"GSSAPI"}, authname, "sieve", sieve_host, saslProps, null);
             byte[] response = sc.evaluateChallenge(new byte[0]);
             String b64resp = com.openexchange.tools.encoding.Base64.encode(response);
-            
+
             bos_sieve.write(new String(SIEVE_AUTH + "\"GSSAPI\" {" + b64resp.length() + "+}").getBytes());
             bos_sieve.write(CRLF.getBytes());
             bos_sieve.flush();
@@ -751,7 +751,7 @@ public class SieveHandler {
             }
         }
     }
-    
+
     private boolean authPLAIN(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
         final String username = getRightEncodedString(sieve_user, "username");
         final String authname = getRightEncodedString(sieve_auth, "authname");
@@ -870,7 +870,7 @@ public class SieveHandler {
         if( ! useSIEVEResponseCodes ) {
             return null;
         }
-        
+
         final Pattern p = Pattern.compile("^(?:NO|OK|BYE)\\s+\\((.*?)\\)\\s+(.*$)");
         final Matcher m = p.matcher(resp);
         if( m.matches() ) {
@@ -890,7 +890,7 @@ public class SieveHandler {
         }
         return null;
     }
-    
+
     private void activate(final String sieve_script_name, final StringBuilder commandBuilder) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
         if (!(AUTH)) {
             throw new OXSieveHandlerException("Activate a script not possible. Auth first.", sieve_host, sieve_host_port, null);
@@ -1020,11 +1020,11 @@ public class SieveHandler {
 
     /**
      * Parses and gets the error text. Note this will be CRLF terminated.
-     * 
+     *
      * @param actualline
      * @return
      * @throws IOException
-     * @throws OXSieveHandlerException 
+     * @throws OXSieveHandlerException
      */
     private String parseError(final String actualline) throws IOException, OXSieveHandlerException {
         final StringBuilder sb = new StringBuilder();

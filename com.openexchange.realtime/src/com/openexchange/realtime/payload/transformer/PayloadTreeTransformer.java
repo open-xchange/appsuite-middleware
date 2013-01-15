@@ -57,14 +57,14 @@ import com.openexchange.tools.session.ServerSession;
  * {@link PayloadTreeTransformer} - Walks over a PayloadTree and transforms PayloadElements contained in PayloadTreeNodes from the current
  * to the desired representation. Transformation happens when PayloadTrees of incoming Requests or outgoing Responses have to be changed so
  * that client/server can handle them.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public interface PayloadTreeTransformer {
 
     /**
      * Transform an incoming PayloadTree.
-     * 
+     *
      * @param payloadTree The incoming PayloadTree to process
      * @param session The currently active session
      * @return
@@ -74,7 +74,7 @@ public interface PayloadTreeTransformer {
 
     /**
      * Transform an outgoing PayloadTree.
-     * 
+     *
      * @param payloadTree The PayloadTree to process
      * @param session The currently active session
      * @throws OXException When transformation fails

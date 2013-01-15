@@ -62,9 +62,9 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexFacadeCustomizer implements ServiceTrackerCustomizer<IndexFacadeService, IndexFacadeService> {
-    
+
     private final BundleContext context;
-    
+
 
     public IndexFacadeCustomizer(BundleContext context) {
         super();
@@ -72,7 +72,7 @@ public class IndexFacadeCustomizer implements ServiceTrackerCustomizer<IndexFaca
     }
 
     @Override
-    public IndexFacadeService addingService(ServiceReference<IndexFacadeService> reference) {      
+    public IndexFacadeService addingService(ServiceReference<IndexFacadeService> reference) {
         IndexFacadeService service = context.getService(reference);
         ServerServiceRegistry.getInstance().addService(IndexFacadeService.class, service);
         return service;
@@ -80,13 +80,13 @@ public class IndexFacadeCustomizer implements ServiceTrackerCustomizer<IndexFaca
 
     @Override
     public void modifiedService(ServiceReference<IndexFacadeService> reference, IndexFacadeService service) {
-        // nothing to do        
+        // nothing to do
     }
 
     @Override
     public void removedService(ServiceReference<IndexFacadeService> reference, IndexFacadeService service) {
         ServerServiceRegistry.getInstance().removeService(IndexFacadeService.class);
-        context.ungetService(reference);        
+        context.ungetService(reference);
     }
 
 }

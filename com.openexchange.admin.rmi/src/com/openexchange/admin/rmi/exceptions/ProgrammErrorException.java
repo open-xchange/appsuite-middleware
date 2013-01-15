@@ -51,14 +51,14 @@ package com.openexchange.admin.rmi.exceptions;
 
 /**
  * This class is used if a shell script return an exitstatus != 0
- * 
+ *
  * @author d7
  *
  */
 public class ProgrammErrorException extends Exception {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -222510019935511764L;
 

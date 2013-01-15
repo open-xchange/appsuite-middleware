@@ -95,7 +95,7 @@ final class ConstrainedDelegateGenerator implements PrivilegedExceptionAction<Su
             context.requestMutualAuth(true);
             context.requestCredDeleg(true);
             serviceTicket = context.initSecContext(new byte[0], 0, 0);
-    
+
             delegateSubject = new Subject();
             if (context.getCredDelegState()) {
                 final GSSCredential delegateCredential = context.getDelegCred();

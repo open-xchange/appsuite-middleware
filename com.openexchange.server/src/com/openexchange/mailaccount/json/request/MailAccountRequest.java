@@ -581,12 +581,15 @@ public final class MailAccountRequest {
              * Re-Init account's default folders
              */
             try {
-                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, id);
-                mailAccess.connect(false);
+                MailAccess<?, ?> mailAccess = null;
                 try {
+                    mailAccess = MailAccess.getInstance(session, id);
+                    mailAccess.connect(false);
                     mailAccess.getFolderStorage().checkDefaultFolders();
                 } finally {
-                    mailAccess.close(true);
+                    if (null != mailAccess) {
+                        mailAccess.close(true);
+                    }
                 }
             } catch (final OXException e) {
                 LOG.warn(e.getMessage(), e);

@@ -11,9 +11,9 @@ import com.openexchange.admin.soap.context.dataobjects.Context;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -25,8 +25,8 @@ import com.openexchange.admin.soap.context.dataobjects.Context;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -40,11 +40,11 @@ public class CreateModuleAccessByNameResponse {
 
     /**
      * Ruft den Wert der return-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Context }
-     *     
+     *
      */
     public Context getReturn() {
         return _return;
@@ -52,11 +52,11 @@ public class CreateModuleAccessByNameResponse {
 
     /**
      * Legt den Wert der return-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Context }
-     *     
+     *
      */
     public void setReturn(Context value) {
         this._return = value;

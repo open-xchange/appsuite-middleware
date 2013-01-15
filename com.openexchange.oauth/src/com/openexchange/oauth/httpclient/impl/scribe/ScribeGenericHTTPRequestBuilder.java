@@ -80,7 +80,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 	protected Map<String, String> parameters = new TreeMap<String, String>();
 	protected Map<String, String> headers = new TreeMap<String, String>();
 	protected OAuthHTTPRequestBuilder coreBuilder;
-	
+
 	private boolean isVerbatimUrl;
 	private String verbatimUrl;
 	private String baseUrl;
@@ -90,16 +90,16 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 	public ScribeGenericHTTPRequestBuilder(OAuthHTTPRequestBuilder coreBuilder) {
 		this.coreBuilder = coreBuilder;
 		provider = getProvider(coreBuilder.getApi());
-		
+
 		service = new ServiceBuilder()
         .provider(getProvider(coreBuilder.getApi()))
-        .apiKey(coreBuilder.getApiKey()) 
+        .apiKey(coreBuilder.getApiKey())
         .apiSecret(coreBuilder.getSecret())
         .build();
 	}
 
 	public abstract Verb getVerb();
-	
+
 	protected Class<? extends Api> getProvider(API api) {
 		switch(api) {
 		case FACEBOOK: return FacebookApi.class;
@@ -112,7 +112,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 		case XING: return XingApi.class;
 		case VKONTAKTE: return VkontakteApi.class;
 		// Add new API enums above
-		
+
 		case OTHER: // fall-through
 		default:
 		}
@@ -158,7 +158,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 		} catch (URIException e) {
 			finalUrl = baseUrl;
 		}
-		
+
 		OAuthRequest request = new OAuthRequest(getVerb(), finalUrl);
 		setParameters(parameters, request);
 		setHeaders(headers, request);
@@ -185,7 +185,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 	}
 
 	protected void modify(OAuthRequest request) {
-		
+
 	}
 
 	private Token getToken() {

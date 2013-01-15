@@ -52,12 +52,9 @@ package com.openexchange.index.solr;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
 import junit.framework.TestCase;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.index.AccountFolders;
-import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
@@ -72,10 +69,10 @@ import com.openexchange.index.solr.internal.infostore.SolrInfostoreIndexAccess;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrFilestoreIndexAccessTest extends TestCase {
-    
+
     private SolrInfostoreIndexAccess indexAccess;
-    
-    
+
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -101,19 +98,19 @@ public class SolrFilestoreIndexAccessTest extends TestCase {
         file.setURL("http://some.where");
         file.setVersion(26);
         file.setVersionComment("Version comment...");
-        
+
         StandardIndexDocument<DocumentMetadata> document = new StandardIndexDocument<DocumentMetadata>(file);
 //        document.setProperties(parameters);
         indexAccess.addDocument(document);
-        
+
         QueryParameters query = new QueryParameters.Builder().setHandler(SearchHandler.ALL_REQUEST).setAccountFolders(Collections.singleton(new AccountFolders("sada689"))).build();
         IndexResult<DocumentMetadata> result = indexAccess.query(query, null);
         assertTrue("Wrong result size", result.getNumFound() == 1);
         DocumentMetadata reloaded = result.getResults().get(0).getObject();
         // FIXME: calc differences
-//        Set<DocumentMetadata> differences = file.differences(reloaded);        
+//        Set<DocumentMetadata> differences = file.differences(reloaded);
 //        assertTrue("There were differences.", differences.size() == 0);
         fail("FIXME!");
     }
-    
+
 }

@@ -99,11 +99,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
     }
 
     private static com.openexchange.mail.mime.ContentDisposition toContentDisposition(final String contentDisposition) throws OXException {
-        try {
-            return new com.openexchange.mail.mime.ContentDisposition(contentDisposition);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return new com.openexchange.mail.mime.ContentDisposition(contentDisposition);
     }
 
     @Override
@@ -209,11 +205,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
      */
     @Override
     public void setContentDisposition(final String contentDisp) throws OXException {
-        try {
-            cdo.setContentDisposition(contentDisp);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        cdo.setContentDisposition(contentDisp);
     }
 
     /**

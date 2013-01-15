@@ -68,7 +68,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Duplicate}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Duplicate {
@@ -121,7 +121,7 @@ public final class Duplicate {
 
     /**
      * Detects & deletes duplicates from virtual table.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -144,7 +144,7 @@ public final class Duplicate {
 
     /**
      * Detects & deletes duplicates from virtual table.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier

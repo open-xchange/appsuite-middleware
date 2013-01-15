@@ -55,7 +55,7 @@ import com.openexchange.server.impl.EffectivePermission;
 
 /**
  * {@link FolderService} - The folder service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FolderService {
@@ -87,7 +87,7 @@ public interface FolderService {
      * <p>
      * First look-up is performed for {@link Storage#WORKING}. If a "folder not found" is indicated, then retry is performed for
      * {@link Storage#BACKUP}.
-     * 
+     *
      * @param folderId The folder ID
      * @param contextId The context ID
      * @return The folder object
@@ -97,7 +97,7 @@ public interface FolderService {
 
     /**
      * Gets specified folder from given context.
-     * 
+     *
      * @param folderId The folder ID
      * @param contextId The context ID
      * @param working Whether to look-up working or backup table
@@ -108,7 +108,7 @@ public interface FolderService {
 
     /**
      * Gets specified folder from given context.
-     * 
+     *
      * @param folderId The folder ID
      * @param contextId The context ID
      * @param storage What storage source to look-up
@@ -119,7 +119,7 @@ public interface FolderService {
 
     /**
      * Determines specified user's effective permission on the folder matching given folder ID.
-     * 
+     *
      * @param folderId The folder ID
      * @param userId The user ID
      * @param contextId The context ID
@@ -130,7 +130,7 @@ public interface FolderService {
 
     /**
      * Determines specified user's effective permission on the folder matching given folder ID.
-     * 
+     *
      * @param folderId The folder ID
      * @param userId The user ID
      * @param contextId The context ID

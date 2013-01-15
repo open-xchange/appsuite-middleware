@@ -71,7 +71,7 @@ import com.openexchange.mdns.MDNSServiceListener;
 
 /**
  * {@link MDNSServiceImpl} - The mDNS service implementation backed by <a href="http://sourceforge.net/projects/jmdns/">JmDNS</a>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
@@ -94,7 +94,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
 
     /**
      * Initializes a new {@link MDNSServiceImpl}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public MDNSServiceImpl() throws OXException {

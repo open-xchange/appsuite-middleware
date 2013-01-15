@@ -56,7 +56,7 @@ import java.util.Set;
 
 /**
  * {@link FacetParameters} - Represents facet parameters.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FacetParameters {
@@ -78,7 +78,7 @@ public final class FacetParameters {
 
         /**
          * Sets the fields
-         * 
+         *
          * @param fields The fields to set
          * @return This builder with argument applied
          */
@@ -89,7 +89,7 @@ public final class FacetParameters {
 
         /**
          * Sets the ranges
-         * 
+         *
          * @param ranges The ranges to set
          * @return This builder with argument applied
          */
@@ -100,7 +100,7 @@ public final class FacetParameters {
 
         /**
          * Builds {@link FacetParameters} instance.
-         * 
+         *
          * @return The {@link FacetParameters} instance
          */
         public FacetParameters build() {

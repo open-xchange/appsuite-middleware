@@ -116,7 +116,7 @@ public class UserTest extends AbstractTest {
         final Class clazz = ret.getClass();
         for(final Method m : clazz.getMethods() ) {
             final String name = m.getName();
-            if( !name.equals("getClass") && !name.equals("getPermissionBits") && !name.equals("getProperties") 
+            if( !name.equals("getClass") && !name.equals("getPermissionBits") && !name.equals("getProperties")
                 && !name.equals("getProperty") && (name.startsWith("is") || name.startsWith("get")) ) {
                 //System.out.println("*******" + name);
                 boolean res = (Boolean)m.invoke(ret, null);
@@ -358,9 +358,9 @@ public class UserTest extends AbstractTest {
             fail("Expected to get user data");
         }
     }
-    
+
     /**
-     * Tests if fix for bug 18866 still works. 
+     * Tests if fix for bug 18866 still works.
      */
     @Test
     public void testPublicFolderEditableForUser() throws Exception {
@@ -397,7 +397,7 @@ public class UserTest extends AbstractTest {
     }
 
     /**
-     * Tests if fix for bug 18866 still works. 
+     * Tests if fix for bug 18866 still works.
      */
     @Test
     public void testPublicFolderEditableForAdmin() throws Exception {
@@ -408,7 +408,7 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final User usr = new User();
         usr.setId(Integer.valueOf(2));
-        
+
         // enable and test it.
         UserModuleAccess access = oxu.getModuleAccess(ctx, usr, cred);
         access.setPublicFolderEditable(true);
@@ -1804,7 +1804,7 @@ public class UserTest extends AbstractTest {
         // Remove value
         return retval;
     }
-    
+
     @Test
     public void testExists() throws Exception {
 
@@ -1834,7 +1834,7 @@ public class UserTest extends AbstractTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         assertTrue("created user does not exist",existingexists);
     }
 

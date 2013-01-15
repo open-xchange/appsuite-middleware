@@ -54,14 +54,14 @@ import javax.servlet.http.Cookie;
 
 /**
  * {@link CookieWrapper} - {@link Set}-capable CookieWrapper
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CookieWrapper {
 
     /**
      * Creates a new {@link CookieWrapper} for specified cookie.
-     * 
+     *
      * @param cookie The cookie
      * @return The new wrapper
      * @throws IllegalArgumentException If passed {@link Cookie} instance is <code>null</code>
@@ -76,7 +76,7 @@ public final class CookieWrapper {
 
     /**
      * Initializes a new {@link CookieWrapper}.
-     * 
+     *
      * @throws IllegalArgumentException If passed {@link Cookie} instance is <code>null</code>
      */
     public CookieWrapper(final Cookie cookie) {
@@ -101,7 +101,7 @@ public final class CookieWrapper {
 
     /**
      * Gets the assigned cookie.
-     * 
+     *
      * @return The cookie
      */
     public Cookie getCookie() {

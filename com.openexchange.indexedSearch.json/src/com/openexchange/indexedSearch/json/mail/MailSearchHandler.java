@@ -53,10 +53,8 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -92,7 +90,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailSearchHandler}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailSearchHandler implements SearchHandler {
@@ -126,14 +124,14 @@ public class MailSearchHandler implements SearchHandler {
                 SearchTerm<?> mailSearchTerm = map(searchTerm);
                 {
                     more[0] = false;
-                    String name = null == names ? null : names.get(i++);     
-                    
+                    String name = null == names ? null : names.get(i++);
+
                     // FIXME: Add account and folder filter
                     QueryParameters.Builder builder = new QueryParameters.Builder()
                                                                 .setOffset(range[0])
                                                                 .setLength(range[1] - range[0])
                                                                 .setSortField(MailIndexField.RECEIVED_DATE)
-                                                                .setOrder(Order.DESC);                    
+                                                                .setOrder(Order.DESC);
 
                     QueryParameters parameters = builder.setHandler(com.openexchange.index.SearchHandler.CUSTOM).setSearchTerm(mailSearchTerm).build();
                     MailField[] mailFields = MailField.getFields(fields);
@@ -166,7 +164,7 @@ public class MailSearchHandler implements SearchHandler {
 
     /**
      * Generates an appropriate mail search term from specified search term.
-     * 
+     *
      * @param searchTerm The search term
      * @return An appropriate mail search term
      * @throws IllegalArgumentException If an appropriate mail search term cannot be generated

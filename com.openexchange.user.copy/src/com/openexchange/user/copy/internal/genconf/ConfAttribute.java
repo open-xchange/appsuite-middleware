@@ -56,23 +56,23 @@ package com.openexchange.user.copy.internal.genconf;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ConfAttribute {
-    
+
     public static final int STRING = 1;
-    
+
     public static final int BOOL = 2;
-    
+
     private String name;
-    
+
     private String value;
-    
+
     private final int type;
-    
-    
+
+
     public ConfAttribute(final int type) {
         super();
         this.type = type;
     }
-    
+
     public int getType() {
         return type;
     }
@@ -101,7 +101,7 @@ public class ConfAttribute {
         result = prime * result + type;
         if (!name.equals("account")) {
             result = prime * result + ((value == null) ? 0 : value.hashCode());
-        }        
+        }
 
         return result;
     }
@@ -128,7 +128,7 @@ public class ConfAttribute {
         if (type != other.type) {
             return false;
         }
-        
+
         if (!name.equals("account")) {
             if (value == null) {
                 if (other.value != null) {
@@ -138,10 +138,10 @@ public class ConfAttribute {
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     /**
      * @see java.lang.Object#toString()
      */

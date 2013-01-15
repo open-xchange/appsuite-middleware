@@ -57,7 +57,7 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
  *
  */
 public interface OXAdminPoolInterfaceExtension extends OXAdminPoolInterface {
-    
+
     // SPECIAL METHODS FOR CONTEXT MOVING
     public int getDBPoolIdForContextId(int context_id) throws PoolException;
     public Connection getWRITEConnectionForPoolId(int db_pool_id,String db_schema) throws PoolException;

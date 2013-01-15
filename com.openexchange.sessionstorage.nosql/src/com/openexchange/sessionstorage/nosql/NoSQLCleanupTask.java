@@ -54,7 +54,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * {@link NoSQLCleanupTask}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class NoSQLCleanupTask implements Runnable {

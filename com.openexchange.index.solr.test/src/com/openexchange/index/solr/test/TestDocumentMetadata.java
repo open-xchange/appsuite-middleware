@@ -63,15 +63,15 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 public class TestDocumentMetadata implements DocumentMetadata {
 
     private static final long serialVersionUID = -1997702831900046302L;
-    
+
     private Date lastModified;
-    
+
     private Date creationDate;
-    
+
     private int modifiedBy;
-    
+
     private long folderId;
-    
+
     private int id;
 
     private String title;
@@ -95,7 +95,7 @@ public class TestDocumentMetadata implements DocumentMetadata {
     private String filestoreLocation;
 
     private int numberOfVersions;
-        
+
 
     @Override
     public String getProperty(String key) {

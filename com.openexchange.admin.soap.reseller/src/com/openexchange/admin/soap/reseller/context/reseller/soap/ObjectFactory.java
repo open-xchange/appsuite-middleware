@@ -5,18 +5,18 @@ import javax.xml.bind.annotation.XmlRegistry;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the com.openexchange.admin.soap.reseller.context.reseller.soap package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the com.openexchange.admin.soap.reseller.context.reseller.soap package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
+ *
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -24,14 +24,14 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com.openexchange.admin.soap.reseller.context.reseller.soap
-     * 
+     *
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link InvalidDataException }
-     * 
+     *
      */
     public InvalidDataException createInvalidDataException() {
         return new InvalidDataException();
@@ -39,7 +39,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Change }
-     * 
+     *
      */
     public Change createChange() {
         return new Change();
@@ -47,7 +47,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Enable }
-     * 
+     *
      */
     public Enable createEnable() {
         return new Enable();
@@ -55,7 +55,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link NoSuchContextException }
-     * 
+     *
      */
     public NoSuchContextException createNoSuchContextException() {
         return new NoSuchContextException();
@@ -63,7 +63,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExistsResponse }
-     * 
+     *
      */
     public ExistsResponse createExistsResponse() {
         return new ExistsResponse();
@@ -71,7 +71,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CreateModuleAccess }
-     * 
+     *
      */
     public CreateModuleAccess createCreateModuleAccess() {
         return new CreateModuleAccess();
@@ -79,7 +79,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListAll }
-     * 
+     *
      */
     public ListAll createListAll() {
         return new ListAll();
@@ -87,7 +87,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListByFilestore }
-     * 
+     *
      */
     public ListByFilestore createListByFilestore() {
         return new ListByFilestore();
@@ -95,7 +95,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetModuleAccess }
-     * 
+     *
      */
     public GetModuleAccess createGetModuleAccess() {
         return new GetModuleAccess();
@@ -103,7 +103,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link StorageException }
-     * 
+     *
      */
     public StorageException createStorageException() {
         return new StorageException();
@@ -111,7 +111,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetAccessCombinationName }
-     * 
+     *
      */
     public GetAccessCombinationName createGetAccessCombinationName() {
         return new GetAccessCombinationName();
@@ -119,7 +119,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ChangeModuleAccessByName }
-     * 
+     *
      */
     public ChangeModuleAccessByName createChangeModuleAccessByName() {
         return new ChangeModuleAccessByName();
@@ -127,7 +127,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CreateModuleAccessByNameResponse }
-     * 
+     *
      */
     public CreateModuleAccessByNameResponse createCreateModuleAccessByNameResponse() {
         return new CreateModuleAccessByNameResponse();
@@ -135,7 +135,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CreateResponse }
-     * 
+     *
      */
     public CreateResponse createCreateResponse() {
         return new CreateResponse();
@@ -143,7 +143,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Delete }
-     * 
+     *
      */
     public Delete createDelete() {
         return new Delete();
@@ -151,7 +151,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Disable }
-     * 
+     *
      */
     public Disable createDisable() {
         return new Disable();
@@ -159,7 +159,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Downgrade }
-     * 
+     *
      */
     public Downgrade createDowngrade() {
         return new Downgrade();
@@ -167,7 +167,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CreateModuleAccessResponse }
-     * 
+     *
      */
     public CreateModuleAccessResponse createCreateModuleAccessResponse() {
         return new CreateModuleAccessResponse();
@@ -175,7 +175,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link RemoteException }
-     * 
+     *
      */
     public RemoteException createRemoteException() {
         return new RemoteException();
@@ -183,7 +183,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link NoSuchDatabaseException }
-     * 
+     *
      */
     public NoSuchDatabaseException createNoSuchDatabaseException() {
         return new NoSuchDatabaseException();
@@ -191,7 +191,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListByFilestoreResponse }
-     * 
+     *
      */
     public ListByFilestoreResponse createListByFilestoreResponse() {
         return new ListByFilestoreResponse();
@@ -199,7 +199,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link NoSuchReasonException }
-     * 
+     *
      */
     public NoSuchReasonException createNoSuchReasonException() {
         return new NoSuchReasonException();
@@ -207,7 +207,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link List }
-     * 
+     *
      */
     public List createList() {
         return new List();
@@ -215,7 +215,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Create }
-     * 
+     *
      */
     public Create createCreate() {
         return new Create();
@@ -223,7 +223,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link OXContextException }
-     * 
+     *
      */
     public OXContextException createOXContextException() {
         return new OXContextException();
@@ -231,7 +231,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListAllResponse }
-     * 
+     *
      */
     public ListAllResponse createListAllResponse() {
         return new ListAllResponse();
@@ -239,7 +239,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ChangeModuleAccess }
-     * 
+     *
      */
     public ChangeModuleAccess createChangeModuleAccess() {
         return new ChangeModuleAccess();
@@ -247,7 +247,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DuplicateExtensionException }
-     * 
+     *
      */
     public DuplicateExtensionException createDuplicateExtensionException() {
         return new DuplicateExtensionException();
@@ -255,7 +255,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListByDatabaseResponse }
-     * 
+     *
      */
     public ListByDatabaseResponse createListByDatabaseResponse() {
         return new ListByDatabaseResponse();
@@ -263,7 +263,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListByDatabase }
-     * 
+     *
      */
     public ListByDatabase createListByDatabase() {
         return new ListByDatabase();
@@ -271,7 +271,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetAccessCombinationNameResponse }
-     * 
+     *
      */
     public GetAccessCombinationNameResponse createGetAccessCombinationNameResponse() {
         return new GetAccessCombinationNameResponse();
@@ -279,7 +279,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ContextExistsException }
-     * 
+     *
      */
     public ContextExistsException createContextExistsException() {
         return new ContextExistsException();
@@ -287,7 +287,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InvalidCredentialsException }
-     * 
+     *
      */
     public InvalidCredentialsException createInvalidCredentialsException() {
         return new InvalidCredentialsException();
@@ -295,7 +295,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetData }
-     * 
+     *
      */
     public GetData createGetData() {
         return new GetData();
@@ -303,7 +303,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link NoSuchFilestoreException }
-     * 
+     *
      */
     public NoSuchFilestoreException createNoSuchFilestoreException() {
         return new NoSuchFilestoreException();
@@ -311,7 +311,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Exists }
-     * 
+     *
      */
     public Exists createExists() {
         return new Exists();
@@ -319,7 +319,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListResponse }
-     * 
+     *
      */
     public ListResponse createListResponse() {
         return new ListResponse();
@@ -327,7 +327,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetModuleAccessResponse }
-     * 
+     *
      */
     public GetModuleAccessResponse createGetModuleAccessResponse() {
         return new GetModuleAccessResponse();
@@ -335,7 +335,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DatabaseUpdateException }
-     * 
+     *
      */
     public DatabaseUpdateException createDatabaseUpdateException() {
         return new DatabaseUpdateException();
@@ -343,7 +343,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetDataResponse }
-     * 
+     *
      */
     public GetDataResponse createGetDataResponse() {
         return new GetDataResponse();
@@ -351,7 +351,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CreateModuleAccessByName }
-     * 
+     *
      */
     public CreateModuleAccessByName createCreateModuleAccessByName() {
         return new CreateModuleAccessByName();
@@ -359,7 +359,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DisableAll }
-     * 
+     *
      */
     public DisableAll createDisableAll() {
         return new DisableAll();
@@ -367,7 +367,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EnableAll }
-     * 
+     *
      */
     public EnableAll createEnableAll() {
         return new EnableAll();
@@ -375,7 +375,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Exception }
-     * 
+     *
      */
     public Exception createException() {
         return new Exception();

@@ -70,7 +70,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link UserConfigCascadeActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UserConfigCascadeActivator extends HousekeepingActivator {

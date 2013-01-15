@@ -88,34 +88,34 @@ public enum Table {
      */
     DELETED_LINKS("del_contacts_linkage"),
     ;
-    
+
     private final String name;
-    
+
     private Table(final String name) {
         this.name = name;
     }
-    
+
     /**
      * Gets the name of the table.
-     * 
+     *
      * @return the name
      */
     public String getName() {
         return this.name;
     }
-    
+
     public boolean isImageTable() {
         return Table.IMAGES.equals(this) || Table.DELETED_IMAGES.equals(this);
     }
-    
+
     public boolean isDistListTable() {
         return Table.DISTLIST.equals(this) || Table.DELETED_DISTLIST.equals(this);
     }
-    
+
     public boolean isContactTable() {
         return Table.CONTACTS.equals(this) || Table.DELETED_CONTACTS.equals(this);
     }
-    
+
     @Override
     public String toString() {
         return this.getName();

@@ -130,7 +130,7 @@ public class UpdatesAction extends AbstractFileAction {
                 public SearchIterator<File> getDeleted() {
                     return diter;
                 }
-                
+
             };
         }
 

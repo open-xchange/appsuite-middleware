@@ -54,7 +54,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -78,7 +77,7 @@ public class MessageBuilder extends StanzaBuilder<Message> {
         this.json = json;
         this.stanza = new Message();
     }
-    
+
     @Override
     public Message build() throws OXException {
         throw new UnsupportedOperationException("Not implemented yet!");

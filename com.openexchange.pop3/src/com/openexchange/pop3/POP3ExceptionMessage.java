@@ -65,7 +65,7 @@ public class POP3ExceptionMessage implements LocalizableStrings {
     private POP3ExceptionMessage() {
         super();
     }
-    
+
     /**
      * No connection available to access mailbox
      */

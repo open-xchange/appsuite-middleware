@@ -84,7 +84,7 @@ public final class DatabasePasswordChange extends PasswordChangeService {
         {
             final UserService userService = getServiceRegistry().getService(UserService.class);
             if (userService == null) {
-                throw new OXException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName()));
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName());
             }
             final User user = userService.getUser(event.getSession().getUserId(), ctx);
             // Get encoded version of new password

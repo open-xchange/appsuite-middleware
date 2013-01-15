@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * {@link AbstractHashKeyCollection}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractHashKeyCollection<C> {
@@ -70,7 +70,7 @@ public abstract class AbstractHashKeyCollection<C> {
 
     /**
      * Sets given generator.
-     * 
+     *
      * @param generator The generator
      * @return This collection with generator applied
      */
@@ -81,14 +81,14 @@ public abstract class AbstractHashKeyCollection<C> {
 
     /**
      * Returns this collection.
-     * 
+     *
      * @return This cleared collection
      */
     protected abstract C thisCollection();
 
     /**
      * Creates a new {@link HashKey} for specified <code>String</code> key.
-     * 
+     *
      * @param s The <code>String</code> key
      * @return The hash key
      */

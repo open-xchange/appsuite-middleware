@@ -65,7 +65,7 @@ public class UnifiedInboxExceptionMessage implements LocalizableStrings {
     private UnifiedInboxExceptionMessage() {
         super();
     }
-    
+
     // Unified Mail does not support to create folders.
     public final static String CREATE_DENIED_MSG = "Unified Mail does not support to create folders.";
 
@@ -86,7 +86,7 @@ public class UnifiedInboxExceptionMessage implements LocalizableStrings {
 
     // Unified Mail does not support draft messages.
     public final static String DRAFTS_NOT_SUPPORTED_MSG = "Unified Mail does not support draft messages.";
-    
+
     // Unified Mail does not support to move folders.
     public final static String MOVE_DENIED_MSG = "Unified Mail does not support to move folders.";
 

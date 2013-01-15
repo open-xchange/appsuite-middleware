@@ -109,7 +109,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
 
     /**
      * Initializes a new {@link CompositingIDBasedFileAccess}.
-     * 
+     *
      * @param session The associated session
      */
     protected CompositingIDBasedFileAccess(final Session session) {
@@ -259,14 +259,14 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         final FolderID id = new FolderID(folderId);
 
         getFileAccess(id.getService(), id.getAccountId()).removeDocument(id.getFolderId(), sequenceNumber);
-        // TODO: Does this method really make sense? Skipping possible delete event.     
+        // TODO: Does this method really make sense? Skipping possible delete event.
     }
 
     @Override
     public List<String> removeDocument(final List<String> ids, final long sequenceNumber) throws OXException {
         final Map<FileStorageFileAccess, List<IDTuple>> deleteOperations = new HashMap<FileStorageFileAccess, List<IDTuple>>();
         final List<File> reloaded = new ArrayList<File>();
-        for (final String id : ids) {            
+        for (final String id : ids) {
             final FileID fileID = new FileID(id);
             final FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
             List<IDTuple> deletes = deleteOperations.get(fileAccess);
@@ -275,7 +275,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                 deleteOperations.put(fileAccess, deletes);
             }
 
-            deletes.add(new FileStorageFileAccess.IDTuple(fileID.getFolderId(), fileID.getFileId()));     
+            deletes.add(new FileStorageFileAccess.IDTuple(fileID.getFolderId(), fileID.getFileId()));
             TimedResult<File> documents = fileAccess.getDocuments(deletes, Arrays.asList(new Field[] { Field.ID, Field.FOLDER_ID }));
             if (documents != null) {
                 SearchIterator<File> it = documents.results();
@@ -283,10 +283,10 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                     File file = it.next();
                     reloaded.add(file);
                 }
-            }            
+            }
         }
 
-        
+
         final List<String> notDeleted = new ArrayList<String>(ids.size());
         for (final Map.Entry<FileStorageFileAccess, List<IDTuple>> deleteOp : deleteOperations.entrySet()) {
             final FileStorageFileAccess access = deleteOp.getKey();
@@ -300,7 +300,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                     tuple.getFolder(),
                     tuple.getId()).toUniqueID());
             }
-            
+
             /*
              * Send event
              */
@@ -316,11 +316,11 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                      */
                     for (File file : reloaded) {
                         if (file.getId().equals(id)) {
-                            fileFolder = file.getFolderId();                            
+                            fileFolder = file.getFolderId();
                         }
                     }
                 } else {
-                    
+
                 }
                 String folderId = new FolderID(serviceId, accountId, fileFolder).toUniqueID();
                 String objectId = new FileID(serviceId, accountId, fileFolder, id).toUniqueID();
@@ -335,18 +335,18 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         FileID fileID = new FileID(id);
         FileStorageFileAccess access = getFileAccess(fileID.getService(), fileID.getAccountId());
         String[] notRemoved = access.removeVersion(fileID.getFolderId(), fileID.getFileId(), versions);
-        
+
         String serviceId = access.getAccountAccess().getService().getId();
         String accountId = access.getAccountAccess().getAccountId();
         Set<String> removed = new HashSet<String>(versions.length);
         for (String i : versions) {
             removed.add(i);
         }
-        
+
         for (String i : notRemoved) {
             removed.remove(i);
         }
-        
+
         String objectId = fileID.getFileId();
         FolderID folderID;
         String fileFolder = fileID.getFolderId();
@@ -359,15 +359,15 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         } else {
             folderID = new FolderID(serviceId, accountId, fileFolder);
         }
-        
+
         postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderID.toUniqueID(), fileID.toUniqueID(), removed));
         return notRemoved;
     }
 
     private static interface FileAccessDelegation {
-        
+
         public void call(FileStorageFileAccess access) throws OXException;
-        
+
     }
 
     protected void save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final FileAccessDelegation delegation) throws OXException {
@@ -387,30 +387,30 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                 move(document, data, sequenceNumber, modifiedColumns);
                 return;
             }
-            
-            document.setId(fileID.getFileId());        
+
+            document.setId(fileID.getFileId());
             event = FileStorageEventHelper.buildUpdateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
-        }        
-        
+        }
+
         document.setFolderId(folderID.getFolderId());
         FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
         FolderID srcFolder = null;
-        if (id != null) {            
+        if (id != null) {
             File fileMetadata = fileAccess.getFileMetadata(folderID.getFolderId(), new FileID(id).getFileId(), FileStorageFileAccess.CURRENT_VERSION);
             srcFolder = new FolderID(folderID.getService(), folderID.getAccountId(), fileMetadata.getFolderId());
         }
         delegation.call(fileAccess);
-        
+
         FileID fileID = new FileID(folderID.getService(), folderID.getAccountId(), document.getFolderId(), document.getId());
         document.setId(fileID.toUniqueID());
-        document.setFolderId(new FolderID(folderID.getService(), folderID.getAccountId(), document.getFolderId()).toUniqueID());        
+        document.setFolderId(new FolderID(folderID.getService(), folderID.getAccountId(), document.getFolderId()).toUniqueID());
         if (event == null) {
             event = FileStorageEventHelper.buildCreateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
         } else if (modifiedColumns != null && modifiedColumns.contains(Field.FOLDER_ID)) {
             event = FileStorageEventHelper.buildCreateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
             postEvent(FileStorageEventHelper.buildDeleteEvent(session, fileID.getService(), fileID.getAccountId(), srcFolder.toUniqueID(), fileID.toUniqueID(), null));
         }
-        
+
         postEvent(event);
     }
 
@@ -451,7 +451,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         document.setFolderId(new FolderID(folderId.getService(), folderId.getAccountId(), document.getFolderId()).toUniqueID());
 
         sourceAccess.removeDocument(Arrays.asList(new FileStorageFileAccess.IDTuple(id.getFolderId(), id.getFileId())), sequenceNumber);
-        
+
         Event deleteEvent = FileStorageEventHelper.buildDeleteEvent(session, id.getService(), id.getAccountId(), new FolderID(id.getService(), id.getAccountId(), id.getFolderId()).toUniqueID(), id.toUniqueID(), null);
         Event createEvent = FileStorageEventHelper.buildCreateEvent(session, folderId.getService(), folderId.getAccountId(), folderId.toUniqueID(), newId.toUniqueID());
         postEvent(deleteEvent);
@@ -575,7 +575,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         }
         /*-
          * We have to consider multiple file storages
-         * 
+         *
          * Poll them concurrently...
          */
         final ConcurrentTIntObjectHashMap<SearchIterator<File>> resultMap = new ConcurrentTIntObjectHashMap<SearchIterator<File>>(numOfStorages);
@@ -588,7 +588,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                     final FileStorageFileAccess files = all.get(i);
                     final int index = i;
                     completionService.submit(new Callable<Void>() {
-    
+
                         @Override
                         public Void call() throws Exception {
                             try {
@@ -610,7 +610,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                     final FileStorageFileAccess files = all.get(i);
                     final int index = i;
                     tcompletionService.submit(new Callable<Void>() {
-    
+
                         @Override
                         public Void call() throws OXException {
                             try {
@@ -655,7 +655,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         final FileID fileID = new FileID(id);
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
         fileAccess.touch(fileID.getFolderId(), fileID.getFileId());
-        
+
         /*
          * Post event
          */
@@ -667,11 +667,11 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         } else {
             folderID = new FolderID(fileID.getService(), fileID.getAccountId(), fileID.getFolderId());
         }
-        
+
         Event event = FileStorageEventHelper.buildUpdateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
         postEvent(event);
     }
-    
+
     protected void postEvent(Event event) {
         EventAdmin eventAdmin = getEventAdmin();
         eventAdmin.postEvent(event);
@@ -783,7 +783,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     protected abstract FileStorageService getFileStorageService(String serviceId) throws OXException;
 
     protected abstract List<FileStorageService> getAllFileStorageServices() throws OXException;
-    
+
     protected abstract EventAdmin getEventAdmin();
 
     // Transaction Handling

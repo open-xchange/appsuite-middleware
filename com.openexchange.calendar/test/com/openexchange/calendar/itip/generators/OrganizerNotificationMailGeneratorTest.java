@@ -77,31 +77,31 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
     MockParticipantResolver resolver  = new MockParticipantResolver();
     MockITipIntegrationUtility util = new MockITipIntegrationUtility();
     SimSession session = new SimSession(12, 1337);
-    
+
     @Test
     public void create() throws OXException {
         final Appointment appointment = createTestAppointment();
         final Appointment exc = createTestAppointment();
         exc.setObjectID(13);
         util.setExceptions(Arrays.asList(exc));
-        
-        
+
+
         final NotificationMailGenerator generator = new NotificationMailGenerator(null, null, resolver, util, null, appointment, user, user, null, session);
         final NotificationMail notificationMail = generator.generateCreateMailFor("external1@otherdomain.ox");
         assertNotNull(notificationMail);
         assertEquals("external1@otherdomain.ox", notificationMail.getRecipient().getEmail());
         assertEquals("organizer@domain.ox", notificationMail.getSender().getEmail());
-        
+
         assertEquals(appointment.getObjectID(), notificationMail.getAppointment().getObjectID());
-        
-        
+
+
         final ITipMessage message = notificationMail.getMessage();
         assertNotNull(message);
         assertEquals(ITipMethod.REQUEST, message.getMethod());
         assertEquals(appointment.getObjectID(), message.getAppointment().getObjectID());
-        
+
         assertTrue(null == generator.generateCreateMailFor("organizer@domain.ox"));
-        
+
         assertEquals("notify.appointment.create", notificationMail.getTemplateName());
     }
 
@@ -109,13 +109,13 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
     public void update() throws OXException {
         final Appointment appointment = createTestAppointment();
         appointment.setTitle("New Title");
-        
+
         final Appointment original = createTestAppointment();
 
         final Appointment exc = createTestAppointment();
         exc.setObjectID(13);
         util.setExceptions(Arrays.asList(exc));
-    
+
         final NotificationMailGenerator generator = new NotificationMailGenerator(null, null, resolver, util, original, appointment, user, user, null, session);
         final NotificationMail notificationMail = generator.generateUpdateMailFor("external1@otherdomain.ox");
 
@@ -124,7 +124,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
         assertEquals("organizer@domain.ox", notificationMail.getSender().getEmail());
         assertEquals(appointment.getObjectID(), notificationMail.getAppointment().getObjectID());
         assertEquals(original.getTitle(), notificationMail.getOriginal().getTitle());
-        
+
         final ITipMessage message = notificationMail.getMessage();
         assertNotNull(message);
         assertEquals(ITipMethod.REQUEST, message.getMethod());
@@ -135,7 +135,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
         assertEquals("notify.appointment.update", notificationMail.getTemplateName());
 
     }
-    
+
     @Test
     public void addChangeException() throws OXException {
         final Appointment appointment = createTestAppointment();
@@ -144,7 +144,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
 
         final Appointment master = createTestAppointment();
 
-    
+
         final NotificationMailGenerator generator = new NotificationMailGenerator(null, null, resolver, util, master, appointment, user, user, null, session);
         final NotificationMail notificationMail = generator.generateCreateExceptionMailFor("external1@otherdomain.ox");
 
@@ -152,7 +152,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
         assertEquals("external1@otherdomain.ox", notificationMail.getRecipient().getEmail());
         assertEquals("organizer@domain.ox", notificationMail.getSender().getEmail());
         assertEquals(appointment.getObjectID(), notificationMail.getAppointment().getObjectID());
-        
+
         final ITipMessage message = notificationMail.getMessage();
         assertNotNull(message);
         assertEquals(ITipMethod.REQUEST, message.getMethod());
@@ -162,19 +162,19 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
 
         assertEquals("notify.appointment.createexception", notificationMail.getTemplateName());
     }
-    
+
     @Test
     public void addParticipant() throws OXException {
         final Appointment appointment = createTestAppointment();
         addParticipant(appointment, "external2@otherdomain.ox", 101);
-        
+
         final Appointment original = createTestAppointment();
         removeExternalParticipant(original, "external2@otherdomain.ox");
-        
+
         final Appointment exc = createTestAppointment();
         exc.setObjectID(13);
         util.setExceptions(Arrays.asList(exc));
-    
+
         final NotificationMailGenerator generator = new NotificationMailGenerator(null, null, resolver, util, original, appointment, user, user, null, session);
         NotificationMail notificationMail = generator.generateUpdateMailFor("external1@otherdomain.ox");
 
@@ -182,27 +182,27 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
         assertNotNull(message);
         assertEquals(ITipMethod.REQUEST, message.getMethod());
         assertEquals("notify.appointment.update", notificationMail.getTemplateName());
-        
+
         notificationMail = generator.generateUpdateMailFor("external2@otherdomain.ox");
 
         message = notificationMail.getMessage();
         assertNotNull(message);
         assertEquals(ITipMethod.REQUEST, message.getMethod());
         assertEquals("notify.appointment.create", notificationMail.getTemplateName());
-        
+
     }
-    
+
     @Test
     public void removeParticipant() throws OXException {
         final Appointment appointment = createTestAppointment();
         removeExternalParticipant(appointment, "external1@otherdomain.ox");
-        
+
         final Appointment original = createTestAppointment();
 
         final Appointment exc = createTestAppointment();
         exc.setObjectID(13);
         util.setExceptions(Arrays.asList(exc));
-    
+
         final NotificationMailGenerator generator = new NotificationMailGenerator(null, null, resolver, util, original, appointment, user, user, null, session);
         NotificationMail notificationMail = generator.generateUpdateMailFor("internal1@domain.ox");
 
@@ -210,7 +210,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
         assertNotNull(message);
         assertEquals(ITipMethod.REQUEST, message.getMethod());
         assertEquals("notify.appointment.update", notificationMail.getTemplateName());
-        
+
         notificationMail = generator.generateUpdateMailFor("external1@otherdomain.ox");
 
         message = notificationMail.getMessage();
@@ -219,41 +219,41 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
         assertEquals(12, message.getAppointment().getObjectID());
         assertEquals("notify.appointment.delete", notificationMail.getTemplateName());
     }
-  
-    
+
+
     @Test
     public void deleteAppointment() throws OXException {
         final Appointment appointment = createTestAppointment();
-        
-        
+
+
         final NotificationMailGenerator generator = new NotificationMailGenerator(null, null, resolver, util, null, appointment, user, user, null, session);
         final NotificationMail notificationMail = generator.generateDeleteMailFor("external1@otherdomain.ox");
         assertNotNull(notificationMail);
         assertEquals("external1@otherdomain.ox", notificationMail.getRecipient().getEmail());
         assertEquals("organizer@domain.ox", notificationMail.getSender().getEmail());
-        
+
         assertEquals(appointment.getObjectID(), notificationMail.getAppointment().getObjectID());
-        
-        
+
+
         final ITipMessage message = notificationMail.getMessage();
         assertNotNull(message);
         assertEquals(ITipMethod.CANCEL, message.getMethod());
         assertEquals(appointment.getObjectID(), message.getAppointment().getObjectID());
 
         assertEquals("notify.appointment.delete", notificationMail.getTemplateName());
-        
+
         assertTrue(null == generator.generateDeleteMailFor("organizer@domain.ox"));
     }
-    
+
     public void addParticipantInChangeExceptionOnly() {
         // TODO: Find out what others are doing here
     }
-    
+
     public void addParticipantToASecondChangeException() {
         // TODO: Find out what others are doing here
     }
-    
-    
+
+
     private Appointment createTestAppointment() {
         final Appointment appointment = new Appointment();
         appointment.setObjectID(12);

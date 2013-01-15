@@ -70,12 +70,12 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
- * {@link WebdavMkCalendarAction} 
+ * {@link WebdavMkCalendarAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class WebdavMkCalendarAction extends AbstractAction {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavMkCalendarAction.class));
 
     /**
@@ -84,7 +84,7 @@ public class WebdavMkCalendarAction extends AbstractAction {
     public WebdavMkCalendarAction() {
         super();
     }
-    
+
     @Override
     public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
         try {
@@ -94,14 +94,14 @@ public class WebdavMkCalendarAction extends AbstractAction {
             }
             if (req.hasBody()) {
                 /*
-                 * check body  
+                 * check body
                  */
                 Document requestDoc = req.getBodyAsDocument();
                 if (null == requestDoc || null == requestDoc.getRootElement()) {
                     throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(),HttpServletResponse.SC_BAD_REQUEST);
                 }
                 Element rootElement = requestDoc.getRootElement();
-                if (null == rootElement || false == CaldavProtocol.CAL_NS.equals(rootElement.getNamespace()) || 
+                if (null == rootElement || false == CaldavProtocol.CAL_NS.equals(rootElement.getNamespace()) ||
                     false == "mkcalendar".equals(rootElement.getName())) {
                     throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(),HttpServletResponse.SC_BAD_REQUEST);
                 }
@@ -135,13 +135,13 @@ public class WebdavMkCalendarAction extends AbstractAction {
 
     /**
      * Extracts a WebDAV property from the supplied property XML element.
-     * 
+     *
      * @param propertyElement The XML element representing the property
      * @return The WebDAV property
      * @throws IOException
      */
     private static WebdavProperty getProperty(Element propertyElement) throws IOException {
-        WebdavProperty property = new WebdavProperty(propertyElement.getNamespaceURI(), propertyElement.getName());                            
+        WebdavProperty property = new WebdavProperty(propertyElement.getNamespaceURI(), propertyElement.getName());
         if (null != propertyElement.getChildren() && 0 < propertyElement.getChildren().size()) {
             property.setXML(true);
             Writer writer = null;

@@ -78,7 +78,7 @@ import com.openexchange.mq.example.MQJmsTopicExample;
  * Prefer to store only primitive data types (including Strings) to avoid data serialization issues short and long-term.
  * </p>
  * </div>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MQService extends MQConstants {
@@ -90,7 +90,7 @@ public interface MQService extends MQConstants {
 
     /**
      * Gets the special queue for managing Message Queue system.
-     * 
+     *
      * @return The special queue for managing Message Queue system.
      */
     Queue getManagementQueue() throws OXException;
@@ -115,7 +115,7 @@ public interface MQService extends MQConstants {
      * <p>
      * A {@link ConnectionFactory} is the main starting point to use message queue services in JMS-like manner:<br>
      * <img src="http://docs.oracle.com/javaee/1.4/tutorial/doc/images/jms-programmingModel.gif" alt="jms-model">
-     * 
+     *
      * @param name The name of the {@link ConnectionFactory}
      * @return The looked-up {@link ConnectionFactory} instance.
      * @see MQJmsQueueExample
@@ -128,7 +128,7 @@ public interface MQService extends MQConstants {
      * <p>
      * A {@link ConnectionFactory} is the main starting point to use message queue services in JMS-like manner:<br>
      * <img src="http://docs.oracle.com/javaee/1.4/tutorial/doc/images/jms-programmingModel.gif" alt="jms-model">
-     * 
+     *
      * @return The default {@link ConnectionFactory} instance.
      * @see MQJmsQueueExample
      * @see MQJmsTopicExample
@@ -152,7 +152,7 @@ public interface MQService extends MQConstants {
      * <li>The receiver acknowledges the successful processing of a message.</li>
      * </ul>
      * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.2.gif" alt="p2p">
-     * 
+     *
      * @param name The name of the queue
      * @return The looked-up {@link Queue} instance.
      * @throws OXException If such a queue does not exist
@@ -172,7 +172,7 @@ public interface MQService extends MQConstants {
      * <li>The receiver acknowledges the successful processing of a message.</li>
      * </ul>
      * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.2.gif" alt="p2p">
-     * 
+     *
      * @param name The name of the queue
      * @param createIfAbsent <code>true</code> to create such a queue if absent; otherwise <code>false</code> to respond with an error
      * @param params Optional parameters for the queue in case of creation; pass <code>null</code> to create with default parameters (e.g.
@@ -196,7 +196,7 @@ public interface MQService extends MQConstants {
      * <li>The receiver acknowledges the successful processing of a message.</li>
      * </ul>
      * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.2.gif" alt="p2p">
-     * 
+     *
      * @param name The name of the queue
      * @return The looked-up {@link Queue} instance.
      * @throws OXException If such a queue does not exist
@@ -217,7 +217,7 @@ public interface MQService extends MQConstants {
      * <li>The receiver acknowledges the successful processing of a message.</li>
      * </ul>
      * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.2.gif" alt="p2p">
-     * 
+     *
      * @param name The name of the queue
      * @param createIfAbsent <code>true</code> to create such a queue if absent; otherwise <code>false</code> to respond with an error
      * @param params Optional parameters for the queue in case of creation; pass <code>null</code> to create with default parameters (e.g.
@@ -231,7 +231,7 @@ public interface MQService extends MQConstants {
 
     /**
      * Checks if the denoted queue is local-only.
-     * 
+     *
      * @return <code>true</code> if local-only; otherwise <code>false</code>
      * @throws OXException If check fails
      */
@@ -253,7 +253,7 @@ public interface MQService extends MQConstants {
      * after the client has created a subscription, and the subscriber must continue to be active in order for it to consume messages.</li>
      * </ul>
      * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.3.gif" alt="pub-sub">
-     * 
+     *
      * @param name The name of the topic
      * @return The looked-up {@link Topic} instance.
      * @throws OXException If such a topic does not exist
@@ -272,7 +272,7 @@ public interface MQService extends MQConstants {
      * after the client has created a subscription, and the subscriber must continue to be active in order for it to consume messages.</li>
      * </ul>
      * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.3.gif" alt="pub-sub">
-     * 
+     *
      * @param name The name of the topic
      * @param createIfAbsent <code>true</code> to create such a queue if absent; otherwise <code>false</code> to respond with an error
      * @return The looked-up {@link Topic} instance.
@@ -293,7 +293,7 @@ public interface MQService extends MQConstants {
      * after the client has created a subscription, and the subscriber must continue to be active in order for it to consume messages.</li>
      * </ul>
      * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.3.gif" alt="pub-sub">
-     * 
+     *
      * @param name The name of the topic
      * @return The looked-up {@link Topic} instance.
      * @throws OXException If such a topic does not exist
@@ -313,7 +313,7 @@ public interface MQService extends MQConstants {
      * after the client has created a subscription, and the subscriber must continue to be active in order for it to consume messages.</li>
      * </ul>
      * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.3.gif" alt="pub-sub">
-     * 
+     *
      * @param name The name of the topic
      * @param createIfAbsent <code>true</code> to create such a queue if absent; otherwise <code>false</code> to respond with an error
      * @return The looked-up {@link Topic} instance.
@@ -325,7 +325,7 @@ public interface MQService extends MQConstants {
 
     /**
      * Checks if the denoted topic is local-only.
-     * 
+     *
      * @return <code>true</code> if local-only; otherwise <code>false</code>
      * @throws OXException If check fails
      */
@@ -337,7 +337,7 @@ public interface MQService extends MQConstants {
 
     /**
      * Deletes specified queue.
-     * 
+     *
      * @param name The queue name
      * @throws OXException If deletion fails
      */
@@ -345,7 +345,7 @@ public interface MQService extends MQConstants {
 
     /**
      * Deletes specified local queue.
-     * 
+     *
      * @param name The queue name
      * @throws OXException If deletion fails
      */
@@ -353,7 +353,7 @@ public interface MQService extends MQConstants {
 
     /**
      * Deletes specified topic.
-     * 
+     *
      * @param name The topic name
      * @throws OXException If deletion fails
      */
@@ -361,7 +361,7 @@ public interface MQService extends MQConstants {
 
     /**
      * Deletes specified local topic.
-     * 
+     *
      * @param name The topic name
      * @throws OXException If deletion fails
      */

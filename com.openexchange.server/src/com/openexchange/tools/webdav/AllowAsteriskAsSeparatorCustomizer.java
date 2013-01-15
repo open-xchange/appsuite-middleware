@@ -67,11 +67,6 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
         return new LoginRequest() {
 
             @Override
-            public boolean isVolatile() {
-                return loginReq.isVolatile();
-            }
-
-            @Override
             public String getAuthId() {
                 return loginReq.getAuthId();
             }

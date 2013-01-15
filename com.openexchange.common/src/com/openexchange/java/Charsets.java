@@ -65,7 +65,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * Class for storing character sets.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Charsets {
@@ -104,7 +104,7 @@ public final class Charsets {
 
     /**
      * Gets the ASCII string from specified bytes.
-     * 
+     *
      * @param bytes The bytes
      * @return The ASCII string
      */
@@ -118,7 +118,7 @@ public final class Charsets {
 
     /**
      * Gets the ASCII string from specified bytes.
-     * 
+     *
      * @param bytes The bytes
      * @param off The start offset in the data.
      * @param len The number of bytes to write
@@ -140,7 +140,7 @@ public final class Charsets {
 
     /**
      * Gets specified string's ASCII bytes
-     * 
+     *
      * @param str The string
      * @return The ASCII bytes
      */
@@ -150,7 +150,7 @@ public final class Charsets {
 
     /**
      * Gets specified string's ASCII bytes
-     * 
+     *
      * @param str The string
      * @return The ASCII bytes
      */
@@ -171,7 +171,7 @@ public final class Charsets {
 
     /**
      * Writes specified string's ASCII bytes to given stream.
-     * 
+     *
      * @param str The string
      * @param out The stream to write to
      * @throws IOException If an I/O error occurs
@@ -199,7 +199,7 @@ public final class Charsets {
 
     /**
      * Checks if specified charset name denotes ASCII charset.
-     * 
+     *
      * @param charset The charset name to check
      * @return <code>true</code> if specified charset name denotes ASCII charset; otherwise <code>false</code>
      */
@@ -212,7 +212,7 @@ public final class Charsets {
 
     /**
      * Gets a {@link Charset charset} object for the named charset.
-     * 
+     *
      * @param charsetName The name of the requested charset; may be either a canonical name or an alias
      * @return The {@link Charset charset} object for the named charset
      * @throws IllegalCharsetNameException If the given charset name is illegal
@@ -233,7 +233,7 @@ public final class Charsets {
     /**
      * Constructs a new <tt>String</tt> by decoding the specified array of bytes using the specified charset. The length of the new
      * <tt>String</tt> is a function of the charset, and hence may not be equal to the length of the byte array.
-     * 
+     *
      * @param bytes The bytes to construct the <tt>String</tt> from
      * @param charset The charset
      * @return The new <tt>String</tt>
@@ -244,7 +244,7 @@ public final class Charsets {
 
     /**
      * Encodes specified <tt>String</tt> into a sequence of bytes using the given charset, storing the result into a new byte array.
-     * 
+     *
      * @param source The string
      * @param charset The charset
      * @return The resulting bytes

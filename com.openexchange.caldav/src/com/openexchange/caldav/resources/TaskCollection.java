@@ -65,28 +65,28 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
  * {@link TaskCollection} - CalDAV collection for tasks.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class TaskCollection extends CalDAVFolderCollection<Task> {
-    
-    private static final int[] BASIC_COLUMNS = { 
+
+    private static final int[] BASIC_COLUMNS = {
         Task.UID, Task.FILENAME, Task.FOLDER_ID, Task.OBJECT_ID, Task.PARTICIPANTS, Task.LAST_MODIFIED, Task.CREATION_DATE
     };
-    
+
     private final GroupwareCaldavFactory factory;
     private TasksSQLInterface taskInterface = null;
-    
+
     public TaskCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder, order);
         this.factory = factory;
         super.includeProperties(new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VTODO));
     }
-    
+
     public TaskCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder) throws OXException {
         this(factory, url, folder, NO_ORDER);
     }
-    
+
     private TasksSQLInterface getTaskInterface() {
         if (null == this.taskInterface) {
             this.taskInterface = factory.getTaskInterface();
@@ -113,16 +113,16 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
     protected TaskResource createResource(Task object, WebdavPath url) throws OXException {
         return new TaskResource(factory, this, object, url);
     }
-    
+
     protected Task load(Task task) throws OXException {
         return getTaskInterface().getTaskById(task.getObjectID(), task.getParentFolderID());
     }
-    
+
     @Override
     protected boolean isSupported(Task task) throws WebdavProtocolException {
         return null != task && null == task.getParticipants() && isInInterval(task, getIntervalStart(), getIntervalEnd());
     }
-    
+
     @Override
     protected List<Task> getObjectsInRange(Date from, Date until) throws OXException {
         List<Task> tasks = new ArrayList<Task>();

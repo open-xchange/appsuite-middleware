@@ -98,7 +98,7 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
             }
         } catch (final OXException e) {
             if (e.isGeneric(Generic.NOT_FOUND)) {
-                LOG.error(StringCollection.convertArraytoString(new Object[] { 
+                LOG.error(StringCollection.convertArraytoString(new Object[] {
                     "checkMayAttach failed. The object does not exists (cid:oid) : ", session.getContextId(), ":", objectId } ));
             }
             throw e;
@@ -121,7 +121,7 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
             }
         } catch (final OXException e) {
             if (e.isGeneric(Generic.NOT_FOUND)) {
-                LOG.error(StringCollection.convertArraytoString(new Object[] { 
+                LOG.error(StringCollection.convertArraytoString(new Object[] {
                     "checkMayReadAttachments failed. The object does not exists (cid:oid) : ", session.getContextId(), ":", objectId } ));
             }
             throw e;

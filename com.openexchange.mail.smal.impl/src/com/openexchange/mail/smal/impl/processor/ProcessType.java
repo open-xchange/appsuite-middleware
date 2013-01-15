@@ -51,7 +51,7 @@ package com.openexchange.mail.smal.impl.processor;
 
 /**
  * The processing type.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum ProcessType {

@@ -65,22 +65,22 @@ import com.openexchange.calendar.itip.sender.MailSenderService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultITipDingeMacherFactoryService implements ITipDingeMacherFactoryService {
-    
+
     private final EnumMap<ITipAction, ITipDingeMacher> macherRegistry = new EnumMap<ITipAction, ITipDingeMacher>(ITipAction.class);
-    
+
     public DefaultITipDingeMacherFactoryService(CalendarITipIntegrationUtility util, MailSenderService sender, ITipMailGeneratorFactory generators) {
         addMacher(new UpdatePerformer(util, sender, generators));
         addMacher(new CancelPerformer(util, sender, generators));
         addMacher(new MailPerformer(util, sender, generators));
     }
-    
+
     public void addMacher(ITipDingeMacher macher) {
         Collection<ITipAction> supportedActions = macher.getSupportedActions();
         for (ITipAction action : supportedActions) {
             macherRegistry.put(action, macher);
         }
     }
-    
+
     @Override
     public ITipDingeMacher getMacher(ITipAction action) {
         return macherRegistry.get(action);

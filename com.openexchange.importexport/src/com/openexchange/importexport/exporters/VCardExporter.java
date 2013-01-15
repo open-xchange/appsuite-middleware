@@ -263,8 +263,6 @@ public class VCardExporter implements Exporter {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
         } catch (final ConverterException e) {
             throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final IOException e) {
             throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
         }
@@ -285,7 +283,7 @@ public class VCardExporter implements Exporter {
 
             final int folderId = Integer.parseInt(folder);
             //final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-            
+
             ContactField[] fields = ContactMapper.getInstance().getFields(
                 null != fieldsToBeExported ? fieldsToBeExported : _contactFields, null, (ContactField[])null);
             final Contact contactObj = ImportExportServices.getContactService().getContact(sessObj, Integer.toString(folderId), Integer.toString(objectId), fields);
@@ -296,8 +294,6 @@ public class VCardExporter implements Exporter {
             }
         } catch (final NumberFormatException e) {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final IOException e) {
             throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
         } catch (final ConverterException e) {

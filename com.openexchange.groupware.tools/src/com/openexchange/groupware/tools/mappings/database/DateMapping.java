@@ -57,7 +57,7 @@ import java.sql.Types;
 import java.util.Date;
 
 /**
- * {@link DateMapping} - Database mapping for <code>Types.DATE</code>. 
+ * {@link DateMapping} - Database mapping for <code>Types.DATE</code>.
  *
  * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -67,7 +67,7 @@ public abstract class DateMapping<O> extends DefaultDbMapping<Date, O> {
 	public DateMapping(final String columnName, final String readableName) {
 		super(columnName, readableName, Types.TIMESTAMP);
 	}
-	
+
 	@Override
 	public Date get(final ResultSet resultSet) throws SQLException {
 	    try {
@@ -83,7 +83,7 @@ public abstract class DateMapping<O> extends DefaultDbMapping<Date, O> {
 	        throw e;
 	    }
 	}
-	
+
 	@Override
 	public void set(final PreparedStatement statement, final int parameterIndex, final O object) throws SQLException {
 		if (this.isSet(object)) {

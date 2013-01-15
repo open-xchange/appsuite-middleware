@@ -64,17 +64,17 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link QuartzServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class QuartzServiceImpl implements QuartzService {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(QuartzServiceImpl.class);
 
     private final Map<String, Scheduler> clusteredSchedulers = new HashMap<String, Scheduler>();
-    
+
     private Scheduler localScheduler = null;
-    
+
 
     /**
      * Initializes a new {@link QuartzServiceImpl}.
@@ -179,7 +179,7 @@ public final class QuartzServiceImpl implements QuartzService {
             }
         }
     }
-    
+
     public void shutdown() {
         synchronized (clusteredSchedulers) {
             try {

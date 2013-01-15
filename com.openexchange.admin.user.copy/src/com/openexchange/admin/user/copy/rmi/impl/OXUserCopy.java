@@ -98,7 +98,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
         }
 
         new BasicAuthenticator(context).doAuthentication(auth);
-        
+
         try {
             contextcheck(src, "source");
             contextcheck(dest, "destination");
@@ -133,7 +133,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
             LOG.error(e1.getMessage(), e1);
             throw e1;
         }
-        
+
 
         final int newUserId;
         try {
@@ -144,7 +144,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
         }
 
         LOG.info("User " + user.getId() + " successfully copied to Context " + dest.getId() + " from Context " + src.getId());
-        
+
         return new User(newUserId);
     }
 

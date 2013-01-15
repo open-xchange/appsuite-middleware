@@ -54,13 +54,13 @@ import com.openexchange.realtime.packet.Stanza;
 
 /**
  * {@link StanzaSender} - Handles sending of Stanzas to the ID specified in the
- * stanza. 
+ * stanza.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface StanzaSender {
     /**
-     * Send Stanzas to the ID specified in the Stanza. 
+     * Send Stanzas to the ID specified in the Stanza.
      * @param stanza the Stanza to send
      * @throws OXException when sending of the Stanza fails
      */

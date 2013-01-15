@@ -104,7 +104,7 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
     public String getEmailAddress() {
         return emailaddress == null ? null : emailaddress.toLowerCase();
     }
-    
+
     public void setEmailAddress(String emailaddress) {
         this.emailaddress = emailaddress == null ? null : emailaddress.toLowerCase();
     }

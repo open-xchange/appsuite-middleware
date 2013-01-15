@@ -78,7 +78,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
  * {@link DropboxFileAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DropboxFileAccess extends AbstractDropboxAccess implements FileStorageFileAccess {

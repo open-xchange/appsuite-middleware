@@ -68,7 +68,7 @@ import com.openexchange.textxtraction.TextXtractExceptionCodes;
 
 /**
  * {@link CleanContentTextXtraction} - The text extractor based on CleanContent SDK.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CleanContentTextXtraction implements DelegateTextXtraction {
@@ -86,17 +86,17 @@ public final class CleanContentTextXtraction implements DelegateTextXtraction {
         try {
             /*
              * Note that the SecureRequest object is REUSED for all the file.
-             */ 
+             */
             final SecureRequest request = new SecureRequest();
-            request.setOption(SecureOptions.JustAnalyze, true);             
+            request.setOption(SecureOptions.JustAnalyze, true);
             if (inputStream instanceof FileInputStream) {
                 request.setOption(SecureOptions.SourceDocument, inputStream);
-            } else {      
+            } else {
                 byte[] byteArray = IOUtils.toByteArray(inputStream);
                 ByteBuffer buffer = ByteBuffer.wrap(byteArray);
                 request.setOption(SecureOptions.SourceDocument, buffer);
             }
-            
+
             final TextAppendingElementHandler elementHandlerImpl = new TextAppendingElementHandler();
             request.setOption(SecureOptions.ElementHandler, elementHandlerImpl);
             request.setOption(SecureOptions.OutputType, OutputTypeOption.ToHandler);
@@ -112,7 +112,7 @@ public final class CleanContentTextXtraction implements DelegateTextXtraction {
                 extracted = true;
                 return elementHandlerImpl.getText();
             }
-            
+
             return null;
         } catch (final IOException e) {
             throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -154,7 +154,7 @@ public final class CleanContentTextXtraction implements DelegateTextXtraction {
         } catch (final RuntimeException e) {
             throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
         }
-        
+
     }
 
     @Override

@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -70,7 +70,7 @@ public final class LoxandraServiceLookUp {
 
 	/**
 	 * Gets the service look-up
-	 * 
+	 *
 	 * @return The service look-up or <code>null</code>
 	 */
 	public static ServiceLookup get() {
@@ -79,7 +79,7 @@ public final class LoxandraServiceLookUp {
 
 	/**
 	 * Gets the service of specified type
-	 * 
+	 *
 	 * @param clazz
 	 *            The service's class
 	 * @return The service or <code>null</code> is absent
@@ -93,7 +93,7 @@ public final class LoxandraServiceLookUp {
 
 	/**
 	 * Sets the service look-up
-	 * 
+	 *
 	 * @param serviceLookup
 	 *            The service look-up or <code>null</code>
 	 */

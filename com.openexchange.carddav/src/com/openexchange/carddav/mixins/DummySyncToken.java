@@ -60,7 +60,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class DummySyncToken extends SingleXMLPropertyMixin {
 
-   
+
     public DummySyncToken() {
         super(Protocol.DAV_NS.getURI(), "sync-token");
     }

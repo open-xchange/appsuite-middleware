@@ -81,7 +81,7 @@ public abstract class LdapDistListMapping extends LdapMapping<DistributionListEn
                     if (null != value) {
                         /*
                          * set the display name to the member attribute value temporary; will be
-                         * resolved at a later stage by the storage. 
+                         * resolved at a later stage by the storage.
                          */
                         DistributionListEntryObject member = new DistributionListEntryObject();
                         member.setDisplayname(value);
@@ -95,9 +95,9 @@ public abstract class LdapDistListMapping extends LdapMapping<DistributionListEn
             }
             return members.toArray(new DistributionListEntryObject[members.size()]);
         }
-        return null;                
+        return null;
     }
-    
+
     @Override
     public String encode(DistributionListEntryObject[] value, LdapIDResolver idResolver) throws OXException {
         throw new UnsupportedOperationException("unable to encode distribution list members");

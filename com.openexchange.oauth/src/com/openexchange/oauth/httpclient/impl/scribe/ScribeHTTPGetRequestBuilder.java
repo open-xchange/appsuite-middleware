@@ -60,7 +60,7 @@ public class ScribeHTTPGetRequestBuilder extends ScribeGenericHTTPRequestBuilder
 	public ScribeHTTPGetRequestBuilder(OAuthHTTPRequestBuilder coreBuilder) {
 		super(coreBuilder);
 	}
-	
+
 	@Override
     public Verb getVerb(){
 		return Verb.GET;

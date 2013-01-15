@@ -348,7 +348,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 // Supports SPECIAL-USE capability
                 checker = new SpecialUseDefaultFolderChecker(accountId, session, ctx, imapStore, imapConfig);
             } else {
-                checker = new IMAPDefaultFolderChecker(accountId, session, ctx, imapStore, imapConfig);                
+                checker = new IMAPDefaultFolderChecker(accountId, session, ctx, imapStore, imapConfig);
             }
         }
         return checker;
@@ -1178,11 +1178,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (null == mass) {
                     name = MailFolder.DEFAULT_FOLDER_NAME;
                 } else {
-                    try {
-                        name = mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
-                    } catch (final OXException e) {
-                        throw new OXException(e);
-                    }
+                    name = mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
                 }
 
             }
@@ -2955,7 +2951,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      */
     private static boolean checkFolderNameValidity(final String name, final char separator, final boolean mboxEnabled) {
         WILDCARDS.forEach(new TIntProcedure() {
-            
+
             @Override
             public boolean execute(final int value) {
                 return name.indexOf(value) < 0;

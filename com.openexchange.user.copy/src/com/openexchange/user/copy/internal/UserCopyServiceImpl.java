@@ -72,7 +72,7 @@ import com.openexchange.user.copy.UserCopyService;
 public final class UserCopyServiceImpl implements UserCopyService {
 
     private List<CopyUserTaskService> tasks = new ArrayList<CopyUserTaskService>();
-    
+
 
     public UserCopyServiceImpl() {
         super();
@@ -92,10 +92,10 @@ public final class UserCopyServiceImpl implements UserCopyService {
             public Set<Integer> getSourceKeys() {
                 final Set<Integer> keySet = new HashSet<Integer>(1);
                 keySet.add(I(srcCtxId));
-                
+
                 return keySet;
             }});
-        
+
         copied.put(Constants.USER_ID_KEY, new ObjectMapping<Integer>() {
             public Integer getSource(final int id) {
                 return I(userId);
@@ -106,7 +106,7 @@ public final class UserCopyServiceImpl implements UserCopyService {
             public Set<Integer> getSourceKeys() {
                 final Set<Integer> keySet = new HashSet<Integer>(1);
                 keySet.add(I(userId));
-                
+
                 return keySet;
             }});
         final Stack<CopyUserTaskService> executed = new Stack<CopyUserTaskService>();

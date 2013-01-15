@@ -213,15 +213,11 @@ public final class MIMEStructureParser {
      * @throws OXException If parsing fails
      */
     public static ComposedMailMessage parseStructure(final JSONObject jsonStructure, final Session session) throws OXException {
-        try {
-            /*
-             * Create appropriate ComposedMailMessage instance
-             */
-            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            return new ComposedMailWrapper(parseStructure(jsonStructure), session, ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        /*
+         * Create appropriate ComposedMailMessage instance
+         */
+        final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+        return new ComposedMailWrapper(parseStructure(jsonStructure), session, ctx);
     }
 
     /**

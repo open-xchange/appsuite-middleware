@@ -75,7 +75,7 @@ public class SearchTermParser {
      * The generic {@link SearchTermParser} instance.
      */
     public static final SearchTermParser INSTANCE = new SearchTermParser();
-    
+
     /**
      * Parses specified search term JSON array.
      *
@@ -86,7 +86,7 @@ public class SearchTermParser {
     public static SearchTerm<?> parse(final JSONArray jsonArray) throws OXException {
         return INSTANCE.parseSearchTerm(jsonArray);
     }
-    
+
     public static void parseSingleOperands(final SingleSearchTerm singleSearchTerm, final JSONArray array, final int maxTerms) throws OXException {
         INSTANCE.parseSingleOperands(array, singleSearchTerm, maxTerms);
     }

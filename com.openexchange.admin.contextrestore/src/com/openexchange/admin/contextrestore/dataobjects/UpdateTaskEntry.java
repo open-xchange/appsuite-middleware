@@ -51,7 +51,7 @@ package com.openexchange.admin.contextrestore.dataobjects;
 
 /**
  * {@link UpdateTaskEntry} - Update task entry.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdateTaskEntry {
@@ -81,7 +81,7 @@ public final class UpdateTaskEntry {
 
     /**
      * Gets the context identifier
-     * 
+     *
      * @return The context identifier
      */
     public int getContextId() {
@@ -90,7 +90,7 @@ public final class UpdateTaskEntry {
 
     /**
      * Sets the context identifier
-     * 
+     *
      * @param contextId The context identifier to set
      */
     public void setContextId(final int contextId) {
@@ -99,7 +99,7 @@ public final class UpdateTaskEntry {
 
     /**
      * Gets the task name
-     * 
+     *
      * @return The task name
      */
     public String getTaskName() {
@@ -108,7 +108,7 @@ public final class UpdateTaskEntry {
 
     /**
      * Sets the task name
-     * 
+     *
      * @param taskName The task name to set
      */
     public void setTaskName(final String taskName) {
@@ -117,7 +117,7 @@ public final class UpdateTaskEntry {
 
     /**
      * Gets the successful flag
-     * 
+     *
      * @return The successful flag
      */
     public boolean isSuccessful() {
@@ -126,7 +126,7 @@ public final class UpdateTaskEntry {
 
     /**
      * Sets the successful flag
-     * 
+     *
      * @param successful The successful flag to set
      */
     public void setSuccessful(final boolean successful) {
@@ -135,7 +135,7 @@ public final class UpdateTaskEntry {
 
     /**
      * Gets the last-modified time stamp.
-     * 
+     *
      * @return The last-modified time stamp
      */
     public long getLastModified() {
@@ -144,7 +144,7 @@ public final class UpdateTaskEntry {
 
     /**
      * Sets the last-modified time stamp
-     * 
+     *
      * @param lastModified The last-modified time stamp to set
      */
     public void setLastModified(final long lastModified) {

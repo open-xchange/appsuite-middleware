@@ -63,52 +63,52 @@ public final class Fields {
     /**
      * A set of all contact fields as used by the contacts database table.
      */
-    public static final EnumSet<ContactField> CONTACT_DATABASE = EnumSet.complementOf(EnumSet.of(ContactField.IMAGE1_URL, 
-        ContactField.IMAGE1_CONTENT_TYPE, ContactField.IMAGE_LAST_MODIFIED, ContactField.IMAGE1, ContactField.DISTRIBUTIONLIST, 
+    public static final EnumSet<ContactField> CONTACT_DATABASE = EnumSet.complementOf(EnumSet.of(ContactField.IMAGE1_URL,
+        ContactField.IMAGE1_CONTENT_TYPE, ContactField.IMAGE_LAST_MODIFIED, ContactField.IMAGE1, ContactField.DISTRIBUTIONLIST,
         ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, ContactField.LAST_MODIFIED_UTC, ContactField.LINKS));
-    
+
     /**
      * An array of all contact fields as used by the contacts database table.
      */
-    public static final ContactField[] CONTACT_DATABASE_ARRAY = 
+    public static final ContactField[] CONTACT_DATABASE_ARRAY =
         CONTACT_DATABASE.toArray(new ContactField[CONTACT_DATABASE.size()]);
 
     /**
      * A set of all contact fields that are only set once during creation and never change afterwards.
      */
-    public static final EnumSet<ContactField> READONLY_CONTACT_DATABASE = EnumSet.of(ContactField.OBJECT_ID, ContactField.CREATED_BY, 
+    public static final EnumSet<ContactField> READONLY_CONTACT_DATABASE = EnumSet.of(ContactField.OBJECT_ID, ContactField.CREATED_BY,
         ContactField.CREATION_DATE, ContactField.CONTEXTID, ContactField.UID);
-    
+
     /**
      * A set of all contact fields as used by the images database table.
      */
-    public static final EnumSet<ContactField> IMAGE_DATABASE = EnumSet.of(ContactField.OBJECT_ID, ContactField.IMAGE1, 
+    public static final EnumSet<ContactField> IMAGE_DATABASE = EnumSet.of(ContactField.OBJECT_ID, ContactField.IMAGE1,
         ContactField.IMAGE_LAST_MODIFIED, ContactField.IMAGE1_CONTENT_TYPE, ContactField.CONTEXTID);
-    
+
     /**
      * A set of all additional contact fields as used by the images database table.
      */
-    public static final EnumSet<ContactField> IMAGE_DATABASE_ADDITIONAL = EnumSet.of(ContactField.IMAGE1, 
+    public static final EnumSet<ContactField> IMAGE_DATABASE_ADDITIONAL = EnumSet.of(ContactField.IMAGE1,
         ContactField.IMAGE_LAST_MODIFIED, ContactField.IMAGE1_CONTENT_TYPE);
-    
+
     /**
      * An array of all contact fields as used by the images database table.
      */
-    public static final ContactField[] IMAGE_DATABASE_ARRAY = 
+    public static final ContactField[] IMAGE_DATABASE_ARRAY =
         IMAGE_DATABASE.toArray(new ContactField[IMAGE_DATABASE.size()]);
 
     /**
      * A set of all contact fields as used by the distribution list database table.
      */
-    public static final EnumSet<DistListMemberField> DISTLIST_DATABASE = EnumSet.allOf(DistListMemberField.class); 
+    public static final EnumSet<DistListMemberField> DISTLIST_DATABASE = EnumSet.allOf(DistListMemberField.class);
 
     /**
      * An array of all contact fields as used by the distribution list database table.
      */
-    public static final DistListMemberField[] DISTLIST_DATABASE_ARRAY = 
+    public static final DistListMemberField[] DISTLIST_DATABASE_ARRAY =
         DISTLIST_DATABASE.toArray(new DistListMemberField[DISTLIST_DATABASE.size()]);
 
-    
+
     private Fields() {
         // prevent instantiation
     }

@@ -72,7 +72,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link JsonCacheServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JsonCacheServiceImpl implements JsonCacheService {

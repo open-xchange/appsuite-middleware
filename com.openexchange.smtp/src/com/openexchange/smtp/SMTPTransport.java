@@ -50,7 +50,6 @@
 package com.openexchange.smtp;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import static com.openexchange.mail.mime.converters.MimeMessageConverter.saveChanges;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import java.io.IOException;
@@ -76,6 +75,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
@@ -274,7 +274,7 @@ public final class SMTPTransport extends MailTransport {
 
     /**
      * Checks if Kerberos authentication is supposed to be performed.
-     * 
+     *
      * @return <code>true</code> for Kerberos authentication; otherwise <code>false</code>
      */
     private boolean isKerberosAuth() {
@@ -314,7 +314,7 @@ public final class SMTPTransport extends MailTransport {
                     this.kerberosSubject = (Subject) session.getParameter(KERBEROS_SESSION_SUBJECT);
                     final boolean kerberosAuth = isKerberosAuth();
                     if (kerberosAuth) {
-                        smtpProps.put("mail.smtp.auth", "true"); 
+                        smtpProps.put("mail.smtp.auth", "true");
                         smtpProps.put("mail.smtp.sasl.enable", "true");
                         smtpProps.put("mail.smtp.sasl.authorizationid", smtpConfig.getLogin());
                         smtpProps.put("mail.smtp.sasl.mechanisms", (kerberosAuth ? "GSSAPI" : "PLAIN"));
@@ -844,41 +844,18 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
-    private void saveChangesSafe(final SMTPMessage smtpMessage) throws OXException {
-        try {
-            saveChanges(smtpMessage);
-            /*
-             * Change Message-Id header appropriately
-             */
-            final String messageId = smtpMessage.getHeader("Message-ID", null);
-            if (null != messageId) {
-                /*
-                 * Somewhat of: <744810669.1.1314981157714.JavaMail.username@host.com>
-                 */
-                final HostnameService hostnameService = SMTPServiceRegistry.getServiceRegistry().getService(HostnameService.class);
-                String hostName;
-                if (null == hostnameService) {
-                    hostName = getHostName();
-                } else {
-                    hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
-                }
-                if (null == hostName) {
-                    hostName = getHostName();
-                }
-                final int pos = messageId.indexOf('@');
-                if (pos > 0 ) {
-                    final StringBuilder mid = new StringBuilder(messageId.substring(0, pos + 1)).append(hostName);
-                    if (messageId.charAt(0) == '<') {
-                        mid.append('>');
-                    }
-                    smtpMessage.setHeader("Message-ID", mid.toString());
-                } else {
-                    smtpMessage.setHeader("Message-ID", messageId + hostName);
-                }
-            }
-        } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
+    private void saveChangesSafe(final MimeMessage mimeMessage) throws OXException {
+        final HostnameService hostnameService = SMTPServiceRegistry.getServiceRegistry().getService(HostnameService.class);
+        String hostName;
+        if (null == hostnameService) {
+            hostName = getHostName();
+        } else {
+            hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
         }
+        if (null == hostName) {
+            hostName = getHostName();
+        }
+        MimeMessageConverter.saveChanges(mimeMessage, hostName);
     }
 
     private static String getHostName() {

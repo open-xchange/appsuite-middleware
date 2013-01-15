@@ -56,13 +56,13 @@ package com.openexchange.groupware.attach.index;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class SearchTerm<T> {
-    
+
     public SearchTerm() {
         super();
     }
-    
+
     public abstract T getPattern();
-    
+
     public abstract void accept(SearchTermVisitor visitor);
 
 }

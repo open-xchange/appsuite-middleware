@@ -63,7 +63,7 @@ public interface SecretEncryptionService<T> {
 
     /**
      * Encrypts specified string using given session data.
-     * 
+     *
      * @param session The session providing data
      * @param toEncrypt The string to encrypt
      * @return The encrypted string
@@ -73,7 +73,7 @@ public interface SecretEncryptionService<T> {
 
     /**
      * Decrypts specified string using given session data.
-     * 
+     *
      * @param session The session providing data
      * @param toDecrypt The string to decrypt
      * @return The decrypted string
@@ -83,7 +83,7 @@ public interface SecretEncryptionService<T> {
 
     /**
      * Decrypts specified string using given session data.
-     * 
+     *
      * @param session The session providing data
      * @param toDecrypt The string to decrypt
      * @param customizationNote The optional customization note

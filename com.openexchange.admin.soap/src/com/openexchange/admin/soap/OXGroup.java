@@ -64,7 +64,7 @@ import com.openexchange.admin.soap.dataobjects.Group;
 import com.openexchange.admin.soap.dataobjects.User;
 
 /**
- * SOAP Service implementing RMI Interface OXGroupInterface 
+ * SOAP Service implementing RMI Interface OXGroupInterface
  *
  * @author choeger
  *
@@ -81,7 +81,7 @@ public class OXGroup extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXGroupInterface#addMember(Context, Group, User[], Credentials)}
-     * 
+     *
      * @param ctx
      * @param grp
      * @param members
@@ -107,7 +107,7 @@ public class OXGroup extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXGroupInterface#change(Context, Group, Credentials)}
-     * 
+     *
      * @param ctx
      * @param grp
      * @param auth
@@ -132,7 +132,7 @@ public class OXGroup extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXGroupInterface#create(Context, Group, Credentials)}
-     * 
+     *
      * @param ctx
      * @param grp
      * @param auth
@@ -157,7 +157,7 @@ public class OXGroup extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXGroupInterface#delete(Context, Group, Credentials)}
-     * 
+     *
      * @param ctx
      * @param grp
      * @param auth
@@ -181,7 +181,7 @@ public class OXGroup extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXGroupInterface#delete(Context, Group[], Credentials)}
-     * 
+     *
      * @param ctx
      * @param grps
      * @param auth
@@ -205,7 +205,7 @@ public class OXGroup extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXGroupInterface#getData(Context, Group, Credentials)}
-     * 
+     *
      * @param ctx
      * @param grp
      * @param auth
@@ -230,7 +230,7 @@ public class OXGroup extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXGroupInterface#getData(Context, Group[], Credentials)}
-     * 
+     *
      * @param ctx
      * @param grps
      * @param auth
@@ -255,7 +255,7 @@ public class OXGroup extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXGroupInterface#getDefaultGroup(Context, Credentials)}
-     * 
+     *
      * @param ctx
      * @param auth
      * @return
@@ -278,7 +278,7 @@ public class OXGroup extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXGroupInterface#getMembers(Context, Group, Credentials)}
-     * 
+     *
      * @param ctx
      * @param grp
      * @param auth
@@ -303,7 +303,7 @@ public class OXGroup extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXGroupInterface#list(Context, String, Credentials)}
-     * 
+     *
      * @param ctx
      * @param pattern
      * @param auth
@@ -327,7 +327,7 @@ public class OXGroup extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXGroupInterface#listAll(Context, Credentials)}
-     * 
+     *
      * @param ctx
      * @param auth
      * @return
@@ -350,7 +350,7 @@ public class OXGroup extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXGroupInterface#listGroupsForUser(Context, User, Credentials)}
-     * 
+     *
      * @param ctx
      * @param usr
      * @param auth
@@ -375,7 +375,7 @@ public class OXGroup extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXGroupInterface#removeMember(Context, Group, User[], Credentials)}
-     * 
+     *
      * @param ctx
      * @param grp
      * @param members

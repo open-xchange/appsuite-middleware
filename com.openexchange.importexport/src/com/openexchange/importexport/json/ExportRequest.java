@@ -59,7 +59,7 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 public class ExportRequest {
-	
+
 	private ServerSession session;
 	private AJAXRequestData request;
 	private String folder;

@@ -187,9 +187,9 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     private final String scriptname;
 
     private boolean useSIEVEResponseCodes = false;
-    
+
     private final Subject krbSubject;
-    
+
     /**
      * Default constructor.
      */
@@ -217,7 +217,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             sieveHandler.initializeConnection();
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -699,11 +699,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             try {
                 handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
-                if (null != activeScript) {
-                    return sieveHandler.getScript(activeScript);
-                } else {
-                    return "";
-                }
+                return null == activeScript ? "" : sieveHandler.getScript(activeScript);
             } catch (final UnsupportedEncodingException e) {
                 throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
             } catch (final IOException e) {
@@ -1114,7 +1110,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         }
         return Category.CATEGORY_ERROR;
     }
-    
+
     /**
      * The SIEVE parser is not very expressive when it comes to exceptions.
      * This method analyses an exception message and throws a more detailed

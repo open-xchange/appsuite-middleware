@@ -66,30 +66,30 @@ import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.tools.StringCollection;
 
 /**
- * {@link ContactSearchAdapter} 
- * 
+ * {@link ContactSearchAdapter}
+ *
  * Helps constructing the database statement for a contact search object.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ContactSearchAdapter extends DefaultSearchAdapter {
-	
+
     /** To make MySQL use the correct indices for UNIONs created from contact search object */
     private static final boolean IGNORE_INDEX_CID_FOR_UNIONS = true;
-    
+
     /** Fields that have an alternative index */
-    private static final EnumSet<ContactField> ALTERNATIVE_INDEXED_FIELDS = EnumSet.of(ContactField.EMAIL1, ContactField.EMAIL2, 
+    private static final EnumSet<ContactField> ALTERNATIVE_INDEXED_FIELDS = EnumSet.of(ContactField.EMAIL1, ContactField.EMAIL2,
         ContactField.EMAIL3, ContactField.GIVEN_NAME, ContactField.SUR_NAME, ContactField.DISPLAY_NAME);
-    
+
 	private static String eMailAutomCompleteClause = null;
 	private static ContactField startLetterField = null;
-	
+
 	private final com.openexchange.java.StringAllocator stringBuilder;
 
 	/**
 	 * Initializes a new {@link ContactSearchAdapter}.
-	 * 
-	 * @param contactSearch The used contact search object 
+	 *
+	 * @param contactSearch The used contact search object
 	 * @param contextID the context ID
 	 * @param fields the fields to select
 	 * @param charset The used charset
@@ -109,7 +109,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	public String getClause() {
 		return stringBuilder.toString().trim();
 	}
-	
+
 	private void appendSearch(ContactSearchObject contactSearch, int contextID, ContactField[] fields) throws OXException {
 		stringBuilder.append(getSelectClause(fields)).append(" WHERE ").append(getContextIDClause(contextID)).append(" AND ");
 		/*
@@ -117,23 +117,23 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		 */
 		if (false == contactSearch.isStartLetter() || false == appendStartLetterComparison(contactSearch.getPattern())) {
 			/*
-			 * display name search, otherwise					
+			 * display name search, otherwise
 			 */
 			this.stringBuilder.append(Mappers.CONTACT.get(ContactField.DISPLAY_NAME).getColumnLabel()).append(" LIKE ?");
-            this.parameters.add(StringCollection.prepareForSearch(contactSearch.getPattern(), false, true, true));            
+            this.parameters.add(StringCollection.prepareForSearch(contactSearch.getPattern(), false, true, true));
 		}
 		/*
 		 * append folders
 		 */
 		stringBuilder.append(" AND ").append(getFolderIDsClause(contactSearch.getFolders()));
 	}
-	
+
 	private void appendSearchAlternative(ContactSearchObject contactSearch, int contextID, ContactField[] fields) throws OXException {
 		Map<ContactField, Object> comparisons = extractComparisons(contactSearch);
 		String contextIDClause = getContextIDClause(contextID);
 		String folderIDsClause = getFolderIDsClause(contactSearch.getFolders());
 		String selectClause = getSelectClause(fields);
-		
+
 		Iterator<Entry<ContactField, Object>> iterator = comparisons.entrySet().iterator();
 		if (iterator.hasNext()) {
 		    if (contactSearch.isOrSearch() || contactSearch.isEmailAutoComplete()) {
@@ -141,12 +141,12 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	             * construct clause using UNION SELECTs
 	             */
                 Entry<ContactField, Object> entry = iterator.next();
-                appendComparison(contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(), 
+                appendComparison(contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(),
                     contactSearch.isEmailAutoComplete());
 	            while (iterator.hasNext()) {
 	                stringBuilder.append(" UNION ");
 	                entry = iterator.next();
-	                appendComparison(contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(), 
+	                appendComparison(contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(),
 	                    contactSearch.isEmailAutoComplete());
 	            }
 	        } else {
@@ -190,12 +190,12 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 			/*
 			 * match pattern with fallback
 			 */
-			String fallbackColumnLabel = Mappers.CONTACT.get(ContactField.DISPLAY_NAME).getColumnLabel();			
+			String fallbackColumnLabel = Mappers.CONTACT.get(ContactField.DISPLAY_NAME).getColumnLabel();
             stringBuilder.append('(').append(columnLabel).append(" LIKE ? OR (")
             	.append(columnLabel).append(" IS NULL AND ").append(fallbackColumnLabel).append(" LIKE ?))");
-            String preparedPattern = StringCollection.prepareForSearch(pattern, false, true, true); 
-            this.parameters.add(preparedPattern);            
-            this.parameters.add(preparedPattern);            
+            String preparedPattern = StringCollection.prepareForSearch(pattern, false, true, true);
+            this.parameters.add(preparedPattern);
+            this.parameters.add(preparedPattern);
 			return true;
 		} else {
 			/*
@@ -204,8 +204,8 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 			return false;
 		}
 	}
-	
-	private void appendComparison(String contextIDClause, String folderIDsClause, String selectClause, ContactField field, Object value, 
+
+	private void appendComparison(String contextIDClause, String folderIDsClause, String selectClause, ContactField field, Object value,
 			boolean needsEMail) throws OXException {
 		stringBuilder.append('(').append(selectClause);
 		if (IGNORE_INDEX_CID_FOR_UNIONS && ALTERNATIVE_INDEXED_FIELDS.contains(field)) {
@@ -219,7 +219,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		}
 		stringBuilder.append(')');
 	}
-	
+
 	private static Map<ContactField, Object> extractComparisons(ContactSearchObject contactSearch) {
 		Map<ContactField, Object> comparisons = new HashMap<ContactField, Object>();
 		if (null != contactSearch.getSurname()) {
@@ -264,20 +264,20 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		if (null != contactSearch.getYomiLastName()) {
 			comparisons.put(ContactField.YOMI_LAST_NAME, contactSearch.getYomiLastName());
 		}
-		
-		if (0 != contactSearch.getIgnoreOwn() || null != contactSearch.getAnniversaryRange() || 
+
+		if (0 != contactSearch.getIgnoreOwn() || null != contactSearch.getAnniversaryRange() ||
 				null != contactSearch.getBirthdayRange() || null != contactSearch.getBusinessPostalCodeRange() ||
 				null != contactSearch.getCreationDateRange() || null != contactSearch.getDynamicSearchField() ||
 				null != contactSearch.getDynamicSearchFieldValue() || null != contactSearch.getFrom() ||
 				null != contactSearch.getLastModifiedRange() || null != contactSearch.getNumberOfEmployeesRange() ||
-				null != contactSearch.getSalesVolumeRange() || null != contactSearch.getOtherPostalCodeRange() || 
+				null != contactSearch.getSalesVolumeRange() || null != contactSearch.getOtherPostalCodeRange() ||
 				null != contactSearch.getPrivatePostalCodeRange()) {
 			throw new UnsupportedOperationException("not implemented");
 		}
-		
+
 		return comparisons;
 	}
-	
+
 	private static String getSelectClause(ContactField[] fields) throws OXException {
 		return "SELECT " + Mappers.CONTACT.getColumns(fields) + " FROM " + Table.CONTACTS;
 	}
@@ -291,10 +291,10 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		if (1 == folderIDs.length) {
 			return columnlabel + "=" + folderIDs[0];
 		} else {
-			return columnlabel + " IN (" + Tools.toCSV(folderIDs) + ")";			
+			return columnlabel + " IN (" + Tools.toCSV(folderIDs) + ")";
 		}
-	}	
-	
+	}
+
 	private void appendComparison(ContactField field, Object value) throws OXException {
 		DbMapping<? extends Object, Contact> dbMapping = Mappers.CONTACT.get(field);
 		if (isTextColumn(dbMapping)) {
@@ -326,12 +326,12 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 				.append(Mappers.CONTACT.get(ContactField.EMAIL2).getColumnLabel()).append("<>'' OR ")
 				.append(Mappers.CONTACT.get(ContactField.EMAIL3).getColumnLabel()).append("<>'' OR ")
 				.append(Mappers.CONTACT.get(ContactField.NUMBER_OF_DISTRIBUTIONLIST).getColumnLabel()).append(">0")
-			;			
+			;
 			eMailAutomCompleteClause = stringBuilder.toString();
 		}
 		return eMailAutomCompleteClause;
 	}
-	
+
 	private static ContactField getStartLetterField() throws OXException {
 		if (null == startLetterField) {
 			String field = ContactConfig.getInstance().getString(ContactConfig.Property.LETTER_FIELD);
@@ -343,5 +343,5 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		}
 		return startLetterField;
 	}
-	
+
 }

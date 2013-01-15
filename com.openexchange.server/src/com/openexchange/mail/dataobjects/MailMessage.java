@@ -90,10 +90,10 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public abstract class MailMessage extends MailPart {
 
-
     private static final long serialVersionUID = 8585899349289256569L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailMessage.class));
+    private static final transient org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailMessage.class));
 
     private static final String HDR_REFERENCES = MessageHeaders.HDR_REFERENCES;
     private static final String HDR_MESSAGE_ID = MessageHeaders.HDR_MESSAGE_ID;
@@ -457,6 +457,13 @@ public abstract class MailMessage extends MailPart {
     private int recentCount;
 
     private boolean b_recentCount;
+
+    /**
+     * The Message-Id header value.
+     */
+    private String messageId;
+
+    private boolean b_messageId;
 
     /**
      * Default constructor
@@ -1510,16 +1517,48 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the <i>Message-Id</i> value.
-     * 
+     *
      * @return The <i>Message-Id</i> value or <code>null</code>
      */
     public String getMessageId() {
-        return getFirstHeader(HDR_MESSAGE_ID);
+        if (!b_messageId) {
+            final String messageId = getFirstHeader(HDR_MESSAGE_ID);
+            if (messageId == null) {
+                return null;
+            }
+            setMessageId(messageId);
+        }
+        return this.messageId;
+    }
+
+    /**
+     * @return <code>true</code> if <i>Message-Id</i> is set; otherwise <code>false</code>
+     */
+    public boolean containsMessageId() {
+        return b_messageId;
+    }
+
+    /**
+     * Removes the <i>Message-Id</i>.
+     */
+    public void removeMessageId() {
+        messageId = null;
+        b_messageId = false;
+    }
+
+    /**
+     * Sets the <i>Message-Id</i>.
+     *
+     * @param sReferences The <i>Message-Id</i> header value
+     */
+    public void setMessageId(final String messageId) {
+        b_messageId = true;
+        this.messageId = messageId;
     }
 
     /**
      * Gets the <i>In-Reply-To</i> value.
-     * 
+     *
      * @return The <i>In-Reply-To</i> value or <code>null</code>
      */
     public String getInReplyTo() {
@@ -1530,7 +1569,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the <i>References</i>.
-     * 
+     *
      * @return The <i>References</i> or <code>null</code>
      */
     public String[] getReferences() {
@@ -1561,7 +1600,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the <i>References</i>.
-     * 
+     *
      * @param sReferences The <i>References</i> header value
      */
     public void setReferences(final String sReferences) {
@@ -1575,7 +1614,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the <i>References</i>.
-     * 
+     *
      * @param references The <i>References</i>
      */
     public void setReferences(final String[] references) {

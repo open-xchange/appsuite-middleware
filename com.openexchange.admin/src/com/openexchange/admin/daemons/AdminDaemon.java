@@ -170,7 +170,7 @@ public class AdminDaemon {
 
     /**
      * Checks if specified bundle is contained in list of allowed bundles.
-     * 
+     *
      * @param bundle The bundle to check
      * @return <code>true</code> if allowed; otherwise <code>false</code>
      */
@@ -180,7 +180,7 @@ public class AdminDaemon {
 
     /**
      * Checks if specified symbolic name is contained in list of allowed bundles.
-     * 
+     *
      * @param symbolicName The symbolic name to check
      * @return <code>true</code> if allowed; otherwise <code>false</code>
      */
@@ -217,7 +217,7 @@ public class AdminDaemon {
      * Checks if a simple check shall be performed in order to determine if a bundle is needed for admin to work:
      * <p>
      * Bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>.
-     * 
+     *
      * @return <code>true</code> if a simple check is sufficient; otherwise <code>false</code>
      */
     static boolean checkSimple() {
@@ -226,7 +226,7 @@ public class AdminDaemon {
 
     /**
      * Checks if specified bundle is <b>not</b> a fragment bundle.
-     * 
+     *
      * @param bundle The bundle to check
      * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle; else <code>false</code>
      */
@@ -236,7 +236,7 @@ public class AdminDaemon {
 
     /**
      * Checks if specified bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>.
-     * 
+     *
      * @param bundle The bundle to check
      * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>; else <code>false</code>
      */
@@ -248,7 +248,7 @@ public class AdminDaemon {
      * This method is used for initialization of the list of current running bundles. The problem is that the listener itself will not get
      * any events before this bundle is started, so if any bundles are started beforehand you won't notice this here. The consequence is
      * that we have to build an initial list on startup
-     * 
+     *
      * @param context
      */
     public void getCurrentBundleStatus(final BundleContext context) {
@@ -311,7 +311,7 @@ public class AdminDaemon {
             ClientAdminThread.cache = cache;
         }
     }
-    
+
     public static AdminCache getCache() throws OXGenericException {
         if (cache == null) {
             ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -365,7 +365,7 @@ public class AdminDaemon {
 
     /**
      * Looks for a matching service reference inside all bundles provided through {@link #getBundlelist()}.
-     * 
+     *
      * @param <S> Type of the service
      * @param bundleSymbolicName The bundle's symbolic name which offers the service
      * @param serviceName The service's name provided through "<i>name</i>" property
@@ -401,7 +401,7 @@ public class AdminDaemon {
 
     /**
      * Ungets the service identified through given bundle's symbolic name and "<i>name</i>" property.
-     * 
+     *
      * @param bundleSymbolicName The bundle's symbolic name which offers the service
      * @param serviceName The service's name provided through "<i>name</i>" property
      * @param context The bundle context (on which {@link BundleContext#ungetService(ServiceReference)} is invoked)

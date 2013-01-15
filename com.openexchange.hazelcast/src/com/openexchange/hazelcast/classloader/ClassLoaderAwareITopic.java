@@ -56,7 +56,7 @@ import com.hazelcast.monitor.LocalTopicStats;
 
 /**
  * {@link ClassLoaderAwareITopic}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ClassLoaderAwareITopic<E extends Serializable> extends AbstractClassLoaderAware implements ITopic<E> {

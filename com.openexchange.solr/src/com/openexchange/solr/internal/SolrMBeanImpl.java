@@ -75,9 +75,9 @@ import com.openexchange.solr.SolrProperties;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
-    
+
     private final DelegationSolrAccessImpl solrServer;
-    
+
     private final SolrCoreConfigService coreService;
 
     public SolrMBeanImpl(DelegationSolrAccessImpl solrServer, SolrCoreConfigService coreService) throws NotCompliantMBeanException {
@@ -91,8 +91,8 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
         ConfigurationService config = Services.getService(ConfigurationService.class);
         boolean isNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         if (isNode) {
-            return new ArrayList<String>(solrServer.getEmbeddedServerAccess().getActiveCores());            
-        }        
+            return new ArrayList<String>(solrServer.getEmbeddedServerAccess().getActiveCores());
+        }
 
         throw new MBeanException(null, "This node is not a solr node.");
     }
@@ -115,26 +115,26 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
         try {
             QueryResponse response = solrServer.query(identifier, query);
             SolrDocumentList results = response.getResults();
-            
+
             StringBuilder sb = new StringBuilder("Documents found: ");
             sb.append(results.getNumFound());
             Iterator<SolrDocument> it = results.iterator();
             int i = 1;
             while (it.hasNext()) {
                 SolrDocument next = it.next();
-                sb.append("\n").append("    ").append(i++).append(". ");            
+                sb.append("\n").append("    ").append(i++).append(". ");
                 for (String fieldName : next.keySet()) {
                     sb.append(fieldName).append(": ").append(String.valueOf(next.get(fieldName)));
                     sb.append("\n        ");
                 }
             }
-            
+
             return sb.toString();
         } catch (OXException e) {
             throw new MBeanException(null, e.getMessage());
-        }        
+        }
     }
-    
+
     @Override
     public long delete(int contextId, int userId, int module, String queryString) throws MBeanException {
         SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, module);
@@ -146,7 +146,7 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
             throw new MBeanException(null, e.getMessage());
         }
     }
-    
+
     @Override
     public long count(int contextId, int userId, int module, String queryString) throws MBeanException {
         SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, module);
@@ -160,7 +160,7 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
             throw new MBeanException(null, e.getMessage());
         }
     }
-    
+
     @Override
     public SolrCoreStore getCoreStore(int id) throws MBeanException {
         try {

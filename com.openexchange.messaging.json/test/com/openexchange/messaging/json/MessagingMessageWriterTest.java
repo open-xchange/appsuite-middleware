@@ -70,7 +70,6 @@ import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
-import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.SimpleMessagingMessage;

@@ -54,13 +54,12 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.blackwhitelist.BlackWhiteListInterface;
 import com.openexchange.blackwhitelist.BlackWhiteListServlet;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link Activator}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Activator extends DeferredActivator {

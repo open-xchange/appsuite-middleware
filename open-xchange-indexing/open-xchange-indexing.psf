@@ -8,6 +8,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.smal.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.service.indexing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.service.indexing.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.service.indexing.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.solr"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.solr.monitoring"/>
 </provider>
 </psf>

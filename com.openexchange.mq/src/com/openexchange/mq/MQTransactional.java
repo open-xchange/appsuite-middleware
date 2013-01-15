@@ -53,21 +53,21 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MQTransactional} - Offers methods for transactional message delivery.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MQTransactional {
 
     /**
      * Commits all messages done in this transaction and releases any locks currently held.
-     * 
+     *
      * @throws OXException If transaction cannot be committed
      */
     void commit() throws OXException;
 
     /**
      * Rolls back any messages done in this transaction and releases any locks currently held.
-     * 
+     *
      * @throws OXException If transaction roll-back fails
      */
     void rollback() throws OXException;

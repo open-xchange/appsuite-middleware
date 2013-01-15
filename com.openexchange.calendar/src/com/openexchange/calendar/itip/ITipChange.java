@@ -64,7 +64,7 @@ import static com.openexchange.calendar.itip.ITipUtils.*;
 
 /**
  * {@link ITipChange}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ITipChange {
@@ -114,7 +114,7 @@ public class ITipChange {
     public Appointment getCurrentAppointment() {
         if (currentAppointment == null) {
             if (isException && master != null && newAppointment != null && newAppointment.getRecurrenceDatePosition() != null) {
-                // TODO: Calculate original ocurrence time for diff 
+                // TODO: Calculate original ocurrence time for diff
                 CalendarDataObject originalOcurrence = master.clone();
                 CalendarCollection calCol = new CalendarCollection();
                 try {
@@ -192,7 +192,7 @@ public class ITipChange {
         }
 
         if (isException && master != null && newAppointment != null && type == Type.CREATE) {
-            // TODO: Calculate original ocurrence time for diff 
+            // TODO: Calculate original ocurrence time for diff
             CalendarDataObject originalOcurrence = master.clone();
             CalendarCollection calCol = new CalendarCollection();
             try {
@@ -216,7 +216,7 @@ public class ITipChange {
     public void setDiffDescription(List<String> diffDescription) {
         this.diffDescription = diffDescription;
     }
-    
+
     public List<String> getDiffDescription() {
         return diffDescription;
     }
@@ -224,11 +224,11 @@ public class ITipChange {
 	public void setIntroduction(String message) {
 		this.introduction = message;
 	}
-	
+
 	public String getIntroduction() {
 		return introduction;
 	}
 
-    
+
 
 }

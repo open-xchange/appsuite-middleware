@@ -79,7 +79,7 @@ public final class MailFillers {
 
     /**
      * Gets all available mail fillers
-     * 
+     *
      * @return All available fillers
      */
     public static List<MailFiller> allFillers() {
@@ -100,7 +100,7 @@ public final class MailFillers {
 
     /**
      * Gets the mail fillers for given fields
-     * 
+     *
      * @param mailFields The fields or <code>null</code> for all available fillers
      * @return The appropriate fillers
      */
@@ -219,7 +219,7 @@ public final class MailFillers {
             final Integer colorLabel = MailFillers.<Integer> getFieldValue(SolrMailField.COLOR_LABEL.solrName(), doc);
             if (colorLabel != null) {
                 mail.setColorLabel(colorLabel.intValue());
-            }            
+            }
         }
     };
 
@@ -230,7 +230,7 @@ public final class MailFillers {
             final Boolean hasAttachment = MailFillers.<Boolean> getFieldValue(SolrMailField.ATTACHMENT.solrName(), doc);
             if (hasAttachment != null) {
                 mail.setHasAttachment(hasAttachment.booleanValue());
-            }            
+            }
         }
     };
 
@@ -413,7 +413,7 @@ public final class MailFillers {
         if (name == null) {
             return null;
         }
-        
+
         final Object value = document.getFieldValue(name);
         if (null == value) {
             return null;

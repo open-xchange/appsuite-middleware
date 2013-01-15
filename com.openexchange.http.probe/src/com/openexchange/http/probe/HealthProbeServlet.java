@@ -59,7 +59,7 @@ import javax.servlet.http.HttpServletResponse;
  * {@link HealthProbeServlet} - Used for health checks from proxy servers in front of our backend(cluster). Many proxies use simple http get
  * request to test if backends return an answer and how long it takes to answer so they can do proper loadbalancing. This Servlet implements
  * this functionality in a minimal way.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class HealthProbeServlet extends HttpServlet {

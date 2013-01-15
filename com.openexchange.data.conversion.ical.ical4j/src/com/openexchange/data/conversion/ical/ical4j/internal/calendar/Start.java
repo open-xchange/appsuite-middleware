@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.property.DtEnd;
 import net.fortuna.ical4j.model.property.DtStart;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
@@ -132,7 +131,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
                 // Special flag for appointments.
             }
         }
-        
+
         if (!isDateTime && calendar instanceof Appointment) {
             final Appointment appointment = (Appointment) calendar;
             appointment.setFullTime(true);

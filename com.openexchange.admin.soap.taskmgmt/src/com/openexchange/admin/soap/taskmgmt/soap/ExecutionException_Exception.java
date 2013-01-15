@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "ExecutionException", targetNamespace = "http://soap.admin.openexchange.com")
 public class ExecutionException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.taskmgmt.soap.ExecutionException executionException;
 
     public ExecutionException_Exception() {
         super();
     }
-    
+
     public ExecutionException_Exception(String message) {
         super(message);
     }
-    
+
     public ExecutionException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

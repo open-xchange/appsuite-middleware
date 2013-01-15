@@ -59,7 +59,7 @@ import com.hazelcast.query.Predicate;
 import com.openexchange.quartz.hazelcast.TriggerStateWrapper;
 
 /**
- * 
+ *
  * {@link AcquiredAndExecutingTriggersPredicate}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -67,13 +67,13 @@ import com.openexchange.quartz.hazelcast.TriggerStateWrapper;
 public class AcquiredAndExecutingTriggersPredicate implements Predicate<TriggerKey, TriggerStateWrapper>, DataSerializable {
 
     private static final long serialVersionUID = -1102361681951763092L;
-    
+
     private String nodeIp;
 
     public AcquiredAndExecutingTriggersPredicate(String nodeIp) {
         this.nodeIp = nodeIp;
     }
-    
+
     public AcquiredAndExecutingTriggersPredicate() {
         super();
     }

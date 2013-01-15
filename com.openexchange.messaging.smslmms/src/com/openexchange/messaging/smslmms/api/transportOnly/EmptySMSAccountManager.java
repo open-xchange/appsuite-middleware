@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link EmptySMSAccountManager} - The empty SMS/MMS {@link MessagingAccountManager}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EmptySMSAccountManager implements MessagingAccountManager {
@@ -69,7 +69,7 @@ public final class EmptySMSAccountManager implements MessagingAccountManager {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static EmptySMSAccountManager getInstance() {

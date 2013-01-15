@@ -64,31 +64,31 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link FreeBusyData}
- * 
+ *
  * Data structure hosting a user's or resource's free/busy intervals.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class FreeBusyData {
-    
+
     protected String participant;
     protected Date from;
     protected Date until;
-    protected List<OXException> warnings;    
+    protected List<OXException> warnings;
     protected List<FreeBusyInterval> intervals;
-    
+
     /**
      * Initializes a new {@link FreeBusyData}.
      */
     public FreeBusyData() {
         this(null, null, null);
     }
-    
+
     /**
      * Initializes a new {@link FreeBusyData}.
-     * 
+     *
      * @param participant The participant, represented either as e-mail address or group-, user- or resource-ID
-     * @param from The lower (inclusive) limit of the time-range  
+     * @param from The lower (inclusive) limit of the time-range
      * @param until The upper (exclusive) limit of the time-range
      */
     public FreeBusyData(String participant, Date from, Date until) {
@@ -104,10 +104,10 @@ public class FreeBusyData {
     public void clear() {
         this.intervals = null;
     }
-    
+
     /**
      * Adds a free/busy interval.
-     * 
+     *
      * @param interval The interval
      */
     public void add(FreeBusyInterval interval) {
@@ -116,10 +116,10 @@ public class FreeBusyData {
         }
         this.intervals.add(interval);
     }
-    
+
     /**
      * Adds multiple intervals.
-     * 
+     *
      * @param intervals The intervals to add
      */
     public void addAll(Collection<? extends FreeBusyInterval> intervals) {
@@ -130,10 +130,10 @@ public class FreeBusyData {
             this.intervals.addAll(intervals);
         }
     }
-    
+
     /**
      * Adds all data from another {@link FreeBusyData} instance, i.e. all intervals and warnings.
-     * 
+     *
      * @param data The data to add
      */
     public void add(FreeBusyData data) {
@@ -141,26 +141,26 @@ public class FreeBusyData {
             if (data.hasWarnings()) {
                 for (OXException warning : data.warnings) {
                     this.addWarning(warning);
-                }                
+                }
             }
             if (data.hasData()) {
                 this.addAll(data.getIntervals());
             }
         }
     }
-    
+
     /**
      * Gets all intervals.
-     * 
+     *
      * @return The intervals.
      */
     public List<FreeBusyInterval> getIntervals() {
         return null != this.intervals ? Collections.unmodifiableList(this.intervals) : null;
     }
-    
+
     /**
      * Gets the participant, identified either by its internal user-/resource-ID or e-mail address.
-     * 
+     *
      * @return The participant
      */
     public String getParticipant() {
@@ -169,7 +169,7 @@ public class FreeBusyData {
 
     /**
      * Gets the lower (inclusive) limit of the covered time-range.
-     * 
+     *
      * @return The 'from' date
      */
     public Date getFrom() {
@@ -178,7 +178,7 @@ public class FreeBusyData {
 
     /**
      * Gets the upper (exclusive) limit of the covered time-range.
-     * 
+     *
      * @return The 'until' date
      */
     public Date getUntil() {
@@ -187,8 +187,8 @@ public class FreeBusyData {
 
     /**
      * Gets a list of warnings in case data could not be retrieved.
-     * 
-     * @return The warnings, if present, or <code>null</code>, otherwise 
+     *
+     * @return The warnings, if present, or <code>null</code>, otherwise
      */
     public List<OXException> getWarnings() {
         return null != warnings && 0 < warnings.size() ? Collections.unmodifiableList(warnings) : null;
@@ -196,7 +196,7 @@ public class FreeBusyData {
 
     /**
      * Gets a value indicating whether there are warnings or not.
-     * 
+     *
      * @return <code>true</code> in case of existing warnings, <code>false</code>, otherwise
      */
     public boolean hasWarnings() {
@@ -204,8 +204,8 @@ public class FreeBusyData {
     }
 
     /**
-     * Gets a value indicating whether data is available, i.e. the intervals have been initialized. 
-     * 
+     * Gets a value indicating whether data is available, i.e. the intervals have been initialized.
+     *
      * @return <code>true</code> in case of existing data, <code>false</code>, otherwise
      */
     public boolean hasData() {
@@ -214,7 +214,7 @@ public class FreeBusyData {
 
     /**
      * Adds an {@link OXException} as warning.
-     * 
+     *
      * @param warning The exception
      */
     public void addWarning(OXException warning) {
@@ -223,7 +223,7 @@ public class FreeBusyData {
         }
         this.warnings.add(warning);
     }
-    
+
     private static Date[] getTimes(List<FreeBusyInterval> intervals) {
         Set<Date> times = new HashSet<Date>();
         for (FreeBusyInterval freeBusyInterval : intervals) {
@@ -232,16 +232,16 @@ public class FreeBusyData {
         }
         Date[] array = times.toArray(new Date[times.size()]);
         Arrays.sort(array);
-        return array; 
+        return array;
     }
-    
+
     /**
      * Normalizes the contained free/busy intervals. This means<ul>
      * <li>the intervals are sorted chronologically, i.e. the earliest interval is first</li>
-     * <li>all intervals beyond or above the 'from' and 'until' range are removed, intervals overlapping the boundaries are shortened to 
+     * <li>all intervals beyond or above the 'from' and 'until' range are removed, intervals overlapping the boundaries are shortened to
      * fit</li>
      * <li>overlapping intervals are merged so that only the most conflicting ones of overlapping time ranges are used</li>
-     * </ul>  
+     * </ul>
      */
     public void normalize() {
         if (false == hasData()) {
@@ -264,13 +264,13 @@ public class FreeBusyData {
             } else {
                 // outside range
                 iterator.remove();
-            }            
+            }
         }
         if (2 > intervals.size()) {
             return; // nothing more to do
         }
         /*
-         * expand intervals to match all possible boundaries 
+         * expand intervals to match all possible boundaries
          */
         Date[] times = getTimes(this.intervals);
         ArrayList<FreeBusyInterval> expandedIntervals = new ArrayList<FreeBusyInterval>();
@@ -292,7 +292,7 @@ public class FreeBusyData {
             }
         }
         /*
-         * condense all overlapping intervals to most conflicting one 
+         * condense all overlapping intervals to most conflicting one
          */
         Collections.sort(expandedIntervals);
         ArrayList<FreeBusyInterval> mergedIntervals = new ArrayList<FreeBusyInterval>();
@@ -341,7 +341,7 @@ public class FreeBusyData {
          */
         this.intervals = mergedIntervals;
     }
-    
+
     @Override
     public String toString() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -353,7 +353,7 @@ public class FreeBusyData {
             for (FreeBusyInterval interval : this.intervals) {
                 stringBuilder.append(interval).append("\n");
             }
-        } 
+        }
         if (hasWarnings()) {
             for (OXException warning : warnings) {
                 stringBuilder.append(warning.getLogMessage()).append("\n");
@@ -361,5 +361,5 @@ public class FreeBusyData {
         }
         return stringBuilder.toString();
     }
-    
+
 }

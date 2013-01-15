@@ -153,7 +153,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         ret.setFileStorageService(service);
         /*-
          * Set login/password if authenticator is absent
-         * 
+         *
          * Check for an appropriate authenticator
          */
         final ConfigFileStorageAuthenticator authenticator = getAuthenticator(serviceId);
@@ -181,7 +181,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
 
     /**
      * Gets the appropriate and highest-ranked authenticator for given service identifier.
-     * 
+     *
      * @param serviceId The service identifier
      * @return The appropriate and highest-ranked authenticator or <code>null</code> if none available
      */

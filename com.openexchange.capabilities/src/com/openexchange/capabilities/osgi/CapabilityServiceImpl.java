@@ -50,10 +50,8 @@
 package com.openexchange.capabilities.osgi;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -74,12 +72,12 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CapabilityServiceImpl implements CapabilityService {
-	
-	private ConcurrentMap<String, Capability> capabilities = new ConcurrentHashMap<String, Capability>();
-	private Set<String> declaredCapabilities = new HashSet<String>();
-	
-	private ServiceLookup services;
-	
+
+	private final ConcurrentMap<String, Capability> capabilities = new ConcurrentHashMap<String, Capability>();
+	private final Set<String> declaredCapabilities = new HashSet<String>();
+
+	private final ServiceLookup services;
+
 	/**
 	 * Initializes a new {@link CapabilityServiceImpl}.
 	 * @param capabilitiesActivator
@@ -103,24 +101,24 @@ public class CapabilityServiceImpl implements CapabilityService {
 				}
 			}
 		}
-		
+
 		// What about autologin?
-		
+
 		boolean autologin = services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.ajax.login.http-auth.autologin", false);
-		
+
 		if (autologin) {
 			capabilities.add(new Capability("autologin", true));
 		}
-		
+
 		for(String cap: declaredCapabilities) {
 			if (check(cap, session)) {
 				capabilities.add(getCapability(cap));
 			}
 		}
-		
+
 		return capabilities;
 	}
-	
+
 	private boolean check(String cap, ServerSession session) throws OXException {
 		for(CapabilityChecker checker: getCheckers()) {
 			if (!checker.isEnabled(cap, session)) {
@@ -133,15 +131,15 @@ public class CapabilityServiceImpl implements CapabilityService {
 	public Set<Capability> getAllKnownCapabilities() throws OXException {
 		return new HashSet<Capability>(capabilities.values());
 	}
-	
+
 	public Capability getCapability(String id) {
 		Capability capability = capabilities.get(id);
-		
+
 		if (capability == null) {
 			Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id, false));
 			return existingCapability != null ? existingCapability : capability;
 		}
-		
+
 		return capability;
 	}
 
@@ -149,10 +147,10 @@ public class CapabilityServiceImpl implements CapabilityService {
 	public void declareCapability(String capability) {
 		declaredCapabilities.add(capability);
 	}
-	
+
 	public List<CapabilityChecker> getCheckers() {
 		return Collections.emptyList();
 	}
-	
-	
+
+
 }

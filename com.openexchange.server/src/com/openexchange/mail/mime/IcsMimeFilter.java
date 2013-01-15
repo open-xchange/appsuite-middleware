@@ -63,7 +63,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link IcsMimeFilter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IcsMimeFilter extends MimeFilter {
@@ -72,7 +72,7 @@ public final class IcsMimeFilter extends MimeFilter {
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     public static IcsMimeFilter getInstance() {

@@ -16,7 +16,7 @@ import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
 
 /**
  * {@link CompositeFileStorageFactory}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CompositeFileStorageFactory implements FileStorageFactory, ServiceTrackerCustomizer<FileStorageFactoryCandidate, FileStorageFactoryCandidate> {

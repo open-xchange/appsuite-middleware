@@ -59,7 +59,7 @@ public interface TypeAware extends FileStorageFolder {
 
     /**
      * Gets this folder's type.
-     * 
+     *
      * @return The folder type.
      */
     FileStorageFolderType getType();

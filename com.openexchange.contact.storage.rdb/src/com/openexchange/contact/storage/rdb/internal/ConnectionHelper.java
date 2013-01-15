@@ -60,22 +60,22 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ConnectionHelper}
- * 
+ *
  * Provides read-only- and writable connections for accessing the database.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ConnectionHelper {
-    
+
     private final DatabaseService databaseService;
-    private final Session session;        
+    private final Session session;
 
     private Connection readOnlyConnection = null;
     private boolean backReadOnly;
     private Connection writableConnection = null;
     private boolean backWritable;
     private boolean committed;
-    
+
     /**
      * Initializes a new {@link ConnectionHelper}.
      */
@@ -87,7 +87,7 @@ public class ConnectionHelper {
 
     /**
      * Gets a read-only database connection for the current session.
-     * 
+     *
      * @return A read-only connection
      * @throws OXException
      */
@@ -95,7 +95,7 @@ public class ConnectionHelper {
         if (null == readOnlyConnection) {
             Object sessionConnection = session.getParameter(ContactSessionParameterNames.getParamReadOnlyConnection());
             if (null != sessionConnection && Connection.class.isInstance(sessionConnection)) {
-                readOnlyConnection = (Connection)sessionConnection;                                        
+                readOnlyConnection = (Connection)sessionConnection;
                 backReadOnly = false;
             } else {
                 readOnlyConnection = databaseService.getReadOnly(session.getContextId());
@@ -104,10 +104,10 @@ public class ConnectionHelper {
         }
         return readOnlyConnection;
     }
-    
+
     /**
-     * Gets a writable database connection for the current session. Auto-commit is set to <code>false</code> implicitly. 
-     * 
+     * Gets a writable database connection for the current session. Auto-commit is set to <code>false</code> implicitly.
+     *
      * @return A writable connection
      * @throws OXException
      */
@@ -115,7 +115,7 @@ public class ConnectionHelper {
         if (null == writableConnection) {
             Object sessionConnection = session.getParameter(ContactSessionParameterNames.getParamWritableConnection());
             if (null != sessionConnection && Connection.class.isInstance(sessionConnection)) {
-                writableConnection = (Connection)sessionConnection;                                        
+                writableConnection = (Connection)sessionConnection;
                 backWritable = false;
             } else {
                 writableConnection = databaseService.getWritable(session.getContextId());
@@ -129,27 +129,27 @@ public class ConnectionHelper {
         }
         return writableConnection;
     }
-    
+
     public void commit() throws SQLException {
         if (null != writableConnection) {
             writableConnection.commit();
             committed = true;
-        }        
+        }
     }
-    
+
     /**
      * Backs all acquired database connections to the pool if needed.
-     * 
+     *
      * @throws OXException
      */
     public void back() throws OXException {
         backReadOnly();
         backWritable();
     }
-    
+
     /**
      * Backs an acquired read-only connection to the pool if needed.
-     * 
+     *
      * @throws OXException
      */
     public void backReadOnly() throws OXException {
@@ -158,17 +158,17 @@ public class ConnectionHelper {
             readOnlyConnection = null;
         }
     }
-    
+
     /**
      * Backs an acquired writable connection to the pool if needed, rolling back the transaction automatically if not yet committed.
-     * 
+     *
      * @throws OXException
      */
     public void backWritable() throws OXException {
         if (null != writableConnection) {
             if (false == committed) {
                 DBUtils.rollback(writableConnection);
-            }            
+            }
             if (backWritable) {
                 DBUtils.autocommit(writableConnection);
                 databaseService.backWritable(session.getContextId(), writableConnection);
@@ -176,6 +176,6 @@ public class ConnectionHelper {
             }
         }
     }
-    
+
 }
 

@@ -71,11 +71,7 @@ public final class MailNotifyPushDeleteListener implements DeleteListener {
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_USER == event.getType()) {
-            try {
-                MailNotifyPushListenerRegistry.getInstance().purgeUserPushListener(event.getContext().getContextId(), event.getId());
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            MailNotifyPushListenerRegistry.getInstance().purgeUserPushListener(event.getContext().getContextId(), event.getId());
         }
     }
 

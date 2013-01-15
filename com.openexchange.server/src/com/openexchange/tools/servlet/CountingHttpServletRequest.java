@@ -70,7 +70,7 @@ import com.openexchange.tools.stream.CountingInputStream;
 /**
  * {@link CountingHttpServletRequest} - The HTTP Servlet request wrapper aware of <code>"com.openexchange.servlet.maxBodySize"</code>
  * property.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CountingHttpServletRequest implements HttpServletRequest, Parameterizable {

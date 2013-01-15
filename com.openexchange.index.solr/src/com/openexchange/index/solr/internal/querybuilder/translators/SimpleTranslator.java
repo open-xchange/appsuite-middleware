@@ -60,7 +60,7 @@ import com.openexchange.index.solr.internal.querybuilder.utils.FormalFieldParser
 
 /**
  * {@link SimpleTranslator}
- * 
+ *
  * @author Sven Maurmann
  */
 public class SimpleTranslator implements QueryTranslator {
@@ -95,7 +95,8 @@ public class SimpleTranslator implements QueryTranslator {
         if (o instanceof String) {
             String parsedQueryString = parser.parse((String) o);
             return parsedQueryString;
-        } else
+        } else {
             throw new IllegalArgumentException("Only strings are allowed");
+        }
     }
 }

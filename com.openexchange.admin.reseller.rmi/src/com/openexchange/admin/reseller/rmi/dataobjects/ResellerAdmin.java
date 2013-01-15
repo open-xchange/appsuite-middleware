@@ -61,7 +61,7 @@ import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 public class ResellerAdmin extends EnforceableDataObject implements PasswordMechObject,Cloneable {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 7212339205350666355L;
 
@@ -70,7 +70,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     private boolean idset = false;
 
     private Integer parentId;
-    
+
     private boolean parentIdset = false;
 
     private String name;
@@ -78,7 +78,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     private boolean nameset = false;
 
     private String password;
-    
+
     private boolean passwordset = false;
 
     private String passwordMech;
@@ -90,9 +90,9 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     private boolean displaynameset = false;
 
     private Restriction[] restrictions;
-    
+
     private boolean restrictionsset = false;
-    
+
     public ResellerAdmin() {
         super();
         init();
@@ -116,7 +116,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         setName(name);
     }
 
-    
+
     /**
      * Initializes a new {@link ResellerAdmin}.
      * @param id
@@ -160,7 +160,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     public String getName() {
         return name;
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPassword()
      */
@@ -168,7 +168,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     public String getPassword() {
         return password;
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPasswordMech()
      */
@@ -279,7 +279,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
 
     /**
      * This parameter is currently not used
-     * 
+     *
      * @param pid the pid to set
      */
     public void setParentId(final Integer pid) {
@@ -301,7 +301,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         this.restrictionsset = true;
         this.restrictions = restrictions;
     }
-    
+
     public final boolean isRestrictionsset() {
         return restrictionsset;
     }

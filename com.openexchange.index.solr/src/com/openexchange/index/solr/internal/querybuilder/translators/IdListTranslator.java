@@ -57,7 +57,7 @@ import com.openexchange.index.solr.internal.querybuilder.TranslationException;
 
 /**
  * {@link IdListTranslator}
- * 
+ *
  * @author Sven Maurmann
  */
 public class IdListTranslator implements QueryTranslator {
@@ -73,7 +73,7 @@ public class IdListTranslator implements QueryTranslator {
     private String handlerName;
 
     private static Log log = com.openexchange.log.Log.loggerFor(IdListTranslator.class);
-    
+
 
     @Override
     public void init(String name, Configuration config) throws TranslationException {
@@ -101,14 +101,16 @@ public class IdListTranslator implements QueryTranslator {
             Set<?> idList = (Set<?>) o;
 
             for (Object idVal : idList) {
-                if (idVal instanceof String)
+                if (idVal instanceof String) {
                     b.append(idKey + ":" + idVal + " ");
-                else
+                } else {
                     log.warn("[translate]: Wrong type in list");
+                }
             }
 
             return b.toString().trim();
-        } else
+        } else {
             throw new IllegalArgumentException(TRANSLATION_ERROR);
+        }
     }
 }

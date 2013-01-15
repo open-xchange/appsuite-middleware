@@ -53,14 +53,14 @@ import com.openexchange.session.Session;
 
 /**
  * A secret source token.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Token {
 
     /**
      * Gets the appropriate value for specified session.
-     * 
+     *
      * @param session The session
      * @return The value
      */

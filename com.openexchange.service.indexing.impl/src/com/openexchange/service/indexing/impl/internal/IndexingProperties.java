@@ -56,7 +56,7 @@ package com.openexchange.service.indexing.impl.internal;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexingProperties {
-    
+
     public static final String WORKER_THREADS = "com.openexchange.service.indexing.workerThreads";
 
 }

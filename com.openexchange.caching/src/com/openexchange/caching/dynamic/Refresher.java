@@ -88,7 +88,7 @@ public abstract class Refresher<T extends Serializable> {
      * Whether to issue a cache remove operation before replacing a cache element.
      */
     private boolean removeBeforePut;
-    
+
     /**
      * Default constructor.
      */

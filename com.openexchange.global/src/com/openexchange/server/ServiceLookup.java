@@ -64,10 +64,10 @@ public interface ServiceLookup {
      * @throws IllegalStateException If an error occurs while returning the demanded service
      */
     public <S extends Object> S getService(final Class<? extends S> clazz);
-    
+
     /**
      * Gets the optional service  of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      */

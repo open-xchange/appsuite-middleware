@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ComposedConfigProperty}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ComposedConfigProperty<T> extends ConfigProperty<T> {

@@ -59,7 +59,7 @@ public class CompositeTrackingActivator extends CompositeBundleActivator {
 	protected BundleActivator[] getActivators() {
 		TrackingJMXActivator trackingJMXActivator = new TrackingJMXActivator();
 		TrackingActivator trackingActivator = new TrackingActivator(trackingJMXActivator);
-		
+
 		return new BundleActivator[]{trackingActivator, trackingJMXActivator};
 	}
 

@@ -62,7 +62,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ImageActionFactory}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ImageActionFactory implements AJAXActionServiceFactory {
@@ -80,7 +80,7 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Adds specified mapping
-     * 
+     *
      * @param registrationName The registration name
      * @param alias The alias
      */
@@ -91,7 +91,7 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Gets the registration name for given URL.
-     * 
+     *
      * @param url The URL
      * @return The associated registration name or <code>null</code>
      */

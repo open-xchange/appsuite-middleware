@@ -104,7 +104,7 @@ public final class contacts extends XmlServlet<ContactService> {
     protected Interface getInterface() {
         return Interface.WEBDAV_XML;
     }
-    
+
     @Override
     protected boolean isServletDisabled() {
         return true;
@@ -266,7 +266,7 @@ public final class contacts extends XmlServlet<ContactService> {
 
                         final Date currentLastModified = lastModifiedCache.getLastModified(contactObject.getObjectID(), lastModified);
                         lastModifiedCache.update(contactObject.getObjectID(), 0, lastModified);
-                        contactService.updateContact(session, Integer.toString(inFolder), Integer.toString(contactObject.getObjectID()), 
+                        contactService.updateContact(session, Integer.toString(inFolder), Integer.toString(contactObject.getObjectID()),
                         		contactObject, currentLastModified);
                         lastModifiedCache.update(contactObject.getObjectID(), 0, contactObject.getLastModified());
                     } else {
@@ -278,7 +278,7 @@ public final class contacts extends XmlServlet<ContactService> {
                     if (lastModified == null) {
                         throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);
                     }
-                    contactService.deleteContact(session, Integer.toString(inFolder), Integer.toString(contactObject.getObjectID()), 
+                    contactService.deleteContact(session, Integer.toString(inFolder), Integer.toString(contactObject.getObjectID()),
                     		contactObject.getLastModified());
                     break;
                 default:

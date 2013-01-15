@@ -120,7 +120,7 @@ public class DefaultFileStorageAccount implements FileStorageAccount, ServiceAwa
     public String getServiceId() {
         return serviceId;
     }
-  
+
     /**
      * Sets the service identifier
      *

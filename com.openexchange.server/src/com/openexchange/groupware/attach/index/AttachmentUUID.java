@@ -52,13 +52,13 @@ package com.openexchange.groupware.attach.index;
 
 /**
  * {@link AttachmentUUID}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class AttachmentUUID {
 
     private final String uuid;
-    
+
 
     private AttachmentUUID(int contextId, int userId, int module, String account, String folder, String objectId, String attachmentId) {
         super();
@@ -75,20 +75,20 @@ public class AttachmentUUID {
     public static AttachmentUUID newUUID(int contextId, int userId, int module, String account, String folder, String objectId, String attachmentId) {
         return new AttachmentUUID(contextId, userId, module, account, folder, objectId, attachmentId);
     }
-    
+
     public static AttachmentUUID newUUID(int contextId, int userId, Attachment attachment) {
-        return new AttachmentUUID(contextId, userId, attachment.getModule(), 
+        return new AttachmentUUID(contextId, userId, attachment.getModule(),
             attachment.getAccount(),
             attachment.getFolder(),
             attachment.getObjectId(),
             attachment.getAttachmentId());
     }
-    
+
     @Override
-    public String toString() {        
+    public String toString() {
         return uuid;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -99,18 +99,23 @@ public class AttachmentUUID {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         AttachmentUUID other = (AttachmentUUID) obj;
         if (uuid == null) {
-            if (other.uuid != null)
+            if (other.uuid != null) {
                 return false;
-        } else if (!uuid.equals(other.uuid))
+            }
+        } else if (!uuid.equals(other.uuid)) {
             return false;
+        }
         return true;
     }
 }

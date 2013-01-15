@@ -66,17 +66,17 @@ public class FreeBusySlot implements Serializable {
     private Date start;
 	private Date end;
 	private int shownAs;
-	
+
 	/**
 	 * Initializes a new {@link FreeBusySlot}.
 	 */
 	public FreeBusySlot() {
 		super();
 	}
-	
+
 	/**
 	 * Initializes a new {@link FreeBusySlot}.
-	 * 
+	 *
 	 * @param start The start date
 	 * @param end The end date
 	 * @param shownAs The "shown-as" flag
@@ -87,11 +87,11 @@ public class FreeBusySlot implements Serializable {
 		this.end = end;
 		this.shownAs = shownAs;
 	}
-	
+
 	public static FreeBusySlot create(Appointment appointment) {
-		return new FreeBusySlot(appointment.getStartDate(), appointment.getEndDate(), appointment.getShownAs());				
+		return new FreeBusySlot(appointment.getStartDate(), appointment.getEndDate(), appointment.getShownAs());
 	}
-	
+
 	/**
 	 * @return the start
 	 */
@@ -127,6 +127,6 @@ public class FreeBusySlot implements Serializable {
 	 */
 	public void setShownAs(int shownAs) {
 		this.shownAs = shownAs;
-	}	
-	
+	}
+
 }

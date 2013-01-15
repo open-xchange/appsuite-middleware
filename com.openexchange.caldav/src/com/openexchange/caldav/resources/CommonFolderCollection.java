@@ -72,9 +72,9 @@ import com.openexchange.webdav.protocol.WebdavStatusImpl;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
- * {@link CommonFolderCollection} - Abstract base class for WebDAV collections 
+ * {@link CommonFolderCollection} - Abstract base class for WebDAV collections
  * containing groupware objects.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class CommonFolderCollection<T extends CommonObject> extends CommonCollection {
@@ -82,15 +82,15 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
     protected WebdavFactory factory;
     protected UserizedFolder folder;
     protected int folderID;
-    
+
     private Date lastModified = null;
 
     /**
      * Initializes a new {@link CommonFolderCollection}.
-     * 
+     *
      * @param factory the factory
      * @param url the WebDAV path
-     * @throws OXException 
+     * @throws OXException
      */
     public CommonFolderCollection(WebdavFactory factory, WebdavPath url, UserizedFolder folder) throws OXException {
         super(factory, url);
@@ -102,7 +102,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
         }
         LOG.debug(getUrl() + ": initialized.");
     }
-    
+
     @Override
     public List<WebdavResource> getChildren() throws WebdavProtocolException {
         try {
@@ -118,9 +118,9 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
     }
 
     /**
-     * Gets a child resource from this collection by name. If the resource 
+     * Gets a child resource from this collection by name. If the resource
      * does not yet exists, a placeholder resource is created.
-     * 
+     *
      * @param name the name of the resource
      * @return the child resource
      * @throws WebdavProtocolException
@@ -141,11 +141,11 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
             throw protocolException(e);
         }
     }
-    
+
     /**
-     * Gets an updated {@link Syncstatus} based on the supplied sync token for 
+     * Gets an updated {@link Syncstatus} based on the supplied sync token for
      * this collection.
-     * 
+     *
      * @param syncToken the sync token as supplied by the client
      * @return the sync status
      * @throws WebdavProtocolException
@@ -156,7 +156,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
             try {
                 since = Long.parseLong(token);
             } catch (NumberFormatException e) {
-                LOG.warn("Invalid sync token: '" + token + "', falling back to '0'.");                              
+                LOG.warn("Invalid sync token: '" + token + "', falling back to '0'.");
             }
         }
         try {
@@ -204,21 +204,21 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
         }
         return lastModified;
     }
-    
+
     /**
      * Gets the folder of this collection.
-     * 
+     *
      * @return the folder
      */
     public UserizedFolder getFolder() {
         return folder;
     }
-    
+
     /**
-     * Gets all objects that have been created or modified since the 
+     * Gets all objects that have been created or modified since the
      * supplied time.
-     * 
-     * @param since the exclusive minimum modification time to consider  
+     *
+     * @param since the exclusive minimum modification time to consider
      * @return the objects
      * @throws OXException
      */
@@ -226,8 +226,8 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
 
     /**
      * Gets all objects that have been deleted since the supplied time.
-     * 
-     * @param since the exclusive minimum modification time to consider  
+     *
+     * @param since the exclusive minimum modification time to consider
      * @return the objects
      * @throws OXException
      */
@@ -235,7 +235,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
 
     /**
      * Gets all groupware objects in the collection.
-     * 
+     *
      * @return the objects
      * @throws OXException
      */
@@ -244,15 +244,15 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
     protected abstract T getObject(String resourceName) throws OXException;
 
     protected abstract AbstractResource createResource(T object, WebdavPath url) throws OXException;
-    
+
     protected abstract String getFileExtension();
-    
+
     public abstract User getOwner() throws OXException;
-    
+
     /**
      * Constructs a {@link WebdavPath} for a child resource of this
      * collection with the resource name found in the supplied object.
-     * 
+     *
      * @param object the groupware object represented by the resource
      * @return the path
      */
@@ -269,9 +269,9 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
     }
 
 	/**
-	 * Create a 'sync-status' multistatus report considering all changes since 
-	 * the supplied time. 
-	 * 
+	 * Create a 'sync-status' multistatus report considering all changes since
+	 * the supplied time.
+	 *
 	 * @param since the time
 	 * @return the sync status
 	 * @throws WebdavProtocolException
@@ -288,10 +288,10 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
 		for (T object : modifiedObjects) {
 			// add resource to multistatus
 			WebdavResource resource = createResource(object, constructPathForChildResource(object));
-			int status = null != object.getCreationDate() && object.getCreationDate().after(since) ? 
+			int status = null != object.getCreationDate() && object.getCreationDate().after(since) ?
 			    HttpServletResponse.SC_CREATED : HttpServletResponse.SC_OK;
 			multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(status, resource.getUrl(), resource));
-			// remember aggregated last modified for next sync token 
+			// remember aggregated last modified for next sync token
 			nextSyncToken = Tools.getLatestModified(nextSyncToken, object);
 		}
 		/*
@@ -316,8 +316,8 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
 		 */
 		multistatus.setToken(Long.toString(nextSyncToken.getTime()));
 		return multistatus;
-	}	
-	   
+	}
+
 	private static <T extends CommonObject> boolean contains(Collection<T> objects, String uid) {
 		for (T object : objects) {
 			if (uid.equals(object.getUid())) {

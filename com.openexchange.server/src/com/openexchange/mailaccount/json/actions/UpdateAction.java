@@ -92,7 +92,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.PUT, name = "update", description = "Update a mail account", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module.") 
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, requestBody = "A JSON object identifiying (field ID is present) and describing the account to update. See mail account data.",
 responseDescription = "A JSON object representing the updated mail account. See mail account data.")
 public final class UpdateAction extends AbstractMailAccountAction {
@@ -230,12 +230,15 @@ public final class UpdateAction extends AbstractMailAccountAction {
                  * Re-Init account's default folders
                  */
                 try {
-                    final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, id);
-                    mailAccess.connect(false);
+                    MailAccess<?, ?> mailAccess = null;
                     try {
+                        mailAccess = MailAccess.getInstance(session, id);
+                        mailAccess.connect(false);
                         mailAccess.getFolderStorage().checkDefaultFolders();
                     } finally {
-                        mailAccess.close(true);
+                        if (null != mailAccess) {
+                            mailAccess.close(true);
+                        }
                     }
                 } catch (final OXException e) {
                     LOG.warn(e.getMessage(), e);

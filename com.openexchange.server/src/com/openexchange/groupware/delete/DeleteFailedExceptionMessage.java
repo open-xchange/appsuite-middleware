@@ -65,7 +65,7 @@ public class DeleteFailedExceptionMessage implements LocalizableStrings {
     private DeleteFailedExceptionMessage() {
         super();
     }
-    
+
     // Unknown delete event type: %1$d
     public final static String UNKNOWN_TYPE_MSG = "Unknown delete event type: %1$d";
 

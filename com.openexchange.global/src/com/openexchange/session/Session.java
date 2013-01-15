@@ -64,32 +64,32 @@ public interface Session {
      * The empty lock, doing nothing on invocations.
      */
     public static final Lock EMPTY_LOCK = new Lock() {
-        
+
         @Override
         public void unlock() {
             // ignore
         }
-        
+
         @Override
         public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
             return true;
         }
-        
+
         @Override
         public boolean tryLock() {
             return true;
         }
-        
+
         @Override
         public Condition newCondition() {
             throw new UnsupportedOperationException("Empty lock provides no condition.");
         }
-        
+
         @Override
         public void lockInterruptibly() throws InterruptedException {
             // ignore
         }
-        
+
         @Override
         public void lock() {
             // ignore

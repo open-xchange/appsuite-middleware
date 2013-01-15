@@ -106,14 +106,14 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
 			throws com.openexchange.exception.OXException, SQLException {
 		return delegate.getDeletedAppointmentsInFolder(folderId, cols, since);
 	}
-	
+
 	@Override
 	public void deleteAppointmentObject(CalendarDataObject appointmentObject,
 			int inFolder, Date clientLastModified, boolean checkPermissions)
 			throws OXException, SQLException {
 		cached.remove(appointmentObject.getObjectID());
 		delegate.deleteAppointmentObject(appointmentObject, inFolder, clientLastModified, checkPermissions);
-		
+
 	}
 
 	@Override
@@ -170,7 +170,7 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
 		return delegate.updateAppointmentObject(cdao, inFolder,
 				clientLastModified);
 	}
-	
+
 	@Override
 	public Appointment[] updateAppointmentObject(CalendarDataObject cdao,
 			int inFolder, Date clientLastModified, boolean checkPermissions)
@@ -274,7 +274,7 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
 		return delegate.getAppointmentsBetween(user_uid, start, end, cols,
 				orderBy, order);
 	}
-	
+
     @Override
     public SearchIterator<Appointment> getAppointmentsBetween(Date start, Date end, int cols[], int orderBy, Order order) throws OXException, SQLException {
         return delegate.getAppointmentsBetween(start, end, cols, orderBy, order);

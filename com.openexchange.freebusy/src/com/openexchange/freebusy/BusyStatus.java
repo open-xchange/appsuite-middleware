@@ -51,18 +51,18 @@ package com.openexchange.freebusy;
 
 /**
  * {@link BusyStatus}
- * 
+ *
  * Enumeration of the possible "shown as" types for a free/busy time.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public enum BusyStatus {
-    
+
     /**
      * No data
      */
     UNKNOWN(0),
-    
+
     /**
      * Free / 4 / <code>Appointment.FREE</code>
      */
@@ -72,7 +72,7 @@ public enum BusyStatus {
      * Tentative / 2 /<code>Appointment.TEMPORARY</code>
      */
     TEMPORARY(2),
-    
+
     /**
      * Busy / 1 / <code>Appointment.RESERVED</code>
      */
@@ -84,10 +84,10 @@ public enum BusyStatus {
     ABSENT(3),
     ;
 
-    
+
     /**
      * Gets the busy status value of the supplied 'shown as' constant.
-     * 
+     *
      * @param shownAs The shown as
      * @return The busy status
      */
@@ -99,16 +99,16 @@ public enum BusyStatus {
             return BusyStatus.TEMPORARY;
         case 3:
             return BusyStatus.ABSENT;
-        case 4:        
+        case 4:
             return BusyStatus.FREE;
         default:
             return BusyStatus.UNKNOWN;
         }
     }
-    
+
     /**
      * Gets the underlying "shown as" value as defined in {@link Appointment}.
-     * 
+     *
      * @return The value
      */
     public int getValue() {
@@ -118,18 +118,18 @@ public enum BusyStatus {
     /**
      * Gets a value indicating whether this busy status is more conflicting than another one, i.e. it denotes a 'more busy' state
      * (in the order: <code>ABSENT > RESERVED > TEMPORARY > FREE > UNKNOWN</code>).
-     * 
+     *
      * @param other The busy status to compare
      * @return <code>true</code>, if this status is more conflicting, <code>false</code>, otherwise
      */
     public boolean isMoreConflicting(BusyStatus other) {
         return 0 < this.compareTo(other);
     }
-    
+
     private final int value;
 
     private BusyStatus(int value) {
         this.value = value;
     }
-    
+
 }

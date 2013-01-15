@@ -83,8 +83,6 @@ public interface LoginRequest {
      */
     String getClientToken();
 
-    boolean isVolatile();
-
     Interface getInterface();
 
     Map<String, List<String>> getHeaders();

@@ -53,7 +53,7 @@ import java.math.BigInteger;
 
 /**
  * {@link Questions}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Questions {
@@ -103,29 +103,29 @@ public class Questions {
     public static final String NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR = "numberOfUsersWithEventsInPrivateCalendar";
 
     public static final String NUMBER_OF_USERS = "numberOfUsers";
-    
+
     public static final String NUMBER_OF_USERS_CONNECTED_TO_FACEBOOK = "numberOfUsersConnectedToFacebook";
-    
+
     public static final String NUMBER_OF_USERS_CONNECTED_TO_LINKEDIN = "numberOfUsersConnectedToLinkedIn";
-    
+
     public static final String NUMBER_OF_USERS_CONNECTED_TO_TWITTER = "numberOfUsersConnectedToTwitter";
-    
+
     public static final String NUMBER_OF_USERS_CONNECTED_TO_GOOGLE = "numberOfUsersConnectedToGoogle";
-    
+
     public static final String NUMBER_OF_USERS_CONNECTED_TO_MSN = "numberOfUsersConnectedToMSN";
-    
+
     public static final String NUMBER_OF_USERS_CONNECTED_TO_YAHOO = "numberOfUsersConnectedToYahoo";
-    
+
     public static final String NUMBER_OF_USERS_CONNECTED_TO_XING = "numberOfUsersConnectedToXing";
-    
+
     public static final String NUMBER_OF_USERS_CONNECTED_TO_TONLINE = "numberOfUsersConnectedToTOnline";
-    
+
     public static final String NUMBER_OF_USERS_CONNECTED_TO_WEBDE = "numberOfUsersConnectedToWebDe";
-    
+
     public static final String NUMBER_OF_USERS_CONNECTED_TO_GMX = "numberOfUsersConnectedToGMX";
-    
+
     public static final String NUMBER_OF_USERS_WITH_TASKS = "numberOfUsersWithTasks";
-    
+
     public static final String NUMBER_OF_USERS_WHO_CHANGED_THEIR_TASKS_IN_THE_LAST30_DAYS = "numberOfUsersWhoChangedTheirTasksInTheLast30Days";
 
     protected static void reportNumberOfUsers() {
@@ -242,7 +242,7 @@ public class Questions {
 
     protected static void reportSliceAndDiceOnDocumentSize() {
         try {
-            
+
             String[] size1 = {
                 "1", "3000", "10000", "30000", "100000", "300000", "1000000", "3000000", "10000000", "30000000", "100000000", "300000000",
                 "1000000000" };
@@ -273,7 +273,7 @@ public class Questions {
             // divide the two (numberOfContacts / (numberOfUsers - numberOfContexts)) -> average number of contacts per User
 
             float numberOfContacts = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_CONTACTS));
-            float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_CONTACTS));            
+            float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_CONTACTS));
 
             Datamining.report(
                 AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CONTACTS_AT_ALL,
@@ -367,7 +367,7 @@ public class Questions {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_SELECTED_LIST_VIEW_AS_INFOSTORE_DEFAULT);
             String sql = "SELECT count(*) FROM user_setting WHERE value LIKE '%\"view\":\"infostore/list\"%';";
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
-            Datamining.report(NUMBER_OF_USERS_WHO_SELECTED_LIST_VIEW_AS_INFOSTORE_DEFAULT, numberOfInfostoreObjects.toString());            
+            Datamining.report(NUMBER_OF_USERS_WHO_SELECTED_LIST_VIEW_AS_INFOSTORE_DEFAULT, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
         }
     }
@@ -391,7 +391,7 @@ public class Questions {
         } catch (Exception e) {
         }
     }
-    
+
     public static void reportNumberOfUsersConnectedToFacebook() {
     	String networkName = "facebook";
         try {
@@ -402,7 +402,7 @@ public class Questions {
         } catch (Exception e) {
         }
     }
-    
+
     public static void reportNumberOfUsersConnectedToLinkedIn() {
     	String networkName = "linkedin";
         try {
@@ -413,7 +413,7 @@ public class Questions {
         } catch (Exception e) {
         }
     }
-    
+
     public static void reportNumberOfUsersConnectedToTwitter() {
     	String networkName = "twitter";
         try {
@@ -424,7 +424,7 @@ public class Questions {
         } catch (Exception e) {
         }
     }
-    
+
     public static void reportNumberOfUsersConnectedToGoogle() {
     	String networkName = "google";
         try {
@@ -435,7 +435,7 @@ public class Questions {
         } catch (Exception e) {
         }
     }
-    
+
     public static void reportNumberOfUsersConnectedToMSN() {
     	String networkName = "msn";
         try {
@@ -446,7 +446,7 @@ public class Questions {
         } catch (Exception e) {
         }
     }
-    
+
     public static void reportNumberOfUsersConnectedToYahoo() {
     	String networkName = "yahoo";
         try {
@@ -457,7 +457,7 @@ public class Questions {
         } catch (Exception e) {
         }
     }
-    
+
     public static void reportNumberOfUsersConnectedToXing() {
     	String networkName = "xing";
         try {
@@ -468,7 +468,7 @@ public class Questions {
         } catch (Exception e) {
         }
     }
-    
+
     public static void reportNumberOfUsersConnectedToTOnline() {
     	String networkName = "t-online";
         try {
@@ -479,7 +479,7 @@ public class Questions {
         } catch (Exception e) {
         }
     }
-    
+
     public static void reportNumberOfUsersConnectedToGMX() {
     	String networkName = "gmx";
         try {
@@ -490,7 +490,7 @@ public class Questions {
         } catch (Exception e) {
         }
     }
-    
+
     public static void reportNumberOfUsersConnectedToWebDe() {
     	String networkName = "facebook";
         try {
@@ -501,7 +501,7 @@ public class Questions {
         } catch (Exception e) {
         }
     }
-    
+
     protected static void reportNumberOfUsersWithTasks() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WITH_TASKS);
@@ -511,7 +511,7 @@ public class Questions {
         } catch (Exception e) {
         }
     }
-    
+
     protected static void reportNumberOfUsersWhoChangedTheirTasksInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_CHANGED_THEIR_TASKS_IN_THE_LAST30_DAYS);

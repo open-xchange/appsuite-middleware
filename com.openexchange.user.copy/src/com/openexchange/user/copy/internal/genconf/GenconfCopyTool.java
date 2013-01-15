@@ -69,8 +69,8 @@ import com.openexchange.user.copy.UserCopyExceptionCodes;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class GenconfCopyTool {
-    
-    private static final String SELECT_ATTRIBUTES = 
+
+    private static final String SELECT_ATTRIBUTES =
         "SELECT " +
             "name, value " +
         "FROM " +
@@ -79,19 +79,19 @@ public class GenconfCopyTool {
             "cid = ? " +
         "AND " +
             "id = ?";
-    
+
     private static final String INSERT_ATTRIBUTES =
         "INSERT INTO " +
             "genconf_attributes_#TYPE# " +
             "(cid, id, name, value) " +
         "VALUES " +
             "(?, ?, ?, ?)";
-    
-    
+
+
     public static void writeAttributesToDB(final List<ConfAttribute> attributes, final Connection con, final int id, final int cid, final int type) throws OXException {
         final String sql = replaceTableInAttributeStatement(INSERT_ATTRIBUTES, type);
         PreparedStatement stmt = null;
-        try {            
+        try {
             stmt = con.prepareStatement(sql);
             for (final ConfAttribute attribute : attributes) {
                 int i = 1;
@@ -103,10 +103,10 @@ public class GenconfCopyTool {
                 } else {
                     setStringOrNull(i++, stmt, attribute.getValue());
                 }
-                
+
                 stmt.addBatch();
             }
-            
+
             stmt.executeBatch();
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
@@ -114,7 +114,7 @@ public class GenconfCopyTool {
             DBUtils.closeSQLStuff(stmt);
         }
     }
-    
+
     public static List<ConfAttribute> loadAttributesFromDB(final Connection con, final int id, final int cid, final int type) throws OXException {
         final List<ConfAttribute> attributes = new ArrayList<ConfAttribute>();
         PreparedStatement stmt = null;
@@ -122,11 +122,11 @@ public class GenconfCopyTool {
         try {
             final boolean isBool = (type == ConfAttribute.BOOL);
             final String sql = replaceTableInAttributeStatement(SELECT_ATTRIBUTES, type);
-            
+
             stmt = con.prepareStatement(sql);
             stmt.setInt(1, cid);
             stmt.setInt(2, id);
-            
+
             rs = stmt.executeQuery();
             while (rs.next()) {
                 final ConfAttribute attribute = new ConfAttribute(type);
@@ -136,7 +136,7 @@ public class GenconfCopyTool {
                 } else {
                     attribute.setValue(rs.getString(2));
                 }
-                
+
                 attributes.add(attribute);
             }
         } catch (final SQLException e) {
@@ -144,19 +144,19 @@ public class GenconfCopyTool {
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
-        
+
         return attributes;
     }
-    
+
     private static String replaceTableInAttributeStatement(final String statement, final int type) {
         final boolean isBool = (type == ConfAttribute.BOOL);
         final String sql;
         if (isBool) {
             sql = statement.replaceFirst("#TYPE#", "bools");
-        } else {                
+        } else {
             sql = statement.replaceFirst("#TYPE#", "strings");
         }
-        
+
         return sql;
     }
 

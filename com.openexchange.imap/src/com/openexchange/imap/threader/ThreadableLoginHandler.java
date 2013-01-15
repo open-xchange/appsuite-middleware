@@ -72,7 +72,7 @@ import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link ThreadableLoginHandler} - The {@link LoginHandlerService login handler} obtaining <tt>Threadable</tt> for sent folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadableLoginHandler implements LoginHandlerService {
@@ -81,7 +81,7 @@ public final class ThreadableLoginHandler implements LoginHandlerService {
 
     /**
      * Initializes a new {@link ThreadableLoginHandler}.
-     * 
+     *
      * @param services The service look-up
      */
     public ThreadableLoginHandler(final ServiceLookup services) {

@@ -87,7 +87,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * {@link FilterJerichoHandler}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FilterJerichoHandler implements JerichoHandler {
@@ -244,7 +244,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     /**
      * Sets whether to replace URLs.
-     * 
+     *
      * @param replaceUrls <code>true</code> to replace URLs; otherwise <code>false</code>
      * @return This handler with new behavior applied
      */
@@ -255,7 +255,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     /**
      * Sets whether to replace image URLs.
-     * 
+     *
      * @param dropExternalImages <code>true</code> to replace image URLs; otherwise <code>false</code>
      * @return This handler with new behavior applied
      */
@@ -266,7 +266,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     /**
      * Checks whether an image URL was replaced.
-     * 
+     *
      * @return <code>true</code> if an image URL was replaced; otherwise <code>false</code>
      */
     public boolean isImageURLFound() {
@@ -362,7 +362,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     /*-
                      * Should we re-encode prior to appending?
                      * E.g. "<" ==> "&lt;"
-                     * 
+                     *
                      * htmlBuilder.append(CharacterReference.reencode(content));
                      */
                     htmlBuilder.append(content);
@@ -938,7 +938,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     /**
      * Parses specified HTML map.
-     * 
+     *
      * @param htmlMapStr The HTML map string
      * @return The parsed map
      */
@@ -1019,7 +1019,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     /**
      * Parses specified combination map for CSS elements.
-     * 
+     *
      * @param combiMapStr The string representation for combination map
      * @return The parsed map
      */

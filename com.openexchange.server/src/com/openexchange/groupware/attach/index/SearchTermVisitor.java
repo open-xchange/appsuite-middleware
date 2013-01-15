@@ -56,9 +56,9 @@ package com.openexchange.groupware.attach.index;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface SearchTermVisitor {
-    
+
     void visit(ORTerm term);
-    
+
     void visit(ANDTerm term);
 
     void visit(ObjectIdTerm objectIdTerm);

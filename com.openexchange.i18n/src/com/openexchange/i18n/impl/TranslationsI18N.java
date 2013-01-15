@@ -99,5 +99,5 @@ public class TranslationsI18N implements I18nService {
         return builder.toString();
     }
 
-    
+
 }

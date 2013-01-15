@@ -66,28 +66,28 @@ import com.openexchange.freebusy.FreeBusyInterval;
 
 /**
  * {@link Tools}
- * 
+ *
  * Utilities for the EWS free/busy provider
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class Tools {
-    
+
     public static OXException getError(String participant, ResponseMessageType responseMessage) {
         if (null != responseMessage && false == ResponseClassType.SUCCESS.equals(responseMessage.getResponseClass())) {
             OXException ewsException = EWSExceptionCodes.create(responseMessage);
             if ("ErrorMailRecipientNotFound".equals(responseMessage.getResponseCode())) {
-                return FreeBusyExceptionCodes.PARTICIPANT_NOT_FOUND.create(ewsException, participant);               
+                return FreeBusyExceptionCodes.PARTICIPANT_NOT_FOUND.create(ewsException, participant);
             } else {
-                return ewsException;             
+                return ewsException;
             }
         }
         return null;
     }
-    
+
     public static Collection<FreeBusyInterval> getFreeBusyIntervals(FreeBusyView freeBusyView) {
         Collection<FreeBusyInterval> freeBusyIntervals = new ArrayList<FreeBusyInterval>();
-        if (null != freeBusyView && null != freeBusyView.getCalendarEventArray()) { 
+        if (null != freeBusyView && null != freeBusyView.getCalendarEventArray()) {
             List<CalendarEvent> calendarEvents = freeBusyView.getCalendarEventArray().getCalendarEvent();
             if (null != calendarEvents) {
                 for (CalendarEvent calendarEvent : calendarEvents) {
@@ -97,30 +97,30 @@ public final class Tools {
         }
         return freeBusyIntervals;
     }
-        
+
     public static FreeBusyInterval getFreeBusyInterval(CalendarEvent calendarEvent) {
         FreeBusyInterval interval = new FreeBusyInterval(DateConverter.DEFAULT.getDate(calendarEvent.getStartTime()),
-            DateConverter.DEFAULT.getDate(calendarEvent.getEndTime()), getStatus(calendarEvent.getBusyType())); 
+            DateConverter.DEFAULT.getDate(calendarEvent.getEndTime()), getStatus(calendarEvent.getBusyType()));
         if (null != calendarEvent.getCalendarEventDetails()) {
             interval.setTitle(calendarEvent.getCalendarEventDetails().getSubject());
             interval.setLocation(calendarEvent.getCalendarEventDetails().getLocation());
         }
         return interval;
     }
-        
+
     public static BusyStatus getStatus(LegacyFreeBusyType type) {
         switch (type) {
         case FREE:
-            return BusyStatus.FREE;            
+            return BusyStatus.FREE;
         case OOF:
-            return BusyStatus.ABSENT;          
+            return BusyStatus.ABSENT;
         case TENTATIVE:
-            return BusyStatus.TEMPORARY;           
+            return BusyStatus.TEMPORARY;
         case BUSY:
-            return BusyStatus.RESERVED;            
+            return BusyStatus.RESERVED;
         default:
             return BusyStatus.UNKNOWN;
         }
     }
-        
+
 }

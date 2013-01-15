@@ -64,17 +64,17 @@ public abstract class FilestoreAbstraction extends UtilAbstraction {
     protected final static String OPT_NAME_STORE_SIZE_LONG = "storesize";
     protected final static char OPT_NAME_STORE_MAX_CTX_SHORT = 'x';
     protected final static String OPT_NAME_STORE_MAX_CTX_LONG = "maxcontexts";
-    
+
     protected CLIOption filestoreIdOption = null;
 
     protected CLIOption filestorePathOption = null;
-    
+
     protected CLIOption filestoreSizeOption = null;
-    
+
     protected CLIOption filestoreMaxContextsOption = null;
-    
+
     protected String filestoreid = null;
-    
+
     protected void parseAndSetFilestorePath(final AdminParser parser, final Filestore fstore) throws URISyntaxException {
         final String store_path = (String) parser.getOptionValue(this.filestorePathOption);
         if (null != store_path) {

@@ -134,7 +134,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     parameterString += URLEncoder.encode(nvp.getName(), "utf-8") + "=" + URLEncoder.encode(nvp.getValue(), "utf-8");
                 }
             }
-            
+
             if (debuggingEnabled) {
                 LOG.error("DEBUG: complete URL : " + urlString);
             }
@@ -144,7 +144,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
             HashMap<String, String> initialMap = new HashMap<String, String>();
             initialMap.put("Content-Type", "application/x-www-form-urlencoded;charset=\"UTF-8\"");
             requestSettings.setAdditionalHeaders(initialMap);
-          
+
             // Adding the parameters to the Body as well
             requestSettings.setRequestBody(parameterString);
             webClient.setRedirectEnabled(false);
@@ -176,19 +176,19 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     String newUrlBase = matcher.group(1);
                     String functionCall = "json/PersonService/getAll";
                     String session = matcher.group(2);
-                    
-                    String toEncode = username + ":sid=" + session;  
+
+                    String toEncode = username + ":sid=" + session;
                     Base64 encoder = new Base64();
                     String base64Encoded = "";
                     try {
                         base64Encoded = new String(encoder.encode(toEncode.getBytes("UTF-8")));
                     } catch (UnsupportedEncodingException e2) {
                         LOG.error(e2);
-                    }                                        
-                    
+                    }
+
                     // remove the whitespaces otherwise there is an error
                     base64Encoded = base64Encoded.replaceAll("\\s", "");
-                    
+
                     String apiURL = newUrlBase + functionCall;
                     try {
                         WebRequestSettings requestSettingsForAPICall = new WebRequestSettings(new URL(apiURL), HttpMethod.POST);
@@ -259,7 +259,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     //setting the displayname
                     contact.setDisplayName(contact.getGivenName() + " " + contact.getSurName());
 
-                    if (JSONObject.NULL != contactJSON.get("birthday") && contactJSON.has("birthday")) {                        
+                    if (JSONObject.NULL != contactJSON.get("birthday") && contactJSON.has("birthday")) {
                         JSONObject birthdayJSON = contactJSON.getJSONObject("birthday");
                         String day = "";
                         String month = "";

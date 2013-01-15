@@ -52,7 +52,7 @@ package com.openexchange.realtime.packet;
 
 /**
  * {@link PresenceState} - The different Presence states that can be used to display your availability.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public enum PresenceState {

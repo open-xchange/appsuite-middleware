@@ -49,14 +49,11 @@
 
 package com.openexchange.realtime.packet;
 
-import com.openexchange.realtime.payload.PayloadElement;
-import com.openexchange.realtime.payload.PayloadTree;
-
 /**
  * {@link IQ} - Used for command exchanges.
  * <p>
  * Example for registering a new account:
- * 
+ *
  * <pre>
  *    C: &lt;iq type='get' id='reg1'&gt;
  *           &lt;query xmlns='jabber:iq:register'/&gt;
@@ -74,7 +71,7 @@ import com.openexchange.realtime.payload.PayloadTree;
  *           &lt;/query&gt;
  *       &lt;/iq&gt;
  * </pre>
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -102,7 +99,7 @@ public class IQ extends Stanza {
 
     /**
      * Gets the type.
-     * 
+     *
      * @return The type
      */
     public Type getType() {
@@ -111,7 +108,7 @@ public class IQ extends Stanza {
 
     /**
      * Sets the type.
-     * 
+     *
      * @param type The type
      */
     public void setType(final Type type) {

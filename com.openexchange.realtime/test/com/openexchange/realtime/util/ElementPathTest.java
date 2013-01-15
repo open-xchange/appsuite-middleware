@@ -65,7 +65,7 @@ public class ElementPathTest {
         new ElementPath(".Element");
         new ElementPath("path.");
     }
-    
+
     @Test
     public void testGoodElementPathString() {
         String namespace ="path.subPath.subSubPath#FunkyStuff";
@@ -73,7 +73,7 @@ public class ElementPathTest {
         ElementPath elementPath = new ElementPath(namespace+"."+element);
         assertEquals(namespace, elementPath.getNamespace());
         assertEquals(element, elementPath.getElement());
-        
+
         ElementPath defaultNamespace = new ElementPath(element);
         assertEquals("", defaultNamespace.getNamespace());
         assertEquals(element, defaultNamespace.getElement());

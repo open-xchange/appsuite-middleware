@@ -39,7 +39,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * This class contains the implementation of the API defined in {@link OXContextRestoreInterface}
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>: Bugfix 20044
  */
@@ -62,7 +62,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
     /**
      * Safely flushes specified {@link Flushable} instance.
-     * 
+     *
      * @param toFlush The {@link Flushable} instance
      */
     protected static void flush(final Flushable toFlush) {
@@ -151,7 +151,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
         /**
          * Starts parsing named MySQL dump file
-         * 
+         *
          * @param cid The context identifier
          * @param fileName The name of the MySQL dump file
          * @return The information object for parsed MySQL dump file
@@ -550,7 +550,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         /**
          * Searches for the cid and returns the line number in which is was found, after this method the reader's position is behind the
          * create structure
-         * 
+         *
          * @param in
          * @return
          * @throws IOException
@@ -613,7 +613,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
     }
 
     protected final static Log LOG = LogFactory.getLog(OXContextRestore.class);
-    
+
     private final BasicAuthenticator basicauth;
 
     public OXContextRestore() throws StorageException {
@@ -632,7 +632,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             LOG.error("One of the arguments for restore is null", e);
             throw e;
         }
-        
+
         try {
             basicauth.doAuthentication(auth);
         } catch (final InvalidCredentialsException e) {
@@ -643,11 +643,11 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         final Parser parser = new Parser();
         LOG.info("Context: " + ctx);
         LOG.info("Filenames: " + java.util.Arrays.toString(fileNames));
-        
+
         try {
             VersionInformation versionInfo = null;
             UpdateTaskInformation updateTaskInfo = null;
-            PoolIdSchemaAndVersionInfo result = null; 
+            PoolIdSchemaAndVersionInfo result = null;
             for (final String fileName : fileNames) {
                 final PoolIdSchemaAndVersionInfo infoObject = parser.start(ctx.getId().intValue(), fileName);
                 final VersionInformation versionInformation = infoObject.getVersionInformation();
@@ -667,14 +667,14 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             if (null == result) {
                 throw new OXContextRestoreException(Code.NO_CONFIGDB_FOUND);
             }
-            
+
             final OXContextRestoreStorageInterface instance = OXContextRestoreStorageInterface.getInstance();
             result.setVersionInformation(versionInfo);
             result.setUpdateTaskInformation(updateTaskInfo);
             instance.checkVersion(result);
-            
+
             final OXContextInterface contextInterface = Activator.getContextInterface();
-            
+
             final OXToolStorageInterface storage = OXToolStorageInterface.getInstance();
             if (storage.existsContext(ctx)) {
                 try {
@@ -712,5 +712,5 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             throw e;
         }
     }
-    
+
 }

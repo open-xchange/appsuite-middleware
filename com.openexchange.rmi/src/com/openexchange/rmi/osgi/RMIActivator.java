@@ -57,7 +57,7 @@ import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link RMIService}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class RMIActivator extends HousekeepingActivator {

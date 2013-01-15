@@ -94,7 +94,7 @@ public final class AccessedIMAPStore extends IMAPStore {
 
     /**
      * Drops & returns the underlying IMAP store.
-     * 
+     *
      * @return The IMAP store
      */
     public IMAPStore dropAndGetImapStore() {

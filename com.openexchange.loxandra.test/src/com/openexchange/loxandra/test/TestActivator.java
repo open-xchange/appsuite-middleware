@@ -58,9 +58,9 @@ import com.openexchange.osgi.HousekeepingActivator;
  *
  */
 public class TestActivator extends HousekeepingActivator {
-	
+
 	private static Log log = LogFactory.getLog(TestActivator.class);
-	
+
 	public TestActivator() {}
 
 	@Override

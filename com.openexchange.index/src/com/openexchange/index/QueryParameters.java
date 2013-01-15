@@ -53,11 +53,11 @@ import java.util.Set;
 
 /**
  * {@link QueryParameters} - Represents query parameters.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class QueryParameters {
-    
+
     public static enum Order {
         ASC, DESC;
     }
@@ -87,12 +87,12 @@ public final class QueryParameters {
 //            init();
 //            this.searchTerm = searchTerm;
 //        }
-        
+
         public Builder() {
             super();
             init();
         }
-        
+
         private void init() {
             off = 0;
             len = Integer.MAX_VALUE;
@@ -130,12 +130,12 @@ public final class QueryParameters {
             this.len = len;
             return this;
         }
-        
+
         public Builder setModule(final int module) {
             this.module = module;
             return this;
         }
-        
+
         public Builder setIndexIds(final Set<String> indexIds) {
             this.indexIds = indexIds;
             return this;
@@ -150,22 +150,22 @@ public final class QueryParameters {
             this.handler = handler;
             return this;
         }
-        
+
 //        public Builder setFolders(final Set<String> folders) {
 //            this.folders = folders;
 //            return this;
 //        }
-        
+
         public Builder setSortField(final IndexField sortField) {
             this.sortField = sortField;
             return this;
         }
-        
+
         public Builder setOrder(final Order order) {
             this.order = order;
             return this;
         }
-        
+
         /**
          * Sets accounts and corresponding folders to filter search results.
          * You can filter by multiple accounts and multiple folders per account.
@@ -191,17 +191,17 @@ public final class QueryParameters {
     private final Object searchTerm;
 
 //    private final Set<String> folders;
-    
+
     private final IndexField sortField;
-    
+
     private final Order order;
-    
+
     private final Set<AccountFolders> accountFolders;
-    
+
     private final int module;
-    
+
     private final Set<String> indexIds;
-    
+
 
     /**
      * Initializes a new {@link QueryParameters}.
@@ -232,7 +232,7 @@ public final class QueryParameters {
 
     /**
      * Gets the offset.
-     * 
+     *
      * @return The offset
      */
     public int getOff() {
@@ -241,24 +241,24 @@ public final class QueryParameters {
 
     /**
      * Gets the length.
-     * 
+     *
      * @return The length
      */
     public int getLen() {
         return len;
     }
-    
+
     public int getModule() {
         return module;
     }
-    
+
     public Set<String> getIndexIds() {
         return indexIds;
     }
-    
+
 //    /**
 //     * Gets the folder or <code>null</code> if not set.
-//     * 
+//     *
 //     * @return The folder
 //     */
 //    public Set<String> getFolders() {
@@ -267,7 +267,7 @@ public final class QueryParameters {
 
 //    /**
 //     * Gets the parameters.
-//     * 
+//     *
 //     * @return The parameters
 //     */
 //    public Map<String, Object> getParameters() {
@@ -276,13 +276,13 @@ public final class QueryParameters {
 
     /**
      * Gets the handler.
-     * 
+     *
      * @return The handler
      */
     public SearchHandler getHandler() {
         return handler;
     }
-    
+
     /**
      * Gets the sortField
      *
@@ -291,7 +291,7 @@ public final class QueryParameters {
     public IndexField getSortField() {
         return sortField;
     }
-    
+
     /**
      * Gets the order
      *
@@ -300,7 +300,7 @@ public final class QueryParameters {
     public Order getOrder() {
         return order;
     }
-    
+
     /**
      * Gets the set of accounts and folders.
      * @return The account folders

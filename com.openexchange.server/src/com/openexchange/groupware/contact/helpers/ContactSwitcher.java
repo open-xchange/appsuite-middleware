@@ -297,13 +297,13 @@ public interface ContactSwitcher {
     public Object yomicompanyname(Object[] objects) throws OXException;
 
     public Object image1contenttype(Object[] objects) throws OXException;
-    
+
     public Object homeaddress(Object[] objects) throws OXException;
-    
-    public Object businessaddress(Object[] objects) throws OXException;   
-    
+
+    public Object businessaddress(Object[] objects) throws OXException;
+
     public Object otheraddress(Object[] objects) throws OXException;
-    
+
     public Object uid(Object[] objects) throws OXException;
 
     public Object image1(Object[] objects) throws OXException;

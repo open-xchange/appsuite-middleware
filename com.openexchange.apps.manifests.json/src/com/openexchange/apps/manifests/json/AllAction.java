@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AllAction}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 @DispatcherNotes(noSession = true)
@@ -90,11 +90,11 @@ public class AllAction implements AJAXActionService {
 	public AJAXRequestResult perform(AJAXRequestData requestData,
 			ServerSession session) throws OXException {
 
-		
+
 
 		return new AJAXRequestResult(getManifests(session, manifests, services), "json");
 	}
-	
+
 	public static JSONArray getManifests(ServerSession session, JSONArray manifests, ServiceLookup services) throws OXException {
 		JSONArray result = new JSONArray();
 		try {
@@ -134,7 +134,7 @@ public class AllAction implements AJAXActionService {
 		if (!definition.has("namespace")) {
 			return false;
 		}
-		
+
 		return definition.getString("namespace").equalsIgnoreCase("signin");
 	}
 

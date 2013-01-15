@@ -83,12 +83,12 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 	 * Map containing all available mappings.
 	 */
 	protected final EnumMap<E, ? extends JsonMapping<? extends Object, O>> mappings;
-	
+
 	/**
 	 * Maps column IDs to enum values
 	 */
 	protected final Map<Integer, E> columnMap;
-	
+
 	/**
 	 * Initializes a new {@link DefaultJsonMapper}.
 	 */
@@ -100,7 +100,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 			this.columnMap.put(Integer.valueOf(entry.getValue().getColumnID()), entry.getKey());
 		}
 	}
-	
+
 	@Override
 	public JSONObject serialize(final O object, final E[] fields) throws JSONException, OXException {
 		return this.serialize(object, fields, (TimeZone)null);
@@ -120,44 +120,44 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
         	}
 		}
 	}
-	
+
 	@Override
 	public JSONObject serialize(O object, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException {
 		JSONObject jsonObject = new JSONObject();
 		this.serialize(object, jsonObject, fields, timeZone, session);
 		return jsonObject;
 	}
-	
+
 	@Override
 	public JSONObject serialize(O object, E[] fields, String timeZoneID, Session session) throws JSONException, OXException {
 		return this.serialize(object, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null, session);
 	}
-	
+
 	@Override
 	public JSONObject serialize(O object, E[] fields, TimeZone timeZone) throws JSONException, OXException {
 		return this.serialize(object, fields, timeZone, null);
 	}
-	
+
 	@Override
 	public void serialize(final O object, final JSONObject to, final E[] fields, final String timeZoneID) throws JSONException, OXException {
 		this.serialize(object, to, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null);
 	}
-	
+
 	@Override
 	public void serialize(O object, JSONObject to, E[] fields, final TimeZone timeZone) throws JSONException, OXException {
 		this.serialize(object, to, fields, timeZone, null);
 	}
-	
+
 //	@Override
 //	public JSONArray serialize(final List<O> objects, final E[] fields) throws JSONException, OXException {
 //		return this.serialize(objects, fields, null);
 //	}
-//	
+//
 //	@Override
 //	public JSONArray serialize(final List<O> objects, final E[] fields, String timeZoneID) throws JSONException, OXException {
 //		return this.serialize(objects, fields, timeZoneID, null);
 //	}
-//	
+//
 //	@Override
 //	public JSONArray serialize(List<O> objects, E[] fields, String timeZoneID, Session session) throws JSONException, OXException {
 //		final JSONArray jsonArray = new JSONArray();
@@ -170,7 +170,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 
 	@Override
 	public JSONArray serialize(List<O> objects, E[] fields, String timeZoneID, Session session) throws JSONException, OXException {
-		return this.serialize(objects, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null, session);		
+		return this.serialize(objects, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null, session);
 	}
 
 	@Override
@@ -179,7 +179,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 		for (O object : objects) {
 			JSONArray itemArray = new JSONArray();
 			for (E field : fields) {
-				itemArray.put(get(field).serialize(object, timeZone, session));				
+				itemArray.put(get(field).serialize(object, timeZone, session));
 			}
 			jsonArray.put(itemArray);
 		}
@@ -190,7 +190,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
     public O deserialize(final JSONObject jsonObject, final E[] fields) throws OXException, JSONException {
         return this.deserialize(jsonObject, fields, (TimeZone)null);
     }
-    
+
     @Override
     public O deserialize(JSONObject jsonObject, E[] fields, String timeZoneID) throws OXException, JSONException {
         return this.deserialize(jsonObject, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null);
@@ -217,7 +217,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
         }
         return mapping;
     }
-    
+
     @Override
     public JsonMapping<? extends Object, O> opt(final E field) {
         if (null == field) {
@@ -225,12 +225,12 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
         }
         return this.mappings.get(field);
     }
-    
+
     @Override
     public E getMappedField(final int columnID) {
         return this.columnMap.get(Integer.valueOf(columnID));
     }
-    
+
     @Override
     public E getMappedField(String ajaxName) {
         if (null != ajaxName) {
@@ -239,10 +239,10 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
                     return entry.getKey();
                 }
             }
-        }        
+        }
         return null;
     }
-    
+
 	@Override
 	public int[] getColumnIDs(final E[] fields) throws OXException {
 		if (null == fields) {
@@ -259,7 +259,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 	public E[] getFields(final int[] columnIDs) throws OXException {
 		return this.getFields(columnIDs, null, (E[])null);
 	}
-	
+
 	@Override
     public E[] getFields(final int[] columnIDs, final E... mandatoryFields) throws OXException {
 		return this.getFields(columnIDs, null, mandatoryFields);
@@ -289,10 +289,10 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 	protected EnumMap<E, ? extends JsonMapping<? extends Object, O>> getMappings() {
 		return this.mappings;
 	}
-	
+
 	/**
-	 * Creates the mappings for all possible values of the underlying enum. 
-	 * 
+	 * Creates the mappings for all possible values of the underlying enum.
+	 *
 	 * @return the mappings
 	 */
 	protected abstract EnumMap<E, ? extends JsonMapping<? extends Object, O>> createMappings();

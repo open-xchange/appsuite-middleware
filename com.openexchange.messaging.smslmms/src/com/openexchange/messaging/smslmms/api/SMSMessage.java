@@ -58,7 +58,7 @@ import com.openexchange.messaging.CaptchaParams;
 
 /**
  * {@link SMSMessage} - Represents a SMS/MMS message.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SMSMessage {
@@ -70,21 +70,21 @@ public interface SMSMessage {
 
     /**
      * Gets the message text.
-     * 
+     *
      * @return The message text
      */
     public String getMessage();
 
     /**
      * Gets the associated files.
-     * 
+     *
      * @return The files.
      */
     public List<ManagedFile> getFiles();
 
     /**
      * Adds specified attachment.
-     * 
+     *
      * @param managedFile The attachment as a managed file
      * @throws OXException If attaching denoted file fails
      */
@@ -92,7 +92,7 @@ public interface SMSMessage {
 
     /**
      * Adds the attachment associated with specified identifier.
-     * 
+     *
      * @param attachmentId The attachment identifier
      * @throws OXException If attaching denoted file fails
      */
@@ -100,35 +100,35 @@ public interface SMSMessage {
 
     /**
      * Gets the sender.
-     * 
+     *
      * @return The sender
      */
     String getSender();
 
     /**
      * Gets the recipients.
-     * 
+     *
      * @return The recipients
      */
     Set<String> getRecipients();
 
     /**
      * Gets the identifier.
-     * 
+     *
      * @return The identifier or <code>null</code> if not available
      */
     String getId();
 
     /**
      * Gets the folder full name.
-     * 
+     *
      * @return The folder full name or <code>null</code> if not available
      */
     String getFolder();
 
     /**
      * Get the size of this part in bytes. Return <code>-1</code> if the size cannot be determined.
-     * 
+     *
      * @return The size of this part or <code>-1</code>
      * @throws OXException If size cannot be returned
      */
@@ -136,14 +136,14 @@ public interface SMSMessage {
 
     /**
      * Sets the captcha parameters
-     * 
+     *
      * @param params The captcha parameters
      */
     void setCaptchaParameters(CaptchaParams captchaParams);
 
     /**
      * Gets the captcha parameters
-     * 
+     *
      * @return The captcha parameters
      */
     CaptchaParams getCaptchaParams();
@@ -152,14 +152,14 @@ public interface SMSMessage {
      * Gets all parameters of this message as a map.
      * <p>
      * Note: Any modifications applied to returned map will also be reflectedf in message's parameters.
-     * 
+     *
      * @return The parameters as a map
      */
     Map<String, Object> getParameters();
 
     /**
      * Gets the associated parameter value.
-     * 
+     *
      * @param name The parameter name
      * @return The parameter value or <code>null</code> if absent
      */
@@ -167,7 +167,7 @@ public interface SMSMessage {
 
     /**
      * Puts specified parameter (and thus overwrites any existing parameter)
-     * 
+     *
      * @param name The parameter name
      * @param value The parameter value
      */
@@ -175,7 +175,7 @@ public interface SMSMessage {
 
     /**
      * Puts specified parameter if not already present.
-     * 
+     *
      * @param name The parameter name
      * @param value The parameter value
      * @return <code>true</code> if parameter has been put; otherwise <code>false</code> if already present
@@ -189,7 +189,7 @@ public interface SMSMessage {
 
     /**
      * Checks if this message contains denoted parameter.
-     * 
+     *
      * @param name The parameter name
      * @return <code>true</code> if such a parameter exists; <code>false</code> if absent
      */

@@ -52,7 +52,7 @@ package com.openexchange.indexedSearch.json;
 
 /**
  * {@link FieldResults}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FieldResults {
@@ -78,7 +78,7 @@ public final class FieldResults {
 
     /**
      * Gets the format
-     * 
+     *
      * @return The format
      */
     public String getFormat() {
@@ -87,7 +87,7 @@ public final class FieldResults {
 
     /**
      * Gets the field name
-     * 
+     *
      * @return The field name
      */
     public String getFieldName() {
@@ -96,7 +96,7 @@ public final class FieldResults {
 
     /**
      * Gets the results
-     * 
+     *
      * @return The results
      */
     public Object getResults() {
@@ -105,7 +105,7 @@ public final class FieldResults {
 
     /**
      * Gets the <i>has-more</i> flag
-     * 
+     *
      * @return The <i>has-more</i> flag
      */
     public boolean hasMore() {

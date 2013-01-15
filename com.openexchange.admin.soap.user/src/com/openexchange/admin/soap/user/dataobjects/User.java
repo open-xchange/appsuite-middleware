@@ -1,7 +1,6 @@
 
 package com.openexchange.admin.soap.user.dataobjects;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,9 +14,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * <p>Java-Klasse f\u00fcr User complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="User">
  *   &lt;complexContent>
@@ -153,8 +152,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "User", propOrder = {
@@ -538,25 +537,25 @@ public class User {
 
     /**
      * Gets the value of the aliases property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the aliases property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAliases().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getAliases() {
         return this.aliases;
@@ -564,11 +563,11 @@ public class User {
 
     /**
      * Ruft den Wert der anniversary-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getAnniversary() {
         return anniversary;
@@ -576,11 +575,11 @@ public class User {
 
     /**
      * Legt den Wert der anniversary-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setAnniversary(final XMLGregorianCalendar value) {
         this.anniversary = value;
@@ -588,11 +587,11 @@ public class User {
 
     /**
      * Ruft den Wert der assistantName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAssistantName() {
         return assistantName;
@@ -600,11 +599,11 @@ public class User {
 
     /**
      * Legt den Wert der assistantName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAssistantName(final String value) {
         this.assistantName = value;
@@ -612,11 +611,11 @@ public class User {
 
     /**
      * Ruft den Wert der birthday-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getBirthday() {
         return birthday;
@@ -624,11 +623,11 @@ public class User {
 
     /**
      * Legt den Wert der birthday-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setBirthday(final XMLGregorianCalendar value) {
         this.birthday = value;
@@ -636,11 +635,11 @@ public class User {
 
     /**
      * Ruft den Wert der branches-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getBranches() {
         return branches;
@@ -648,11 +647,11 @@ public class User {
 
     /**
      * Legt den Wert der branches-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setBranches(final String value) {
         this.branches = value;
@@ -660,11 +659,11 @@ public class User {
 
     /**
      * Ruft den Wert der businessCategory-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getBusinessCategory() {
         return businessCategory;
@@ -672,11 +671,11 @@ public class User {
 
     /**
      * Legt den Wert der businessCategory-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setBusinessCategory(final String value) {
         this.businessCategory = value;
@@ -684,11 +683,11 @@ public class User {
 
     /**
      * Ruft den Wert der categories-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCategories() {
         return categories;
@@ -696,11 +695,11 @@ public class User {
 
     /**
      * Legt den Wert der categories-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCategories(final String value) {
         this.categories = value;
@@ -708,11 +707,11 @@ public class User {
 
     /**
      * Ruft den Wert der cellularTelephone1-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCellularTelephone1() {
         return cellularTelephone1;
@@ -720,11 +719,11 @@ public class User {
 
     /**
      * Legt den Wert der cellularTelephone1-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCellularTelephone1(final String value) {
         this.cellularTelephone1 = value;
@@ -732,11 +731,11 @@ public class User {
 
     /**
      * Ruft den Wert der cellularTelephone2-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCellularTelephone2() {
         return cellularTelephone2;
@@ -744,11 +743,11 @@ public class User {
 
     /**
      * Legt den Wert der cellularTelephone2-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCellularTelephone2(final String value) {
         this.cellularTelephone2 = value;
@@ -756,11 +755,11 @@ public class User {
 
     /**
      * Ruft den Wert der cityBusiness-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCityBusiness() {
         return cityBusiness;
@@ -768,11 +767,11 @@ public class User {
 
     /**
      * Legt den Wert der cityBusiness-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCityBusiness(final String value) {
         this.cityBusiness = value;
@@ -780,11 +779,11 @@ public class User {
 
     /**
      * Ruft den Wert der cityHome-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCityHome() {
         return cityHome;
@@ -792,11 +791,11 @@ public class User {
 
     /**
      * Legt den Wert der cityHome-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCityHome(final String value) {
         this.cityHome = value;
@@ -804,11 +803,11 @@ public class User {
 
     /**
      * Ruft den Wert der cityOther-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCityOther() {
         return cityOther;
@@ -816,11 +815,11 @@ public class User {
 
     /**
      * Legt den Wert der cityOther-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCityOther(final String value) {
         this.cityOther = value;
@@ -828,11 +827,11 @@ public class User {
 
     /**
      * Ruft den Wert der commercialRegister-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCommercialRegister() {
         return commercialRegister;
@@ -840,11 +839,11 @@ public class User {
 
     /**
      * Legt den Wert der commercialRegister-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCommercialRegister(final String value) {
         this.commercialRegister = value;
@@ -852,11 +851,11 @@ public class User {
 
     /**
      * Ruft den Wert der company-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCompany() {
         return company;
@@ -864,11 +863,11 @@ public class User {
 
     /**
      * Legt den Wert der company-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCompany(final String value) {
         this.company = value;
@@ -876,11 +875,11 @@ public class User {
 
     /**
      * Ruft den Wert der contextadmin-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isContextadmin() {
         return contextadmin;
@@ -888,11 +887,11 @@ public class User {
 
     /**
      * Legt den Wert der contextadmin-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setContextadmin(final Boolean value) {
         this.contextadmin = value;
@@ -900,11 +899,11 @@ public class User {
 
     /**
      * Ruft den Wert der countryBusiness-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCountryBusiness() {
         return countryBusiness;
@@ -912,11 +911,11 @@ public class User {
 
     /**
      * Legt den Wert der countryBusiness-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCountryBusiness(final String value) {
         this.countryBusiness = value;
@@ -924,11 +923,11 @@ public class User {
 
     /**
      * Ruft den Wert der countryHome-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCountryHome() {
         return countryHome;
@@ -936,11 +935,11 @@ public class User {
 
     /**
      * Legt den Wert der countryHome-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCountryHome(final String value) {
         this.countryHome = value;
@@ -948,11 +947,11 @@ public class User {
 
     /**
      * Ruft den Wert der countryOther-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCountryOther() {
         return countryOther;
@@ -960,11 +959,11 @@ public class User {
 
     /**
      * Legt den Wert der countryOther-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCountryOther(final String value) {
         this.countryOther = value;
@@ -972,11 +971,11 @@ public class User {
 
     /**
      * Ruft den Wert der defaultSenderAddress-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDefaultSenderAddress() {
         return defaultSenderAddress;
@@ -984,11 +983,11 @@ public class User {
 
     /**
      * Legt den Wert der defaultSenderAddress-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDefaultSenderAddress(final String value) {
         this.defaultSenderAddress = value;
@@ -996,11 +995,11 @@ public class User {
 
     /**
      * Ruft den Wert der defaultGroup-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Group }
-     *     
+     *
      */
     public Group getDefaultGroup() {
         return defaultGroup;
@@ -1008,11 +1007,11 @@ public class User {
 
     /**
      * Legt den Wert der defaultGroup-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Group }
-     *     
+     *
      */
     public void setDefaultGroup(final Group value) {
         this.defaultGroup = value;
@@ -1020,11 +1019,11 @@ public class User {
 
     /**
      * Ruft den Wert der department-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDepartment() {
         return department;
@@ -1032,11 +1031,11 @@ public class User {
 
     /**
      * Legt den Wert der department-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDepartment(final String value) {
         this.department = value;
@@ -1044,11 +1043,11 @@ public class User {
 
     /**
      * Ruft den Wert der displayName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDisplayName() {
         return displayName;
@@ -1056,11 +1055,11 @@ public class User {
 
     /**
      * Legt den Wert der displayName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDisplayName(final String value) {
         this.displayName = value;
@@ -1068,11 +1067,11 @@ public class User {
 
     /**
      * Ruft den Wert der email1-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getEmail1() {
         return email1;
@@ -1080,11 +1079,11 @@ public class User {
 
     /**
      * Legt den Wert der email1-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setEmail1(final String value) {
         this.email1 = value;
@@ -1092,11 +1091,11 @@ public class User {
 
     /**
      * Ruft den Wert der email2-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getEmail2() {
         return email2;
@@ -1104,11 +1103,11 @@ public class User {
 
     /**
      * Legt den Wert der email2-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setEmail2(final String value) {
         this.email2 = value;
@@ -1116,11 +1115,11 @@ public class User {
 
     /**
      * Ruft den Wert der email3-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getEmail3() {
         return email3;
@@ -1128,11 +1127,11 @@ public class User {
 
     /**
      * Legt den Wert der email3-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setEmail3(final String value) {
         this.email3 = value;
@@ -1140,11 +1139,11 @@ public class User {
 
     /**
      * Ruft den Wert der employeeType-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getEmployeeType() {
         return employeeType;
@@ -1152,11 +1151,11 @@ public class User {
 
     /**
      * Legt den Wert der employeeType-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setEmployeeType(final String value) {
         this.employeeType = value;
@@ -1164,11 +1163,11 @@ public class User {
 
     /**
      * Ruft den Wert der faxBusiness-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFaxBusiness() {
         return faxBusiness;
@@ -1176,11 +1175,11 @@ public class User {
 
     /**
      * Legt den Wert der faxBusiness-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFaxBusiness(final String value) {
         this.faxBusiness = value;
@@ -1188,11 +1187,11 @@ public class User {
 
     /**
      * Ruft den Wert der faxHome-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFaxHome() {
         return faxHome;
@@ -1200,11 +1199,11 @@ public class User {
 
     /**
      * Legt den Wert der faxHome-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFaxHome(final String value) {
         this.faxHome = value;
@@ -1212,11 +1211,11 @@ public class User {
 
     /**
      * Ruft den Wert der faxOther-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFaxOther() {
         return faxOther;
@@ -1224,11 +1223,11 @@ public class User {
 
     /**
      * Legt den Wert der faxOther-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFaxOther(final String value) {
         this.faxOther = value;
@@ -1236,11 +1235,11 @@ public class User {
 
     /**
      * Ruft den Wert der folderTree-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getFolderTree() {
         return folderTree;
@@ -1248,11 +1247,11 @@ public class User {
 
     /**
      * Legt den Wert der folderTree-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setFolderTree(final Integer value) {
         this.folderTree = value;
@@ -1260,11 +1259,11 @@ public class User {
 
     /**
      * Ruft den Wert der givenName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getGivenName() {
         return givenName;
@@ -1272,11 +1271,11 @@ public class User {
 
     /**
      * Legt den Wert der givenName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setGivenName(final String value) {
         this.givenName = value;
@@ -1284,11 +1283,11 @@ public class User {
 
     /**
      * Ruft den Wert der guiPreferencesForSoap-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link SOAPStringMap }
-     *     
+     *
      */
     public SOAPStringMap getGuiPreferencesForSoap() {
         return guiPreferencesForSoap;
@@ -1296,11 +1295,11 @@ public class User {
 
     /**
      * Legt den Wert der guiPreferencesForSoap-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link SOAPStringMap }
-     *     
+     *
      */
     public void setGuiPreferencesForSoap(final SOAPStringMap value) {
         this.guiPreferencesForSoap = value;
@@ -1308,11 +1307,11 @@ public class User {
 
     /**
      * Ruft den Wert der guiSpamFilterEnabled-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isGuiSpamFilterEnabled() {
         return guiSpamFilterEnabled;
@@ -1320,16 +1319,16 @@ public class User {
 
     /**
      * Legt den Wert der guiSpamFilterEnabled-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setGuiSpamFilterEnabled(final Boolean value) {
         this.guiSpamFilterEnabled = value;
     }
-    
+
     /**
      * Sets the aliases
      *
@@ -1341,11 +1340,11 @@ public class User {
 
     /**
      * Ruft den Wert der id-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getId() {
         return id;
@@ -1353,11 +1352,11 @@ public class User {
 
     /**
      * Legt den Wert der id-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setId(final Integer value) {
         this.id = value;
@@ -1365,11 +1364,11 @@ public class User {
 
     /**
      * Ruft den Wert der imapLogin-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getImapLogin() {
         return imapLogin;
@@ -1377,11 +1376,11 @@ public class User {
 
     /**
      * Legt den Wert der imapLogin-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setImapLogin(final String value) {
         this.imapLogin = value;
@@ -1389,11 +1388,11 @@ public class User {
 
     /**
      * Ruft den Wert der imapPort-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getImapPort() {
         return imapPort;
@@ -1401,11 +1400,11 @@ public class User {
 
     /**
      * Legt den Wert der imapPort-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setImapPort(final Integer value) {
         this.imapPort = value;
@@ -1413,11 +1412,11 @@ public class User {
 
     /**
      * Ruft den Wert der imapSchema-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getImapSchema() {
         return imapSchema;
@@ -1425,11 +1424,11 @@ public class User {
 
     /**
      * Legt den Wert der imapSchema-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setImapSchema(final String value) {
         this.imapSchema = value;
@@ -1437,11 +1436,11 @@ public class User {
 
     /**
      * Ruft den Wert der imapServer-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getImapServer() {
         return imapServer;
@@ -1449,11 +1448,11 @@ public class User {
 
     /**
      * Legt den Wert der imapServer-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setImapServer(final String value) {
         this.imapServer = value;
@@ -1461,11 +1460,11 @@ public class User {
 
     /**
      * Ruft den Wert der imapServerString-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getImapServerString() {
         return imapServerString;
@@ -1473,11 +1472,11 @@ public class User {
 
     /**
      * Legt den Wert der imapServerString-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setImapServerString(final String value) {
         this.imapServerString = value;
@@ -1485,11 +1484,11 @@ public class User {
 
     /**
      * Ruft den Wert der info-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getInfo() {
         return info;
@@ -1497,11 +1496,11 @@ public class User {
 
     /**
      * Legt den Wert der info-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setInfo(final String value) {
         this.info = value;
@@ -1509,11 +1508,11 @@ public class User {
 
     /**
      * Ruft den Wert der instantMessenger1-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getInstantMessenger1() {
         return instantMessenger1;
@@ -1521,11 +1520,11 @@ public class User {
 
     /**
      * Legt den Wert der instantMessenger1-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setInstantMessenger1(final String value) {
         this.instantMessenger1 = value;
@@ -1533,11 +1532,11 @@ public class User {
 
     /**
      * Ruft den Wert der instantMessenger2-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getInstantMessenger2() {
         return instantMessenger2;
@@ -1545,11 +1544,11 @@ public class User {
 
     /**
      * Legt den Wert der instantMessenger2-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setInstantMessenger2(final String value) {
         this.instantMessenger2 = value;
@@ -1557,11 +1556,11 @@ public class User {
 
     /**
      * Ruft den Wert der language-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLanguage() {
         return language;
@@ -1569,11 +1568,11 @@ public class User {
 
     /**
      * Legt den Wert der language-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLanguage(final String value) {
         this.language = value;
@@ -1581,11 +1580,11 @@ public class User {
 
     /**
      * Ruft den Wert der mailFolderConfirmedHamName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMailFolderConfirmedHamName() {
         return mailFolderConfirmedHamName;
@@ -1593,11 +1592,11 @@ public class User {
 
     /**
      * Legt den Wert der mailFolderConfirmedHamName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMailFolderConfirmedHamName(final String value) {
         this.mailFolderConfirmedHamName = value;
@@ -1605,11 +1604,11 @@ public class User {
 
     /**
      * Ruft den Wert der mailFolderConfirmedSpamName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMailFolderConfirmedSpamName() {
         return mailFolderConfirmedSpamName;
@@ -1617,11 +1616,11 @@ public class User {
 
     /**
      * Legt den Wert der mailFolderConfirmedSpamName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMailFolderConfirmedSpamName(final String value) {
         this.mailFolderConfirmedSpamName = value;
@@ -1629,11 +1628,11 @@ public class User {
 
     /**
      * Ruft den Wert der mailFolderDraftsName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMailFolderDraftsName() {
         return mailFolderDraftsName;
@@ -1641,11 +1640,11 @@ public class User {
 
     /**
      * Legt den Wert der mailFolderDraftsName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMailFolderDraftsName(final String value) {
         this.mailFolderDraftsName = value;
@@ -1653,11 +1652,11 @@ public class User {
 
     /**
      * Ruft den Wert der mailFolderSentName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMailFolderSentName() {
         return mailFolderSentName;
@@ -1665,11 +1664,11 @@ public class User {
 
     /**
      * Legt den Wert der mailFolderSentName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMailFolderSentName(final String value) {
         this.mailFolderSentName = value;
@@ -1677,11 +1676,11 @@ public class User {
 
     /**
      * Ruft den Wert der mailFolderSpamName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMailFolderSpamName() {
         return mailFolderSpamName;
@@ -1689,11 +1688,11 @@ public class User {
 
     /**
      * Legt den Wert der mailFolderSpamName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMailFolderSpamName(final String value) {
         this.mailFolderSpamName = value;
@@ -1701,11 +1700,11 @@ public class User {
 
     /**
      * Ruft den Wert der mailFolderTrashName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMailFolderTrashName() {
         return mailFolderTrashName;
@@ -1713,11 +1712,11 @@ public class User {
 
     /**
      * Legt den Wert der mailFolderTrashName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMailFolderTrashName(final String value) {
         this.mailFolderTrashName = value;
@@ -1725,11 +1724,11 @@ public class User {
 
     /**
      * Ruft den Wert der mailenabled-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isMailenabled() {
         return mailenabled;
@@ -1737,11 +1736,11 @@ public class User {
 
     /**
      * Legt den Wert der mailenabled-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setMailenabled(final Boolean value) {
         this.mailenabled = value;
@@ -1749,11 +1748,11 @@ public class User {
 
     /**
      * Ruft den Wert der managerName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getManagerName() {
         return managerName;
@@ -1761,11 +1760,11 @@ public class User {
 
     /**
      * Legt den Wert der managerName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setManagerName(final String value) {
         this.managerName = value;
@@ -1773,11 +1772,11 @@ public class User {
 
     /**
      * Ruft den Wert der maritalStatus-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMaritalStatus() {
         return maritalStatus;
@@ -1785,11 +1784,11 @@ public class User {
 
     /**
      * Legt den Wert der maritalStatus-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMaritalStatus(final String value) {
         this.maritalStatus = value;
@@ -1797,11 +1796,11 @@ public class User {
 
     /**
      * Ruft den Wert der middleName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMiddleName() {
         return middleName;
@@ -1809,11 +1808,11 @@ public class User {
 
     /**
      * Legt den Wert der middleName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMiddleName(final String value) {
         this.middleName = value;
@@ -1821,11 +1820,11 @@ public class User {
 
     /**
      * Ruft den Wert der name-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -1833,11 +1832,11 @@ public class User {
 
     /**
      * Legt den Wert der name-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(final String value) {
         this.name = value;
@@ -1845,11 +1844,11 @@ public class User {
 
     /**
      * Ruft den Wert der nickname-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNickname() {
         return nickname;
@@ -1857,11 +1856,11 @@ public class User {
 
     /**
      * Legt den Wert der nickname-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNickname(final String value) {
         this.nickname = value;
@@ -1869,11 +1868,11 @@ public class User {
 
     /**
      * Ruft den Wert der note-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNote() {
         return note;
@@ -1881,11 +1880,11 @@ public class User {
 
     /**
      * Legt den Wert der note-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNote(final String value) {
         this.note = value;
@@ -1893,11 +1892,11 @@ public class User {
 
     /**
      * Ruft den Wert der numberOfChildren-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNumberOfChildren() {
         return numberOfChildren;
@@ -1905,11 +1904,11 @@ public class User {
 
     /**
      * Legt den Wert der numberOfChildren-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNumberOfChildren(final String value) {
         this.numberOfChildren = value;
@@ -1917,11 +1916,11 @@ public class User {
 
     /**
      * Ruft den Wert der numberOfEmployee-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNumberOfEmployee() {
         return numberOfEmployee;
@@ -1929,11 +1928,11 @@ public class User {
 
     /**
      * Legt den Wert der numberOfEmployee-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNumberOfEmployee(final String value) {
         this.numberOfEmployee = value;
@@ -1941,11 +1940,11 @@ public class User {
 
     /**
      * Ruft den Wert der password-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPassword() {
         return password;
@@ -1953,11 +1952,11 @@ public class User {
 
     /**
      * Legt den Wert der password-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPassword(final String value) {
         this.password = value;
@@ -1965,11 +1964,11 @@ public class User {
 
     /**
      * Ruft den Wert der passwordMech-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPasswordMech() {
         return passwordMech;
@@ -1977,11 +1976,11 @@ public class User {
 
     /**
      * Legt den Wert der passwordMech-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPasswordMech(final String value) {
         this.passwordMech = value;
@@ -1989,11 +1988,11 @@ public class User {
 
     /**
      * Ruft den Wert der passwordExpired-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isPasswordExpired() {
         return passwordExpired;
@@ -2001,11 +2000,11 @@ public class User {
 
     /**
      * Legt den Wert der passwordExpired-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setPasswordExpired(final Boolean value) {
         this.passwordExpired = value;
@@ -2013,11 +2012,11 @@ public class User {
 
     /**
      * Ruft den Wert der position-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPosition() {
         return position;
@@ -2025,11 +2024,11 @@ public class User {
 
     /**
      * Legt den Wert der position-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPosition(final String value) {
         this.position = value;
@@ -2037,11 +2036,11 @@ public class User {
 
     /**
      * Ruft den Wert der postalCodeBusiness-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPostalCodeBusiness() {
         return postalCodeBusiness;
@@ -2049,11 +2048,11 @@ public class User {
 
     /**
      * Legt den Wert der postalCodeBusiness-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPostalCodeBusiness(final String value) {
         this.postalCodeBusiness = value;
@@ -2061,11 +2060,11 @@ public class User {
 
     /**
      * Ruft den Wert der postalCodeHome-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPostalCodeHome() {
         return postalCodeHome;
@@ -2073,11 +2072,11 @@ public class User {
 
     /**
      * Legt den Wert der postalCodeHome-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPostalCodeHome(final String value) {
         this.postalCodeHome = value;
@@ -2085,11 +2084,11 @@ public class User {
 
     /**
      * Ruft den Wert der postalCodeOther-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPostalCodeOther() {
         return postalCodeOther;
@@ -2097,11 +2096,11 @@ public class User {
 
     /**
      * Legt den Wert der postalCodeOther-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPostalCodeOther(final String value) {
         this.postalCodeOther = value;
@@ -2109,11 +2108,11 @@ public class User {
 
     /**
      * Ruft den Wert der primaryEmail-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPrimaryEmail() {
         return primaryEmail;
@@ -2121,11 +2120,11 @@ public class User {
 
     /**
      * Legt den Wert der primaryEmail-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPrimaryEmail(final String value) {
         this.primaryEmail = value;
@@ -2133,11 +2132,11 @@ public class User {
 
     /**
      * Ruft den Wert der profession-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getProfession() {
         return profession;
@@ -2145,11 +2144,11 @@ public class User {
 
     /**
      * Legt den Wert der profession-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setProfession(final String value) {
         this.profession = value;
@@ -2157,11 +2156,11 @@ public class User {
 
     /**
      * Ruft den Wert der roomNumber-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getRoomNumber() {
         return roomNumber;
@@ -2169,11 +2168,11 @@ public class User {
 
     /**
      * Legt den Wert der roomNumber-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setRoomNumber(final String value) {
         this.roomNumber = value;
@@ -2181,11 +2180,11 @@ public class User {
 
     /**
      * Ruft den Wert der salesVolume-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSalesVolume() {
         return salesVolume;
@@ -2193,11 +2192,11 @@ public class User {
 
     /**
      * Legt den Wert der salesVolume-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSalesVolume(final String value) {
         this.salesVolume = value;
@@ -2205,11 +2204,11 @@ public class User {
 
     /**
      * Ruft den Wert der smtpPort-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getSmtpPort() {
         return smtpPort;
@@ -2217,11 +2216,11 @@ public class User {
 
     /**
      * Legt den Wert der smtpPort-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setSmtpPort(final Integer value) {
         this.smtpPort = value;
@@ -2229,11 +2228,11 @@ public class User {
 
     /**
      * Ruft den Wert der smtpSchema-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSmtpSchema() {
         return smtpSchema;
@@ -2241,11 +2240,11 @@ public class User {
 
     /**
      * Legt den Wert der smtpSchema-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSmtpSchema(final String value) {
         this.smtpSchema = value;
@@ -2253,11 +2252,11 @@ public class User {
 
     /**
      * Ruft den Wert der smtpServer-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSmtpServer() {
         return smtpServer;
@@ -2265,11 +2264,11 @@ public class User {
 
     /**
      * Legt den Wert der smtpServer-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSmtpServer(final String value) {
         this.smtpServer = value;
@@ -2299,11 +2298,11 @@ public class User {
 
     /**
      * Ruft den Wert der smtpServerString-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSmtpServerString() {
         if (smtpServerString == null) {
@@ -2328,11 +2327,11 @@ public class User {
 
     /**
      * Legt den Wert der smtpServerString-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSmtpServerString(final String value) {
         this.smtpServerString = value;
@@ -2340,11 +2339,11 @@ public class User {
 
     /**
      * Ruft den Wert der spouseName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSpouseName() {
         return spouseName;
@@ -2352,11 +2351,11 @@ public class User {
 
     /**
      * Legt den Wert der spouseName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSpouseName(final String value) {
         this.spouseName = value;
@@ -2364,11 +2363,11 @@ public class User {
 
     /**
      * Ruft den Wert der stateBusiness-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getStateBusiness() {
         return stateBusiness;
@@ -2376,11 +2375,11 @@ public class User {
 
     /**
      * Legt den Wert der stateBusiness-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setStateBusiness(final String value) {
         this.stateBusiness = value;
@@ -2388,11 +2387,11 @@ public class User {
 
     /**
      * Ruft den Wert der stateHome-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getStateHome() {
         return stateHome;
@@ -2400,11 +2399,11 @@ public class User {
 
     /**
      * Legt den Wert der stateHome-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setStateHome(final String value) {
         this.stateHome = value;
@@ -2412,11 +2411,11 @@ public class User {
 
     /**
      * Ruft den Wert der stateOther-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getStateOther() {
         return stateOther;
@@ -2424,11 +2423,11 @@ public class User {
 
     /**
      * Legt den Wert der stateOther-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setStateOther(final String value) {
         this.stateOther = value;
@@ -2436,11 +2435,11 @@ public class User {
 
     /**
      * Ruft den Wert der streetBusiness-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getStreetBusiness() {
         return streetBusiness;
@@ -2448,11 +2447,11 @@ public class User {
 
     /**
      * Legt den Wert der streetBusiness-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setStreetBusiness(final String value) {
         this.streetBusiness = value;
@@ -2460,11 +2459,11 @@ public class User {
 
     /**
      * Ruft den Wert der streetHome-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getStreetHome() {
         return streetHome;
@@ -2472,11 +2471,11 @@ public class User {
 
     /**
      * Legt den Wert der streetHome-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setStreetHome(final String value) {
         this.streetHome = value;
@@ -2484,11 +2483,11 @@ public class User {
 
     /**
      * Ruft den Wert der streetOther-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getStreetOther() {
         return streetOther;
@@ -2496,11 +2495,11 @@ public class User {
 
     /**
      * Legt den Wert der streetOther-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setStreetOther(final String value) {
         this.streetOther = value;
@@ -2508,11 +2507,11 @@ public class User {
 
     /**
      * Ruft den Wert der suffix-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSuffix() {
         return suffix;
@@ -2520,11 +2519,11 @@ public class User {
 
     /**
      * Legt den Wert der suffix-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSuffix(final String value) {
         this.suffix = value;
@@ -2532,11 +2531,11 @@ public class User {
 
     /**
      * Ruft den Wert der surName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSurName() {
         return surName;
@@ -2544,11 +2543,11 @@ public class User {
 
     /**
      * Legt den Wert der surName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSurName(final String value) {
         this.surName = value;
@@ -2556,11 +2555,11 @@ public class User {
 
     /**
      * Ruft den Wert der taxId-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTaxId() {
         return taxId;
@@ -2568,11 +2567,11 @@ public class User {
 
     /**
      * Legt den Wert der taxId-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTaxId(final String value) {
         this.taxId = value;
@@ -2580,11 +2579,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephoneAssistant-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephoneAssistant() {
         return telephoneAssistant;
@@ -2592,11 +2591,11 @@ public class User {
 
     /**
      * Legt den Wert der telephoneAssistant-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephoneAssistant(final String value) {
         this.telephoneAssistant = value;
@@ -2604,11 +2603,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephoneBusiness1-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephoneBusiness1() {
         return telephoneBusiness1;
@@ -2616,11 +2615,11 @@ public class User {
 
     /**
      * Legt den Wert der telephoneBusiness1-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephoneBusiness1(final String value) {
         this.telephoneBusiness1 = value;
@@ -2628,11 +2627,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephoneBusiness2-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephoneBusiness2() {
         return telephoneBusiness2;
@@ -2640,11 +2639,11 @@ public class User {
 
     /**
      * Legt den Wert der telephoneBusiness2-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephoneBusiness2(final String value) {
         this.telephoneBusiness2 = value;
@@ -2652,11 +2651,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephoneCallback-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephoneCallback() {
         return telephoneCallback;
@@ -2664,11 +2663,11 @@ public class User {
 
     /**
      * Legt den Wert der telephoneCallback-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephoneCallback(final String value) {
         this.telephoneCallback = value;
@@ -2676,11 +2675,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephoneCar-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephoneCar() {
         return telephoneCar;
@@ -2688,11 +2687,11 @@ public class User {
 
     /**
      * Legt den Wert der telephoneCar-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephoneCar(final String value) {
         this.telephoneCar = value;
@@ -2700,11 +2699,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephoneCompany-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephoneCompany() {
         return telephoneCompany;
@@ -2712,11 +2711,11 @@ public class User {
 
     /**
      * Legt den Wert der telephoneCompany-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephoneCompany(final String value) {
         this.telephoneCompany = value;
@@ -2724,11 +2723,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephoneHome1-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephoneHome1() {
         return telephoneHome1;
@@ -2736,11 +2735,11 @@ public class User {
 
     /**
      * Legt den Wert der telephoneHome1-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephoneHome1(final String value) {
         this.telephoneHome1 = value;
@@ -2748,11 +2747,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephoneHome2-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephoneHome2() {
         return telephoneHome2;
@@ -2760,11 +2759,11 @@ public class User {
 
     /**
      * Legt den Wert der telephoneHome2-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephoneHome2(final String value) {
         this.telephoneHome2 = value;
@@ -2772,11 +2771,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephoneIp-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephoneIp() {
         return telephoneIp;
@@ -2784,11 +2783,11 @@ public class User {
 
     /**
      * Legt den Wert der telephoneIp-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephoneIp(final String value) {
         this.telephoneIp = value;
@@ -2796,11 +2795,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephoneIsdn-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephoneIsdn() {
         return telephoneIsdn;
@@ -2808,11 +2807,11 @@ public class User {
 
     /**
      * Legt den Wert der telephoneIsdn-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephoneIsdn(final String value) {
         this.telephoneIsdn = value;
@@ -2820,11 +2819,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephoneOther-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephoneOther() {
         return telephoneOther;
@@ -2832,11 +2831,11 @@ public class User {
 
     /**
      * Legt den Wert der telephoneOther-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephoneOther(final String value) {
         this.telephoneOther = value;
@@ -2844,11 +2843,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephonePager-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephonePager() {
         return telephonePager;
@@ -2856,11 +2855,11 @@ public class User {
 
     /**
      * Legt den Wert der telephonePager-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephonePager(final String value) {
         this.telephonePager = value;
@@ -2868,11 +2867,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephonePrimary-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephonePrimary() {
         return telephonePrimary;
@@ -2880,11 +2879,11 @@ public class User {
 
     /**
      * Legt den Wert der telephonePrimary-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephonePrimary(final String value) {
         this.telephonePrimary = value;
@@ -2892,11 +2891,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephoneRadio-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephoneRadio() {
         return telephoneRadio;
@@ -2904,11 +2903,11 @@ public class User {
 
     /**
      * Legt den Wert der telephoneRadio-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephoneRadio(final String value) {
         this.telephoneRadio = value;
@@ -2916,11 +2915,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephoneTelex-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephoneTelex() {
         return telephoneTelex;
@@ -2928,11 +2927,11 @@ public class User {
 
     /**
      * Legt den Wert der telephoneTelex-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephoneTelex(final String value) {
         this.telephoneTelex = value;
@@ -2940,11 +2939,11 @@ public class User {
 
     /**
      * Ruft den Wert der telephoneTtytdd-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTelephoneTtytdd() {
         return telephoneTtytdd;
@@ -2952,11 +2951,11 @@ public class User {
 
     /**
      * Legt den Wert der telephoneTtytdd-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTelephoneTtytdd(final String value) {
         this.telephoneTtytdd = value;
@@ -2964,11 +2963,11 @@ public class User {
 
     /**
      * Ruft den Wert der timezone-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTimezone() {
         return timezone;
@@ -2976,11 +2975,11 @@ public class User {
 
     /**
      * Legt den Wert der timezone-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTimezone(final String value) {
         this.timezone = value;
@@ -2988,11 +2987,11 @@ public class User {
 
     /**
      * Ruft den Wert der title-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTitle() {
         return title;
@@ -3000,11 +2999,11 @@ public class User {
 
     /**
      * Legt den Wert der title-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTitle(final String value) {
         this.title = value;
@@ -3012,11 +3011,11 @@ public class User {
 
     /**
      * Ruft den Wert der uploadFileSizeLimit-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getUploadFileSizeLimit() {
         return uploadFileSizeLimit;
@@ -3024,11 +3023,11 @@ public class User {
 
     /**
      * Legt den Wert der uploadFileSizeLimit-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setUploadFileSizeLimit(final Integer value) {
         this.uploadFileSizeLimit = value;
@@ -3036,11 +3035,11 @@ public class User {
 
     /**
      * Ruft den Wert der uploadFileSizeLimitPerFile-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getUploadFileSizeLimitPerFile() {
         return uploadFileSizeLimitPerFile;
@@ -3048,11 +3047,11 @@ public class User {
 
     /**
      * Legt den Wert der uploadFileSizeLimitPerFile-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setUploadFileSizeLimitPerFile(final Integer value) {
         this.uploadFileSizeLimitPerFile = value;
@@ -3060,11 +3059,11 @@ public class User {
 
     /**
      * Ruft den Wert der url-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUrl() {
         return url;
@@ -3072,11 +3071,11 @@ public class User {
 
     /**
      * Legt den Wert der url-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUrl(final String value) {
         this.url = value;
@@ -3084,11 +3083,11 @@ public class User {
 
     /**
      * Ruft den Wert der userAttributes-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link SOAPStringMapMap }
-     *     
+     *
      */
     public SOAPStringMapMap getUserAttributes() {
         return userAttributes;
@@ -3096,11 +3095,11 @@ public class User {
 
     /**
      * Legt den Wert der userAttributes-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link SOAPStringMapMap }
-     *     
+     *
      */
     public void setUserAttributes(final SOAPStringMapMap value) {
         this.userAttributes = value;
@@ -3108,11 +3107,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield01-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield01() {
         return userfield01;
@@ -3120,11 +3119,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield01-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield01(final String value) {
         this.userfield01 = value;
@@ -3132,11 +3131,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield02-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield02() {
         return userfield02;
@@ -3144,11 +3143,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield02-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield02(final String value) {
         this.userfield02 = value;
@@ -3156,11 +3155,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield03-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield03() {
         return userfield03;
@@ -3168,11 +3167,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield03-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield03(final String value) {
         this.userfield03 = value;
@@ -3180,11 +3179,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield04-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield04() {
         return userfield04;
@@ -3192,11 +3191,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield04-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield04(final String value) {
         this.userfield04 = value;
@@ -3204,11 +3203,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield05-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield05() {
         return userfield05;
@@ -3216,11 +3215,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield05-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield05(final String value) {
         this.userfield05 = value;
@@ -3228,11 +3227,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield06-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield06() {
         return userfield06;
@@ -3240,11 +3239,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield06-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield06(final String value) {
         this.userfield06 = value;
@@ -3252,11 +3251,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield07-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield07() {
         return userfield07;
@@ -3264,11 +3263,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield07-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield07(final String value) {
         this.userfield07 = value;
@@ -3276,11 +3275,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield08-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield08() {
         return userfield08;
@@ -3288,11 +3287,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield08-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield08(final String value) {
         this.userfield08 = value;
@@ -3300,11 +3299,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield09-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield09() {
         return userfield09;
@@ -3312,11 +3311,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield09-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield09(final String value) {
         this.userfield09 = value;
@@ -3324,11 +3323,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield10-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield10() {
         return userfield10;
@@ -3336,11 +3335,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield10-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield10(final String value) {
         this.userfield10 = value;
@@ -3348,11 +3347,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield11-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield11() {
         return userfield11;
@@ -3360,11 +3359,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield11-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield11(final String value) {
         this.userfield11 = value;
@@ -3372,11 +3371,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield12-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield12() {
         return userfield12;
@@ -3384,11 +3383,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield12-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield12(final String value) {
         this.userfield12 = value;
@@ -3396,11 +3395,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield13-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield13() {
         return userfield13;
@@ -3408,11 +3407,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield13-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield13(final String value) {
         this.userfield13 = value;
@@ -3420,11 +3419,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield14-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield14() {
         return userfield14;
@@ -3432,11 +3431,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield14-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield14(final String value) {
         this.userfield14 = value;
@@ -3444,11 +3443,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield15-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield15() {
         return userfield15;
@@ -3456,11 +3455,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield15-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield15(final String value) {
         this.userfield15 = value;
@@ -3468,11 +3467,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield16-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield16() {
         return userfield16;
@@ -3480,11 +3479,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield16-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield16(final String value) {
         this.userfield16 = value;
@@ -3492,11 +3491,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield17-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield17() {
         return userfield17;
@@ -3504,11 +3503,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield17-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield17(final String value) {
         this.userfield17 = value;
@@ -3516,11 +3515,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield18-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield18() {
         return userfield18;
@@ -3528,11 +3527,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield18-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield18(final String value) {
         this.userfield18 = value;
@@ -3540,11 +3539,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield19-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield19() {
         return userfield19;
@@ -3552,11 +3551,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield19-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield19(final String value) {
         this.userfield19 = value;
@@ -3564,11 +3563,11 @@ public class User {
 
     /**
      * Ruft den Wert der userfield20-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserfield20() {
         return userfield20;
@@ -3576,11 +3575,11 @@ public class User {
 
     /**
      * Legt den Wert der userfield20-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserfield20(final String value) {
         this.userfield20 = value;

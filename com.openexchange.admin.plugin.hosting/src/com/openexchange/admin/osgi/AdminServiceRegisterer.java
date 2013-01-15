@@ -67,7 +67,7 @@ final class AdminServiceRegisterer implements ServiceTrackerCustomizer {
 
     /**
      * Initializes a new {@link AdminServiceRegisterer}.
-     * @param context 
+     * @param context
      */
     public AdminServiceRegisterer(Class<?> clazz, BundleContext context) {
         super();

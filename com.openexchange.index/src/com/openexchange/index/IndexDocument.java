@@ -52,14 +52,14 @@ package com.openexchange.index;
 
 /**
  * {@link IndexDocument} - Represents an indexed document.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexDocument<V> {
     /**
      * Gets the object associated with this index document.
-     * 
+     *
      * @return The associated object
      */
     public V getObject();

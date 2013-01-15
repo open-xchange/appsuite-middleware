@@ -60,6 +60,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * {@link Mappings}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Mappings {
 
@@ -74,149 +75,231 @@ public class Mappings {
 
         final Contact contact = new Contact();
 
-        if (map.containsKey("first_name")) {
-            contact.setGivenName(map.get("first_name"));
+        {
+            final String fn = map.get("first_name");
+            if (!isEmpty(fn)) {
+                contact.setGivenName(fn);
+                contact.setDisplayName(fn);
+            }
+
+            final String ln = map.get("last_name");
+            if (!isEmpty(ln)) {
+                contact.setSurName(ln);
+                contact.setDisplayName(ln);
+            }
+
+            if (!isEmpty(fn) && !isEmpty(ln)) {
+                contact.setDisplayName(fn + " " + ln);
+            }
         }
-        if (map.containsKey("last_name")) {
-            contact.setSurName(map.get("last_name"));
+
+        String tmp = map.get("display_name");
+        if (!isEmpty(tmp)) {
+            contact.setDisplayName(tmp);
         }
-        if (map.containsKey("first_name")) {
-        	contact.setDisplayName(map.get("first_name"));
+
+        tmp = map.get("middle_name");
+        if (!isEmpty(tmp)) {
+            contact.setMiddleName(tmp);
         }
-        if (map.containsKey("last_name")) {
-        	contact.setDisplayName(map.get("last_name"));
+
+        tmp = map.get("title");
+        if (!isEmpty(tmp)) {
+            contact.setTitle(tmp);
         }
-        if (map.containsKey("first_name") && map.containsKey("last_name")) {
-            contact.setDisplayName(map.get("first_name") + " " + map.get("last_name"));
+
+        tmp = map.get("street_home");
+        if (!isEmpty(tmp)) {
+            contact.setStreetHome(tmp);
         }
-        if (map.containsKey("display_name")) {
-            contact.setDisplayName(map.get("display_name"));
+
+        tmp = map.get("postal_code_home");
+        if (!isEmpty(tmp)) {
+            contact.setPostalCodeHome(tmp);
         }
-        if (map.containsKey("middle_name")) {
-            contact.setMiddleName(map.get("middle_name"));
+
+        tmp = map.get("city_home");
+        if (!isEmpty(tmp)) {
+            contact.setCityHome(tmp);
         }
-        if (map.containsKey("title")) {
-            contact.setTitle(map.get("title"));
+
+        tmp = map.get("state_home");
+        if (!isEmpty(tmp)) {
+            contact.setStateHome(tmp);
         }
-        if (map.containsKey("street_home")) {
-            contact.setStreetHome(map.get("street_home"));
+
+        tmp = map.get("country_home");
+        if (!isEmpty(tmp)) {
+            contact.setCountryHome(tmp);
         }
-        if (map.containsKey("postal_code_home")) {
-            contact.setPostalCodeHome(map.get("postal_code_home"));
+
+        tmp = map.get("street_business");
+        if (!isEmpty(tmp)) {
+            contact.setStreetBusiness(tmp);
         }
-        if (map.containsKey("city_home")) {
-            contact.setCityHome(map.get("city_home"));
+
+        tmp = map.get("postal_code_business");
+        if (!isEmpty(tmp)) {
+            contact.setPostalCodeBusiness(tmp);
         }
-        if (map.containsKey("state_home")) {
-            contact.setStateHome(map.get("state_home"));
+
+        tmp = map.get("city_business");
+        if (!isEmpty(tmp)) {
+            contact.setCityBusiness(tmp);
         }
-        if (map.containsKey("country_home")) {
-            contact.setCountryHome(map.get("country_home"));
+
+        tmp = map.get("state_business");
+        if (!isEmpty(tmp)) {
+            contact.setStateBusiness(tmp);
         }
-        if (map.containsKey("street_business")) {
-            contact.setStreetBusiness(map.get("street_business"));
+
+        tmp = map.get("country_business");
+        if (!isEmpty(tmp)) {
+            contact.setCountryBusiness(tmp);
         }
-        if (map.containsKey("postal_code_business")) {
-            contact.setPostalCodeBusiness(map.get("postal_code_business"));
+
+        tmp = map.get("street_other");
+        if (!isEmpty(tmp)) {
+            contact.setStreetOther(tmp);
         }
-        if (map.containsKey("city_business")) {
-            contact.setCityBusiness(map.get("city_business"));
+
+        tmp = map.get("postal_code_other");
+        if (!isEmpty(tmp)) {
+            contact.setPostalCodeOther(tmp);
         }
-        if (map.containsKey("state_business")) {
-            contact.setStateBusiness(map.get("state_business"));
+
+        tmp = map.get("city_other");
+        if (!isEmpty(tmp)) {
+            contact.setCityOther(tmp);
         }
-        if (map.containsKey("country_business")) {
-            contact.setCountryBusiness(map.get("country_business"));
+
+        tmp = map.get("state_other");
+        if (!isEmpty(tmp)) {
+            contact.setStateOther(tmp);
         }
-        if (map.containsKey("street_other")) {
-            contact.setStreetOther(map.get("street_other"));
+
+        tmp = map.get("country_other");
+        if (!isEmpty(tmp)) {
+            contact.setCountryOther(tmp);
         }
-        if (map.containsKey("postal_code_other")) {
-            contact.setPostalCodeOther(map.get("postal_code_other"));
+
+        tmp = map.get("email1");
+        if (!isEmpty(tmp)) {
+            contact.setEmail1(tmp);
         }
-        if (map.containsKey("city_other")) {
-            contact.setCityOther(map.get("city_other"));
+
+        tmp = map.get("email2");
+        if (!isEmpty(tmp)) {
+            contact.setEmail2(tmp);
         }
-        if (map.containsKey("state_other")) {
-            contact.setStateOther(map.get("state_other"));
+
+        tmp = map.get("email3");
+        if (!isEmpty(tmp)) {
+            contact.setEmail3(tmp);
         }
-        if (map.containsKey("country_other")) {
-            contact.setCountryOther(map.get("country_other"));
+
+        tmp = map.get("telephone_home1");
+        if (!isEmpty(tmp)) {
+            contact.setTelephoneHome1(tmp);
         }
-        if (map.containsKey("email1")) {
-            contact.setEmail1(map.get("email1"));
+
+        tmp = map.get("telephone_business1");
+        if (!isEmpty(tmp)) {
+            contact.setTelephoneBusiness1(tmp);
         }
-        if (map.containsKey("email2")) {
-            contact.setEmail2(map.get("email2"));
+
+        tmp = map.get("cellular_telephone1");
+        if (!isEmpty(tmp)) {
+            contact.setCellularTelephone1(tmp);
         }
-        if (map.containsKey("email3")) {
-            contact.setEmail3(map.get("email3"));
+
+        tmp = map.get("cellular_telephone2");
+        if (!isEmpty(tmp)) {
+            contact.setCellularTelephone2(tmp);
         }
-        if (map.containsKey("telephone_home1")) {
-            contact.setTelephoneHome1(map.get("telephone_home1"));
+
+        tmp = map.get("fax_home");
+        if (!isEmpty(tmp)) {
+            contact.setFaxHome(tmp);
         }
-        if (map.containsKey("telephone_business1")) {
-            contact.setTelephoneBusiness1(map.get("telephone_business1"));
+
+        tmp = map.get("fax_business");
+        if (!isEmpty(tmp)) {
+            contact.setFaxBusiness(tmp);
         }
-        if (map.containsKey("cellular_telephone1")) {
-            contact.setCellularTelephone1(map.get("cellular_telephone1"));
+
+        tmp = map.get("company");
+        if (!isEmpty(tmp)) {
+            contact.setCompany(tmp);
         }
-        if (map.containsKey("cellular_telephone2")) {
-            contact.setCellularTelephone2(map.get("cellular_telephone2"));
+
+        tmp = map.get("position");
+        if (!isEmpty(tmp)) {
+            contact.setPosition(tmp);
         }
-        if (map.containsKey("fax_home")) {
-            contact.setFaxHome(map.get("fax_home"));
+
+        tmp = map.get("employee_type");
+        if (!isEmpty(tmp)) {
+            contact.setEmployeeType(tmp);
         }
-        if (map.containsKey("fax_business")) {
-            contact.setFaxBusiness(map.get("fax_business"));
+
+        tmp = map.get("department");
+        if (!isEmpty(tmp)) {
+            contact.setDepartment(tmp);
         }
-        if (map.containsKey("company")) {
-            contact.setCompany(map.get("company"));
-        }
-        if (map.containsKey("position")) {
-            contact.setPosition(map.get("position"));
-        }
-        if (map.containsKey("employee_type")) {
-            contact.setEmployeeType(map.get("employee_type"));
-        }
-        if (map.containsKey("department")) {
-            contact.setDepartment(map.get("department"));
-        }
-        if (map.containsKey("note")) {
-            contact.setNote(map.get("note"));
+
+        tmp = map.get("note");
+        if (!isEmpty(tmp)) {
+            contact.setNote(tmp);
         }
         // a special kind of note containing the address of the contact (used if the address is only available as one String)
-        if (map.containsKey("address_note")) {
-            final String htmlString = map.get("address_note");
+
+        tmp = map.get("address_note");
+        if (!isEmpty(tmp)) {
+            final String htmlString = tmp;
             final String noHTMLString = htmlString.replaceAll("<br[ \t]*/?[ \t]*>", "\n").replaceAll("<.*?>", "");
             contact.setNote(noHTMLString);
         }
-        if (map.containsKey("profession")) {
-            contact.setProfession(map.get("profession"));
+
+        tmp = map.get("profession");
+        if (!isEmpty(tmp)) {
+            contact.setProfession(tmp);
         }
-        if (map.containsKey("url")) {
+
+        tmp = map.get("url");
+        if (!isEmpty(tmp)) {
             contact.setURL(map.get("url"));
         }
-        if (map.containsKey("instant_messenger1")) {
-            if (map.containsKey("instant_messenger1_type")){
-                contact.setInstantMessenger1(map.get("instant_messenger1") + " (" + map.get("instant_messenger1_type") + ")");
+
+        tmp = map.get("instant_messenger1");
+        if (!isEmpty(tmp)) {
+            final String tmp2 = map.get("instant_messenger1_type");
+            if (null == tmp2) {
+                contact.setInstantMessenger1(tmp);
             } else {
-                contact.setInstantMessenger1(map.get("instant_messenger1"));
+                contact.setInstantMessenger1(tmp + " (" + tmp2 + ")");
             }
         }
-        if (map.containsKey("instant_messenger2")) {
-            if (map.containsKey("instant_messenger2_type")){
-                contact.setInstantMessenger1(map.get("instant_messenger2") + " (" + map.get("instant_messenger2_type") + ")");
+
+        tmp = map.get("instant_messenger2");
+        if (!isEmpty(tmp)) {
+            final String tmp2 = map.get("instant_messenger2_type");
+            if (null == tmp2) {
+                contact.setInstantMessenger1(tmp);
             } else {
-                contact.setInstantMessenger1(map.get("instant_messenger2"));
+                contact.setInstantMessenger1(tmp + " (" + tmp2 + ")");
             }
         }
         // handle birthdays
-        if (map.containsKey("birthday_month_real")){
-            map.put("birthday_month", Integer.toString(Integer.parseInt(map.get("birthday_month_real"))-1));
+
+        tmp = map.get("birthday_month_real");
+        if (!isEmpty(tmp)) {
+            map.put("birthday_month", Integer.toString(Integer.parseInt(tmp) - 1));
         }
-        if (map.containsKey("birthday_month_string")) {
-            String month = map.get("birthday_month_string");
+
+        tmp = map.get("birthday_month_string");
+        if (!isEmpty(tmp)) {
+            final String month = tmp;
             if (month.matches("(Januar|January|janvier|enero)")) {
                 map.put("birthday_month", "0");
             }
@@ -254,13 +337,15 @@ public class Mappings {
                 map.put("birthday_month", "11");
             }
         }
-        Calendar cal = null;
-        if (map.containsKey("birthday_day") && map.containsKey("birthday_month")) {
-            cal = Calendar.getInstance();
-            final int date = Integer.parseInt(map.get("birthday_day"));
-            final int month = Integer.parseInt(map.get("birthday_month"));
+
+        final String sDay = map.get("birthday_day");
+        final String sMonth = map.get("birthday_month");
+        if (null != sDay && null != sMonth) {
+            final Calendar cal = Calendar.getInstance();
+            final int date = Integer.parseInt(sDay);
+            final int month = Integer.parseInt(sMonth);
             int year = 2009;
-            if (map.containsKey("birthday_year")) {
+            if (null != map.get("birthday_year")) {
                 year = Integer.parseInt(map.get("birthday_year"));
             }
             cal.set(year, month, date, 1, 1, 1);
@@ -268,8 +353,9 @@ public class Mappings {
         }
 
         // add the image from a url to the contact
-        if (map.containsKey("image")) {
-            OXContainerConverter.loadImageFromURL(contact, map.get("image"));
+        tmp = map.get("image");
+        if (!isEmpty(tmp)) {
+            OXContainerConverter.loadImageFromURL(contact, tmp);
         }
 
         return contact;
@@ -277,27 +363,36 @@ public class Mappings {
 
     public static CalendarDataObject translateMapToCalendarDataObject(final Map<String, String> map){
 
-        CalendarDataObject oxEvent = new CalendarDataObject();
+        final CalendarDataObject oxEvent = new CalendarDataObject();
 
-        if (map.containsKey("title")){
-            oxEvent.setTitle(map.get("title"));
+        {
+            final String title = map.get("title");
+            if (!isEmpty(title)) {
+                oxEvent.setTitle(title);
+            }
         }
-        if (map.containsKey("note")){
-            oxEvent.setNote(map.get("note"));
+        {
+            final String note = map.get("note");
+            if (!isEmpty(note)) {
+                oxEvent.setNote(note);
+            }
         }
-        if (map.containsKey("timezone")){
-            oxEvent.setTimezone(map.get("timezone"));
+        {
+            final String tz = map.get("timezone");
+            if (!isEmpty(tz)) {
+                oxEvent.setTimezone(tz);
+            }
         }
-        String[] dateTypes = new String[]{"start_date_","end_date_"};
+        final String[] dateTypes = new String[]{"start_date_","end_date_"};
         Calendar cal = null;
-        for (String dateType : dateTypes){
+        for (final String dateType : dateTypes){
             cal = Calendar.getInstance();
             if (map.containsKey(dateType+"day") && map.containsKey(dateType+"month") && map.containsKey(dateType+"year") && map.containsKey(dateType+"hour") && map.containsKey(dateType+"minute")){
-                int year = Integer.parseInt(map.get("year"));
-                int month = Integer.parseInt(map.get("month"));
-                int date = Integer.parseInt("day");
-                int hour = Integer.parseInt(map.get("hour"));
-                int minute = Integer.parseInt(map.get("minute"));
+                final int year = Integer.parseInt(map.get("year"));
+                final int month = Integer.parseInt(map.get("month"));
+                final int date = Integer.parseInt("day");
+                final int hour = Integer.parseInt(map.get("hour"));
+                final int minute = Integer.parseInt(map.get("minute"));
                 cal.set(year, month, date, hour, minute);
                 if (dateType.equals("start_date_")){
                     oxEvent.setStartDate(cal.getTime());
@@ -308,4 +403,39 @@ public class Mappings {
         }
         return oxEvent;
     }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        boolean isSNull = true;
+        for (int i = 0; (isWhitespace || isSNull) && i < len; i++) {
+            final char c = string.charAt(i);
+            isWhitespace = Character.isWhitespace(c);
+            if (isSNull) {
+                switch (i) {
+                case 0:
+                    isSNull = ('n' == c || 'N' == c);
+                    break;
+                case 1:
+                    isSNull = ('u' == c || 'U' == c);
+                    break;
+                case 2:
+                    isSNull = ('l' == c || 'L' == c);
+                    break;
+                case 3:
+                    isSNull = ('l' == c || 'L' == c);
+                    break;
+                default:
+                    isSNull = false;
+                    break;
+                }
+            }
+        }
+        return isWhitespace || isSNull;
+    }
+
 }

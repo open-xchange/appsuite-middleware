@@ -58,7 +58,7 @@ import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link UploadException} - Indicates an error during an upload.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UploadException extends OXException {
@@ -128,7 +128,7 @@ public class UploadException extends OXException {
 
         /**
          * Gets the prefix.
-         * 
+         *
          * @return The prefix
          */
         public static String prefix() {
@@ -174,7 +174,7 @@ public class UploadException extends OXException {
 
         /**
          * Creates a new {@link UploadException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @return The newly created {@link UploadException} instance
          */
         public UploadException create() {
@@ -183,7 +183,7 @@ public class UploadException extends OXException {
 
         /**
          * Creates a new {@link UploadException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link UploadException} instance
          */
@@ -193,7 +193,7 @@ public class UploadException extends OXException {
 
         /**
          * Creates a new {@link UploadException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param cause The optional initial cause
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link UploadException} instance
@@ -221,7 +221,7 @@ public class UploadException extends OXException {
 
     /**
      * Initializes a new {@link UploadException}.
-     * 
+     *
      * @param code The code
      * @param displayMessage The display message
      * @param cause The cause
@@ -233,7 +233,7 @@ public class UploadException extends OXException {
 
     /**
      * Sets the action string.
-     * 
+     *
      * @param action The action string
      * @return This exception with action string applied
      */
@@ -244,7 +244,7 @@ public class UploadException extends OXException {
 
     /**
      * Gets the action string.
-     * 
+     *
      * @return The action string
      */
     public String getAction() {

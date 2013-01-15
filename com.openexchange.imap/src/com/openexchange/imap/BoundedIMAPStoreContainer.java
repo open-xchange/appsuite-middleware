@@ -66,7 +66,7 @@ import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link BoundedIMAPStoreContainer} - The bounded {@link IMAPStoreContainer}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer {

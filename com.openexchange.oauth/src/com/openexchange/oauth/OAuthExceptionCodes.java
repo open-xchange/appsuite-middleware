@@ -101,15 +101,15 @@ public enum OAuthExceptionCodes implements OXExceptionCode {
     /**
      * An OAuth error occurred: %1$s
      */
-    OAUTH_ERROR(OAuthExceptionMessages.OAUTH_ERROR_MSG, CATEGORY_ERROR, 10),     
+    OAUTH_ERROR(OAuthExceptionMessages.OAUTH_ERROR_MSG, CATEGORY_ERROR, 10),
     /**
      * "The address %1 is not white-listed as for the %2 OAuth API"
      */
-    NOT_A_WHITELISTED_URL(OAuthExceptionMessages.NOT_A_WHITELISTED_URL_MSG, CATEGORY_PERMISSION_DENIED, 11), 
+    NOT_A_WHITELISTED_URL(OAuthExceptionMessages.NOT_A_WHITELISTED_URL_MSG, CATEGORY_PERMISSION_DENIED, 11),
     /**
      * The request sent was missing its body
      */
-    MISSING_BODY(OAuthExceptionMessages.MISSING_BODY_MSG, CATEGORY_USER_INPUT, 12), 
+    MISSING_BODY(OAuthExceptionMessages.MISSING_BODY_MSG, CATEGORY_USER_INPUT, 12),
     /**
      * The account is invalid, please recreate it.
      */

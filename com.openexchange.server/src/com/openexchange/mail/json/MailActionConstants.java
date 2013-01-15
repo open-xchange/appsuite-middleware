@@ -57,7 +57,7 @@ import com.openexchange.mail.MailServletInterface;
 
 /**
  * {@link MailActionConstants}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MailActionConstants {

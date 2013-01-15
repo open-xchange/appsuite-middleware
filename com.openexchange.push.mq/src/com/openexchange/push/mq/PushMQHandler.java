@@ -73,7 +73,7 @@ import com.openexchange.push.mq.registry.PushMQServiceRegistry;
 
 /**
  * {@link PushMQHandler}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class PushMQHandler implements EventHandler {
@@ -84,7 +84,7 @@ public class PushMQHandler implements EventHandler {
 
     /**
      * Initializes a new {@link PushMQHandler}.
-     * 
+     *
      * @throws OXException
      */
     public PushMQHandler(PushMQPublisher publisher) throws OXException {

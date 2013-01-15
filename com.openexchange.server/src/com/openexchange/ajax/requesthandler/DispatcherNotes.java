@@ -66,7 +66,7 @@ public @interface DispatcherNotes {
      * @return The default format
      */
     String defaultFormat() default "apiResponse";
-    
+
     /**
      * Indicates whether this action allows falling back to the public session cookie for session retrieval. This is useful
      * if you don't want varying URLs between sessions. The trade-off is less stability for your requests in problematic infrastructures.

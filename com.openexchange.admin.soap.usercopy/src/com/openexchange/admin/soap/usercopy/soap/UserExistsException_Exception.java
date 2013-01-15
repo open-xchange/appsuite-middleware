@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "UserExistsException", targetNamespace = "http://soap.copy.user.admin.openexchange.com")
 public class UserExistsException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.usercopy.soap.UserExistsException userExistsException;
 
     public UserExistsException_Exception() {
         super();
     }
-    
+
     public UserExistsException_Exception(String message) {
         super(message);
     }
-    
+
     public UserExistsException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

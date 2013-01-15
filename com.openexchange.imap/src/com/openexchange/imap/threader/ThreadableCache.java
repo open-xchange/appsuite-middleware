@@ -55,17 +55,14 @@ import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
-import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.session.Session;
 
 /**
  * {@link ThreadableCache} - A volatile thread cache.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadableCache {
@@ -74,7 +71,7 @@ public final class ThreadableCache {
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     public static ThreadableCache getInstance() {
@@ -83,7 +80,7 @@ public final class ThreadableCache {
 
     /**
      * Drops the cache associated with specified user.
-     * 
+     *
      * @param session The session providing user information
      */
     public static void dropFor(final Session session) {
@@ -92,7 +89,7 @@ public final class ThreadableCache {
 
     /**
      * Indicates whether <tt>Threadable</tt> cache is enabled.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public static boolean isThreadableCacheEnabled() {
@@ -122,7 +119,7 @@ public final class ThreadableCache {
 
     /**
      * Clears the cache associated with specified user.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      */
@@ -132,7 +129,7 @@ public final class ThreadableCache {
 
     /**
      * Gets the associated cache entry.
-     * 
+     *
      * @param fullName The full name
      * @param accountId The account identifier
      * @param uids The UIDs
@@ -170,7 +167,7 @@ public final class ThreadableCache {
 
     /**
      * (Optionally) Gets the associated cache entry.
-     * 
+     *
      * @param fullName The full name
      * @param accountId The account identifier
      * @return The cache entry or <code>null</code>
@@ -208,7 +205,7 @@ public final class ThreadableCache {
 
         /**
          * Gets the cached thread.
-         * 
+         *
          * @return The cached thread
          */
         public Threadable getThreadable() {
@@ -217,7 +214,7 @@ public final class ThreadableCache {
 
         /**
          * Gets the sorted flag
-         * 
+         *
          * @return The sorted flag
          */
         public boolean isSorted() {
@@ -226,7 +223,7 @@ public final class ThreadableCache {
 
         /**
          * Sets the cached thread.
-         * 
+         *
          * @param uids The UIDs
          * @param threadable The cached thread
          * @return This entry with thread applied
@@ -240,7 +237,7 @@ public final class ThreadableCache {
 
         /**
          * Checks if a reconstruct is needed.
-         * 
+         *
          * @param uids The current UIDs
          * @return <code>true</code> to signal needed reconstruct; otherwise <code>false</code>
          */
@@ -250,7 +247,7 @@ public final class ThreadableCache {
 
         /**
          * Checks if a reconstruct is needed.
-         * 
+         *
          * @param uids The current UIDs
          * @return <code>true</code> to signal needed reconstruct; otherwise <code>false</code>
          */

@@ -64,7 +64,7 @@ import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 public class DatabaseDataMover implements Callable<Void> {
 
     private final static Log log = LogFactory.getLog(DatabaseDataMover.class);
-    
+
     private Context ctx = null;
 
     private Database db = null;
@@ -72,7 +72,7 @@ public class DatabaseDataMover implements Callable<Void> {
     private MaintenanceReason reason_id = null;
 
     /**
-     * 
+     *
      */
     public DatabaseDataMover(final Context ctx, final Database db, final MaintenanceReason reason) {
         this.ctx = ctx;

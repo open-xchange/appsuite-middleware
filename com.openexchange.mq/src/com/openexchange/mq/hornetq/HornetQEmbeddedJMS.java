@@ -55,7 +55,7 @@ import org.hornetq.jms.server.embedded.EmbeddedJMS;
 
 /**
  * {@link HornetQEmbeddedJMS}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HornetQEmbeddedJMS extends EmbeddedJMS {
@@ -69,7 +69,7 @@ public class HornetQEmbeddedJMS extends EmbeddedJMS {
 
     /**
      * Gets the associated {@link JMSConfiguration} instance.
-     * 
+     *
      * @return The associated {@link JMSConfiguration} instance
      */
     public JMSConfiguration getJMSConfiguration() {
@@ -78,7 +78,7 @@ public class HornetQEmbeddedJMS extends EmbeddedJMS {
 
     /**
      * Gets the associated {@link JMSServerManager} instance.
-     * 
+     *
      * @return The associated {@link JMSServerManager} instance.
      */
     public JMSServerManager getServerManager() {

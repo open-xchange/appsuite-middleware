@@ -58,7 +58,7 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
  * CalendarObject
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public abstract class CalendarObject extends CommonObject {
@@ -116,11 +116,11 @@ public abstract class CalendarObject extends CommonObject {
 	public static final int SEQUENCE = 225;
 
 	public static final int CONFIRMATIONS = 226;
-	
+
 	public static final int ORGANIZER_ID = 227;
-	
+
 	public static final int PRINCIPAL = 228;
-	
+
 	public static final int PRINCIPAL_ID = 229;
 
 	public static final int NONE = 0;
@@ -849,7 +849,7 @@ public abstract class CalendarObject extends CommonObject {
 		this.confirmations = confirmations;
 		bConfirmations = true;
 	}
-	
+
 	public void removeConfirmations() {
 		this.confirmations = null;
 		bConfirmations = false;
@@ -962,7 +962,7 @@ public abstract class CalendarObject extends CommonObject {
 	 * event (change exception).
 	 * <p>
 	 * This test checks if recurrence ID is different to zero.
-	 * 
+	 *
 	 * @return <code>true</code> if this event is either a recurring event or a
 	 *         part of a recurring event (change exception); otherwise
 	 *         <code>false</code>
@@ -974,7 +974,7 @@ public abstract class CalendarObject extends CommonObject {
 	/**
 	 * Tests if this event denotes a specific occurrence within a recurring
 	 * event.
-	 * 
+	 *
 	 * @return <code>true</code> if this event denotes a specific occurrence
 	 *         within a recurring event; otherwise <code>false</code>
 	 */
@@ -984,7 +984,7 @@ public abstract class CalendarObject extends CommonObject {
 
 	/**
 	 * Tests if this event denotes a change exception.
-	 * 
+	 *
 	 * @return <code>true</code> if this event denotes a change exception;
 	 *         otherwise <code>false</code>
 	 */
@@ -996,7 +996,7 @@ public abstract class CalendarObject extends CommonObject {
 	/**
 	 * Tests if this event denotes a recurring event (and <b>not</b> a change
 	 * exception).
-	 * 
+	 *
 	 * @return <code>true</code> if this event denotes a recurring event (and
 	 *         <b>not</b> a change exception); otherwise <code>false</code>
 	 */
@@ -1009,7 +1009,7 @@ public abstract class CalendarObject extends CommonObject {
 	 * recurring event (change exception).
 	 * <p>
 	 * This test checks if recurrence ID is equal to zero.
-	 * 
+	 *
 	 * @return <code>true</code> if this event is a single event; otherwise
 	 *         <code>false</code>
 	 */
@@ -1186,11 +1186,11 @@ public abstract class CalendarObject extends CommonObject {
         if ((!containsPrincipal() && other.containsPrincipal()) || (containsPrincipal() && other.containsPrincipal() && getPrincipal() != other.getPrincipal() && (getPrincipal() == null || !getPrincipal().equals(other.getPrincipal())))) {
             differingFields.add(PRINCIPAL);
         }
-        
+
         if ((!containsOrganizerId() && other.containsOrganizerId()) || (containsOrganizerId() && other.containsOrganizerId() && getOrganizerId() != other.getOrganizerId())) {
             differingFields.add(ORGANIZER_ID);
         }
-        
+
         if ((!containsPrincipalId() && other.containsPrincipalId()) || (containsPrincipalId() && other.containsPrincipalId() && getPrincipalId() != other.getPrincipalId())) {
             differingFields.add(PRINCIPAL_ID);
         }
@@ -1279,7 +1279,7 @@ public abstract class CalendarObject extends CommonObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.container.CommonObject#set(int,
 	 * java.lang.Object)
 	 */
@@ -1392,7 +1392,7 @@ public abstract class CalendarObject extends CommonObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.container.CommonObject#get(int)
 	 */
 	@Override
@@ -1461,7 +1461,7 @@ public abstract class CalendarObject extends CommonObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.container.CommonObject#contains(int)
 	 */
 	@Override
@@ -1526,7 +1526,7 @@ public abstract class CalendarObject extends CommonObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.container.CommonObject#remove(int)
 	 */
 	@Override
@@ -1628,13 +1628,13 @@ public abstract class CalendarObject extends CommonObject {
 	public String toString() {
 		return "[" + this.getObjectID() + "] " + this.getTitle();
 	}
-	
+
 	@Override
     public CalendarObject clone() {
 	    CalendarObject retval;
         try {
             retval = (CalendarObject) super.clone();
-            
+
             if (getParticipants() != null) {
                 Participant[] clonedParticipants = new Participant[getParticipants().length];
                 for (int i = 0; i < getParticipants().length; i++) {
@@ -1642,7 +1642,7 @@ public abstract class CalendarObject extends CommonObject {
                 }
                 retval.setParticipants(clonedParticipants);
             }
-            
+
             if (getConfirmations() != null) {
                 ConfirmableParticipant[] clonedConfirmations = new ConfirmableParticipant[getConfirmations().length];
                 for (int i = 0; i < getConfirmations().length; i++) {
@@ -1650,7 +1650,7 @@ public abstract class CalendarObject extends CommonObject {
                 }
                 retval.setConfirmations(clonedConfirmations);
             }
-            
+
             if (getUsers() != null) {
                 UserParticipant[] clonedUsers = new UserParticipant[getUsers().length];
                 for (int i = 0; i <  getUsers().length; i++) {
@@ -1658,7 +1658,7 @@ public abstract class CalendarObject extends CommonObject {
                 }
                 retval.setUsers(clonedUsers);
             }
-            
+
         } catch (CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }

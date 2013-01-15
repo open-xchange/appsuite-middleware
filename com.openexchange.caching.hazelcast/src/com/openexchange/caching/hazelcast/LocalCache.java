@@ -71,7 +71,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link LocalCache}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LocalCache extends DefaultCacheKeyService implements Cache, SupportsLocalOperations, PutIfAbsent {
@@ -273,7 +273,7 @@ public final class LocalCache extends DefaultCacheKeyService implements Cache, S
     }
 
     @Override
-    public Set<?> getGroupKeys(String group) throws OXException { 
+    public Set<?> getGroupKeys(String group) throws OXException {
         throw CacheExceptionCode.UNSUPPORTED_OPERATION.create("LocalCache.getGroupKeys()");
     }
 

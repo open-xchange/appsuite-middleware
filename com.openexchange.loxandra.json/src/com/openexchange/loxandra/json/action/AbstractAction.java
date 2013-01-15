@@ -58,7 +58,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public abstract class AbstractAction implements AJAXActionService {
-	
+
 	private final ServiceLookup serviceLookup;
 
 	/**
@@ -69,11 +69,11 @@ public abstract class AbstractAction implements AJAXActionService {
         super();
         this.serviceLookup = serviceLookup;
     }
-	
+
 	/**
      * Gets the contact service.
-     * 
-     * @return the contact service 
+     *
+     * @return the contact service
      * @throws OXException
      */
     protected EAVContactFactoryService getContactService() throws OXException {

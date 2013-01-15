@@ -67,7 +67,7 @@ import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 
 /**
  * {@link OSGiMetaDataRegistry}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry {
@@ -80,7 +80,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
 
     /**
      * Gets the registry instance.
-     * 
+     *
      * @return The instance
      */
     public static OSGiMetaDataRegistry getInstance() {

@@ -55,7 +55,7 @@ import com.sun.mail.iap.Response;
 
 /**
  * {@link ImapUtility} - IMAP utility class.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImapUtility {
@@ -69,7 +69,7 @@ public final class ImapUtility {
 
     /**
      * Checks if given <code>MessagingException</code> indicates "Invalid messageset" or "Invalid uidset" error.
-     * 
+     *
      * @param response The IMAP response to check
      * @return <code>true</code> if given <code>MessagingException</code> indicates "Invalid messageset" or "Invalid uidset" error; otherwise <code>false</code>
      */
@@ -86,7 +86,7 @@ public final class ImapUtility {
 
     /**
      * Checks if given <code>BadCommandException</code> indicates "Invalid messageset" or "Invalid uidset" error.
-     * 
+     *
      * @param response The IMAP response to check
      * @return <code>true</code> if given <code>BadCommandException</code> indicates "Invalid messageset" or "Invalid uidset" error; otherwise <code>false</code>
      */
@@ -105,7 +105,7 @@ public final class ImapUtility {
 
     /**
      * Checks if given response indicates "Invalid messageset" or "Invalid uidset" IMAP error.
-     * 
+     *
      * @param response The IMAP response to check
      * @return <code>true</code> if given response indicates "Invalid messageset" or "Invalid uidset" IMAP error; otherwise <code>false</code>
      */

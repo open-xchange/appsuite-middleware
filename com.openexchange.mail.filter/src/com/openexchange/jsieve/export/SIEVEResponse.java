@@ -74,23 +74,23 @@ public class SIEVEResponse {
         UNKNOWN("UNKNOWN",99);
 
         private final String sieveCode;
-        
+
         private String message;
-        
+
         private final int detailnumber;
-        
+
         private Code(final String sieveCode, final int detailNumber) {
             this.sieveCode = sieveCode;
             this.detailnumber = detailNumber;
         }
-        
+
         /**
          * @return the sieveCode
          */
         public final String getSieveCode() {
             return sieveCode;
         }
-        
+
         /**
          * @return the message
          */
@@ -104,7 +104,7 @@ public class SIEVEResponse {
         public final void setMessage(String message) {
             this.message = message;
         }
-        
+
         /**
          * @return the detailnumber
          */
@@ -121,7 +121,7 @@ public class SIEVEResponse {
             }
             return UNKNOWN;
         }
-        
+
         public static boolean isKnownCode(final String respCode) {
             for(final Code code : Code.values() ) {
                 final String codeStr = code.toString();

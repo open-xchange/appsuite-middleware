@@ -77,7 +77,7 @@ import com.openexchange.oauth.OAuthToken;
 
 /**
  * {@link DropboxOAuthServiceMetaData}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
@@ -169,7 +169,7 @@ public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaD
                 // Re-auth specific stuff
                 final AccessTokenPair reAuthTokens = new AccessTokenPair(tokenKey, tokenSecret);
                 mDBApi.getSession().setAccessTokenPair(reAuthTokens);
-                
+
                 final Account accountInfo = mDBApi.accountInfo();
                 LOG.info("Dropbox OAuth account successfully created for " + accountInfo.displayName);
             }

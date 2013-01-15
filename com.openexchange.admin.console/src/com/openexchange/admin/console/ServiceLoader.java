@@ -24,7 +24,7 @@ import java.util.List;
 public class ServiceLoader<S> implements Iterable<S> {
 
     private List<S> list = null;
-    
+
     /**
      * Initializes a new {@link ServiceLoader}.
      * @param list
@@ -37,7 +37,7 @@ public class ServiceLoader<S> implements Iterable<S> {
     public static <S> ServiceLoader<S> load(final Class<S> service) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IOException {
         return load(service, Thread.currentThread().getContextClassLoader());
     }
-    
+
     public static <S> ServiceLoader<S> load(final Class<S> service, final ClassLoader loader) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IOException {
         final List<S> retval = new ArrayList<S>();
         try {
@@ -71,7 +71,7 @@ public class ServiceLoader<S> implements Iterable<S> {
         }
         return new ServiceLoader<S>(retval);
     }
-    
+
     @Override
     public Iterator<S> iterator() {
         return this.list.iterator();

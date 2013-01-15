@@ -63,14 +63,14 @@ public @interface Module {
 
 	/**
 	 * Specifies the name. Required.
-	 * 
+	 *
 	 * @return The name.
 	 */
 	String name();
 
 	/**
 	 * Specifies the description. Defaults to <code>""</code>.
-	 * 
+	 *
 	 * @return The description.
 	 */
 	String description() default "";

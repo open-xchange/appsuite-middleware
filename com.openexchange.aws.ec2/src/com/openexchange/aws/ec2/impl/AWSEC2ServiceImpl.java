@@ -68,7 +68,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * {@link AWSEC2ServiceImpl}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AWSEC2ServiceImpl implements AWSEC2Service {

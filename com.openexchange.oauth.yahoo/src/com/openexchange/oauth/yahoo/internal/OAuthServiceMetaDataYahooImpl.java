@@ -57,7 +57,7 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 
 /**
  * {@link OAuthServiceMetaDataYahooImpl}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

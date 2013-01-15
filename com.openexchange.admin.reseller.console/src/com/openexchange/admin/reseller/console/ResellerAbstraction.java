@@ -100,24 +100,24 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     protected CLIOption addRestrictionsOption = null;
     protected CLIOption editRestrictionsOption = null;
     protected CLIOption removeRestrictionsOption = null;
-    
+
     protected Integer adminid = null;
     protected String adminname = null;
-    
+
     protected final void setIdOption(final AdminParser admp){
         this.idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, NeededQuadState.eitheror);
     }
-    
+
     protected final void setAdminnameOption(final AdminParser admp, final NeededQuadState needed) {
         this.adminNameOption = setShortLongOpt(admp,OPT_ADMINNAME_SHORT,OPT_ADMINNAME_LONG,"Name of the admin user", true, needed);
     }
-    
+
     protected final void setDisplayNameOption(final AdminParser admp, final NeededQuadState needed) {
-        this.displayNameOption = setShortLongOpt(admp,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the admin user", true, needed); 
+        this.displayNameOption = setShortLongOpt(admp,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the admin user", true, needed);
     }
-    
+
     protected final void setPasswordOption(final AdminParser admp, final NeededQuadState needed) {
-        this.passwordOption =  setShortLongOpt(admp,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the admin user", true, needed); 
+        this.passwordOption =  setShortLongOpt(admp,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the admin user", true, needed);
     }
 
     protected final void setPasswordMechOption(final AdminParser admp) {
@@ -131,14 +131,14 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     protected final void setEditRestrictionsOption(final AdminParser admp) {
         this.editRestrictionsOption = setShortLongOpt(admp, OPT_EDIT_RESTRICTION_SHORT, OPT_EDIT_RESTRICTION_LONG, "Restriction to edit (can be specified multiple times)", true, NeededQuadState.notneeded);
     }
-    
+
     protected final void setRemoveRestrictionsOption(final AdminParser admp) {
         this.removeRestrictionsOption = setShortLongOpt(admp, OPT_REMOVE_RESTRICTION_SHORT, OPT_REMOVE_RESTRICTION_LONG, "Restriction to remove (can be specified multiple times)", true, NeededQuadState.notneeded);
     }
 
     protected void setNameAndIdOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-        
+
         setIdOption(parser);
         setAdminnameOption(parser, NeededQuadState.eitheror);
     }
@@ -156,14 +156,14 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
 
     protected void setCreateOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-        
+
         setAdminnameOption(parser, NeededQuadState.needed);
         setDisplayNameOption(parser, NeededQuadState.needed);
         setPasswordOption(parser, NeededQuadState.needed);
         setPasswordMechOption(parser);
         setAddRestrictionsOption(parser);
     }
-    
+
     protected void parseAndSetAdminname(final AdminParser parser, final ResellerAdmin adm) {
         final String adminname = (String) parser.getOptionValue(this.adminNameOption);
         if (null != adminname) {
@@ -171,7 +171,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
             adm.setName(adminname);
         }
     }
-    
+
     protected void parseAndSetAdminId(final AdminParser parser, final ResellerAdmin adm) {
         final String optionValue = (String) parser.getOptionValue(this.idOption);
         if (null != optionValue) {
@@ -207,17 +207,17 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
             return null;
         }
         final HashSet<String> ret = new HashSet<String>();
-        
+
         for (Object opt : resopts) {
             ret.add((String) opt);
         }
         return ret;
     }
-    
+
     public static HashSet<Restriction> getRestrictionsToEdit(final AdminParser parser, final CLIOption option) throws InvalidDataException {
         return parseRestrictions(parser, option);
     }
-    
+
     protected static void parseAndSetAddRestrictions(final AdminParser parser, final ResellerAdmin adm, final CLIOption option) throws InvalidDataException {
         HashSet<Restriction> res = parseRestrictions(parser, option);
         if( res.size() > 0 ) {
@@ -254,10 +254,10 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
 
     protected final ResellerAdmin parseDeleteOptions(final AdminParser parser) {
         final ResellerAdmin adm = new ResellerAdmin();
-        
+
         parseAndSetAdminId(parser, adm);
         parseAndSetAdminname(parser, adm);
-        
+
         return adm;
     }
 
@@ -267,13 +267,13 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
 
     protected final ResellerAdmin parseCreateOptions(final AdminParser parser) throws InvalidDataException {
         final ResellerAdmin adm = new ResellerAdmin();
-        
+
         parseAndSetAdminname(parser, adm);
         parseAndSetDisplayname(parser, adm);
         parseAndSetPassword(parser, adm);
         parseAndSetPasswordMech(parser, adm);
         parseAndSetAddRestrictions(parser, adm, this.addRestrictionsOption);
-        
+
         return adm;
     }
 
@@ -342,7 +342,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
 
     /**
      * This method takes an array of objects and format them in one comma-separated string
-     * 
+     *
      * @param objects
      * @return
      */

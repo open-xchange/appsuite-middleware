@@ -107,13 +107,13 @@ public class Capability2JSON implements ResultConverter {
 		JSONObject object = new JSONObject();
 		object.put("id", resultObject.getId());
 		object.put("backendSupport", resultObject.isSupportedByBackend());
-		
+
 		JSONObject attributes = new JSONObject();
 		for(Map.Entry<String, String> entry: resultObject.getAttributes().entrySet()) {
 			attributes.put(entry.getKey(), entry.getValue());
 		}
 		object.put("attributes", attributes);
-		
+
 		return object;
 	}
 

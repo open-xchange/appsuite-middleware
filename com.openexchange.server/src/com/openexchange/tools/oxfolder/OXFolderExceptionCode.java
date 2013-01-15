@@ -486,7 +486,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
 
     /**
      * Checks specified exception for a folder-not-found error.
-     * 
+     *
      * @param e The exception to check
      * @return <code>true</code> if a folder-not-found error; otherwise <code>false</code>
      */
@@ -532,7 +532,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
 
     /**
      * Gets the (detail) number.
-     * 
+     *
      * @return The (detail) number.
      */
     @Override
@@ -542,7 +542,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
 
     /**
      * Gets the (unformatted) message.
-     * 
+     *
      * @return The (unformatted) message.
      */
     @Override
@@ -552,7 +552,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
 
     /**
      * Gets the category.
-     * 
+     *
      * @return The category.
      */
     @Override
@@ -567,7 +567,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -576,7 +576,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -586,7 +586,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

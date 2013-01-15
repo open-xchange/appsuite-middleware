@@ -57,7 +57,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link JSlobExceptionCodes} - The error code for JSlob module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum JSlobExceptionCodes implements OXExceptionCode {
@@ -102,9 +102,9 @@ public enum JSlobExceptionCodes implements OXExceptionCode {
      * The JSlob %1$s is too big.
      */
     JSLOB_TOO_BIG(JSlobExceptionMessages.JSLOB_TOO_BIG, EnumCategory.CATEGORY_USER_INPUT, 10)
-    
+
     ;
-    
+
     /**
      * The error code prefix for JSlob exceptions.
      */

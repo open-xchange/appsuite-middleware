@@ -236,7 +236,7 @@ public final class MessageUtility {
     public static String readMimePart(final Part p, final String charset) throws MessagingException {
         try {
             final InputStreamProvider streamProvider = new AbstractInputStreamProvider() {
-                
+
                 @Override
                 public InputStream getInputStream() throws IOException {
                     try {
@@ -258,7 +258,7 @@ public final class MessageUtility {
             final InputStreamProvider streamProvider;
             if (p instanceof MimeBodyPart) {
                 streamProvider = new AbstractInputStreamProvider() {
-                    
+
                     @Override
                     public InputStream getInputStream() throws IOException {
                         try {
@@ -270,7 +270,7 @@ public final class MessageUtility {
                 };
             } else if (p instanceof MimeMessage) {
                 streamProvider = new AbstractInputStreamProvider() {
-                    
+
                     @Override
                     public InputStream getInputStream() throws IOException {
                         try {
@@ -305,7 +305,7 @@ public final class MessageUtility {
      */
     public static String readMailPart(final MailPart mailPart, final String charset) throws IOException, OXException {
         final InputStreamProvider streamProvider = new AbstractInputStreamProvider() {
-            
+
             @Override
             public InputStream getInputStream() throws IOException {
                 try {
@@ -682,7 +682,7 @@ public final class MessageUtility {
 
     /**
      * Detects possible duplicate &lt;html&gt; tags and removes all but last.
-     * 
+     *
      * @param html The HTML content
      * @return The HTML content with duplicate &lt;html&gt; tags removed
      */
@@ -695,7 +695,7 @@ public final class MessageUtility {
         {
             int count = 0;
             int idx = 0;
-            final int subLen = sub.length();            
+            final int subLen = sub.length();
             while ((idx = lc.indexOf(sub, idx)) >= 0) {
                 count++;
                 idx += subLen;

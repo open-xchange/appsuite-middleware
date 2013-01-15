@@ -61,17 +61,17 @@ import com.openexchange.mail.dataobjects.MailMessage;
 public class MailUUID {
 
     private final String mailUUID;
-    
+
     private final int contextId;
-    
+
     private final int userId;
-    
+
     private final int accountId;
-    
+
     private final String fullName;
-    
+
     private final String mailId;
-    
+
 
     /**
      * Initializes a new {@link MailUUID}.
@@ -94,31 +94,31 @@ public class MailUUID {
         tmp.append(MailPath.getMailPath(accountId, fullName, mailId));
         mailUUID = tmp.toString();
     }
-    
+
     public static MailUUID newUUID(int contextId, int userId, int accountId, String fullName, String mailId) {
         return new MailUUID(contextId, userId, accountId, fullName, mailId);
     }
-    
+
     public static MailUUID newUUID(int contextId, int userId, MailMessage message) {
         return new MailUUID(contextId, userId, message.getAccountId(), message.getFolder(), message.getMailId());
-    }    
-    
+    }
+
     public final int getContextId() {
         return contextId;
     }
-    
+
     public final int getUserId() {
         return userId;
     }
-    
+
     public final int getAccountId() {
         return accountId;
     }
-    
+
     public final String getFullName() {
         return fullName;
     }
-    
+
     public final String getMailId() {
         return mailId;
     }
@@ -127,7 +127,7 @@ public class MailUUID {
     public String toString() {
         return mailUUID;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;

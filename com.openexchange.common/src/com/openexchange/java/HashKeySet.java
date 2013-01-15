@@ -57,7 +57,7 @@ import java.util.Set;
 
 /**
  * {@link HashKeySet} - The <code>String</code> set backed by a <code>HashKey</code> set.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HashKeySet extends AbstractHashKeyCollection<HashKeySet> implements Set<String> {

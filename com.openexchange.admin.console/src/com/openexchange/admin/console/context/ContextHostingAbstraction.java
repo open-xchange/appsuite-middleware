@@ -69,22 +69,22 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * in the hosting part of Open-Xchange. This class is not only used to derive from it but it is also
  * used as aggregation inside some object. So the public method are used through aggregation while the
  * protected are used by inheritance.
- * 
+ *
  * @author d7
  *
  */
 public class ContextHostingAbstraction extends ObjectNamingAbstraction {
-    
+
     private String[] remove_mappings = null;
     private String[] add_mappings = null;
     private Integer storeid = null;
     private Integer databaseid = null;
-    
+
     private CLIOption addLoginMappingOption = null;
     private CLIOption removeLoginMappingOption = null;
     private CLIOption destinationStoreIdMappingOption = null;
     private CLIOption destinationDatabaseIdMappingOption = null;
-    
+
     @Override
     protected String getObjectName() {
         return "context";
@@ -113,7 +113,7 @@ public class ContextHostingAbstraction extends ObjectNamingAbstraction {
             this.databaseid = Integer.parseInt((String)parser.getOptionValue(this.destinationDatabaseIdMappingOption));
         }
     }
-    
+
     public void setDestinationStoreIdOption(final AdminParser parser,final boolean required) {
         this.destinationStoreIdMappingOption = setShortLongOpt(parser, ContextAbstraction.OPT_CONTEXT_DESTINATION_STORE_ID_SHORT, ContextAbstraction.OPT_CONTEXT_DESTINATION_STORE_ID_LONG,"Create context in the given filestore",true, convertBooleantoTriState(required));
     }
@@ -125,12 +125,12 @@ public class ContextHostingAbstraction extends ObjectNamingAbstraction {
     public void setAddMappingOption(final AdminParser parser,final boolean required) {
         this.addLoginMappingOption = setShortLongOpt(parser, ContextAbstraction.OPT_CONTEXT_ADD_LOGIN_MAPPINGS_SHORT, ContextAbstraction.OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG,"Add login mappings.Seperated by \",\"",true, convertBooleantoTriState(required));
     }
-    
+
     public void setRemoveMappingOption(final AdminParser parser,final boolean required) {
         this.removeLoginMappingOption = setShortLongOpt(parser, ContextAbstraction.OPT_CONTEXT_REMOVE_LOGIN_MAPPINGS_SHORT, ContextAbstraction.OPT_CONTEXT_REMOVE_LOGIN_MAPPINGS_LONG,"Remove login mappings.Seperated by \",\"",true, convertBooleantoTriState(required));
     }
-    
-    
+
+
     public void changeMappingSetting(final OXContextInterface oxres, final Context ctx, final Credentials auth, final boolean change) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         // check if wants to change login mappings, then first load current mappings from server
         if(add_mappings!=null || remove_mappings!=null){
@@ -152,7 +152,7 @@ public class ContextHostingAbstraction extends ObjectNamingAbstraction {
         }
     }
 
-    
+
     /**
      * @return the storeid
      */
@@ -160,7 +160,7 @@ public class ContextHostingAbstraction extends ObjectNamingAbstraction {
         return storeid;
     }
 
-    
+
     /**
      * @return the databaseid
      */

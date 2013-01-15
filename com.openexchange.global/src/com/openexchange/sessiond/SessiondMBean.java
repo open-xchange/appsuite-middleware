@@ -53,7 +53,7 @@ import javax.management.MBeanException;
 
 /**
  * {@link SessiondMBean} - The MBean for sessiond
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SessiondMBean {
@@ -62,7 +62,7 @@ public interface SessiondMBean {
 
     /**
      * Clears all sessions belonging to the user identified by given user ID in specified context
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @return The number of removed sessions belonging to the user or <code>-1</code> if an error occurred
@@ -71,21 +71,21 @@ public interface SessiondMBean {
 
     /**
      * Clears all sessions belonging to specified context
-     * 
+     *
      * @param contextId The context ID
      */
     public void clearContextSessions(int contextId);
 
     /**
      * Gets the number of short-term sessions.
-     * 
+     *
      * @return The number of short-term sessions
      */
     int[] getNumberOfShortTermSessions();
 
     /**
      * Gets the number of long-term sessions.
-     * 
+     *
      * @return The number of long-term sessions
      */
     int[] getNumberOfLongTermSessions();

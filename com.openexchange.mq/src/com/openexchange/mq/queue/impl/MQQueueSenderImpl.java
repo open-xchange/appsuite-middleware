@@ -66,13 +66,13 @@ import com.openexchange.mq.serviceLookup.MQServiceLookup;
 
 /**
  * {@link MQQueueSenderImpl} - A queue sender intended to be re-used. Invoke {@link #close()} method when done.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender {
 
     protected static final int DEFAULT_PRIORITY = Message.DEFAULT_PRIORITY;
-    
+
     protected static final long DEFAULT_TIME_TO_LIVE = Message.DEFAULT_TIME_TO_LIVE;
 
     protected QueueSender queueSender; // Within synchronized, no volatile needed
@@ -81,7 +81,7 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
 
     /**
      * Initializes a new {@link MQQueueSenderImpl}.
-     * 
+     *
      * @param queueName The name of the queue to send to
      * @throws OXException If initialization fails
      */
@@ -231,7 +231,7 @@ public class MQQueueSenderImpl extends MQQueueResource implements MQQueueSender 
 
     /**
      * Checks proper priority range.
-     * 
+     *
      * @param priority The priority to check
      * @return The checked priority
      */

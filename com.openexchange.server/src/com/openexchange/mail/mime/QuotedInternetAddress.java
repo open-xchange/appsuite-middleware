@@ -946,7 +946,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     /**
      * Gets the email address in its internationalized, unicode form.
-     * 
+     *
      * @return The IDN email address
      * @see #toIDN(String)
      */
@@ -1002,7 +1002,7 @@ public final class QuotedInternetAddress extends InternetAddress {
     /**
      * Get the personal name. If the name is encoded as per RFC 2047, it is decoded and converted into Unicode. If the decoding or
      * conversion fails, the raw data is returned as is.
-     * 
+     *
      * @return personal name
      */
     @Override
@@ -1029,7 +1029,7 @@ public final class QuotedInternetAddress extends InternetAddress {
     /**
      * Convert this address into a RFC 822 / RFC 2047 encoded address. The resulting string contains only US-ASCII characters, and hence is
      * mail-safe.
-     * 
+     *
      * @return possibly encoded address string
      */
     @Override

@@ -81,7 +81,7 @@ public abstract class FreeBusyAction implements AJAXActionService {
 
     /**
      * Initializes a new {@link FreeBusyAction}.
-     * 
+     *
      * @param serviceLookup The service lookup to use
      */
     public FreeBusyAction(ServiceLookup serviceLookup) {
@@ -96,7 +96,7 @@ public abstract class FreeBusyAction implements AJAXActionService {
 
     /**
      * Performs the free/busy request.
-     * 
+     *
      * @param request The request
      * @return The AJAX result
      * @throws OXException
@@ -105,14 +105,14 @@ public abstract class FreeBusyAction implements AJAXActionService {
 
     /**
      * Gets the free/busy service.
-     * 
-     * @return The free/busy service 
+     *
+     * @return The free/busy service
      * @throws OXException
      */
     protected FreeBusyService getFreeBusyService() throws OXException {
         return serviceLookup.getService(FreeBusyService.class);
     }
-    
+
     protected JSONObject serialize(Map<String, FreeBusyData> freeBusyData, TimeZone timeZone, Locale locale) throws OXException {
         try {
             JSONObject jsonObject = new JSONObject();
@@ -164,7 +164,7 @@ public abstract class FreeBusyAction implements AJAXActionService {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     protected JSONArray serialize(Iterable<FreeBusyInterval> freeBusyIntervals, TimeZone timeZone) throws OXException {
         JSONArray jsonArray = new JSONArray();
         if (null != freeBusyIntervals) {
@@ -174,14 +174,14 @@ public abstract class FreeBusyAction implements AJAXActionService {
         }
         return jsonArray;
     }
-    
+
     protected Object serialize(Date date, TimeZone timeZone) throws JSONException {
         if (null == date) {
             return JSONObject.NULL;
         } else {
             long time = date.getTime();
-            return null == timeZone ? time : time + timeZone.getOffset(time); 
-        }        
+            return null == timeZone ? time : time + timeZone.getOffset(time);
+        }
     }
 
 }

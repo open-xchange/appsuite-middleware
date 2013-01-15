@@ -106,7 +106,7 @@ public abstract class ComposedMailMessage extends MailMessage {
 
     /**
      * Sets the send type.
-     * 
+     *
      * @param sendType The send type
      */
     public void setSendType(ComposeType sendType) {
@@ -115,7 +115,7 @@ public abstract class ComposedMailMessage extends MailMessage {
 
     /**
      * Gets the send type.
-     * 
+     *
      * @return The send type
      */
     public ComposeType getSendType() {

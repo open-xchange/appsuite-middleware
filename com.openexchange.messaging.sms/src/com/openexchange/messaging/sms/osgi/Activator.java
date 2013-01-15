@@ -65,17 +65,17 @@ import com.openexchange.osgi.ServiceRegistry;
  *
  */
 public class Activator extends DeferredActivator {
-    
+
     private static transient final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
 
     private volatile ServletRegisterer servletRegisterer;
-    
+
     private volatile ServiceRegistration<PreferencesItemService> serviceRegistration;
-        
+
     public Activator() {
-        super();        
+        super();
     }
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { HttpService.class, MessagingNewService.class, DispatcherPrefixService.class };

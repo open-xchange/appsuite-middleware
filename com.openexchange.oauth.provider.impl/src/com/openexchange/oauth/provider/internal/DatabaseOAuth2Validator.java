@@ -55,7 +55,7 @@ import org.apache.commons.logging.Log;
 
 /**
  * {@link DatabaseOAuth2Validator} - A simple {@link OAuth2Validator}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DatabaseOAuth2Validator extends SimpleOAuth2Validator {
@@ -72,7 +72,7 @@ public final class DatabaseOAuth2Validator extends SimpleOAuth2Validator {
 
     /**
      * Initializes a new {@link DatabaseOAuth2Validator}.
-     * 
+     *
      * @param maxTimestampAgeMsec The range of valid time stamps, in milliseconds into the past or future. So the total range of valid time
      *            stamps is twice this value, rounded to the nearest second.
      * @param maxVersion The maximum valid oauth_version

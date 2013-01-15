@@ -77,5 +77,5 @@ public class DocumentationJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
     	super.registerModule(new DocumentationActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "documentation");
     }
-    
+
 }

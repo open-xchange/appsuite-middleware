@@ -136,11 +136,7 @@ public final class FolderParser {
                             entity = elem.getInt(FolderFields.ENTITY);
                         } catch (final JSONException e) {
                             final String entityStr = elem.getString(FolderFields.ENTITY);
-                            try {
-                                entity = us.getUserId(entityStr, ContextStorage.getStorageContext(session.getContextId()));
-                            } catch (final OXException e1) {
-                                throw new OXException(e1);
-                            }
+                            entity = us.getUserId(entityStr, ContextStorage.getStorageContext(session.getContextId()));
                         }
                         final MailPermission mailPerm = provider.createNewMailPermission(session, accountId);
                         mailPerm.setEntity(entity);
@@ -167,8 +163,6 @@ public final class FolderParser {
             }
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

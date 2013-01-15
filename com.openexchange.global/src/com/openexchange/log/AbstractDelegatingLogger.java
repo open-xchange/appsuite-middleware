@@ -63,14 +63,14 @@ import com.openexchange.java.StringAllocator;
  * {@link AbstractDelegatingLogger} - A <code>java.util.logging.Logger</code> implementation delegating to another framework.
  * <p>
  * All methods can be used except: setLevel addHandler / getHandlers setParent / getParent setUseParentHandlers / getUseParentHandlers.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractDelegatingLogger extends Logger {
 
     /**
      * Initializes a new {@link AbstractDelegatingLogger}.
-     * 
+     *
      * @param name The logger name
      * @param resourceBundleName The resource bundle name
      */
@@ -451,7 +451,7 @@ public abstract class AbstractDelegatingLogger extends Logger {
 
     /**
      * Load the specified resource bundle
-     * 
+     *
      * @param resourceBundleName the name of the resource bundle to load, cannot be null
      * @return the loaded resource bundle.
      * @throws java.util.MissingResourceException If the specified resource bundle can not be loaded.

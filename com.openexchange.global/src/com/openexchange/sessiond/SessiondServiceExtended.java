@@ -59,7 +59,7 @@ public interface SessiondServiceExtended extends SessiondService {
 
     /**
      * Checks for any active session for specified context.
-     * 
+     *
      * @param contextId The context identifier
      * @return <code>true</code> if at least one active session is found; otherwise <code>false</code>
      */

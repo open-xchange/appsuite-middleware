@@ -14,9 +14,9 @@ import com.openexchange.admin.soap.context.dataobjects.UserModuleAccess;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -31,8 +31,8 @@ import com.openexchange.admin.soap.context.dataobjects.UserModuleAccess;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -55,11 +55,11 @@ public class CreateModuleAccess {
 
     /**
      * Ruft den Wert der ctx-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Context }
-     *     
+     *
      */
     public Context getCtx() {
         return ctx;
@@ -67,11 +67,11 @@ public class CreateModuleAccess {
 
     /**
      * Legt den Wert der ctx-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Context }
-     *     
+     *
      */
     public void setCtx(Context value) {
         this.ctx = value;
@@ -79,11 +79,11 @@ public class CreateModuleAccess {
 
     /**
      * Ruft den Wert der adminUser-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link User }
-     *     
+     *
      */
     public User getAdminUser() {
         return adminUser;
@@ -91,11 +91,11 @@ public class CreateModuleAccess {
 
     /**
      * Legt den Wert der adminUser-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link User }
-     *     
+     *
      */
     public void setAdminUser(User value) {
         this.adminUser = value;
@@ -103,11 +103,11 @@ public class CreateModuleAccess {
 
     /**
      * Ruft den Wert der access-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UserModuleAccess }
-     *     
+     *
      */
     public UserModuleAccess getAccess() {
         return access;
@@ -115,11 +115,11 @@ public class CreateModuleAccess {
 
     /**
      * Legt den Wert der access-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UserModuleAccess }
-     *     
+     *
      */
     public void setAccess(UserModuleAccess value) {
         this.access = value;
@@ -127,11 +127,11 @@ public class CreateModuleAccess {
 
     /**
      * Ruft den Wert der auth-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Credentials }
-     *     
+     *
      */
     public Credentials getAuth() {
         return auth;
@@ -139,11 +139,11 @@ public class CreateModuleAccess {
 
     /**
      * Legt den Wert der auth-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Credentials }
-     *     
+     *
      */
     public void setAuth(Credentials value) {
         this.auth = value;

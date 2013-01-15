@@ -75,19 +75,11 @@ public class FacebookSubscriptionsOAuthAccountDeleteListener implements OAuthAcc
 
     @Override
     public void onAfterOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
-        try {
-            fbService.deleteAllUsingOAuthAccount(getContext(cid), id);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        fbService.deleteAllUsingOAuthAccount(getContext(cid), id);
     }
 
     private Context getContext(final int cid) throws OXException {
-        try {
-            return contexts.getContext(cid);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return contexts.getContext(cid);
     }
 
     @Override

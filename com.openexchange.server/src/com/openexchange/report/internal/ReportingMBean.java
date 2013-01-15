@@ -159,7 +159,7 @@ public class ReportingMBean implements DynamicMBean {
         }
         throw new AttributeNotFoundException("Cannot find " + attribute + " attribute ");
     }
-    
+
     private final Map<Integer, ReportContext> loadContextData() throws MBeanException {
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         try {
@@ -200,7 +200,7 @@ public class ReportingMBean implements DynamicMBean {
                         final int inaccnt = rs.getInt(4);
                         if( null != rc ) {
                             Map<Integer,Integer> accCombs = rc.getAccessCombinations();
-                            Map<Integer,Integer> inactive = rc.getInactiveByCombination(); 
+                            Map<Integer,Integer> inactive = rc.getInactiveByCombination();
                             if( null == accCombs ) {
                                 accCombs = new HashMap<Integer, Integer>();
                             }
@@ -380,7 +380,7 @@ public class ReportingMBean implements DynamicMBean {
         final TabularDataSupport detail = new TabularDataSupport(detailType);
         try {
             /**
-             *  FIXME: 
+             *  FIXME:
              *  Caldav/Carddav only available via ConfigCascade this might need to be added
              *  Former version also did send login_mappings, but report client did not use it
              */

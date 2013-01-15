@@ -73,7 +73,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
  * {@link ContactResource} - Abstract base class for CardDAV resources.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -82,15 +82,15 @@ public class ContactResource extends CardDAVResource {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactResource.class);
 	private static final OXContainerConverter CONVERTER = new OXContainerConverter((TimeZone) null, (String) null);
 	private static final int MAX_RETRIES = 3;
-    
+
     private boolean exists = false;
-    private Contact contact = null;    
+    private Contact contact = null;
     private int retryCount = 0;
     private String parentFolderID = null;
 
     /**
      * Creates a new {@link ContactResource} representing an existing contact.
-     * 
+     *
      * @param contact the contact
      * @param factory the CardDAV factory
 	 * @param url the WebDAV URL
@@ -103,7 +103,7 @@ public class ContactResource extends CardDAVResource {
 
 	/**
 	 * Creates a new placeholder {@link ContactResource} at the specified URL.
-	 * 
+	 *
      * @param factory the CardDAV factory
 	 * @param url the WebDAV URL
 	 * @param parentFolderID the ID of the parent folder
@@ -130,13 +130,13 @@ public class ContactResource extends CardDAVResource {
 	            LOG.debug(this.getUrl() + ": created.");
 		    } else {
 	            /*
-	             * Insert & delete not supported contact (next sync cleans up the client) 
+	             * Insert & delete not supported contact (next sync cleans up the client)
 	             */
                 LOG.warn(this.getUrl() + ": contact groups not supported, performing immediate deletion of this resource.");
 		        contact.removeDistributionLists();
 		        contact.removeNumberOfDistributionLists();
                 this.factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
-                this.factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), 
+                this.factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
                     Integer.toString(contact.getObjectID()), contact.getLastModified());
 		    }
         } catch (OXException e) {
@@ -155,12 +155,12 @@ public class ContactResource extends CardDAVResource {
 	public void delete() throws WebdavProtocolException {
 		if (false == this.exists()) {
 			throw protocolException(HttpServletResponse.SC_NOT_FOUND);
-		} 		
-    	try {	
+		}
+    	try {
     		/*
     		 * Delete contact
     		 */
-        	this.factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), 
+        	this.factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
         			Integer.toString(contact.getObjectID()), contact.getLastModified());
             LOG.debug(this.getUrl() + ": deleted.");
             this.contact = null;
@@ -168,17 +168,17 @@ public class ContactResource extends CardDAVResource {
         	if (handle(e)) {
         		delete();
         	}
-        }   
+        }
 	}
 
 	@Override
 	public void save() throws WebdavProtocolException {
 		if (false == this.exists()) {
 			throw protocolException(HttpServletResponse.SC_NOT_FOUND);
-		}		
+		}
         try {
         	/*
-        	 * Update contact 
+        	 * Update contact
         	 */
         	this.factory.getContactService().updateContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
         			Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
@@ -253,7 +253,7 @@ public class ContactResource extends CardDAVResource {
 	    			String extractedUID = Tools.extractUID(url);
 	    			if (null != extractedUID && false == extractedUID.equals(newContact.getUid())) {
 	                	/*
-	                	 * Always extract the UID from the URL; the Addressbook client in MacOS 10.6 uses different UIDs in 
+	                	 * Always extract the UID from the URL; the Addressbook client in MacOS 10.6 uses different UIDs in
 	                	 * the WebDAV path and the UID field in the vCard, so we need to store this UID in the contact
 	                	 * resource, too, to recognize later updates on the resource.
 	                	 */
@@ -286,11 +286,11 @@ public class ContactResource extends CardDAVResource {
 	private Contact deserializeAsContact(VersitObject versitObject) throws OXException, ConverterException {
 		return CONVERTER.convertContact(versitObject);
 	}
-	
+
     private Contact deserializeAsTemporaryGroup(VersitObject versitObject) throws OXException {
         Contact contact = new Contact();
         contact.setMarkAsDistributionlist(true);
-        String formattedName = versitObject.getProperty("FN").getValue().toString(); 
+        String formattedName = versitObject.getProperty("FN").getValue().toString();
         contact.setDisplayName(formattedName);
         contact.setSurName(formattedName);
         String uid = versitObject.getProperty("UID").getValue().toString();
@@ -299,7 +299,7 @@ public class ContactResource extends CardDAVResource {
         }
         return contact;
     }
-    
+
 	private String serializeAsContact() throws WebdavProtocolException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         VersitDefinition contactDef = Versit.getDefinition("text/vcard");
@@ -321,9 +321,9 @@ public class ContactResource extends CardDAVResource {
 
 	/**
 	 * Tries to handle an exception.
-	 * 
+	 *
 	 * @param e the exception to handle
-	 * @return <code>true</code>, if the operation should be retried, 
+	 * @return <code>true</code>, if the operation should be retried,
 	 * <code>false</code>, otherwise.
 	 * @throws WebdavProtocolException
 	 */
@@ -356,10 +356,10 @@ public class ContactResource extends CardDAVResource {
     	} else {
     		throw super.protocolException(e);
     	}
-    	
+
     	if (retry) {
     		retryCount++;
-    		return retryCount <= MAX_RETRIES; 
+    		return retryCount <= MAX_RETRIES;
     	} else {
     		return false;
     	}
@@ -373,7 +373,7 @@ public class ContactResource extends CardDAVResource {
 			return false;
 		}
 	}
-	
+
     private static boolean isGroup(VersitObject versitObject) {
         com.openexchange.tools.versit.Property property = versitObject.getProperty("X-ADDRESSBOOKSERVER-KIND");
         return null != property  && "group".equals(property.getValue());

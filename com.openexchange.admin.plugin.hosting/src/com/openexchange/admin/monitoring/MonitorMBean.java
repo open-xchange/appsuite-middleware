@@ -50,7 +50,7 @@
 package com.openexchange.admin.monitoring;
 
 /**
- * Defines the attributes to be monitored. 
+ * Defines the attributes to be monitored.
  * @author cutmasta
  */
 public interface MonitorMBean {

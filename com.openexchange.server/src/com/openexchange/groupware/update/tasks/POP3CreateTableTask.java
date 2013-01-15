@@ -114,12 +114,7 @@ public class POP3CreateTableTask implements UpdateTask {
     }
 
     private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
-        final Connection writeCon;
-        try {
-            writeCon = Database.get(contextId, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection writeCon = Database.get(contextId, true);
         PreparedStatement stmt = null;
         try {
             try {

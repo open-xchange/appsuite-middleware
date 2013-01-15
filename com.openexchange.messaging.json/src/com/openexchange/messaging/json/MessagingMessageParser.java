@@ -93,7 +93,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 /**
  * A parser to parse JSON representations of MessagingMessages. Note that parsing can be customized by registering one or more
  * {@link MessagingHeaderParser} and one or more {@link MessagingContentParser}.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -304,7 +304,7 @@ public class MessagingMessageParser {
 
     /**
      * Adds a {@link MessagingHeaderParser} to the list of known parsers. In this way new headers may be parsed in a custom manner
-     * 
+     *
      * @param parser
      */
     public void addHeaderParser(final MessagingHeaderParser parser) {
@@ -318,7 +318,7 @@ public class MessagingMessageParser {
     /**
      * Adds a {@link MessagingContentParser} to the list of known parsers. In this way new {@link MessagingContent} types may be parsed in a
      * custom manner
-     * 
+     *
      * @param parser
      */
     public void addContentParser(final MessagingContentParser parser) {
@@ -555,7 +555,7 @@ public class MessagingMessageParser {
 
         /**
          * Initializes a new {@link ManagedFileContentImplementation}.
-         * 
+         *
          * @param managedFile
          */
         public ManagedFileContentImpl(final ManagedFile managedFile) {

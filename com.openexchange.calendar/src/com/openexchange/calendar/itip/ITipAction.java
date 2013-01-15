@@ -56,7 +56,7 @@ package com.openexchange.calendar.itip;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public enum ITipAction {
-    
+
     /**
      * Cases:
      * 1. Create Appointment if not existing
@@ -65,35 +65,35 @@ public enum ITipAction {
      * 4. If Attendee: Answer with REPLY
      */
     ACCEPT,
-    
+
     /**
      * see accept
      * (implicit ignore conflicts)
      */
     DECLINE,
-    
+
     /**
      * see accept
      * (implicit ignore conflicts)
      */
     TENTATIVE,
-    
+
     /**
-     * 
+     *
      */
     DELEGATE,
-    
+
     /**
      * Create original appointment
      * add user with status "none"
      */
     COUNTER,
-    
+
     /**
      * see accept with "ignore conflicts"
      */
     ACCEPT_AND_IGNORE_CONFLICTS,
-    
+
     /**
      * Cases:
      * 1. Delete Appointment or sequence: Just delete.
@@ -101,50 +101,50 @@ public enum ITipAction {
      * 3. Delete occurrence: Create delete exception
      */
     DELETE,
-    
+
     /**
      * does nothing
      */
     IGNORE,
-    
+
     /**
      * Edit change exception
      * See accept
      */
     ACCEPT_AND_REPLACE,
-    
+
     /**
      * only mails
      * Send a REFRESH mail
      */
     REFRESH,
-    
+
     /**
      * only mails
      * Send a REQUEST mail
      */
     SEND_APPOINTMENT,
-    
+
     /**
      * for organizer:
      * add participant
      * Send a REQUEST mail
      */
     ACCEPT_PARTY_CRASHER,
-    
+
     /**
      * for organizer:
      * accept a counter -> change appointment
      * Send a REQUEST mail
      */
     UPDATE,
-    
+
     /**
      * just mail
      * Send a DECLINECOUNTER mail
      */
     DECLINECOUNTER,
-    
+
     /**
      * Create change exception
      * If ORGANIZER: Send an ADD mail

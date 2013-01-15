@@ -64,7 +64,7 @@ public class UpdateModuleAccessRestrictions extends ResellerAbstraction {
     }
 
     /**
-     * 
+     *
      */
     public UpdateModuleAccessRestrictions() {
     }

@@ -53,7 +53,7 @@ import java.io.Serializable;
 
 /**
  * {@link Category} - The category for an {@link OXException} determines its behavior during exception handling and logging.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Category extends Serializable {
@@ -384,7 +384,7 @@ public interface Category extends Serializable {
 
         /**
          * Gets the name for parental category.
-         * 
+         *
          * @return The name
          */
         String getName();
@@ -522,14 +522,14 @@ public interface Category extends Serializable {
 
     /**
      * Gets the log level in which associated exception shall be logged.
-     * 
+     *
      * @return The log level
      */
     LogLevel getLogLevel();
 
     /**
      * Gets this category's type.
-     * 
+     *
      * @return The type
      */
     Type getType();
@@ -537,7 +537,7 @@ public interface Category extends Serializable {
     /**
      * Compares this category with the specified category for order. Returns a negative integer, zero, or a positive integer as this object
      * is less than, equal to, or greater than the specified object.
-     * 
+     *
      * @param other The other category to be compared.
      * @return A negative integer, zero, or a positive integer as this object is less than, equal to, or greater than the specified object.
      */

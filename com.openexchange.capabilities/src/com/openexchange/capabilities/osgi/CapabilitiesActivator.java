@@ -73,10 +73,10 @@ public class CapabilitiesActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final ServiceTracker<CapabilityChecker, CapabilityChecker> capCheckers = track(CapabilityChecker.class);
-    	
-    	
+
+
     	final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, context) {
-        	
+
         	@Override
         	public List<CapabilityChecker> getCheckers() {
         		Object[] services = capCheckers.getServices();
@@ -88,11 +88,11 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         		for (Object service : services) {
 					checkers.add((CapabilityChecker) service);
 				}
-        		
+
         		return checkers;
         	}
         };
-        
+
         registerService(CapabilityService.class, capService);
 
         track(Capability.class, new SimpleRegistryListener<Capability>() {

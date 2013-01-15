@@ -59,7 +59,7 @@ import org.apache.commons.io.FileUtils;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class DocumentCreator {
-    
+
     public static void main(String[] args) throws Exception {
         byte[] byteArray = FileUtils.readFileToByteArray(new File("/home/steffen/Dokumente/sample.txt"));
         StringBuilder sb = new StringBuilder("new byte[] { ");

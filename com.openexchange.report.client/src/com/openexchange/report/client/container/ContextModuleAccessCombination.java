@@ -52,9 +52,9 @@ package com.openexchange.report.client.container;
 public class ContextModuleAccessCombination {
 
 	private String userAccessCombination;
-	
+
 	private String userCount;
-	
+
 	private String inactiveCount;
 
 	public ContextModuleAccessCombination(String userAccessCombination,
@@ -93,5 +93,5 @@ public class ContextModuleAccessCombination {
 		return "ContextModuleAccessCombinationObject [userAccessCombination="
 				+ userAccessCombination + ", userCount=" + userCount + "]";
 	}
-	
+
 }

@@ -53,14 +53,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MQServerStartup} - The start-up for a Messaging Queue server.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MQServerStartup {
 
     /**
      * Starts-up the MQ server.
-     * 
+     *
      * @throws OXException If server start-up fails
      */
     void start() throws OXException;
@@ -72,7 +72,7 @@ public interface MQServerStartup {
 
     /**
      * Gets the currently active Message Queue service.
-     * 
+     *
      * @return The service
      * @throws OXException If service cannot be returned
      */

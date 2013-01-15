@@ -80,7 +80,7 @@ import com.hazelcast.partition.PartitionService;
  * loader aware} instances of <tt>IMap</tt>, <tt>MultiMap</tt>, <tt>ISet</tt>, <tt>IList</tt>, <tt>IQueue</tt>, and <tt>ITopic</tt>.
  * <p>
  * Furthermore it {@link Log#warn(Object) logs a warning} if any resource is accessed without an appropriate configuration available.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ClassLoaderAwareHazelcastInstance implements HazelcastInstance {
@@ -95,7 +95,7 @@ public class ClassLoaderAwareHazelcastInstance implements HazelcastInstance {
 
     /**
      * Initializes a new {@link ClassLoaderAwareHazelcastInstance}.
-     * 
+     *
      * @param hazelcastInstance
      */
     public ClassLoaderAwareHazelcastInstance(final HazelcastInstance hazelcastInstance, final boolean kryorize) {

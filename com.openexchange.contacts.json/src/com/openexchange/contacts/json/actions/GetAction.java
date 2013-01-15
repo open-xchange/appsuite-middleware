@@ -75,7 +75,7 @@ public class GetAction extends ContactAction {
     public GetAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
-    
+
     @Override
     protected AJAXRequestResult perform(final ContactRequest request) throws OXException {
         final Contact contact = getContactService().getContact(request.getSession(), request.getFolderID(), request.getObjectID());

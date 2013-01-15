@@ -54,12 +54,12 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 
 
 /**
- * {@link DistListMember} - 
+ * {@link DistListMember} -
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DistListMember extends DistributionListEntryObject {
-	
+
 	private int parentContactID;
 	private boolean b_parentContactID;
 
@@ -68,8 +68,8 @@ public class DistListMember extends DistributionListEntryObject {
 
 	/**
 	 * Creates an array of distribution list members using the supplied data.
-	 * 
-	 * @param distList an array of distribution list entry objects 
+	 *
+	 * @param distList an array of distribution list entry objects
 	 * @param contextID the context ID
 	 * @param parentContactID the ID of the corresponding contact
 	 * @return the distribution list members
@@ -85,11 +85,11 @@ public class DistListMember extends DistributionListEntryObject {
     	}
     	return null;
 	}
-	
+
 	public static DistListMember create(final DistributionListEntryObject dleo, final int contextID, final int parentContactID) throws OXException {
 		final DistListMember member = new DistListMember();
 		member.setParentContactID(parentContactID);
-		member.setContextID(contextID);		
+		member.setContextID(contextID);
 		if (dleo.containsDisplayname()) {
 			member.setDisplayname(dleo.getDisplayname());
 		}
@@ -111,10 +111,10 @@ public class DistListMember extends DistributionListEntryObject {
 		if (dleo.containsLastname()) {
 			member.setLastname(dleo.getLastname());
 		}
-		
+
 		return member;
 	}
-	
+
 	/**
 	 * @return the parentContactID
 	 */
@@ -150,7 +150,7 @@ public class DistListMember extends DistributionListEntryObject {
 		this.contextID = contextID;
 	}
 
-	
+
     public void removeContextID() {
         contextID = 0;
         b_contextID = false;

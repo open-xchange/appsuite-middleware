@@ -53,7 +53,7 @@ import com.openexchange.session.Session;
 
 /**
  * A literal token.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LiteralToken implements Token {

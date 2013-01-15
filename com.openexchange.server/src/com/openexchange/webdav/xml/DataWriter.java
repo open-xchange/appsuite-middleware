@@ -259,7 +259,7 @@ public class DataWriter {
 
     /**
      * Gets the error message for given arguments.
-     * 
+     *
      * @param message The message template in <tt>printf</tt> style
      * @param arg The message argument
      * @return The error message
@@ -270,7 +270,7 @@ public class DataWriter {
 
     /**
      * Gets the error message for given arguments.
-     * 
+     *
      * @param message The message template in <tt>printf</tt> style
      * @param errorCode The error code
      * @return The error message

@@ -79,7 +79,7 @@ public class PushMQPublisher extends MQTopicPublisherImpl {
     public PushMQPublisher(String topicName) throws OXException {
         super(topicName);
     }
-    
+
     @Override
     protected boolean isTransacted() {
         return false;
@@ -106,7 +106,7 @@ public class PushMQPublisher extends MQTopicPublisherImpl {
         LOG.warn("Object messages not supported by topic: " + topicName);
         publishMQObject((PushMQObject) object);
     }
-    
+
     public void publishMQObject(final PushMQObject obj) throws OXException {
         if (null == obj) {
             return;

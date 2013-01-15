@@ -99,7 +99,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ConfigJSlobService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConfigJSlobService implements JSlobService {
@@ -114,10 +114,10 @@ public final class ConfigJSlobService implements JSlobService {
     private static final String PREFERENCE_PATH = "preferencePath".intern();
 
     private static final String SERVICE_ID = "com.openexchange.jslob.config";
-    
+
     private static final String CORE = "io.ox/core";
-    
-    
+
+
     /*-
      * ------------------------- Member stuff -----------------------------
      */
@@ -129,12 +129,12 @@ public final class ConfigJSlobService implements JSlobService {
     private final Map<String, Map<String, String>[]> configTreeEquivalents;
     private final int CONFIG2LOB = 0;
     private final int LOB2CONFIG = 1;
-    
+
     private final Map<String, JSlob> sharedJSlobs;
 
     /**
      * Initializes a new {@link ConfigJSlobService}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public ConfigJSlobService(final ServiceLookup services) throws OXException {
@@ -150,13 +150,13 @@ public final class ConfigJSlobService implements JSlobService {
         	configTreeEquivalents = new HashMap<String, Map<String,String>[]>();
             readPerfMap(file, configTreeEquivalents);
         }
-       
+
         sharedJSlobs = new ConcurrentHashMap<String, JSlob>();
     }
 
     /**
      * Gets the service look-up.
-     * 
+     *
      * @return The service look-up
      */
     public ServiceLookup getServices() {
@@ -245,7 +245,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     /**
      * Gets the <code>SessiondService</code>.
-     * 
+     *
      * @return The <code>SessiondService</code>
      */
     private SessiondService getSessiondService() {
@@ -256,7 +256,7 @@ public final class ConfigJSlobService implements JSlobService {
     public Collection<JSlob> get(final ServerSession session) throws OXException {
     	final int userId = session.getUserId();
     	final int contextId = session.getContextId();
-    	
+
         final Collection<JSlob> list = getStorage().list(new JSlobId(SERVICE_ID, null, userId, contextId));
         final List<JSlob> ret = new ArrayList<JSlob>(list.size() << 1);
         boolean coreIncluded = false;
@@ -316,9 +316,9 @@ public final class ConfigJSlobService implements JSlobService {
                 add2JSlob(attributedProperty, jsonJSlob, view);
             }
         }
-        
+
         addConfigTreeToJslob(session, jsonJSlob);
-        
+
         return jsonJSlob;
     }
 
@@ -330,7 +330,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     /**
      * Adds data from config-tree to jslob mappings.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The {@link JSlob} instance.
@@ -344,7 +344,7 @@ public final class ConfigJSlobService implements JSlobService {
             }
             final SettingStorage stor = SettingStorage.getInstance(session);
             final ConfigTree configTree = ConfigTree.getInstance();
-            
+
             final Set<Entry<String, String>> entrySet = maps[CONFIG2LOB].entrySet();
             final JSONObject jObject = new JSONObject(entrySet.size());
             for (final Map.Entry<String, String> mapping : entrySet) {
@@ -372,7 +372,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     /**
      * Converts a tree of settings into the according java script objects.
-     * 
+     *
      * @param setting Tree of settings.
      * @return java script object representing the setting tree.
      * @throws JSONException if the conversion to java script objects fails.
@@ -426,7 +426,7 @@ public final class ConfigJSlobService implements JSlobService {
     public void set(final String id, final JSlob jsonJSlob, final ServerSession session) throws OXException {
     	final int userId = session.getUserId();
     	final int contextId = session.getContextId();
-    	
+
     	if (null == jsonJSlob) {
             getStorage().remove(new JSlobId(SERVICE_ID, id, userId, contextId));
         } else {
@@ -438,14 +438,14 @@ public final class ConfigJSlobService implements JSlobService {
             // Remember the paths to purge
             final List<List<JSONPathElement>> pathsToPurge = new LinkedList<List<JSONPathElement>>();
             // Config Tree Values first
-            
+
             final Map<String, String>[] configTreeEquivMaps = configTreeEquivalents.get(id);
             if (configTreeEquivMaps != null) {
 				final SettingStorage stor = SettingStorage
 						.getInstance(session);
 				final ConfigTree configTree = ConfigTree.getInstance();
 				final Map<String, String> attribute2ConfigTreeMap = configTreeEquivMaps[LOB2CONFIG];
-				
+
 				for (final Entry<String, Object> entry : jObject.entrySet()) {
 					String path = attribute2ConfigTreeMap.get(entry.getKey());
 					if (path != null) {
@@ -462,7 +462,7 @@ public final class ConfigJSlobService implements JSlobService {
 					}
 				}
             }
-            
+
             // Set (or replace) JSlob
             final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
             if (null == attributes) {
@@ -510,7 +510,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     /**
      * Splits a value for a not leaf setting into its sub-settings and stores them.
-     * 
+     *
      * @param storage setting storage.
      * @param setting actual setting.
      * @throws OXException If an error occurs.
@@ -598,16 +598,16 @@ public final class ConfigJSlobService implements JSlobService {
                 set(id, jsonJSlob.setJsonObject(merged), session);
                 return;
             }
-            
+
             /*
              * Let's try the config mappings
              */
-            
+
             if (path.size() == 1) {
             	// Only first level elements can be config tree equivalents
                 final Map<String, String>[] configTreeEquivMaps = configTreeEquivalents.get(id);
                 if (configTreeEquivMaps != null) {
-                	
+
                 	final String configTreePath = configTreeEquivMaps[LOB2CONFIG].get(path.get(0).getName());
                 	final Object value = jsonUpdate.getValue();
 					if (null != value) {
@@ -619,11 +619,11 @@ public final class ConfigJSlobService implements JSlobService {
 						setting.setSingleValue(value);
 						saveSettingWithSubs(stor, setting);
 					}
-                	
+
                 }
             }
-            
-            
+
+
             /*
              * Update in config cascade or basic storage
              */
@@ -632,7 +632,7 @@ public final class ConfigJSlobService implements JSlobService {
             if (null == attributes) {
                 /*-
                  * Update in store
-                 * 
+                 *
                  * Iterate path except last element
                  */
                 final int msize = size - 1;
@@ -713,15 +713,11 @@ public final class ConfigJSlobService implements JSlobService {
                 }
                 final Object value = jsonUpdate.getValue();
                 if (null != value) {
-                    try {
-                        final ConfigView view = getConfigViewFactory().getView(userId, contextId);
-                        final String oldValue = view.get(attributedProperty.propertyName, String.class);
-                        // Clients have a habit of dumping the config back at us, so we only save differing values.
-                        if (!value.equals(oldValue)) {
-                            view.set("user", attributedProperty.propertyName, value);
-                        }
-                    } catch (final OXException e) {
-                        throw new OXException(e);
+                    final ConfigView view = getConfigViewFactory().getView(userId, contextId);
+                    final String oldValue = view.get(attributedProperty.propertyName, String.class);
+                    // Clients have a habit of dumping the config back at us, so we only save differing values.
+                    if (!value.equals(oldValue)) {
+                        view.set("user", attributedProperty.propertyName, value);
                     }
                 }
             }
@@ -884,7 +880,7 @@ public final class ConfigJSlobService implements JSlobService {
      * Converts given String to a regular JSON-supported value.
      * <p>
      * The value can be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
-     * 
+     *
      * @param propertyValue The value to convert
      * @return The resulting value; either Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object
      */

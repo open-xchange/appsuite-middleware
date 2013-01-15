@@ -61,7 +61,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
@@ -69,7 +68,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class FileUtils {
 	private static final Log log = com.openexchange.log.Log.loggerFor(FileUtils.class);
-	
+
 	/**
 	 * Read data from a file and convert it to a byte array.
 	 * @param aInputFileName path
@@ -105,11 +104,11 @@ public class FileUtils {
 
 		return result;
 	}
-	
+
 	public static ByteBuffer binToByteBuffer(String filename) {
 		return ByteBuffer.wrap(binToByteArray(filename));
 	}
-	
+
 	/**
 	 * Transforms a byte array to file
 	 * @param aInput the byte array
@@ -133,7 +132,7 @@ public class FileUtils {
 			log.error(ex);
 		}
 	}
-	
+
 	public static void writeToFile(ByteBuffer input, String output) {
 		try {
 			FileChannel channel = new FileOutputStream(new File(output), false).getChannel();

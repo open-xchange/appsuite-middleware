@@ -64,22 +64,22 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ContactImporter}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class ContactImporter extends AbstractImporter {
-    
+
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactImporter.class));
 
     /**
      * Defines the maximum number of implicit retries in case of truncation errors.
      */
     protected static final int MAX_RETRIES = 10;
-    
+
     /**
-     * Creates a new contact, implicitly trying again with trimmed values in 
+     * Creates a new contact, implicitly trying again with trimmed values in
      * case of truncation errors.
-     * 
+     *
      * @param session the current session
      * @param contact the contact to create
      * @param folderID the target folder ID
@@ -98,19 +98,19 @@ public abstract class ContactImporter extends AbstractImporter {
                 if (retryCount < MAX_RETRIES && handle(e, contact)) {
                     // try again
                     LOG.debug(e.getMessage() + " - trying again (" + retryCount + "/" + MAX_RETRIES + ")", e);
-                    continue; 
+                    continue;
                 } else {
                     // re-throw
                     throw e;
                 }
-            }   
+            }
         }
     }
 
     protected boolean handle(OXException e, Contact contact) {
         return ContactExceptionCodes.DATA_TRUNCATION.equals(e) && null != e.getProblematics() && trimTruncatedAttributes(e, contact);
     }
-    
+
     private static boolean trimTruncatedAttributes(OXException e, Contact contact) {
         try {
             return MappedTruncation.truncate(e.getProblematics(), contact);
@@ -119,7 +119,7 @@ public abstract class ContactImporter extends AbstractImporter {
             return false;
         }
     }
-    
+
     @Override
     protected String getNameForFieldInTruncationError(int id, OXException e) {
         if (null != e && ContactExceptionCodes.DATA_TRUNCATION.equals(e) && null != e.getProblematics()) {

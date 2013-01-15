@@ -84,7 +84,7 @@ public final class Cookies {
 
     /**
      * Checks if specified request's server name is considered as part of local LAN.
-     * 
+     *
      * @param request The request
      * @return <code>true</code> if considered as part of local LAN; otherwise <code>false</code>
      */
@@ -94,7 +94,7 @@ public final class Cookies {
 
     /**
      * Checks if specified server name is considered as part of local LAN.
-     * 
+     *
      * @param serverName The server name
      * @return <code>true</code> if considered as part of local LAN; otherwise <code>false</code>
      */
@@ -109,7 +109,7 @@ public final class Cookies {
 
     /**
      * Checks whether domain parameter is enabled
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public static boolean domainEnabled() {
@@ -131,7 +131,7 @@ public final class Cookies {
 
     /**
      * Checks whether domain parameter should start with a dot (<code>'.'</code>) character
-     * 
+     *
      * @return <code>true</code> for starting dot; otherwise <code>false</code>
      */
     public static boolean prefixWithDot() {
@@ -153,7 +153,7 @@ public final class Cookies {
 
     /**
      * Gets the configured domain or <code>null</code>
-     * 
+     *
      * @return The configured domain or <code>null</code>
      */
     public static String configuredDomain() {
@@ -174,7 +174,7 @@ public final class Cookies {
     /**
      * Gets the domain parameter for specified server name with configured default behavior whether to prefix domain with a dot (
      * <code>'.'</code>) character.
-     * 
+     *
      * @param serverName The server name
      * @return The domain parameter or <code>null</code>
      * @see #prefixWithDot()
@@ -193,7 +193,7 @@ public final class Cookies {
 
     /**
      * Gets the domain parameter for specified server name.
-     * 
+     *
      * @param serverName The server name
      * @param prefixWithDot Whether to prefix domain with a dot (<code>'.'</code>) character
      * @param configuredDomain The pre-configured domain name for this host
@@ -245,7 +245,7 @@ public final class Cookies {
 
     /**
      * Extracts domain parameter out of specified (JSESSIONID) cookie value.
-     * 
+     *
      * @param id The cookie value
      * @return The domain parameter or <code>null</code>
      */

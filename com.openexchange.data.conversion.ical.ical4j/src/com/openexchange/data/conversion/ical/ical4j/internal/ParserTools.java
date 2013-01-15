@@ -184,19 +184,19 @@ public final class ParserTools {
         }
         return new Date(icaldate.getTime());
     }
-    
+
     /**
-     * Takes an Outlook timezone id and guesses the appropriate 
+     * Takes an Outlook timezone id and guesses the appropriate
      * Java timezone. It does so by counting all timezones that
-     * have somewhat matching names, sorts them by their UTC 
+     * have somewhat matching names, sorts them by their UTC
      * offset and chooses one of those that have the most often
-     * used offset, e.g. if you have three zones that have a +1 
+     * used offset, e.g. if you have three zones that have a +1
      * offset and one with +2, you'll get one of the +1 ones.
-     *  
-     * This thing would be way better if we had the timezone 
-     * information that we probably painfully extracted somewhere 
-     * in ical4j but got rid off again before this method is 
-     * needed. 
+     *
+     * This thing would be way better if we had the timezone
+     * information that we probably painfully extracted somewhere
+     * in ical4j but got rid off again before this method is
+     * needed.
      */
     public static TimeZone findTzidBySimilarity(String tzidName) {
     	if("Z".equals(tzidName)){
@@ -232,7 +232,7 @@ public final class ParserTools {
     		}
     	}
 		//now count how many different offsets there are
-    	BidiMap occurrences = new TreeBidiMap(); 
+    	BidiMap occurrences = new TreeBidiMap();
     	int highestNumberOccurrences = 0;
     	for(TimeZone cand: candidates2){
     		int offset = cand.getRawOffset();
@@ -241,7 +241,7 @@ public final class ParserTools {
             }
     		int numOccurrences = ((Integer)occurrences.get(offset))+1;
     		occurrences.put(offset, numOccurrences);
-    		highestNumberOccurrences = highestNumberOccurrences < numOccurrences ? numOccurrences : highestNumberOccurrences; 
+    		highestNumberOccurrences = highestNumberOccurrences < numOccurrences ? numOccurrences : highestNumberOccurrences;
     	}
     	//select the most often occurring ones and take the one with the shortest name (probably a generic name)
     	Integer mostCommonOffset = (Integer) occurrences.getKey(highestNumberOccurrences);
@@ -252,12 +252,12 @@ public final class ParserTools {
     			int l2 = cand.getID().length();
     			if(l2 < maxlength){
     				candidate = cand;
-    				maxlength = l2; 
+    				maxlength = l2;
     			}
     		}
     	}
     	return candidate;
 	}
-    
-    
+
+
 }

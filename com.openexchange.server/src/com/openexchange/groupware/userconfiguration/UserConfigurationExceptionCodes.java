@@ -69,7 +69,7 @@ public enum UserConfigurationExceptionCodes {
 
     /**
      * Creates an {@link OXException} instance using this error code.
-     * 
+     *
      * @return The newly created {@link OXException} instance.
      */
     public OXException create() {
@@ -78,7 +78,7 @@ public enum UserConfigurationExceptionCodes {
 
     /**
      * Creates an {@link OXException} instance using this error code.
-     * 
+     *
      * @param logArguments The arguments for log message.
      * @return The newly created {@link OXException} instance.
      */
@@ -90,7 +90,7 @@ public enum UserConfigurationExceptionCodes {
 
     /**
      * Creates an {@link OXException} instance using this error code.
-     * 
+     *
      * @param cause The initial cause for {@link OXException}
      * @param logArguments The arguments for log message.
      * @return The newly created {@link OXException} instance.

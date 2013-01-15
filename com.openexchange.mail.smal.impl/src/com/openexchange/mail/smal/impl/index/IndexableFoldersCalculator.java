@@ -72,7 +72,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexableFoldersCalculator {
-    
+
     public static Set<MailFolder> calculatePrivateMailFolders(Session session, MailAccountStorageService storageService, int accountId) throws OXException {
         int userId = session.getUserId();
         int contextId = session.getContextId();
@@ -81,7 +81,7 @@ public class IndexableFoldersCalculator {
         if (!mailAccount.isDefaultAccount() && AccountBlacklist.isServerBlacklisted(mailServer)) {
             return Collections.EMPTY_SET;
         }
-        
+
         Set<MailFolder> allFolders = new HashSet<MailFolder>();
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = SmalMailAccess.getUnwrappedInstance(
             session,
@@ -95,10 +95,10 @@ public class IndexableFoldersCalculator {
         } finally {
             SmalMailAccess.closeUnwrappedInstance(mailAccess);
         }
-        
+
         return allFolders;
     }
-    
+
     public static Map<Integer, Set<MailFolder>> calculatePrivateMailFolders(Session session, MailAccountStorageService storageService) throws OXException {
         int userId = session.getUserId();
         int contextId = session.getContextId();
@@ -109,7 +109,7 @@ public class IndexableFoldersCalculator {
             if (!account.isDefaultAccount() && AccountBlacklist.isServerBlacklisted(mailServer)) {
                 continue;
             }
-            
+
             Set<MailFolder> allFolders = new HashSet<MailFolder>();
             int accountId = account.getId();
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = SmalMailAccess.getUnwrappedInstance(
@@ -126,26 +126,26 @@ public class IndexableFoldersCalculator {
                 SmalMailAccess.closeUnwrappedInstance(mailAccess);
             }
         }
-        
+
         return folderMap;
     }
-    
+
     private static void addFoldersRecursive(MailFolder[] subfolders, Set<MailFolder> allFolders, IMailFolderStorage folderStorage) throws OXException {
         for (MailFolder folder : subfolders) {
             if (!folder.exists() || folder.isSpam() || folder.isConfirmedSpam()) {
                 continue;
             }
-            
+
             boolean index = true;
             if ((folder.containsShared() && folder.isShared()) || (folder.containsPublic() && folder.isPublic())) {
                 index = false;
             }
-            
+
             MailPermission ownPermission = folder.getOwnPermission();
             if (index && ownPermission.isFolderVisible() && ownPermission.canReadAllObjects() && folder.isHoldsMessages()) {
                 allFolders.add(folder);
             }
-            
+
             if (folder.isHoldsFolders()) {
                 MailFolder[] subsubfolders = folderStorage.getSubfolders(folder.getFullname(), true);
                 if (subsubfolders != null && subsubfolders.length > 0 && subsubfolders != IMailFolderStorage.EMPTY_PATH) {

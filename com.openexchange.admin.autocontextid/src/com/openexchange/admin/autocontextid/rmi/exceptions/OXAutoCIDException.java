@@ -133,21 +133,21 @@ public class OXAutoCIDException extends Exception {
          * The following restrictions are going to be removed, but still are in use: %1$s
          */
         MODULE_ACCESS_RESTRICTIONS_IN_USE("The following restrictions are going to be removed, but still are in use: %1$s");
-        
-        
+
+
         private final String text;
-        
+
         private Code(final String text) {
             this.text = text;
         }
-        
+
         public final String getText() {
             return text;
         }
     }
-    
+
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -3749789561669512300L;
 
@@ -166,7 +166,7 @@ public class OXAutoCIDException extends Exception {
     public OXAutoCIDException(final Code code, final String... args) {
         super(String.format(code.getText(), (Object[])args));
     }
-    
+
     /**
      * Initializes a new {@link OXAutoCIDException}.
      * @param arg0

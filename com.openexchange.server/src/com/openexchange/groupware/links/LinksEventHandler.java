@@ -132,7 +132,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
     public void contactDeleted(final Contact contactObj, final Session sessionObj) {
         deleteLink(contactObj.getObjectID(), Types.CONTACT, contactObj.getParentFolderID(), sessionObj);
     }
-    
+
     @Override
     public void handleEvent(Event event) {
         if (FileStorageEventHelper.isInfostoreEvent(event)) {
@@ -150,7 +150,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                 } catch (NumberFormatException e) {
                     LOG.error(e.getMessage(), e);
                 }
-                
+
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
                 }
@@ -168,7 +168,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                 } catch (NumberFormatException e) {
                     LOG.error(e.getMessage(), e);
                 }
-                
+
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(FileStorageEventHelper.createDebugMessage("DebugEvent", event));
                 }

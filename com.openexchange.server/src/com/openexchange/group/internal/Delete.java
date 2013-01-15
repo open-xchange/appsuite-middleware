@@ -124,11 +124,7 @@ public final class Delete {
 
     Group getOrig() throws OXException {
         if (null == orig) {
-            try {
-                orig = storage.getGroup(groupId, ctx);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            orig = storage.getGroup(groupId, ctx);
         }
         return orig;
     }
@@ -200,11 +196,7 @@ public final class Delete {
         // Delete all references to that group.
         final DeleteEvent event = new DeleteEvent(getOrig(), groupId,
             DeleteEvent.TYPE_GROUP, ctx);
-        try {
-            DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
     }
 
     private void delete(final Connection con) throws OXException {
@@ -227,10 +219,6 @@ public final class Delete {
      */
     private void propagate() throws OXException {
         final UserStorage storage = UserStorage.getInstance();
-        try {
-            storage.invalidateUser(ctx, getOrig().getMember());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        storage.invalidateUser(ctx, getOrig().getMember());
     }
 }

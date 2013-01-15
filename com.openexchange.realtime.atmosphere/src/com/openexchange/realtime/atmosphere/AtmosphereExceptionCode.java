@@ -60,7 +60,7 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public enum AtmosphereExceptionCode implements OXExceptionCode {
-    
+
     /** The session information didn't match any ServerSession. */
     SESSIONINFO_DIDNT_MATCH_SERVERSESSION(AtmosphereExceptionMessage.SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG, CATEGORY_ERROR, 1),
     /** Missing key \"%1$s\" in: \"%2$s\" */
@@ -115,7 +115,7 @@ public enum AtmosphereExceptionCode implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *

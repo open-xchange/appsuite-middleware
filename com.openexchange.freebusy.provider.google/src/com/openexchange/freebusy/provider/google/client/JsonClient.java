@@ -79,14 +79,14 @@ import com.openexchange.log.LogFactory;
 
 
 /**
- * {@link JsonClient} 
- * 
+ * {@link JsonClient}
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class JsonClient {
-    
+
     private static final ThreadLocal<DateFormat> DATE_FORMAT = new ThreadLocal<DateFormat>() {
-        
+
         @Override
         protected DateFormat initialValue() {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -110,13 +110,13 @@ public class JsonClient {
         this.apiEndpoint = apiEndpoint;
         this.httpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
     }
-    
+
     public List<FreeBusyData> getFreeBusy(List<String> ids, Date from, Date until) throws OXException {
         JSONObject freeBusyRequest = this.createFreeBusyRequest(ids, from, until);
         JSONObject response = getAndCheckResponse(getRequestURL(), freeBusyRequest);
         return this.deserializeResponse(response, ids, from, until);
     }
-    
+
     private List<FreeBusyData> deserializeResponse(JSONObject response, List<String> ids, Date from, Date until) {
         List<FreeBusyData> freeBusyInformation = new ArrayList<FreeBusyData>();
         if (null != response && response.hasAndNotNull("calendars")) {
@@ -140,9 +140,9 @@ public class JsonClient {
                         JSONObject interval = busy.getJSONObject(i);
                         Date start = DATE_FORMAT.get().parse(interval.getString("start"));
                         Date end = DATE_FORMAT.get().parse(interval.getString("end"));
-                        freeBusyData.add(new FreeBusyInterval(start, end, BusyStatus.RESERVED));                        
+                        freeBusyData.add(new FreeBusyInterval(start, end, BusyStatus.RESERVED));
                     }
-                } 
+                }
                 if (data.hasAndNotNull("errors")) {
                     JSONArray errors = data.getJSONArray("errors");
                     for (int i = 0; i < errors.length(); i++) {
@@ -159,7 +159,7 @@ public class JsonClient {
         }
         return freeBusyData;
     }
-    
+
     private OXException deserializeError(String id, JSONObject error) throws JSONException {
         String reason = error.hasAndNotNull("reason") ? error.getString("reason") : null;
         String domain = error.hasAndNotNull("domain") ? error.getString("domain") : null;
@@ -168,7 +168,7 @@ public class JsonClient {
         }
         return FreeBusyExceptionCodes.EXTERNAL_ERROR.create("Reason: " + reason + ", Domain: " + domain);
     }
-    
+
     private JSONObject createFreeBusyRequest(List<String> ids, Date from, Date until) throws OXException {
         try {
             JSONObject freeBusyRequest = new JSONObject();
@@ -177,7 +177,7 @@ public class JsonClient {
             JSONArray items = new JSONArray();
             for (String id : ids) {
                 JSONObject item = new JSONObject();
-                item.put("id", id);                
+                item.put("id", id);
                 items.put(item);
             }
             freeBusyRequest.put("items", items);
@@ -186,13 +186,13 @@ public class JsonClient {
             throw FreeBusyExceptionCodes.INTERNAL_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     private String getRequestURL() {
         return String.format("%s/freeBusy?key=%s", apiEndpoint, apiKey);
     }
 
     private JSONObject getResponse(String requestURL, JSONObject request) throws OXException {
-        long start = 0; 
+        long start = 0;
         if (LOG.isTraceEnabled()) {
             start = new Date().getTime();
             LOG.trace(String.format("==> POST %s%n  > %s", requestURL, request));
@@ -215,7 +215,7 @@ public class JsonClient {
             method.releaseConnection();
         }
     }
-    
+
     private JSONObject getAndCheckResponse(String requestURL, JSONObject request) throws OXException {
         JSONObject jsonData = getResponse(requestURL, request);
         if (null == jsonData) {
@@ -235,7 +235,7 @@ public class JsonClient {
                     JSONArray errors = error.getJSONArray("error");
                     for (int i = 0; i < errors.length(); i++) {
                         stringBuilder.append("; ");
-                        JSONObject errorObject = errors.getJSONObject(i); 
+                        JSONObject errorObject = errors.getJSONObject(i);
                         if (errorObject.hasAndNotNull("message")) {
                             stringBuilder.append(errorObject.getString("message")).append(' ');
                         }
@@ -252,13 +252,13 @@ public class JsonClient {
                 throw FreeBusyExceptionCodes.INTERNAL_ERROR.create(e, e.getMessage());
             }
         }
-        
+
         if (false == "calendar#freeBusy".equals(jsonData.optString("kind"))) {
             throw FreeBusyExceptionCodes.COMMUNICATION_FAILURE.create("got no calendar#freeBusy response");
         }
-        return jsonData;        
+        return jsonData;
     }
-    
+
     private int executeMethod(HttpMethod method) throws OXException {
         try {
             return httpClient.executeMethod(method);
@@ -266,9 +266,9 @@ public class JsonClient {
             throw FreeBusyExceptionCodes.COMMUNICATION_FAILURE.create(e, e.getMessage());
         } catch (IOException e) {
             throw FreeBusyExceptionCodes.COMMUNICATION_FAILURE.create(e, e.getMessage());
-        }        
+        }
     }
-    
+
     private PostMethod createPostMethod(String requestURL, JSONObject request) throws OXException {
         try {
             PostMethod postMethod = new PostMethod();
@@ -281,5 +281,5 @@ public class JsonClient {
             throw FreeBusyExceptionCodes.COMMUNICATION_FAILURE.create(e, e.getMessage());
         }
     }
-        
+
 }

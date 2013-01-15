@@ -59,14 +59,14 @@ import com.openexchange.database.AbstractCreateTableImpl;
 public final class LdapCreateTableService extends AbstractCreateTableImpl {
 
     private static final String TABLE_LDAP_IDS = "ldapIds";
-    
+
     private static final String CREATE_LDAP_IDS = "CREATE TABLE " + TABLE_LDAP_IDS +" (\n" +
-            " cid INT4 unsigned NOT NULL,\n" + 
-            " fid INT4 unsigned NOT NULL,\n" + 
-            " contact INT4 unsigned NOT NULL,\n" + 
-            " ldapId VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,\n" + 
-            " PRIMARY KEY (cid, fid, contact),\n" + 
-            " INDEX `ldapId` (cid, fid, ldapId)\n" + 
+            " cid INT4 unsigned NOT NULL,\n" +
+            " fid INT4 unsigned NOT NULL,\n" +
+            " contact INT4 unsigned NOT NULL,\n" +
+            " ldapId VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,\n" +
+            " PRIMARY KEY (cid, fid, contact),\n" +
+            " INDEX `ldapId` (cid, fid, ldapId)\n" +
     		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
     ;
 
@@ -87,7 +87,7 @@ public final class LdapCreateTableService extends AbstractCreateTableImpl {
     public static String[] getCreateStmts() {
         return new String[] { CREATE_LDAP_IDS };
     }
-    
+
     /**
      * Initializes a new {@link LdapCreateTableService}.
      */

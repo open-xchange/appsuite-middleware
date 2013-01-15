@@ -52,7 +52,7 @@ package com.openexchange.jslob;
 
 /**
  * {@link JSlobId} - The JSlob identifier.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSlobId {
@@ -69,7 +69,7 @@ public final class JSlobId {
 
     /**
      * Initializes a new {@link JSlobId}.
-     * 
+     *
      * @param serviceId The JSlob service identifier
      * @param id The JSlob identifier
      * @param user The user identifier
@@ -130,7 +130,7 @@ public final class JSlobId {
 
     /**
      * Gets the user identifier.
-     * 
+     *
      * @return The user identifier
      */
     public int getUser() {
@@ -139,7 +139,7 @@ public final class JSlobId {
 
     /**
      * Gets the context identifier.
-     * 
+     *
      * @return The context identifier
      */
     public int getContext() {
@@ -148,7 +148,7 @@ public final class JSlobId {
 
     /**
      * Gets the JSlob service identifier.
-     * 
+     *
      * @return The JSlob service identifier
      */
     public String getServiceId() {
@@ -157,7 +157,7 @@ public final class JSlobId {
 
     /**
      * Gets the JSlob identifier.
-     * 
+     *
      * @return The JSlob identifier
      */
     public String getId() {

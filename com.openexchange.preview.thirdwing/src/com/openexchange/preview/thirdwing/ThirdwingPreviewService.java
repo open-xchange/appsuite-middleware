@@ -206,7 +206,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
         ThirdwingPreviewDocument previewDocument = new ThirdwingPreviewDocument(metaData, observationTask.call(), streamProvider.getPreviewImage(), observationTask.hasMoreContent());
 
         return previewDocument;
-        
+
     }
 
     private File streamToFile(final InputStream is, final String name) throws OXException, IOException {

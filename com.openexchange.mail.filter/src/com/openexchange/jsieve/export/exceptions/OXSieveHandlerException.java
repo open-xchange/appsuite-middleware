@@ -65,8 +65,8 @@ public class OXSieveHandlerException extends Exception {
 	private final int sieveHostPort;
 
 	private final SIEVEResponse.Code sieveResponseCode;
-	
-	
+
+
     /**
 	 * Initializes a new {@link OXSieveHandlerException}
 	 *

@@ -76,11 +76,11 @@ public interface AtmosphereService {
      * Add an {@link AtmosphereHandler} to be serviced by the
      * {@link AtmosphereServlet}.
      *
-     * @param handlerMapping    the mapping for this handler  
+     * @param handlerMapping    the mapping for this handler
      * @param handler           instance of {@link AtmosphereHandler}
      */
     void addAtmosphereHandler(String handlerMapping, AtmosphereHandler handler);
-        
+
     /**
      * Add an {@link AtmosphereHandler} serviced by the
      * {@link AtmosphereServlet}.
@@ -91,11 +91,11 @@ public interface AtmosphereService {
      *                           {@link AtmosphereHandler}.
      */
     void addAtmosphereHandler(String handlerMapping, AtmosphereHandler handler, Broadcaster broadcaster);
-    
+
     /**
      * Unregister a previously registered {@link AtmosphereHandler}.
      * @param handlerMapping    the mapping used while registering the handler
      */
     void unregister(String handlerMapping);
-    
+
 }

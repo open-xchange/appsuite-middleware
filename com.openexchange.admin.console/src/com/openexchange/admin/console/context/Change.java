@@ -65,7 +65,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class Change extends ChangeCore {
 
     private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
-    
+
     public Change(final String[] args2) {
         final AdminParser parser = new AdminParser("changecontext");
 
@@ -83,19 +83,19 @@ public class Change extends ChangeCore {
 
         // add login mappings
         ctxabs.parseAndSetAddLoginMapping(parser);
-        
+
         // remove login mappings
         ctxabs.parseAndSetRemoveLoginMapping(parser);
-        
+
         ctxabs.changeMappingSetting(oxctx, ctx, auth, true);
-                
+
         // do the change
         oxctx.change(ctx, auth);
-        
-        
+
+
         UserModuleAccess changed_access = oxctx.getModuleAccess(ctx, auth);
         final boolean wantsChange = setModuleAccessOptions(parser, changed_access);
-        
+
         final String accessCombinationName = parseAndSetAccessCombinationName(parser);
 
         if( wantsChange && accessCombinationName == null) {
@@ -104,15 +104,15 @@ public class Change extends ChangeCore {
         } else if (accessCombinationName != null && !wantsChange) {
             oxctx.changeModuleAccess(ctx, accessCombinationName, auth);
         } else if ( accessCombinationName != null && wantsChange ) {
-            throw new InvalidDataException(ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR);        	
+            throw new InvalidDataException(ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR);
         }
-        
+
     }
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
     	parser.setExtendedOptions();
-        ctxabs.setAddMappingOption(parser, false);        
+        ctxabs.setAddMappingOption(parser, false);
         ctxabs.setRemoveMappingOption(parser, false);
         setAddAccessRightCombinationNameOption(parser);
         setModuleAccessOptions(parser);

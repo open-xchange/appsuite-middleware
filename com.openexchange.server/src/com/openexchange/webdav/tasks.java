@@ -97,7 +97,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
     protected Interface getInterface() {
         return Interface.WEBDAV_ICAL;
     }
-    
+
     @Override
     protected boolean isServletDisabled() {
         return true;

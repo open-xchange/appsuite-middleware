@@ -52,19 +52,19 @@ package com.openexchange.solr;
 
 /**
  * {@link SolrCore}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrCore {
 
     private String server;
-    
+
     private int store;
 
     private final SolrCoreIdentifier identifier;
-    
+
     private boolean active;
-    
+
 
     public SolrCore(final SolrCoreIdentifier identifier) {
         super();
@@ -73,7 +73,7 @@ public class SolrCore {
 
     /**
      * Gets the server
-     * 
+     *
      * @return The server
      */
     public String getServer() {
@@ -82,13 +82,13 @@ public class SolrCore {
 
     /**
      * Sets the server
-     * 
+     *
      * @param server The server to set
      */
     public void setServer(final String server) {
         this.server = server;
     }
-    
+
     /**
      * Gets the store
      *
@@ -97,7 +97,7 @@ public class SolrCore {
     public int getStore() {
         return store;
     }
-    
+
     /**
      * Sets the store
      *
@@ -106,7 +106,7 @@ public class SolrCore {
     public void setStore(final int store) {
         this.store = store;
     }
-    
+
     /**
      * Returns the cores name.
      * @return The name.

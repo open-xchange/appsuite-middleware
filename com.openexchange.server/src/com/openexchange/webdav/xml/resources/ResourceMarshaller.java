@@ -58,6 +58,6 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public interface ResourceMarshaller {
-	
+
 	public List<Element> marshal(WebdavResource resource) throws WebdavProtocolException;
 }

@@ -56,13 +56,13 @@ package com.openexchange.solr;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrIndexEventProperties {
-    
+
     public static final String TOPIC_LOCK_INDEX = "com/openexchange/solr/lockIndex";
-    
+
     public static final String PROP_CONTEXT_ID = "contextId";
-    
+
     public static final String PROP_USER_ID = "userId";
-    
+
     public static final String PROP_MODULE = "module";
 
 }

@@ -73,11 +73,7 @@ public final class UserSettingServerDeleteListener implements DeleteListener {
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_USER == event.getType()) {
-            try {
-                ServerUserSetting.getInstance(writeCon).deleteEntry(event.getContext().getContextId(), event.getId());
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            ServerUserSetting.getInstance(writeCon).deleteEntry(event.getContext().getContextId(), event.getId());
         }
     }
 }

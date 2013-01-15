@@ -65,13 +65,13 @@ import com.openexchange.test.osgi.OSGiTest;
 public class OSGiTestRunner extends Thread {
 
     private final OSGiTest test;
-    
-    
+
+
     public OSGiTestRunner(OSGiTest test) {
         super();
         this.test = test;
     }
-    
+
     @Override
     public void run() {
         if (test == null) {
@@ -83,7 +83,7 @@ public class OSGiTestRunner extends Thread {
             System.out.println("No tests  found.");
             exitOsgi();
         }
-        
+
         for (Class<?> clazz : testClasses) {
             String className = clazz.getName();
             System.out.println("Running test " + className);
@@ -98,7 +98,7 @@ public class OSGiTestRunner extends Thread {
             int successful = result.getRunCount() - result.getFailureCount();
             System.out.println("Successful: " + successful + " (" + result.getRunCount() + ").");
         }
-        
+
         exitOsgi();
     }
 
@@ -108,7 +108,7 @@ public class OSGiTestRunner extends Thread {
         } catch (InterruptedException e) {
 
         }
-        
+
         System.exit(0);
     }
 

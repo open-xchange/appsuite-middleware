@@ -134,7 +134,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class provides the implementation for the storage into a MySQL database
- * 
+ *
  * @author d7
  * @auhtor cutmasta
  */
@@ -1009,7 +1009,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             ctx.setFilestoreId(OXUtilStorageInterface.getInstance().findFilestoreForContext().getId());
         } else {
             if( ! OXToolStorageInterface.getInstance().existsStore(storeId) ) {
-                StorageException e = new StorageException("Filestore with id " + storeId + " does not exist"); 
+                StorageException e = new StorageException("Filestore with id " + storeId + " does not exist");
                 LOG.error(e);
                 throw e;
             }
@@ -1033,19 +1033,19 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             } else {
                 db = OXToolStorageInterface.getInstance().loadDatabaseById(dbId);
                 if( null == db ) {
-                    StorageException e = new StorageException("Database with id " + dbId + " does not exist"); 
+                    StorageException e = new StorageException("Database with id " + dbId + " does not exist");
                     LOG.error(e);
                     throw e;
                 }
             }
             // Check Database instance
             if (isEmpty(db.getUrl())) {
-                StorageException e = new StorageException("Database with id " + db.getId() + " has no URL specified"); 
+                StorageException e = new StorageException("Database with id " + db.getId() + " has no URL specified");
                 LOG.error(e);
                 throw e;
             }
             if (isEmpty(db.getDriver())) {
-                StorageException e = new StorageException("Database with id " + db.getId() + " has no Driver specified"); 
+                StorageException e = new StorageException("Database with id " + db.getId() + " has no Driver specified");
                 LOG.error(e);
                 throw e;
             }
@@ -1166,8 +1166,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         }
     }
-    
-    
+
+
     private void updateDynamicAttributes(final Connection oxCon, final Context ctx) throws SQLException {
         PreparedStatement stmtupdateattribute = null;
         PreparedStatement stmtinsertattribute = null;
@@ -1225,7 +1225,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /**
      * Translate display name for context default group resolved via administrators language.
-     * 
+     *
      * @param administrator administrator user of the context.
      * @return the translated group name if a corresponding service is available.
      */
@@ -1903,7 +1903,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     /**
      * Determine the next database to use depending on database weight factor. Each database should be equal full according to their weight.
      * Additionally check each master for availability.
-     * 
+     *
      * @param con
      * @return Database handle containing information about database
      * @throws SQLException
@@ -1989,7 +1989,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /**
      * count the number of contexts (or users) on the given database
-     * 
+     *
      * @param db
      * @param configdb_con
      * @return number of units (contexts/user depending on settings)
@@ -2220,7 +2220,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         // add always the context name
         if (ctx.getName() != null) {
-           // a new context Name has been specified 
+           // a new context Name has been specified
            loginMappings.add(ctx.getName());
         } else {
             // try to read context name from database
@@ -2271,7 +2271,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /**
      * Check if no mapping which the client wants to add already exists for some context.
-     * 
+     *
      * @param con readable connection to the configuration database.
      * @param loginMappings login mappings to check for existance.
      */

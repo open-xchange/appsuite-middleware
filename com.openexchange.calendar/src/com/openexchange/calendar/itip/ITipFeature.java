@@ -11,8 +11,8 @@ public class ITipFeature implements CalendarFeature {
 	private static final String ITIP = "itip";
 
 	private final ServiceLookup services;
-	
-	
+
+
 	public ITipFeature(ServiceLookup services) {
 		super();
 		this.services = services;
@@ -25,12 +25,12 @@ public class ITipFeature implements CalendarFeature {
 		return ITIP;
 	}
 
-	
-	
+
+
 	@Override
     public AppointmentSQLInterface wrap(AppointmentSQLInterface delegate,
 			Session session) throws OXException {
-		
+
 		return new ITipConsistencyCalendar(delegate, session, services);
 	}
 

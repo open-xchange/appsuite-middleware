@@ -81,7 +81,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * {@link CalendarITipIntegrationUtility}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
@@ -193,7 +193,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         	throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         }
     }
-    
+
     @Override
     public Appointment reloadAppointment(final Appointment appointment, final Session session) throws OXException {
         try {
@@ -202,7 +202,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         	throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         }
     }
-    
+
 	@Override
     public Appointment loadAppointment(final Appointment appointment, final Session session) throws OXException {
 	       try {
@@ -254,7 +254,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         }
         appointments.updateAppointmentObject(appointment, appointment.getParentFolderID(), clientLastModified, checkPermissions);
     }
-    
+
     @Override
     public int getFolderIdForUser(final int appId, final int userId, final int contextId) throws OXException {
     	if (appId <= 0) {
@@ -264,9 +264,9 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     	final AppointmentSQLInterface appointments = factory.createAppointmentSql(mockSession);
     	return appointments.getFolder(appId);
     }
-    
+
     private int getPrincipalsFolderId(final CalendarDataObject appointment, final Session session) throws OXException {
-    	
+
     	if (appointment.getPrincipalId() <= 0) {
     		return 0;
     	}
@@ -276,7 +276,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
 	@Override
     public void changeConfirmationForExternalParticipant(final Appointment appointment, final ConfirmationChange change, final Session session) throws OXException {
         final AppointmentSQLInterface appointments = factory.createAppointmentSql(session);
-        
+
         appointments.setExternalConfirmation(appointment.getObjectID(), appointment.getParentFolderID(), change.getIdentifier(), change.getNewStatus(), change.getNewMessage());
     }
 
@@ -298,7 +298,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         	throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
 		}
     }
-    
+
     private long startOfTheDay(final Date recurrenceDatePosition) {
         final GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -317,7 +317,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     }
 
 
-	
+
 
 
 }

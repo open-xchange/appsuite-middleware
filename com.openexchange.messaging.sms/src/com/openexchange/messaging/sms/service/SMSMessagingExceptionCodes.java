@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link SMSMessagingExceptionCodes} - Enumeration of all {@link SMSMessagingException}s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum SMSMessagingExceptionCodes implements OXExceptionCode {
@@ -90,7 +90,7 @@ public enum SMSMessagingExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new messaging exception of this error type with specified message arguments.
-     * 
+     *
      * @param messageArgs The message arguments
      * @return A new twitter exception
      */
@@ -100,7 +100,7 @@ public enum SMSMessagingExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new messaging exception of this error type with specified cause and message arguments.
-     * 
+     *
      * @param cause The cause
      * @param messageArgs The message arguments
      * @return A new twitter exception

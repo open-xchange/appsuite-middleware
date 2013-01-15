@@ -80,7 +80,7 @@ public class ContactFolderLoaderTest extends TestCase {
 
     @Override
     public void setUp() {
-    	
+
     	final SimContactService contactService = new SimContactService();
 
         cid = 1;

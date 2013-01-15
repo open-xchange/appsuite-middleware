@@ -54,7 +54,7 @@ import java.util.Map;
 /**
  * {@link AbstractTrackableTask} - An abstract {@code TrackableTask} which leaves {@code #afterExecute(Throwable)},
  * {@code #beforeExecute(Thread)}, {@code #setThreadName(ThreadRenamer)}, and {@code #optLogProperties()} empty.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractTrackableTask<V> extends AbstractTask<V> implements TrackableTask<V> {

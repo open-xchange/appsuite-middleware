@@ -57,14 +57,14 @@ import com.openexchange.documentation.descriptions.ParameterDescription;
 
 /**
  * {@link DescriptionFactory} - Defines methods to create various descriptions.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface DescriptionFactory {
-	
+
 	/**
 	 * Creates a {@link ModuleDescription} from the supplied parameters.
-	 * 
+	 *
 	 * @param name the name
 	 * @param description the description
 	 * @param containers the containers
@@ -72,20 +72,20 @@ public interface DescriptionFactory {
 	 * @return the module description
 	 */
 	ModuleDescription module(String name, String description, ContainerDescription[] containers, ActionDescription... actions);
-	
+
 	/**
 	 * Creates a {@link ContainerDescription} from the supplied parameters.
-	 * 
+	 *
 	 * @param name the name
 	 * @param description the description
 	 * @param attributes the attributes
 	 * @return the container description
 	 */
 	ContainerDescription container(String name, String description, AttributeDescription... attributes);
-	
+
 	/**
 	 * Creates an {@link ActionDescription} from the supplied parameters.
-	 * 
+	 *
 	 * @param name the name
 	 * @param description the description
 	 * @param method the method
@@ -100,7 +100,7 @@ public interface DescriptionFactory {
 
 	/**
 	 * Creates an {@link AttributeDescription} from the supplied parameters.
-	 * 
+	 *
 	 * @param name the name
 	 * @param description the description
 	 * @param type the type
@@ -108,16 +108,16 @@ public interface DescriptionFactory {
 	 * @return the attribute description
 	 */
 	AttributeDescription attribute(String name, String description, Type type, boolean mandatory);
-	
+
 	/**
 	 * Creates a {@link ParameterDescription} from the supplied parameters.
-	 * 
+	 *
 	 * @param name the name
 	 * @param description the description
 	 * @param type the type
 	 * @param optional whether it is optional or not
 	 * @return the parameter description
 	 */
-	ParameterDescription parameter(String name, String description, Type type, boolean optional);	
-	
+	ParameterDescription parameter(String name, String description, Type type, boolean optional);
+
 }

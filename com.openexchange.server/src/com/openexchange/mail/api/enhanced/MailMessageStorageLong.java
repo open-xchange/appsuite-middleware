@@ -262,7 +262,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
             } catch (Throwable t) {
                 LOG.warn("Error while getting primary content for mail '" + mailIds[i] + "' in folder '" + folder + "'. Returning null.", t);
             }
-            
+
             retval[i] = text;
         }
         return retval;
@@ -599,7 +599,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * <p>
      * Note that neither the character <code>L</code> (<code>'&#92;u004C'</code>) nor <code>l</code> (<code>'&#92;u006C'</code>) is
      * permitted to appear at the end of the string as a type indicator, as would be permitted in Java programming language source code.
-     * 
+     *
      * @param s A <code>String</code> containing the <code>long</code> representation to be parsed
      * @return The <code>long</code> represented by the argument in decimal or <code>-1</code> if the string does not contain a parsable
      *         <code>long</code>.

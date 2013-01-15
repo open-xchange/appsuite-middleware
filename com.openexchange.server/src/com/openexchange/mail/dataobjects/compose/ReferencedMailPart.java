@@ -380,17 +380,13 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 
     @Override
     public InputStream getInputStream() throws OXException {
-        try {
-            if (data != null) {
-                return new UnsynchronizedByteArrayInputStream(data);
-            }
-            if (file != null) {
-                return file.getInputStream();
-            }
-            throw MailExceptionCode.NO_CONTENT.create();
-        } catch (final OXException e) {
-            throw new OXException(e);
+        if (data != null) {
+            return new UnsynchronizedByteArrayInputStream(data);
         }
+        if (file != null) {
+            return file.getInputStream();
+        }
+        throw MailExceptionCode.NO_CONTENT.create();
     }
 
     @Override

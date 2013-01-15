@@ -1,3 +1,22 @@
+* 2013-01-15 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21930: Trying to determine task delegator in case somebody else created the task in the delegator's shared folder.
+
+* 2013-01-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24489: Fixed possible visibility scope issue
+ - Fix for bug 24479: Restore original Message-Id when filtering by MIME parts is done
+ - Fix for bug 24496: More lenient comparison of fields during update attempt
+
+* 2013-01-15 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 24446: Fixed classpath & java_opts
+
+* 2013-01-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23723: Also check for "null" string prior to setting contact fields
+ - Fix for bug 24480: Don't include already contained messaged to conversation thread
+
 * 2013-01-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 24469: Added alternative html2text conversion utilizing Tika framework
@@ -5,6 +24,10 @@
 * 2013-01-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 23455: Fixed naming of referenced commons-logging jar
+
+* 2013-01-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24362: Support AJP echo header with Coyote AJP handler
 
 * 2013-01-10 - martin.herfurth@open-xchange.com
 

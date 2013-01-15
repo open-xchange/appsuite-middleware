@@ -63,7 +63,7 @@ import com.openexchange.mail.utils.MailMessageComparator;
 
 /**
  * {@link Conversation} - Encapsulates a list of messages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Conversation {
@@ -125,7 +125,7 @@ public final class Conversation {
 
     /**
      * Adds given message to this conversation
-     * 
+     *
      * @param message The message to add
      * @return This conversation with message added
      */
@@ -162,7 +162,7 @@ public final class Conversation {
 
     /**
      * Joins this conversation with other conversation.
-     * 
+     *
      * @param other The other conversation to join with
      * @return This conversation
      */
@@ -178,7 +178,7 @@ public final class Conversation {
 
     /**
      * Checks if this conversation references OR is referenced by given conversation
-     * 
+     *
      * @param other The other conversation
      * @return <code>true</code> if references or referenced-by; otherwise <code>false</code>
      */
@@ -188,7 +188,7 @@ public final class Conversation {
 
     /**
      * Checks if this conversation references to given conversation
-     * 
+     *
      * @param other The other conversation possibly referenced
      * @return <code>true</code> if references; otherwise <code>false</code>
      */
@@ -198,7 +198,7 @@ public final class Conversation {
 
     /**
      * Checks if this conversation is referenced by given conversation
-     * 
+     *
      * @param other The other conversation
      * @return <code>true</code> if referenced-by; otherwise <code>false</code>
      */
@@ -208,7 +208,7 @@ public final class Conversation {
 
     /**
      * Checks if at least one element is in both collections.
-     * 
+     *
      * @param set1 The first collection, must not be <code>null</code>
      * @param set2 The second collection, must not be <code>null</code>
      * @return <code>true</code> if the intersection of the collections is non-empty
@@ -224,7 +224,7 @@ public final class Conversation {
 
     /**
      * Gets the messages.
-     * 
+     *
      * @return The messages with default sorting
      */
     public List<MailMessage> getMessages() {
@@ -233,7 +233,7 @@ public final class Conversation {
 
     /**
      * Gets the messages.
-     * 
+     *
      * @return The messages with given sorting
      */
     public List<MailMessage> getMessages(final Comparator<MailMessage> comparator) {

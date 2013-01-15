@@ -86,7 +86,7 @@ import com.openexchange.tools.sql.DBUtils;
 /**
  * Provides the Business Logic for the consistency tool. Concrete subclasses must provide integration to the environment by implementing the
  * abstract methods.
- * 
+ *
  * @author Dennis Sieben
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
@@ -644,7 +644,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
         /**
          * This method create a dummy file a returns its name
-         * 
+         *
          * @return The name of the dummy file
          * @throws OXException
          */

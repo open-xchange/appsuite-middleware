@@ -61,7 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXResultDecoratorRegistry;
 
 /**
  * {@link OSGiAJAXResultDecoratorRegistry}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OSGiAJAXResultDecoratorRegistry implements AJAXResultDecoratorRegistry, ServiceTrackerCustomizer<AJAXResultDecorator, AJAXResultDecorator> {

@@ -62,12 +62,12 @@ import com.openexchange.threadpool.ThreadPoolService;
  * <p>
  * Addresses the need to create an unbounded thread pool with minimum and maximum threads.<br>
  * What most people do is the following:
- * 
+ *
  * <pre>
  * // similar to j.u.c.Executors.newCachedThreadPool()
  * new ThreadPoolExecutor(coreThreads, maximumThreads, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue());
  * </pre>
- * 
+ *
  * This construction of thread pool will simply not work as expected. This is due to the logic within the <code>ThreadPoolExecutor</code>
  * where new threads are added if there is a failure to offer a task to the queue. In our case, we use an unbounded
  * <code>LinkedBlockingQueue</code>, where we can always offer a task to the queue. It effectively means that we will never grow above the
@@ -78,7 +78,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  * a new thread (up to the maximum threads). If there are no threads, the task will be rejected. In our case, if the task is rejected, we
  * would like to put it back to the queue. This is a simple thing to do with <code>ThreadPoolExecutor</code> since we can implement our own
  * <code>RejectedExecutionHandler</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ScalingQueue extends LinkedBlockingQueue<Runnable> {
@@ -179,7 +179,7 @@ public class ScalingQueue extends LinkedBlockingQueue<Runnable> {
 
     /**
      * Creates a TaskQueue with the given (fixed) capacity.
-     * 
+     *
      * @param capacity the capacity of this queue.
      */
     public ScalingQueue(final int capacity) {
@@ -188,7 +188,7 @@ public class ScalingQueue extends LinkedBlockingQueue<Runnable> {
 
     /**
      * Creates an appropriate {@link RejectedExecutionHandler} instance for this queue that re-inserts rejected tasks into this queue.
-     * 
+     *
      * @return The appropriate {@link RejectedExecutionHandler} instance
      */
     public RejectedExecutionHandler createRejectedExecutionHandler(final RejectedExecutionHandler defaultHandler) {
@@ -197,7 +197,7 @@ public class ScalingQueue extends LinkedBlockingQueue<Runnable> {
 
     /**
      * Sets the thread pool
-     * 
+     *
      * @param threadPool The thread pool to set
      */
     public synchronized void setThreadPool(final ThreadPoolService threadPool) {
@@ -217,7 +217,7 @@ public class ScalingQueue extends LinkedBlockingQueue<Runnable> {
      * <p>
      * When using a capacity-restricted queue, this method is generally preferable to method {@link BlockingQueue#add add}, which can fail
      * to insert an element only by throwing an exception.
-     * 
+     *
      * @param o The task to add.
      * @return <code>true</code> if it was possible to add the task to this queue, else <code>false</code>
      * @throws NullPointerException If the specified task is <code>null</code>
@@ -229,7 +229,7 @@ public class ScalingQueue extends LinkedBlockingQueue<Runnable> {
     /**
      * Inserts the specified task at the tail of this queue if there is at least one available thread to run the current task. If all pool
      * threads are actively busy, it rejects the offer.
-     * 
+     *
      * @param o The task to add.
      * @return <code>true</code> if it was possible to add the task to this queue, else <code>false</code>
      * @see ThreadPoolExecutor#execute(Runnable)

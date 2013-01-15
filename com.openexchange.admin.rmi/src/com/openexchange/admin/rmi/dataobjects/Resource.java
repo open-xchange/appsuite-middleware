@@ -56,7 +56,7 @@ import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
 
 /**
  * This dataobject stores all the data which is related to a resource
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
@@ -71,23 +71,23 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     private Integer id;
 
     private String name;
-    
+
     private boolean nameset;
 
     private String displayname;
-    
+
     private boolean displaynameset;
 
     private String description;
-    
+
     private boolean descriptionset;
 
     private String email;
-    
+
     private boolean emailset;
 
     private Boolean available;
-    
+
     private boolean availableset;
 
     /**
@@ -100,7 +100,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Instantiates a new {@link Resource} object with the given id
-     * 
+     *
      * @param id An {@link Integer} object containing the id
      */
     public Resource(final Integer id) {
@@ -118,7 +118,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
         this.email = null;
         this.available = null;
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getId()
      */
@@ -154,7 +154,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Returns the displayname of this resource
-     * 
+     *
      * @return A {@link String} containing the displayname
      */
     public String getDisplayname() {
@@ -163,7 +163,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Sets the displayname for this resource
-     * 
+     *
      * @param displayname A {@link String} containing the displayname
      */
     public void setDisplayname(final String displayname) {
@@ -173,7 +173,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Returns the E-Mail of this resource
-     * 
+     *
      * @return A {@link String} object containing the E-Mail address
      */
     public String getEmail() {
@@ -182,7 +182,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Sets the email address for this resource
-     * 
+     *
      * @param email A {@link String} object containing the E-Mail address
      */
     public void setEmail(final String email) {
@@ -207,7 +207,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Returns the description of this resource
-     * 
+     *
      * @return A {@link String} object containing the description
      */
     public String getDescription() {
@@ -216,7 +216,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Sets the description for this resource
-     * 
+     *
      * @param description A {@link String} object containing the description
      */
     public void setDescription(final String description) {
@@ -254,7 +254,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * @param extension
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     public void addExtension(final OXResourceExtensionInterface extension) {
@@ -263,7 +263,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * @return
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     public ArrayList<OXResourceExtensionInterface> getExtensions() {
@@ -273,11 +273,11 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
         }
         return retval;
     }
-    
+
     /**
      * @param o
      * @return
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     public boolean removeExtension(final OXResourceExtensionInterface o) {
@@ -292,10 +292,10 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
      * This method is used to get an extensions through the name of this
      * extension. This first occurence will be returned, or null if no fitting
      * extension was found.
-     * 
+     *
      * @param extname a String for the extension
      * @return the {@link OXResourceExtensionInterface} with extname
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     public OXResourceExtensionInterface getExtensionbyName(final String extname) {
@@ -349,7 +349,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Used to check if the member of this object has been changed
-     * 
+     *
      * @return true if set; false if not
      */
     public boolean isNameset() {
@@ -358,7 +358,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Used to check if the displayname of this object has been changed
-     * 
+     *
      * @return true if set; false if not
      */
     public boolean isDisplaynameset() {
@@ -367,7 +367,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Used to check if the description of this object has been changed
-     * 
+     *
      * @return true if set; false if not
      */
     public boolean isDescriptionset() {
@@ -376,7 +376,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Used to check if the E-Mail of this object has been changed
-     * 
+     *
      * @return true if set; false if not
      */
     public boolean isEmailset() {

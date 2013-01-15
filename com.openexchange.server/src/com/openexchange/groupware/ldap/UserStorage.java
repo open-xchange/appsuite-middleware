@@ -188,7 +188,7 @@ public abstract class UserStorage {
 
     /**
      * Searches user(s) by mail login.
-     * 
+     *
      * @param login The mail login
      * @param context The associated context
      * @return The queried users or an empty array of none found
@@ -208,7 +208,7 @@ public abstract class UserStorage {
 
     /**
      * Searches a user by its login/display name.
-     * 
+     *
      * @param name The login/display name of the user.
      * @param context The context.
      * @param searchType The search type
@@ -268,23 +268,23 @@ public abstract class UserStorage {
 
     /**
      * Creates a user within the database.
-     * 
+     *
      * @param con The connection.
      * @param context The context.
      * @param user The user.
      * @return The ID of the created user.
      */
-    public abstract int createUser(final Context context, final User user) throws OXException;    
-    
+    public abstract int createUser(final Context context, final User user) throws OXException;
+
     /**
-     * 
+     *
      * @param con The database connection.
      * @param context The context.
      * @param user The user.
      * @return The ID of the created user.
      */
     public abstract int createUser(final Connection con, final Context context, final User user) throws OXException;
-    
+
     public final void invalidateUser(final Context ctx, final int[] userIds) throws OXException {
         for (final int member : userIds) {
             invalidateUser(ctx, member);

@@ -66,13 +66,13 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
  * {@link CalDAVResource}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class CalDAVResource<T extends CalendarObject> extends CommonResource<T> {
-    
-    public static final String EXTENSION_ICS = ".ics"; 
-    public static final String CONTENT_TYPE = "text/calendar"; 
+
+    public static final String EXTENSION_ICS = ".ics";
+    public static final String CONTENT_TYPE = "text/calendar";
 
     private String iCalFile = null;
     private TimeZone timeZone = null;
@@ -84,9 +84,9 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
         this.factory = factory;
         this.parent = parent;
     }
-    
+
     protected abstract String generateICal() throws OXException;
-    
+
     protected abstract void move(String targetFolderID) throws OXException;
 
     protected String getICalFile() throws WebdavProtocolException {
@@ -103,7 +103,7 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
     protected ICalParser getICalParser() {
         return factory.getIcalParser();
     }
-    
+
     protected ICalEmitter getICalEmitter() {
         return factory.getIcalEmitter();
     }
@@ -111,11 +111,11 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
     protected TimeZone getTimeZone() {
         if (null == this.timeZone) {
             String timeZoneID = factory.getUser().getTimeZone();
-            this.timeZone = TimeZone.getTimeZone(null != timeZoneID ? timeZoneID : "UTC");            
+            this.timeZone = TimeZone.getTimeZone(null != timeZoneID ? timeZoneID : "UTC");
         }
         return timeZone;
     }
-    
+
     @Override
     protected String getFileExtension() {
         return EXTENSION_ICS;
@@ -132,7 +132,7 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
 
     @Override
     public Long getLength() throws WebdavProtocolException {
-        return new Long(null != getICalFile() ? getICalFile().getBytes().length : 0); 
+        return new Long(null != getICalFile() ? getICalFile().getBytes().length : 0);
     }
 
     @Override
@@ -158,21 +158,21 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
         }
         return null;
     }
-    
+
     @Override
     public CalDAVResource<T> move(WebdavPath dest, boolean noroot, boolean overwrite) throws WebdavProtocolException {
         WebdavResource destinationResource = factory.getState().resolveResource(dest);
-        CommonCollection destinationCollection = destinationResource.isCollection() ? 
+        CommonCollection destinationCollection = destinationResource.isCollection() ?
             (CommonCollection)destinationResource : factory.getState().resolveCollection(dest.parent());
         if (false == parent.getClass().isInstance(destinationCollection)) {
             throw protocolException(HttpServletResponse.SC_FORBIDDEN);
-        }        
-        CalDAVFolderCollection<T> targetCollection = null; 
+        }
+        CalDAVFolderCollection<T> targetCollection = null;
         try {
             targetCollection = (CalDAVFolderCollection<T>)destinationCollection;
         } catch (ClassCastException e) {
             throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
-        }        
+        }
         try {
             this.move(targetCollection.getFolder().getID());
         } catch (OXException e) {
@@ -185,5 +185,5 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
         this.parent = targetCollection;
         return this;
     }
-    
+
 }

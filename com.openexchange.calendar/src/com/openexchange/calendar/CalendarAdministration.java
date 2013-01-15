@@ -154,8 +154,6 @@ public class CalendarAdministration implements CalendarAdministrationService {
         } catch (final SQLException e) {
             LOG.error(e);
             throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 
@@ -204,8 +202,6 @@ public class CalendarAdministration implements CalendarAdministrationService {
         } catch (final SQLException e) {
             LOG.error(e);
             throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             final CalendarCollection collection = new CalendarCollection();
             collection.closeResultSet(rs);
@@ -285,15 +281,11 @@ public class CalendarAdministration implements CalendarAdministrationService {
     }
 
     private final void deleteUser(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws OXException, SQLException {
-        try {
-            //  Delete all appointments where the user is the only participant (and where the app is private) !! NO MOVE TO del_* !!
-            //  Delete the user from the participant list and update the appointment
-            //  Update all created_by and changed_from and changing_dates WHERE the user is the creator
-            //  Update all changed_from and changing_dates WHERE the user is the editor
-            deleteUserFromAppointments(deleteEvent, readcon, writecon);
-        } catch (final OXException ex) {
-            throw new OXException(ex);
-        }
+        //  Delete all appointments where the user is the only participant (and where the app is private) !! NO MOVE TO del_* !!
+        //  Delete the user from the participant list and update the appointment
+        //  Update all created_by and changed_from and changing_dates WHERE the user is the creator
+        //  Update all changed_from and changing_dates WHERE the user is the editor
+        deleteUserFromAppointments(deleteEvent, readcon, writecon);
     }
 
 
@@ -662,7 +654,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst6 = writecon.prepareStatement(delete_participant_rights.toString());
             pst6.addBatch();
             pst6.executeBatch();
-            
+
             com.openexchange.java.StringAllocator replaceOrganizerId = new com.openexchange.java.StringAllocator();
             replaceOrganizerId.append("UPDATE ");
             replaceOrganizerId.append(CalendarSql.DATES_TABLE_NAME);
@@ -683,7 +675,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst7 = writecon.prepareStatement(replaceOrganizerId.toString());
             pst7.addBatch();
             pst7.executeBatch();
-            
+
             com.openexchange.java.StringAllocator replacePrincipalId = new com.openexchange.java.StringAllocator();
             replacePrincipalId.append("UPDATE ");
             replacePrincipalId.append(CalendarSql.DATES_TABLE_NAME);

@@ -57,8 +57,8 @@ import com.openexchange.documentation.annotations.Action;
  * @author <a href="tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public enum RequestMethod {
-	GET, 
-	POST, 
+	GET,
+	POST,
 	PUT,
 	UPLOAD
 }

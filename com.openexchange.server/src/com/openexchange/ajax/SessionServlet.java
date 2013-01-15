@@ -124,7 +124,7 @@ public abstract class SessionServlet extends AJAXServlet {
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     public static final String SESSION_KEY = "sessionObject";
-    
+
     public static final String PUBLIC_SESSION_KEY = "publicSessionObject";
 
     public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
@@ -243,7 +243,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Verifies given session.
-     * 
+     *
      * @param req The HTTP request
      * @param sessiondService The service
      * @param sessionId The session identifier
@@ -678,10 +678,10 @@ public abstract class SessionServlet extends AJAXServlet {
         req.setAttribute(SESSION_KEY, session);
         session.setParameter("JSESSIONID", req.getSession().getId());
     }
-    
+
     public static void rememberPublicSession(final HttpServletRequest req, final ServerSession session) {
     	req.setAttribute(PUBLIC_SESSION_KEY, session);
-        session.setParameter("JSESSIONID", req.getSession().getId());	
+        session.setParameter("JSESSIONID", req.getSession().getId());
     }
 
     /**
@@ -723,7 +723,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Removes all JSESSIONID cookies found in given HTTP Servlet request.
-     * 
+     *
      * @param req The HTTP Servlet request
      * @param resp The HTTP Servlet response
      */
@@ -765,7 +765,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Returns the remembered session.
-     * 
+     *
      * @param req The Servlet request.
      * @param mayUseFallbackSession <code>true</code> to look-up fall-back session; otherwise <code>false</code>
      * @return The remembered session

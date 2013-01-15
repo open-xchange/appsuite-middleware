@@ -59,7 +59,7 @@ public interface LogWrapperFactory {
 
 	/**
 	 * Wraps specified class' logger with customized logger.
-	 * 
+	 *
 	 * @param className The class name
 	 * @param log The logger to wrap
 	 * @return The wrapped logger

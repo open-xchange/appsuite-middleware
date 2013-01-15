@@ -217,12 +217,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
          * Compare desired VARCHAR size with actual VARCHAR size and track
          * results in a Result object
          */
-        final Connection writeCon;
-        try {
-            writeCon = Database.get(contextId, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection writeCon = Database.get(contextId, true);
         ResultSet rs = null;
         try {
             final DatabaseMetaData metadata = writeCon.getMetaData();
@@ -329,12 +324,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
         /*
          * Fetch a writable connection
          */
-        final Connection writeCon;
-        try {
-            writeCon = Database.get(contextId, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection writeCon = Database.get(contextId, true);
         Statement st = null;
         try {
             /*

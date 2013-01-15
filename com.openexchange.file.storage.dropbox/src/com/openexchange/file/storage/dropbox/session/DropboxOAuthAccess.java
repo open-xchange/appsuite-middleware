@@ -153,7 +153,7 @@ public final class DropboxOAuthAccess {
             final OAuthAccount oauthAccount = oAuthService.getAccount(oauthAccountId, session, user, contextId);
             /*-
              * Retrieve information about the user's Dropbox account.
-             * 
+             *
              * See: https://www.dropbox.com/developers/reference/api#account-info
              */
             final AppKeyPair appKeys = new AppKeyPair(DropboxConfiguration.getInstance().getApiKey(), DropboxConfiguration.getInstance().getSecretKey());
@@ -178,7 +178,7 @@ public final class DropboxOAuthAccess {
             throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     /**
      * Gets the DropboxAPI reference
      *

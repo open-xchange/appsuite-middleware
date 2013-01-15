@@ -101,7 +101,7 @@ public class AdminCache {
 
     /**
      * Gets the <tt>BundleContext</tt>.
-     * 
+     *
      * @return The <tt>BundleContext</tt> or <code>null</code>
      */
     public static BundleContext getBundleContext() {
@@ -110,7 +110,7 @@ public class AdminCache {
 
     /**
      * Atomically sets the <tt>BundleContext</tt> to the given updated <tt>BundleContext</tt> reference if the current value <tt>==</tt> the expected value.
-     * 
+     *
      * @param expect the expected <tt>BundleContext</tt>
      * @param update the new <tt>BundleContext</tt>
      * @return <code>true</code> if successful. <code>false</code> return indicates that the actual <tt>ConfigurationService</tt> was not equal to the expected <tt>ConfigurationService</tt>.
@@ -121,7 +121,7 @@ public class AdminCache {
 
     /**
      * Sets the <tt>BundleContext</tt>.
-     * 
+     *
      * @param service The <tt>BundleContext</tt> to set
      */
     public static void setBundleContext(final BundleContext service) {
@@ -132,7 +132,7 @@ public class AdminCache {
 
     /**
      * Gets the <tt>ConfigurationService</tt>.
-     * 
+     *
      * @return The <tt>ConfigurationService</tt> or <code>null</code>
      */
     public static ConfigurationService getConfigurationService() {
@@ -141,7 +141,7 @@ public class AdminCache {
 
     /**
      * Atomically sets the <tt>ConfigurationService</tt> to the given updated <tt>ConfigurationService</tt> reference if the current value <tt>==</tt> the expected value.
-     * 
+     *
      * @param expect the expected <tt>ConfigurationService</tt>
      * @param update the new <tt>ConfigurationService</tt>
      * @return <code>true</code> if successful. <code>false</code> return indicates that the actual <tt>ConfigurationService</tt> was not equal to the expected <tt>ConfigurationService</tt>.
@@ -152,7 +152,7 @@ public class AdminCache {
 
     /**
      * Sets the <tt>ConfigurationService</tt>.
-     * 
+     *
      * @param service The <tt>ConfigurationService</tt> to set
      */
     public static void setConfigurationService(final ConfigurationService service) {

@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FileStorageEventHelper}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class FileStorageEventHelper {

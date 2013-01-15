@@ -58,7 +58,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link MailUtility} - Provides utility methods for Solr mail access.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailUtility {
@@ -71,12 +71,12 @@ public final class MailUtility {
     }
     /**
      * Gets the indexable fields.
-     * 
+     *
      * @return The indexable fields
      */
     public static MailFields getIndexableFields(IndexAccess<MailMessage> indexAccess) {
         final MailFields fields = new MailFields();
-        final Set<? extends IndexField> indexedFields = indexAccess.getIndexedFields();                
+        final Set<? extends IndexField> indexedFields = indexAccess.getIndexedFields();
         for (IndexField field : indexedFields) {
             if (field instanceof MailIndexField) {
                 MailField mailField = ((MailIndexField) field).getMailField();
@@ -85,13 +85,13 @@ public final class MailUtility {
                 }
             }
         }
-        
+
         return fields;
     }
 
     /**
      * Safely releases specified access using given facade.
-     * 
+     *
      * @param facade The facade
      * @param indexAccess The access
      */

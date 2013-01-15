@@ -78,7 +78,7 @@ import com.openexchange.session.Session;
 public final class SmalFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced, IMailFolderStorageDelegator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalFolderStorage.class);
-    
+
     private static final String DEFAULT_FOLDER_ID = MailFolder.DEFAULT_FOLDER_ID;
 
     private final IMailFolderStorage folderStorage;
@@ -230,7 +230,7 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
         } catch (OXException e) {
             LOG.warn("Could not schedule folder job for folder " + fullName + '.', e);
         }
-        
+
         return nfn;
     }
 

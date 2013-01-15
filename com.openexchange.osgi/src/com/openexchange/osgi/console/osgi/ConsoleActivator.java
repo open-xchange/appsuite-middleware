@@ -147,7 +147,7 @@ public class ConsoleActivator implements BundleActivator, CommandProvider {
             for (final ServiceReference<?> serviceReference : references) {
                 final String className = context.getService(serviceReference).getClass().getName();
                 if (pattern.matcher(className).matches()) {
-                    ci.println(className);                    
+                    ci.println(className);
                 }
                 context.ungetService(serviceReference);
             }

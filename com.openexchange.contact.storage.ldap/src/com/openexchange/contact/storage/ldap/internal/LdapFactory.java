@@ -82,7 +82,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class LdapFactory  {
-    
+
     private final LdapConfig config;
     private Hashtable<String, String> environment = null;
     private final Map<String, String> userDNs = new ConcurrentHashMap<String, String>();
@@ -91,10 +91,10 @@ public class LdapFactory  {
         super();
         this.config = config;
     }
-    
+
     /**
      * Creates a LDAP context.
-     * 
+     *
      * @param session
      * @return
      * @throws OXException
@@ -102,10 +102,10 @@ public class LdapFactory  {
     public LdapContext createContext(Session session) throws OXException {
         return createContext(session, config.getAuthtype());
     }
-    
+
     /**
-     * Constructs an array of request results from the supplied values. 
-     * 
+     * Constructs an array of request results from the supplied values.
+     *
      * @param sortKeys
      * @param cookie
      * @param deleted
@@ -124,7 +124,7 @@ public class LdapFactory  {
             if (null != sortKeys && 0 < sortKeys.length) {
 //                controls.add(new SortControl(sortKeys, Control.NONCRITICAL));
                 controls.add(new SortControl(sortKeys, Control.CRITICAL));
-            }        
+            }
         } catch (IOException e) {
             throw LdapExceptionCodes.LDAP_ERROR.create(e, e.getMessage());
         }
@@ -133,7 +133,7 @@ public class LdapFactory  {
 
     /**
      * Constructs search controls from the supplied values.
-     * 
+     *
      * @param attributeNames
      * @param limit
      * @return
@@ -141,7 +141,7 @@ public class LdapFactory  {
     public SearchControls createSearchControls(String[] attributeNames, int limit) {
         return createSearchControls(config.getSearchScope(), attributeNames, limit);
     }
-    
+
     public SearchControls createSearchControls(SearchScope scope, String[] attributeNames, int limit) {
         SearchControls searchControls = new SearchControls();
         if (null != scope) {
@@ -151,13 +151,13 @@ public class LdapFactory  {
         searchControls.setReturningAttributes(attributeNames);
         return searchControls;
     }
-    
+
     private Hashtable<String, String> getEnvironment() {
         if (null == this.environment) {
             environment = new Hashtable<String, String>();
             environment.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
             environment.put(Context.PROVIDER_URL, config.getUri());
-            if (config.isTrustAllCerts() && config.getUri().startsWith("ldaps://")) { 
+            if (config.isTrustAllCerts() && config.getUri().startsWith("ldaps://")) {
                 environment.put("java.naming.ldap.factory.socket", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
             }
             if (null != config.getReferrals()) {
@@ -177,7 +177,7 @@ public class LdapFactory  {
         }
         return environment;
     }
-    
+
     private LdapContext createContext(Session session, AuthType authType) throws OXException {
         try {
             return authenticate(new InitialLdapContext(getEnvironment(), null), authType, session);
@@ -185,7 +185,7 @@ public class LdapFactory  {
             throw LdapExceptionCodes.INITIAL_LDAP_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     private LdapContext authenticate(LdapContext context, AuthType authType, Session session) throws OXException, NamingException {
         switch (authType) {
         case ADMINDN:
@@ -206,15 +206,15 @@ public class LdapFactory  {
             break;
         default:
             throw new IllegalArgumentException("Unknown AuthType: " + authType);
-        }        
+        }
         return context;
     }
-    
+
     private static User getUser(int contextID, int userID) throws OXException {
         return LdapServiceLookup.getService(UserService.class).getUser(userID,
             LdapServiceLookup.getService(ContextService.class).getContext(contextID));
     }
-    
+
     private String getUserLoginSource(Session session) throws OXException {
         User user = getUser(session.getContextId(), session.getUserId());
         switch (config.getUserLoginSource()) {
@@ -222,13 +222,13 @@ public class LdapFactory  {
             String imapLogin = user.getImapLogin();
             if (null == imapLogin) {
                 throw LdapExceptionCodes.IMAP_LOGIN_NULL.create(user.getLoginInfo());
-            } 
+            }
             return imapLogin;
         case MAIL:
             String mail = user.getMail();
             if (null == mail) {
                 throw LdapExceptionCodes.PRIMARY_MAIL_NULL.create(user.getLoginInfo());
-            } 
+            }
             return mail;
         case NAME:
             return user.getLoginInfo();
@@ -236,30 +236,30 @@ public class LdapFactory  {
             throw LdapExceptionCodes.WRONG_OR_MISSING_CONFIG_VALUE.create(config.getUserLoginSource());
         }
     }
-    
+
     private String getUserBindDN(String username) throws NamingException, OXException {
         String userBindDN = this.userDNs.get(username);
         if (null == userBindDN) {
             userBindDN = searchUserBindDN(username);
             userDNs.put(username, userBindDN);
-        }       
+        }
         return userBindDN;
     }
-    
+
     private String searchUserBindDN(String username) throws NamingException, OXException {
         LdapContext context = createContext(null, config.getUserAuthType());
         SearchScope searchScope = null != config.getUserSearchScope() ? config.getUserSearchScope() : config.getSearchScope();
         SearchControls searchControls = createSearchControls(searchScope, new String[] { "dn" }, 0);
         String searchFilter = null != config.getUserSearchFilter() ? config.getUserSearchFilter() : config.getSearchfilter();
-        String filter = "(&" + searchFilter + "(" + config.getUserSearchAttribute() + "=" + 
+        String filter = "(&" + searchFilter + "(" + config.getUserSearchAttribute() + "=" +
             Tools.escapeLDAPSearchFilter(username) + "))";
-        String baseDN = null != config.getUserSearchBaseDN() ? config.getUserSearchBaseDN() : config.getBaseDN(); 
+        String baseDN = null != config.getUserSearchBaseDN() ? config.getUserSearchBaseDN() : config.getBaseDN();
         NamingEnumeration<SearchResult> results = null;
         try {
             results = context.search(baseDN, filter, searchControls);
             if (null == results || false == results.hasMore()) {
                 throw LdapExceptionCodes.NO_USER_RESULTS.create(username);
-            } 
+            }
             String userDN = results.next().getNameInNamespace();
             if (results.hasMore()) {
                 throw LdapExceptionCodes.TOO_MANY_USER_RESULTS.create();

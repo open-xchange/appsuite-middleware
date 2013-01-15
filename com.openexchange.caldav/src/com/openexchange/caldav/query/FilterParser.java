@@ -59,7 +59,6 @@ import org.apache.commons.logging.Log;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import com.openexchange.caldav.CaldavProtocol;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -71,13 +70,13 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  */
 public class FilterParser {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(FilterParser.class);
-    
+
     public Filter parse(Element rootElement) throws WebdavProtocolException {
         Filter filter = new Filter();
         initChildFilters(filter, rootElement);
         return filter;
     }
-    
+
     private static final String DATETIME_PATTERN = "yyyyMMdd'T'HHmmss'Z'";
 
     private void initChildFilters(Filter filter, Element rootElement) throws WebdavProtocolException {
@@ -89,7 +88,7 @@ public class FilterParser {
             initChildFilters(compFilter, compFilterElement);
             filter.addFilter(compFilter);
         }
-        
+
         children = rootElement.getChildren("time-range", CaldavProtocol.CAL_NS);
         for (Object cObj : children) {
             Element timeRangeElement = (Element) cObj;

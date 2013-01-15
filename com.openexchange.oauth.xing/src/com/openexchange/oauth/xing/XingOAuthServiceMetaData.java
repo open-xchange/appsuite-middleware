@@ -66,10 +66,11 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
 
     /**
      * Initializes a new {@link XingOAuthServiceMetaData}.
-     * 
+     *
      * @param configService The configuration service
+     * @throws IllegalStateException If either API key or secret is missing
      */
-    public XingOAuthServiceMetaData(ConfigurationService configService) {
+    public XingOAuthServiceMetaData(final ConfigurationService configService) {
         super();
         id = "com.openexchange.oauth.xing";
         displayName = "XING";

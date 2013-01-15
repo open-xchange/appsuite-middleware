@@ -78,7 +78,7 @@ public abstract class OXResellerStorageInterface {
     private static Class<? extends OXResellerStorageInterface> implementingClass;
 
     private static final Log log = LogFactory.getLog(OXResellerStorageInterface.class);
-    
+
     protected static AdminCacheExtended cache = null;
 
     protected static PropertyHandler prop = null;
@@ -178,7 +178,7 @@ public abstract class OXResellerStorageInterface {
      * @throws StorageException
      */
     public abstract ResellerAdmin[] getData(final ResellerAdmin[] admins) throws StorageException;
-    
+
     /**
      * @param adm
      * @return The right ResellerAdmin[] data, in any other case an exception is raised
@@ -207,21 +207,21 @@ public abstract class OXResellerStorageInterface {
      * @throws StorageException
      */
     public abstract boolean existsAdmin(final ResellerAdmin[] admins) throws StorageException;
-    
+
     /**
      * @param ctx
      * @param adm
      * @throws StorageException
      */
     public abstract void ownContextToAdmin(final Context ctx, final Credentials creds) throws StorageException;
-    
+
     /**
      * @param ctx
      * @param creds
      * @throws StorageException
      */
     public abstract void unownContextFromAdmin(final Context ctx, final Credentials creds) throws StorageException;
-    
+
     /**
      * @param ctx
      * @param adm
@@ -236,7 +236,7 @@ public abstract class OXResellerStorageInterface {
      * @throws StorageException
      */
     public abstract boolean checkOwnsContextAndSetSid(final Context ctx, final Credentials creds) throws StorageException;
-    
+
     /**
      * @param ctx
      * @param adm
@@ -247,31 +247,31 @@ public abstract class OXResellerStorageInterface {
 
     /**
      * Checks whether context is owned by a subadmin
-     * 
+     *
      * @param ctx
      * @return {@link ResellerAdmin} null cannot be returned, if the context is owner by no special admin the master admin is returned
      * @throws StorageException
      */
     public abstract ResellerAdmin getContextOwner(final Context ctx) throws StorageException;
-    
+
     /**
      * @param search_pattern
      * @return
      * @throws StorageException
      */
     public abstract Map<String, Restriction> listRestrictions(final String search_pattern) throws StorageException;
-    
+
     /**
      * Check whether any of the restrictions bound to subadmin apply. UserModuleAccess must be provided in order
      * to check the per module access restrictions.
-     *  
+     *
      * @param creds
      * @param access
      * @param restriction_types
      * @throws StorageException
      */
     public abstract void checkPerSubadminRestrictions(final Credentials creds, final UserModuleAccess access, final String... restriction_types) throws StorageException;
-    
+
     /**
      * @param ctx
      * @param access
@@ -279,26 +279,26 @@ public abstract class OXResellerStorageInterface {
      * @throws StorageException
      */
     public abstract void checkPerContextRestrictions(final Context ctx, final UserModuleAccess access, final String... restriction_types) throws StorageException;
-    
+
     /**
      * @param creds
      * @param restrictions
      * @throws StorageException
      */
     public abstract void applyRestrictionsToContext(final Restriction[] restrictions, final Context ctx) throws StorageException;
-    
+
     /**
      * @param ctx
      * @return
      * @throws StorageException
      */
     public abstract Restriction[] getRestrictionsFromContext(final Context ctx) throws StorageException;
-    
+
     /**
      * @throws StorageException
      */
     public abstract void initDatabaseRestrictions() throws StorageException;
-    
+
     /**
      * @throws StorageException
      */
@@ -306,10 +306,10 @@ public abstract class OXResellerStorageInterface {
 
     /**
      * @throws StorageException
-     * @throws OXResellerException 
+     * @throws OXResellerException
      */
     public abstract void updateModuleAccessRestrictions() throws StorageException, OXResellerException;
-    
+
     /**
      * @throws StorageException
      * @throws OXResellerException
@@ -322,25 +322,25 @@ public abstract class OXResellerStorageInterface {
      * @throws StorageException
      */
     public abstract String getCustomId(final Context ctx) throws StorageException;
-    
+
     /**
      * @param ctx
      * @throws StorageException
      */
     public abstract void writeCustomId(final Context ctx) throws StorageException;
-    
+
     /**
      * @param ctx
      * @throws StorageException
      */
     public abstract void deleteCustomFields(final Context ctx) throws StorageException;
-    
+
     /**
      * @param ctx
      * @throws StorageException
      */
     public abstract void generateCreateTimestamp(final Context ctx) throws StorageException;
-    
+
     /**
      * @param ctx
      * @throws StorageException

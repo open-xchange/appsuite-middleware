@@ -186,7 +186,7 @@ final class SessionContainer {
 
     /**
      * Gets any session associated with specified user.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return An arbitrary session or <code>null</code>
@@ -431,7 +431,7 @@ final class SessionContainer {
 
     /**
      * Checks if there is any session for given context.
-     * 
+     *
      * @param contextId The context identifier
      * @return <code>true</code> if there is such a session; otherwise <code>false</code>
      */

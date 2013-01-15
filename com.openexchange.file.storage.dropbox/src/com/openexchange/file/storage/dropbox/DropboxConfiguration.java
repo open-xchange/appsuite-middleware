@@ -53,7 +53,7 @@ import com.openexchange.config.ConfigurationService;
 
 /**
  * {@link DropboxConfiguration}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DropboxConfiguration {
@@ -62,7 +62,7 @@ public final class DropboxConfiguration {
 
     /**
      * Gets the {@link DropboxConfiguration instance}.
-     * 
+     *
      * @return The instance
      */
     public static DropboxConfiguration getInstance() {
@@ -94,7 +94,7 @@ public final class DropboxConfiguration {
 
     /**
      * Configures this {@link DropboxConfiguration instance} using given {@link ConfigurationService configuration service}.
-     * 
+     *
      * @param configurationService The configuration service
      */
     public void configure(final ConfigurationService configurationService) {
@@ -115,7 +115,7 @@ public final class DropboxConfiguration {
 
     /**
      * Gets the API key.
-     * 
+     *
      * @return The API key
      */
     public String getApiKey() {
@@ -124,7 +124,7 @@ public final class DropboxConfiguration {
 
     /**
      * Gets the secret key.
-     * 
+     *
      * @return The secret key
      */
     public String getSecretKey() {

@@ -70,22 +70,22 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DbIDResolver extends DefaultLdapIDResolver {
-    
-    private static final String SELECT_CONTACTID_STMT = 
-        "SELECT contact FROM ldapIds WHERE cid=? AND fid=? AND ldapId=?;"; 
-    private static final String SELECT_LDAPID_STMT = 
-        "SELECT ldapId FROM ldapIds WHERE cid=? AND fid=? AND contact=?;"; 
-    private static final String INSERT_ID_STMT = 
-        "INSERT INTO ldapIds (cid,fid,contact,ldapId) VALUES (?,?,?,?);"; 
-    private static final String SELECT_IDS_STMT = 
-        "SELECT contact,ldapId FROM ldapIds WHERE cid=? AND fid=?;"; 
-    
+
+    private static final String SELECT_CONTACTID_STMT =
+        "SELECT contact FROM ldapIds WHERE cid=? AND fid=? AND ldapId=?;";
+    private static final String SELECT_LDAPID_STMT =
+        "SELECT ldapId FROM ldapIds WHERE cid=? AND fid=? AND contact=?;";
+    private static final String INSERT_ID_STMT =
+        "INSERT INTO ldapIds (cid,fid,contact,ldapId) VALUES (?,?,?,?);";
+    private static final String SELECT_IDS_STMT =
+        "SELECT contact,ldapId FROM ldapIds WHERE cid=? AND fid=?;";
+
     private ConcurrentMap<String, Integer> contactIDs;
     private ConcurrentMap<Integer, String> ldapIDs;
-    
+
     /**
      * Initializes a new {@link DbIDResolver}.
-     * 
+     *
      * @param contextID the context ID
      * @param folderID the folder ID
      * @throws OXException
@@ -100,7 +100,7 @@ public class DbIDResolver extends DefaultLdapIDResolver {
         Integer contactID = contactIDs.get(ldapID);
         if (null != contactID) {
             return contactID.intValue();
-        }        
+        }
         DatabaseService databaseService = LdapServiceLookup.getService(DatabaseService.class);
         {
             Connection connection = databaseService.getReadOnly(contextID);
@@ -138,13 +138,13 @@ public class DbIDResolver extends DefaultLdapIDResolver {
             }
         }
     }
-    
+
     @Override
     public String getLdapID(int contactID) throws OXException {
         String ldapID = ldapIDs.get(Integer.valueOf(contactID));
         if (null != ldapID) {
             return ldapID;
-        }        
+        }
         DatabaseService databaseService = LdapServiceLookup.getService(DatabaseService.class);
         Connection connection = databaseService.getReadOnly(contextID);
         try {
@@ -161,7 +161,7 @@ public class DbIDResolver extends DefaultLdapIDResolver {
             databaseService.backReadOnly(contextID, connection);
         }
     }
-    
+
     private void initCache() throws OXException {
         DatabaseService databaseService = LdapServiceLookup.getService(DatabaseService.class);
         Connection connection = databaseService.getReadOnly(contextID);
@@ -189,12 +189,12 @@ public class DbIDResolver extends DefaultLdapIDResolver {
             stmt.setInt(2, folderID);
             stmt.setInt(3, id);
             resultSet = stmt.executeQuery();
-            return resultSet.next() ? resultSet.getString("ldapId") : null; 
+            return resultSet.next() ? resultSet.getString("ldapId") : null;
         } finally {
             DBUtils.closeSQLStuff(resultSet, stmt);
         }
     }
-    
+
     private static int loadContactID(Connection connection, int contextID, int folderID, String ldapID) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
@@ -204,12 +204,12 @@ public class DbIDResolver extends DefaultLdapIDResolver {
             stmt.setInt(2, folderID);
             stmt.setString(3, ldapID);
             resultSet = stmt.executeQuery();
-            return resultSet.next() ? resultSet.getInt("contact") : -1; 
+            return resultSet.next() ? resultSet.getInt("contact") : -1;
         } finally {
             DBUtils.closeSQLStuff(resultSet, stmt);
         }
     }
-    
+
     private static int createContactID(Connection connection, int contextID, int folderID, String ldapID) throws SQLException {
         PreparedStatement stmt = null;
         try {
@@ -227,7 +227,7 @@ public class DbIDResolver extends DefaultLdapIDResolver {
             DBUtils.closeSQLStuff(stmt);
         }
     }
-    
+
     private static ConcurrentMap<String, Integer> loadIDs(Connection connection, int contextID, int folderID) throws SQLException {
         ConcurrentMap<String, Integer> map = new ConcurrentHashMap<String, Integer>();
         PreparedStatement stmt = null;
@@ -246,6 +246,6 @@ public class DbIDResolver extends DefaultLdapIDResolver {
             DBUtils.closeSQLStuff(resultSet, stmt);
         }
         return map;
-    }    
+    }
 
 }

@@ -87,10 +87,10 @@ public class ConnectionHolder implements ObjectMapping<Connection> {
         }
         return connections.get(dstCtxId);
     }
-    
+
     public Set<Integer> getSourceKeys() {
         final Set<Integer> keySet = new HashSet<Integer>(mapping.keySet());
-        
+
         return keySet;
     }
 

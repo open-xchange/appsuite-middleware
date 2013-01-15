@@ -58,11 +58,11 @@ package com.openexchange.subscribe;
 public class EncryptedField {
     public final Subscription subscription;
     public final String field;
-    
+
     public EncryptedField(Subscription subscription, String field) {
         super();
         this.subscription = subscription;
         this.field = field;
     }
-    
+
 }

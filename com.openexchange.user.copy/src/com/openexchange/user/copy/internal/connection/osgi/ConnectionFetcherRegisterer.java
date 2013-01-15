@@ -65,9 +65,9 @@ import com.openexchange.user.copy.internal.connection.ConnectionFetcherTask;
 public class ConnectionFetcherRegisterer implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
 
     private final BundleContext context;
-    
+
     private ServiceRegistration<CopyUserTaskService> registration;
-    
+
 
     public ConnectionFetcherRegisterer(final BundleContext context) {
         super();
@@ -78,7 +78,7 @@ public class ConnectionFetcherRegisterer implements ServiceTrackerCustomizer<Dat
         final DatabaseService service = context.getService(reference);
         final ConnectionFetcherTask task = new ConnectionFetcherTask(service);
         registration = context.registerService(CopyUserTaskService.class, task, null);
-        
+
         return service;
     }
 

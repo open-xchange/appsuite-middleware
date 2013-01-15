@@ -69,7 +69,7 @@ import com.openexchange.tools.webdav.OXServlet;
 
 /**
  * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CalDAV extends OXServlet {
@@ -77,9 +77,9 @@ public class CalDAV extends OXServlet {
 	private static final long serialVersionUID = -7768308794451862636L;
 
 	private static final transient Log LOG = com.openexchange.log.Log.loggerFor(CalDAV.class);
-    
+
     private static volatile ServiceLookup services;
-    
+
     public static void setServiceLookup(final ServiceLookup serviceLookup) {
         services = serviceLookup;
     }
@@ -169,7 +169,7 @@ public class CalDAV extends OXServlet {
     protected void doMkCalendar(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         doIt(req, resp, CaldavPerformer.Action.MKCALENDAR);
     }
-    
+
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final CaldavPerformer.Action action) throws ServletException, IOException {
         ServerSession session;
         try {
@@ -234,12 +234,12 @@ public class CalDAV extends OXServlet {
     protected void incrementRequests() {
         // Nothing to do
     }
-    
+
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
-    
+
     @Override
     protected LoginCustomizer getLoginCustomizer() {
         return ALLOW_ASTERISK;
     }
-   
+
 }

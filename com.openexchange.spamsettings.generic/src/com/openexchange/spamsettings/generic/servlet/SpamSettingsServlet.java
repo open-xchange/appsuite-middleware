@@ -25,7 +25,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class SpamSettingsServlet extends PermissionServlet {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 2124511440962531967L;
 

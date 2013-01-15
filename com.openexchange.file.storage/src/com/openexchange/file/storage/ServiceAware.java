@@ -62,7 +62,7 @@ public interface ServiceAware extends Serializable {
 
     /**
      * Gets the service identifier
-     * 
+     *
      * @return The service identifier.
      */
     public String getServiceId();

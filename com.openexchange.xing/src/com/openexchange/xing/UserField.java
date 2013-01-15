@@ -56,7 +56,7 @@ import com.openexchange.xing.util.InverseComparator;
 
 /**
  * {@link UserField} - The supported user fields.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum UserField {

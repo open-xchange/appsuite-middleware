@@ -53,14 +53,14 @@ import java.io.Serializable;
 
 /**
  * {@link CacheKeyService} - The service to provide cache keys.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface CacheKeyService {
 
     /**
      * Creates a new instance of {@link CacheKey} consisting of specified context ID and object ID.
-     * 
+     *
      * @param contextId The context ID
      * @param objectId The object ID
      * @return The new instance of {@link CacheKey}
@@ -69,7 +69,7 @@ public interface CacheKeyService {
 
     /**
      * Creates a new instance of {@link CacheKey} consisting of specified context ID and serializable object.
-     * 
+     *
      * @param contextId The context ID
      * @param obj The serializable object
      * @return new instance of {@link CacheKey}
@@ -78,7 +78,7 @@ public interface CacheKeyService {
 
     /**
      * Creates a new instance of {@link CacheKey} consisting of specified context ID and serializable objects.
-     * 
+     *
      * @param contextId The context ID
      * @param objs The serializable objects
      * @return new instance of {@link CacheKey}

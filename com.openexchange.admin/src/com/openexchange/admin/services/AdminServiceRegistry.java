@@ -53,7 +53,7 @@ import com.openexchange.osgi.AbstractServiceRegistry;
 
 /**
  * {@link AdminServiceRegistry} - A registry for services needed by the administration daemon.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AdminServiceRegistry extends AbstractServiceRegistry {

@@ -100,7 +100,7 @@ import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 
 /**
  * {@link PermissionLoaderService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PermissionLoaderService implements Runnable {
@@ -200,7 +200,7 @@ public final class PermissionLoaderService implements Runnable {
 
     /**
      * Starts up this service.
-     * 
+     *
      * @throws OXException If start-up fails
      */
     public void startUp() throws OXException {
@@ -209,19 +209,19 @@ public final class PermissionLoaderService implements Runnable {
         	threadPool = ThreadPools.getThreadPool();
         } else {
 	        final ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService> customizer = new ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService>() {
-	
+
 	            @Override
 	            public ThreadPoolService addingService(final ServiceReference<ThreadPoolService> reference) {
 	                final ThreadPoolService service = context.getService(reference);
 	                threadPool = service;
 	                return service;
 	            }
-	
+
 	            @Override
 	            public void modifiedService(final ServiceReference<ThreadPoolService> reference, final ThreadPoolService service) {
 	                // Nope
 	            }
-	
+
 	            @Override
 	            public void removedService(final ServiceReference<ThreadPoolService> reference, final ThreadPoolService service) {
 	                threadPool = null;
@@ -235,7 +235,7 @@ public final class PermissionLoaderService implements Runnable {
         permsMap = new TimeoutConcurrentMap<Pair, OCLPermission[]>(20, true);
         pooledCons = new ConcurrentHashMap<Integer, ConWrapper>();
         final Runnable task = new Runnable() {
-            
+
             @Override
             public void run() {
                 try {
@@ -321,7 +321,7 @@ public final class PermissionLoaderService implements Runnable {
 
     /**
      * Polls the possibly loaded permissions for specified folder in given context.
-     * 
+     *
      * @param folderId The folder identifier
      * @param contextId The context identifier
      * @return The loaded permissions or <code>null</code>
@@ -343,17 +343,17 @@ public final class PermissionLoaderService implements Runnable {
 
         @Override
         public void setThreadName(final ThreadRenamer threadRenamer) {
-            // 
+            //
         }
 
         @Override
         public void beforeExecute(final Thread t) {
-            // 
+            //
         }
 
         @Override
         public void afterExecute(final Throwable t) {
-            // 
+            //
         }
 
         @Override
@@ -441,7 +441,7 @@ public final class PermissionLoaderService implements Runnable {
 
     /**
      * Handles specified equally-grouped fillers
-     * 
+     *
      * @param groupedPairs The equally-grouped pairs
      * @throws InterruptedException If thread is interrupted
      */
@@ -524,7 +524,7 @@ public final class PermissionLoaderService implements Runnable {
 
     /**
      * Handles specified chunk of equally-grouped pairs
-     * 
+     *
      * @param pairsChunk The chunk of equally-grouped pairs
      * @param threadDesc The thread description
      */
@@ -740,7 +740,7 @@ public final class PermissionLoaderService implements Runnable {
 
         /**
          * Opens this task for processing.
-         * 
+         *
          * @param sf The stamped future object associated with this task
          */
         protected void start(final StampedFuture sf) {
@@ -784,7 +784,7 @@ public final class PermissionLoaderService implements Runnable {
 
         /**
          * Opens this task for processing.
-         * 
+         *
          * @param sf The stamped future object associated with this task
          */
         @Override

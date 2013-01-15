@@ -72,7 +72,7 @@ import com.openexchange.tools.webdav.OXServlet;
 
 /**
  * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CardDAV extends OXServlet {
@@ -80,9 +80,9 @@ public class CardDAV extends OXServlet {
 	private static final long serialVersionUID = -6381396333467867154L;
 
 	private static final transient Log LOG = com.openexchange.log.Log.loggerFor(CardDAV.class);
-    
+
     private static volatile ServiceLookup services;
-    
+
     public static void setServiceLookup(ServiceLookup serviceLookup) {
         services = serviceLookup;
     }
@@ -228,9 +228,9 @@ public class CardDAV extends OXServlet {
         // Nothing to do
     }
 
-    
+
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
-    
+
     @Override
     protected LoginCustomizer getLoginCustomizer() {
         return ALLOW_ASTERISK;

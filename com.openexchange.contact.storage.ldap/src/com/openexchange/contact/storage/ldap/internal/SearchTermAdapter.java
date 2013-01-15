@@ -62,22 +62,22 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
  * {@link SearchAdapter}
- * 
+ *
  * Helps constructing LDAP filters for a search term.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SearchTermAdapter {
-	
+
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SearchTermAdapter.class);
 
     private final String filter;
     private final LdapMapper mapper;
     private final LdapIDResolver idResolver;
-	
+
 	/**
 	 * Initializes a new {@link SearchAdapter}.
-	 * 
+	 *
 	 * @param term
 	 * @throws OXException
 	 */
@@ -87,11 +87,11 @@ public class SearchTermAdapter {
         this.idResolver = idResolver;
 		this.filter = getTerm(term);
 	}
-    
+
     public String getFilter() {
         return filter;
 	}
-	
+
     private String getTerm(SearchTerm<?> term) throws OXException {
         if (SingleSearchTerm.class.isInstance(term)) {
             return getTerm((SingleSearchTerm)term);
@@ -100,11 +100,11 @@ public class SearchTermAdapter {
         } else {
             throw new IllegalArgumentException("Need either an 'SingleSearchTerm' or 'CompositeSearchTerm'.");
         }
-    }    
-    
+    }
+
     private String getTerm(SingleSearchTerm term) throws OXException {
         /*
-         * get relevant mapping for term 
+         * get relevant mapping for term
          */
         LdapMapping<? extends Object> ldapMapping = mapper.getMapping(term);
         if (null == ldapMapping || null == ldapMapping.getLdapAttributeName(true)) {
@@ -124,7 +124,7 @@ public class SearchTermAdapter {
                     alternativeFormatArgs[i] = ldapMapping.getAlternativeLdapAttributeName(true);
                 }
             } else if (Operand.Type.CONSTANT.equals(operands[i].getType())) {
-                String encoded = ldapMapping.encodeForFilter(operands[i].getValue(), idResolver); 
+                String encoded = ldapMapping.encodeForFilter(operands[i].getValue(), idResolver);
                 formatArgs[i] = encoded;
                 if (null != alternativeFormatArgs) {
                     alternativeFormatArgs[i] = encoded;
@@ -134,15 +134,15 @@ public class SearchTermAdapter {
             }
         }
         /*
-         * build filter 
+         * build filter
          */
         String filter = String.format(term.getOperation().getLdapRepresentation(), formatArgs);
         if (null != alternativeFormatArgs) {
             String alternativeFilter = String.format(term.getOperation().getLdapRepresentation(), alternativeFormatArgs);
             Object[] isNullFormatArgs = new String[] { ldapMapping.getLdapAttributeName(true) };
-            String isNullFilter = String.format(SingleOperation.ISNULL.getLdapRepresentation(), isNullFormatArgs);             
+            String isNullFilter = String.format(SingleOperation.ISNULL.getLdapRepresentation(), isNullFormatArgs);
             filter = "|(" + filter + ")(&(" + isNullFilter + ")(" + alternativeFilter + "))";
-        } 
+        }
         return "(" + filter + ")";
     }
 
@@ -157,7 +157,7 @@ public class SearchTermAdapter {
             }
         }
         if (0 < stringBuilder.length()) {
-            return "(" + String.format(operation.getLdapRepresentation(), stringBuilder.toString()) + ")"; 
+            return "(" + String.format(operation.getLdapRepresentation(), stringBuilder.toString()) + ")";
         } else {
             return null;
         }

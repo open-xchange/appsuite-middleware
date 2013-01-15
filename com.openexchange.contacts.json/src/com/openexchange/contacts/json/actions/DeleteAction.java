@@ -85,7 +85,7 @@ public class DeleteAction extends ContactAction {
     public DeleteAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
-    
+
     @Override
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
         ServerSession session = request.getSession();
@@ -105,5 +105,5 @@ public class DeleteAction extends ContactAction {
         }
         return new AJAXRequestResult(new JSONObject(), lastRead, "json");
     }
-    
+
 }

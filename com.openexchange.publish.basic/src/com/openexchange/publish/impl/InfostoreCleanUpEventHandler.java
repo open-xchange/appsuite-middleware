@@ -66,13 +66,13 @@ import com.openexchange.groupware.contexts.Context;
  *
  */
 public class InfostoreCleanUpEventHandler implements EventHandler {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreCleanUpEventHandler.class);
-    
+
     private final EntityCleanUp entityCleanUp;
-    
+
     private final ContextService contextService;
-    
+
 
     public InfostoreCleanUpEventHandler(EntityCleanUp entityCleanUp, ContextService contextService) {
         super();
@@ -97,7 +97,7 @@ public class InfostoreCleanUpEventHandler implements EventHandler {
             } catch (OXException e) {
                 LOG.error("Could not delete all dependent publications: " + e.getMessage(), e);
             }
-        }        
+        }
     }
 
 }

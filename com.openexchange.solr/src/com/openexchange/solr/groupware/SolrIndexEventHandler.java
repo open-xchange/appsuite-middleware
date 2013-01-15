@@ -70,9 +70,9 @@ import com.openexchange.solr.rmi.RMISolrAccessService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrIndexEventHandler implements EventHandler {
-    
+
     private final DelegationSolrAccessImpl solrAccess;
-    
+
 
     public SolrIndexEventHandler(DelegationSolrAccessImpl solrAccess) {
         super();

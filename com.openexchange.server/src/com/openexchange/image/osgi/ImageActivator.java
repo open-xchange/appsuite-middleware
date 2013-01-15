@@ -61,7 +61,7 @@ import com.openexchange.mail.conversion.InlineImageDataSource;
 
 /**
  * {@link ImageActivator}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ImageActivator extends AJAXModuleActivator {

@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SearchAction}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 @Action(method = RequestMethod.PUT, name = "search", description = "Search infoitems", parameters = {
@@ -75,12 +75,12 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "start", optional = true, description = "The start index (inclusive) in the ordered search, that is requested."),
     @Parameter(name = "end", optional = true, description = "The last index (inclusive) from the ordered search, that is requested.") }, requestBody = "An Object as described in Search contacts.", responseDescription = "")
 public class SearchAction extends AbstractFileAction {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SearchAction.class);
 
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
-        request.require(Param.COLUMNS);        
+        request.require(Param.COLUMNS);
 
         final Field sortingField = request.getSortingField();
         final SortDirection sortingOrder = request.getSortingOrder();
@@ -93,7 +93,7 @@ public class SearchAction extends AbstractFileAction {
             sortingOrder,
             request.getStart(),
             request.getEnd());
-        
+
         if (Field.CREATED_BY.equals(sortingField)) {
             final ServerSession serverSession = request.getSession();
             final CreatedByComparator comparator = new CreatedByComparator(

@@ -62,30 +62,30 @@ public final class OAuth2ProviderCreateTableService extends AbstractCreateTableI
     private static final String TABLE_ACCESSOR_V2 = "oauth2Accessor";
     private static final String TABLE_ACCESSOR_PROPERTY_V2 = "oauth2AccessorProperty";
 
-    private static final String CREATE_ACCESSOR_V2 = "CREATE TABLE `"+TABLE_ACCESSOR_V2+"` (" + 
-        " `cid` INT4 unsigned NOT NULL," + 
-        " `user` INT4 unsigned NOT NULL," + 
-        " `clientId` INT4 unsigned NOT NULL," + 
-        " `providerId` INT4 unsigned NOT NULL," + 
-        " `code` varchar(255) DEFAULT NULL," + 
-        " `refreshToken` varchar(255) DEFAULT NULL," + 
-        " `accessToken` varchar(255) DEFAULT NULL," + 
-        " `expiresIn` varchar(255) DEFAULT NULL," + 
-        " `tokenType` varchar(255) DEFAULT NULL," + 
-        " `scope` varchar(255) DEFAULT NULL," + 
-        " `state` varchar(255) DEFAULT NULL," + 
-        " PRIMARY KEY (`cid`,`user`,`clientId`)," + 
-        " KEY `userIndex` (`cid`,`user`)," + 
-        " KEY `consumerIndex` (`clientId`,`providerId`)" + 
+    private static final String CREATE_ACCESSOR_V2 = "CREATE TABLE `"+TABLE_ACCESSOR_V2+"` (" +
+        " `cid` INT4 unsigned NOT NULL," +
+        " `user` INT4 unsigned NOT NULL," +
+        " `clientId` INT4 unsigned NOT NULL," +
+        " `providerId` INT4 unsigned NOT NULL," +
+        " `code` varchar(255) DEFAULT NULL," +
+        " `refreshToken` varchar(255) DEFAULT NULL," +
+        " `accessToken` varchar(255) DEFAULT NULL," +
+        " `expiresIn` varchar(255) DEFAULT NULL," +
+        " `tokenType` varchar(255) DEFAULT NULL," +
+        " `scope` varchar(255) DEFAULT NULL," +
+        " `state` varchar(255) DEFAULT NULL," +
+        " PRIMARY KEY (`cid`,`user`,`clientId`)," +
+        " KEY `userIndex` (`cid`,`user`)," +
+        " KEY `consumerIndex` (`clientId`,`providerId`)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
-    private static final String CREATE_ACCESSOR_PROPERTY_V2 = "CREATE TABLE `"+TABLE_ACCESSOR_PROPERTY_V2+"` (" + 
-        " `cid` INT4 unsigned NOT NULL," + 
-        " `user` INT4 unsigned NOT NULL," + 
-        " `clientId` INT4 unsigned NOT NULL," + 
-        " `name` varchar(32) NOT NULL," + 
-        " `value` varchar(255) NOT NULL," + 
-        " PRIMARY KEY (`cid`,`user`,`clientId`,`name`)" + 
+    private static final String CREATE_ACCESSOR_PROPERTY_V2 = "CREATE TABLE `"+TABLE_ACCESSOR_PROPERTY_V2+"` (" +
+        " `cid` INT4 unsigned NOT NULL," +
+        " `user` INT4 unsigned NOT NULL," +
+        " `clientId` INT4 unsigned NOT NULL," +
+        " `name` varchar(32) NOT NULL," +
+        " `value` varchar(255) NOT NULL," +
+        " PRIMARY KEY (`cid`,`user`,`clientId`,`name`)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     /**

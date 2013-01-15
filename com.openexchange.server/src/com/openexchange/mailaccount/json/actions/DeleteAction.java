@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.PUT, name = "delete", description = "Delete mail accounts", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module.") 
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, requestBody = "An array with the IDs of the mail accounts to delete.")
 public final class DeleteAction extends AbstractMailAccountAction {
 

@@ -82,7 +82,7 @@ public class GenericSubscribeServiceForGoogleCalendarICalTest extends GenericSub
             "",
             ".*ServiceLoginAuth",
             "Email",
-            "Passwd",            
+            "Passwd",
             1,
             "https://calendar.google.com",
             "",

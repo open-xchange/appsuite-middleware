@@ -54,6 +54,7 @@ import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -76,6 +77,7 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.LogProperties.Name;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -98,12 +100,14 @@ public class DispatcherServlet extends SessionServlet {
     private static final long serialVersionUID = -8060034833311074781L;
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(DispatcherServlet.class);
-    
+
     private static final Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
 
     /*-
      * /!\ These must be static for our servlet container to work properly. /!\
      */
+
+    private static final EnumSet<Name> PROPS_TO_IGNORE = EnumSet.of(LogProperties.Name.SESSION_CONTEXT_ID);
 
     private static final AtomicReference<Dispatcher> DISPATCHER = new AtomicReference<Dispatcher>();
 
@@ -160,7 +164,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Gets the <code>AJAXRequestDataTools</code> instance to use for parsing incoming requests.
-     * 
+     *
      * @return The <code>AJAXRequestDataTools</code> instance
      */
     protected AJAXRequestDataTools getAjaxRequestDataTools() {
@@ -331,7 +335,7 @@ public class DispatcherServlet extends SessionServlet {
             if (e.isLoggable(LogLevel.ERROR)) {
                 if (LogProperties.isEnabled()) {
                     final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
-                    logBuilder.append(LogProperties.getAndPrettyPrint());
+                    logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
                     LOG.error(logBuilder.toString(), e);
                 } else {
                     LOG.error(e.getMessage(), e);
@@ -342,7 +346,7 @@ public class DispatcherServlet extends SessionServlet {
         } catch (final RuntimeException e) {
             if(LogProperties.isEnabled()) {
                 final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
-                logBuilder.append(LogProperties.getAndPrettyPrint());
+                logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
                 LOG.error(logBuilder.toString(),e);
             } else {
                 LOG.error(e.getMessage(), e);

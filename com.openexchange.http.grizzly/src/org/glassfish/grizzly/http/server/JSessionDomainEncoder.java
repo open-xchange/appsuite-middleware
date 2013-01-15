@@ -56,7 +56,7 @@ import java.util.regex.Pattern;
 /**
  * {@link JSessionDomainEncoder} Generates an application/x-www-form-urlencoded versions of domain strings that additionally have the safe
  * character "." and "-" replaced by the according URL-Encoding.
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class JSessionDomainEncoder {
@@ -68,7 +68,7 @@ public class JSessionDomainEncoder {
     /**
      * Generates an application/x-www-form-urlencoded version of specified domain string that additionally has the safe character "." and
      * "-" replaced by the according URL-Encoding.
-     * 
+     *
      * @param domain The domain to encode
      * @return The URL-encoded text that additionally has dots and dashes replaced by their URLEncodings
      * @throws IllegalStateException if the running Java platform doesn't support the iso-8859-1 encoding which is mandatory since 1.4.2

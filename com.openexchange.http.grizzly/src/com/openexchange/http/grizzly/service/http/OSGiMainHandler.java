@@ -36,7 +36,7 @@
  * and therefore, elected the GPL Version 2 license, then the option applies
  * only if the new code is made subject to such option by the copyright
  * holder.
- * 
+ *
  * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
  */
 
@@ -64,15 +64,10 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.http.grizzly.GrizzlyExceptionMessage;
-import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
 import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
@@ -85,7 +80,7 @@ import com.openexchange.tools.exceptions.ExceptionUtils;
  * <li>Manages registration data.</li>
  * <li>Dispatching {@link HttpHandler#service(Request, Response)} method call to registered {@link HttpHandler}s.</li>
  * </ul>
- * 
+ *
  * @author Hubert Iwaniuk
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -101,7 +96,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
     /**
      * Constructor.
-     * 
+     *
      * @param logger Logger utility.
      * @param bundle Bundle that we create if for, for local data reference.
      */
@@ -148,7 +143,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     ExceptionUtils.handleThrowable(t);
                     StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
                     if (LogProperties.isEnabled()) {
-                        logBuilder.append(LogProperties.getAndPrettyPrint());
+                        logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));
                     }
                     appendRequestInfo(logBuilder, request);
                     LOG.error(logBuilder.toString(), t);
@@ -181,7 +176,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
     /**
      * Appends request information.
-     * 
+     *
      * @param builder The builder to append to
      */
     private void appendRequestInfo(final StringBuilder builder, Request request) {
@@ -196,7 +191,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * Registers {@link services.http.OSGiServletHandler} in OSGi Http Service.
      * <p/>
      * Keeps track of all registrations, takes care of thread safety.
-     * 
+     *
      * @param alias Alias to register, if wrong value than throws {@link org.osgi.service.http.NamespaceException}.
      * @param servlet Servlet to register under alias, if fails to {@link javax.servlet.Servlet#init(javax.servlet.ServletConfig)} throws
      *            {@link javax.servlet.ServletException}.
@@ -249,9 +244,9 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
     /**
      * Add our default set of Filters to the ServletHandler.
-     * 
+     *
      * @param servletHandler The ServletHandler with the FilterChain
-     * @throws ServletException 
+     * @throws ServletException
      */
     private void addServletFilters(OSGiServletHandler servletHandler) throws ServletException {
         // wrap it
@@ -273,7 +268,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * Registers {@link OSGiResourceHandler} in OSGi Http Service.
      * <p/>
      * Keeps truck of all registrations, takes care of thread safety.
-     * 
+     *
      * @param alias Alias to register, if wrong value than throws {@link NamespaceException}.
      * @param context OSGi {@link HttpContext}, provides mime handling, security and bundle specific resource access.
      * @param internalPrefix Prefix to map request for this alias to.
@@ -305,7 +300,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * Unregisters previously registered alias.
      * <p/>
      * Keeps truck of all registrations, takes care of thread safety.
-     * 
+     *
      * @param alias Alias to unregister, if not owning alias {@link IllegalArgumentException} is thrown.
      * @throws IllegalArgumentException If alias was not registered by calling bundle.
      */
@@ -385,7 +380,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
     /**
      * Chek if <code>alias</code> has been already registered.
-     * 
+     *
      * @param alias Alias to check.
      * @throws NamespaceException If <code>alias</code> has been registered.
      */
@@ -421,7 +416,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * <p/>
      * An instance of {@link Servlet} can be registed only once, so in case of servlet been registered before will throw
      * {@link ServletException} as specified in OSGI HttpService Spec.
-     * 
+     *
      * @param servlet {@link Servlet} to check if can be registered.
      * @param servletPath the path under which the servlet should be registered
      * @throws ServletException Iff <code>servlet</code> has been registered before.
@@ -442,7 +437,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * <p/>
      * If is already registered for <code>httpContext</code> then create new instance based on already registered. Else Create new one.
      * <p/>
-     * 
+     *
      * @param servlet {@link Servlet} been registered.
      * @param httpContext {@link HttpContext} used for registration.
      * @param initparams Init parameters that will be visible in {@link javax.servlet.ServletContext}.

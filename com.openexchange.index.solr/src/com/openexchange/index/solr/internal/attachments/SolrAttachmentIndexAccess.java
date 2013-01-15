@@ -75,17 +75,17 @@ import com.openexchange.solr.SolrCoreIdentifier;
 
 /**
  * {@link SolrAttachmentIndexAccess}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachment> {
-    
+
     private final SolrQueryBuilder queryBuilder;
-    
+
 
     /**
      * Initializes a new {@link SolrAttachmentIndexAccess}.
-     * 
+     *
      * @param identifier
      */
     public SolrAttachmentIndexAccess(SolrCoreIdentifier identifier, SolrQueryBuilder queryBuilder) {
@@ -113,7 +113,7 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
         if (documents.isEmpty()) {
             return;
         }
-        
+
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<Attachment> document : documents) {
             inputDocuments.add(convertToDocument(document));
@@ -136,7 +136,7 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
         fields.add(AttachmentIndexField.FOLDER);
         fields.add(AttachmentIndexField.OBJECT_ID);
         fields.add(AttachmentIndexField.ATTACHMENT_ID);
-        
+
         IndexResult<Attachment> indexResult = query(parameters, fields);
         List<IndexDocument<Attachment>> documents = indexResult.getResults();
         Set<String> uuids = new HashSet<String>(documents.size());
@@ -159,16 +159,16 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
         if (results.isEmpty()) {
             return Indexes.emptyResult();
         }
-        
+
         return new SolrIndexResult<Attachment>(results.size(), results, null);
     }
-    
+
     @Override
     public IndexResult<Attachment> query0(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
         // Nothing to do
         return null;
     }
-    
+
     private Set<SolrAttachmentField> checkAndConvert(Set<? extends IndexField> fields) {
         Set<SolrAttachmentField> set;
         if (fields == null) {
@@ -181,7 +181,7 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
                 }
             }
         }
-        
+
         return set;
     }
 

@@ -69,7 +69,7 @@ import com.openexchange.textxtraction.TextXtractService;
 
 /**
  * {@link SolrAttachmentDocumentConverter}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrAttachmentDocumentConverter implements SolrResultConverter<Attachment> {

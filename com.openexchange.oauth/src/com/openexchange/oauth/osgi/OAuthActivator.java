@@ -163,7 +163,7 @@ public final class OAuthActivator extends HousekeepingActivator {
              */
             CallbackRegistry cbRegistry = new CallbackRegistry();
             getService(TimerService.class).scheduleAtFixedRate(cbRegistry, 600000, 600000);
-            
+
             delegateServices = new OSGiDelegateServiceMap();
             delegateServices.put(DBProvider.class, new OSGiDatabaseServiceDBProvider().start(context));
             delegateServices.put(ContextService.class, new OSGiContextService().start(context));
@@ -176,17 +176,17 @@ public final class OAuthActivator extends HousekeepingActivator {
                 registry,
                 delegateServices.get(ContextService.class),
                 cbRegistry);
-            
+
             registerService(CustomRedirectURLDetermination.class, cbRegistry);
             registerService(OAuthService.class, oauthService);
             registerService(OAuthServiceMetaDataRegistry.class, registry);
             registerService(EncryptedItemDetectorService.class, oauthService);
             registerService(SecretMigrator.class, oauthService);
             registerService(EncryptedItemCleanUpService.class, oauthService);
-            
+
             final ScribeHTTPClientFactoryImpl oauthFactory = new ScribeHTTPClientFactoryImpl();
 			registerService(OAuthHTTPClientFactory.class, oauthFactory);
-			
+
 			SimpleRegistryListener<HTTPResponseProcessor> listener = new SimpleRegistryListener<HTTPResponseProcessor>() {
 
 				@Override

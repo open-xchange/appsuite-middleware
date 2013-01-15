@@ -181,8 +181,6 @@ public final class FacebookOAuthAccess {
             checkForErrors(object);
             facebookUserId = object.getString("id");
             facebookUserName = object.getString("name");
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
@@ -209,7 +207,7 @@ public final class FacebookOAuthAccess {
         if (object.has("error")) {
             final JSONObject error = object.getJSONObject("error");
             if ("OAuthException".equals(error.opt("type"))) {
-                final OXException e = new OXException(OAuthExceptionCodes.TOKEN_EXPIRED.create(oauthAccount.getDisplayName()));
+                final OXException e = OAuthExceptionCodes.TOKEN_EXPIRED.create(oauthAccount.getDisplayName());
                 LOG.error(e.getErrorCode() + " exceptionId=" + e.getExceptionId() + " JSON error object:\n" + error.toString(2));
                 throw e;
             }

@@ -57,18 +57,18 @@ import com.openexchange.groupware.EnumComponent;
 
 /**
  * {@link MyServletException}
- * 
- * 
+ *
+ *
  */
 public enum MyServletExceptionCode implements OXExceptionCode {
 
     /**
-     * A spamexperts interface error occurred. action: \"%1$s\" ,response: \"%2$s\" 
+     * A spamexperts interface error occurred. action: \"%1$s\" ,response: \"%2$s\"
      */
     SPAMEXPERTS_COMMUNICATION_ERROR("A spamexperts api interface error occurred. action: \"%1$s\" ,response: \"%2$s\" " , CATEGORY_ERROR, 1),
-    
+
     HTTP_COMMUNICATION_ERROR("Http communication error deteced. Details: \"%1$s\"" , CATEGORY_ERROR, 1);
-    
+
     public static final String PREFIX = EnumComponent.RESOURCE.getAbbreviation();
 
     private final String message;
@@ -110,7 +110,7 @@ public enum MyServletExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -119,7 +119,7 @@ public enum MyServletExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -129,7 +129,7 @@ public enum MyServletExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

@@ -98,8 +98,6 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
             con = databaseService.getWritable(cid);
             final String folderName = StringHelper.valueOf(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             create(login.getSession(), login.getContext(), folderName, con);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -131,7 +129,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         }
         /*-
          * Should collect, or not explicitly set, so create folder
-         * 
+         *
          * Create folder
          */
         int collectFolderID = 0;

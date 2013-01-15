@@ -65,7 +65,7 @@ import com.openexchange.index.solr.internal.querybuilder.SimpleConfiguration;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SimpleConfigurationTest {
-    
+
     private static final String CONTENT = "translator.test = a.b.c.TestTranslator\n" +
     		"test.param1 = field1\n" +
     		"test.param2 = field2\n" +
@@ -78,19 +78,19 @@ public class SimpleConfigurationTest {
         fw.write(CONTENT);
         fw.flush();
         fw.close();
-        
+
         Configuration config = new SimpleConfiguration(tempFile.getAbsolutePath());
         tempFile.delete();
-        
+
         Set<String> handlers = config.getHandlers();
         Assert.assertTrue(handlers.size() == 1);
         Assert.assertEquals("test", handlers.iterator().next());
-        
+
         List<String> indexFields = config.getIndexFields("test");
         Set<String> keys = config.getKeys();
         Set<String> keys2 = config.getKeys("test");
 
         System.out.println(config.toString());
     }
-    
+
 }

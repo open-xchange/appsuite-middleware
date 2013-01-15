@@ -63,7 +63,7 @@ import java.util.NoSuchElementException;
 
 /**
  * {@link EmptyTIntObjectMap}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EmptyTIntObjectMap<V> implements TIntObjectMap<V> {
@@ -72,7 +72,7 @@ public final class EmptyTIntObjectMap<V> implements TIntObjectMap<V> {
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     @SuppressWarnings("unchecked")

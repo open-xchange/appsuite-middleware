@@ -53,7 +53,7 @@ import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link MyServiceRegistry} - A registry for services
- * 
+ *
  */
 public final class MyServiceRegistry {
 
@@ -61,7 +61,7 @@ public final class MyServiceRegistry {
 
     /**
      * Gets the service registry
-     * 
+     *
      * @return The service registry
      */
     public static ServiceRegistry getServiceRegistry() {

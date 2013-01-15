@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DeleteAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.PUT, name = "delete", description = "Delete an OAuth account", parameters = {
@@ -119,7 +119,7 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
         	int id = request.getParameter("id", int.class).intValue();
         	final OAuthService oAuthService = getOAuthService();
             oAuthService.deleteAccount(id, session.getUserId(), session.getContextId());
-        	
+
         }
         /*
          * Return appropriate result

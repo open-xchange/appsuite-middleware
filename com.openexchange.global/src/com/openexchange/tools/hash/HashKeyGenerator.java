@@ -51,14 +51,14 @@ package com.openexchange.tools.hash;
 
 /**
  * {@link HashKeyGenerator} - Generates a new {@link HashKey} instance.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface HashKeyGenerator {
 
     /**
      * Creates a new {@link HashKey} instance from given key.
-     * 
+     *
      * @param key The String key
      * @return The hash key
      */

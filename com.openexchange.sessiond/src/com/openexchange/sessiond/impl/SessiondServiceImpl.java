@@ -63,7 +63,6 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
-import com.openexchange.sessiond.Parameterized;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
@@ -75,10 +74,6 @@ import com.openexchange.sessiond.SessiondServiceExtended;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessiondServiceImpl implements SessiondServiceExtended {
-
-    private static final String PARAM_SESSION = Parameterized.PARAM_SESSION;
-
-    private static final String PARAM_VOLATILE = Parameterized.PARAM_VOLATILE;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondServiceImpl.class));
 
@@ -99,14 +94,6 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public Session addSession(final AddSessionParameter param) throws OXException {
-        final Parameterized parameterized = (param instanceof Parameterized) ? (Parameterized) param : null;
-        final boolean isVolatile;
-        if (null == parameterized) {
-            isVolatile = false;
-        } else {
-            final Boolean parameter = parameterized.<Boolean> getParameter(PARAM_VOLATILE);
-            isVolatile = null == parameter ? false : parameter.booleanValue();
-        }
         final SessionImpl session = SessionHandler.addSession(
             param.getUserId(),
             param.getUserLoginInfo(),
@@ -117,13 +104,9 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             param.getAuthId(),
             param.getHash(),
             param.getClient(),
-            isVolatile ? new VolatileParams(parameterized) : null,
             param.getClientToken());
         if (null == session) {
             return null;
-        }
-        if (null != parameterized) {
-            parameterized.setParameter(PARAM_SESSION, session);
         }
         return session;
     }

@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link CryptoSecretEncryptionService} - The {@link SecretEncryptionService} backed by {@link CryptoService}.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -93,7 +93,7 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
 
     /**
      * Initializes a new {@link CryptoSecretEncryptionService}.
-     * 
+     *
      * @param crypto The crypto service reference
      * @param secretService The fall-back secret service
      * @param strategy The strategy to use
@@ -168,7 +168,7 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
         }
         /*-
          * Use token-based entries.
-         * 
+         *
          * Try with last list entry first
          */
         String secret = tokenList.peekLast().getSecret(session);

@@ -61,17 +61,17 @@ public final class JsonCacheCreateTableService extends AbstractCreateTableImpl {
 
     private static final String TABLE = "jsonCache";
 
-    private static final String CREATE = "CREATE TABLE " + TABLE + " (\n" + 
-        "  cid INT4 unsigned NOT NULL,\n" + 
-        "  user INT4 unsigned NOT NULL,\n" + 
-        "  id VARCHAR(128) CHARACTER SET latin1 NOT NULL,\n" + 
-        "  json TEXT CHARACTER SET latin1 NOT NULL,\n" + 
-        "  PRIMARY KEY (cid,user,id)\n" + 
+    private static final String CREATE = "CREATE TABLE " + TABLE + " (\n" +
+        "  cid INT4 unsigned NOT NULL,\n" +
+        "  user INT4 unsigned NOT NULL,\n" +
+        "  id VARCHAR(128) CHARACTER SET latin1 NOT NULL,\n" +
+        "  json TEXT CHARACTER SET latin1 NOT NULL,\n" +
+        "  PRIMARY KEY (cid,user,id)\n" +
         ") ENGINE=InnoDB";
 
     /**
      * Gets the table names.
-     * 
+     *
      * @return The table names.
      */
     public static String[] getTablesToCreate() {
@@ -80,7 +80,7 @@ public final class JsonCacheCreateTableService extends AbstractCreateTableImpl {
 
     /**
      * Gets the CREATE-TABLE statements.
-     * 
+     *
      * @return The CREATE statements
      */
     public static String[] getCreateStmts() {

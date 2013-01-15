@@ -100,7 +100,7 @@ public final class SmbFileMapManagement {
                 if (null == tmp) {
                     final ConcurrentMap<Integer, ConcurrentMap<Integer, SmbFileMap>> map = this.map;
                     final Runnable task = new Runnable() {
-                        
+
                         @Override
                         public void run() {
                             try {

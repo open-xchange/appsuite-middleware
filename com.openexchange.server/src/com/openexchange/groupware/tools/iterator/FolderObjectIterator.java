@@ -673,11 +673,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     private OCLPermission[] getFolderPermissions(final int folderId) throws OXException {
         Connection con = readCon;
         if (null == con) {
-            try {
-                con = Database.get(ctx, false);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            con = Database.get(ctx, false);
             try {
                 return loadFolderPermissions(folderId, ctx.getContextId(), con);
             } finally {

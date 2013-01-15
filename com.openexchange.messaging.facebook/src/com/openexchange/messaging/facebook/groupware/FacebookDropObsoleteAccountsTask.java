@@ -91,12 +91,7 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
     @Override
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
-        final Connection writeCon;
-        try {
-            writeCon = dbService.getForUpdateTask(contextId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection writeCon = dbService.getForUpdateTask(contextId);
         try {
             writeCon.setAutoCommit(false);
             final List<int[]> dataList = listFacebookMessagingAccounts(writeCon);

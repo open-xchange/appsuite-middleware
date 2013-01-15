@@ -52,7 +52,6 @@ package com.openexchange.http.grizzly.service.atmosphere;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
-import org.atmosphere.container.Grizzly2CometSupport;
 import org.atmosphere.container.Grizzly2WebSocketSupport;
 import org.atmosphere.cpr.AtmosphereFramework;
 import org.atmosphere.cpr.AtmosphereHandler;
@@ -72,19 +71,19 @@ import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AtmosphereServiceImpl  implements AtmosphereService {
-    
+
     private final static Log LOG = com.openexchange.log.Log.loggerFor(AtmosphereServiceImpl.class);
     private final AtmosphereFramework atmosphereFramework;
     private final String atmosphereServletMapping;
-    
+
     public AtmosphereServiceImpl(OXHttpServer grizzly, Bundle bundle) throws ServletException {
-        
+
         ConfigurationService configurationService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
         String realtimeContextPath = configurationService.getProperty("com.openexchange.http.realtime.contextPath", "/realtime");
         atmosphereServletMapping = configurationService.getProperty("com.openexchange.http.atmosphere.servletMapping", "/atmosphere/*");
-        
+
         WebappContext realtimeContext = new WebappContext("Realtime context", realtimeContextPath);
-        
+
         AtmosphereServlet atmosphereServlet = new AtmosphereServlet(false, false);
         atmosphereFramework = atmosphereServlet.framework();
         ServletConfig config = FrameworkConfig.with("Atmosphere Servlet", realtimeContext)
@@ -93,23 +92,23 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
         atmosphereFramework.init(config);
 //        atmosphereFramework.setAsyncSupport(new Grizzly2CometSupport(atmosphereFramework.getAtmosphereConfig()));
         atmosphereFramework.setAsyncSupport(new Grizzly2WebSocketSupport(atmosphereFramework.getAtmosphereConfig()));
-        
+
         ServletRegistration atmosphereRegistration = realtimeContext.addServlet("AtmosphereServlet", atmosphereServlet);
         atmosphereRegistration.addMapping(atmosphereServletMapping);
         atmosphereRegistration.setLoadOnStartup(0);
-        
+
         //Deliver js lib matching the serverside lib
 //        ServletRegistration atmosphereJSRegistration = realtimeContext.addServlet("AtmosphereJSServlet", new AtmosphereJSServlet(bundle));
 //        atmosphereJSRegistration.addMapping("/atmosphere/jquery.atmosphere.js");
 //        atmosphereJSRegistration.setLoadOnStartup(0);
-        
+
         realtimeContext.deploy(grizzly);
     }
-    
+
     /**
      * Strip the trailing "/*" characters if a path mapping is used for the
-     * registration of the {@link AtmosphereServlet}. 
-     * @param mapping the configured mapping for the {@link AtmosphereServlet} 
+     * registration of the {@link AtmosphereServlet}.
+     * @param mapping the configured mapping for the {@link AtmosphereServlet}
      * @return the servletPath configured for the {@link AtmosphereServlet}
      */
     private String getServletPathFromMapping(String mapping) {
@@ -117,14 +116,14 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
             throw new IllegalArgumentException();
         }
         if (!mapping.isEmpty() && mapping.startsWith("/") && mapping.endsWith("/*")) {
-            // remove the last two characters iow. "/*" 
+            // remove the last two characters iow. "/*"
             return mapping.substring(0, mapping.length()-2);
         } else {
-            // return empty string to reach the default servlet 
+            // return empty string to reach the default servlet
             return "";
         }
     }
-    
+
     /**
      * Concatenate servletPath and handlerMapping to form a mapping the Atmosphere
      * framework can use to map Requests to AtmosphereHandlers.

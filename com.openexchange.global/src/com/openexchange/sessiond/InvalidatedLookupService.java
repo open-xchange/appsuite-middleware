@@ -51,14 +51,14 @@ package com.openexchange.sessiond;
 
 /**
  * {@link InvalidatedLookupService} - Tests whether the denoted user's sessions have been invalidated.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface InvalidatedLookupService {
 
     /**
      * Tests whether the denoted user's sessions have been invalidated. The <i>invalidated status</i> of the user is cleared by this method.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return <code>true</code> if invalidated; otherwise <code>false</code>

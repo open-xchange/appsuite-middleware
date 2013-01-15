@@ -151,7 +151,7 @@ public class RequestTools {
 		    }
 		}
 	}
-    
+
     public static void setImageData(final Contact contact, final UploadFile file) throws OXException {
         checkIsImageFile(file);
         FileInputStream fis = null;
@@ -175,14 +175,14 @@ public class RequestTools {
             Streams.close(fis);
         }
     }
-    
+
     private static void checkIsImageFile(UploadFile file) throws OXException {
         if (null == file) {
             throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
         }
         String contentType = file.getContentType();
         if (isImageContentType(contentType)) {
-            return;            
+            return;
         }
         String mimeType = null;
         if (null != file.getPreparedFileName()) {
@@ -198,7 +198,7 @@ public class RequestTools {
 //        }
         throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), readableType);
     }
-    
+
     private static boolean isImageContentType(String contentType) {
         return null != contentType && contentType.toLowerCase().startsWith("image");
     }
@@ -206,14 +206,14 @@ public class RequestTools {
     /**
      * Gets a comparator to sort contacts by an upcoming annual date, relative to the supplied reference date. Only available for
      * {@link ContactField#BIRTHDAY} and {@link ContactField#ANNIVERSARY}.
-     *  
+     *
      * @param dateField The annual date field to compare
      * @param reference The reference date
      * @return
      */
     public static Comparator<Contact> getAnnualDateComparator(final ContactField dateField, final Date reference) {
         return new Comparator<Contact>() {
-            
+
             @Override
             public int compare(Contact o1, Contact o2) {
                 Date date1, date2;
@@ -252,9 +252,9 @@ public class RequestTools {
                     } else {
                      // second is next
                         return 1;
-                    }                
+                    }
                 }
-            }        
+            }
         };
     }
 }

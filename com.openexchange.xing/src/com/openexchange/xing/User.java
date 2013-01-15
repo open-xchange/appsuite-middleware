@@ -68,7 +68,7 @@ import com.openexchange.xing.exception.XingException;
 
 /**
  * {@link User} - Represents a XING user account.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class User {
@@ -102,7 +102,7 @@ public class User {
 
     /**
      * Initializes a new {@link User}.
-     * 
+     *
      * @param accountInfo The JSON account information
      * @throws XingException If parsing account information fails
      */
@@ -245,7 +245,7 @@ public class User {
 
     /**
      * Gets the identifier
-     * 
+     *
      * @return The identifier
      */
     public String getId() {
@@ -254,7 +254,7 @@ public class User {
 
     /**
      * Gets the birth date.
-     * 
+     *
      * @return The birth date
      */
     public Date getBirthDate() {
@@ -263,7 +263,7 @@ public class User {
 
     /**
      * Gets the display name
-     * 
+     *
      * @return The display name
      */
     public String getDisplayName() {
@@ -272,7 +272,7 @@ public class User {
 
     /**
      * Gets the last name
-     * 
+     *
      * @return The last name
      */
     public String getLastName() {
@@ -281,7 +281,7 @@ public class User {
 
     /**
      * Gets the first name
-     * 
+     *
      * @return The first name
      */
     public String getFirstName() {
@@ -290,7 +290,7 @@ public class User {
 
     /**
      * Gets the page name
-     * 
+     *
      * @return The page name
      */
     public String getPageName() {
@@ -299,7 +299,7 @@ public class User {
 
     /**
      * Gets the perma link
-     * 
+     *
      * @return The perma link
      */
     public String getPermalink() {
@@ -308,7 +308,7 @@ public class User {
 
     /**
      * Gets the gender
-     * 
+     *
      * @return The gender
      */
     public String getGender() {
@@ -317,7 +317,7 @@ public class User {
 
     /**
      * Gets the active mail
-     * 
+     *
      * @return The active mail
      */
     public String getActiveMail() {
@@ -326,7 +326,7 @@ public class User {
 
     /**
      * Gets the timeZone
-     * 
+     *
      * @return The timeZone
      */
     public TimeZone getTimeZone() {
@@ -335,7 +335,7 @@ public class User {
 
     /**
      * Gets the XING premium services
-     * 
+     *
      * @return The XING premium services
      */
     public List<String> getPremiumServices() {
@@ -344,7 +344,7 @@ public class User {
 
     /**
      * Gets the badges
-     * 
+     *
      * @return The badges
      */
     public List<String> getBadges() {
@@ -353,7 +353,7 @@ public class User {
 
     /**
      * Gets the wants
-     * 
+     *
      * @return The wants
      */
     public String getWants() {
@@ -362,7 +362,7 @@ public class User {
 
     /**
      * Gets the haves
-     * 
+     *
      * @return The haves
      */
     public String getHaves() {
@@ -371,7 +371,7 @@ public class User {
 
     /**
      * Gets the interests
-     * 
+     *
      * @return The interests
      */
     public String getInterests() {
@@ -380,7 +380,7 @@ public class User {
 
     /**
      * Gets the organisation member
-     * 
+     *
      * @return The organisation member
      */
     public String getOrganisationMember() {
@@ -389,7 +389,7 @@ public class User {
 
     /**
      * Gets the languages
-     * 
+     *
      * @return The languages
      */
     public Map<Locale, String> getLanguages() {
@@ -398,7 +398,7 @@ public class User {
 
     /**
      * Gets the private address
-     * 
+     *
      * @return The private address
      */
     public Address getPrivateAddress() {
@@ -407,7 +407,7 @@ public class User {
 
     /**
      * Gets the business address
-     * 
+     *
      * @return The business address
      */
     public Address getBusinessAddress() {
@@ -416,7 +416,7 @@ public class User {
 
     /**
      * Gets the web profiles
-     * 
+     *
      * @return The web profiles
      */
     public Map<String, List<String>> getWebProfiles() {
@@ -425,7 +425,7 @@ public class User {
 
     /**
      * Gets the IM accounts
-     * 
+     *
      * @return The IM accounts
      */
     public Map<String, String> getInstantMessagingAccounts() {
@@ -434,7 +434,7 @@ public class User {
 
     /**
      * Gets the professional experience
-     * 
+     *
      * @return The professional experience
      */
     public Map<String, Object> getProfessionalExperience() {
@@ -443,7 +443,7 @@ public class User {
 
     /**
      * Gets the educational background
-     * 
+     *
      * @return The educational background
      */
     public Map<String, Object> getEducationalBackground() {
@@ -452,7 +452,7 @@ public class User {
 
     /**
      * Gets the photo URLs
-     * 
+     *
      * @return The photo URLs
      */
     public Map<String, Object> getPhotoUrls() {

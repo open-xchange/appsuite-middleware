@@ -78,7 +78,7 @@ public class ShellExecutor {
         public final ArrayList<String> errOutput = new ArrayList<String>();
 
         public final ArrayList<String> stdOutput = new ArrayList<String>();
-        
+
         public int exitstatus;
     }
 

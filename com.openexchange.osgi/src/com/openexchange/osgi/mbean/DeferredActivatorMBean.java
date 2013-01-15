@@ -55,7 +55,7 @@ import com.openexchange.osgi.DeferredActivator;
 
 /**
  * {@link DeferredActivatorMBean} - MBean for {@link DeferredActivator}.
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public interface DeferredActivatorMBean {
@@ -67,22 +67,22 @@ public interface DeferredActivatorMBean {
 
     /**
      * Gets a list of canonical class names of services needed for start-up, but currently not (yet) available for specified bundle.
-     * 
+     *
      * @name The bundle name
      * @return A list of canonical class names of missing services
      */
     List<String> listMissingServices(String name);
-    
+
     /**
      * Gets a list of canonical class names of services needed for start-up, but currently not (yet) available.
-     * 
+     *
      * @return A canonical class names of missing services mapped to bundle
      */
     Map<String, List<String>> listAllMissingServices();
 
     /**
      * Checks if activator for specified bundle is active; meaning all needed services are available.
-     * 
+     *
      * @name The bundle name
      * @return <code>true</code> if active; otherwise <code>false</code>
      */
@@ -90,7 +90,7 @@ public interface DeferredActivatorMBean {
 
     /**
      * Lists all available bundles.
-     * 
+     *
      * @return All available bundles
      */
     List<String> listAvailableBundles();

@@ -74,7 +74,7 @@ public final class SessionThreadCountEventHandler extends ServiceTracker<Session
     private final SessionThreadCounterImpl counterImpl;
 
     private final int threshold;
-    
+
     /**
      * Initializes a new {@link SessionThreadCountEventHandler}.
      */

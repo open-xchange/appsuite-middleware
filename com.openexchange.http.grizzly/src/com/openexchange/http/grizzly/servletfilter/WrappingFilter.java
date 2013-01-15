@@ -67,7 +67,7 @@ import com.openexchange.log.Props;
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
  * and creates a new HttpSession if needed to achieve feature parity with the ajp based implementation.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class WrappingFilter implements Filter {

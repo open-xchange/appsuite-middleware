@@ -59,7 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
- * 
+ *
  * @author d7,cutmasta
  *
  */
@@ -75,16 +75,16 @@ public class ListDatabase extends DatabaseAbstraction {
             parser.ownparse(args2);
 
             final Credentials auth = credentialsparsing(parser);
-            
+
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
-            
+
             String searchpattern = "*";
             if (parser.getOptionValue(this.searchOption) != null) {
                 searchpattern = (String)parser.getOptionValue(this.searchOption);
             }
             final Database[] databases = oxutil.listDatabase(searchpattern, auth);
-            
+
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 precsvinfos(databases);
             } else {
@@ -103,7 +103,7 @@ public class ListDatabase extends DatabaseAbstraction {
         for (final Database database : databases) {
             data.add(makeStandardData(database, false));
         }
-        
+
         doOutput(new String[] { "r", "l", "l", "l", "r", "r", "r", "r", "l", "r", "r" },
 //        doOutput(new String[] { "3r", "10l", "20l", "7l", "7r", "7r", "7r", "7r", "6l", "4r", "7r" },
                  new String[] { "id", "name", "hostname", "master", "mid", "weight", "maxctx", "curctx", "hlimit", "max", "inital" }, data);
@@ -128,13 +128,13 @@ public class ListDatabase extends DatabaseAbstraction {
         columns.add("driver");
         columns.add("read_id");
         columns.add("scheme");
-        
+
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-        
+
         for (final Database database : databases) {
             data.add(makeCSVData(database));
         }
-        
+
         doCSVOutput(columns, data);
     }
 
@@ -147,7 +147,7 @@ public class ListDatabase extends DatabaseAbstraction {
         setSearchOption(parser);
         setCSVOutputOption(parser);
     }
-    
+
     /**
      * @param db
      * @return
@@ -155,7 +155,7 @@ public class ListDatabase extends DatabaseAbstraction {
      */
     private ArrayList<String> makeCSVData(final Database db) throws URISyntaxException{
         final ArrayList<String> rea_data = makeStandardData(db, true);
-        
+
         if (null != db.getLogin()) {
             rea_data.add(db.getLogin());
         } else {
@@ -185,22 +185,22 @@ public class ListDatabase extends DatabaseAbstraction {
         } else {
             rea_data.add(null);
         }
-        
-        
+
+
         return rea_data;
     }
 
     private ArrayList<String> makeStandardData(final Database db, final boolean csv) throws URISyntaxException {
         final ArrayList<String> rea_data = new ArrayList<String>();
-        
+
         rea_data.add(db.getId().toString());
-        
+
         if (null != db.getName()) {
             rea_data.add(db.getName());
         } else {
             rea_data.add(null);
         }
-        
+
         if (null != db.getUrl()) {
             if (csv) {
                 rea_data.add(db.getUrl());
@@ -210,37 +210,37 @@ public class ListDatabase extends DatabaseAbstraction {
         } else {
             rea_data.add(null);
         }
-        
+
         if (null != db.isMaster()) {
             rea_data.add(db.isMaster().toString());
         } else {
             rea_data.add(null);
         }
-        
+
         if (null != db.getMasterId()) {
             rea_data.add(db.getMasterId().toString());
         } else {
             rea_data.add(null);
         }
-        
+
         if (null != db.getClusterWeight()) {
             rea_data.add(db.getClusterWeight().toString());
         } else {
             rea_data.add(null);
         }
-        
+
         if (null != db.getMaxUnits()) {
             rea_data.add(db.getMaxUnits().toString());
         } else {
             rea_data.add(null);
         }
-        
+
         if (null != db.getCurrentUnits()) {
             rea_data.add(db.getCurrentUnits().toString());
         } else {
             rea_data.add(null);
         }
-        
+
         if (null != db.getPoolHardLimit()) {
             if (csv) {
                 rea_data.add(db.getPoolHardLimit().toString());
@@ -250,13 +250,13 @@ public class ListDatabase extends DatabaseAbstraction {
         } else {
             rea_data.add(null);
         }
-        
+
         if (null != db.getPoolMax()) {
             rea_data.add(db.getPoolMax().toString());
         } else {
             rea_data.add(null);
         }
-        
+
         if (null != db.getPoolInitial()) {
             rea_data.add(db.getPoolInitial().toString());
         } else {
@@ -264,7 +264,7 @@ public class ListDatabase extends DatabaseAbstraction {
         }
         return rea_data;
     }
-    
+
     @Override
     protected final String getObjectName() {
         return "databases";

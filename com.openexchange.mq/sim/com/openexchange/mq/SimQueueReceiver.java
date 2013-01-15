@@ -56,7 +56,7 @@ import com.openexchange.mq.queue.MQQueueReceiver;
 
 /**
  * {@link SimQueueReceiver}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SimQueueReceiver implements MQQueueReceiver {
@@ -102,7 +102,7 @@ public class SimQueueReceiver implements MQQueueReceiver {
 
     /**
      * Creates the associated sender.
-     * 
+     *
      * @return The sender
      */
     public SimQueueSender createSimSender() {

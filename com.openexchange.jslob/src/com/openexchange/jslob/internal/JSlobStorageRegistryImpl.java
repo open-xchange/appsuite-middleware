@@ -60,7 +60,7 @@ import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 
 /**
  * {@link JSlobStorageRegistryImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSlobStorageRegistryImpl implements JSlobStorageRegistry {
@@ -69,7 +69,7 @@ public final class JSlobStorageRegistryImpl implements JSlobStorageRegistry {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static JSlobStorageRegistryImpl getInstance() {

@@ -54,10 +54,10 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
  * The {@link DefaultAlarmVeventDatetime}
- * 
- * A default alarm applied to "VEVENT" components whose "DTSTART" property 
+ *
+ * A default alarm applied to "VEVENT" components whose "DTSTART" property
  * value type is "DATE-TIME"
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DefaultAlarmVeventDatetime extends SingleXMLPropertyMixin {
@@ -65,10 +65,10 @@ public class DefaultAlarmVeventDatetime extends SingleXMLPropertyMixin {
     public DefaultAlarmVeventDatetime() {
         super(CaldavProtocol.CAL_NS.getURI(), "default-alarm-vevent-datetime");
     }
-    
+
     @Override
     protected String getValue() {
     	return "BEGIN:VALARM&#xD;\r\nEND:VALARM&#xD;\r\n";
     }
-    
+
 }

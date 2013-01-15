@@ -73,7 +73,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 /**
  * {@link RootCollection} - Top-level collection for CardDAV.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class RootCollection extends AbstractCollection {
@@ -85,7 +85,7 @@ public class RootCollection extends AbstractCollection {
     private static final String DISPLAY_NAME = "Addressbooks";
     private static final String AGGREGATED_FOLDER_ID = "Contacts"; // folder ID needs to be exactly "Contacts" for backwards compatibility
     private static final String AGGREGATED_DISPLAY_NAME = "All Contacts";
-    
+
     private final GroupwareCarddavFactory factory;
     private final WebdavPath url;
     private String exposedCollections = null;
@@ -94,7 +94,7 @@ public class RootCollection extends AbstractCollection {
 
     /**
      * Initializes a new {@link RootCollection}.
-     * 
+     *
      * @param factory the factory
      */
     public RootCollection(GroupwareCarddavFactory factory) {
@@ -104,7 +104,7 @@ public class RootCollection extends AbstractCollection {
         includeProperties(new DummySyncToken());
         LOG.debug(getUrl() + ": initialized.");
     }
-    
+
     protected WebdavProtocolException protocolException(Throwable t) {
     	return protocolException(t, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
@@ -118,7 +118,7 @@ public class RootCollection extends AbstractCollection {
 	public WebdavPath getUrl() {
 		return this.url;
 	}
-	
+
 	@Override
 	protected WebdavFactory getFactory() {
 		return this.factory;
@@ -128,7 +128,7 @@ public class RootCollection extends AbstractCollection {
 	protected boolean isset(Property p) {
 		int id = p.getId();
 		return Protocol.GETCONTENTLANGUAGE != id && Protocol.GETCONTENTLENGTH != id && Protocol.GETETAG != id;
-	}	
+	}
 
 	@Override
 	public List<WebdavResource> getChildren() throws WebdavProtocolException {
@@ -139,7 +139,7 @@ public class RootCollection extends AbstractCollection {
 			 */
 			children.add(new AggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME));
 			LOG.debug(getUrl() + ": adding aggregated collection as child resource.");
-		} 
+		}
 		if (isUseFolderCollections()) {
 			/*
 			 * add one child resource per contact folder
@@ -164,7 +164,7 @@ public class RootCollection extends AbstractCollection {
 
     /**
      * Constructs a string representing the WebDAV name for a folder resource.
-     * 
+     *
      * @param folder the folder to construct the name for
      * @return the name
      */
@@ -177,13 +177,13 @@ public class RootCollection extends AbstractCollection {
     }
 
     private WebdavPath constructPathForChildResource(String id) {
-    	return this.getUrl().dup().append(id);    	
+    	return this.getUrl().dup().append(id);
     }
 
     /**
-     * Gets a child collection from this collection by name. If the resource 
+     * Gets a child collection from this collection by name. If the resource
      * does not yet exists, a placeholder contact resource is created.
-     * 
+     *
      * @param name the name of the resource
      * @return the child collection
      * @throws WebdavProtocolException
@@ -230,7 +230,7 @@ public class RootCollection extends AbstractCollection {
 		}
 		throw protocolException(new Throwable("child resource '" + name + "' not found"), HttpServletResponse.SC_NOT_FOUND);
 	}
-	
+
     private String getExposedCollections() {
         if (null == this.exposedCollections) {
             exposedCollections = "0";
@@ -269,13 +269,13 @@ public class RootCollection extends AbstractCollection {
     }
 
 	private boolean isUseAggregatedCollection() {
-		return "2".equals(getExposedCollections()) || "0".equals(getExposedCollections()) && isAddressbookClient(); 
+		return "2".equals(getExposedCollections()) || "0".equals(getExposedCollections()) && isAddressbookClient();
 	}
 
 	private boolean isUseFolderCollections() {
-		return "1".equals(getExposedCollections()) || "0".equals(getExposedCollections()) && false == isAddressbookClient(); 
+		return "1".equals(getExposedCollections()) || "0".equals(getExposedCollections()) && false == isAddressbookClient();
 	}
-	
+
 	private boolean isAddressbookClient() {
 		String userAgent = (String)factory.getSession().getParameter("user-agent");
 		if (null != userAgent && 0 < userAgent.length() && null != getUserAgentForAggregatedCollection()) {

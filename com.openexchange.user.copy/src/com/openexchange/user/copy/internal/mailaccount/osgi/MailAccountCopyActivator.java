@@ -62,7 +62,7 @@ import com.openexchange.user.copy.internal.mailaccount.MailAccountCopyTask;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountCopyActivator implements BundleActivator {
-    
+
     private ServiceRegistration<CopyUserTaskService> serviceRegistration;
 
     public MailAccountCopyActivator() {

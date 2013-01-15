@@ -166,18 +166,18 @@ public abstract class WebDavServlet extends HttpServlet {
         ConfigurationService config = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         return config.getBoolProperty("com.openexchange.webdav.disabled", true);
     }
-    
+
     protected String getDisabledMessage() {
         ConfigurationService config = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         String text = config.getText("webdav-disabled-message.txt");
         return text;
     }
-    
+
     /**
      * Override this and return true to disable the servlet. In this case an error message will be sent to the client.
      * Whether WebDav servlets can be disabled at all has to be specified with "com.openexchange.webdav.disabled=true"
      * in server.properties. The error message may be customized within the property "com.openexchange.webdav.errorMessage".
-     * 
+     *
      * @return
      */
     protected boolean isServletDisabled() {
@@ -191,7 +191,7 @@ public abstract class WebDavServlet extends HttpServlet {
     protected void service(final HttpServletRequest request, final HttpServletResponse resp) throws ServletException, IOException {
         // create a new HttpSession if it's missing
         request.getSession(true);
-        
+
         if (isServletDisabled() && isDisabledByProperty()) {
             resp.setContentType("text/html; charset=UTF-8");
             resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, getDisabledMessage());

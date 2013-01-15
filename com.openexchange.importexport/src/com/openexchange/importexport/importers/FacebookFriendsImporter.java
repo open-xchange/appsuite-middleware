@@ -74,7 +74,7 @@ public class FacebookFriendsImporter extends ContactImporter {
 				res.setException(ImportExportExceptionCodes.COULD_NOT_WRITE.create());
 				res.setDate(new Date());
 			}
-			list.add(res); 
+			list.add(res);
 		}
 
 		return list;

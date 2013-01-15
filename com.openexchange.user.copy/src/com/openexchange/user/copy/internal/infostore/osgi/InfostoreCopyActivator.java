@@ -61,7 +61,7 @@ import com.openexchange.tools.file.external.QuotaFileStorageFactory;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class InfostoreCopyActivator implements BundleActivator {
-    
+
     private ServiceTracker<QuotaFileStorageFactory, QuotaFileStorageFactory> tracker;
 
     /**

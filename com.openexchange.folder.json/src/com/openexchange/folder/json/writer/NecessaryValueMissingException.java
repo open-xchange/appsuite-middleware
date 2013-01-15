@@ -53,7 +53,7 @@ package com.openexchange.folder.json.writer;
 /**
  * {@link NecessaryValueMissingException} - Thrown to indicate that a necessary value is missing in a
  * {@link com.openexchange.folderstorage.UserizedFolder UserizedFolder} instance.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class NecessaryValueMissingException extends RuntimeException {
@@ -69,7 +69,7 @@ final class NecessaryValueMissingException extends RuntimeException {
 
     /**
      * Initializes a new {@link NecessaryValueMissingException}.
-     * 
+     *
      * @param message
      */
     protected NecessaryValueMissingException(final String message) {
@@ -78,7 +78,7 @@ final class NecessaryValueMissingException extends RuntimeException {
 
     /**
      * Initializes a new {@link NecessaryValueMissingException}.
-     * 
+     *
      * @param cause
      */
     protected NecessaryValueMissingException(final Throwable cause) {
@@ -87,7 +87,7 @@ final class NecessaryValueMissingException extends RuntimeException {
 
     /**
      * Initializes a new {@link NecessaryValueMissingException}.
-     * 
+     *
      * @param message
      * @param cause
      */

@@ -62,33 +62,33 @@ import com.openexchange.documentation.Type;
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Parameter {
-	
+
 	/**
 	 * Specifies the name. Required.
-	 * 
+	 *
 	 * @return the name
 	 */
 	String name();
-	
+
 	/**
 	 * Specifies the description. Defaults to <code>""</code>.
-	 * 
+	 *
 	 * @return the description
 	 */
 	String description() default "";
 
 	/**
 	 * Specifies whether the {@link Parameter} is optional or not. Defaults to <code>false</code>.
-	 * 
+	 *
 	 * @return <code>true</code>, if it is optional, <code>false</code>, otherwise
 	 */
 	boolean optional() default false;
-	
+
 	/**
 	 * Specifies the type. Defaults to <code>Type.STRING</code>.
-	 * 
+	 *
 	 * @return the type
 	 */
 	Type type() default Type.STRING;
-	
+
 }

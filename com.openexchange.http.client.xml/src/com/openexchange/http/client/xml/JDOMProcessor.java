@@ -14,7 +14,7 @@ public class JDOMProcessor implements HTTPResponseProcessor {
 	public JDOMProcessor(final JDOMParser parser) {
 		this.parser = parser;
 	}
-	
+
 	public Class<?>[] getTypes() {
 		return new Class[]{InputStream.class, Document.class};
 	}

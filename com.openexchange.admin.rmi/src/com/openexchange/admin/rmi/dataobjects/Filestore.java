@@ -53,7 +53,7 @@ import java.io.Serializable;
 
 /**
  * This class represents a filestore.
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
@@ -63,40 +63,40 @@ public class Filestore implements Serializable {
     private static final long serialVersionUID = -6970026864761440793L;
 
     private Integer id;
-    
-    private boolean idset;    
+
+    private boolean idset;
 
     private String url;
-    
+
     private boolean urlset;
 
     /**
      * Size in mega bytes (MB).
      */
     private Long size;
-    
+
     private boolean sizeset;
 
     /**
      * Used space in mega bytes (MB)
      */
     private Long used;
-    
+
     private boolean usedset;
 
     /**
      * Reserved space in mega bytes (MB)
      */
     private Long reserved;
-    
+
     private boolean reservedset;
-    
+
     private Integer maxContexts;
-    
+
     private boolean maxContextsset;
 
     private Integer currentContexts;
-    
+
     private boolean currentContextsset;
 
     /**
@@ -108,7 +108,7 @@ public class Filestore implements Serializable {
 
     /**
      * Initiates a filestore object with given id set
-     * 
+     *
      * @param id An {@link Integer} containing the id
      */
     public Filestore(Integer id) {
@@ -118,7 +118,7 @@ public class Filestore implements Serializable {
 
     /**
      * Returns the id of this filestore object
-     * 
+     *
      * @return An {@link Integer} containing the id
      */
     public Integer getId() {
@@ -127,7 +127,7 @@ public class Filestore implements Serializable {
 
     /**
      * Sets the id for this filestore object
-     * 
+     *
      * @param id An {@link Integer} containing the id
      */
     public void setId(final Integer id) {
@@ -137,7 +137,7 @@ public class Filestore implements Serializable {
 
     /**
      * Returns the url of this filestore object
-     * 
+     *
      * @return A {@link String} containing the url
      */
     public String getUrl() {
@@ -146,7 +146,7 @@ public class Filestore implements Serializable {
 
     /**
      * Sets the url for this filestore object
-     * 
+     *
      * @param url A {@link String} containing the url
      */
     public void setUrl(final String url) {
@@ -156,7 +156,7 @@ public class Filestore implements Serializable {
 
     /**
      * Returns the size of this filestore object (in MB)
-     * 
+     *
      * @return A {@link Long} containing the size (in MB)
      */
     public Long getSize() {
@@ -168,7 +168,7 @@ public class Filestore implements Serializable {
      */
     /**
      * Sets the size for this filestore object (in MB)
-     * 
+     *
      * @param size A {@link Long} containing the size (in MB)
      */
     public void setSize(final Long size) {
@@ -178,7 +178,7 @@ public class Filestore implements Serializable {
 
     /**
      * Returns the maximum amount of contexts of this filestore object
-     * 
+     *
      * @return An {@link Integer} containing the maximum amoung of contexts
      */
     public Integer getMaxContexts() {
@@ -187,7 +187,7 @@ public class Filestore implements Serializable {
 
     /**
      * Sets the maximum amount of contexts for this filestore object
-     * 
+     *
      * @param maxContexts A {@link String} containing the maximum amount of contexts
      */
     public void setMaxContexts(final Integer maxContexts) {
@@ -197,7 +197,7 @@ public class Filestore implements Serializable {
 
     /**
      * Returns the current amount of contexts of this filestore object
-     * 
+     *
      * @return An {@link Integer} containing the current
      */
     public Integer getCurrentContexts() {
@@ -206,7 +206,7 @@ public class Filestore implements Serializable {
 
     /**
      * Sets the current amount of contexts for this filestore object
-     * 
+     *
      * @param currentContexts An {@link Integer} containing the current amount of contexts
      */
     public void setCurrentContexts(final Integer currentContexts) {
@@ -216,7 +216,7 @@ public class Filestore implements Serializable {
 
     /**
      * Returns the currently used size of this filestore object (in MB)
-     * 
+     *
      * @return A {@link Long} containing the currently used size (in MB)
      */
     public Long getUsed() {
@@ -225,7 +225,7 @@ public class Filestore implements Serializable {
 
     /**
      * Sets the currently used size for this filestore object (in MB)
-     * 
+     *
      * @param quota_used A {@link Long} containing the currently used size
      */
     public void setUsed(final Long quota_used) {
@@ -236,7 +236,7 @@ public class Filestore implements Serializable {
     /**
      * Constructs a <code>String</code> with all attributes in name = value
      * format.
-     * 
+     *
      * @return a <code>String</code> representation of this object.
      */
     @Override

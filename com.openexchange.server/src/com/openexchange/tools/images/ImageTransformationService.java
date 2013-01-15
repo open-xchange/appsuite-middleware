@@ -55,35 +55,35 @@ import java.io.InputStream;
 
 /**
  * {@link ImageTransformationService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ImageTransformationService {
-	
+
 	/**
-	 * Initializes a new {@link ImageTransformations} working on the supplied source image. 
-	 * 
+	 * Initializes a new {@link ImageTransformations} working on the supplied source image.
+	 *
 	 * @param sourceImage The source image to use
 	 * @return A new {@link ImageTransformations} instance for the image
 	 */
     ImageTransformations transfom(BufferedImage sourceImage);
-    
+
     /**
-     * Initializes a new {@link ImageTransformations} working on the supplied source image stream. 
-     * 
+     * Initializes a new {@link ImageTransformations} working on the supplied source image stream.
+     *
      * @param imageStream The source image stream to use
      * @return A new {@link ImageTransformations} instance for the stream
-     * @throws IOException 
+     * @throws IOException
      */
     ImageTransformations transfom(InputStream imageStream) throws IOException;
-    
+
     /**
-     * Initializes a new {@link ImageTransformations} working on the supplied source image data. 
-     * 
+     * Initializes a new {@link ImageTransformations} working on the supplied source image data.
+     *
      * @param sourceImage The source image data to use
      * @return A new {@link ImageTransformations} instance for the image
-     * @throws IOException 
+     * @throws IOException
      */
     ImageTransformations transfom(byte[] imageData) throws IOException;
-    
+
 }

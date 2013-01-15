@@ -68,7 +68,7 @@ import org.osgi.framework.Bundle;
  */
 public class AtmosphereJSServlet extends HttpServlet {
     private final Bundle bundle;
-    
+
     public AtmosphereJSServlet(Bundle bundle) {
         this.bundle = bundle;
     }
@@ -81,9 +81,9 @@ public class AtmosphereJSServlet extends HttpServlet {
         InputStream fileStream = bundle.getEntry("lib/jquery.atmosphere.js").openStream();
         ReadableByteChannel fileChannel = Channels.newChannel(fileStream);
         WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream());
-        
+
         final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
-        
+
         while(fileChannel.read(buffer) != -1) {
             buffer.flip();
             outputChannel.write(buffer);

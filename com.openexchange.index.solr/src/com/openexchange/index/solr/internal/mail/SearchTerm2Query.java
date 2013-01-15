@@ -74,7 +74,7 @@ import com.openexchange.mail.search.ToTerm;
 
 /**
  * {@link SearchTerm2Query} - Transforms a search term to a query.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SearchTerm2Query {
@@ -290,7 +290,7 @@ public final class SearchTerm2Query {
             if (SolrMailField.TO.isIndexed()) {
                 final List<String> fields = Collections.singletonList(SolrMailField.TO.parameterName());
                 stringPattern(fields, term.getPattern());
-            }            
+            }
         }
 
         private void stringPattern(final List<String> names, final String pattern) {
@@ -313,7 +313,7 @@ public final class SearchTerm2Query {
 
     /**
      * Transforms specified search term to a query.
-     * 
+     *
      * @param mailSearchTerm The mail search term
      * @return The resulting query
      */

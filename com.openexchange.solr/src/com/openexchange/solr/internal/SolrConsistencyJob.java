@@ -71,9 +71,9 @@ import com.openexchange.solr.SolrCoreIdentifier;
  */
 @DisallowConcurrentExecution
 public class SolrConsistencyJob implements Job {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrConsistencyJob.class);
-    
+
     public SolrConsistencyJob() {
         super();
     }
@@ -84,7 +84,7 @@ public class SolrConsistencyJob implements Job {
             DelegationSolrAccessImpl accessService = (DelegationSolrAccessImpl) Services.getService(SolrAccessService.class);
             EmbeddedSolrAccessImpl embeddedAccess = accessService.getEmbeddedServerAccess();
             HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-            
+
             Member member = hazelcast.getCluster().getLocalMember();
             String host = SolrCoreTools.resolveSocketAddress(member.getInetSocketAddress());
             SqlPredicate predicate = new SqlPredicate("this = " + host);
@@ -99,7 +99,7 @@ public class SolrConsistencyJob implements Job {
                     embeddedAccess.freeResources(new SolrCoreIdentifier(core));
                 }
             }
-            
+
             String hostAddress = member.getInetSocketAddress().getAddress().getHostAddress();
             IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
             solrNodes.put(hostAddress, coresInHazelcast.size());

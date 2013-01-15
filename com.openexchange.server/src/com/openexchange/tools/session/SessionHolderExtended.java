@@ -60,7 +60,7 @@ public interface SessionHolderExtended extends SessionHolder {
 
     /**
      * Optionally gets the {@link Session session}.
-     * 
+     *
      * @return The session or <code>null</code>
      */
     public Session optSessionObject();

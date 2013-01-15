@@ -59,17 +59,17 @@ import java.util.List;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AnalyzerElement {
-    
+
     private final List<AnalyzerElement> children = new ArrayList<AnalyzerElement>();
     protected boolean capturing;
-    
+
     protected abstract boolean applyAndExtract(Filter filter, List<Object> extracted);
     protected abstract boolean apply(Filter filter);
-    
+
     public void addChildAnalyzer(AnalyzerElement analyzer) {
         children.add(analyzer);
     }
-    
+
     public boolean matches(Filter filter, List<Object> extracted) {
         boolean match = false;
         if (capturing) {
@@ -80,7 +80,7 @@ public abstract class AnalyzerElement {
         if (!match) {
             return false;
         }
-        
+
         List<AnalyzerElement> copy = new ArrayList<AnalyzerElement>(children);
         for (Filter childFilter : filter.getFilters()) {
             boolean matchedOnce = false;

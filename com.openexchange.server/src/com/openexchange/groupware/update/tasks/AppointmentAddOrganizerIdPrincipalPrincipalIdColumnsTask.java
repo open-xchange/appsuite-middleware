@@ -65,7 +65,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link AppointmentAddOrganizerIdPrincipalPrincipalIdColumnsTask}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AppointmentAddOrganizerIdPrincipalPrincipalIdColumnsTask extends UpdateTaskAdapter {

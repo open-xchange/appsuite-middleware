@@ -60,7 +60,7 @@ import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
 
 /**
  * {@link AWSS3Activator}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AWSS3Activator extends HousekeepingActivator {

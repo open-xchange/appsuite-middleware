@@ -55,7 +55,6 @@ import static com.openexchange.ajax.fields.LoginFields.CLIENT_IP_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.PASSWORD_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.VERSION_PARAM;
-import static com.openexchange.ajax.fields.LoginFields.VOLATILE;
 import static com.openexchange.login.Interface.HTTP_JSON;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.util.List;
@@ -162,14 +161,6 @@ public final class LoginTools {
         return parseParameter(req, LoginFields.USER_AGENT, req.getHeader(Header.USER_AGENT));
     }
 
-    public static boolean parseVolatile(HttpServletRequest req) {
-        final String parameter = req.getParameter(VOLATILE);
-        if (isEmpty(parameter)) {
-            return false;
-        }
-        return Boolean.parseBoolean(parameter.trim());
-    }
-
     public static LoginRequestImpl parseLogin(HttpServletRequest req, String login, String password, boolean strict, String defaultClient, boolean forceHTTPS) throws OXException {
         final String authId = parseAuthId(req, strict);
         final String client = parseClient(req, strict, defaultClient);
@@ -184,7 +175,6 @@ public final class LoginTools {
         }
         final String clientIP = parseClientIP(req);
         final String userAgent = parseUserAgent(req);
-        final boolean isVolatile = parseVolatile(req);
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         final String httpSessionId = req.getSession(true).getId();
@@ -197,7 +187,6 @@ public final class LoginTools {
             client,
             version,
             HashCalculator.getInstance().getHash(req, userAgent, client),
-            isVolatile,
             HTTP_JSON,
             headers,
             cookies,

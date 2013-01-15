@@ -3238,7 +3238,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Handles specified response(s).
-     * 
+     *
      * @param r The response(s)
      * @param protocol The IMAP protocol
      */
@@ -3259,7 +3259,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Performs specified command without arguments
-     * 
+     *
      * @param p The IMAP protocol
      * @param command The command
      * @return The responses
@@ -3270,7 +3270,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Performs specified command using given arguments
-     * 
+     *
      * @param p The IMAP protocol
      * @param command The command
      * @param args The argument

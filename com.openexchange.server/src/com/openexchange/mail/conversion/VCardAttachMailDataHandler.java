@@ -123,12 +123,8 @@ public final class VCardAttachMailDataHandler implements DataHandler {
     public Object processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
         final Context ctx;
         final UserSettingMail usm;
-        try {
-            ctx = ContextStorage.getStorageContext(session);
-            usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        ctx = ContextStorage.getStorageContext(session);
+        usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
         try {
             /*
              * Temporary store VCard as a file for later transport
@@ -202,6 +198,8 @@ public final class VCardAttachMailDataHandler implements DataHandler {
             }
             mimeMessage.setContent(mimeMultipart);
             mimeMessage.saveChanges();
+            // Remove generated Message-Id for template message
+            mimeMessage.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
             /*
              * Return mail's JSON object
              */
@@ -214,8 +212,6 @@ public final class VCardAttachMailDataHandler implements DataHandler {
                 null);
             addFileInformation(mailObject, managedFile.getID());
             return mailObject;
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final MessagingException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -259,8 +255,6 @@ public final class VCardAttachMailDataHandler implements DataHandler {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(vcard.getClass().getName());
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

@@ -190,7 +190,7 @@ final class Reminder {
                 .getDate());
         }
     }
-    
+
     static void loadReminder(final Context ctx, final int userId,
         final Collection<Task> tasks, final Connection con) throws OXException {
             final ReminderService remStor = new ReminderHandler(ctx);
@@ -234,7 +234,7 @@ final class Reminder {
             reminder.deleteReminder(task.getObjectID(), Types.TASK);
         } catch (final OXException e) {
             if (!ReminderExceptionCode.NOT_FOUND.equals(e)) {
-                throw new OXException(e);
+                throw e;
             }
         }
     }

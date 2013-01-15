@@ -68,7 +68,7 @@ import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 
 /**
  * Authorization request handler.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AuthorizationServlet extends AbstractAuthorizationServlet {

@@ -57,14 +57,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SmalAccessService} - Simple service to acquire/release unwrapped {@link MailAccess} instances.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SmalAccessService {
 
     /**
      * Gets an un-wrapped {@link MailAccess} instance for specified account and session.
-     * 
+     *
      * @param session The session
      * @param accountId The account identifier
      * @return An un-wrapped {@link MailAccess} instance either fetched from cache or newly created

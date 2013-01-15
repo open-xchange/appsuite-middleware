@@ -61,29 +61,29 @@ import java.sql.SQLException;
 public interface SearchAdapter {
 
 	/**
-	 * Gets the parameter values that were detected in the search term during 
+	 * Gets the parameter values that were detected in the search term during
 	 * parsing to be included in the database statement in the correct order.
-	 *  
+	 *
 	 * @return the parameters
 	 */
 	public Object[] getParameters();
-	
+
 	/**
 	 * Gets the constructed <code>WHERE</code>-clause for the search term to be
-	 * used in the database statement, without the leading <code>WHERE</code>.  
-	 * 
+	 * used in the database statement, without the leading <code>WHERE</code>.
+	 *
 	 * @return the search clause
 	 */
 	public String getClause();
-	
+
 	/**
 	 * Sets the detected database parameters in the supplied prepared statement,
 	 * beginning at the specified parameter index.
-	 * 
+	 *
 	 * @param stmt the statement to set the parameters for
 	 * @param parameterIndex the start index to set the parameters
 	 * @throws SQLException
 	 */
 	public void setParameters(PreparedStatement stmt, int parameterIndex) throws SQLException;
-	
+
 }

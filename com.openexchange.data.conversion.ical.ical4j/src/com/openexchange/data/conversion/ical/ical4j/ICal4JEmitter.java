@@ -276,7 +276,7 @@ public class ICal4JEmitter implements ICalEmitter {
             throw new ConversionError(-1, Code.VALIDATION, e);
         }
     }
-    
+
     @Override
     public void flush(final ICalSession session, final OutputStream stream) throws ConversionError {
         final Calendar calendar = getCalendar(session);
@@ -295,7 +295,7 @@ public class ICal4JEmitter implements ICalEmitter {
         } catch (final ValidationException e) {
             throw new ConversionError(-1, Code.VALIDATION, e);
         }
-        
+
         if (!(session instanceof ICal4jSession)) {
         	throw new ConversionError(-1, Code.INVALID_SESSION, session.getClass().getName());
         }
@@ -306,9 +306,9 @@ public class ICal4JEmitter implements ICalEmitter {
 
     private String removeTimezoneData(String string) {
 		return Pattern
-			.compile("\n?BEGIN:VTIMEZONE.+?\nEND:VTIMEZONE\n?", 
-				  Pattern.CASE_INSENSITIVE 
-				| Pattern.DOTALL 
+			.compile("\n?BEGIN:VTIMEZONE.+?\nEND:VTIMEZONE\n?",
+				  Pattern.CASE_INSENSITIVE
+				| Pattern.DOTALL
 				| Pattern.MULTILINE)
 			.matcher(string).replaceAll("");
 	}

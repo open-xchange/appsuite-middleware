@@ -693,7 +693,7 @@ public class ContactStringGetter implements ContactSwitcher {
     public Object image1contenttype(final Object[] objects) throws OXException {
         return stringify(delegate.image1contenttype(objects));
     }
-    
+
     @Override
     public Object homeaddress(final Object[] objects) throws OXException {
         return stringify(delegate.homeaddress(objects));

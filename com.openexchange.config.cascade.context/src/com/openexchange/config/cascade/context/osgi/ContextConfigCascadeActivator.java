@@ -81,7 +81,7 @@ public class ContextConfigCascadeActivator extends HousekeepingActivator {
             registerService(ConfigProviderService.class, provider, properties);
         }
 
-        {   
+        {
             ConfigViewFactory configViews = getService(ConfigViewFactory.class);
 
             ContextSetConfigProvider provider = new ContextSetConfigProvider(contexts, configuration, userConfigs, configViews);

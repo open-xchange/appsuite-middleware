@@ -59,14 +59,14 @@ import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
  * {@link SessiondMBeanImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessiondMBeanImpl extends StandardMBean implements SessiondMBean {
 
     /**
      * Initializes a new {@link SessiondMBeanImpl}
-     * 
+     *
      * @throws NotCompliantMBeanException If the mbeanInterface does not follow JMX design patterns for Management Interfaces, or if this
      *             does not implement the specified interface.
      */

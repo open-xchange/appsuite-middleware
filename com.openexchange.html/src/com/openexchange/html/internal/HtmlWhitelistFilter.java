@@ -86,7 +86,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * {@link HtmlWhitelistFilter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HtmlWhitelistFilter {
@@ -94,7 +94,7 @@ public final class HtmlWhitelistFilter {
     /**
      * Gets the default {@link HtmlWhitelistFilter} instance.
      * @param capacity The capacity
-     * 
+     *
      * @return The default {@link HtmlWhitelistFilter} instance
      */
     public static HtmlWhitelistFilter newDefaultHtmlWhitelistFilter(final int capacity) {
@@ -248,7 +248,7 @@ public final class HtmlWhitelistFilter {
 
     /**
      * Checks whether an image URL was found and replaced.
-     * 
+     *
      * @return <code>true</code> if an image URL was found and replaced; otherwise <code>false</code>
      */
     public boolean isImageURLFound() {
@@ -257,7 +257,7 @@ public final class HtmlWhitelistFilter {
 
     /**
      * Sanitizes specified HTML content.
-     * 
+     *
      * @param pseudoHTML The possibly broken HTML content to sanitize
      * @param formatWhiteSpace Whether whitespace characters shall be replaced with HTML markup
      * @param stripInvalidElements Whether invalid elements shall be removed
@@ -608,7 +608,7 @@ public final class HtmlWhitelistFilter {
 
     /**
      * Parses specified HTML map.
-     * 
+     *
      * @param htmlMapStr The HTML map string
      * @return The parsed map
      */
@@ -691,7 +691,7 @@ public final class HtmlWhitelistFilter {
 
     /**
      * Parses specified combination map for CSS elements.
-     * 
+     *
      * @param combiMapStr The string representation for combination map
      * @return The parsed map
      */

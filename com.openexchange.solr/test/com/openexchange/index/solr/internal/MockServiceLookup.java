@@ -59,7 +59,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MockServiceLookup implements ServiceLookup {
-    
+
     private final DatabaseService dbService;
 
     public MockServiceLookup(final DatabaseService dbService) {

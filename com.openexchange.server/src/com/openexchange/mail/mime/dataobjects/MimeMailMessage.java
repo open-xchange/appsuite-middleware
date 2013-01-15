@@ -152,7 +152,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
     public MimeMessage getMimeMessage() {
         return (MimeMessage) mailPart.getPart();
     }
- 
+
     @Override
     public void cleanUp() {
         final MimeMessage mimeMessage = getMimeMessage();

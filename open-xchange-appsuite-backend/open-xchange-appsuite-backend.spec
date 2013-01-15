@@ -14,15 +14,15 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       Backend extensions to serve App Suite frontend
+Summary:       Backend extensions to serve OX App Suite frontend
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-halo
 Requires:      open-xchange-appsuite-manifest
 
 %description
-This package installs the OSGi bundles and configuration files that are necessary to use the App Suite frontend. If the Open-Xchange 6
+This package installs the OSGi bundles and configuration files that are necessary to use the OX App Suite frontend. If the Open-Xchange 6
 frontend is used, this package has no effect at all.
-The available Apps and the access permissions in the App Suite frontend are configured by this package. Additionally this package contains
+The available Apps and the access permissions in the OX App Suite frontend are configured by this package. Additionally this package contains
 dependencies to all necessary other extensions of the backend.
 
 Authors:

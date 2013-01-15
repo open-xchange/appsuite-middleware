@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link CoverExtractorRegistry} - A registry for extractors.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface CoverExtractorRegistry {
@@ -67,7 +67,7 @@ public interface CoverExtractorRegistry {
 
     /**
      * Gets registered extractors.
-     * 
+     *
      * @return The registered extractors (at time of invocation)
      * @throws OXException If retrieving extractors fails
      */

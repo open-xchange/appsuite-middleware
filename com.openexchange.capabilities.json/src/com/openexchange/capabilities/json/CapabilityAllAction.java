@@ -69,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(noSession = true)
 public class CapabilityAllAction implements AJAXActionService {
 
-	private ServiceLookup services;
+	private final ServiceLookup services;
 
 	public CapabilityAllAction(ServiceLookup services) {
 		super();
@@ -79,11 +79,11 @@ public class CapabilityAllAction implements AJAXActionService {
 	@Override
 	public AJAXRequestResult perform(AJAXRequestData requestData,
 			ServerSession session) throws OXException {
-		
+
 		CapabilityService capabilityService = services.getService(CapabilityService.class);
-		
+
 		Set<Capability> capabilities = capabilityService.getCapabilities(session);
-		
+
 		return new AJAXRequestResult(capabilities, "capability");
 	}
 

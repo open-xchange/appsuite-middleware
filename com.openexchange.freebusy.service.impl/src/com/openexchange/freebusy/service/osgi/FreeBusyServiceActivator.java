@@ -70,7 +70,7 @@ import com.openexchange.userconf.UserConfigurationService;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class FreeBusyServiceActivator extends HousekeepingActivator {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyServiceActivator.class));
 
     /**
@@ -84,7 +84,7 @@ public class FreeBusyServiceActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ContextService.class, UserConfigurationService.class, ThreadPoolService.class };
     }
-    
+
     @Override
     protected void startBundle() throws Exception {
         try {
@@ -93,7 +93,7 @@ public class FreeBusyServiceActivator extends HousekeepingActivator {
             /*
              * track providers
              */
-            final FreeBusyProviderRegistry registry = new FreeBusyProviderRegistry();            
+            final FreeBusyProviderRegistry registry = new FreeBusyProviderRegistry();
             super.track(InternalFreeBusyProvider.class, new SimpleRegistryListener<InternalFreeBusyProvider>() {
 
                 @Override
@@ -105,7 +105,7 @@ public class FreeBusyServiceActivator extends HousekeepingActivator {
                 public void removed(ServiceReference<InternalFreeBusyProvider> ref, InternalFreeBusyProvider service) {
                     registry.remove(service);
                 }
-            });            
+            });
             super.track(FreeBusyProvider.class, new SimpleRegistryListener<FreeBusyProvider>() {
 
                 @Override
@@ -117,7 +117,7 @@ public class FreeBusyServiceActivator extends HousekeepingActivator {
                 public void removed(ServiceReference<FreeBusyProvider> ref, FreeBusyProvider service) {
                     registry.remove(service);
                 }
-            });            
+            });
             super.openTrackers();
             /*
              * register services
@@ -126,15 +126,15 @@ public class FreeBusyServiceActivator extends HousekeepingActivator {
             super.registerService(FreeBusyService.class, freeBusyService);
         } catch (Exception e) {
             LOG.error("error starting com.openexchange.freebusy", e);
-            throw e;            
+            throw e;
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.freebusy");
-        FreeBusyServiceLookup.set(null);            
+        FreeBusyServiceLookup.set(null);
         super.stopBundle();
     }
-    
+
 }

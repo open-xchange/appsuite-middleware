@@ -64,12 +64,12 @@ import com.openexchange.server.ServiceLookup;
  */
 public class CapabilityActionFactory implements AJAXActionServiceFactory {
 
-	private CapabilityAllAction allAction;
+	private final CapabilityAllAction allAction;
 
 	public CapabilityActionFactory(ServiceLookup services) {
 		this.allAction = new CapabilityAllAction(services);
 	}
-	
+
 	@Override
 	public AJAXActionService createActionService(String action)
 			throws OXException {

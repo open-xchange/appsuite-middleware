@@ -55,7 +55,7 @@ import com.openexchange.mq.MQService;
 
 /**
  * {@link MQServiceLookup} - The static service lookup for Message Queue bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MQServiceLookup {
@@ -71,7 +71,7 @@ public final class MQServiceLookup {
 
     /**
      * Sets the {@link MQService} instance.
-     * 
+     *
      * @param service The service instance or <code>null</code>
      */
     public static void setMQService(final MQService service) {
@@ -82,7 +82,7 @@ public final class MQServiceLookup {
      * (Optionally) Gets the {@link MQService} instance.
      * <p>
      * Convenience method for {@link #optService(Class) optService(MQService.class)}.
-     * 
+     *
      * @return The {@link MQService} instance or <code>null</code> if absent.
      */
     public static MQService optMQService() {
@@ -93,7 +93,7 @@ public final class MQServiceLookup {
      * Gets the {@link MQService} instance.
      * <p>
      * Convenience method for {@link #getService(Class) getService(MQService.class)}.
-     * 
+     *
      * @return The {@link MQService} instance.
      * @throws IllegalStateException If service is absent
      */
@@ -110,7 +110,7 @@ public final class MQServiceLookup {
 
     /**
      * Sets the service lookup.
-     * 
+     *
      * @param serviceLookup The service lookup or <code>null</code>
      */
     public static void setServiceLookup(final com.openexchange.server.ServiceLookup serviceLookup) {
@@ -119,7 +119,7 @@ public final class MQServiceLookup {
 
     /**
      * Gets the service of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service
      * @throws IllegalStateException If an error occurs while returning the demanded service
@@ -135,7 +135,7 @@ public final class MQServiceLookup {
 
     /**
      * (Optionally) Gets the service of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      */

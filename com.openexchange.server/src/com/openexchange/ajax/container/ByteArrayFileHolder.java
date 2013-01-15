@@ -134,7 +134,7 @@ public final class ByteArrayFileHolder implements IFileHolder {
     public void setName(final String name) {
         this.name = name;
     }
-        
+
     /**
      * Sets the delivery
      *

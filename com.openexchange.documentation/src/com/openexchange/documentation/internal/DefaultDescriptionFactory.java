@@ -68,22 +68,22 @@ public class DefaultDescriptionFactory implements DescriptionFactory {
 	@Override
 	public ModuleDescription module(final String name, final String description, final ContainerDescription[] containers, final ActionDescription... actions) {
 		return new ModuleDescription() {
-			
+
 			@Override
 			public String getName() {
 				return name;
 			}
-			
+
 			@Override
 			public String getDescription() {
 				return null != description ? description : "";
 			}
-			
+
 			@Override
 			public ContainerDescription[] getContainers() {
 				return containers;
 			}
-			
+
 			@Override
 			public ActionDescription[] getActions() {
 				return actions;
@@ -94,17 +94,17 @@ public class DefaultDescriptionFactory implements DescriptionFactory {
 	@Override
 	public ContainerDescription container(final String name, final String description, final AttributeDescription... attributes) {
 		return new ContainerDescription() {
-			
+
 			@Override
 			public String getName() {
 				return name;
 			}
-			
+
 			@Override
 			public String getDescription() {
 				return null != description ? description : "";
 			}
-			
+
 			@Override
 			public AttributeDescription[] getAttributes() {
 				return attributes;
@@ -113,46 +113,46 @@ public class DefaultDescriptionFactory implements DescriptionFactory {
 	}
 
 	@Override
-	public ActionDescription action(final String name, final String description, final RequestMethod method, 
-			final String defaultFormat, final String requestBody, final String responseDescription, final boolean deprecated, 
+	public ActionDescription action(final String name, final String description, final RequestMethod method,
+			final String defaultFormat, final String requestBody, final String responseDescription, final boolean deprecated,
 			final ParameterDescription... parameters) {
 		return new ActionDescription() {
-			
+
 			@Override
 			public String getName() {
 				return name;
 			}
-			
+
 			@Override
 			public String getDescription() {
 				return null != description ? description : "";
 			}
-			
+
 			@Override
 			public boolean isDeprecated() {
 				return deprecated;
 			}
-			
+
 			@Override
 			public String getResponseDescription() {
 				return null != responseDescription ? responseDescription : "";
 			}
-			
+
 			@Override
 			public String getRequestBody() {
 				return null != requestBody ? requestBody : "";
 			}
-			
+
 			@Override
 			public ParameterDescription[] getParameters() {
 				return parameters;
 			}
-			
+
 			@Override
 			public RequestMethod getMethod() {
 				return method;
 			}
-			
+
 			@Override
 			public String getDefaultFormat() {
 				return null != defaultFormat ? defaultFormat : "apiResponse";
@@ -163,22 +163,22 @@ public class DefaultDescriptionFactory implements DescriptionFactory {
 	@Override
 	public AttributeDescription attribute(final String name, final String description, final Type type, final boolean mandatory) {
 		return new AttributeDescription() {
-			
+
 			@Override
 			public String getName() {
 				return name;
 			}
-			
+
 			@Override
 			public String getDescription() {
 				return null != description ? description : "";
 			}
-			
+
 			@Override
 			public boolean isMandatory() {
 				return mandatory;
 			}
-			
+
 			@Override
 			public Type getType() {
 				return null != type ? type : Type.STRING;
@@ -189,27 +189,27 @@ public class DefaultDescriptionFactory implements DescriptionFactory {
 	@Override
 	public ParameterDescription parameter(final String name, final String description, final Type type, final boolean optional) {
 		return new ParameterDescription() {
-			
+
 			@Override
 			public String getName() {
 				return name;
 			}
-			
+
 			@Override
 			public String getDescription() {
 				return null != description ? description : "";
 			}
-			
+
 			@Override
 			public boolean isOptional() {
 				return optional;
 			}
-			
+
 			@Override
 			public Type getType() {
 				return null != type ? type : Type.STRING;
 			}
 		};
 	}
-	
+
 }

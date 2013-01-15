@@ -191,7 +191,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
         String ret = content;
         ret = ret.replaceAll("<body[^>]*>", "<div>");
         ret = ret.substring(ret.indexOf("<div>"));
-        ret = ret.replaceAll("</body[^>]*>", "</div>"); 
+        ret = ret.replaceAll("</body[^>]*>", "</div>");
         ret = ret.substring(0, ret.lastIndexOf("</div>") + 6);
         return ret;
     }
@@ -208,7 +208,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
         private final List<String> sanitizedHtml;
 
         private final InputStream thumbnail;
-        
+
         private final Boolean moreAvailable;
 
         /**

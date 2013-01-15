@@ -54,11 +54,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IQ;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link IQBuilder} - Parse an atmosphere client's IQ message and build a IQ Stanza from it by adding the recipients ID.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class IQBuilder extends StanzaBuilder<IQ> {
@@ -66,7 +65,7 @@ public class IQBuilder extends StanzaBuilder<IQ> {
     /**
      * Create a new IQBuilder
      * Initializes a new {@link IQBuilder}.
-     * 
+     *
      * @param from the sender's ID, must not be null
      * @param json the sender's message, must not be null
      * @throws IllegalArgumentException if from or json are null
@@ -88,7 +87,7 @@ public class IQBuilder extends StanzaBuilder<IQ> {
     }
 
     /**
-     * Check for the obligatory type key of IQ Stanzas in the received json and set the value in the Stanza 
+     * Check for the obligatory type key of IQ Stanzas in the received json and set the value in the Stanza
      * @throws OXException if the type key is missing
      */
     private void type() throws OXException {
@@ -104,5 +103,5 @@ public class IQBuilder extends StanzaBuilder<IQ> {
 //            }
 //        }
     }
-    
+
 }

@@ -64,32 +64,32 @@ import com.openexchange.search.SingleSearchTerm;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SearchTermAnalyzer {
-	
+
     private final List<String> folderIDs = new ArrayList<String>();
-    
+
     public SearchTermAnalyzer(final SearchTerm<?> term) {
-    	super();    
+    	super();
     	this.analyzeTerm(term);
     }
-    
+
     /**
      * Gets the detected folder IDs present in the underlying term.
-     * 
+     *
      * @return the folder IDs
      */
     public List<String> getFolderIDs() {
     	return this.folderIDs;
     }
-    
+
     /**
      * Gets a value indicating whether folder IDs have been detected or not.
-     *  
+     *
      * @return
      */
     public boolean hasFolderIDs() {
     	return null != this.folderIDs && 0 < this.folderIDs.size();
     }
-    
+
 	private void analyzeTerm(final SearchTerm<?> term) {
 		if (SingleSearchTerm.class.isInstance(term)) {
 			this.analyzeTerm((SingleSearchTerm)term);
@@ -114,7 +114,7 @@ public class SearchTermAnalyzer {
 					//TODO: this is basically for backwards compatibility until ajax names are no longer used in search terms
 					field = ContactField.getByAjaxName(value.toString());
 				}
-				if (null != field && ContactField.FOLDER_ID.equals(field) && i + 1 < operands.length && 
+				if (null != field && ContactField.FOLDER_ID.equals(field) && i + 1 < operands.length &&
 						null != operands[i + 1] && null != operands[i + 1].getValue()) {
 					this.folderIDs.add((String)operands[i + 1].getValue());
 					i++;

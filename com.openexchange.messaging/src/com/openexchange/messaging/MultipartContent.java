@@ -62,7 +62,7 @@ public interface MultipartContent extends MessagingContent {
 
     /**
      * Gets this multipart's sub-type; e.g <code>"mixed"</code>.
-     * 
+     *
      * @return The sub-type
      */
     public String getSubType();

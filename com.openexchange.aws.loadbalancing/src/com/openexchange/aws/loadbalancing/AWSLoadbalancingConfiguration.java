@@ -51,7 +51,7 @@ package com.openexchange.aws.loadbalancing;
 
 /**
  * {@link AWSLoadbalancingConfiguration}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AWSLoadbalancingConfiguration {

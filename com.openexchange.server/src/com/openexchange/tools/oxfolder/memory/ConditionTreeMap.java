@@ -81,7 +81,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ConditionTreeMap}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConditionTreeMap {
@@ -106,7 +106,7 @@ public final class ConditionTreeMap {
 
     /**
      * Initializes the tree map for map's associated context.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public void init() throws OXException {
@@ -158,7 +158,7 @@ public final class ConditionTreeMap {
 
     /**
      * Removes the tree for specified entity.
-     * 
+     *
      * @param entity The entity identifier
      */
     public void removeFor(final int entity) {
@@ -167,7 +167,7 @@ public final class ConditionTreeMap {
 
     /**
      * Feed given permission to this tree map.
-     * 
+     *
      * @param permission The permission
      */
     public void insert(final Permission permission) {
@@ -186,7 +186,7 @@ public final class ConditionTreeMap {
 
     /**
      * Gets the visible folders for given user.
-     * 
+     *
      * @param userId The user identifier
      * @param groups The groups associated with given user
      * @param accessibleModules The user's accessible modules
@@ -219,7 +219,7 @@ public final class ConditionTreeMap {
 
     /**
      * Gets the visible folders for given user.
-     * 
+     *
      * @param userId The user identifier
      * @param groups The groups associated with given user
      * @param accessibleModules The user's accessible modules
@@ -252,7 +252,7 @@ public final class ConditionTreeMap {
 
     /**
      * Checks for visibility of given user.
-     * 
+     *
      * @param userId The user identifier
      * @param groups The groups associated with given user
      * @param accessibleModules The user's accessible modules
@@ -288,7 +288,7 @@ public final class ConditionTreeMap {
 
     /**
      * Checks for any shared folder visible to given user.
-     * 
+     *
      * @param userId The user identifier
      * @param groups The groups associated with given user
      * @param accessibleModules The user's accessible modules
@@ -321,7 +321,7 @@ public final class ConditionTreeMap {
 
     /**
      * Gets the visible folders for given user.
-     * 
+     *
      * @param userId The user identifier
      * @param groups The groups associated with given user
      * @param accessibleModules The user's accessible modules
@@ -354,7 +354,7 @@ public final class ConditionTreeMap {
 
     /**
      * Gets the visible folders for given user.
-     * 
+     *
      * @param userId The user identifier
      * @param groups The groups associated with given user
      * @param accessibleModules The user's accessible modules
@@ -396,7 +396,7 @@ public final class ConditionTreeMap {
 
     /**
      * Gets the visible folders for given user.
-     * 
+     *
      * @param userId The user identifier
      * @param groups The groups associated with given user
      * @param accessibleModules The user's accessible modules
@@ -439,7 +439,7 @@ public final class ConditionTreeMap {
 
     /**
      * Creates a list for specified set.
-     * 
+     *
      * @param set The set to turn into a list
      * @param ctx The associated context
      * @return The list
@@ -451,7 +451,7 @@ public final class ConditionTreeMap {
 
     /**
      * Creates a list for specified set.
-     * 
+     *
      * @param set The set to turn into a list
      * @param ctx The associated context
      * @param con A connection in read mode

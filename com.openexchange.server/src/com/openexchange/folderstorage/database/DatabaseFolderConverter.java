@@ -194,7 +194,7 @@ public final class DatabaseFolderConverter {
 
     /**
      * Look-up of default file storage account.
-     * 
+     *
      * @param session The session
      * @return The default file storage account or <code>null</code>
      * @throws OXException If look-up attempt fails
@@ -286,14 +286,14 @@ public final class DatabaseFolderConverter {
                 retval = new DatabaseFolder(fo);
                 /*-
                  * If enabled performance need to be improved for:
-                 * 
+                 *
                  * VirtualListFolder.getVirtualListFolderSubfolders(int, User, UserConfiguration, Context, Connection)
                  */
                 final boolean checkIfVirtuallyReachable = false;
                 if (checkIfVirtuallyReachable) {
                     /*-
                      * Does it appear below virtual folder?:
-                     * 
+                     *
                      * FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
                      * FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID
                      */

@@ -288,7 +288,7 @@ public class Contact extends CommonObject {
     /**
      * This attribute identifier has only a sorting purpose. This does not represent a contact attribute. This identifier can be specified
      * only for the sorting column. The sorting is then done the following way: Use one of {@link #SUR_NAME}, {@link #DISPLAY_NAME},
-     * {@link #COMPANY}, {@link #EMAIL1} or {@link #EMAIL2} in this order whichever is first not null and not empty. Use the selected 
+     * {@link #COMPANY}, {@link #EMAIL1} or {@link #EMAIL2} in this order whichever is first not null and not empty. Use the selected
      * value for sorting with the AlphanumComparator.
      */
     public static final int SPECIAL_SORTING = 607;

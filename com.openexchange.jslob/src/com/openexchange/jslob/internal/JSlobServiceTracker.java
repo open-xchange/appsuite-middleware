@@ -57,7 +57,7 @@ import com.openexchange.jslob.JSlobService;
 
 /**
  * {@link JSlobServiceTracker}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSlobServiceTracker implements ServiceTrackerCustomizer<JSlobService, JSlobService> {

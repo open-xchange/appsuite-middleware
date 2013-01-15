@@ -87,11 +87,11 @@ public class InternalITipAnalyzer extends AbstractITipAnalyzer {
     @Override
     public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
-        
+
         ITipAnnotation annotation = new ITipAnnotation(Messages.INTERNAL_MAIL, locale);
         annotation.setAppointment(message.getAppointment());
         analysis.addAnnotation(annotation);
-        
+
         return analysis;
     }
 

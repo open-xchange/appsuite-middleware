@@ -49,7 +49,6 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.TimeZone;
@@ -59,6 +58,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Streams;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
 import com.openexchange.tools.versit.Versit;
@@ -121,7 +121,7 @@ public class ContactObjectsByHTMLAnchorsToVCardsStep extends AbstractStep<Contac
                 if (vcardPage != null) {
                     final byte[] vcard = vcardPage.getWebResponse().getContentAsBytes();
 
-                    versitReader = def.getReader(new ByteArrayInputStream(vcard), encoding);
+                    versitReader = def.getReader(Streams.newByteArrayInputStream(vcard), encoding);
                     final VersitObject versitObject = def.parse(versitReader);
                     contact = oxContainerConverter.convertContact(versitObject);
                 }

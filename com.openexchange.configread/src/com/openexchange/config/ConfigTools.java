@@ -53,7 +53,7 @@ import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link ConfigTools} collect common parsing operations for configuration options.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -77,7 +77,7 @@ public class ConfigTools {
      * <li>W for weeks</li>
      * </ul>
      * So, for example 2D 1h 12ms would be 2 days and one hour and 12 milliseconds
-     * 
+     *
      * @param span The span description or special identifier <code>"web-browser"</code> to let the Cookie be deleted when the Web browser
      *            exits
      * @return The parsed time span in seconds or <code>-1</code> to let the Cookie be deleted when the Web browser exits
@@ -104,7 +104,7 @@ public class ConfigTools {
      * <li>W for weeks</li>
      * </ul>
      * So, for example 2D 1h 12ms would be 2 days and one hour and 12 milliseconds
-     * 
+     *
      * @param span The span description or special identifier <code>"web-browser"</code> to let the Cookie be deleted when the Web browser
      *            exits
      * @return The parsed time span in milliseconds or <code>-1</code> to let the Cookie be deleted when the Web browser exits
@@ -126,7 +126,7 @@ public class ConfigTools {
      * <p>
      * Parses the property as a signed decimal <code>long</code>. The characters in the property must all be decimal digits, except that the
      * first character may be an ASCII minus sign <code>'-'</code> (<code>'&#92;u002D'</code>) to indicate a negative value.
-     * 
+     *
      * @param name The property name.
      * @param defaultValue The default value
      * @param service The configuration service reference

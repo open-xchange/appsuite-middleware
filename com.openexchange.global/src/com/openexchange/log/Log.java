@@ -72,7 +72,7 @@ public final class Log implements org.apache.commons.logging.Log {
 
     /**
      * Gets the appropriate {@link org.apache.commons.logging.Log logger} for specified class.
-     * 
+     *
      * @param clazz The class
      * @return The logger.
      */

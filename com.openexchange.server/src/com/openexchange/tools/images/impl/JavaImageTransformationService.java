@@ -59,11 +59,11 @@ import com.openexchange.tools.images.transformations.ImageTransformationsImpl;
 
 /**
  * {@link JavaImageTransformationService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class JavaImageTransformationService implements ImageTransformationService {
-    
+
     /**
      * Initializes a new {@link JavaImageTransformationService}.
      */

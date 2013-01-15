@@ -67,7 +67,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link PushMQActivator} - OSGi bundle activator for push mq
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class PushMQActivator extends HousekeepingActivator {

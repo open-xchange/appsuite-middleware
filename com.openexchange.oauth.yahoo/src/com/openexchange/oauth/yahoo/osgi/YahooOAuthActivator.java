@@ -62,7 +62,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link YahooOAuthActivator}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

@@ -111,7 +111,7 @@ public interface ReminderService {
      */
     ReminderObject[] loadReminder(int[] targetIds, int userId, int module)
         throws OXException;
-    
+
     ReminderObject[] loadReminders(int[] targetIds, int userId, int module, Connection con)
         throws OXException;
 

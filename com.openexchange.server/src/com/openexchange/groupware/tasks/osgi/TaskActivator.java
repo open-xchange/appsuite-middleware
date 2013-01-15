@@ -59,7 +59,7 @@ import com.openexchange.groupware.tasks.ModifyThroughDependant;
 
 /**
  * {@link TaskActivator}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class TaskActivator extends AJAXModuleActivator {

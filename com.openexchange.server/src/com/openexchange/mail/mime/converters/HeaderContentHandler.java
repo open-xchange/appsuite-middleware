@@ -60,7 +60,7 @@ import com.openexchange.mail.mime.HeaderCollection;
 
 /**
  * {@link HeaderContentHandler}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 class HeaderContentHandler implements ContentHandler {
@@ -98,7 +98,7 @@ class HeaderContentHandler implements ContentHandler {
 
     /**
      * Initializes a new {@link HeaderContentHandler}.
-     * 
+     *
      * @param headers The header collection to fill
      */
     protected HeaderContentHandler(final HeaderCollection headers) {

@@ -66,11 +66,11 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
  */
-@Action(method = RequestMethod.PUT, name = "delete", description = "Delete an EAV Contact.", parameters = { 
-		@Parameter(name = "uuid")}) 
+@Action(method = RequestMethod.PUT, name = "delete", description = "Delete an EAV Contact.", parameters = {
+		@Parameter(name = "uuid")})
 public class DeleteAction extends AbstractAction {
 
-	
+
 	/**
 	 * Default Constructor
 	 * @param serviceLookup

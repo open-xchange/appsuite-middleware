@@ -70,5 +70,5 @@ public class GrizzlyExceptionMessage implements LocalizableStrings{
     public static final String FILE_NOT_FOUND_MSG = "File \"%1$s\" could not be found.";
     /** An I/O error occurred: %1$s */
     public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-    
+
 }

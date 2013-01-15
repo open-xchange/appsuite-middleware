@@ -68,7 +68,7 @@ public final class IndexExceptionMessages implements LocalizableStrings {
 
     // An unexpected error occurred: %1$s
     public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
-    
+
     // An index entry does not exist for folder %1$s in account %2$s.
     public static final String MISSING_FOLDER_ENTRY_MSG = "An index entry does not exist for folder %1$s in account %2$s.";
 
@@ -77,5 +77,5 @@ public final class IndexExceptionMessages implements LocalizableStrings {
 
     // The index for module %1$d for user %2$d in context %3$d is currently locked.
     public static final String INDEX_LOCKED = "The index for module %1$d for user %2$d in context %3$d is currently locked.";
-    
+
 }

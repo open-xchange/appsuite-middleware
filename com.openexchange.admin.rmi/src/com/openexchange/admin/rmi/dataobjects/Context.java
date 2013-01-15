@@ -57,64 +57,64 @@ import java.util.Map;
 
 /**
  * Class representing a context.
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- * 
+ *
  */
 public class Context extends ExtendableDataObject implements NameAndIdObject {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -8939189372445990901L;
 
     private Integer id;
-    
+
     private boolean idset;
-    
+
     private Database readDatabase;
-    
+
     private boolean readDatabaseset;
-    
+
     private Database writeDatabase;
-    
+
     private boolean writeDatabaseset;
-    
+
     private Integer filestore_id;
-    
+
     private boolean filestore_idset;
-    
+
     private String filestore_name;
-    
+
     private boolean filestore_nameset;
-    
+
     private Long average_size;
-    
+
     private boolean average_sizeset;
-    
+
     private Long maxQuota;
-    
+
     private boolean maxQuotaset;
-    
+
     private Long usedQuota;
-    
+
     private boolean usedQuotaset;
-    
+
     private MaintenanceReason maintenanceReason;
-    
+
     private boolean maintenanceReasonset;
-    
+
     private Boolean enabled;
-    
-    private boolean enabledset;    
+
+    private boolean enabledset;
 
     private String name;
-    
-    private boolean nameset;    
-    
+
+    private boolean nameset;
+
     private HashSet<String> login_mappings;
-    
+
     private Map<String, Map<String, String>> userAttributes = null;
 
     private boolean userAttribtuesset;
@@ -159,7 +159,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         this.id = id;
         this.idset = true;
     }
-    
+
     @Override
     public final String getName() {
         return name;
@@ -174,16 +174,16 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     /*
      * Add login mappings.
      * Example:
-     * If you add here  a HashSet containing "mydomain.org", then you can later 
+     * If you add here  a HashSet containing "mydomain.org", then you can later
      * login with <username>@ mydomain.org OR   <username>@<context_id>
-     *  
-     */    
+     *
+     */
     public final void setLoginMappings(final HashSet<String> mappings) {
         this.login_mappings = mappings;
     }
-    
+
     /*
-     * Add a single login mapping entry. 
+     * Add a single login mapping entry.
      */
     public final void addLoginMapping(final String mapping) {
         if (this.login_mappings == null) {
@@ -198,7 +198,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         }
         this.login_mappings.addAll(mapping);
     }
-    
+
     /*
      * Remove a login mapping.
      */
@@ -239,7 +239,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * 
+     *
      * @param maxQuota (in MB)
      */
     public final void setMaxQuota(final Long maxQuota) {
@@ -309,7 +309,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         this.average_size = average_size;
         this.average_sizeset = true;
     }
-    
+
     public final String getFilestore_name() {
         return filestore_name;
     }
@@ -473,7 +473,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     public boolean isWriteDatabaseset() {
         return writeDatabaseset;
     }
-    
+
     /**
      * Sets a generic user attribute
      */
@@ -481,26 +481,26 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         getNamespace(namespace).put(name, value);
         userAttribtuesset = true;
     }
-    
+
     /**
      * Read a generic user attribute
      */
     public String getUserAttribute(String namespace, String name) {
         return getNamespace(namespace).get(name);
     }
-    
+
     public Map<String, Map<String, String>> getUserAttributes() {
         if(userAttributes == null) {
             userAttributes = new HashMap<String, Map<String, String>>();
         }
         return userAttributes;
     }
-    
+
     public void setUserAttributes(Map<String, Map<String, String>> userAttributes) {
         this.userAttribtuesset = true;
         this.userAttributes = userAttributes;
     }
-    
+
     public Map<String, String> getNamespace(String namespace) {
         if(userAttributes == null) {
             userAttributes = new HashMap<String, Map<String, String>>();
@@ -512,7 +512,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         }
         return ns;
     }
-    
+
     /**
      * Used to check if the user attributes have been modified
      */
@@ -692,20 +692,20 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         return enabled;
     }
 
-    
+
     /**
      * This settings are only used internally, don't manipulate the setting here or rely on this methods existence
-     * 
+     *
      * @return
      */
     public final boolean isListrun() {
         return listrun;
     }
 
-    
+
     /**
      * This settings are only used internally, don't manipulate the setting here or rely on this methods existence
-     * 
+     *
      * @param listrun
      */
     public final void setListrun(boolean listrun) {

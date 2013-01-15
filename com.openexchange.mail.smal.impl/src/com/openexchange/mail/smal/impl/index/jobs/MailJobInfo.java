@@ -55,7 +55,7 @@ import com.openexchange.service.indexing.JobInfo;
 
 /**
  * {@link MailJobInfo} - Provides necessary information for performing a mail job.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailJobInfo extends JobInfo {
@@ -81,19 +81,19 @@ public final class MailJobInfo extends JobInfo {
      * The password.
      */
     public final String password;
-    
+
     /**
      * The optional mail folder affected within this job.
      */
     public final String folder;
-    
+
     /**
      * Shall this job be executed with forced behavior.
      */
     public boolean force;
-    
+
     private String uniqueId = null;
-    
+
 
     /**
      * Initializes a new {@link MailJobInfo}.
@@ -107,12 +107,12 @@ public final class MailJobInfo extends JobInfo {
         folder = builder.folder;
         force = builder.force;
     }
-    
+
     @Override
     public int getModule() {
         return Types.EMAIL;
     }
-    
+
     @Override
     public String toUniqueId() {
         if (uniqueId == null) {
@@ -127,10 +127,10 @@ public final class MailJobInfo extends JobInfo {
                 sb.append('/');
                 sb.append(folder);
             }
-            
+
             uniqueId = sb.toString();
         }
-        
+
         return uniqueId;
     }
 
@@ -146,7 +146,7 @@ public final class MailJobInfo extends JobInfo {
             sb.append(", ").append("folder=").append(folder);
         }
         sb.append('}');
-        
+
         return sb.toString();
     }
 
@@ -154,7 +154,7 @@ public final class MailJobInfo extends JobInfo {
      * Initializes a new {@link Builder}.
      * <p>
      * Convenience method for <code>new MailJobInfo.Builder(Class<? extends IndexingJob> jobClass)</code>.
-     * 
+     *
      * @param jobClass The job class.
      * @return The new builder.
      */
@@ -174,14 +174,14 @@ public final class MailJobInfo extends JobInfo {
         protected String login;
 
         protected String password;
-        
+
         protected String folder;
-        
+
         protected boolean force = false;
 
         /**
          * Initializes a new {@link Builder}.
-         * 
+         *
          * @param userId The user identifier
          * @param contextId The context identifier
          */
@@ -191,7 +191,7 @@ public final class MailJobInfo extends JobInfo {
 
         /**
          * Builds a {@link MailJobInfo} instance.
-         * 
+         *
          * @return The {@link MailJobInfo} instance
          */
         @Override
@@ -218,12 +218,12 @@ public final class MailJobInfo extends JobInfo {
             this.password = password;
             return this;
         }
-        
+
         public Builder folder(final String folder) {
             this.folder = folder;
             return this;
         }
-        
+
         public Builder force() {
             force = true;
             return this;
