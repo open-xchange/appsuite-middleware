@@ -942,7 +942,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         Attribute.TRASH_LITERAL);
 
     /**
-     * Contains attributes which denote the fullnames of an account's default folders.
+     * Contains attributes which denote the full names of an account's default folders.
      */
     private static final EnumSet<Attribute> DEFAULT_FULL_NAMES = EnumSet.of(
         Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
@@ -1004,7 +1004,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (!PRIMARY_EDITABLE.contains(attribute)) {
                     final Object storageValue = attribute.doSwitch(storageGetSwitch);
                     final Object newValue = attribute.doSwitch(getSwitch);
-                    if (null != storageValue && !storageValue.equals(newValue)) {
+                    if (null != storageValue && (Attribute.PASSWORD_LITERAL.equals(attribute) ? null != newValue : !(DEFAULT_FULL_NAMES.contains(attribute) ? MailFolderUtility.prepareMailFolderParam(storageValue.toString()).equals(MailFolderUtility.prepareMailFolderParam(newValue.toString())) : storageValue.equals(newValue)))) {
                         /*
                          * Another attribute must not be changed
                          */
