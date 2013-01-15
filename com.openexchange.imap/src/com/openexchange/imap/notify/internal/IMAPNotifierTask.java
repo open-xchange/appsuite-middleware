@@ -231,9 +231,10 @@ public final class IMAPNotifierTask {
                 /*
                  * Get connected IMAP access
                  */
-                final MailAccess<?, ?> access = MailAccess.getInstance(user, context, accountId);
-                access.connect(false);
+                MailAccess<?, ?> access = null;
                 try {
+                    access = MailAccess.getInstance(user, context, accountId);
+                    access.connect(false);
                     final IMAPFolderStorage imapFolderStorage =  (IMAPFolderStorage) access.getFolderStorage();
                     final IMAPStore imapStore = imapFolderStorage.getImapStore();
                     final Session session = imapFolderStorage.getSession();
@@ -249,7 +250,9 @@ public final class IMAPNotifierTask {
                         imapFolder.close(true);
                     } while (iter.hasNext());
                 } finally {
-                    access.close(true);
+                    if (null != access) {
+                        access.close(true);
+                    }
                 }
             } catch (final Exception e) {
                 LOG.warn("Failed IMAP notifier task run.", e);

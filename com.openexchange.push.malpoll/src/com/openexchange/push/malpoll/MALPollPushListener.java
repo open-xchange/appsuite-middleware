@@ -364,9 +364,10 @@ public final class MALPollPushListener implements PushListener {
     }
 
     private Set<String> gatherUIDs(final MailService mailService) throws OXException {
-        final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
-        mailAccess.connect();
+        MailAccess<?, ?> mailAccess = null;
         try {
+            mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
+            mailAccess.connect();
             final String fullname = folder;
             final MailMessage[] messages =
                 mailAccess.getMessageStorage().searchMessages(fullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS);
@@ -376,7 +377,9 @@ public final class MALPollPushListener implements PushListener {
             }
             return uidSet;
         } finally {
-            mailAccess.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
         }
     }
 

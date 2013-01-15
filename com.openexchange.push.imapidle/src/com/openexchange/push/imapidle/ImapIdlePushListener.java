@@ -350,19 +350,20 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             /*
              * Get access
              */
-            final MailAccess<?, ?> access = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
-            /*
-             * Check protocol
-             */
-            final Protocol protocol = access.getProvider().getProtocol();
-            if (null == protocol || (!Protocol.ALL.equals(protocol.getName()) && !IMAPProvider.PROTOCOL_IMAP.equals(protocol))) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary mail account is not IMAP, but " + (null == protocol ? "is missing." : protocol.getName()));
-            }
-            /*
-             * Check for IDLE capability
-             */
-            access.connect(false);
+            MailAccess<?, ?> access = null;
             try {
+                access = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
+                /*
+                 * Check protocol
+                 */
+                final Protocol protocol = access.getProvider().getProtocol();
+                if (null == protocol || (!Protocol.ALL.equals(protocol.getName()) && !IMAPProvider.PROTOCOL_IMAP.equals(protocol))) {
+                    throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary mail account is not IMAP, but " + (null == protocol ? "is missing." : protocol.getName()));
+                }
+                /*
+                 * Check for IDLE capability
+                 */
+                access.connect(false);
                 final IMAPCapabilities capabilities = (IMAPCapabilities) access.getMailConfig().getCapabilities();
                 if (!capabilities.hasIdle()) {
                     throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary IMAP account does not support \"IDLE\" capability!");
@@ -378,7 +379,9 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 }
                  */
             } finally {
-                access.close(true);
+                if (null != access) {
+                    access.close(true);
+                }
             }
         }
         imapIdleFuture = threadPoolService.submit(ThreadPools.task(this, getClass().getName()));

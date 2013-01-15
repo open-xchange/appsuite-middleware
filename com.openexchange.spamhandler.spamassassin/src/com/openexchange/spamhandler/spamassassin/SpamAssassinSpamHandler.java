@@ -61,8 +61,8 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
@@ -214,9 +214,10 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         if (null == mailService) {
             throw SpamhandlerSpamassassinExceptionCode.MAILSERVICE_MISSING.create();
         }
-        final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session, accountId);
-        mailAccess.connect();
+        MailAccess<?, ?> mailAccess = null;
         try {
+            mailAccess = mailService.getMailAccess(session, accountId);
+            mailAccess.connect();
             if (isCreateConfirmedSpam()) {
                 final String confirmedSpamFullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
                 mailAccess.getMessageStorage().copyMessages(fullname, confirmedSpamFullname, mailIDs, true);
@@ -234,7 +235,9 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
                 mailAccess.getMessageStorage().moveMessages(fullname, spamFullname, mailIDs, true);
             }
         } finally {
-            mailAccess.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
         }
     }
 

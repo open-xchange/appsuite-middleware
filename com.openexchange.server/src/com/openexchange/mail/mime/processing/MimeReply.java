@@ -168,14 +168,17 @@ public final class MimeReply {
             final String[] arr =
                 MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
             if (arr == null) {
-                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
-                mailAccess.connect();
+                MailAccess<?, ?> mailAccess = null;
                 try {
+                    mailAccess = MailAccess.getInstance(session, accountId);
+                    mailAccess.connect();
                     final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
                     preferToAsRecipient =
                         originalMailFolder.equals(folderStorage.getSentFolder()) || originalMailFolder.equals(folderStorage.getDraftsFolder());
                 } finally {
-                    mailAccess.close(false);
+                    if (null != mailAccess) {
+                        mailAccess.close(false);
+                    }
                 }
             } else {
                 preferToAsRecipient =

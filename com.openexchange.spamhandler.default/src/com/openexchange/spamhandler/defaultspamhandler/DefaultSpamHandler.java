@@ -98,16 +98,19 @@ public final class DefaultSpamHandler extends SpamHandler {
         if (null == mailService) {
             return;
         }
-        final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session, accountId);
-        mailAccess.connect();
+        MailAccess<?, ?> mailAccess = null;
         try {
+            mailAccess = mailService.getMailAccess(session, accountId);
+            mailAccess.connect();
             final String confirmedHamFullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
             mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, mailIDs, true);
             if (move) {
                 mailAccess.getMessageStorage().moveMessages(spamFullname, FULLNAME_INBOX, mailIDs, true);
             }
         } finally {
-            mailAccess.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
         }
     }
 

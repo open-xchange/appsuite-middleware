@@ -164,9 +164,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
     }
 
     private String composeUniquePath(final int pop3AccountId, final int user, final int cid) throws OXException {
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = getDefaultMailAccess();
-        defaultMailAccess.connect(false);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = null;
         try {
+            defaultMailAccess = getDefaultMailAccess();
+            defaultMailAccess.connect(false);
             final String trashFullname = defaultMailAccess.getFolderStorage().getTrashFolder();
             final char sep = defaultMailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
             /*
@@ -209,7 +210,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
              */
             return fullname;
         } finally {
-            defaultMailAccess.close(true);
+            if (null != defaultMailAccess) {
+                defaultMailAccess.close(true);
+            }
         }
     }
 
@@ -324,9 +327,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     @Override
     public void connect() throws OXException {
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = getDefaultMailAccess();
-        defaultMailAccess.connect(false);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = null;
         try {
+            defaultMailAccess = getDefaultMailAccess();
+            defaultMailAccess.connect(false);
             // Check path existence
             final IMailFolderStorage fs = defaultMailAccess.getFolderStorage();
             if (!fs.exists(path)) {
@@ -418,13 +422,17 @@ public class MailAccountPOP3Storage implements POP3Storage {
             /*
              * Close on error
              */
-            defaultMailAccess.close(true);
+            if (null != defaultMailAccess) {
+                defaultMailAccess.close(true);
+            }
             throw e;
         } catch (final Exception e) {
             /*
              * Close on error
              */
-            defaultMailAccess.close(true);
+            if (null != defaultMailAccess) {
+                defaultMailAccess.close(true);
+            }
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
