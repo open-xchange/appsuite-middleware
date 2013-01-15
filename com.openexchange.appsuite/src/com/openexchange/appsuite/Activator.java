@@ -47,82 +47,36 @@
  *
  */
 
-package com.openexchange.ui7;
+package com.openexchange.appsuite;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.osgi.framework.BundleException;
+import org.osgi.service.http.HttpService;
+import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
 
-/**
- * An in-memory file cache for small files (mostly UI files).
- * Since all data is held in RAM, this class should only be used as a singleton.
- * This pretty much restricts it to only storing publicly accessible files
- * (e.g. the UI).
- *
- * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
- */
-public class FileCache {
+public class Activator extends HousekeepingActivator {
 
-    private static org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileCache.class));
+    private static Class<?>[] NEEDED_SERVICES = { HttpService.class, ConfigurationService.class };
 
-    private class CacheEntry {
-
-        private final File path;
-
-        private long timestamp = Long.MIN_VALUE;
-
-        private byte[] data = null;
-
-        public CacheEntry(File path) {
-            this.path = path;
-        }
-
-        public byte[] getData() {
-            if (!path.isFile()) {
-                return null;
-            }
-            long current = path.lastModified();
-            if (current > timestamp) {
-                timestamp = current;
-                // Read the entire file into a byte array
-                LOG.debug("Reading " + path);
-                try {
-                    RandomAccessFile f = new RandomAccessFile(path, "r");
-                    data = new byte[(int) f.length()];
-                    f.readFully(data);
-                    f.close();
-                } catch (IOException e) {
-                    data = null;
-                }
-            }
-            return data;
-        }
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
     }
 
-    private final Map<File, CacheEntry> cache = new ConcurrentHashMap<File, CacheEntry>();
-
-    /**
-     * Returns the file contents as a byte array.
-     * @param path The file to return.
-     * @return The file contents as a byte array, or null if the file does
-     * not exist or is not a normal file.
-     */
-    public byte[] get(File path) {
-        CacheEntry entry = cache.get(path);
-        if (entry == null) {
-            entry = new CacheEntry(path);
-            cache.put(path, entry);
+    @Override
+    protected void startBundle() throws Exception {
+        String prefix = Dispatcher.PREFIX.get();
+        ConfigurationService config = getService(ConfigurationService.class);
+        String property = config.getProperty("com.openexchange.apps.path");
+        if (property == null) {
+            throw new BundleException("Missing property: com.openexchange.apps.path", BundleException.ACTIVATOR_ERROR);
         }
-        return entry.getData();
+        File path = new File(property);
+        File apps = new File(path, "apps");
+        File zoneinfo = new File(config.getProperty("com.openexchange.apps.zoneinfo", "/usr/share/zoneinfo/"));
+        HttpService service = getService(HttpService.class);
+        service.registerServlet(prefix + "apps/load", new AppsLoadServlet(apps, zoneinfo), null, null);
     }
-
-    /**
-     * Clears the cache.
-     */
-    public void clear() {
-        cache.clear();
-    }
-
 }

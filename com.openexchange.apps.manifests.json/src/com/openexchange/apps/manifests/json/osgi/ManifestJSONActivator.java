@@ -122,9 +122,14 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 	}
 
     private JSONArray readManifests() {
-        final String property = getService(ConfigurationService.class).getProperty("com.openexchange.apps.manifestPath");
+        ConfigurationService conf = getService(ConfigurationService.class);
+        String property = conf.getProperty("com.openexchange.apps.manifestPath");
         if (null == property) {
-            return new JSONArray(0);
+            property = conf.getProperty("com.openexchange.apps.path");
+            if (null == property) {
+                return new JSONArray(0);
+            }
+            property += "/manifests";
         }
 
         JSONArray array = new JSONArray();

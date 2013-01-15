@@ -10,8 +10,8 @@ Package: open-xchange-appsuite-backend
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}, open-xchange-halo, open-xchange-appsuite-manifest
-Description: Backend extensions to serve App Suite frontend
- This package installs the OSGi bundles and configuration files that are necessary to use the App Suite frontend. If the Open-Xchange 6
+Description: Backend extensions to serve OX App Suite frontend
+ This package installs the OSGi bundles and configuration files that are necessary to use the OX App Suite frontend. If the Open-Xchange 6
  frontend is used, this package has no effect at all.
- The available Apps and the access permissions in the App Suite frontend are configured by this package. Additionally this package contains
+ The available Apps and the access permissions in the OX App Suite frontend are configured by this package. Additionally this package contains
  dependencies to all necessary other extensions of the backend.
