@@ -316,6 +316,18 @@ public abstract class FolderStorage {
         return retval;
     }
 
+    public static Set<Folder> extractNonParticipantFolder(Set<Folder> folders, Set<InternalParticipant> participants) {
+        Set<Folder> retval = new HashSet<Folder>();
+        retval.addAll(folders);
+        for (InternalParticipant participant : participants) {
+            Folder remove = extractFolderOfUser(retval, participant.getIdentifier());
+            if (null != remove) {
+                retval.remove(remove);
+            }
+        }
+        return retval;
+    }
+
     static Folder getFolder(final Set<Folder> folders, final int folderId) {
         Folder retval = null;
         for (final Folder folder : folders) {

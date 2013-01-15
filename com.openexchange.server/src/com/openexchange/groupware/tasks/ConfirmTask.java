@@ -142,14 +142,28 @@ public final class ConfirmTask {
         }
     }
 
-
     void sentEvent(final Session session) throws OXException {
         final Task orig = getOrigTask();
-        if (userId != orig.getCreatedBy() && null == ParticipantStorage.getParticipant(ParticipantStorage.extractInternal(getParticipants()), orig.getCreatedBy())) {
-            // Delegator not participant and participant changed task. Change parent folder of original task to delegators folder identifier
-            // so we are able to use that for participant notification.
+        if (userId != orig.getCreatedBy() && null == ParticipantStorage.getParticipant(
+            ParticipantStorage.extractInternal(getParticipants()),
+            orig.getCreatedBy())) {
+            // Delegator is not participant and participant changed task. Change parent folder of original task to delegators folder
+            // identifier so we are able to use that for participant notification.
             Folder delegatorFolder = FolderStorage.extractFolderOfUser(getFolders(), orig.getCreatedBy());
-            orig.setParentFolderID(delegatorFolder.getIdentifier());
+            if (null != delegatorFolder) {
+                orig.setParentFolderID(delegatorFolder.getIdentifier());
+            } else {
+                // Another user created the task in a shared folder. Normally there can be only one user having the task in its folder who
+                // is not participant. And this is the delegator of the task.
+                Set<Folder> nonParticipantFolder = FolderStorage.extractNonParticipantFolder(
+                    getFolders(),
+                    ParticipantStorage.extractInternal(getParticipants()));
+                if (nonParticipantFolder.size() > 0) {
+                    orig.setParentFolderID(nonParticipantFolder.iterator().next().getIdentifier());
+                } else {
+                    throw TaskExceptionCode.UNKNOWN_DELEGATOR.create(I(orig.getCreatedBy()));
+                }
+            }
             orig.setUsers(new UserParticipant[0]);
             orig.setParticipants(new Participant[0]);
         }
