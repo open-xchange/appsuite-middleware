@@ -14,3 +14,4 @@ opt/open-xchange/etc/linkedinsubscribe.properties
 opt/open-xchange/etc/microformatSubscription.properties
 opt/open-xchange/etc/msnsubscribe.properties
 opt/open-xchange/etc/yahoosubscribe.properties
+opt/open-xchange/etc/xingsubscribe.properties
