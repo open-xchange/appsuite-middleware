@@ -1,0 +1,11 @@
+open-xchange-datamining (7.0.1-0) UNRELEASED; urgency=low
+
+  * prepare for 7.0.1
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Thu, 10 Jan 2013 10:10:23 +0100
+
+open-xchange-datamining (7.0.0-3) unstable; urgency=low
+
+  * First release candidate for 7.0.0
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Fri, 21 Dec 2012 14:40:00 +0100
