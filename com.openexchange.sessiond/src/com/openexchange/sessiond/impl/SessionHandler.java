@@ -408,7 +408,7 @@ public final class SessionHandler {
      * @return The created session
      * @throws OXException If creating a new session fails
      */
-    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, final VolatileParams volatileParams, String clientToken) throws OXException {
+    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, String clientToken) throws OXException {
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
@@ -424,7 +424,7 @@ public final class SessionHandler {
         // Add session
         final SessionImpl addedSession;
         if (null == clientToken) {
-            addedSession = sessionData.addSession(session, noLimit, volatileParams).getSession();
+            addedSession = sessionData.addSession(session, noLimit).getSession();
             final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
             if (sessionStorageService != null) {
                 storeSession(addedSession, sessionStorageService, false);
@@ -676,7 +676,7 @@ public final class SessionHandler {
         SessionImpl activatedSession = tokenControl.getSession();
 
         // Put this session into the normal session container
-        SessionControl sessionControl = sessionData.addSession(activatedSession, noLimit, null);
+        SessionControl sessionControl = sessionData.addSession(activatedSession, noLimit);
         SessionImpl addedSession = sessionControl.getSession();
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
@@ -710,7 +710,7 @@ public final class SessionHandler {
                 try {
                     final Session storedSession = getSessionFrom(sessionId, storageService);
                     if (null != storedSession) {
-                        final SessionControl sc = sessionData.addSession(new SessionImpl(storedSession), noLimit, null, true);
+                        final SessionControl sc = sessionData.addSession(new SessionImpl(storedSession), noLimit, true);
                         return null == sc ? sessionToSessionControl(storedSession) : sc;
                     }
                 } catch (final OXException e) {
@@ -822,7 +822,7 @@ public final class SessionHandler {
                     // A cache hit! Add to local session containers
                     LOG.info("Migrate session: " + cachedSession.getSessionId());
                     final SessionData sessionData = sessionDataRef.get();
-                    return null == sessionData ? null : sessionData.addSession(new SessionImpl(cachedSession), noLimit, null);
+                    return null == sessionData ? null : sessionData.addSession(new SessionImpl(cachedSession), noLimit);
                 }
             }
         } catch (final OXException e) {

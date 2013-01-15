@@ -483,22 +483,4 @@ public final class SessionImpl implements PutIfAbsent {
     public void setClient(final String client) {
         this.client = client;
     }
-
-    /**
-     * Gets the volatile flag
-     *
-     * @return The volatile flag
-     */
-    public boolean isVolatile() {
-        return isVolatile;
-    }
-
-    /**
-     * Sets the volatile flag.
-     *
-     * @param isVolatile The volatile flag
-     */
-    public void setVolatile(final boolean isVolatile) {
-        this.isVolatile = isVolatile;
-    }
 }

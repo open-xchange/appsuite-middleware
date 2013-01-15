@@ -1120,7 +1120,6 @@ public class Login extends AJAXServlet {
         final String client = LoginTools.parseClient(req, false, conf.getDefaultClient());
         final String clientIP = LoginTools.parseClientIP(req);
         final String userAgent = LoginTools.parseUserAgent(req);
-        final boolean isVolatile = LoginTools.parseVolatile(req);
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         final String httpSessionId = req.getSession(true).getId();
@@ -1133,7 +1132,6 @@ public class Login extends AJAXServlet {
             client,
             null,
             HashCalculator.getInstance().getHash(req, client),
-            isVolatile,
             HTTP_JSON,
             headers,
             cookies,
@@ -1197,7 +1195,6 @@ public class Login extends AJAXServlet {
         final String client = parseClient(req);
         final String clientIP = LoginTools.parseClientIP(req);
         final String userAgent = LoginTools.parseUserAgent(req);
-        final boolean isVolatile = LoginTools.parseVolatile(req);
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         final String httpSessionId = req.getSession(true).getId();
@@ -1210,7 +1207,6 @@ public class Login extends AJAXServlet {
             client,
             version,
             HashCalculator.getInstance().getHash(req, userAgent, client),
-            isVolatile,
             Interface.HTTP_JSON,
             headers,
             cookies,
