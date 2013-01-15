@@ -1,3 +1,7 @@
+* 2013-01-15 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 24446: Fixed classpath & java_opts
+
 * 2013-01-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 23723: Also check for "null" string prior to setting contact fields
