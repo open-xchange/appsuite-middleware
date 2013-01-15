@@ -373,7 +373,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
             StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
             if (LogProperties.isEnabled()) {
-                logBuilder.append(LogProperties.getAndPrettyPrint());
+                logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));
             }
 
             if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
