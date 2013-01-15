@@ -102,23 +102,6 @@ public class IDMangler {
             return null;
         }
         return encodeQP(string);
-        // com.openexchange.java.StringAllocator buffer = new com.openexchange.java.StringAllocator(string.length() * 3);
-        // for (char c : string.toCharArray()) {
-        // switch (c) {
-        // case '/':
-        // buffer.append("[/]");
-        // break;
-        // case '[':
-        // buffer.append("[[]");
-        // break;
-        // case ':':
-        // buffer.append("[:]");
-        // break;
-        // default:
-        // buffer.append(c);
-        // }
-        // }
-        // return buffer.toString();
     }
 
     private static enum ParserState {
@@ -149,7 +132,9 @@ public class IDMangler {
             ParserState state = ParserState.APPEND_PREFIX;
             ParserState unescapedState = null;
 
-            for (final char c : mangled.toCharArray()) {
+            final int length = mangled.length();
+            for (int i = 0; i < length; i++) {
+                final char c = mangled.charAt(i);
                 switch (c) {
                 case '[': {
                     if (state == ParserState.ESCAPED) {

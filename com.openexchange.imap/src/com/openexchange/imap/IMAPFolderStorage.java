@@ -2855,9 +2855,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     private static String stripPOSTRight(final String rights) {
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(rights.length());
-        final char[] chars = rights.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            final char c = chars[i];
+        final int length = rights.length();
+        for (int i = 0; i < length; i++) {
+            final char c = rights.charAt(i);
             if ('p' != c && 'P' != c) {
                 sb.append(c);
             }

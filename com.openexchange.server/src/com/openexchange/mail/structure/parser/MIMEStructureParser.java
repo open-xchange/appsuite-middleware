@@ -545,8 +545,7 @@ public final class MIMEStructureParser {
         if ("message-id".equals(name)) {
             return "Message-ID";
         }
-        final char[] chars = name.toCharArray();
-        final int len = chars.length;
+        final int len = name.length();
         if (len <= 0) {
             return "";
         }
@@ -557,12 +556,12 @@ public final class MIMEStructureParser {
             sb = builder;
             sb.setLength(0);
         }
-        sb.append(Character.toUpperCase(chars[0]));
+        sb.append(Character.toUpperCase(name.charAt(0)));
         int i = 1;
         while (i < len) {
-            final char c = chars[i++];
+            final char c = name.charAt(i++);
             if ('-' == c && i < len) {
-                sb.append(c).append(Character.toUpperCase(chars[i++]));
+                sb.append(c).append(Character.toUpperCase(name.charAt(i++)));
             } else {
                 sb.append(c);
             }

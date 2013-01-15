@@ -473,10 +473,10 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         { '\t', '\n', '\r', ' ', '"', '(', ')', ',', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']' };
 
     private static boolean containsSpecial(final String str) {
-        final char[] chars = str.toCharArray();
+        final int length = str.length();
         boolean quote = false;
-        for (int i = 0; (i < chars.length) && !quote; i++) {
-            quote |= (Arrays.binarySearch(SPECIALS, chars[i]) >= 0);
+        for (int i = 0; (i < length) && !quote; i++) {
+            quote |= (Arrays.binarySearch(SPECIALS, str.charAt(i)) >= 0);
         }
         return quote;
     }
@@ -496,11 +496,11 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     private static String unescape(final String escaped) {
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(escaped.length());
 
-        final char[] chars = escaped.toCharArray();
+        final int length = escaped.length();
 
         boolean ignore = false;
-        for (int i = 0; i < chars.length; i++) {
-            final char c = chars[i];
+        for (int i = 0; i < length; i++) {
+            final char c = escaped.charAt(i);
             if ('\\' == c) {
                 if (ignore) {
                     ignore = false;

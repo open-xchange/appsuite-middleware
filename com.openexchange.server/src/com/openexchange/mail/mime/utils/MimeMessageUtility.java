@@ -629,13 +629,14 @@ public final class MimeMessageUtility {
          * is transferred as:
          * =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?= =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
          */
-        final char[] chars = checkNonAscii(subject).toCharArray();
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(chars.length);
+        final String s = checkNonAscii(subject);
+        final int length = s.length();
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length);
         int i = 0;
-        while (i < chars.length) {
-            final char c = chars[i];
+        while (i < length) {
+            final char c = s.charAt(i);
             if ('\t' == c || ' ' == c) {
-                while ((i + 1) < chars.length && ' ' == chars[i + 1]) {
+                while ((i + 1) < length && ' ' == s.charAt(i + 1)) {
                     i++;
                 }
                 sb.append(' ');

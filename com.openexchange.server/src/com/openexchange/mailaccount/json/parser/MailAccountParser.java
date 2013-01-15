@@ -282,15 +282,4 @@ public class MailAccountParser extends DataParser {
         return attributes;
     }
 
-    private static String stripSpecials(final String src) {
-        final char[] chars = src.toCharArray();
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(chars.length);
-        for (final char c : chars) {
-            if (Character.isLetterOrDigit(c)) {
-                sb.append(c);
-            }
-        }
-        return sb.toString();
-    }
-
 }

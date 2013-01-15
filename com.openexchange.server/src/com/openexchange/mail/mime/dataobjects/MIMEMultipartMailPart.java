@@ -522,11 +522,10 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @return The converted string's byte array
      */
     private static byte[] getBytes(final String s) {
-        final char[] chars = s.toCharArray();
-        final int size = chars.length;
-        final byte[] bytes = new byte[size];
-        for (int i = 0; i < size;) {
-            bytes[i] = (byte) chars[i++];
+        final int length = s.length();
+        final byte[] bytes = new byte[length];
+        for (int i = 0; i < length; i++) {
+            bytes[i] = (byte) s.charAt(i);
         }
         return bytes;
     }

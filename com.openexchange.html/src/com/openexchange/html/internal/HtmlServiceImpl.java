@@ -391,13 +391,12 @@ public final class HtmlServiceImpl implements HtmlService {
         /*
          * Still contains any non-ascii character?
          */
-        final char[] chars = urlStr.toCharArray();
-        final int len = chars.length;
+        final int len = urlStr.length();
         StringBuilder tmp = null;
         int lastpos = 0;
         int i;
         for (i = 0; i < len; i++) {
-            final char c = chars[i];
+            final char c = urlStr.charAt(i);
             if (c >= 128) {
                 if (null == tmp) {
                     tmp = new StringBuilder(len + 16);
@@ -422,10 +421,10 @@ public final class HtmlServiceImpl implements HtmlService {
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
     private static boolean isAscii(final String s) {
-        final char[] chars = s.toCharArray();
+        final int length = s.length();
         boolean isAscci = true;
-        for (int i = 0; isAscci && (i < chars.length); i++) {
-            isAscci = (chars[i] < 128);
+        for (int i = 0; isAscci && (i < length); i++) {
+            isAscci = (s.charAt(i) < 128);
         }
         return isAscci;
     }
@@ -759,11 +758,11 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private void escapePlain(final String s, final boolean withQuote, final StringBuilder sb) {
-        final char[] chars = s.toCharArray();
+        final int length = s.length();
         final Map<Character, String> htmlChar2EntityMap = htmlCharMap;
         if (withQuote) {
-            for (int i = 0; i < chars.length; i++) {
-                final char c = chars[i];
+            for (int i = 0; i < length; i++) {
+                final char c = s.charAt(i);
                 final String entity = htmlChar2EntityMap.get(Character.valueOf(c));
                 if (entity == null) {
                     sb.append(c);
@@ -772,8 +771,8 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
             }
         } else {
-            for (int i = 0; i < chars.length; i++) {
-                final char c = chars[i];
+            for (int i = 0; i < length; i++) {
+                final char c = s.charAt(i);
                 if ('"' == c) {
                     sb.append(c);
                 } else {

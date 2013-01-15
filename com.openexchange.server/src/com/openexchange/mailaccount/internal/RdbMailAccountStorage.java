@@ -2379,10 +2379,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (null == string) {
             return true;
         }
-        final char[] chars = string.toCharArray();
+        final int len = string.length();
         boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < chars.length; i++) {
-            isWhitespace = Character.isWhitespace(chars[i]);
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -2413,13 +2413,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             return true;
         }
 
-        final char[] chars = name.toCharArray();
+        final int len = name.length();
         boolean valid = true;
         boolean isWhitespace = true;
-        for (int i = 0; valid && i < chars.length; i++) {
-            final char c = chars[i];
+        for (int i = 0; valid && i < len; i++) {
+            final char c = name.charAt(i);
             valid = (Arrays.binarySearch(CHARS_INVALID, c) < 0);
-            isWhitespace &= Character.isWhitespace(c);
+            isWhitespace = Character.isWhitespace(c);
         }
         return !isWhitespace && valid;
     }

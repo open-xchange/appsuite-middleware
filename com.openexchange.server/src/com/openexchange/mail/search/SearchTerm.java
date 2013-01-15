@@ -221,10 +221,10 @@ public abstract class SearchTerm<T> implements Serializable {
      * @return <code>true</code> if string only consists of ASCII 7 bit characters; otherwise <code>false</code>
      */
     protected static final boolean isAscii(final String s) {
-        final char[] chars = s.toCharArray();
+        final int length = s.length();
         boolean isAscii = true;
-        for (int i = 0; i < chars.length && isAscii; i++) {
-            isAscii = (chars[i] < 128);
+        for (int i = 0; i < length && isAscii; i++) {
+            isAscii = (s.charAt(i) < 128);
         }
         return isAscii;
     }

@@ -49,7 +49,6 @@
 
 package com.openexchange.html.internal.css;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -203,16 +202,15 @@ public final class CSSMatcher {
             final String allowedValue = allowedValues[i];
             if (PATTERN_IS_PATTERN.matcher(allowedValue).matches()) {
                 patIndices.add(Integer.valueOf(i));
-                final char[] chars = allowedValue.toCharArray();
-                Arrays.sort(chars);
-                if (Arrays.binarySearch(chars, 'd') >= 0) {
+                if (allowedValue.indexOf('d') >= 0) {
                     return false;
                 }
-                if (Arrays.binarySearch(chars, '*') >= 0) {
+                if (allowedValue.indexOf('*') >= 0) {
                     return true;
                 }
-                for (int j = 0; j < chars.length; j++) {
-                    if (matchesPattern(chars[j], value)) {
+                final int length = allowedValue.length();
+                for (int j = 0; j < length; j++) {
+                    if (matchesPattern(allowedValue.charAt(j), value)) {
                         return true;
                     }
                 }

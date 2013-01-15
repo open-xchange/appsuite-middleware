@@ -108,6 +108,18 @@ public final class HashKey {
 
     private static final int MULTIPLICATION_CONSTANT = 33;
 
+    private static int calcSafeHashCode(final int hashStart, final String val) {
+        int h = hashStart;
+        final int len = val.length();
+        if (len > 0) {
+            final int fac = MULTIPLICATION_CONSTANT;
+            for (int i = 0; i < len; i++) {
+                h = fac * h + val.charAt(i);
+            }
+        }
+        return h;
+    }
+
     private static int calcSafeHashCode(final int hashStart, final char[] val) {
         int h = hashStart;
         final int len = val.length;
@@ -133,7 +145,7 @@ public final class HashKey {
         super();
         value = key;
         if (null == salt) {
-            hash = calcSafeHashCode(hashStart, key.toCharArray());
+            hash = calcSafeHashCode(hashStart, key);
         } else {
             final StringBuilder sb = new StringBuilder(key).append('-').append(salt);
             final int count = sb.length();

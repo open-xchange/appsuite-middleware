@@ -220,10 +220,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
         if (null == src || src.length() == 0) {
             return Long.toString(System.currentTimeMillis());
         }
-        final char[] chars = src.toCharArray();
-        final StringBuilder sb = new StringBuilder(chars.length);
-        for (int i = 0; i < chars.length; i++) {
-            final char c = chars[i];
+        final int length = src.length();
+        final StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = src.charAt(i);
             if (Character.isLetterOrDigit(c)) {
                 sb.append(c);
             }

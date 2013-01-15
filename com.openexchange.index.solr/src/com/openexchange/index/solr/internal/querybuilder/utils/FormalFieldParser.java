@@ -111,7 +111,9 @@ public class FormalFieldParser {
         StringBuilder b = new StringBuilder();
         log.trace("[split]: Starting to split \'" + source + "\'");
 
-        for (char ch : source.toCharArray()) {
+        final int length = source.length();
+        for (int i = 0; i < length; i++) {
+            final char ch = source.charAt(i);
             log.trace("[split]: \'" + ch + "\'");
             switch (ch) {
                 case '\\':

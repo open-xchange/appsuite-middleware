@@ -70,11 +70,12 @@ import javax.security.sasl.Sasl;
 import javax.security.sasl.SaslClient;
 import javax.security.sasl.SaslException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 
@@ -1082,24 +1083,24 @@ public class SieveHandler {
         retval[0] = UNDEFINED;
         retval[1] = UNDEFINED;
         // Check for starting "NO" or "OK"
-        final char[] chars = firstLine.toCharArray();
+        final int length = firstLine.length();
         int index = 0;
-        if ('N' == chars[index] && 'O' == chars[index + 1]) {
+        if ('N' == firstLine.charAt(index) && 'O' == firstLine.charAt(index + 1)) {
             retval[0] = NO;
             index += 2;
-        } else if ('O' == chars[index] && 'K' == chars[index + 1]) {
+        } else if ('O' == firstLine.charAt(index) && 'K' == firstLine.charAt(index + 1)) {
             retval[0] = OK;
             index += 2;
         }
         // Check for a literal
-        if (index < chars.length) {
+        if (index < length) {
             char c;
-            while ((index < chars.length) && (((c = chars[index]) == ' ') || (c == '\t'))) {
+            while ((index < length) && (((c = firstLine.charAt(index)) == ' ') || (c == '\t'))) {
                 index++;
             }
-            if (index < chars.length && '{' == chars[index]) {
+            if (index < length && '{' == firstLine.charAt(index)) {
                 // A literal
-                retval[1] = parseLiteralLength(readString(index, chars));
+                retval[1] = parseLiteralLength(readString(index, firstLine));
             }
         }
 
@@ -1121,8 +1122,8 @@ public class SieveHandler {
         return -1;
     }
 
-    private static String readString(final int index, final char[] chars) {
-        final int size = chars.length;
+    private static String readString(final int index, final String chars) {
+        final int size = chars.length();
         if (index >= size) {
             // already at end of response
             return null;
@@ -1131,7 +1132,7 @@ public class SieveHandler {
         final int start = index;
         int i = index;
         char c;
-        while ((i < size) && ((c = chars[i]) != ' ') && (c != '\r') && (c != '\n') && (c != '\t')) {
+        while ((i < size) && ((c = chars.charAt(i)) != ' ') && (c != '\r') && (c != '\n') && (c != '\t')) {
             i++;
         }
         return toString(chars, start, i);
@@ -1141,13 +1142,13 @@ public class SieveHandler {
      * Convert the chars within the specified range of the given byte array into a {@link String}. The range extends from <code>start</code>
      * till, but not including <code>end</code>.
      */
-    private static String toString(final char[] chars, final int start, final int end) {
+    private static String toString(final String chars, final int start, final int end) {
         final int size = end - start;
-        final char[] theChars = new char[size];
-        for (int i = 0, j = start; i < size;) {
-            theChars[i++] = (chars[j++]);
+        final StringAllocator theChars = new StringAllocator(size);
+        for (int i = 0, j = start; i < size; i++) {
+            theChars.append(chars.charAt(j++));
         }
-        return new String(theChars);
+        return theChars.toString();
     }
 
     /**
