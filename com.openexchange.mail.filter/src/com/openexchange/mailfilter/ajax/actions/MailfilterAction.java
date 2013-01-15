@@ -699,11 +699,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             try {
                 handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
-                if (null != activeScript) {
-                    return sieveHandler.getScript(activeScript);
-                } else {
-                    return "";
-                }
+                return null == activeScript ? "" : sieveHandler.getScript(activeScript);
             } catch (final UnsupportedEncodingException e) {
                 throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
             } catch (final IOException e) {
