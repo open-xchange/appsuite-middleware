@@ -63,6 +63,7 @@ public class AsciiReader extends Reader {
      */
     public AsciiReader(final InputStream inputStream) {
         this(inputStream, DEFAULT_BUFFER_SIZE);
+        errorOnAsciiFault = false;
     }
 
     /**
