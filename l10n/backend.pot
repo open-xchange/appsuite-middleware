@@ -7835,6 +7835,12 @@ msgstr ""
 msgid "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters."
 msgstr ""
 
+#. A participant changed his confirmation state of a delegated task and we are not able to determine who delegated the task. %1$d is
+#. replaced with the identifier of the task for further investigations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:224
+msgid "Can not determine delegator of task %1$d."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
 msgid ""
 "The current version number %1$s is already lower than or equal to the "
