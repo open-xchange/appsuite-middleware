@@ -1,3 +1,7 @@
+* 2013-01-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24489: Fixed possible visibility scope issue
+
 * 2013-01-15 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 24446: Fixed classpath & java_opts
