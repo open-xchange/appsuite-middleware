@@ -55,12 +55,15 @@ import java.nio.charset.Charset;
 import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.Buffer;
 import org.glassfish.grizzly.ThreadCache;
+import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.http.Cookie;
+import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.Method;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.server.Session;
 import org.glassfish.grizzly.http.server.util.Globals;
+import org.glassfish.grizzly.http.util.DataChunk;
 import org.glassfish.grizzly.utils.Charsets;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.log.LogProperties;
@@ -76,6 +79,10 @@ public class OXRequest extends Request {
 
     private static Log LOG = com.openexchange.log.Log.loggerFor(OXRequest.class);
 
+    private String XForwardProto = null;
+
+    private int XForwardPort = 0;
+
     private static GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
 
     private static final ThreadCache.CachedTypeIndex<Request> CACHE_IDX = ThreadCache.obtainIndex(Request.class, 16);
@@ -90,8 +97,67 @@ public class OXRequest extends Request {
         return oxRequest;
     }
 
+    @Override
+    protected void recycle() {
+        XForwardProto = null;
+        XForwardPort = 0;
+        super.recycle();
+    }
+
     protected OXRequest(Response response) {
         super(response);
+    }
+
+    /**
+     * Gets the XForwardProto e.g. http/s
+     * 
+     * @return The XForwardProto
+     */
+    public String getXForwardProto() {
+        return XForwardProto;
+    }
+
+    /**
+     * Sets the xForwardProto e.g. http/s
+     * 
+     * @param XForwardProto The XForwardProto to set
+     */
+    public void setxForwardProto(String XForwardProto) {
+        this.XForwardProto = XForwardProto;
+    }
+
+    /**
+     * Gets the XForwardPort
+     * 
+     * @return The XForwardPort
+     */
+    public int getXForwardPort() {
+        return XForwardPort;
+    }
+
+    /**
+     * Sets the XForwardPort
+     * 
+     * @param XForwardPort The XForwardPort to set
+     */
+    public void setXForwardPort(int XForwardPort) {
+        this.XForwardPort = XForwardPort;
+    }
+
+    @Override
+    public String getScheme() {
+        if (XForwardProto != null) {
+            return XForwardProto;
+        }
+        return super.getScheme();
+    }
+
+    @Override
+    public int getServerPort() {
+        if (XForwardPort > 0) {
+            return XForwardPort;
+        }
+        return super.getServerPort();
     }
 
     /**
@@ -150,7 +216,7 @@ public class OXRequest extends Request {
     private void registerNewSession(String sessionId) {
         session = new Session(sessionId);
         session.setTimestamp(System.currentTimeMillis());
-        session.setSessionTimeout(grizzlyConfig.getCookieMaxInactivityInterval()*1000);
+        session.setSessionTimeout(grizzlyConfig.getCookieMaxInactivityInterval() * 1000);
         sessions.put(sessionId, session);
         response.addCookie(createSessionCookie(sessionId));
         if (LogProperties.isEnabled()) {
@@ -249,7 +315,7 @@ public class OXRequest extends Request {
          * Toggle the security of the cookie on when we are dealing with a https request or the forceHttps config option is true e.g. when A
          * proxy like apache terminates ssl in front of the backend. The exception from forced https is a request from the local LAN.
          */
-        boolean isCookieSecure = request.isSecure() || (grizzlyConfig.isCookieForceHttps() && !Cookies.isLocalLan(getServerName()));
+        boolean isCookieSecure = request.isSecure() || (grizzlyConfig.isForceHttps() && !Cookies.isLocalLan(getServerName()));
         jSessionIdCookie.setSecure(isCookieSecure);
 
         /*
