@@ -539,8 +539,7 @@ public class MailObject {
             if (internalRecipient && recurrenceDatePosition != 0) {
             	msg.setHeader(HEADER_X_OX_RECURRENCE_DATE, String.valueOf(recurrenceDatePosition));
             }
-
-            msg.saveChanges();
+            saveChangesSafe(msg);
             /*
              * Finally transport mail
              */
