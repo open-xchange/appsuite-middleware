@@ -61,7 +61,7 @@ public interface LockAware {
 
     /**
      * Gets the lock associated with this cache.
-     * 
+     *
      * @return The lock or <code>null</code>
      */
     Lock getLock();

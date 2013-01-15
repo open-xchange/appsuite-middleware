@@ -68,11 +68,11 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public abstract class ListCore extends ContextAbstraction {
 
     private ServiceLoader<ContextConsoleListInterface> listsubclasses = null;
-    
+
     private interface GetterClosureInterface {
         public ArrayList<String> getData(final ContextConsoleListInterface commonex) throws PluginException;
     }
-    
+
     protected void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         setCSVOutputOption(parser);

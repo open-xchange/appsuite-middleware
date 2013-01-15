@@ -55,8 +55,8 @@ import com.openexchange.groupware.container.CalendarObject;
 
 /**
  * {@link FreeBusyInformation}
- * 
- * Holds additional calendar data needed for VFREEBUSY iCal components. 
+ *
+ * Holds additional calendar data needed for VFREEBUSY iCal components.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -67,7 +67,7 @@ public class FreeBusyInformation extends CalendarObject {
     private String attendee;
     private String[] attendees;
     private List<FreeBusyInterval> intervals;
-    
+
     /**
      * Initializes a new {@link FreeBusyInformation}.
      */
@@ -76,9 +76,9 @@ public class FreeBusyInformation extends CalendarObject {
     }
 
     /**
-     * Gets the attendee, i.e. the calendar user responding to the free/busy 
+     * Gets the attendee, i.e. the calendar user responding to the free/busy
      * time request.
-     * 
+     *
      * @return The attendee
      */
     public String getAttendee() {
@@ -86,9 +86,9 @@ public class FreeBusyInformation extends CalendarObject {
     }
 
     /**
-     * Gets the attendees, i.e. the calendar users whose free/busy time is 
+     * Gets the attendees, i.e. the calendar users whose free/busy time is
      * being requested.
-     * 
+     *
      * @return The attendees
      */
     public String[] getAttendees() {
@@ -96,9 +96,9 @@ public class FreeBusyInformation extends CalendarObject {
     }
 
     /**
-     * Sets the attendee, i.e. the calendar user responding to the free/busy 
-     * time request. 
-     * 
+     * Sets the attendee, i.e. the calendar user responding to the free/busy
+     * time request.
+     *
      * @param attendee The attendee to set
      */
     public void setAttendee(String attendee) {
@@ -106,9 +106,9 @@ public class FreeBusyInformation extends CalendarObject {
     }
 
     /**
-     * Sets the attendee, i.e. the calendar users whose free/busy time is 
+     * Sets the attendee, i.e. the calendar users whose free/busy time is
      * being requested.
-     * 
+     *
      * @param attendee The attendee to set
      */
     public void setAttendees(String[] attendees) {
@@ -117,7 +117,7 @@ public class FreeBusyInformation extends CalendarObject {
 
     /**
      * Gets the free/busy data.
-     * 
+     *
      * @return The free/busy intervals
      */
     public List<FreeBusyInterval> getFreeBusyIntervals() {
@@ -126,7 +126,7 @@ public class FreeBusyInformation extends CalendarObject {
 
     /**
      * Sets the free/busy intervals.
-     * 
+     *
      * @param freeBusySlots The intervals to set
      */
     public void setFreeBusyIntervals(List<FreeBusyInterval> freeBusySlots) {

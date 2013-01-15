@@ -64,18 +64,18 @@ public class SolrCoreStore implements Serializable {
     private static final long serialVersionUID = -3765429569358418129L;
 
     private int id;
-    
+
     private URI uri;
-    
+
     private int maxCores;
-    
+
     private int numCores;
-    
-    
+
+
     public SolrCoreStore() {
         super();
-    }    
-    
+    }
+
     /**
      * Gets the id
      *
@@ -84,7 +84,7 @@ public class SolrCoreStore implements Serializable {
     public int getId() {
         return id;
     }
-    
+
     /**
      * Sets the id
      *
@@ -102,7 +102,7 @@ public class SolrCoreStore implements Serializable {
     public URI getUri() {
         return uri;
     }
-    
+
     /**
      * Sets the uri
      *
@@ -111,7 +111,7 @@ public class SolrCoreStore implements Serializable {
     public void setUri(final URI uri) {
         this.uri = uri;
     }
-    
+
     /**
      * Gets the maxCores
      *
@@ -120,7 +120,7 @@ public class SolrCoreStore implements Serializable {
     public int getMaxCores() {
         return maxCores;
     }
-    
+
     /**
      * Sets the maxCores
      *
@@ -130,12 +130,12 @@ public class SolrCoreStore implements Serializable {
         this.maxCores = maxCores;
     }
 
-    
+
     public final int getNumCores() {
         return numCores;
     }
 
-    
+
     public final void setNumCores(int numCores) {
         this.numCores = numCores;
     }

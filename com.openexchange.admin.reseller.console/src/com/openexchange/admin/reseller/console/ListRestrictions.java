@@ -73,7 +73,7 @@ public class ListRestrictions extends ResellerAbstraction {
     }
 
     /**
-     * 
+     *
      */
     public ListRestrictions() {
     }
@@ -147,7 +147,7 @@ public class ListRestrictions extends ResellerAbstraction {
 
     /**
      * Generate data which can be processed by the csv output method.
-     * 
+     *
      * @param group
      * @param members
      * @return

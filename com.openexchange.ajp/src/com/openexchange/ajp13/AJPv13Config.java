@@ -63,7 +63,7 @@ import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link AJPv13Config} - The AJPv13 configuration
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -240,7 +240,7 @@ public final class AJPv13Config implements Initialization {
 
     /**
      * Gets the capacity for listener pool
-     * 
+     *
      * @return The capacity for listener pool
      */
     public static int getAJPListenerPoolSize() {
@@ -253,7 +253,7 @@ public final class AJPv13Config implements Initialization {
 
     /**
      * Gets the keep-alive time
-     * 
+     *
      * @return The keep-alive time
      */
     public static int getKeepAliveTime() {
@@ -262,7 +262,7 @@ public final class AJPv13Config implements Initialization {
 
     /**
      * Gets the max. request parameter count allowed.
-     * 
+     *
      * @return The max. request parameter count
      */
     public static int getMaxRequestParameterCount() {
@@ -310,7 +310,7 @@ public final class AJPv13Config implements Initialization {
 
     /**
      * Gets the specified server property.
-     * 
+     *
      * @param property The server property
      * @return The property value
      */
@@ -321,7 +321,7 @@ public final class AJPv13Config implements Initialization {
 
     /**
      * Gets the specified system property.
-     * 
+     *
      * @param property The system property
      * @return The property value
      */

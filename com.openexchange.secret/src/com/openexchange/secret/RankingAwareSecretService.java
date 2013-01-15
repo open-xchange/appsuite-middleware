@@ -59,7 +59,7 @@ public interface RankingAwareSecretService extends SecretService {
 
     /**
      * Gets the ranking of the currently applicable {@link SecretService} reference.
-     * 
+     *
      * @return The currently applicable service ranking
      */
     public int getRanking();

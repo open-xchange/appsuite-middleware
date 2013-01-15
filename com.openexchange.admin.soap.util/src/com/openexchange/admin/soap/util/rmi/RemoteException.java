@@ -10,9 +10,9 @@ import com.openexchange.admin.soap.util.io.IOException;
 
 /**
  * <p>Java-Klasse f\u00fcr RemoteException complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="RemoteException">
  *   &lt;complexContent>
@@ -24,8 +24,8 @@ import com.openexchange.admin.soap.util.io.IOException;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "RemoteException", propOrder = {
@@ -40,11 +40,11 @@ public class RemoteException
 
     /**
      * Ruft den Wert der message-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMessage() {
         return message;
@@ -52,11 +52,11 @@ public class RemoteException
 
     /**
      * Legt den Wert der message-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMessage(String value) {
         this.message = value;

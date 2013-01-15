@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link BasicTypeAPIResultConverter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BasicTypeAPIResultConverter implements ResultConverter {
@@ -82,7 +82,7 @@ public final class BasicTypeAPIResultConverter implements ResultConverter {
 
     /**
      * Initializes a new {@link BasicTypeAPIResultConverter}.
-     * 
+     *
      * @param inputFormat The input format
      */
     protected BasicTypeAPIResultConverter(final String inputFormat) {

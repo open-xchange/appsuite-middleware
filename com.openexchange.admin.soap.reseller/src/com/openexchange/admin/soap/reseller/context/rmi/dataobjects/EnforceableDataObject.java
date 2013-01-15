@@ -14,9 +14,9 @@ import com.openexchange.admin.soap.reseller.context.reseller.rmi.dataobjects.Res
 
 /**
  * <p>Java-Klasse f\u00fcr EnforceableDataObject complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="EnforceableDataObject">
  *   &lt;complexContent>
@@ -31,8 +31,8 @@ import com.openexchange.admin.soap.reseller.context.reseller.rmi.dataobjects.Res
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "EnforceableDataObject", propOrder = {
@@ -59,25 +59,25 @@ public class EnforceableDataObject {
 
     /**
      * Gets the value of the mandatoryMembersChange property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the mandatoryMembersChange property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getMandatoryMembersChange().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getMandatoryMembersChange() {
         if (mandatoryMembersChange == null) {
@@ -88,25 +88,25 @@ public class EnforceableDataObject {
 
     /**
      * Gets the value of the mandatoryMembersCreate property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the mandatoryMembersCreate property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getMandatoryMembersCreate().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getMandatoryMembersCreate() {
         if (mandatoryMembersCreate == null) {
@@ -117,25 +117,25 @@ public class EnforceableDataObject {
 
     /**
      * Gets the value of the mandatoryMembersDelete property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the mandatoryMembersDelete property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getMandatoryMembersDelete().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getMandatoryMembersDelete() {
         if (mandatoryMembersDelete == null) {
@@ -146,25 +146,25 @@ public class EnforceableDataObject {
 
     /**
      * Gets the value of the mandatoryMembersRegister property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the mandatoryMembersRegister property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getMandatoryMembersRegister().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getMandatoryMembersRegister() {
         if (mandatoryMembersRegister == null) {

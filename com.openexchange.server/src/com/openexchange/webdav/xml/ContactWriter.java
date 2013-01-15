@@ -138,7 +138,7 @@ public class ContactWriter extends CommonWriter {
         final XMLOutputter xo = new XMLOutputter();
         try {
         	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-            final Contact contactobject = contactService.getContact(sessionObj, Integer.toString(folderId), Integer.toString(objectId)); 
+            final Contact contactobject = contactService.getContact(sessionObj, Integer.toString(folderId), Integer.toString(objectId));
             writeObject(contactobject, eProp, false, xo, os);
         } catch (final OXException exc) {
             if (exc.isGeneric(Generic.NOT_FOUND)) {
@@ -214,7 +214,7 @@ public class ContactWriter extends CommonWriter {
             object_id = contactObj.getObjectID();
             if (contactObj.containsImage1() && !delete) {
             	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-            	final Contact contactObjectWithImage = contactService.getContact(sessionObj, 
+            	final Contact contactObjectWithImage = contactService.getContact(sessionObj,
             			Integer.toString(contactObj.getParentFolderID()), Integer.toString(contactObj.getObjectID()));
                 addContent2PropElement(eProp, contactObjectWithImage, delete);
             } else {

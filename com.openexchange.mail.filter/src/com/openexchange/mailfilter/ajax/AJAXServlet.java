@@ -105,7 +105,7 @@ public abstract class AJAXServlet extends HttpServlet {
 
     /**
      * Gets the locale for given session
-     * 
+     *
      * @param session The session
      * @return The locale
      */

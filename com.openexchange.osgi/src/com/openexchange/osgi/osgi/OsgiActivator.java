@@ -59,7 +59,7 @@ import com.openexchange.osgi.console.osgi.ConsoleActivator;
 
 /**
  * {@link OsgiActivator} - Activator for OSGi-Bundle
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class OsgiActivator extends HousekeepingActivator {

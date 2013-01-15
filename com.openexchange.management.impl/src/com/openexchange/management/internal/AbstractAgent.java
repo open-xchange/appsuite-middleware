@@ -220,7 +220,7 @@ public abstract class AbstractAgent {
         mbs = ManagementFactory.getPlatformMBeanServer();
     }
 
-    
+
     /**
      * Gets the {@link ThreadMXBean} instance.
      *

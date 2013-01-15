@@ -51,14 +51,14 @@ package com.openexchange.config;
 
 /**
  * {@link Filter} - A filter for a value's string representation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Filter {
 
     /**
      * Tests whether or not the specified abstract pathname should be included in a pathname list.
-     * 
+     *
      * @param value The value's string representation to be tested
      * @return <code>true</code> if and only if <code>value</code> should be included; otherwise <code>false</code>
      */

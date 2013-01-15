@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link HazelcastPresenceStatusServiceImpl} - Hazelcast based PresenceStatusService that is implemented via a distributed Map containing
  * <ID, PresenceData> pairs.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 // TODO: PresenceService must honor priority
@@ -83,7 +83,7 @@ public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService
 
     /**
      * Initializes a new {@link HazelcastPresenceStatusServiceImpl}.
-     * 
+     *
      * @param hazelcastInstance The haszelcastInstance of this server which is used to get the presenceStatus Map distributed in the cluster
      */
     public HazelcastPresenceStatusServiceImpl(HazelcastInstance hazelcastInstance) {
@@ -163,7 +163,7 @@ public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService
 
     /**
      * Are we dealing with an initial Presence Stanza iow. was the client offline before?
-     * 
+     *
      * @param stanza The incoming Presence Stanza that has to be insepcted
      * @return true if the client is sending an initial Presence, false otherwise
      * @throws OXException If the AtmospherePresenceService can't be queried
@@ -179,7 +179,7 @@ public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService
 
     /**
      * Are we dealing with a final Presence Stanza iow. is the client going offline?
-     * 
+     *
      * @param stanza The incoming Presence Stanza that has to be inspected
      * @return true if the client is sending a final Presence, false otherwise
      */

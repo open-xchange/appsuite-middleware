@@ -59,14 +59,14 @@ public interface Delegatized {
 
     /**
      * Gets the un-delegated account identifier.
-     * 
+     *
      * @return The un-delegated account identifier or <code>-1</code> if not available
      */
     int getUndelegatedAccountId();
 
     /**
      * Sets the un-delegated account identifier
-     * 
+     *
      * @param undelegatedAccountId The identifier to set
      */
     void setUndelegatedAccountId(int undelegatedAccountId);

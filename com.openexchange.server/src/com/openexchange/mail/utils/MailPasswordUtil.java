@@ -105,7 +105,7 @@ public final class MailPasswordUtil {
      * Mail account secret encryption strategy.
      */
     public static final SecretEncryptionStrategy<GenericProperty> STRATEGY = new SecretEncryptionStrategy<GenericProperty>() {
-        
+
         @Override
         public void update(final String recrypted, final GenericProperty customizationNote) throws OXException {
             final int contextId = customizationNote.session.getContextId();
@@ -179,7 +179,7 @@ public final class MailPasswordUtil {
      * @param session The session
      * @return The decrypted password
      * @throws GeneralSecurityException If password decryption fails
-     * @throws OXException 
+     * @throws OXException
      */
     public static String decrypt(final String encryptedPassword, final Session session, final int accountId, final String login, final String server) throws OXException {
         final SecretEncryptionService<GenericProperty> encryptionService = ServerServiceRegistry.getInstance().getService(SecretEncryptionFactoryService.class).createService(STRATEGY);

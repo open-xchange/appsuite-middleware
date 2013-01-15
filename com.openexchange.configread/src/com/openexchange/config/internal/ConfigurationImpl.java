@@ -525,7 +525,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             return file;
         }
         final File[] subDirs = file.listFiles(new FileFilter() {
-            
+
             @Override
             public boolean accept(final File file) {
                 return file.isDirectory();

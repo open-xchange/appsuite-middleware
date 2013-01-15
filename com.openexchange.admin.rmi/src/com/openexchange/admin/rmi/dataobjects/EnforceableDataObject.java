@@ -59,7 +59,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  * @author choeger
- * 
+ *
  */
 public abstract class EnforceableDataObject implements Serializable, Cloneable {
 
@@ -71,7 +71,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
      * This method must be implemented and it must return a String array
      * containing all names of mandatory members of the corresponding class
      * required to CREATE data.
-     * 
+     *
      * @return String array containing names of mandatory members or null if
      *         unwanted
      */
@@ -81,7 +81,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
      * This method must be implemented and it must return a String array
      * containing all names of mandatory members of the corresponding class
      * required to CHANGE data.
-     * 
+     *
      * @return String array containing names of mandatory members or null if
      *         unwanted
      */
@@ -91,7 +91,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
      * This method must be implemented and it must return a String array
      * containing all names of mandatory members of the corresponding class
      * required to DELETE data.
-     * 
+     *
      * @return String array containing names of mandatory members or null if
      *         unwanted
      */
@@ -101,7 +101,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
      * This method must be implemented and it must return a String array
      * containing all names of mandatory members of the corresponding class
      * required to REGISTER data.
-     * 
+     *
      * @return String array containing names of mandatory members or null if
      *         unwanted
      */
@@ -109,7 +109,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
 
     /**
      * Checks if the mandatory members for create are set for an object
-     * 
+     *
      * @return true if they are set; false otherwise
      * @throws EnforceableDataObjectException
      */
@@ -119,7 +119,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
 
     /**
      * Checks if the mandatory members for change are set for an object
-     * 
+     *
      * @return true if they are set; false otherwise
      * @throws EnforceableDataObjectException
      */
@@ -129,7 +129,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
 
     /**
      * Checks if the mandatory members for delete are set for an object
-     * 
+     *
      * @return true if they are set; false otherwise
      * @throws EnforceableDataObjectException
      */
@@ -139,7 +139,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
 
     /**
      * Checks if the mandatory members for register are set for an object
-     * 
+     *
      * @return true if they are set; false otherwise
      * @throws EnforceableDataObjectException
      */
@@ -183,7 +183,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
      * Returns those fields which are failing during a mandatory members check. This method is intended to be used
      * after a call of {@link #mandatoryCreateMembersSet()}, {@link #mandatoryChangeMembersSet()},
      * {@link #mandatoryDeleteMembersSet()} or {@link #mandatoryRegisterMembersSet()} to determine the missing fields
-     * 
+     *
      * @return An {@link ArrayList<String>} containing the missing fields
      */
     public ArrayList<String> getUnsetMembers() {
@@ -192,7 +192,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#clone()
      */
     @Override
@@ -207,7 +207,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
      */
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
@@ -262,9 +262,9 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
     /**
      * This method is used to check that the mandatory fields specified for create aren't set to null through a
      * change
-     * 
+     *
      * @param enforcableobject
-     * @throws InvalidDataException 
+     * @throws InvalidDataException
      */
     public void testMandatoryCreateFieldsNull() throws InvalidDataException {
         final String[] mandatoryMembersCreate = this.getMandatoryMembersCreate();
@@ -344,5 +344,5 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
         return true;
     }
 
-    
+
 }

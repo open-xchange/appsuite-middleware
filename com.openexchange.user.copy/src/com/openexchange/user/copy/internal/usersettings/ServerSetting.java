@@ -51,7 +51,7 @@ package com.openexchange.user.copy.internal.usersettings;
 
 /**
  * {@link ServerSetting}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ServerSetting {
@@ -69,7 +69,7 @@ public class ServerSetting {
     private boolean contactCollectOnMailAccess;
 
     private int folderTree;
-    
+
 
     public ServerSetting() {
         super();

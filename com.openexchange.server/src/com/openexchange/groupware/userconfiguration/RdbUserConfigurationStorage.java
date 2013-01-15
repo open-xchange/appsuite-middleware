@@ -85,7 +85,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 
     /**
      * Sets whether to initialize extended permissions. Default is <code>true</code>.
-     * 
+     *
      * @param initExtendedPermissions <code>true</code> to initialize extended permissions; else <code>false</code>
      * @return This storage
      */

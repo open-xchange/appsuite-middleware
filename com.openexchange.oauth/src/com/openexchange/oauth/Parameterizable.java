@@ -53,7 +53,7 @@ import java.util.Set;
 
 /**
  * {@link Parameterizable} - Marks implementing class as parameterizable.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Parameterizable {
@@ -62,7 +62,7 @@ public interface Parameterizable {
      * Puts given name-value-pair into this data's parameters.
      * <p>
      * A <code>null</code> value removes the mapping.
-     * 
+     *
      * @param name The parameter name
      * @param value The parameter value
      * @throws NullPointerException If name is <code>null</code>
@@ -71,7 +71,7 @@ public interface Parameterizable {
 
     /**
      * Gets specified parameter's value.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>String</code> representing the single value of the parameter
      * @throws NullPointerException If name is <code>null</code>
@@ -80,7 +80,7 @@ public interface Parameterizable {
 
     /**
      * Gets the available parameters' names.
-     * 
+     *
      * @return The paramter names
      */
     Set<String> getParamterNames();

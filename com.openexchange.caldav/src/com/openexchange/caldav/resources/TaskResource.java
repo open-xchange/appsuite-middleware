@@ -71,7 +71,7 @@ import com.openexchange.webdav.protocol.WebdavPath;
 
 /**
  * {@link TaskResource}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class TaskResource extends CalDAVResource<Task> {
@@ -98,7 +98,7 @@ public class TaskResource extends CalDAVResource<Task> {
         super(factory, parent, object, url);
         this.parent = parent;
     }
-    
+
     private TasksSQLInterface getTaskInterface() {
         if (null == this.taskInterface) {
             this.taskInterface = factory.getTaskInterface();
@@ -137,8 +137,8 @@ public class TaskResource extends CalDAVResource<Task> {
     protected String generateICal() throws OXException {
         final ICalEmitter icalEmitter = factory.getIcalEmitter();
         final ICalSession session = icalEmitter.createSession();
-        final Task task = parent.load(this.object);        
-        icalEmitter.writeTask(session, task, factory.getContext(), 
+        final Task task = parent.load(this.object);
+        icalEmitter.writeTask(session, task, factory.getContext(),
             new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
         final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         icalEmitter.writeSession(session, bytes);
@@ -151,7 +151,7 @@ public class TaskResource extends CalDAVResource<Task> {
 
     @Override
     protected void deserialize(final InputStream body) throws OXException {
-        final List<Task> tasks = getICalParser().parseTasks(body, getTimeZone(), factory.getContext(), 
+        final List<Task> tasks = getICalParser().parseTasks(body, getTimeZone(), factory.getContext(),
             new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
         if (null == tasks || 1 != tasks.size()) {
             throw protocolException(HttpServletResponse.SC_BAD_REQUEST);
@@ -178,7 +178,7 @@ public class TaskResource extends CalDAVResource<Task> {
                     taskToSave.set(truncated.getId(), stringValue.substring(0, truncated.getMaxSize()));
                     return true;
                 }
-            }        
+            }
         }
         return false;
     }
@@ -191,7 +191,7 @@ public class TaskResource extends CalDAVResource<Task> {
             if (originalTask.contains(field) && false == updatedTask.contains(field)) {
                 if (Task.STATUS == field) {
                     // '1' is the default value for state
-                    updatedTask.setStatus(Task.NOT_STARTED); 
+                    updatedTask.setStatus(Task.NOT_STARTED);
                 } else {
                     // use generic setter with default value
                     updatedTask.set(field, updatedTask.get(field));

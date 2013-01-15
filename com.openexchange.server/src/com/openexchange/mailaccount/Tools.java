@@ -161,7 +161,7 @@ public final class Tools {
         } finally {
             Database.back(contextId, false, rcon);
         }
-        
+
     }
 
     /**

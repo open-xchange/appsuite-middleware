@@ -1035,18 +1035,18 @@ public class DocumentMetadataResource extends AbstractResource implements
 		return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject(),
 				sessionHolder.getContext());
 	}
-	
+
 	@Override
 	protected SpecialSetSwitch getSetSwitch(String value) {
 		return new InfostoreSetSwitch(value);
 	}
-	
+
 	private class InfostoreSetSwitch extends AbstractResource.SpecialSetSwitch {
 
 		public InfostoreSetSwitch(String value) {
 			super(value);
 		}
-		
+
 		@Override
 		public Object lastModified() throws WebdavProtocolException {
 			try {
@@ -1060,6 +1060,6 @@ public class DocumentMetadataResource extends AbstractResource implements
 			}
 			return Boolean.TRUE;
 		}
-		
+
 	}
 }

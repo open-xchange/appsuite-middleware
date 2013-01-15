@@ -57,7 +57,7 @@ import com.openexchange.indexedSearch.json.ResultConverters;
 
 /**
  * {@link IndexJSONActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class IndexJSONActivator extends AJAXModuleActivator {

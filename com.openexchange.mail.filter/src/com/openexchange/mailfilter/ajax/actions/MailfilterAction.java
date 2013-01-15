@@ -187,9 +187,9 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     private final String scriptname;
 
     private boolean useSIEVEResponseCodes = false;
-    
+
     private final Subject krbSubject;
-    
+
     /**
      * Default constructor.
      */
@@ -217,7 +217,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             sieveHandler.initializeConnection();
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -1114,7 +1114,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         }
         return Category.CATEGORY_ERROR;
     }
-    
+
     /**
      * The SIEVE parser is not very expressive when it comes to exceptions.
      * This method analyses an exception message and throws a more detailed

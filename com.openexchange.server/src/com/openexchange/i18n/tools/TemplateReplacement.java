@@ -88,7 +88,7 @@ public interface TemplateReplacement extends Cloneable {
 
     /**
      * Checks if this replacement is a relevant change to notify about.
-     * 
+     *
      * @return <code>true</code> if relevant; otherwise <code>false</code>
      */
     public boolean relevantChange();

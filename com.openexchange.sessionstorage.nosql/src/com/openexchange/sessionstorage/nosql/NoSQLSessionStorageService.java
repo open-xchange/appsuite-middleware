@@ -86,7 +86,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link NoSQLSessionStorageService}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class NoSQLSessionStorageService implements SessionStorageService {

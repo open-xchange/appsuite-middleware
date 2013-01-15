@@ -66,13 +66,13 @@ import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link LdapLookup}
- * 
+ *
  * Active Directory lookup implementation based on LDAP.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class LdapLookup extends Lookup {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(LdapLookup.class);
 
     private String baseDN;
@@ -81,7 +81,7 @@ public class LdapLookup extends Lookup {
     private final String bindPW;
     private final String filter;
     private final boolean trustAllCerts;
-        
+
     /**
      * Initializes a new {@link LdapLookup}.
      */
@@ -94,11 +94,11 @@ public class LdapLookup extends Lookup {
         this.bindPW = bindPW;
         this.trustAllCerts = trustAllCerts;
     }
-    
+
     /**
      * Initializes a new {@link LdapLookup}.
-     * 
-     * @throws OXException 
+     *
+     * @throws OXException
      */
     public LdapLookup() throws OXException {
         this(
@@ -110,7 +110,7 @@ public class LdapLookup extends Lookup {
             Tools.getConfigPropertyBool("com.openexchange.freebusy.publisher.ews.trustAllCerts", false)
         );
     }
-    
+
     @Override
     public String[] getLegacyExchangeDNs(User[] users) throws OXException  {
         LdapContext context = null;
@@ -137,14 +137,14 @@ public class LdapLookup extends Lookup {
             }
         }
     }
-    
+
     private String searchLegacyExchangeDN(LdapContext context, User user) throws OXException {
         NamingEnumeration<SearchResult> results = null;
         try {
             SearchControls searchControls = new SearchControls();
             searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
             searchControls.setReturningAttributes(new String[] { "legacyExchangeDN" });
-            String searchfilter = super.replaceUserAttributes(filter, user); 
+            String searchfilter = super.replaceUserAttributes(filter, user);
             String baseDN = getBaseDN(context);
             if (null == baseDN) {
                 throw EWSExceptionCodes.EXTERNAL_ERROR.create("Unable to determine baseDN");
@@ -152,7 +152,7 @@ public class LdapLookup extends Lookup {
             results = context.search(baseDN, searchfilter, searchControls);
             if (null == results || false == results.hasMore()) {
                 throw EWSExceptionCodes.NOT_FOUND.create(searchfilter);
-            }            
+            }
             SearchResult searchResult = results.next();
             if (results.hasMoreElements()) {
                 throw EWSExceptionCodes.AMBIGUOUS_NAME.create(searchfilter);
@@ -175,13 +175,13 @@ public class LdapLookup extends Lookup {
             }
         }
     }
- 
+
     private LdapContext createContext() throws NamingException {
         Hashtable<String, String> environment = new Hashtable<String, String>();
         environment.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         environment.put(Context.PROVIDER_URL, uri);
         environment.put(Context.REFERRAL, "follow");
-        if (trustAllCerts && uri.startsWith("ldaps://")) { 
+        if (trustAllCerts && uri.startsWith("ldaps://")) {
             environment.put("java.naming.ldap.factory.socket", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
         }
         if (null != bindDN) {
@@ -193,7 +193,7 @@ public class LdapLookup extends Lookup {
         }
         return new InitialLdapContext(environment, null);
     }
-    
+
     private String getBaseDN(LdapContext context) throws NamingException {
         if (null == this.baseDN || 0 == baseDN.length()) {
             this.baseDN = discoverDefaultNamingContext(context);

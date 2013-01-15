@@ -86,7 +86,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link SMSMessagingMessage} - Represents a SMS message.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMSMessagingMessage implements ParameterizedMessagingMessage, SMSMessage {
@@ -97,7 +97,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage,
 
     /**
      * Sets the service look-up.
-     * 
+     *
      * @param serviceLookup The service look-up
      */
     public static void setServiceLookup(final ServiceLookup serviceLookup) {
@@ -106,7 +106,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage,
 
     /**
      * Gets the service look-up.
-     * 
+     *
      * @return The service look-up
      */
     public static ServiceLookup getServiceLookup() {
@@ -150,7 +150,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage,
 
     /**
      * Initializes a new {@link SMSMessagingMessage}.
-     * 
+     *
      * @param smsMessage The SMS/MMS message
      * @throws OXException If creation fails
      */
@@ -202,7 +202,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage,
 
     /**
      * Initializes a new {@link SMSMessagingMessage}.
-     * 
+     *
      * @param recipient The recipient of the direct message
      * @param from The sending user
      */
@@ -218,7 +218,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage,
 
     /**
      * Initializes a new {@link SMSMessagingMessage}.
-     * 
+     *
      * @param recipient The recipient of the direct message
      * @param from The sending user
      */
@@ -424,7 +424,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage,
 
     /**
      * Sets the captcha parameters
-     * 
+     *
      * @param params The captcha parameters
      */
     @Override
@@ -435,7 +435,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage,
 
     /**
      * Gets the captcha parameters
-     * 
+     *
      * @return The captcha parameters
      */
     @Override
@@ -448,7 +448,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage,
 
     /**
      * Adds specified attachment.
-     * 
+     *
      * @param managedFile The attachment as a managed file
      * @throws OXException If attaching denoted file fails
      */
@@ -494,7 +494,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage,
 
     /**
      * Adds the attachment associated with specified identifier.
-     * 
+     *
      * @param attachmentId The attachment identifier
      * @throws OXException If attaching denoted file fails
      */
@@ -516,7 +516,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage,
 
         /**
          * Initializes a new {@link ManagedFileContentImplementation}.
-         * 
+         *
          * @param managedFile
          */
         public ManagedFileContentImpl(final ManagedFile managedFile) {

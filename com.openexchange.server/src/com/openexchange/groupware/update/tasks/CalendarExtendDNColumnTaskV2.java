@@ -57,9 +57,9 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
  * {@link CalendarExtendDNColumnTaskV2}
- * 
+ *
  * Executes CalendarExtendDNColumnTask again, because it's changes were not added to calendar.sql script.
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class CalendarExtendDNColumnTaskV2 extends CalendarExtendDNColumnTask implements UpdateTaskV2 {

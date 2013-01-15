@@ -67,7 +67,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class DeleteCore extends UserAbstraction {
-    
+
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         setIdOption(parser);
@@ -88,7 +88,7 @@ public abstract class DeleteCore extends UserAbstraction {
 
             // create user obj
             final User usr = new User();
-            
+
             parseAndSetUserId(parser, usr);
             parseAndSetUsername(parser, usr);
 

@@ -53,7 +53,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
  * {@link MailFolderInfo} - Provides needed information about the mail folder to process
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailFolderInfo {
@@ -64,7 +64,7 @@ public final class MailFolderInfo {
 
     /**
      * Initializes a new {@link MailFolderInfo}.
-     * 
+     *
      * @param fullName The full name
      * @param messageCount The message count or <code>-1</code> if denoted folder does not hold messages
      */
@@ -76,7 +76,7 @@ public final class MailFolderInfo {
 
     /**
      * Initializes a new {@link MailFolderInfo}.
-     * 
+     *
      * @param mailFolder The mail folder
      */
     public MailFolderInfo(final MailFolder mailFolder) {
@@ -87,7 +87,7 @@ public final class MailFolderInfo {
 
     /**
      * Gets the full name
-     * 
+     *
      * @return The full name
      */
     public String getFullName() {
@@ -96,7 +96,7 @@ public final class MailFolderInfo {
 
     /**
      * Gets the message count
-     * 
+     *
      * @return The message count
      */
     public int getMessageCount() {

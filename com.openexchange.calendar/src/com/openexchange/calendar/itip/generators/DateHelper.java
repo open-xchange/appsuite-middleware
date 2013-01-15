@@ -69,16 +69,16 @@ import com.openexchange.groupware.container.CalendarObject;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DateHelper {
-    
+
     private DateFormat timeFormat;
     private DateFormat dateFormat;
     private DateFormat weekdayFormat;
-    
+
     private final Appointment appointment;
     private Locale locale;
 	private TimeZone timezone;
 	private final TimeZone utc = TimeZone.getTimeZone("UTC");
-    
+
 
     public DateHelper(Appointment appointment, Locale locale, TimeZone tz) {
         super();
@@ -89,21 +89,21 @@ public class DateHelper {
             this.locale = locale;
             this.timezone = tz;
             weekdayFormat = new SimpleDateFormat("E", locale);
-            
+
             timeFormat.setTimeZone(timezone);
             dateFormat.setTimeZone(timezone);
             weekdayFormat.setTimeZone(timezone);
         }
     }
-    
+
     public String getRecurrenceDatePosition() {
         return formatDate(appointment.getRecurrenceDatePosition());
     }
-    
+
     public String getInterval() {
         return formatInterval(appointment);
     }
-    
+
 
     public String getDateSpec() {
         com.openexchange.java.StringAllocator b = new com.openexchange.java.StringAllocator();
@@ -128,7 +128,7 @@ public class DateHelper {
     	if (appointment.getFullTime()) {
     		endDate = new Date(endDate.getTime()-1000);
     	}
-    	
+
     	if (differentDays(startDate, endDate)) {
     		if (appointment.getFullTime()) {
         		return String.format("%s - %s", formatDate(startDate, utc), formatDate(endDate, utc));
@@ -146,7 +146,7 @@ public class DateHelper {
         }
         return dateFormat.format(date);
     }
-    
+
     public String formatDate(Date date, TimeZone timezone) {
         if (date == null || dateFormat == null) {
             return "";
@@ -156,7 +156,7 @@ public class DateHelper {
         return format.format(date);
     }
 
-    
+
     public String formatTime(Date date) {
         return timeFormat.format(date);
     }
@@ -168,7 +168,7 @@ public class DateHelper {
         // TODO: Longer than a day
         Date startDate = appointment.getStartDate();
 		Date endDate = appointment.getEndDate();
-		
+
 		if (differentDays(startDate, endDate)) {
 			if (differentWeeks(startDate, endDate)) {
 				return formatTimeAndDay(startDate) + " - " + formatTimeAndDay(endDate);
@@ -179,16 +179,16 @@ public class DateHelper {
 			return formatTime(startDate) + " - " + formatTime(endDate);
 		}
     }
-    
+
     private boolean differentDays(Date startDate, Date endDate) {
     	GregorianCalendar cal1 = new GregorianCalendar();
         cal1.setTime(startDate);
         cal1.setTimeZone(timezone);
-        
+
         GregorianCalendar cal2 = new GregorianCalendar();
         cal2.setTime(endDate);
         cal2.setTimeZone(timezone);
-        
+
         return cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR) || cal1.get(Calendar.DAY_OF_YEAR) != cal2.get(Calendar.DAY_OF_YEAR);
 	}
 
@@ -196,11 +196,11 @@ public class DateHelper {
 	   	GregorianCalendar cal1 = new GregorianCalendar();
         cal1.setTimeZone(timezone);
         cal1.setTime((new Date(startDate.getTime())));
-        
+
         GregorianCalendar cal2 = new GregorianCalendar();
         cal2.setTimeZone(timezone);
         cal2.setTime(new Date(endDate.getTime()));
-        
+
         return cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR) || cal1.get(Calendar.WEEK_OF_YEAR) != cal2.get(Calendar.WEEK_OF_YEAR);
 	}
 
@@ -216,12 +216,12 @@ public class DateHelper {
         Date date = appointment.getCreationDate();
         return formatDate(date)+" "+formatTime(date);
     }
-    
+
     public String getModified() {
         Date date = appointment.getLastModified();
         return formatDate(date)+" "+formatTime(date);
     }
-    
+
 
 
 }

@@ -65,9 +65,9 @@ public class AdminProperties {
 	    public static final String CHECK_NOT_ALLOWED_NAMES  = "CHECK_GROUP_UID_FOR_NOT_ALLOWED_NAMES";
 	    public static final String NOT_ALLOWED_NAMES        = "NOT_ALLOWED_GROUP_UID_NAMES";
             public static final String GID_NUMBER_START        = "GID_NUMBER_START";
-            
+
 	}
-	
+
 	/**
 	 * The general properties
 	 * @author d7
@@ -75,17 +75,17 @@ public class AdminProperties {
 	 */
 	public class Prop {
 	    public static final String SERVER_NAME                      = "SERVER_NAME";
-	    
+
 	    public static final String ADMINDAEMON_LOGLEVEL             = "LOG_LEVEL";
 	    public static final String ADMINDAEMON_LOGFILE              = "LOG";
-	    
+
 	    // public static final String PROPERTIES_SQL_FILE              = "SQL_PROP";
 	    // public static final String PROPERTIES_USER_FILE             = "USER_PROP";
 	    // public static final String PROPERTIES_GROUP_FILE            = "GROUP_PROP";
 	    // public static final String PROPERTIES_RESOURCE_FILE         = "RESOURE_PROP";
 	    // public static final String PROPERTIES_RMI_FILE              = "RMI_PROP";
 	}
-	
+
 	/**
 	 * The properties for resources
 	 * @author d7
@@ -97,7 +97,7 @@ public class AdminProperties {
 	    public static final String CHECK_NOT_ALLOWED_NAMES  = "CHECK_RES_UID_FOR_NOT_ALLOWED_NAMES";
 	    public static final String NOT_ALLOWED_NAMES        = "NOT_ALLOWED_RES_UID_NAMES";
 	}
-	
+
 	/**
 	 * The properties for RMI
 	 * @author d7
@@ -106,7 +106,7 @@ public class AdminProperties {
 	public class RMI {
 	    public static final String RMI_PORT   = "RMI_PORT";
 	}
-	
+
 	/**
 	 * The properties for the user
 	 * @author d7

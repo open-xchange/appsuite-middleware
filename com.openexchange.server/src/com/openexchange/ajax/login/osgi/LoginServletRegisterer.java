@@ -85,7 +85,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
     private ConfigurationService configService;
     private HttpService httpService;
     private DispatcherPrefixService prefixService;
-    
+
     private Login login;
 
     public LoginServletRegisterer(final BundleContext context) {

@@ -51,13 +51,13 @@ package com.openexchange.admin.soap.dataobjects;
 
 
 /**
- * 
+ *
  * This class represents a server.
- * 
+ *
  */
 public class Server {
     private Integer id;
-    
+
     private String name;
 
     /**
@@ -71,10 +71,10 @@ public class Server {
         this.id = s.getId();
         this.name = s.getName();
     }
-    
+
     /**
      * Returns the id of this server object
-     * 
+     *
      * @return An {@link Integer} containing the id
      */
     public Integer getId() {
@@ -83,7 +83,7 @@ public class Server {
 
     /**
      * Sets the id for this server object
-     * 
+     *
      * @param id An {@link Integer} containing the id
      */
     public void setId(final Integer id) {
@@ -92,7 +92,7 @@ public class Server {
 
     /**
      * Returns the name of this server object
-     * 
+     *
      * @return A {@link String} containing the name
      */
     public String getName() {
@@ -101,7 +101,7 @@ public class Server {
 
     /**
      * Sets the name for this server object
-     * 
+     *
      * @param name A {@link String} containing the name
      */
     public void setName(final String name) {

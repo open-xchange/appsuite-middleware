@@ -60,7 +60,7 @@ import java.sql.PreparedStatement;
  */
 public class IndexTestTool {
 
-    
+
     public static void createInactiveCoreEntry(final Connection con, final int cid, final int uid, final int module) throws Exception {
         PreparedStatement stmt = null;
         stmt = con.prepareStatement("INSERT INTO solrCores (cid, uid, module, active, core, server) VALUES (?, ?, ?, ?, ?, ?)");
@@ -73,7 +73,7 @@ public class IndexTestTool {
         stmt.setNull(i, java.sql.Types.INTEGER);
         stmt.executeUpdate();
     }
-    
+
     public static void createIndexFileEntry(final Connection con, final int cid, final int uid, final int module, final String indexFile) throws Exception {
         PreparedStatement stmt = null;
         stmt = con.prepareStatement("INSERT INTO solrIndexFiles (cid, uid, module, indexFile) VALUES (?, ?, ?, ?)");

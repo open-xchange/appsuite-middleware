@@ -51,7 +51,7 @@ package com.openexchange.index;
 
 /**
  * {@link FacetRange} - Represents a facet range.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FacetRange {
@@ -64,7 +64,7 @@ public final class FacetRange {
 
     /**
      * Initializes a new {@link FacetRange}.
-     * 
+     *
      * @param field The index fields
      * @param from The <code>from</code> value
      * @param to The <code>to</code> value
@@ -78,7 +78,7 @@ public final class FacetRange {
 
     /**
      * Gets the field
-     * 
+     *
      * @return The field
      */
     public IndexField getField() {
@@ -87,7 +87,7 @@ public final class FacetRange {
 
     /**
      * Gets the <code>from</code> value
-     * 
+     *
      * @return The <code>from</code> value
      */
     public String getFrom() {
@@ -96,7 +96,7 @@ public final class FacetRange {
 
     /**
      * Gets the <code>to</code> value
-     * 
+     *
      * @return The <code>to</code> value
      */
     public String getTo() {

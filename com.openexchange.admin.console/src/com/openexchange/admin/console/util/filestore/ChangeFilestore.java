@@ -56,36 +56,36 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 
 /**
- * 
+ *
  * @author d7,cutmasta
- * 
+ *
  */
 public class ChangeFilestore extends FilestoreAbstraction {
 
     public ChangeFilestore(final String[] args2) {
         final AdminParser parser = new AdminParser("changefilestore");
-    
+
         setOptions(parser);
-    
+
         try {
             parser.ownparse(args2);
-    
+
             final Credentials auth = credentialsparsing(parser);
-    
+
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
-    
+
             final Filestore fstore = new Filestore();
             parseAndSetFilestoreID(parser, fstore);
-            
+
             parseAndSetFilestorePath(parser, fstore);
-    
+
             parseAndSetFilestoreSize(parser, fstore);
-            
+
             parseAndSetFilestoreMaxCtxs(parser, fstore);
-    
+
             oxutil.changeFilestore(fstore, auth);
-            
+
             displayChangedMessage(filestoreid, null, parser);
             sysexit(0);
         } catch (final Exception e) {

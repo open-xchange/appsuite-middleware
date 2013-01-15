@@ -141,7 +141,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Servlet doing the login and logout stuff.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Login extends AJAXServlet {
@@ -858,7 +858,7 @@ public class Login extends AJAXServlet {
     /**
      * Writes the (groupware's) secret cookie to specified HTTP servlet response whose name is composed by cookie prefix
      * <code>"open-xchange-secret-"</code> and a secret cookie identifier.
-     * 
+     *
      * @param resp The HTTP servlet response
      * @param session The session providing the secret cookie identifier
      * @param hash The hash string used for composing cookie name
@@ -881,7 +881,7 @@ public class Login extends AJAXServlet {
     /**
      * Writes the (groupware's) session cookie to specified HTTP servlet response whose name is composed by cookie prefix
      * <code>"open-xchange-session-"</code> and a secret cookie identifier.
-     * 
+     *
      * @param resp The HTTP servlet response
      * @param session The session providing the secret cookie identifier
      * @param hash The hash string used for composing cookie name
@@ -897,7 +897,7 @@ public class Login extends AJAXServlet {
     /**
      * Writes the (groupware's) session cookie to specified HTTP servlet response whose name is composed by cookie prefix
      * <code>"open-xchange-session-"</code> and a secret cookie identifier.
-     * 
+     *
      * @param resp The HTTP servlet response
      * @param session The session providing the secret cookie identifier
      * @param hash The hash string used for composing cookie name
@@ -1045,7 +1045,7 @@ public class Login extends AJAXServlet {
             }
             // Append "config/modules"
             appendModules(session, json, req);
-            
+
             response.setData(json);
         } catch (final OXException e) {
             if (AjaxExceptionCodes.PREFIX.equals(e.getPrefix())) {
@@ -1053,7 +1053,7 @@ public class Login extends AJAXServlet {
             }
             if (LoginExceptionCodes.NOT_SUPPORTED.equals(e)) {
                 // Rethrow according to previous behavior
-                LOG.debug(e.getMessage(), e);                
+                LOG.debug(e.getMessage(), e);
                 throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
             }
             if (LoginExceptionCodes.REDIRECT.equals(e)) {
@@ -1168,7 +1168,7 @@ public class Login extends AJAXServlet {
 
     /**
      * Parses the specified parameter to a <code>boolean</code> value.
-     * 
+     *
      * @param parameter The parameter value
      * @return <code>true</code> if parameter is <b>not</b> <code>null</code> and is (ignore-case) one of the values <code>"true"</code>,
      *         <code>"1"</code>, <code>"yes"</code> or <code>"on"</code>; otherwise <code>false</code>

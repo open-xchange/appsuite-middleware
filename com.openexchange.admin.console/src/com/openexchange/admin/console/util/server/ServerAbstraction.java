@@ -78,7 +78,7 @@ public abstract class ServerAbstraction extends UtilAbstraction {
             sv.setId(Integer.parseInt(serverid));
         }
     }
-    
+
     protected void parseAndSetServername(final AdminParser parser, final Server sv) {
         servername = (String) parser.getOptionValue(this.serverNameOption);
         if (null != servername) {

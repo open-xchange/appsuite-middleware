@@ -1273,7 +1273,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      * Loads all filestore information. BEWARE! If loadRealUsage is set to <code>true</code> this operation may be very expensive because
      * the filestore usage for all contexts stored in that filestore must be loaded. Setting this parameter to <code>false</code> will set
      * the read usage of the filestore to 0.
-     * 
+     *
      * @param id unique identifier of the filestore.
      * @param loadRealUsage <code>true</code> to load the real file store usage of that filestore.
      * @return all filestore information
@@ -1372,7 +1372,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
         }
     }
-    
+
     private void updateBlockWithFilestoreUsage(final FilestoreContextBlock block) throws StorageException {
         if (block.size() == 0) {
             return;
@@ -1507,7 +1507,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     /**
      * Loads the usage information for a filestore.
-     * 
+     *
      * @param filestoreId the unique identifier of the filestore.
      * @param loadRealUsage <code>true</code> to load the filestore usage from every context in it. BEWARE! This is a slow operation.
      * @return The {@link FilestoreUsage} object for the filestore.

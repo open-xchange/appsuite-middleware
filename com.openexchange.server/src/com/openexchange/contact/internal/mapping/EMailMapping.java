@@ -64,9 +64,9 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class EMailMapping extends StringMapping {
-    
+
     private Boolean validateEmail = null;
-    
+
     private boolean isValidateEmail() throws OXException {
         if (null == validateEmail) {
             validateEmail = Boolean.valueOf(
@@ -89,5 +89,5 @@ public abstract class EMailMapping extends StringMapping {
 			}
 		}
 	}
-	
+
 }

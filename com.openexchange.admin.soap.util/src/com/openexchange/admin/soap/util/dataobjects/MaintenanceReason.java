@@ -9,9 +9,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse f\u00fcr MaintenanceReason complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="MaintenanceReason">
  *   &lt;complexContent>
@@ -26,8 +26,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "MaintenanceReason", namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", propOrder = {
@@ -47,11 +47,11 @@ public class MaintenanceReason {
 
     /**
      * Ruft den Wert der id-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getId() {
         return id;
@@ -59,11 +59,11 @@ public class MaintenanceReason {
 
     /**
      * Legt den Wert der id-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setId(Integer value) {
         this.id = value;
@@ -71,11 +71,11 @@ public class MaintenanceReason {
 
     /**
      * Ruft den Wert der idset-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isIdset() {
         return idset;
@@ -83,11 +83,11 @@ public class MaintenanceReason {
 
     /**
      * Legt den Wert der idset-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setIdset(Boolean value) {
         this.idset = value;
@@ -95,11 +95,11 @@ public class MaintenanceReason {
 
     /**
      * Ruft den Wert der text-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getText() {
         return text;
@@ -107,11 +107,11 @@ public class MaintenanceReason {
 
     /**
      * Legt den Wert der text-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setText(String value) {
         this.text = value;
@@ -119,11 +119,11 @@ public class MaintenanceReason {
 
     /**
      * Ruft den Wert der textset-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isTextset() {
         return textset;
@@ -131,11 +131,11 @@ public class MaintenanceReason {
 
     /**
      * Legt den Wert der textset-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setTextset(Boolean value) {
         this.textset = value;

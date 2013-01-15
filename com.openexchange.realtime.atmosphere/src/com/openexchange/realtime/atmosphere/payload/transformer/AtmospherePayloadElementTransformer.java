@@ -60,7 +60,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AtmospherePayloadElementTransformer} - Used to transform PayloadElements of Stanzas transported via the Atmosphere Channel.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -79,7 +79,7 @@ public class AtmospherePayloadElementTransformer implements PayloadElementTransf
 
     /**
      * Initializes a new {@link AtmospherePayloadElementTransformer} for one special PayloadElement identified by an ElementPath.
-     * 
+     *
      * @param internalFormat The internal Format this Transformer converts the PayloadElement to
      * @param elementPath The ElementPath of the PayloadElement that this Transformer can handle
      */

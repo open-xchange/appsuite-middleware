@@ -70,14 +70,14 @@ import com.openexchange.admin.tools.PropertyHandler;
  *
  */
 public abstract class OXUserStorageInterface {
-    
+
     /**
      * Proxy attribute for the class implementing this interface.
      */
     private static Class<? extends OXUserStorageInterface> implementingClass;
 
     private static final Log log = LogFactory.getLog(OXUserStorageInterface.class);
-    
+
     protected static AdminCache cache = null;
 
     protected static PropertyHandler prop = null;
@@ -137,7 +137,7 @@ public abstract class OXUserStorageInterface {
 
     /**
      * Checks if specified context exists.
-     * 
+     *
      * @param ctx The context at least providing context identifier
      * @return <code>true</code> if exists; otherwise <code>false</code>
      * @throws StorageException If an error occurred
@@ -148,78 +148,78 @@ public abstract class OXUserStorageInterface {
      * Retrieve the ModuleAccess for an user.
      *
      * @param context Context
-     * @param user_id long containing the user id.     
+     * @param user_id long containing the user id.
      * @return UserModuleAccess containing the module access rights.
      * @throws StorageException
      *
      */
     public abstract UserModuleAccess getModuleAccess (final Context ctx,final int user_id)  throws StorageException;
-    
+
     /**
-     * Manipulate user module access within the given context.    
+     * Manipulate user module access within the given context.
      * @param ctx Context object.
      * @param userId int[] containing the user id.
-     * @param moduleAccess UserModuleAccess containing module access.     
+     * @param moduleAccess UserModuleAccess containing module access.
      *
      * @throws StorageException
      */
     public abstract void changeModuleAccess(Context ctx, int userId, UserModuleAccess moduleAccess) throws StorageException;
-    
+
     /**
-     * Manipulate users module access within the given context.    
-     * 
+     * Manipulate users module access within the given context.
+     *
      * @param ctx Context object.
      * @param user_ids int[] containing the user ids.
-     * @param moduleAccess UserModuleAccess containing module access.     
+     * @param moduleAccess UserModuleAccess containing module access.
      *
      * @throws StorageException
      */
     public abstract void changeModuleAccess(final Context ctx,final int[] user_ids,final UserModuleAccess moduleAccess) throws StorageException;
-    
-    
+
+
     /**
      * Retrieve user objects for a range of users identified by User.getUsername().
      *
      * @param context Context object.
      * @param users User[] with users to get data for. Attention: These objects will be cloned by a shallow copy, so
      * non native attributes will point to the same reference after this method
-     * @return User[] containing result objects.     
+     * @return User[] containing result objects.
      * @throws RemoteException
      *
      */
     public abstract User[] getData(final Context ctx, User[] users) throws StorageException;
-    
+
     /**
      * Manipulate user data within the given context.
-     *    
+     *
      * @param context Context in which the new user will be modified.
-     * @param usrdata User containing user data. 
+     * @param usrdata User containing user data.
      * @throws StorageException
      */
     public abstract void change(final Context ctx,final User usrdata) throws StorageException;
-    
+
     /**
      * Changes last modified data in database
      */
     public abstract void changeLastModified( final int user_id, final Context ctx, final Connection write_ox_con ) throws StorageException;
-    
-    /** 
+
+    /**
      * Create new user in given connection with given contact and user id
      * If the uid number feature is active then also supply a correct uid_number(IDGenerator with Type UID_NUMBER).Else set this to -1
      */
     public abstract int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id,final int uid_number ) throws StorageException;
-    
+
     /**
      * Create new user in context ctx
      */
     public abstract int create(final Context ctx,final User usrdata, final UserModuleAccess moduleAccess) throws StorageException;
-    
-    
+
+
     /**
      * Retrieve all user ids for a given context.
      *
-     * @param ctx numerical context identifier     
-     * @return int[] containing user ids. 
+     * @param ctx numerical context identifier
+     * @return int[] containing user ids.
      * @throws StorageException
      *
      */
@@ -228,8 +228,8 @@ public abstract class OXUserStorageInterface {
     /**
      * Retrieve all user objects for a given context. Which match the given search_pattern
      *
-     * @param ctx numerical context identifier     
-     * @return User[] containing user ids. 
+     * @param ctx numerical context identifier
+     * @return User[] containing user ids.
      * @throws StorageException
      *
      */
@@ -243,12 +243,12 @@ public abstract class OXUserStorageInterface {
      * @throws StorageException
      */
     public abstract User[] listCaseInsensitive(final Context ctx, final String search_pattern) throws StorageException;
-    
+
     /**
      * Delete an user or multiple from given context in given connection
      */
     public abstract void delete(final Context ctx, final User[] user_ids, final Connection write_ox_con ) throws StorageException;
-    
+
     /**
      * Delete users in given context
      */
@@ -258,22 +258,22 @@ public abstract class OXUserStorageInterface {
      * Delete one user in given context
      */
     public abstract void delete( final Context ctx, final User user) throws StorageException;
-    
+
     /**
      * Fetch all data from current user  and add it to "del_user"
      */
     public abstract void createRecoveryData ( final Context ctx,final int user_id, final Connection write_ox_con ) throws StorageException;
-    
+
     /**
      *  Delete from "del_user" for given context and user
      */
     public abstract void deleteRecoveryData ( final Context ctx,final int user_id, final Connection con ) throws StorageException;
-    
-    
+
+
     /**
      * Delete from "del_user" for given context
      */
     public abstract void deleteAllRecoveryData (final Context ctx, final Connection con ) throws StorageException;
-    
-    
+
+
 }

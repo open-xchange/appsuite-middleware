@@ -71,7 +71,7 @@ import com.openexchange.user.json.parser.ParsedUser;
 
 /**
  * {@link UserMapper}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class UserMapper extends DefaultJsonMapper<User, UserField> {
@@ -127,9 +127,9 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 
 	@Override
 	protected EnumMap<UserField, JsonMapping<? extends Object, User>> createMappings() {
-		final EnumMap<UserField, JsonMapping<? extends Object, User>> mappings = new 
+		final EnumMap<UserField, JsonMapping<? extends Object, User>> mappings = new
 				EnumMap<UserField, JsonMapping<? extends Object, User>>(UserField.class);
-		
+
 		mappings.put(UserField.ID, new IntegerMapping<User>("id", 1) {
 
 			@Override
@@ -158,9 +158,9 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 				} else {
 					throw new UnsupportedOperationException();
 				}
-			}			
+			}
 		});
-		
+
 		mappings.put(UserField.ALIASES, new ArrayMapping<String, User>("aliases", 610) {
 
 			@Override
@@ -191,9 +191,9 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			@Override
 			protected String deserialize(JSONArray array, int index) throws JSONException, OXException {
 				throw new UnsupportedOperationException();
-			}			
+			}
 		});
-		
+
 		mappings.put(UserField.TIME_ZONE, new StringMapping<User>("timezone", 611) {
 
 			@Override
@@ -222,9 +222,9 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 				} else {
 					throw new UnsupportedOperationException();
 				}
-			}			
+			}
 		});
-		
+
 		mappings.put(UserField.LOCALE, new DefaultJsonMapping<Locale, User>("locale", 612) {
 
 			@Override
@@ -266,14 +266,14 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 				}
 			}
 		});
-		
+
 		mappings.put(UserField.GROUPS, new DefaultJsonMapping<int[], User>("groups", 613) {
 
 			@Override
 			public void deserialize(JSONObject from, User to) throws JSONException, OXException {
 				throw new UnsupportedOperationException();
 			}
-			
+
 			@Override
 			public Object serialize(User from, TimeZone timeZone, Session session) throws JSONException {
 		        int[] value = this.get(from);
@@ -308,7 +308,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 				throw new UnsupportedOperationException();
 			}
 		});
-		
+
 		mappings.put(UserField.CONTACT_ID, new IntegerMapping<User>("contact_id", 614) {
 
 			@Override
@@ -329,9 +329,9 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			@Override
 			public void remove(User object) {
 				throw new UnsupportedOperationException();
-			}			
+			}
 		});
-		
+
 		mappings.put(UserField.LOGIN_INFO, new StringMapping<User>("login_info", 615) {
 
 			@Override
@@ -353,11 +353,11 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			public void remove(User object) {
 				throw new UnsupportedOperationException();
 			}
-		});		
-		
+		});
+
 		return mappings;
 	}
-	
+
     private static final Pattern identifierPattern = Pattern.compile("(\\p{Lower}{2})(?:_(\\p{Upper}{2}))?(?:_([a-zA-Z]{2}))?");
 
     /**
@@ -378,4 +378,4 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
         return retval;
     }
 
-} 
+}

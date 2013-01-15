@@ -84,7 +84,7 @@ public final class Check {
 			throw new IllegalArgumentException("the passed argument '" + argumentName + "' may not be null");
 		}
 	}
-	
+
 	public static void hasStorages(final Map<ContactStorage, List<String>> storages) throws OXException {
 	    if (null == storages || 0 == storages.size()) {
 	        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage available");
@@ -187,7 +187,7 @@ public final class Check {
 	}
 
 	/**
-	 * Performs validation checks prior performing write operations on the global address book, throwing appropriate exceptions if 
+	 * Performs validation checks prior performing write operations on the global address book, throwing appropriate exceptions if
 	 * checks fail.
 	 *
 	 * @param storage The queried storage
@@ -199,7 +199,7 @@ public final class Check {
 	public static void canWriteInGAB(ContactStorage storage, Session session, String folderID, Contact update) throws OXException {
 		if (FolderObject.SYSTEM_LDAP_FOLDER_ID == parse(folderID)) {
 		    /*
-		     * check legacy edit flag 
+		     * check legacy edit flag
 		     */
 	        if (false == OXFolderProperties.isEnableInternalUsersEdit()) {
 	            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(update.getObjectID(), session.getContextId());

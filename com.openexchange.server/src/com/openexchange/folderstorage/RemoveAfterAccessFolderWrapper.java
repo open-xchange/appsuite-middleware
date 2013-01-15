@@ -54,7 +54,7 @@ import java.util.Locale;
 
 /**
  * {@link RemoveAfterAccessFolderWrapper} - Simple wrapper for {@link Folder} to enhance with {@link RemoveAfterAccessFolder} behavior.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RemoveAfterAccessFolderWrapper implements RemoveAfterAccessFolder {
@@ -84,7 +84,7 @@ public final class RemoveAfterAccessFolderWrapper implements RemoveAfterAccessFo
     public int getContextId() {
         return contextId;
     }
-    
+
     @Override
     public int getUserId() {
         return userId;

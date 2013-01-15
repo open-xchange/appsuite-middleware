@@ -64,7 +64,7 @@ public abstract class SingleAccountManager extends AbstractFileStorageAccountMan
 
     /**
      * Initializes a new {@link SingleAccountManager}.
-     * 
+     *
      * @param factory The factory
      */
     protected SingleAccountManager(final FileStorageServiceFactory factory) {

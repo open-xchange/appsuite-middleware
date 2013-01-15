@@ -335,7 +335,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         /*-
          * Since PrintWriter simply delegates flush() invocation to underlying OutputStream,
          * we can safely call ServletOutputStream.flush() directly.
-         * 
+         *
          * See implementation of flush() inside PrintWriter:
          *    public void flush() {
          *        try {
@@ -721,7 +721,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
                 // Already existing; decide which one to keep or to merge
                 // By now: Keep the newer one (cookies is a LinkedHashSet that keeps order)
                 /*-
-                 * 
+                 *
                 if (null != prev) {
                     if (0 == prev.getMaxAge()) {
                         // First indeciates delete
@@ -731,7 +731,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
                         }
                     } else {
                         // First i
-                        
+
                     }
                 }
                 */

@@ -57,7 +57,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * An enumeration for HTTP methods.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum Method {
@@ -76,7 +76,7 @@ public enum Method {
 
     /**
      * Gets the method appropriate for specified HTTP Servlet request.
-     * 
+     *
      * @param req The HTTP Servlet request
      * @return The appropriate method or <code>null</code>
      */

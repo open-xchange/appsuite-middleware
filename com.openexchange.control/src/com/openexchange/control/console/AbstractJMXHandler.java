@@ -38,7 +38,7 @@ public abstract class AbstractJMXHandler {
 
         /**
          * Initializes a new {@link AbstractConsoleJMXAuthenticator}.
-         * 
+         *
          * @param credentials The credentials
          */
         protected AbstractConsoleJMXAuthenticator(final String[] credentials) {

@@ -98,7 +98,7 @@ public class PayloadTreeTest {
     private PayloadTreeNode filledTreePayloadTreeNode5;
     private PayloadTreeNode filledTreePayloadTreeNode6;
     private PayloadTree filledTree;
-    
+
     /**
      * @throws java.lang.Exception
      */
@@ -107,34 +107,34 @@ public class PayloadTreeTest {
         payloadElement1 = new PayloadElement(1, "Integer", "namespace1", "testElement1");
         payloadElement2 = new PayloadElement(2, "Integer", "namespace2", "testElement2");
         payloadElement3 = new PayloadElement(3, "Integer", "namespace3", "testElement3");
-        
+
         payloadTreeNode1 = new PayloadTreeNode(payloadElement1);
         payloadTreeNode2 = new PayloadTreeNode(payloadElement2);
         payloadTreeNode3 = new PayloadTreeNode(payloadElement3);
-        
+
         emptyPayloadTreeNodeList = new ArrayList<PayloadTreeNode>();
         filledPayloadTreeNodeList = new ArrayList<PayloadTreeNode>();
         filledPayloadTreeNodeList.add(payloadTreeNode1);
         filledPayloadTreeNodeList.add(payloadTreeNode2);
         filledPayloadTreeNodeList.add(payloadTreeNode3);
-        
+
         filledTreePayloadElement1 = new PayloadElement(1, "Integer", "namespace1", "testElement1");
         filledTreePayloadElement2 = new PayloadElement(2, "Integer", "namespace2", "testElement2");
         filledTreePayloadElement3 = new PayloadElement(3, "Integer", "namespace3", "testElement3");
         filledTreePayloadElement4 = new PayloadElement(4, "Integer", "namespace4", "testElement4");
         filledTreePayloadElement5 = new PayloadElement(5, "Integer", "namespace5", "testElement5");
         filledTreePayloadElement6 = new PayloadElement(6, "Integer", "namespace6", "testElement6");
-        
+
         filledTreePayloadTreeNode1 = new PayloadTreeNode(filledTreePayloadElement1);
         filledTreePayloadTreeNode2 = new PayloadTreeNode(filledTreePayloadElement2);
         filledTreePayloadTreeNode3 = new PayloadTreeNode(filledTreePayloadElement3);
         filledTreePayloadTreeNode4 = new PayloadTreeNode(filledTreePayloadElement4);
         filledTreePayloadTreeNode5 = new PayloadTreeNode(filledTreePayloadElement5);
         filledTreePayloadTreeNode6 = new PayloadTreeNode(filledTreePayloadElement6);
-        
+
         emptyTree = new PayloadTree();
         treeWithRootNode = new PayloadTree(payloadTreeNode1);
-        
+
         /*
          *          tree
          *            |
@@ -145,10 +145,10 @@ public class PayloadTreeTest {
          *        3   5  6
          */
         filledTree = new PayloadTree(filledTreePayloadTreeNode1);
-        
+
         filledTreePayloadTreeNode2.addChild(filledTreePayloadTreeNode3);
         filledTree.getRoot().addChild(filledTreePayloadTreeNode2);
-        
+
         filledTreePayloadTreeNode4.addChild(filledTreePayloadTreeNode5);
         filledTreePayloadTreeNode4.addChild(filledTreePayloadTreeNode6);
         filledTree.getRoot().addChild(filledTreePayloadTreeNode4);
@@ -268,7 +268,7 @@ public class PayloadTreeTest {
     public void testToString() {
         System.out.println(filledTree);
     }
-    
+
     @Test
     public void testToStringRecursive() {
         System.out.println(filledTreePayloadTreeNode4.recursiveToString(0));

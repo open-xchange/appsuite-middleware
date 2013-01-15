@@ -61,7 +61,7 @@ import com.openexchange.version.Version;
 
 /**
  * The WebDAV version servlet. OXtender needs this servlet to determine the version of the server that it communicates to.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class version extends HttpServlet {

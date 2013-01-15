@@ -63,7 +63,7 @@ import com.openexchange.realtime.presence.subscribe.test.IntegrationTest;
 
 /**
  * {@link Activator}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Activator extends HousekeepingActivator {
@@ -76,7 +76,7 @@ public class Activator extends HousekeepingActivator {
     public Activator()  {
         instance = this;
     }
-    
+
     public static synchronized Activator getDefault() {
         return instance;
     }
@@ -84,7 +84,7 @@ public class Activator extends HousekeepingActivator {
     public BundleContext getContext() {
         return context;
     }
-    
+
     @Override
     public void startBundle() throws Exception {
 //        this.context = context;
@@ -100,7 +100,7 @@ public class Activator extends HousekeepingActivator {
             throw e;
         }
     }
-    
+
 //    @Override
 //    public void start(BundleContext context) throws Exception {
 //        context.registerService(CommandProvider.class.getName(), new TestCommandProvider(), null);
@@ -110,8 +110,9 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        for (ServiceRegistration<?> sr: regs)
+        for (ServiceRegistration<?> sr: regs) {
             sr.unregister();
+        }
     }
 
     @Override
@@ -121,7 +122,7 @@ public class Activator extends HousekeepingActivator {
 
 //    /**
 //     * {@link TestCommandProvider}
-//     * 
+//     *
 //     * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
 //     */
 //    public class TestCommandProvider implements CommandProvider {

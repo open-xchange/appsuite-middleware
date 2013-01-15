@@ -59,7 +59,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
  * {@link MinDateTime}
- * 
+ *
  * Provides a DATE-TIME value indicating the earliest date and
  * time (in UTC) that the server is willing to accept for any DATE or
  * DATE-TIME value in a calendar object resource stored in a calendar
@@ -71,9 +71,9 @@ public class MinDateTime extends SingleXMLPropertyMixin {
 
     public static final String PROPERTY_NAME = "min-date-time";
     public static final Namespace NAMESPACE = CaldavProtocol.CAL_NS;
-    
+
     private final CalDAVFolderCollection<?> collection;
-    
+
     public MinDateTime(CalDAVFolderCollection<?> collection) {
         super(NAMESPACE.getURI(), PROPERTY_NAME);
         this.collection = collection;

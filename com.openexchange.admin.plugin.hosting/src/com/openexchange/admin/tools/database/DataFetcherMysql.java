@@ -63,67 +63,67 @@ import com.openexchange.log.LogFactory;
  * @author cutmasta
  */
 public class DataFetcherMysql implements DataFetcher{
-    
+
     private final Log log = LogFactory.getLog(DataFetcherMysql.class);
-    
+
     private Connection dbConnection = null;
-    
+
     private String selectionCriteria = null;
     private int criteriaType = -1;
     private Object criteriaMatch = null;
     private String catalogname = null;
     private Vector<TableObject> tableObjects = null;
     private DatabaseMetaData dbmetadata = null;
-    
+
     @Override
     public String getCatalogName(){
         return this.catalogname;
     }
-    
+
     public DataFetcherMysql() {
     }
-    
+
     @Override
     public Connection getDbConnection() {
         return dbConnection;
     }
-    
+
     @Override
     public void setDbConnection(Connection dbConnection,String catalog_name) throws SQLException {
         this.dbConnection = dbConnection;
         this.dbConnection.setCatalog(catalog_name);
         this.catalogname = catalog_name;
     }
-    
+
     @Override
     public String getMatchingColumn() {
         return selectionCriteria;
     }
-    
+
     @Override
     public void setMatchingColumn(String column_name) {
         this.selectionCriteria = column_name;
     }
-    
+
     @Override
     public int getColumnMatchType(){
         return this.criteriaType;
     }
-    
+
     @Override
     public Object getColumnMatchObject(){
         return this.criteriaMatch;
     }
-    
+
     @Override
     public void setColumnMatchObject(Object match_obj,int match_type){
         this.criteriaType = match_type;
         this.criteriaMatch = match_obj;
     }
-    
+
     @Override
     public TableObject getDataForTable(TableObject to) throws SQLException{
-        
+
         Vector<TableColumnObject> column_objects = to.getColumns();
         // build the statement string
         StringBuilder sb = new StringBuilder();
@@ -134,8 +134,8 @@ public class DataFetcherMysql implements DataFetcher{
         }
         sb.delete(sb.length()-1,sb.length());
         sb.append(" FROM "+to.getName()+" WHERE "+getMatchingColumn()+" = ?");
-        
-        
+
+
         // fetch data from table
         PreparedStatement prep = null;
         try{
@@ -148,13 +148,13 @@ public class DataFetcherMysql implements DataFetcher{
                 for(int b = 0;b<column_objects.size();b++){
                     TableColumnObject tco = column_objects.get(b);
                     Object o = rs.getObject(tco.getName());
-                    
+
                     TableColumnObject tc2 = new TableColumnObject();
                     tc2.setColumnSize(tco.getColumnSize());
                     tc2.setData(o);
                     tc2.setName(tco.getName());
                     tc2.setType(tco.getType());
-                    
+
                     tro.setColumn(tc2);
                 }
                 to.setDataRow(tro);
@@ -170,22 +170,22 @@ public class DataFetcherMysql implements DataFetcher{
                 log.error("Error closing statement",e);
             }
         }
-        
+
         return to;
-        
-        
+
+
 //        if(to.getDataRowCount()>0){
 //            tableObjects.add(to);
 //            //log.debug(to.getName() +" "+to.getDataRowCount());
 //        }
-        
-        
+
+
     }
-    
+
     @Override
     public Vector<TableObject> fetchTableObjects() throws SQLException{
         tableObjects = new Vector<TableObject>();
-        
+
         dbmetadata = dbConnection.getMetaData();
         // get the tables to check
         ResultSet rs2 = dbmetadata.getTables(null,null,null,null);
@@ -198,13 +198,13 @@ public class DataFetcherMysql implements DataFetcher{
             ResultSet columns_res = dbmetadata.getColumns(getCatalogName(),null,table_name,null);
             boolean table_matches = false;
             while(columns_res.next()){
-                
+
                 TableColumnObject tco = new TableColumnObject();
                 String column_name = columns_res.getString("COLUMN_NAME");
                 tco.setName(column_name);
                 tco.setType(columns_res.getInt("DATA_TYPE"));
                 tco.setColumnSize(columns_res.getInt("COLUMN_SIZE"));
-                
+
                 // if table has our ciriteria column, we should fetch data from it
                 if(column_name.equals(getMatchingColumn())){
                     table_matches = true;
@@ -247,17 +247,17 @@ public class DataFetcherMysql implements DataFetcher{
 //        }
 //        log.error(sb.toString());
 //    }
-    
+
     @Override
     public Vector<TableObject> sortTableObjects() throws SQLException {
-        
+
         findReferences();
         // thx http://de.wikipedia.org/wiki/Topologische_Sortierung :)
         return sortTablesByForeignKey();
-        
+
     }
-    
-    
+
+
     /**
      * Finds references for each table
      */
@@ -284,8 +284,8 @@ public class DataFetcherMysql implements DataFetcher{
             table_references.close();
         }
     }
-    
-    
+
+
     /**
      * Returns -1 if not found else the position in the Vector where the object is located.
      */
@@ -299,13 +299,13 @@ public class DataFetcherMysql implements DataFetcher{
         }
         return found_at_position;
     }
-    
+
     private Vector<TableObject> sortTablesByForeignKey() {
         Vector<TableObject> nasty_order = new Vector<TableObject>();
-        
+
         Vector<TableObject> unsorted = new Vector<TableObject>();
         unsorted.addAll(tableObjects);
-        
+
         // now sort the table with a topological sort mech :)
         // work with the unsorted vector
         while(unsorted.size()>0){
@@ -320,12 +320,12 @@ public class DataFetcherMysql implements DataFetcher{
                 }
             }
         }
-        
+
         //printTables(nasty_order);
-        
+
         return nasty_order;
     }
-    
+
     /*
      * remove no more needed element from list and remove the reference to removed element
      * so that a new element exists which has now references.
@@ -337,5 +337,5 @@ public class DataFetcherMysql implements DataFetcher{
             tob.removeCrossReferenceTable(to.getName());
         }
     }
-    
+
 }

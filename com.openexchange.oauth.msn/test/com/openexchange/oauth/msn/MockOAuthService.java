@@ -68,18 +68,18 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class MockOAuthService implements OAuthService {
-	
+
 	private final OAuthServiceMetaData serviceMetadata;
 
 	public MockOAuthService() {
 		this.serviceMetadata = null;
 	}
-	
+
 	public MockOAuthService(OAuthServiceMetaData serviceMetadata) {
 		this.serviceMetadata = serviceMetadata;
 	}
-	
-	
+
+
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, java.util.Map, int, int)
      */
@@ -133,7 +133,7 @@ public class MockOAuthService implements OAuthService {
 
             @Override
             public String getSecret() {
-                
+
                 return "{\"callback\":\"http://www.open-xchange.com/ajax/oauth/accounts?action=create&respondWithHTML=true&session=740241c6c23b43e69e6426b2fb7f0dd5&displayName=Outlook&serviceId=com.openexchange.oauth.msn&uuid=74296db7-888c-4783-a4fd-9095bc7d0ede\"}";
             }
 

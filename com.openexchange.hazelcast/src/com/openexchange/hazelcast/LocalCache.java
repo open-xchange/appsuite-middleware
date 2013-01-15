@@ -58,14 +58,14 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * {@link LocalCache} - Backed by a <tt>ConcurrentHashMap</tt> that listens to {@link IMap} events since it implements {@link EntryListener}
  * interface.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class LocalCache<K, V> implements EntryListener<K, V> {
 
     /**
      * Creates a new local map for specified distributed map.
-     * 
+     *
      * @param distributedMap The distributed map
      * @return A new local map
      */

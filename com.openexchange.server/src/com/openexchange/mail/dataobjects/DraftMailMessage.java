@@ -64,7 +64,7 @@ import com.openexchange.mail.mime.HeaderCollection;
 
 /**
  * {@link DraftMailMessage} - The Draft mail message with special handling for {@link #getReceivedDate()} and {@link #getSentDate()}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DraftMailMessage extends MailMessage {

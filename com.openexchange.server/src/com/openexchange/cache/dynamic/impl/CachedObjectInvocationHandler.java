@@ -119,7 +119,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
 	/**
 	 * Checks if the object was removed from the cache and must be reloaded from
 	 * the database.
-	 * 
+	 *
 	 * @throws OXException
 	 *             if loading or putting into cache fails.
 	 */
@@ -176,7 +176,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
 		lock.lock();
 
 		try {
-			
+
 			final Object tmp = cache.get(factory.getKey());
 			if (null == tmp) {
 				// I am the thread to load the object. Put temporary condition

@@ -67,7 +67,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link ListAction}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 @Action(method = RequestMethod.PUT, name = "list", description = "Get a list of contacts.", parameters = {
@@ -77,7 +77,7 @@ public class ListAction extends ContactAction {
 
     /**
      * Initializes a new {@link ListAction}.
-     * 
+     *
      * @param serviceLookup
      */
     public ListAction(ServiceLookup serviceLookup) {
@@ -106,7 +106,7 @@ public class ListAction extends ContactAction {
         for (final Entry<String, List<String>> entry : ids.entrySet()) {
             SearchIterator<Contact> searchIterator = null;
             try {
-                searchIterator = getContactService().getContacts(request.getSession(), entry.getKey(), 
+                searchIterator = getContactService().getContacts(request.getSession(), entry.getKey(),
                 		entry.getValue().toArray(new String[entry.getValue().size()]), request.getFields());
                 int parentFolderID = Integer.parseInt(entry.getKey());
                 while (searchIterator.hasNext()) {

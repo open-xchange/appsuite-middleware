@@ -67,14 +67,14 @@ public interface LoginResult {
 
     /**
      * Get the cookies which should be set on the response
-     * 
-     * @return A {@link Cookie} object or null if the underlying implementation did not provide any cookies to set 
+     *
+     * @return A {@link Cookie} object or null if the underlying implementation did not provide any cookies to set
      */
     Cookie[] getCookies();
 
     /**
      * Get the headers which should be set on the response
-     * 
+     *
      * @return A {@link Header} object of null if the underlying implementation did not provide any headers to set
      */
     Header[] getHeaders();

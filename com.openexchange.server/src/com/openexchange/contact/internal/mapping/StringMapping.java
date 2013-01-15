@@ -74,5 +74,5 @@ public abstract class StringMapping extends ContactMapping<String> {
 			}
 		}
 	}
-	
+
 }

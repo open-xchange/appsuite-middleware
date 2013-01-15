@@ -70,7 +70,7 @@ import com.openexchange.mail.search.FromTerm;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrIndexFacadeTest extends TestCase {
-    
+
     private static final byte[] MAIL = ("Date: Sat, 14 Nov 2009 17:03:09 +0100 (CET)\n" +
         "From: Alice Doe <alice@foobar.com>\n" +
         "To: bob@foobar.com\n" +
@@ -89,7 +89,7 @@ public class SolrIndexFacadeTest extends TestCase {
         "is quite straightforward, the difficulty is in deciding how to expose\n" +
         "it to applications, and inhandling the multithreading issues that\n" +
         "arise.").getBytes();
-    
+
     public void testAddAndGetMessage() throws Exception {
         try {
             final IndexFacadeService facade = Services.getService(IndexFacadeService.class);
@@ -105,19 +105,19 @@ public class SolrIndexFacadeTest extends TestCase {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+
 //        final SolrAccessService sas = Services.getService(SolrAccessService.class);
 //        sas.optimize(new SolrCoreIdentifier(1, 3, Types.EMAIL));
 //        final MailMessage message = MimeMessageConverter.convertMessage(MAIL);
 //        final IndexDocument<MailMessage> document = new StandardIndexDocument<MailMessage>(message, Type.MAIL);
 //        indexAccess.addContent(document);
-//        
+//
 //        final Map<String, Object> params = new HashMap<String, Object>(4);
 //        params.put("sort", "received_date");
 //        params.put("order", "desc");
 //        final QueryParameters queryParameter = new QueryParameters.Builder("(user:3) AND (context:1) AND (content_flag:true) AND (from_personal:alice)").setType(IndexDocument.Type.MAIL).setParameters(params).build();
 //        final IndexResult<MailMessage> result = indexAccess.query(queryParameter);
-//        assertEquals("Found wrong number of mails.", 1, result.getNumFound());        
+//        assertEquals("Found wrong number of mails.", 1, result.getNumFound());
 //        final MailMessage foundMessage = result.getResults().get(0).getObject();
 //        assertEquals("Dates were not equal.", message.getSentDate(), foundMessage.getSentDate());
 //        assertTrue("From were not equal.", Arrays.equals(message.getFrom(), foundMessage.getFrom()));

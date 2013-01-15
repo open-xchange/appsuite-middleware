@@ -120,7 +120,7 @@ public interface FileStorageAccountManager extends FileStorageConstants {
 
     /**
      * Migrates all encrypted strings from an old secret to a new one.
-     * 
+     *
      * @param oldSecret The old secret for decrypting stored secret strings
      * @param newSecret The new secret used for encrypting the secret strings
      * @param session The session providing needed user data
@@ -130,7 +130,7 @@ public interface FileStorageAccountManager extends FileStorageConstants {
 
     /**
      * Tests for encrypted items.
-     * 
+     *
      * @param session The session providing needed user data
      * @return <code>true</code> if encrypted items are available; otherwise <code>false</code>
      * @throws OXException If test for encrypted items fails

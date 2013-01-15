@@ -259,7 +259,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
         return parameter;
     }
-    
+
     @Override
     public boolean isForSpecificVersion() {
     	return getVersion() != FileStorageFileAccess.CURRENT_VERSION;
@@ -449,7 +449,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             file.setId(getId());
             fields.add(File.Field.ID);
         }
-        
+
         if (object.has("content")) {
         	try {
 				contentData = object.opt("content").toString().getBytes("UTF-8");

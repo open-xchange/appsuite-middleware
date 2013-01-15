@@ -66,10 +66,10 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
  * {@link ScheduleInboxCollection}
- * 
+ *
  * A scheduling Inbox collection contains copies of incoming scheduling
- * messages. These can be requests sent by an Organizer, or replies sent by an 
- * Attendee in response to a request.  The scheduling Inbox collection is also 
+ * messages. These can be requests sent by an Organizer, or replies sent by an
+ * Attendee in response to a request.  The scheduling Inbox collection is also
  * used to manage scheduling privileges.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -78,14 +78,14 @@ public class ScheduleInboxCollection extends CommonCollection implements Filteri
 
     /**
      * Initializes a new {@link ScheduleInboxCollection}.
-     * 
+     *
      * @param factory the factory
      */
     public ScheduleInboxCollection(GroupwareCaldavFactory factory) {
         super(factory, new WebdavPath(ScheduleInboxURL.SCHEDULE_INBOX));
         includeProperties(new SyncToken(this));
     }
-    
+
     @Override
     public String getResourceType() throws WebdavProtocolException {
         return super.getResourceType() + "<CAL:schedule-inbox />";
@@ -93,8 +93,8 @@ public class ScheduleInboxCollection extends CommonCollection implements Filteri
 
     @Override
     public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
-    }   
-    
+    }
+
     @Override
     public String getDisplayName() throws WebdavProtocolException {
         return "Schedule Inbox";

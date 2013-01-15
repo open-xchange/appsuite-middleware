@@ -322,7 +322,7 @@ public abstract class AbstractSession implements Session {
     }
 
     private static final class XingKeepAliveStrategy implements ConnectionKeepAliveStrategy {
-        
+
         XingKeepAliveStrategy() {
             super();
         }

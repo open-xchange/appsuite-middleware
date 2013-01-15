@@ -70,7 +70,7 @@ public class CassandraEAVStorageServiceLookup {
 
     /**
      * Gets the service look-up
-     * 
+     *
      * @return The service look-up or <code>null</code>
      */
     public static ServiceLookup get() {
@@ -79,7 +79,7 @@ public class CassandraEAVStorageServiceLookup {
 
     /**
      * Gets the service of specified type
-     * 
+     *
      * @param clazz
      *            The service's class
      * @return The service or <code>null</code> is absent
@@ -93,7 +93,7 @@ public class CassandraEAVStorageServiceLookup {
 
     /**
      * Sets the service look-up
-     * 
+     *
      * @param serviceLookup
      *            The service look-up or <code>null</code>
      */

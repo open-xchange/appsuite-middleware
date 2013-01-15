@@ -55,8 +55,8 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
- * 
- * {@link HealthProbeActivator} - Get the HttpService and register the HealthProbeServlet. 
+ *
+ * {@link HealthProbeActivator} - Get the HttpService and register the HealthProbeServlet.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -72,14 +72,14 @@ public class HealthProbeActivator extends HousekeepingActivator {
         trackService(ConfigurationService.class);
         trackService(HttpService.class);
         openTrackers();
-        
+
         ConfigurationService configService = getService(ConfigurationService.class);
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
         }
 
         final String alias = configService.getProperty("com.openexchange.http.probe.alias", "/healthProbe");
-        
+
         HttpService service = getService(HttpService.class);
         if(service == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HttpService.class.getName());

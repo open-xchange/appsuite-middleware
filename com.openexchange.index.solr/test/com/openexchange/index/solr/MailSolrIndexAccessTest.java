@@ -65,69 +65,69 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MailSolrIndexAccessTest extends TestCase {
-    
+
     private static final int QUERY_ROWS = MockMailSolrIndexAccess.getQueryRows();
-    
+
     private static final int DOCS = QUERY_ROWS * 2;
-    
-    
+
+
     public void testChunkLoading() throws Exception {
-        Services.setServiceLookup(new ServiceLookup() {            
+        Services.setServiceLookup(new ServiceLookup() {
             @Override
             public <S> S getService(Class<? extends S> clazz) {
                 return (S) new MockConfigurationService();
             }
-            
+
             @Override
             public <S> S getOptionalService(Class<? extends S> clazz) {
                 return null;
             }
         });
-        
-              
+
+
         /*
          * Get less than one chunk size
-         */    
+         */
         MockMailSolrIndexAccess indexAccess = new MockMailSolrIndexAccess(DOCS);
         Random random = new Random();
         int len = random.nextInt(QUERY_ROWS);
         searchAndCheckLength(indexAccess, 0, len, len);
-        
+
         /*
          * Get more than one chunk but less than index size
          */
         len = QUERY_ROWS + 11;
         searchAndCheckLength(indexAccess, 0, len, len);
-        
+
         /*
          * Search for more than index size
          */
         len = DOCS * 2;
-        searchAndCheckLength(indexAccess, 0, len, DOCS);       
-        
+        searchAndCheckLength(indexAccess, 0, len, DOCS);
+
         /*
          * Get less than one chunk size with offset > 0
          */
         int off = random.nextInt(QUERY_ROWS);
         len = random.nextInt(QUERY_ROWS);
         searchAndCheckLength(indexAccess, off, len, len);
-        
+
         /*
          * Get more than one chunk but less than index size with offset > 0
          */
         off = random.nextInt(QUERY_ROWS);
         len = QUERY_ROWS + 11;
         searchAndCheckLength(indexAccess, off, len, len);
-        
+
         /*
          * Search for more than index size with offset > 0
          */
         off = random.nextInt(QUERY_ROWS);
         len = DOCS * 2;
-        searchAndCheckLength(indexAccess, off, len, DOCS - off);       
+        searchAndCheckLength(indexAccess, off, len, DOCS - off);
     }
-    
-    private void searchAndCheckLength(MockMailSolrIndexAccess indexAccess, int off, int len, int expected) throws Exception {        
+
+    private void searchAndCheckLength(MockMailSolrIndexAccess indexAccess, int off, int len, int expected) throws Exception {
         QueryParameters parameters = new QueryParameters.Builder()
             .setHandler(SearchHandler.ALL_REQUEST)
             .setOffset(off)

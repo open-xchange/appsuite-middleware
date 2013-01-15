@@ -60,14 +60,14 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ManifestActionFactory}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ManifestActionFactory implements AJAXActionServiceFactory {
 
 
-	private AJAXActionService all;
-	private ConfigAction config;
+	private final AJAXActionService all;
+	private final ConfigAction config;
 
 	public ManifestActionFactory(ServiceLookup services,
 			JSONArray manifests, ServerConfigServicesLookup registry) {

@@ -67,7 +67,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link MailQuery}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailQuery {
@@ -82,7 +82,7 @@ public final class MailQuery {
 
     /**
      * Parses specified JSON representation of a query.
-     * 
+     *
      * @param jsonQuery The JSON query representation
      * @return The parsed query
      * @throws OXException If parsing fails
@@ -194,7 +194,7 @@ public final class MailQuery {
 
     /**
      * Gets the search terms
-     * 
+     *
      * @return The search terms
      */
     public List<SearchTerm<?>> getTerms() {
@@ -203,7 +203,7 @@ public final class MailQuery {
 
     /**
      * Gets the account ID
-     * 
+     *
      * @return The account ID
      */
     public int getAccountId() {
@@ -212,7 +212,7 @@ public final class MailQuery {
 
     /**
      * Gets the full name
-     * 
+     *
      * @return The full name
      */
     public String getFullName() {

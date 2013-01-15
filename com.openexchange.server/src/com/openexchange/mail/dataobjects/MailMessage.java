@@ -85,7 +85,7 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 /**
  * {@link MailMessage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailMessage extends MailPart {
@@ -104,7 +104,7 @@ public abstract class MailMessage extends MailPart {
      */
     /**
      * This message has been answered. This flag is set by clients to indicate that this message has been answered to.
-     * 
+     *
      * @value 1
      */
     public static final int FLAG_ANSWERED = 1;
@@ -112,21 +112,21 @@ public abstract class MailMessage extends MailPart {
     /**
      * This message is marked deleted. Clients set this flag to mark a message as deleted. The expunge operation on a folder removes all
      * messages in that folder that are marked for deletion.
-     * 
+     *
      * @value 2
      */
     public static final int FLAG_DELETED = 1 << 1;
 
     /**
      * This message is a draft. This flag is set by clients to indicate that the message is a draft message.
-     * 
+     *
      * @value 4
      */
     public static final int FLAG_DRAFT = 1 << 2;
 
     /**
      * This message is flagged. No semantic is defined for this flag. Clients alter this flag.
-     * 
+     *
      * @value 8
      */
     public static final int FLAG_FLAGGED = 1 << 3;
@@ -136,7 +136,7 @@ public abstract class MailMessage extends MailPart {
      * arrived since the last time this folder was opened.
      * <p>
      * Clients cannot alter this flag.
-     * 
+     *
      * @value 16
      */
     public static final int FLAG_RECENT = 1 << 4;
@@ -144,7 +144,7 @@ public abstract class MailMessage extends MailPart {
     /**
      * This message is seen. This flag is implicitly set by the implementation when the this Message's content is returned to the client in
      * some form.
-     * 
+     *
      * @value 32
      */
     public static final int FLAG_SEEN = 1 << 5;
@@ -153,28 +153,28 @@ public abstract class MailMessage extends MailPart {
      * A special flag that indicates that this folder supports user defined flags.
      * <p>
      * Clients cannot alter this flag.
-     * 
+     *
      * @value 64
      */
     public static final int FLAG_USER = 1 << 6;
 
     /**
      * Virtual Spam flag
-     * 
+     *
      * @value 128
      */
     public static final int FLAG_SPAM = 1 << 7;
 
     /**
      * Virtual forwarded flag that marks this message as being forwarded.
-     * 
+     *
      * @value 256
      */
     public static final int FLAG_FORWARDED = 1 << 8;
 
     /**
      * Virtual read acknowledgment flag that marks this message as being notified for delivery.
-     * 
+     *
      * @value 512
      */
     public static final int FLAG_READ_ACK = 1 << 9;
@@ -184,14 +184,14 @@ public abstract class MailMessage extends MailPart {
      */
     /**
      * The value of virtual forwarded flag.
-     * 
+     *
      * @value $Forwarded
      */
     public static final String USER_FORWARDED = "$Forwarded";
 
     /**
      * The value of virtual read acknowledgment flag.
-     * 
+     *
      * @value $MDNSent
      */
     public static final String USER_READ_ACK = "$MDNSent";
@@ -250,7 +250,7 @@ public abstract class MailMessage extends MailPart {
      * &lt;value-of-{@link #COLOR_LABEL_PREFIX}&gt;&lt;color-label-int-value&gt;
      * <p>
      * &lt;value-of-{@link #COLOR_LABEL_PREFIX_OLD} &gt;&lt;color-label-int-value&gt; is also accepted.
-     * 
+     *
      * @param cl The color label's string representation
      * @return The color label's <code>int</code> value
      * @throws OXException
@@ -268,7 +268,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Tests if specified string matches a color label pattern.
-     * 
+     *
      * @param cl The string to check
      * @return <code>true</code> if specified string matches a color label pattern; otherwise <code>false</code>
      */
@@ -280,7 +280,7 @@ public abstract class MailMessage extends MailPart {
      * Parses specified color label's string.
      * <p>
      * <b>Note</b> that this method assumes {@link #isColorLabel(String)} would return <code>true</code> for specified string.
-     * 
+     *
      * @param cl The color label's string
      * @param defaultValue The default value to return if parsing color label's <code>int</code> value fails
      * @return The color label's <code>int</code> value or <code>defaultValue</code> on failure.
@@ -301,7 +301,7 @@ public abstract class MailMessage extends MailPart {
      * <p>
      * A color label's string representation matches the pattern:<br>
      * &lt;value-of-{@link #COLOR_LABEL_PREFIX}&gt;&lt;color-label-int-value&gt;
-     * 
+     *
      * @param cl The color label's <code>int</code> value
      * @return The color abel's string representation
      */
@@ -477,7 +477,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Adds an email address to <i>From</i>.
-     * 
+     *
      * @param addr The address
      */
     public void addFrom(final InternetAddress addr) {
@@ -493,7 +493,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Adds email addresses to <i>From</i>.
-     * 
+     *
      * @param addrs The addresses
      */
     public void addFrom(final InternetAddress[] addrs) {
@@ -544,7 +544,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Adds an email address to <i>To</i>.
-     * 
+     *
      * @param addr The address
      */
     public void addTo(final InternetAddress addr) {
@@ -560,7 +560,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Adds email addresses to <i>To</i>
-     * 
+     *
      * @param addrs The addresses
      */
     public void addTo(final InternetAddress[] addrs) {
@@ -611,7 +611,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Adds an email address to <i>Cc</i>
-     * 
+     *
      * @param addr The address
      */
     public void addCc(final InternetAddress addr) {
@@ -627,7 +627,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Adds email addresses to <i>Cc</i>
-     * 
+     *
      * @param addrs The addresses
      */
     public void addCc(final InternetAddress[] addrs) {
@@ -678,7 +678,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Adds an email address to <i>Bcc</i>
-     * 
+     *
      * @param addr The address
      */
     public void addBcc(final InternetAddress addr) {
@@ -694,7 +694,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Adds email addresses to <i>Bcc</i>
-     * 
+     *
      * @param addrs The addresses
      */
     public void addBcc(final InternetAddress[] addrs) {
@@ -745,7 +745,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the flags
-     * 
+     *
      * @return the flags
      */
     public int getFlags() {
@@ -839,7 +839,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the flags
-     * 
+     *
      * @param flags the flags to set
      */
     public void setFlags(final int flags) {
@@ -849,7 +849,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets a system flag
-     * 
+     *
      * @param flag The system flag to set
      * @param enable <code>true</code> to enable; otherwise <code>false</code>
      * @throws OXException If an illegal flag argument is specified
@@ -867,7 +867,7 @@ public abstract class MailMessage extends MailPart {
      * <p>
      * This flag is used when writing the message later on. There a check is performed whether header
      * <code>Disposition-Notification-To</code> is indicated or not.
-     * 
+     *
      * @return the previous \Seen state
      */
     public boolean isPrevSeen() {
@@ -894,7 +894,7 @@ public abstract class MailMessage extends MailPart {
      * <p>
      * This flag is used when writing the message later on. There a check is performed whether header
      * <code>Disposition-Notification-To</code> is indicated or not.
-     * 
+     *
      * @param prevSeen the previous \Seen state to set
      */
     public void setPrevSeen(final boolean prevSeen) {
@@ -904,7 +904,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the threadLevel
-     * 
+     *
      * @return the threadLevel
      */
     public int getThreadLevel() {
@@ -928,7 +928,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the threadLevel
-     * 
+     *
      * @param threadLevel the threadLevel to set
      */
     public void setThreadLevel(final int threadLevel) {
@@ -938,7 +938,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the subject
-     * 
+     *
      * @return the subject
      */
     public String getSubject() {
@@ -969,7 +969,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the subject
-     * 
+     *
      * @param subject the subject to set
      */
     public void setSubject(final String subject) {
@@ -986,7 +986,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the sent date which corresponds to <i>Date</i> header
-     * 
+     *
      * @return the sent date
      */
     public Date getSentDate() {
@@ -1026,7 +1026,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the sent date
-     * 
+     *
      * @param sentDate the sent date to set
      */
     public void setSentDate(final Date sentDate) {
@@ -1036,7 +1036,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the received date which represents the internal timestamp set by mail server on arrival.
-     * 
+     *
      * @return The received date
      */
     public Date getReceivedDate() {
@@ -1045,7 +1045,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the received date directly which represents the internal timestamp set by mail server on arrival.
-     * 
+     *
      * @return The received date
      */
     public Date getReceivedDateDirect() {
@@ -1069,7 +1069,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the received date
-     * 
+     *
      * @param receivedDate the received date to set
      */
     public void setReceivedDate(final Date receivedDate) {
@@ -1079,7 +1079,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Adds given user flag
-     * 
+     *
      * @param userFlag The user flag to add
      */
     public void addUserFlag(final String userFlag) {
@@ -1094,7 +1094,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Adds given user flags
-     * 
+     *
      * @param userFlags The user flags to add
      */
     public void addUserFlags(final String[] userFlags) {
@@ -1128,7 +1128,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the user flags
-     * 
+     *
      * @return The user flags
      */
     public String[] getUserFlags() {
@@ -1149,7 +1149,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the color label
-     * 
+     *
      * @return the color label
      */
     public int getColorLabel() {
@@ -1173,7 +1173,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the color label
-     * 
+     *
      * @param colorLabel the color label to set
      */
     public void setColorLabel(final int colorLabel) {
@@ -1183,7 +1183,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the priority
-     * 
+     *
      * @return the priority
      */
     public int getPriority() {
@@ -1220,7 +1220,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the priority
-     * 
+     *
      * @param priority the priority to set
      */
     public void setPriority(final int priority) {
@@ -1230,7 +1230,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the dispositionNotification
-     * 
+     *
      * @return the dispositionNotification
      */
     public InternetAddress getDispositionNotification() {
@@ -1266,7 +1266,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the dispositionNotification
-     * 
+     *
      * @param dispositionNotification the dispositionNotification to set
      */
     public void setDispositionNotification(final InternetAddress dispositionNotification) {
@@ -1276,7 +1276,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the folder
-     * 
+     *
      * @return the folder
      */
     public String getFolder() {
@@ -1300,7 +1300,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the folder
-     * 
+     *
      * @param folder the folder to set
      */
     public void setFolder(final String folder) {
@@ -1310,7 +1310,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the account ID.
-     * 
+     *
      * @return The account ID
      */
     public int getAccountId() {
@@ -1334,7 +1334,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the account ID.
-     * 
+     *
      * @param accountId The account ID
      */
     public void setAccountId(final int accountId) {
@@ -1344,7 +1344,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the account Name
-     * 
+     *
      * @return The account name
      */
     public String getAccountName() {
@@ -1368,7 +1368,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the account Name
-     * 
+     *
      * @param accountName The account name
      */
     public void setAccountName(final String accountName) {
@@ -1378,7 +1378,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the hasAttachment
-     * 
+     *
      * @return the hasAttachment
      */
     public boolean hasAttachment() {
@@ -1402,7 +1402,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the hasAttachment
-     * 
+     *
      * @param hasAttachment the hasAttachment to set
      */
     public void setHasAttachment(final boolean hasAttachment) {
@@ -1439,7 +1439,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the appendVCard
-     * 
+     *
      * @return the appendVCard
      */
     public boolean isAppendVCard() {
@@ -1463,7 +1463,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the appendVCard
-     * 
+     *
      * @param appendVCard the appendVCard to set
      */
     public void setAppendVCard(final boolean appendVCard) {
@@ -1473,7 +1473,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the number of recent mails in associated folder.
-     * 
+     *
      * @return The recent count
      */
     public int getRecentCount() {
@@ -1497,7 +1497,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the number of recent mails in associated folder.
-     * 
+     *
      * @param recentCount The recent count
      */
     public void setRecentCount(final int recentCount) {
@@ -1507,7 +1507,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the mail path.
-     * 
+     *
      * @param accountId The account ID
      * @return The mail path
      */
@@ -1517,7 +1517,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the <i>Message-Id</i> value.
-     * 
+     *
      * @return The <i>Message-Id</i> value or <code>null</code>
      */
     public String getMessageId() {
@@ -1548,7 +1548,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the <i>Message-Id</i>.
-     * 
+     *
      * @param sReferences The <i>Message-Id</i> header value
      */
     public void setMessageId(final String messageId) {
@@ -1558,7 +1558,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the <i>In-Reply-To</i> value.
-     * 
+     *
      * @return The <i>In-Reply-To</i> value or <code>null</code>
      */
     public String getInReplyTo() {
@@ -1569,7 +1569,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Gets the <i>References</i>.
-     * 
+     *
      * @return The <i>References</i> or <code>null</code>
      */
     public String[] getReferences() {
@@ -1600,7 +1600,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the <i>References</i>.
-     * 
+     *
      * @param sReferences The <i>References</i> header value
      */
     public void setReferences(final String sReferences) {
@@ -1614,7 +1614,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Sets the <i>References</i>.
-     * 
+     *
      * @param references The <i>References</i>
      */
     public void setReferences(final String[] references) {
@@ -1634,7 +1634,7 @@ public abstract class MailMessage extends MailPart {
      * <p>
      * <b>Note</b> If ID is numeric, max. 52 bits may be used in returned value which implies a max. allowed value of
      * <code>4503599627370495</code>.
-     * 
+     *
      * @return The ID of this mail or <code>null</code> if not available.
      */
     public abstract String getMailId();
@@ -1645,21 +1645,21 @@ public abstract class MailMessage extends MailPart {
      * <p>
      * <b>Note</b> If ID is numeric, max. 52 bits may be used in specified value which implies a max. allowed value of
      * <code>4503599627370495</code>.
-     * 
+     *
      * @param id The mail ID or <code>null</code> to indicate its absence
      */
     public abstract void setMailId(String id);
 
     /**
      * Gets the number of unread messages
-     * 
+     *
      * @return The number of unread messages
      */
     public abstract int getUnreadMessages();
 
     /**
      * Sets the number of unread messages
-     * 
+     *
      * @param unreadMessages The number of unread messages
      */
     public abstract void setUnreadMessages(int unreadMessages);

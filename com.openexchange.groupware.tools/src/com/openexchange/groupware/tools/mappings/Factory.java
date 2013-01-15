@@ -56,12 +56,12 @@ package com.openexchange.groupware.tools.mappings;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface Factory<T> {
-	
+
 	/**
 	 * Creates a new instance of the underlying type.
-	 * 
+	 *
 	 * @return the new instance
 	 */
 	T newInstance();
-	
+
 }

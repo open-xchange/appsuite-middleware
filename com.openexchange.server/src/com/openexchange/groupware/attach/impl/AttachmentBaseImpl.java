@@ -135,7 +135,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     @Override
     public long attachToObject(final AttachmentMetadata attachment, final InputStream data, final Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 
-        checkMayAttach(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), 
+        checkMayAttach(ServerSessionAdapter.valueOf(session, ctx, user, userConfig),
             attachment.getModuleId(), attachment.getFolderId(), attachment.getAttachedId());
 //        checkMayAttach(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), ctx, user, userConfig);
 

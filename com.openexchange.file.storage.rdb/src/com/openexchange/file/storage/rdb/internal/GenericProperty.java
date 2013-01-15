@@ -68,7 +68,7 @@ public final class GenericProperty {
     public final String serviceId;
 
     public final int id;
-    
+
     /**
      * Initializes a new {@link GenericProperty}.
      */

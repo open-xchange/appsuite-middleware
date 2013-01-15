@@ -98,7 +98,7 @@ public class DispatcherServlet extends SessionServlet {
     private static final long serialVersionUID = -8060034833311074781L;
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(DispatcherServlet.class);
-    
+
     private static final Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
 
     /*-
@@ -160,7 +160,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Gets the <code>AJAXRequestDataTools</code> instance to use for parsing incoming requests.
-     * 
+     *
      * @return The <code>AJAXRequestDataTools</code> instance
      */
     protected AJAXRequestDataTools getAjaxRequestDataTools() {

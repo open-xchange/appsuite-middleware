@@ -64,7 +64,7 @@ import com.openexchange.folderstorage.Permission;
 
 /**
  * {@link FolderParser}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderParser {
@@ -84,7 +84,7 @@ public final class FolderParser {
 
     /**
      * Parses a folder from given file storage folder.
-     * 
+     *
      * @param fsFolder The file storage folder
      * @return The parsed folder
      * @throws OXException If parsing folder fails
@@ -155,7 +155,7 @@ public final class FolderParser {
 
     /**
      * Parses given permissions.
-     * 
+     *
      * @param permissionsList The permissions to parse
      * @return The parsed permissions
      * @throws OXException If parsing fails

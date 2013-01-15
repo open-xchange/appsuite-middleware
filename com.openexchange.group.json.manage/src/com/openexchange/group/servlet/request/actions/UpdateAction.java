@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.PUT, name = "update", description = "Change a group", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "id", description = "Object ID of the group to update."),
-    @Parameter(name = "timestamp", description = "Time stamp of the group to update. If the group was modified after the specified time stamp, then the update must fail.") 
+    @Parameter(name = "timestamp", description = "Time stamp of the group to update. If the group was modified after the specified time stamp, then the update must fail.")
 }, requestBody = "Group object as described in Group data. Only modified fields are present and the field id is omitted.",
 responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated group, and maybe errors.")
 public final class UpdateAction extends AbstractGroupAction {

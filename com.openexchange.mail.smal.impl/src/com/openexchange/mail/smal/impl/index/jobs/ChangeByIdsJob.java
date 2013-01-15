@@ -79,13 +79,13 @@ public class ChangeByIdsJob extends AbstractMailJob {
             if (!(jobInfo instanceof MailJobInfo)) {
                 throw new IllegalArgumentException("Job info must be an instance of MailJobInfo.");
             }
-            
+
             MailJobInfo info = (MailJobInfo) jobInfo;
             long start = System.currentTimeMillis();
             if (LOG.isDebugEnabled()) {
                 LOG.debug(this.getClass().getSimpleName() + " started performing. " + info.toString());
             }
-            
+
             checkJobInfo();
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
             final IndexAccess<MailMessage> mailIndex = indexFacade.acquireIndexAccess(Types.EMAIL, info.userId, info.contextId);
@@ -104,7 +104,7 @@ public class ChangeByIdsJob extends AbstractMailJob {
                 SmalMailAccess.closeUnwrappedInstance(mailAccess);
                 closeIndexAccess(mailIndex);
                 closeIndexAccess(attachmentIndex);
-                
+
                 if (LOG.isDebugEnabled()) {
                     long diff = System.currentTimeMillis() - start;
                     LOG.debug(this.getClass().getSimpleName() + " lasted " + diff + "ms. " + info.toString());
@@ -114,10 +114,10 @@ public class ChangeByIdsJob extends AbstractMailJob {
             throw new OXException(e);
         }
     }
-    
+
     private void checkJobInfo() {
         // Nothing to do
-        
+
     }
-    
+
 }

@@ -76,7 +76,7 @@ import com.openexchange.textxtraction.internal.TikaTextXtractService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class TikaTextXtractServiceTest {
-    
+
     private TikaTextXtractService textXtraction;
     private DelegateTextXtraction delegate;
     private DelegateTextXtraction destructiveDelegate;
@@ -84,51 +84,51 @@ public class TikaTextXtractServiceTest {
     @Before
     public void setUp() {
         textXtraction = new TikaTextXtractService();
-        delegate = new DelegateTextXtraction() {            
+        delegate = new DelegateTextXtraction() {
             @Override
             public String extractFromResource(String resource, String optMimeType) throws OXException {
                 return null;
             }
-            
+
             @Override
             public String extractFrom(String content, String optMimeType) throws OXException {
                 return null;
             }
-            
+
             @Override
             public String extractFrom(InputStream inputStream, String optMimeType) throws OXException {
                 return null;
             }
-            
+
             @Override
             public boolean isDestructive() {
                 return false;
             }
         };
-        
-        destructiveDelegate = new DelegateTextXtraction() {            
+
+        destructiveDelegate = new DelegateTextXtraction() {
             @Override
             public String extractFromResource(String resource, String optMimeType) throws OXException {
                 return null;
             }
-            
+
             @Override
             public String extractFrom(String content, String optMimeType) throws OXException {
                 return null;
             }
-            
+
             @Override
             public String extractFrom(InputStream inputStream, String optMimeType) throws OXException {
                 return null;
             }
-            
+
             @Override
             public boolean isDestructive() {
                 return true;
             }
         };
     }
-    
+
     @Test
     public void testParserConfig() throws Exception {
         Assert.assertNotNull("Tika was null", textXtraction.tika);
@@ -139,13 +139,13 @@ public class TikaTextXtractServiceTest {
         Map<MediaType, Parser> parserMap = compositeParser.getParsers();
         Set<Parser> allParsers = new HashSet<Parser>(parserMap.values());
         Assert.assertEquals("Wrong number of parsers.", TikaTextXtractService.PARSERS.size(), allParsers.size());
-        
+
         for (Parser parser : allParsers) {
             String className = parser.getClass().getName();
             Assert.assertTrue("Missing parser " + className, TikaTextXtractService.PARSERS.contains(className));
         }
     }
-    
+
     @Test
     public void testWithDelegateAndMimeType() throws OXException {
         textXtraction.addDelegateTextXtraction(delegate);
@@ -157,7 +157,7 @@ public class TikaTextXtractServiceTest {
             IOUtils.closeQuietly(is);
         }
     }
-    
+
     @Test
     public void testWithDestructiveDelegateAndMimeType() throws OXException {
         textXtraction.addDelegateTextXtraction(destructiveDelegate);
@@ -169,7 +169,7 @@ public class TikaTextXtractServiceTest {
             IOUtils.closeQuietly(is);
         }
     }
-    
+
     @Test
     public void testWithDelegate() throws OXException {
         textXtraction.addDelegateTextXtraction(delegate);
@@ -181,7 +181,7 @@ public class TikaTextXtractServiceTest {
             IOUtils.closeQuietly(is);
         }
     }
-    
+
     @Test
     public void testWithDestructiveDelegate() throws OXException {
         textXtraction.addDelegateTextXtraction(destructiveDelegate);

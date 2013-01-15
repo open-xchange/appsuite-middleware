@@ -85,7 +85,7 @@ public class RssResult {
 	public String getImageUrl() {
 		return this.imageUrl;
 	}
-	
+
 	public Date getDate() {
 		return this.date;
 	}
@@ -114,17 +114,17 @@ public class RssResult {
 		this.subject = subject;
 		return this;
 	}
-	
+
 	public RssResult setFeedUrl(String feedUrl) {
 		this.feedUrl = feedUrl;
 		return this;
 	}
-	
+
 	public RssResult setFeedTitle(String feedTitle) {
 		this.feedTitle = feedTitle;
 		return this;
 	}
-	
+
 	public RssResult setImageUrl(String imageUrl) {
 		this.imageUrl = imageUrl;
 		return this;

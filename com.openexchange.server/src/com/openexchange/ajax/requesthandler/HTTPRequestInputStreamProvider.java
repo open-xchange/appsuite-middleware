@@ -56,7 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData.InputStreamProvider;
 
 /**
  * {@link HTTPRequestInputStreamProvider} - The <tt>InputStreamProvider</tt> backed by a <tt>HttpServletRequest</tt> instance.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HTTPRequestInputStreamProvider implements InputStreamProvider {
@@ -65,7 +65,7 @@ public class HTTPRequestInputStreamProvider implements InputStreamProvider {
 
     /**
      * Initializes a new {@link HTTPRequestInputStreamProvider}.
-     * 
+     *
      * @param req The Servlet's HTTP request
      */
     public HTTPRequestInputStreamProvider(final HttpServletRequest req) {

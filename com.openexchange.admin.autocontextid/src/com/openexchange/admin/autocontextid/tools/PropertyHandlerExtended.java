@@ -57,19 +57,19 @@ import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.log.LogFactory;
 
 public class PropertyHandlerExtended extends PropertyHandler {
-    
+
     private final static Log log = LogFactory.getLog(PropertyHandlerExtended.class);
-    
+
     // The following lines define the property values for the database implementations
     public static final String AUTOCID_STORAGE = "AUTOCID_STORAGE";
 
     private PropertyHandlerExtended() {
         super(null);
     }
-    
+
     public PropertyHandlerExtended(final Properties sysprops) {
         super(sysprops);
-        final StringBuilder configfile = new StringBuilder(); 
+        final StringBuilder configfile = new StringBuilder();
         configfile.append(sysprops.getProperty("openexchange.propdir"));
         configfile.append(File.separatorChar);
         configfile.append("plugin");
@@ -83,5 +83,5 @@ public class PropertyHandlerExtended extends PropertyHandler {
             log.error("Problems reading file: " + configfile);
         }
     }
-   
+
 }

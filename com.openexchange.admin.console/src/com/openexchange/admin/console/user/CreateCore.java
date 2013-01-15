@@ -74,19 +74,19 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public abstract class CreateCore extends UserAbstraction {
 
     protected final void setOptions(final AdminParser parser) {
-    
+
         parser.setExtendedOptions();
         setCsvImport(parser);
         setDefaultCommandLineOptions(parser);
-    
+
         // add mandatory options
         setMandatoryOptions(parser);
-    
+
         // add optional opts
         setOptionalOptions(parser);
-        
+
         setFurtherOptions(parser);
-        
+
         parser.allowDynamicOptions();
     }
 
@@ -104,7 +104,7 @@ public abstract class CreateCore extends UserAbstraction {
 
             final Context ctx = contextparsing(parser);
             ctxid = ctx.getId();
-            
+
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
@@ -120,7 +120,7 @@ public abstract class CreateCore extends UserAbstraction {
             parseAndSetOptionalOptionsinUser(parser, usr);
 
             applyExtendedOptionsToUser(parser, usr);
-            
+
             applyDynamicOptionsToUser(parser, usr);
 
             final String filename = (String) parser.getOptionValue(parser.getCsvImportOption());
@@ -129,7 +129,7 @@ public abstract class CreateCore extends UserAbstraction {
                 csvParsing(filename, oxusr);
             } else {
                 applyExtendedOptionsToUser(parser, usr);
-                
+
                 maincall(parser, oxusr, ctx, usr, auth);
             }
 
@@ -140,7 +140,7 @@ public abstract class CreateCore extends UserAbstraction {
     }
 
     protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, DuplicateExtensionException, MalformedURLException, NotBoundException, ConnectException;
-    
+
     private void csvParsing(final String filename, final OXUserInterface oxuser) throws FileNotFoundException, IOException, InvalidDataException {
         final CSVReader reader = new CSVReader(new FileReader(filename), ',', '"');
         int[] idarray = csvParsingCommon(reader);

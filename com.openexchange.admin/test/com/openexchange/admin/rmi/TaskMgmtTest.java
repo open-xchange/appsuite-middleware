@@ -77,7 +77,7 @@ public class TaskMgmtTest extends AbstractTest {
         final OXTaskMgmtInterface oxtask = getTaskClient();
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(1, 50);
-        
+
         System.out.println(oxtask.getJobList(ctx, cred));
     }
 

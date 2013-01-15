@@ -59,7 +59,7 @@ import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link AbstractWrappingMessageListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractWrappingMessageListener {
@@ -73,7 +73,7 @@ public abstract class AbstractWrappingMessageListener {
 
     /**
      * Reads the bytes from specified {@link BytesMessage}.
-     * 
+     *
      * @param bytesMessage The byte message to read from
      * @return The read bytes
      * @throws JMSException If reading bytes fails

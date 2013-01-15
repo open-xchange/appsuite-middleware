@@ -57,7 +57,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link WhiteboardEncryptedItemDetector}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -65,7 +65,7 @@ public class WhiteboardEncryptedItemDetector extends ServiceTracker<EncryptedIte
 
     /**
      * Initializes a new {@link WhiteboardEncryptedItemDetector}.
-     * 
+     *
      * @param context The bundle context
      */
     public WhiteboardEncryptedItemDetector(final BundleContext context) {

@@ -84,7 +84,7 @@ public abstract class AbstractAuthorizationServlet extends HttpServlet {
 
     /**
      * Resolves specified login/password pair to user/context.
-     * 
+     *
      * @param login The login
      * @param password The password
      * @return A map containing resolved user/context with keys <code>"user"</code>/<code>"context"</code>.

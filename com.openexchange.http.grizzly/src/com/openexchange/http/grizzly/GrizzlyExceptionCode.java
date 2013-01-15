@@ -62,7 +62,7 @@ import static com.openexchange.http.grizzly.GrizzlyExceptionMessage.*;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public enum GrizzlyExceptionCode implements OXExceptionCode {
-    
+
     /** The grizzly server could not be started. */
     GRIZZLY_SERVER_NOT_STARTED(GRIZZLY_SERVER_NOT_STARTED_MSG, CATEGORY_ERROR, 1),
     /** The following needed service is missing: "%1$s" */
@@ -86,7 +86,7 @@ public enum GrizzlyExceptionCode implements OXExceptionCode {
         number = detailNumber;
         this.category = category;
     }
-    
+
     @Override
     public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
@@ -111,7 +111,7 @@ public enum GrizzlyExceptionCode implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *

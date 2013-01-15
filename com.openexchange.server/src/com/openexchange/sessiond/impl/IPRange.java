@@ -191,7 +191,7 @@ public class IPRange {
         // IPv4
         return new IPRange(new LongRange(ipToLong(octets), ipToLong(octets)), null);
     }
-    
+
     private static long ipToLong(final byte[] octets) {
         long result = 0;
         for (int i = 0; i < octets.length; i++) {

@@ -157,7 +157,7 @@ public class ICal4JParser implements ICalParser {
                 final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
                 if(calendar == null) { break; }
                 ComponentList vevents = calendar.getComponents("VEVENT");
-                int myLimit = limit < 0 ? vevents.size() : limit < vevents.size() ? limit : vevents.size(); 
+                int myLimit = limit < 0 ? vevents.size() : limit < vevents.size() ? limit : vevents.size();
                 for(int i = 0; i < myLimit; i++) {
                 	final Object componentObj = vevents.get(i);
                     final Component vevent = (Component) componentObj;
@@ -200,8 +200,8 @@ public class ICal4JParser implements ICalParser {
             reader = new BufferedReader(new InputStreamReader(ical, UTF8));
             while (true) {
                 net.fortuna.ical4j.model.Calendar calendar = parse(reader);
-                if (null == calendar) { 
-                	break; 
+                if (null == calendar) {
+                	break;
                 }
                 ComponentList freebusies = calendar.getComponents("VFREEBUSY");
                 int myLimit = limit < 0 ? freebusies.size() : limit < freebusies.size() ? limit : freebusies.size();
@@ -224,7 +224,7 @@ public class ICal4JParser implements ICalParser {
         }
         return fbInfos;
 	}
-	
+
 	private FreeBusyInformation convertFreeBusy(int index, VFreeBusy freeBusy, TimeZone defaultTZ, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
         FreeBusyInformation fbInfo = new FreeBusyInformation();
         TimeZone tz = determineTimeZone(freeBusy, defaultTZ);
@@ -371,8 +371,8 @@ public class ICal4JParser implements ICalParser {
 
     private static final TimeZone chooseTimeZone(final DateProperty dateProperty, final TimeZone defaultTZ) {
         TimeZone tz = defaultTZ;
-        if (dateProperty.getParameter("TZID") == null 
-        || dateProperty.getParameter("TZID").getValue() == null){ 
+        if (dateProperty.getParameter("TZID") == null
+        || dateProperty.getParameter("TZID").getValue() == null){
                 return defaultTZ;
         }
         if(dateProperty.isUtc()) {
@@ -381,12 +381,12 @@ public class ICal4JParser implements ICalParser {
         Parameter tzid = dateProperty.getParameter("TZID");
 		String tzidName = tzid.getValue();
 		TimeZone inTZID = TimeZone.getTimeZone(tzidName);
-		
+
         /* now, if the Java core devs had been smart, they'd made TimeZone.getTimeZone(name,fallback) public. But they did not, so have to do this: */
 		if(inTZID.getID().equals("GMT") && ! tzidName.equals("GMT")){
 			inTZID = ParserTools.findTzidBySimilarity(tzidName);
 		}
-		
+
         if (null != inTZID) {
             tz = inTZID;
         }

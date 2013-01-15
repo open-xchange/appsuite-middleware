@@ -35,7 +35,7 @@ public class ExceptionUtils {
 
     /**
      * Checks whether the supplied <tt>Throwable</tt> is one that needs to be rethrown and swallows all others.
-     * 
+     *
      * @param t The <tt>Throwable</tt> to check
      */
     public static void handleThrowable(final Throwable t) {

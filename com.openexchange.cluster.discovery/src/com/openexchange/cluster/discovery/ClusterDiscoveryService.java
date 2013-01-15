@@ -54,14 +54,14 @@ import java.util.List;
 
 /**
  * The {@link ClusterDiscoveryService} maintains a list of known nodes and informs listeners of changes to that list.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ClusterDiscoveryService {
 
     /**
      * Retrieve a list of currently known nodes.
-     * 
+     *
      * @return A list of currently known nodes.
      */
     List<InetAddress> getNodes();

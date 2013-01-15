@@ -73,7 +73,7 @@ public final class SmbFileMap {
 
     /**
      * Initializes a new {@link SmbFileMap}.
-     * 
+     *
      * @param maxCapacity the max capacity
      * @param maxLifeUnits the max life units
      * @param unit the unit
@@ -86,7 +86,7 @@ public final class SmbFileMap {
 
     /**
      * Initializes a new {@link SmbFileMap}.
-     * 
+     *
      * @param maxCapacity the max capacity
      * @param maxLifeMillis the max life millis
      */
@@ -111,7 +111,7 @@ public final class SmbFileMap {
 
     /**
      * Put if absent.
-     * 
+     *
      * @param smbFile the SMB file
      * @return The SMB file
      */
@@ -121,7 +121,7 @@ public final class SmbFileMap {
 
     /**
      * Put if absent.
-     * 
+     *
      * @param path the SMB file path
      * @param treeId the tree id
      * @param smbFile the SMB file
@@ -151,7 +151,7 @@ public final class SmbFileMap {
 
     /**
      * Size.
-     * 
+     *
      * @return The size
      */
     public int size() {
@@ -160,7 +160,7 @@ public final class SmbFileMap {
 
     /**
      * Checks if empty flag is set.
-     * 
+     *
      * @return <code>true</code> if empty flag is set; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -169,7 +169,7 @@ public final class SmbFileMap {
 
     /**
      * Contains.
-     * 
+     *
      * @param path the SMB file path
      * @return <code>true</code> if successful; otherwise <code>false</code>
      */
@@ -179,7 +179,7 @@ public final class SmbFileMap {
 
     /**
      * Gets the SMB file.
-     * 
+     *
      * @param path the SMB file path
      * @return The SMB file
      */
@@ -198,7 +198,7 @@ public final class SmbFileMap {
 
     /**
      * Puts specified SMB file.
-     * 
+     *
      * @param smbFile the SMB file
      * @return The SMB file
      */
@@ -208,7 +208,7 @@ public final class SmbFileMap {
 
     /**
      * Puts specified SMB file.
-     * 
+     *
      * @param path the SMB file path
      * @param smbFile the SMB file
      * @return The SMB file
@@ -228,7 +228,7 @@ public final class SmbFileMap {
 
     /**
      * Removes the SMB file.
-     * 
+     *
      * @param path the SMB file path
      * @return The SMB file
      */

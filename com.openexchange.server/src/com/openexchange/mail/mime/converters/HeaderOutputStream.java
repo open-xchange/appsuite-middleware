@@ -56,7 +56,7 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * {@link HeaderOutputStream} - Reads until two subsequent CR?LF sequences are detected
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HeaderOutputStream extends ByteArrayOutputStream {
@@ -76,7 +76,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
 
     /**
      * Creates a new byte array output stream, with a buffer capacity of the specified size, in bytes.
-     * 
+     *
      * @param size The initial size.
      * @exception IllegalArgumentException If size is negative.
      */
@@ -88,7 +88,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
 
     /**
      * Writes the specified byte to this byte array output stream.
-     * 
+     *
      * @param b The byte to be written.
      */
     @Override
@@ -116,7 +116,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
 
     /**
      * Writes <code>len</code> bytes from the specified byte array starting at offset <code>off</code> to this byte array output stream.
-     * 
+     *
      * @param b The data.
      * @param off The start offset in the data.
      * @param len The number of bytes to write.
@@ -159,7 +159,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
     /**
      * Writes the complete contents of this byte array output stream to the specified output stream argument, as if by calling the output
      * stream's write method using <code>out.write(buf, 0, count)</code>.
-     * 
+     *
      * @param out The output stream to which to write the data.
      * @exception IOException If an I/O error occurs.
      */
@@ -182,7 +182,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
     /**
      * Creates a newly allocated byte array. Its size is the current size of this output stream and the valid contents of the buffer have
      * been copied into it.
-     * 
+     *
      * @return The current contents of this output stream, as a byte array.
      */
     @Override
@@ -195,7 +195,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
     /**
      * Creates a newly allocated byte array. Its size is specified <code>size</code> and the valid contents starting from specified offset
      * <code>off</code> are going to be copied into it.
-     * 
+     *
      * @param off The offset in valid contents
      * @param size The demanded size
      * @return The current contents of this output stream, as a byte array.
@@ -213,7 +213,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
 
     /**
      * Returns the current size of the buffer.
-     * 
+     *
      * @return The value of the <code>count</code> field, which is the number of valid bytes in this output stream.
      */
     @Override
@@ -224,7 +224,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
     /**
      * Converts the buffer's contents into a string, translating bytes into characters according to the platform's default character
      * encoding.
-     * 
+     *
      * @return A string translated from the buffer's contents.
      */
     @Override
@@ -234,7 +234,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
 
     /**
      * Converts the buffer's contents into a string, translating bytes into characters according to the specified character encoding.
-     * 
+     *
      * @param enc The character-encoding name.
      * @return A string translated from the buffer's contents.
      * @throws UnsupportedEncodingException If the named encoding is not supported.
@@ -248,13 +248,13 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
      * Creates a newly allocated string. Its size is the current size of the output stream and the valid contents of the buffer have been
      * copied into it. Each character <i>c</i> in the resulting string is constructed from the corresponding element <i>b</i> in the byte
      * array such that: <blockquote>
-     * 
+     *
      * <pre>
      * c == (char) (((hibyte &amp; 0xff) &lt;&lt; 8) | (b &amp; 0xff))
      * </pre>
-     * 
+     *
      * </blockquote>
-     * 
+     *
      * @deprecated This method does not properly convert bytes into characters. As of JDK&nbsp;1.1, the preferred way to do this is via the
      *             <code>toString(String enc)</code> method, which takes an encoding-name argument, or the <code>toString()</code> method,
      *             which uses the platform's default character encoding.

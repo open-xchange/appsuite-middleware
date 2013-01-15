@@ -62,10 +62,10 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum OXRMIExceptionCodes implements OXExceptionCode {
     RMI_START_FAILED(OXRMIExceptionMessage.RMI_START_FAILED_MSG, 1, Category.CATEGORY_ERROR),
-    
+
     RMI_CREATE_REGISTRY_FAILED(OXRMIExceptionMessage.RMI_CREATE_REGISTRY_FAILED_MSG, 2, Category.CATEGORY_ERROR)
     ;
-    
+
     /**
      * Message of the exception.
      */
@@ -80,7 +80,7 @@ public enum OXRMIExceptionCodes implements OXExceptionCode {
      * Detail number of the exception.
      */
     private final int detailNumber;
-    
+
     private OXRMIExceptionCodes(String message, int detailNumber, Category category) {
         this.message = message;
         this.category = category;
@@ -111,10 +111,10 @@ public enum OXRMIExceptionCodes implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -123,7 +123,7 @@ public enum OXRMIExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -133,7 +133,7 @@ public enum OXRMIExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

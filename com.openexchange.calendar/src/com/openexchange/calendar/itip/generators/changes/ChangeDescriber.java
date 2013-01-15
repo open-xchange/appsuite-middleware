@@ -72,7 +72,7 @@ public class ChangeDescriber {
     public ChangeDescriber(ChangeDescriptionGenerator...generators) {
         this.generators = generators;
     }
-    
+
     public List<String> getChanges(Context ctx, Appointment original, Appointment update, AppointmentDiff diff, TypeWrapper wrapper, Locale locale, TimeZone timezone) throws OXException {
         List<String> changeDescriptions = new ArrayList<String>();
         for (ChangeDescriptionGenerator generator : generators) {
@@ -83,7 +83,7 @@ public class ChangeDescriber {
                 }
             }
         }
-        
+
         return changeDescriptions;
     }
 }

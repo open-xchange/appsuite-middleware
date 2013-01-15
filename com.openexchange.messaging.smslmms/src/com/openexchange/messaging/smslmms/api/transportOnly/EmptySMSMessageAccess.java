@@ -65,7 +65,7 @@ import com.openexchange.messaging.smslmms.api.SMSService;
 
 /**
  * {@link EmptySMSMessageAccess} - The empty SMS/MMS message access.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EmptySMSMessageAccess implements SMSMessageAccess {

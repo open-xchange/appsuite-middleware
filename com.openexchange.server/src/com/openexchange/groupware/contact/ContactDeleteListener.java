@@ -380,7 +380,7 @@ public final class ContactDeleteListener implements DeleteListener {
 
         }
     }
-    
+
     private static void iFtrashAllUserContactsDeletedEntriesFromAdmin(final Statement del, final int cid, final int uid) throws SQLException {
         final StringBuilder tmp =
             new StringBuilder("DELETE FROM del_contacts WHERE created_from = ").append(uid).append(" and cid = ").append(cid);

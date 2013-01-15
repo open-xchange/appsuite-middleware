@@ -1,18 +1,18 @@
-/* 
- * Copyright 2005 - 2009 Terracotta, Inc. 
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
- * use this file except in compliance with the License. You may obtain a copy 
- * of the License at 
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations 
+/*
+ * Copyright 2005 - 2009 Terracotta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
  * under the License.
- * 
+ *
  */
 
 package org.quartz.examples.example8;
@@ -36,10 +36,10 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.calendar.AnnualCalendar;
 
 /**
- * This example will demonstrate how calendars can be used 
+ * This example will demonstrate how calendars can be used
  * to exclude periods of time when scheduling should not
  * take place.
- * 
+ *
  */
 public class CalendarExample {
 
@@ -70,17 +70,17 @@ public class CalendarExample {
 
         // tell the schedule about our holiday calendar
         sched.addCalendar("holidays", holidays, false, false);
-        
+
 
         // schedule a job to run hourly, starting on halloween
         // at 10 am
         Date  runDate = dateOf(0, 0, 10, 31, 10);
-        
+
         JobDetail job = newJob(SimpleJob.class)
             .withIdentity("job1", "group1")
             .build();
-        
-        SimpleTrigger trigger = newTrigger() 
+
+        SimpleTrigger trigger = newTrigger()
             .withIdentity("trigger1", "group1")
             .startAt(runDate)
             .withSchedule(simpleSchedule()
@@ -88,18 +88,18 @@ public class CalendarExample {
                     .repeatForever())
             .modifiedByCalendar("holidays")
             .build();
-        
+
         // schedule the job and print the first run date
         Date firstRunTime = sched.scheduleJob(job, trigger);
-        
+
         // print out the first execution date.
         // Note:  Since Halloween (Oct 31) is a holiday, then
         // we will not run until the next day! (Nov 1)
         System.out.println(job.getKey() +
-                " will run at: " + firstRunTime +  
-                " and repeat: " + trigger.getRepeatCount() + 
+                " will run at: " + firstRunTime +
+                " and repeat: " + trigger.getRepeatCount() +
                 " times, every " + trigger.getRepeatInterval() / 1000 + " seconds");
-        
+
         // All of the jobs have been added to the scheduler, but none of the jobs
         // will run until the scheduler has been started
         System.out.println("------- Starting Scheduler ----------------");
@@ -110,12 +110,12 @@ public class CalendarExample {
         System.out.println("------- Waiting 30 seconds... --------------");
         try {
             // wait 30 seconds to show jobs
-            Thread.sleep(30L * 1000L); 
+            Thread.sleep(30L * 1000L);
             // executing...
         } catch (Exception e) {
         }
-        
-        
+
+
         // shut down the scheduler
         System.out.println("------- Shutting Down ---------------------");
         sched.shutdown(true);

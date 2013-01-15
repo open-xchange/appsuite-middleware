@@ -66,7 +66,7 @@ import com.openexchange.exception.OXException;
 public abstract class LdapBooleanMapping extends LdapMapping<Boolean> {
 
     private String match = null;
-        
+
     @Override
     public void setLdapAttributeName(String ldapAttributeName) {
         if (null == ldapAttributeName) {
@@ -80,7 +80,7 @@ public abstract class LdapBooleanMapping extends LdapMapping<Boolean> {
             }
         }
     }
-    
+
     @Override
     public Boolean get(LdapResult result, LdapIDResolver idResolver) throws OXException {
         Attribute attribute = super.getAttribute(result);
@@ -99,11 +99,11 @@ public abstract class LdapBooleanMapping extends LdapMapping<Boolean> {
                 throw LdapExceptionCodes.ERROR_GETTING_ATTRIBUTE.create(e, e.getMessage());
             } finally {
                 Tools.close(values);
-            }            
+            }
         }
         return Boolean.FALSE;
     }
-    
+
     @Override
     public String encode(Boolean value, LdapIDResolver idResolver) throws OXException {
         if (Boolean.TRUE.equals(value)) {

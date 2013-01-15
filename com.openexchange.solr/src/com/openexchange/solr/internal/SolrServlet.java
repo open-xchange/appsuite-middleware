@@ -91,7 +91,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link SolrServlet}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrServlet extends HttpServlet {
@@ -99,11 +99,11 @@ public class SolrServlet extends HttpServlet {
     private static final long serialVersionUID = -7395630600887358848L;
 
     private static final Log log = com.openexchange.log.Log.loggerFor(SolrServlet.class);
-    
+
     private static final Charset UTF8 = Charset.forName("UTF-8");
-    
+
     private final Map<SolrConfig, SolrRequestParsers> parsers = new WeakHashMap<SolrConfig, SolrRequestParsers>();
-    
+
     private final SolrRequestParsers adminRequestParser;
 
     private final CoreContainer cores;
@@ -304,8 +304,9 @@ public class SolrServlet extends HttpServlet {
             sb.append(name).append("=").append(val).append(" ");
         }
         QueryResponseWriter respWriter = SolrCore.DEFAULT_RESPONSE_WRITERS.get(solrReq.getParams().get(CommonParams.WT));
-        if (respWriter == null)
+        if (respWriter == null) {
             respWriter = SolrCore.DEFAULT_RESPONSE_WRITERS.get("standard");
+        }
         writeResponse(solrResp, response, respWriter, solrReq, Method.getMethod(req.getMethod()));
     }
 
@@ -316,8 +317,9 @@ public class SolrServlet extends HttpServlet {
             // Now write it out
             final String ct = responseWriter.getContentType(solrReq, solrRsp);
             // don't call setContentType on null
-            if (null != ct)
+            if (null != ct) {
                 response.setContentType(ct);
+            }
 
             if (Method.HEAD != reqMethod) {
                 if (responseWriter instanceof BinaryQueryResponseWriter) {

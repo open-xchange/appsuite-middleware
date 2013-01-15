@@ -85,5 +85,5 @@ public class GetUserAction extends ContactAction {
     	Contact contact = getContactService().getUser(request.getSession(), userID);
         return new AJAXRequestResult(contact, contact.getLastModified(), "contact");
     }
-    
+
 }

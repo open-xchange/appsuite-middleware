@@ -72,7 +72,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 
 /**
- * 
+ *
  * @author d7
  * @author cutmasta
  */
@@ -91,7 +91,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
     }
 
     @Override
-    public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException,DatabaseUpdateException {        
+    public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException,DatabaseUpdateException {
         new BasicAuthenticator().doUserAuthentication(auth, ctx);
         triggerUpdateProcess(ctx);
     }
@@ -105,7 +105,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
     @Override
     public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         new BasicAuthenticator().doUserAuthentication(auth, ctx);
-        
+
         triggerUpdateProcess(ctx);
 
         int user_id;
@@ -144,7 +144,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
         return retusers[0];
     }
-    
+
     private void triggerUpdateProcess(Context ctx) throws DatabaseUpdateException{
         // Check for update.
         try {

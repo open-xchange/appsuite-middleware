@@ -244,7 +244,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
         if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
             transformations.rotate();
-        }        
+        }
         if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
             int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
             int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
@@ -262,7 +262,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
         if (null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != compress && compress.booleanValue()) {
             transformations.compress();
-        }        
+        }
         /*
          * transform
          */

@@ -56,7 +56,7 @@ import java.util.Map;
 
 /**
  * {@link SystemObject} - The system object.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public abstract class SystemObject implements Serializable {
@@ -80,7 +80,7 @@ public abstract class SystemObject implements Serializable {
 
     /**
      * Sets the map with arbitrary properties.
-     * 
+     *
      * @param map The properties map
      */
     public void setMap(final Map<? extends Object, ? extends Object> map) {
@@ -89,7 +89,7 @@ public abstract class SystemObject implements Serializable {
 
     /**
      * Gets (optionally) the map with arbitrary properties.
-     * 
+     *
      * @return The map or <code>null</code>
      */
     public Map<?, ?> getMap() {
@@ -102,7 +102,7 @@ public abstract class SystemObject implements Serializable {
      * <tt>out.defaultWriteObject</tt>. The method does not need to concern itself with the state belonging to its superclasses or
      * subclasses. State is saved by writing the individual fields to the <tt>ObjectOutputStream</tt> using the <tt>writeObject</tt> method
      * or by using the methods for primitive data types supported by <tt>DataOutput</tt>.
-     * 
+     *
      * @param out The object output stream
      * @throws java.io.IOException If serialization fails
      */
@@ -132,7 +132,7 @@ public abstract class SystemObject implements Serializable {
      * does not need to concern itself with the state belonging to its superclasses or subclasses. State is saved by writing the individual
      * fields to the <tt>ObjectOutputStream</tt> using the <tt>writeObject</tt> method or by using the methods for primitive data types
      * supported by <tt>DataOutput</tt>.
-     * 
+     *
      * @param in The object input stream
      * @throws java.io.IOException If deserialization fails
      * @throws ClassNotFoundException If appropriate class could not be found

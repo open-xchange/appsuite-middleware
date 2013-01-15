@@ -49,7 +49,7 @@
 package com.openexchange.index.solr.internal.querybuilder.utils;
 
 /**
- * 
+ *
  * {@link TokenTypes}
  *
  * @author Sven Maurmann

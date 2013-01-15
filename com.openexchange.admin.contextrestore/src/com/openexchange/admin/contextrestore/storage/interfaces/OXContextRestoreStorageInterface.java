@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.openexchange.admin.contextrestore.storage.interfaces;
 
@@ -20,12 +20,12 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * This factory class provides access to the right storage layer
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
 public abstract class OXContextRestoreStorageInterface {
-    
+
     /**
      * Proxy attribute for the class implementing this interface.
      */
@@ -34,7 +34,7 @@ public abstract class OXContextRestoreStorageInterface {
     private static final Log log = LogFactory.getLog(OXContextRestoreStorageInterface.class);
 
     protected static PropertyHandlerExtended prop = new PropertyHandlerExtended(System.getProperties());
-    
+
     /**
      * Creates a new instance implementing the group storage interface.
      * @return an instance implementing the group storage interface.
@@ -83,8 +83,8 @@ public abstract class OXContextRestoreStorageInterface {
         }
     }
 
-    
+
     public abstract String restorectx(final Context ctx, final PoolIdSchemaAndVersionInfo poolidandschema) throws SQLException, FileNotFoundException, IOException, OXContextRestoreException, StorageException;
-    
+
     public abstract void checkVersion(final PoolIdSchemaAndVersionInfo poolIdAndSchema) throws SQLException, OXContextRestoreException, StorageException;
 }

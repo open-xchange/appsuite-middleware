@@ -118,7 +118,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Sets whether this token is a one-time token.
-     * 
+     *
      * @param oneTime <code>true</code> for one-time token; otherwise <code>false</code>
      * @return This attachment token with new behavior applied
      */
@@ -129,7 +129,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Checks if this token is a one-time token.
-     * 
+     *
      * @return <code>true</code> for one-time token; otherwise <code>false</code>
      */
     public boolean isOneTime() {

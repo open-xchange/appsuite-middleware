@@ -59,27 +59,27 @@ import com.openexchange.loxandra.dto.EAVContact;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface EAVContactService {
-	
+
 	/**
 	 * Insert a new contact
 	 * @return int code
 	 */
 	public void insertContact(EAVContact c);
-	
+
 	/**
 	 * Delete a contact
 	 * @param uuid for the contact
 	 * @return int code
 	 */
 	public void deleteContact(UUID uuid);
-	
+
 	/**
 	 * Update a contact
 	 * @param c contact to update
 	 * @return int code
 	 */
 	public void updateContact(EAVContact c);
-	
+
 	/**
 	 * Copy the contact to another folder
 	 * @param contact for copy
@@ -87,71 +87,71 @@ public interface EAVContactService {
 	 * @return
 	 */
 	public void copyContactToFolder(EAVContact c, UUID newFolderUUID);
-	
+
 	/**
 	 * Move contact to another folder
 	 * @param the folder UUID for move
 	 * @return
 	 */
 	public void moveContactToFolder(EAVContact c, UUID oldFolderUUID, UUID newFolderUUID);
-	
+
 	/**
 	 * Remove the given contact from a specific folder
 	 * @param c
 	 * @param folderUUID
 	 */
 	public void removeContactFromFolder(EAVContact c, UUID folderUUID);
-	
+
 	/**
 	 * Delete one or more unnamed properties (a.k.a. columns)
 	 * @param o
 	 */
 	public void deleteProperties(UUID uuid, String... prop);
-	
+
 	/**
 	 * Add one or more unnamed properties
-	 * 
+	 *
 	 * @param uuid
 	 * @param props
 	 */
 	public void addProperties(UUID uuid, HashMap<String, String> props);
-	
+
 	/**
 	 * Get one or more unnamed properties
-	 * 
+	 *
 	 * @param uuid
 	 * @param props
 	 * @return props
 	 */
 	public String getProperties(UUID uuid, String... props);
-	
+
 	/**
 	 * Get a contact
 	 * @param uuid
-	 * @param limited boolean value indicated whether to retrieve the full details or the basic stuff 
+	 * @param limited boolean value indicated whether to retrieve the full details or the basic stuff
 	 * @return
 	 */
 	public EAVContact getContact(UUID uuid, boolean limited);
-	
+
 	/**
 	 * Get all contacts residing inside a folder
-	 * 
+	 *
 	 * @param folderUUID uuid of the folder
 	 * @return a sorted list (by surname) of all contacts
 	 */
 	public List<EAVContact> getContactsFromFolder(UUID folderUUID);
-	
+
 	/**
 	 * Get a range of contacts residing inside a folder.
-	 * 
+	 *
 	 * @param folderUUID The Folder UUID
      * @param from Start position in list inclusive
      * @param to End position in list exclusive
-     * 
+     *
      * @return A SearchIterator contains Task objects
 	 */
 	public List<EAVContact> getContactsFromFolder(UUID folderUUID, int from, int to);
-	
+
 	/**
 	 * Return the number of contacts contained within the given folder
 	 * @param folderUUID

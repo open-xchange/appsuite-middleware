@@ -84,7 +84,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /** The en_US locale */
     static final Locale US = Locale.US;
-    
+
     /**
      * Enumeration of known permissions.
      */
@@ -164,7 +164,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
         /**
          * Gets the associated bit constant.
-         * 
+         *
          * @return The bit
          */
         public int getBit() {
@@ -173,7 +173,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
         /**
          * Gets the tag name.
-         * 
+         *
          * @return The tag name
          */
         public String getTagName() {
@@ -182,7 +182,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
         /**
          * Gets the permission associated with given bit.
-         * 
+         *
          * @param bit The bit
          * @return The associated permission or <code>null</code>
          */
@@ -192,7 +192,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
         /**
          * Gets the permissions associated with given bits.
-         * 
+         *
          * @param bits The bits
          * @return The associated permissions
          */
@@ -210,7 +210,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
         /**
          * Adds the permission names to specified set associated with given bits.
-         * 
+         *
          * @param bits The bits
          * @param set The set
          */
@@ -219,7 +219,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
         }
 
     } // End of Permission class
-    
+
     /**
      * The permission bit for mail access.
      */
@@ -459,7 +459,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
         }
         return (null == uc.ctx);
     }
-    
+
     /**
      * Sets the extended permissions
      *
@@ -1170,11 +1170,11 @@ public final class UserConfiguration implements Serializable, Cloneable {
 		}
         return true;
     }
-    
+
     /**
      * Checks if this user configuration enables specified permission.
      *
-     * @param permission The permission 
+     * @param permission The permission
      * @return <code>true</code> if this user configuration enabled specified permission; otherwise <code>false</code>
      */
     public boolean hasPermission(final Permission permission) {
@@ -1183,7 +1183,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
         }
         return hasPermissionInternal(permission);
     }
-    
+
     /**
      * Checks if this user configuration enables named permission.
      *
@@ -1193,11 +1193,11 @@ public final class UserConfiguration implements Serializable, Cloneable {
     public boolean hasPermission(final String name) {
     	return getExtendedPermissions().contains(name.toLowerCase());
     }
-    
+
     private boolean hasPermissionInternal(final int permission) {
         return (permissionBits & permission) == permission;
     }
-    
+
     private boolean hasPermissionInternal(Permission permission) {
     	return hasPermissionInternal(permission.bit);
     }
@@ -1271,7 +1271,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Calculates this user configuration's extended permissions.
-     * 
+     *
      * @return The extended permissions
      */
     public Set<String> calcExtendedPermissions() {

@@ -74,7 +74,7 @@ import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 public class ServerCookieInspector extends AbstractCookieInspector {
 
     private final HttpResponsePacket httpResponsePacket;
-    
+
     /**
      * Initializes a new {@link ServerCookieInspector}.
      * @param headerLine the server Set-Cookie: header, must not be null
@@ -87,19 +87,19 @@ public class ServerCookieInspector extends AbstractCookieInspector {
         }
         this.backendRoute=backendRoute;
         this.httpResponsePacket = httpResponsePacket;
-        
+
         MimeHeaders responseMimeHeaders = httpResponsePacket.getHeaders();
         Iterable<String> headerLines = responseMimeHeaders.values(Header.SetCookie);
         this.cookieMap = getCookieMapFromHeaderLines(headerLines);
     }
-    
+
     /**
      * Convert the server Set-Cookie: header line into a map<name, cookie> of cookies.
      * @param headerLine the Set-Cookie: header line from the client http request
      * @return
      */
     private Map<String, Cookie> getCookieMapFromHeaderLines(Iterable<String> headerLines) {
-        Map<String, Cookie> cookieMap = new HashMap<String, Cookie>(); 
+        Map<String, Cookie> cookieMap = new HashMap<String, Cookie>();
         Cookies cookies = new Cookies();
         for (String headerLine : headerLines) {
             CookieParserUtils.parseServerCookies(cookies, headerLine, true);
@@ -109,11 +109,11 @@ public class ServerCookieInspector extends AbstractCookieInspector {
         }
         return cookieMap;
     }
-    
+
     /**
      * Set the value of the JSESSIONID cookie to a new fixed value.
      * The value was fixed outside of this ServerCookieInspector e.g. in the ClientCookieInspector.
-     * If no existing JSESSIONID cookie can be found in the Set-Cookie: header a new one is created. 
+     * If no existing JSESSIONID cookie can be found in the Set-Cookie: header a new one is created.
      * @param fixedJessionId the fixed value of the JSessionId
      */
     public void setJSessionIDCookieValue(String fixedJessionId) {
@@ -124,7 +124,7 @@ public class ServerCookieInspector extends AbstractCookieInspector {
             cookieMap.put("JSESSIONID", jSessionIdCookie);
         }
     }
-    
+
     /**
      * Configure the JSESSIONID cookie
      * @param cookie the cookie to configure
@@ -151,10 +151,10 @@ public class ServerCookieInspector extends AbstractCookieInspector {
         }
         return httpResponsePacket.getRequest().isSecure();
     }
-    
+
     /**
      * Get a list of ByteBufferWrappers containing the single Set-Cookie header values.
-     * @return a list of ByteBufferWrappers containing the single header values 
+     * @return a list of ByteBufferWrappers containing the single header values
      */
     public List<ByteBufferWrapper> getSetCookieHeaders() {
         List<ByteBufferWrapper> headers = new ArrayList<ByteBufferWrapper>();
@@ -167,7 +167,7 @@ public class ServerCookieInspector extends AbstractCookieInspector {
     }
     /**
      * Get the Set-Cookie header to set the JSESSIONID.
-     * @return a ByteBufferWrapper containing the Set-Cookie header to set the JSESSIONID. 
+     * @return a ByteBufferWrapper containing the Set-Cookie header to set the JSESSIONID.
      */
     public ByteBufferWrapper getSetJSessionIdCookieHeader() {
         Cookie jSessionIDCookie = cookieMap.get("JSESSIONID");
@@ -175,5 +175,5 @@ public class ServerCookieInspector extends AbstractCookieInspector {
         CookieSerializerUtils.serializeServerCookie(sb, jSessionIDCookie);
         return new ByteBufferWrapper(ByteBuffer.wrap(sb.toString().getBytes()));
     }
-    
+
 }

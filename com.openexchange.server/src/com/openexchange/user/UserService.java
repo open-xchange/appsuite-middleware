@@ -57,14 +57,14 @@ import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link UserService} - Offers access method to user module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface UserService {
 
     /**
      * Gets the denoted context.
-     * 
+     *
      * @param contextId The context identifier
      * @return The context
      * @throws OXException If context cannot be returned
@@ -73,7 +73,7 @@ public interface UserService {
 
     /**
      * Gets specified user attribute.
-     * 
+     *
      * @param name The attribute name
      * @param userId The user identifier
      * @param context The context
@@ -85,7 +85,7 @@ public interface UserService {
 
     /**
      * Sets specified user attribute.
-     * 
+     *
      * @param name The attribute name
      * @param value The attribute value
      * @param userId The user identifier
@@ -97,7 +97,7 @@ public interface UserService {
 
     /**
      * Sets specified unscoped user attribute.
-     * 
+     *
      * @param name The attribute name
      * @param value The attribute value
      * @param userId The user identifier
@@ -109,7 +109,7 @@ public interface UserService {
 
     /**
      * Searches for a user whose login matches the given <code>loginInfo</code>.
-     * 
+     *
      * @param loginInfo The login name of the user.
      * @param context The context.
      * @return The unique identifier of the user.
@@ -120,7 +120,7 @@ public interface UserService {
 
     /**
      * Reads the data from a user from the underlying persistent data storage.
-     * 
+     *
      * @param uid The user identifier.
      * @return The user
      * @param context The context.
@@ -131,7 +131,7 @@ public interface UserService {
 
     /**
      * Reads the data from a user from the underlying persistent data storage.
-     * 
+     *
      * @param con The database connection
      * @param uid The user identifier.
      * @param context The context
@@ -143,7 +143,7 @@ public interface UserService {
 
     /**
      * Writes a new user into the database.
-     * 
+     *
      * @param con The database connection.
      * @param context The context.
      * @param user The user
@@ -155,7 +155,7 @@ public interface UserService {
 
     /**
      * Writes a new user into the database.
-     * 
+     *
      * @param context The context.
      * @param user The user.
      * @return ID of the new user.
@@ -166,7 +166,7 @@ public interface UserService {
 
     /**
      * Reads the data for a set of user from the underlying persistent data storage.
-     * 
+     *
      * @param context The context
      * @param userIds The user identifier
      * @return The users
@@ -178,7 +178,7 @@ public interface UserService {
     /**
      * Reads all user for the given context. Use this method if you need a lot of users from that context because this method uses optimized
      * storage loading mechanisms to get all user information from the storage in a fast manner.
-     * 
+     *
      * @param ctx The context
      * @return An array with all users from the given context
      * @see #getContext(int)
@@ -187,7 +187,7 @@ public interface UserService {
 
     /**
      * This method updates some values of a user.
-     * 
+     *
      * @param user The user with the updated values.
      * @param context The context.
      * @throws OXException If an error occurs.
@@ -197,7 +197,7 @@ public interface UserService {
 
     /**
      * Searches a user by its email address. This is used for converting iCal to appointments.
-     * 
+     *
      * @param email The email address of the user.
      * @param context The context.
      * @return A {@link User} instance if the user was found by its email address or <code>null</code> if no user could be found.
@@ -218,7 +218,7 @@ public interface UserService {
 
     /**
      * Searches a user by its login/display name.
-     * 
+     *
      * @param name The login/display name of the user.
      * @param context The context.
      * @param searchType The search type; e.g.
@@ -233,7 +233,7 @@ public interface UserService {
 
     /**
      * Returns an array with all user identifier of the context.
-     * 
+     *
      * @param context The context.
      * @return an array with all user identifier of the context.
      * @throws OXException If generating this list fails.
@@ -243,7 +243,7 @@ public interface UserService {
 
     /**
      * Searches for users whose IMAP login name matches the given login name.
-     * 
+     *
      * @param imapLogin the IMAP login name to search for
      * @param context The context.
      * @return The unique identifiers of the users.
@@ -254,7 +254,7 @@ public interface UserService {
 
     /**
      * Searches users who where modified later than the given date.
-     * 
+     *
      * @param modifiedSince Date after that the returned users are modified.
      * @param context The context.
      * @return a string array with the uids of the matching user.
@@ -265,7 +265,7 @@ public interface UserService {
 
     /**
      * Removes a user from the cache if caching is used.
-     * 
+     *
      * @param ctx Context.
      * @param userId unique identifier of the user.
      * @throws OXException If removing gives an exception.
@@ -275,7 +275,7 @@ public interface UserService {
 
     /**
      * Authenticates the given password against the given user object.
-     * 
+     *
      * @param user user that password is compared with given one.
      * @param password password to check.
      * @return <code>true</code> if the password matches.

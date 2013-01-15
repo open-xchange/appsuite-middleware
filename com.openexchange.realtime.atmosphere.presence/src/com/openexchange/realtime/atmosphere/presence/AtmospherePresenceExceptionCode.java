@@ -62,7 +62,7 @@ import static com.openexchange.realtime.atmosphere.presence.AtmospherePresenceEx
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public enum AtmospherePresenceExceptionCode implements OXExceptionCode {
-    
+
     /** The following obligatory element is missing: \"%1$s\" */
     OBLIGATORY_ELEMENT_MISSING(OBLIGATORY_ELEMENT_MISSING_MSG, CATEGORY_ERROR, 1),
     /** Malformed Presence Data \"%1$s\" */
@@ -80,7 +80,7 @@ public enum AtmospherePresenceExceptionCode implements OXExceptionCode {
         number = detailNumber;
         this.category = category;
     }
-    
+
     @Override
     public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
@@ -105,7 +105,7 @@ public enum AtmospherePresenceExceptionCode implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *

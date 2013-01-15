@@ -91,7 +91,7 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
         " account INT4 unsigned NOT NULL," +
         " confId INT4 unsigned NOT NULL," +
         " displayName VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        " PRIMARY KEY (cid, user, serviceId, account)" + 
+        " PRIMARY KEY (cid, user, serviceId, account)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 

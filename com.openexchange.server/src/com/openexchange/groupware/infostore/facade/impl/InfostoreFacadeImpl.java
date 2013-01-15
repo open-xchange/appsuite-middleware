@@ -767,8 +767,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             CheckSizeSwitch.checkSizes(document, getProvider(), sessionObj.getContext());
 
             final DocumentMetadata oldDocument = checkWriteLock(document.getId(), sessionObj);
-            
-            
+
+
             final Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedColumns));
             if (!updatedCols.contains(Metadata.LAST_MODIFIED_LITERAL)) {
                 document.setLastModified(new Date());
@@ -809,7 +809,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     document.setFileName(reservation.getFilename());
                 	updatedCols.add(Metadata.FILENAME_LITERAL);
                 }
-                
+
                 final String oldTitle = oldDocument.getTitle();
                 if (!updatedCols.contains(Metadata.TITLE_LITERAL) && oldFileName != null && oldTitle != null && oldFileName.equals(oldTitle)) {
                 	final String fileName = document.getFileName();
@@ -900,7 +900,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     updateAction.setTimestamp(Long.MAX_VALUE);
                     perform(updateAction, true);
                 }
-                
+
                 long indexFolderId = document.getFolderId() == oldDocument.getFolderId() ? -1L : oldDocument.getFolderId();
                 indexDocument(sessionObj.getContext(), sessionObj.getUserId(), oldDocument.getId(), indexFolderId, false);
             } finally {
@@ -989,7 +989,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         {
             perform(deleteDocument, true);
         }
-        
+
         removeFromIndex(sessionObj.getContext(), sessionObj.getUserId(), delDocs);
         // TODO: This triggers a full re-indexing and can be improved. We only have to re-index if the latest version is affected.
         removeFromIndex(sessionObj.getContext(), sessionObj.getUserId(), delVers);
@@ -1240,7 +1240,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         for (final Integer integer : versionSet) {
             retval[i++] = integer.intValue();
         }
-        
+
         if (removeCurrent) {
             removeFromIndex(sessionObj.getContext(), sessionObj.getUserId(), Collections.singletonList(metadata));
             indexDocument(sessionObj.getContext(), sessionObj.getUserId(), id, -1L, true);
@@ -1809,12 +1809,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     public void setSessionHolder(final SessionHolder sessionHolder) {
         expiredLocksListener.setSessionHolder(sessionHolder);
     }
-    
+
     private void removeFromIndex(final Context context, final int userId, final List<DocumentMetadata> documents) {
         if (documents == null || documents.isEmpty()) {
             return;
         }
-        
+
         ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
         ExecutorService executorService = threadPoolService.getExecutor();
         executorService.submit(new Runnable() {
@@ -1828,7 +1828,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Deleting infostore document");
                         }
-                        
+
                         infostoreIndex = indexFacade.acquireIndexAccess(Types.INFOSTORE, userId, context.getContextId());
                         attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, userId, context.getContextId());
                         for (DocumentMetadata document : documents) {
@@ -1861,7 +1861,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                             } catch (OXException e) {
                             }
                         }
-                        
+
                         if (attachmentIndex != null) {
                             try {
                                 indexFacade.releaseIndexAccess(attachmentIndex);
@@ -1873,7 +1873,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             }
         });
     }
-    
+
     private void indexDocument(final Context context, final int userId, final int id, final long origFolderId, final boolean isCreation) {
         ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
         ExecutorService executorService = threadPoolService.getExecutor();
@@ -1881,18 +1881,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             @Override
             public void run() {
                 IndexFacadeService indexFacade = ServerServiceRegistry.getInstance().getService(IndexFacadeService.class);
-                if (indexFacade != null) {  
+                if (indexFacade != null) {
                     IndexAccess<DocumentMetadata> infostoreIndex = null;
                     IndexAccess<Attachment> attachmentIndex = null;
                     try {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Indexing infostore document");
                         }
-                        
+
                         infostoreIndex = indexFacade.acquireIndexAccess(Types.INFOSTORE, userId, context.getContextId());
                         attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, userId, context.getContextId());
                         DocumentMetadata document = load(id, CURRENT_VERSION, context);
-                        if (isCreation) {                            
+                        if (isCreation) {
                             addToIndex(document, infostoreIndex, attachmentIndex);
                         } else {
                             if (origFolderId > 0) {
@@ -1906,7 +1906,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                                     String.valueOf(origFolderId),
                                     String.valueOf(id),
                                     IndexConstants.DEFAULT_ATTACHMENT).toString());
-                                
+
                                 addToIndex(document, infostoreIndex, attachmentIndex);
                             } else {
                                 infostoreIndex.deleteById(InfostoreUUID.newUUID(context.getContextId(), userId, document.getFolderId(), id).toString());
@@ -1918,7 +1918,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                                     String.valueOf(document.getFolderId()),
                                     String.valueOf(id),
                                     IndexConstants.DEFAULT_ATTACHMENT).toString());
-                                
+
                                 addToIndex(document, infostoreIndex, attachmentIndex);
                             }
                         }
@@ -1937,7 +1937,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                             } catch (OXException e) {
                             }
                         }
-                        
+
                         if (attachmentIndex != null) {
                             try {
                                 indexFacade.releaseIndexAccess(attachmentIndex);
@@ -1947,13 +1947,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     }
                 }
             }
-                
+
             private void addToIndex(DocumentMetadata document, IndexAccess<DocumentMetadata> infostoreIndex, IndexAccess<Attachment> attachmentIndex) throws OXException {
                 IndexDocument<DocumentMetadata> indexDocument = new StandardIndexDocument<DocumentMetadata>(document);
                 infostoreIndex.addDocument(indexDocument);
-                
+
                 String filestoreLocation = document.getFilestoreLocation();
-                if (filestoreLocation != null) {                    
+                if (filestoreLocation != null) {
                     FileStorage fileStorage = getFileStorage(context);
                     InputStream file = fileStorage.getFile(filestoreLocation);
                     Attachment attachment = new Attachment();
@@ -1967,10 +1967,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     attachment.setMimeType(document.getFileMIMEType());
                     attachment.setMd5Sum(document.getFileMD5Sum());
                     attachment.setContent(file);
-                    
+
                     attachmentIndex.addDocument(new StandardIndexDocument<Attachment>(attachment));
                }
             }
-        });             
+        });
     }
 }

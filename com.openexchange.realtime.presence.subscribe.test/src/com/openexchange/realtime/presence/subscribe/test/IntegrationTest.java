@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link IntegrationTest}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class IntegrationTest extends TestCase {
@@ -108,7 +108,7 @@ public class IntegrationTest extends TestCase {
         ID to = new ID(null, "martin.herfurth", "1337", null);
         subscription.setTo(to);
         subscription.setType(Presence.Type.UNSUBSCRIBED);
-        
+
         // martin approves subscription request
         Presence approval = new Presence();
         approval.setTo(from);
@@ -127,7 +127,7 @@ public class IntegrationTest extends TestCase {
             List<ID> subscriptions = subscriptionService.getSubscriptions(getSessionTwo());
             assertEquals("No subscriptions expected.", 0, subscriptions.size());
 
-            //approve 
+            //approve
             subscriptionService.approve(approval, getSessionOne());
             subscribers = subscriptionService.getSubscribers(getSessionOne());
             assertEquals("One subscriber expected.", 1, subscribers.size());

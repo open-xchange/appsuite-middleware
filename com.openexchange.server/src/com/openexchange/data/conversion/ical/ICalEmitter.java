@@ -74,8 +74,8 @@ public interface ICalEmitter {
     /**
      * Writes a free/busy-reply, using the supplied free/busy information to
      * reflect the free/busy-times and the corresponding attendee.
-     * 
-     * @param freeBusyRequest the free/busy-information 
+     *
+     * @param freeBusyRequest the free/busy-information
      * @param ctx the context
      * @param errors the list of conversion errors
      * @param warnings the list of conversion warnings

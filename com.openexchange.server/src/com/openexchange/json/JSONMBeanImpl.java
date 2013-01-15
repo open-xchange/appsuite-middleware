@@ -98,7 +98,7 @@ public final class JSONMBeanImpl extends StandardMBean implements JSONMBean {
     public int getInUseMedium() {
         return CharArrayPool.getInUse(Part.MEDIUM);
     }
- 
+
     @Override
     public int getPooledMedium() {
         return CharArrayPool.getPooled(Part.LARGE);

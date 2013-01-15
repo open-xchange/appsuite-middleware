@@ -72,9 +72,9 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrIndexManagementService implements IndexManagementService {
-    
+
     private static final String PROPERTY = "com.openexchange.index.lockedIndices";
-    
+
 
     @Override
     public void lockIndex(int contextId, int userId, int module) throws OXException {
@@ -89,7 +89,7 @@ public class SolrIndexManagementService implements IndexManagementService {
             sstmt.setInt(1, contextId);
             sstmt.setInt(2, userId);
             sstmt.setString(3, PROPERTY);
-            
+
             rs = sstmt.executeQuery();
             if (rs.next()) {
                 String value = rs.getString(1);
@@ -104,7 +104,7 @@ public class SolrIndexManagementService implements IndexManagementService {
                     sb.append(',');
                 }
                 sb.append(module);
-                
+
                 ustmt = con.prepareStatement("UPDATE user_attribute SET value = ? WHERE cid = ? AND id = ? AND name = ?");
                 ustmt.setString(1, sb.toString());
                 ustmt.setInt(2, contextId);
@@ -119,7 +119,7 @@ public class SolrIndexManagementService implements IndexManagementService {
                 ustmt.setString(4, String.valueOf(module));
                 ustmt.executeUpdate();
             }
-            
+
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
@@ -130,7 +130,7 @@ public class SolrIndexManagementService implements IndexManagementService {
             DBUtils.autocommit(con);
             dbService.backWritable(contextId, con);
         }
-        
+
         Map<String, Integer> properties = new HashMap<String, Integer>();
         properties.put(SolrIndexEventProperties.PROP_CONTEXT_ID, new Integer(contextId));
         properties.put(SolrIndexEventProperties.PROP_USER_ID, new Integer(userId));
@@ -153,7 +153,7 @@ public class SolrIndexManagementService implements IndexManagementService {
             sstmt.setInt(1, contextId);
             sstmt.setInt(2, userId);
             sstmt.setString(3, PROPERTY);
-            
+
             rs = sstmt.executeQuery();
             if (rs.next()) {
                 String value = rs.getString(1);
@@ -168,11 +168,11 @@ public class SolrIndexManagementService implements IndexManagementService {
                     sb.append(m);
                     sb.append(',');
                 }
-                
+
                 if (sb.length() > 0) {
                     sb.deleteCharAt(sb.length() - 1);
                 }
-                
+
                 ustmt = con.prepareStatement("UPDATE user_attribute SET value = ? WHERE cid = ? AND id = ? AND name = ?");
                 ustmt.setString(1, sb.toString());
                 ustmt.setInt(2, contextId);
@@ -180,7 +180,7 @@ public class SolrIndexManagementService implements IndexManagementService {
                 ustmt.setString(4, PROPERTY);
                 ustmt.executeUpdate();
             }
-            
+
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
@@ -204,7 +204,7 @@ public class SolrIndexManagementService implements IndexManagementService {
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setString(3, PROPERTY);
-            
+
             rs = stmt.executeQuery();
             if (rs.next()) {
                 String value = rs.getString(1);
@@ -216,7 +216,7 @@ public class SolrIndexManagementService implements IndexManagementService {
                     }
                 }
             }
-            
+
             return false;
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());

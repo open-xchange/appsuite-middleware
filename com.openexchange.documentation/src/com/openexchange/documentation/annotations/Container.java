@@ -63,21 +63,21 @@ public @interface Container {
 
 	/**
 	 * Specifies the name. Required.
-	 * 
+	 *
 	 * @return The name.
 	 */
 	String name();
 
 	/**
 	 * Specifies the description. Defaults to <code>""</code>.
-	 * 
+	 *
 	 * @return The description.
 	 */
 	String description() default "";
 
 	/**
 	 * Specifies the attributes. Required.
-	 * 
+	 *
 	 * @return the attributes
 	 */
 	Attribute[] attributes();

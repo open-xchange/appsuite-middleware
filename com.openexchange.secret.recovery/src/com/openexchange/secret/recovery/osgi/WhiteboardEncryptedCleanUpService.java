@@ -58,7 +58,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link WhiteboardEncryptedCleanUpService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -66,7 +66,7 @@ public class WhiteboardEncryptedCleanUpService extends ServiceTracker<EncryptedI
 
     /**
      * Initializes a new {@link WhiteboardEncryptedCleanUpService}.
-     * 
+     *
      * @param context The bundle context
      */
     public WhiteboardEncryptedCleanUpService(final BundleContext context) {

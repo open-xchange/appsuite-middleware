@@ -74,7 +74,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link AddITipAnalyzer}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AddITipAnalyzer extends AbstractITipAnalyzer {
@@ -90,7 +90,7 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
 
     @Override
     public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
-       
+
 
         ITipAnalysis analysis = new ITipAnalysis();
         analysis.setMessage(message);
@@ -128,10 +128,10 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
             change.setConflicts(util.getConflicts(exception, session));
             change.setNewAppointment(exception);
             change.setMaster(master);
-            
+
             describeDiff(change, wrapper, session);
             analysis.addChange(change);
-            
+
 
         }
 

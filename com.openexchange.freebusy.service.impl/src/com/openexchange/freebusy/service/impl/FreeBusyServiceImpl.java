@@ -74,25 +74,25 @@ import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link FreeBusyServiceImpl}
- * 
+ *
  * Default free/busy service implementation.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class FreeBusyServiceImpl implements FreeBusyService {
-    
+
     private final FreeBusyProviderRegistry registry;
 
     /**
      * Initializes a new {@link FreeBusyServiceImpl}.
-     * 
+     *
      * @param registry The registry to use
      */
     public FreeBusyServiceImpl(FreeBusyProviderRegistry registry) {
         super();
         this.registry = registry;
     }
-    
+
     @Override
     public Map<String, FreeBusyData> getFreeBusy(final Session session, final List<String> participants, final Date from, final Date until) throws OXException {
         checkFreeBusyEnabled(session);
@@ -112,7 +112,7 @@ public class FreeBusyServiceImpl implements FreeBusyService {
                 futures.add(future);
             }
             return collectFreeBusyInformation(futures);
-        }                
+        }
     }
 
     @Override
@@ -152,10 +152,10 @@ public class FreeBusyServiceImpl implements FreeBusyService {
                     for (Entry<String, FreeBusyData> entry : providerData.entrySet()) {
                         FreeBusyData newData = entry.getValue();
                         FreeBusyData existingData = freeBusyInformation.get(entry.getKey());
-                        if (null == existingData || 
+                        if (null == existingData ||
                             false == existingData.hasData() && existingData.hasWarnings() && false == newData.hasWarnings()) {
                             // use new data
-                            freeBusyInformation.put(entry.getKey(), newData);                            
+                            freeBusyInformation.put(entry.getKey(), newData);
                         } else if (null == newData || newData.hasWarnings() && false == newData.hasData()) {
                             // use original data
                             continue;
@@ -176,12 +176,12 @@ public class FreeBusyServiceImpl implements FreeBusyService {
             }
         }
         return freeBusyInformation;
-    }     
+    }
 
     private void checkProvidersAvailable() throws OXException {
         if (null == registry || null == registry.getProviders() || 0 == registry.getProviders().size()) {
             throw FreeBusyExceptionCodes.NO_PROVIDERS_AVAILABLE.create();
-        }   
+        }
     }
 
     private void checkFreeBusyEnabled(Session session) throws OXException {

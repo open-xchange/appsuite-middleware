@@ -51,7 +51,7 @@ package com.openexchange.osgi;
 
 /**
  * {@link SimpleServiceProvider}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public final class SimpleServiceProvider<S> implements ServiceProvider<S> {
@@ -60,7 +60,7 @@ public final class SimpleServiceProvider<S> implements ServiceProvider<S> {
 
     /**
      * Initializes a new {@link SimpleServiceProvider}.
-     * 
+     *
      * @param service The service
      */
     public SimpleServiceProvider(S service) {

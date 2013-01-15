@@ -76,7 +76,7 @@ import com.openexchange.user.json.actions.GetAction;
 public class UserContactResultConverter implements ResultConverter {
 
     private static final Set<String> EXPECTED_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-    		AJAXServlet.PARAMETER_COLUMNS, AJAXServlet.PARAMETER_SORT, AJAXServlet.PARAMETER_ORDER, AJAXServlet.LEFT_HAND_LIMIT, 
+    		AJAXServlet.PARAMETER_COLUMNS, AJAXServlet.PARAMETER_SORT, AJAXServlet.PARAMETER_ORDER, AJAXServlet.LEFT_HAND_LIMIT,
     		AJAXServlet.RIGHT_HAND_LIMIT, AJAXServlet.PARAMETER_TIMEZONE, AJAXServlet.PARAMETER_SESSION, AJAXServlet.PARAMETER_ACTION)));
 
 	@Override
@@ -133,5 +133,5 @@ public class UserContactResultConverter implements ResultConverter {
 		}
         result.setResultObject(resultObject, "json");
 	}
-	
+
 }

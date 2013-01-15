@@ -58,14 +58,14 @@ import org.json.JSONException;
 
 /**
  * {@link JSON} - helpers for typical JSON tasks
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class JSON {
 
     /**
      * Takes a JSONArray and transforms it to a list
-     * 
+     *
      * @param array JSONArray to transform
      * @return list that is result of transformation
      * @throws JSONException in case JSON cannot be read
@@ -87,7 +87,7 @@ public class JSON {
 
     /**
      * Takes a collection and transforms it to a JSONArray
-     * 
+     *
      * @param coll Collection to transform
      * @return array that is result of transformation
      */

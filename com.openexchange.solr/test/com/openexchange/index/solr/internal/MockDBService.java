@@ -63,9 +63,9 @@ import com.openexchange.groupware.contexts.Context;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MockDBService implements DatabaseService {
-    
+
     private final DBProvider dbProvider;
-    
+
     public MockDBService(final DBProvider dbProvider) {
         super();
         this.dbProvider = dbProvider;
@@ -144,41 +144,41 @@ public class MockDBService implements DatabaseService {
     @Override
     public void backNoTimeoout(final int poolId, final Connection con) {
         // Nothing to do
-        
+
     }
 
     @Override
     public void backReadOnly(final Context ctx, final Connection con) {
         dbProvider.releaseReadConnection(null, con);
-        
+
     }
 
     @Override
     public void backReadOnly(final int contextId, final Connection con) {
         dbProvider.releaseReadConnection(null, con);
-        
+
     }
 
     @Override
     public void backWritable(final Context ctx, final Connection con) {
-        dbProvider.releaseWriteConnection(null, con);        
+        dbProvider.releaseWriteConnection(null, con);
     }
 
     @Override
     public void backWritable(final int contextId, final Connection con) {
-        dbProvider.releaseWriteConnection(null, con);  
+        dbProvider.releaseWriteConnection(null, con);
     }
 
     @Override
     public void backForUpdateTask(final int contextId, final Connection con) {
         // Nothing to do
-        
+
     }
 
     @Override
     public void back(final int poolId, final Connection con) {
         // Nothing to do
-        
+
     }
 
     @Override
@@ -202,12 +202,12 @@ public class MockDBService implements DatabaseService {
     @Override
     public void invalidate(final int contextId) throws OXException {
         // Nothing to do
-        
+
     }
 
     @Override
     public void writeAssignment(Connection con, Assignment assignment) {
         // Nothing to do
-        
+
     }
 }

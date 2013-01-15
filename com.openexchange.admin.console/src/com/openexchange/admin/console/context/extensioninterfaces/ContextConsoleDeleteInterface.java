@@ -9,9 +9,9 @@ package com.openexchange.admin.console.context.extensioninterfaces;
  * META-INF/services under which a text file whose name is the full-qualified binary name
  * of this interface (com.openexchange.admin.console.context.ContextConsoleCreateInterface). And the
  * content of this file must be the full-qualified binary name of your implementation.
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- * 
+ *
  */
 public interface ContextConsoleDeleteInterface extends ContextConsoleCommonInterface {
 

@@ -59,7 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 
 public abstract class ChangeCore extends ResourceAbstraction {
-    
+
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
 
@@ -72,7 +72,7 @@ public abstract class ChangeCore extends ResourceAbstraction {
         setAvailableOption(parser, false);
         setDescriptionOption(parser, false);
         setEmailOption(parser, false);
-        
+
         setFurtherOptions(parser);
     }
 
@@ -86,22 +86,22 @@ public abstract class ChangeCore extends ResourceAbstraction {
             parser.ownparse(args);
 
             final Resource res = new Resource();
-            
+
             parseAndSetResourceId(parser, res);
             parseAndSetResourceName(parser, res);
-            
+
             successtext = nameOrIdSet(this.resourceid, this.resourcename, "resource");
 
             final Context ctx = contextparsing(parser);
 
             final Credentials auth = credentialsparsing(parser);
-            
+
             final OXResourceInterface oxres = getResourceInterface();
 
             parseAndSetMandatoryFields(parser, res);
 
             maincall(parser, oxres, ctx, res, auth);
-            
+
             oxres.change(ctx, res, auth);
 
             displayChangedMessage(successtext, ctxid, parser);

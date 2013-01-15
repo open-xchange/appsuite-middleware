@@ -62,13 +62,13 @@ import com.openexchange.ui7.FileCache;
 
 /**
  * {@link AllAction}
- * 
+ *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class AllAction extends AppsAction {
 
     private static org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AllAction.class));
-    
+
     public AllAction(ServiceLookup serviceLookup, FileCache cache, File root) {
         super(serviceLookup, cache, root);
     }

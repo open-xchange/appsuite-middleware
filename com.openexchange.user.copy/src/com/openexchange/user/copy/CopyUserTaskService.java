@@ -76,7 +76,7 @@ public interface CopyUserTaskService {
      * increase performance.
      *
      * @param copied map that contains information to ease the task to copy some specific user data.
-     * @return a map containing information to ease other copy tasks work. 
+     * @return a map containing information to ease other copy tasks work.
      * @throws UserCopyException if copying some specific data fails. The {@link #done(boolean)} method is then called with
      * <code>true</code>.
      */

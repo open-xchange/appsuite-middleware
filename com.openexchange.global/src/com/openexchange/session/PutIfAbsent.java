@@ -59,7 +59,7 @@ public interface PutIfAbsent extends Session {
 
     /**
      * Sets specified parameter if currently absent.
-     * 
+     *
      * @param name The parameter name
      * @param value The parameter value
      * @return The already existing parameter value if not absent; otherwise <code>null</code> if parameter has been set

@@ -78,17 +78,17 @@ import com.openexchange.groupware.notify.State.Type;
  */
 public class NotificationMail {
     private ITipMessage itipMessage;
-    
+
     private String templateName;
     private String text;
     private String html;
     private String subject;
-    
+
     private Appointment original;
     private Appointment appointment;
     private AppointmentDiff diff;
-    
-    
+
+
     private NotificationParticipant sender;
     private NotificationParticipant recipient;
     private NotificationParticipant organizer;
@@ -99,11 +99,11 @@ public class NotificationMail {
     private List<NotificationParticipant> resources;
 
     private NotificationParticipant actor;
-    
+
     private final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
 
 	private Type stateType;
-	
+
 	private boolean attachmentUpdate;
 
 	private boolean sortedParticipants;
@@ -174,21 +174,21 @@ public class NotificationMail {
     public String getTemplateName() {
         return templateName;
     }
-    
+
     public void setTemplateName(String templateName) {
         this.templateName = templateName;
     }
 
-    
+
     public NotificationParticipant getOrganizer() {
         return organizer;
     }
 
-    
+
     public void setOrganizer(NotificationParticipant organizer) {
         this.organizer = organizer;
     }
-    
+
     public NotificationParticipant getPrincipal() {
     	if (principal == null) {
     		return principal = organizer;
@@ -204,22 +204,22 @@ public class NotificationMail {
 		if (isAboutActorsStateChangeOnly()) {
 			return actor;
 		}
-		
+
 		if (sharedCalendarOwner != null) {
 			return sharedCalendarOwner;
 		}
-		
+
 		return sender;
 	}
-	
+
 	public NotificationParticipant getSharedCalendarOwner() {
 		return sharedCalendarOwner;
 	}
-	
+
 	public void setSharedCalendarOwner(NotificationParticipant sharedCalendarOwner) {
 		this.sharedCalendarOwner = sharedCalendarOwner;
 	}
-	
+
 	public boolean actionIsDoneOnBehalfOfAnother() {
 		if (getActor().hasRole(ITipRole.PRINCIPAL)) {
 			return false;
@@ -234,7 +234,7 @@ public class NotificationMail {
 		if (actor.hasRole(ITipRole.PRINCIPAL)) {
 			return false;
 		}
-		
+
 		return recipient.equals(principal) ||recipient.equals(sharedCalendarOwner);
 	}
 
@@ -242,7 +242,7 @@ public class NotificationMail {
 		sortedParticipants = false;
         this.participants = recipients;
     }
-    
+
     public List<NotificationParticipant> getParticipants() {
     	if (!sortedParticipants) {
     		Collections.sort(participants, new Comparator<NotificationParticipant>() {
@@ -252,12 +252,12 @@ public class NotificationMail {
 						NotificationParticipant p2) {
 					return p1.getDisplayName().compareTo(p2.getDisplayName());
 				}
-    			
+
     		});
     	}
     	return participants;
     }
-        
+
     public void setResources(List<NotificationParticipant> resources) {
         this.resources = resources;
     }
@@ -265,7 +265,7 @@ public class NotificationMail {
     public List<NotificationParticipant> getResources() {
         return resources;
     }
-    
+
     public String getSubject() {
         return subject;
     }
@@ -273,11 +273,11 @@ public class NotificationMail {
     public void setSubject(String subject) {
         this.subject = subject;
     }
-    
+
     public void setAttachmentUpdate(boolean attachmentUpdate) {
 		this.attachmentUpdate = attachmentUpdate;
 	}
-    
+
     public boolean isAttachmentUpdate() {
 		return attachmentUpdate;
 	}
@@ -295,7 +295,7 @@ public class NotificationMail {
     	if (appointment != null && stateType.equals(Type.NEW) && endsInPast(appointment)) {
     	    return false;
     	}
-    	if (appointment != null && original != null && stateType.equals(Type.MODIFIED) 
+    	if (appointment != null && original != null && stateType.equals(Type.MODIFIED)
     	                        && isNotWorthUpdateNotification(original, appointment)) {
     	    return false;
     	}
@@ -319,7 +319,7 @@ public class NotificationMail {
         }
         return true;
     }
-    
+
     private boolean onlyPseudoChangesOnParticipants() {
         AppointmentDiff appDiff = getDiff();
         boolean onlyParticipantsChanged = appDiff.exactlyTheseChanged(CalendarField.getByColumn(CalendarObject.PARTICIPANTS).getJsonName());
@@ -361,7 +361,7 @@ public class NotificationMail {
         }
         return false;
     }
-    
+
     private boolean isNotWorthUpdateNotification(final Appointment original, final Appointment modified) {
         if (original.containsRecurrenceType() && original.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
             if (endsInPast(original)) {
@@ -381,7 +381,7 @@ public class NotificationMail {
             }
         }
     }
-    
+
     private boolean endsInPast(final Appointment appointment) {
         final Date now = new Date();
         Date endDate;
@@ -391,7 +391,7 @@ public class NotificationMail {
         } else {
             endDate = original.getEndDate();
         }
-        
+
         if (original == null || appointment.getUntil().after(original.getUntil())) {
             until = appointment.getUntil();
         } else {
@@ -407,7 +407,7 @@ public class NotificationMail {
 
             return until.before(now);
         }
-    }    
+    }
 
 	private boolean isCancelMail() {
 		return itipMessage != null && itipMessage.getMethod() == ITipMethod.CANCEL;
@@ -437,7 +437,7 @@ public class NotificationMail {
 			AppointmentFields.USERS,
 			AppointmentFields.CONFIRMATIONS
 		));
-    
+
     private boolean anInterestingFieldChanged() {
     	if (getDiff() == null) {
     		return true;
@@ -445,7 +445,7 @@ public class NotificationMail {
     	if (isAttachmentUpdate()) {
     		return true;
     	}
-    	
+
     	return getDiff().anyFieldChangedOf(FIELDS_TO_REPORT);
     }
 
@@ -481,11 +481,11 @@ public class NotificationMail {
     	}
 		return diff.isAboutCertainParticipantsStateChangeOnly(recipient.getEmail());
 	}
-    	
+
     public void setActor(NotificationParticipant actor) {
         this.actor = actor;
     }
-    
+
     public NotificationParticipant getActor() {
         return actor;
     }
@@ -493,18 +493,18 @@ public class NotificationMail {
 	public Type getStateType() {
 		return stateType;
 	}
-	
+
 	public void setStateType(Type stateType) {
 		this.stateType = stateType;
 	}
-    
+
     public void addAttachment(AttachmentMetadata attachment) {
     	attachments.add(attachment);
     }
-    
+
     public List<AttachmentMetadata> getAttachments() {
 		return attachments;
 	}
-    
-    
+
+
 }

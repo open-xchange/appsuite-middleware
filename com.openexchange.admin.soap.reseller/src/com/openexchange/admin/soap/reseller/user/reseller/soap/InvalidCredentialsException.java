@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -39,11 +39,11 @@ public class InvalidCredentialsException {
 
     /**
      * Ruft den Wert der invalidCredentialsException-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link com.openexchange.admin.soap.reseller.user.rmi.exceptions.InvalidCredentialsException }
-     *     
+     *
      */
     public com.openexchange.admin.soap.reseller.user.rmi.exceptions.InvalidCredentialsException getInvalidCredentialsException() {
         return invalidCredentialsException;
@@ -51,11 +51,11 @@ public class InvalidCredentialsException {
 
     /**
      * Legt den Wert der invalidCredentialsException-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link com.openexchange.admin.soap.reseller.user.rmi.exceptions.InvalidCredentialsException }
-     *     
+     *
      */
     public void setInvalidCredentialsException(com.openexchange.admin.soap.reseller.user.rmi.exceptions.InvalidCredentialsException value) {
         this.invalidCredentialsException = value;

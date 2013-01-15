@@ -82,14 +82,14 @@ import com.openexchange.threadpool.ThreadRenamer;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexingServiceImpl implements IndexingService {
-    
+
     private static final String SCHEDULER_NAME = "com.openexchange.service.indexing";
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexingServiceImpl.class);
-    
+
     private final Scheduler scheduler;
-    
-    
+
+
     public IndexingServiceImpl() throws OXException {
         super();
         ConfigurationService config = Services.getService(ConfigurationService.class);
@@ -153,7 +153,7 @@ public class IndexingServiceImpl implements IndexingService {
                 }
             }
         };
-        
+
         if (async) {
             ThreadPoolService threadPoolService = getThreadPoolService();
             threadPoolService.submit(new TaskAdapter(runnable));
@@ -161,7 +161,7 @@ public class IndexingServiceImpl implements IndexingService {
             runnable.run();
         }
     }
-    
+
     @Override
     public void unscheduleJob(final boolean async, final JobInfo info) throws OXException {
         Runnable runnable = new Runnable() {
@@ -179,7 +179,7 @@ public class IndexingServiceImpl implements IndexingService {
                 }
             }
         };
-        
+
         if (async) {
             ThreadPoolService threadPoolService = getThreadPoolService();
             threadPoolService.submit(new TaskAdapter(runnable));
@@ -187,7 +187,7 @@ public class IndexingServiceImpl implements IndexingService {
             runnable.run();
         }
     }
-    
+
     @Override
     public void unscheduleAllForUser(final boolean async, final int contextId, final int userId) throws OXException {
         Runnable runnable = new Runnable() {
@@ -207,7 +207,7 @@ public class IndexingServiceImpl implements IndexingService {
                 }
             }
         };
-        
+
         if (async) {
             ThreadPoolService threadPoolService = getThreadPoolService();
             threadPoolService.submit(new TaskAdapter(runnable));
@@ -215,7 +215,7 @@ public class IndexingServiceImpl implements IndexingService {
             runnable.run();
         }
     }
-    
+
     @Override
     public void unscheduleAllForContext(final boolean async, final int contextId) throws OXException {
         Runnable runnable = new Runnable() {
@@ -235,7 +235,7 @@ public class IndexingServiceImpl implements IndexingService {
                 }
             }
         };
-        
+
         if (async) {
             ThreadPoolService threadPoolService = getThreadPoolService();
             threadPoolService.submit(new TaskAdapter(runnable));
@@ -243,29 +243,29 @@ public class IndexingServiceImpl implements IndexingService {
             runnable.run();
         }
     }
-    
+
     JobKey generateJobKey(JobInfo info) {
         JobKey key = new JobKey(info.toUniqueId(), generateJobGroup(info.contextId, info.userId));
         return key;
     }
-    
+
     TriggerKey generateTriggerKey(JobInfo info, Date startDate, long repeatInterval) {
         TriggerKey key = new TriggerKey(generateTriggerName(info, startDate, repeatInterval), generateTriggerGroup(info.contextId, info.userId));
         return key;
     }
-    
+
     String generateJobGroup(int contextId) {
         return "indexingJobs/" + contextId;
     }
-    
+
     String generateJobGroup(int contextId, int userId) {
         return "indexingJobs/" + contextId + '/' + userId;
     }
-    
+
     String generateTriggerGroup(int contextId, int userId) {
         return "indexingTriggers/" + contextId + '/' + userId;
     }
-    
+
     String generateTriggerName(JobInfo info, Date startDate, long repeatInterval) {
         StringBuilder sb = new StringBuilder(info.toUniqueId());
         sb.append('/');
@@ -285,33 +285,33 @@ public class IndexingServiceImpl implements IndexingService {
             long time = lastFullHourInMillis + (quarters * 15 * 60000L);
             sb.append(time);
         }
-        
+
         return sb.toString();
     }
 
     Scheduler getScheduler() throws OXException {
         return scheduler;
     }
-    
+
     ThreadPoolService getThreadPoolService() throws OXException {
         ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
         return threadPoolService;
     }
-    
+
     public void shutdown() {
         QuartzService quartzService = Services.getService(QuartzService.class);
         quartzService.releaseClusteredScheduler(SCHEDULER_NAME);
     }
-    
+
     private static final class TaskAdapter implements Task<Void> {
-        
+
         private final Runnable runnable;
 
         public TaskAdapter(Runnable runnable) {
             super();
             this.runnable = runnable;
         }
-        
+
         @Override
         public Void call() throws Exception {
             runnable.run();
@@ -332,6 +332,6 @@ public class IndexingServiceImpl implements IndexingService {
         public void afterExecute(Throwable t) {
            return;
         }
-        
+
     }
 }

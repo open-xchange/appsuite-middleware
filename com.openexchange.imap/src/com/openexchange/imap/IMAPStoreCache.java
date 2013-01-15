@@ -75,7 +75,7 @@ import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link IMAPStoreCache} - A volatile cache for connected {@link IMAPStore} instances.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPStoreCache {
@@ -119,7 +119,7 @@ public final class IMAPStoreCache {
 
     /**
      * Gets the cache instance.
-     * 
+     *
      * @return The instance
      */
     public static IMAPStoreCache getInstance() {
@@ -218,7 +218,7 @@ public final class IMAPStoreCache {
 
     /**
      * Drops all associated with specified user.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      */
@@ -290,7 +290,7 @@ public final class IMAPStoreCache {
 
     /**
      * Gets (optionally) associated IMAP store container.
-     * 
+     *
      * @param server The server name
      * @param port The port
      * @param login The login
@@ -305,7 +305,7 @@ public final class IMAPStoreCache {
 
     /**
      * Gets a connected IMAP store for specified arguments.
-     * 
+     *
      * @param accountId The account identifier
      * @param imapSession The IMAP session
      * @param server The host name of the IMAP server
@@ -344,7 +344,7 @@ public final class IMAPStoreCache {
 
     /**
      * Returns given connected IMAP store to cache.
-     * 
+     *
      * @param imapStore The connected IMAP store to return
      * @param server The host name of the IMAP server
      * @param port The port

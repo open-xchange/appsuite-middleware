@@ -56,120 +56,120 @@ package com.openexchange.user.copy.internal.folder;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class VirtualFolder {
-    
+
     private int tree;
-    
+
     private String folderId;
-    
+
     private String parentId;
-    
+
     private String name;
-    
+
     private long lastModified;
-    
+
     private int modifiedBy;
-    
+
     private String shadow;
-    
+
     private int sortNum;
-    
-    
+
+
     public VirtualFolder() {
         super();
     }
 
 
-    
+
     public int getTree() {
         return tree;
     }
 
 
-    
+
     public void setTree(final int tree) {
         this.tree = tree;
     }
 
 
-    
+
     public String getFolderId() {
         return folderId;
     }
 
 
-    
+
     public void setFolderId(final String folderId) {
         this.folderId = folderId;
     }
 
 
-    
+
     public String getParentId() {
         return parentId;
     }
 
 
-    
+
     public void setParentId(final String parentId) {
         this.parentId = parentId;
     }
 
 
-    
+
     public String getName() {
         return name;
     }
 
 
-    
+
     public void setName(final String name) {
         this.name = name;
     }
 
 
-    
+
     public long getLastModified() {
         return lastModified;
     }
 
 
-    
+
     public void setLastModified(final long lastModified) {
         this.lastModified = lastModified;
     }
 
 
-    
+
     public int getModifiedBy() {
         return modifiedBy;
     }
 
 
-    
+
     public void setModifiedBy(final int modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
 
 
-    
+
     public String getShadow() {
         return shadow;
     }
 
 
-    
+
     public void setShadow(final String shadow) {
         this.shadow = shadow;
     }
 
 
-    
+
     public int getSortNum() {
         return sortNum;
     }
 
 
-    
+
     public void setSortNum(final int sortNum) {
         this.sortNum = sortNum;
     }

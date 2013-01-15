@@ -59,7 +59,7 @@ import com.openexchange.realtime.util.ElementPath;
 
 /**
  * {@link PayloadTree} - Stanzas carry a payload that resembles an n-ary tree. This class handles the representation of this payload.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class PayloadTree implements VisitablePayload {
@@ -74,7 +74,7 @@ public class PayloadTree implements VisitablePayload {
 
     /**
      * Initializes a new {@link PayloadTree} based on another Presence.
-     * 
+     *
      * @param other The PayloadTree to copy, must not be null
      * @throws IllegalArgumentException if the other PayloadTree is null
      */
@@ -90,7 +90,7 @@ public class PayloadTree implements VisitablePayload {
 
     /**
      * Initializes a new {@link PayloadTree} with an initial root node.
-     * 
+     *
      * @param root The root node of the new PayloadTree
      */
     public PayloadTree(PayloadTreeNode root) {
@@ -99,7 +99,7 @@ public class PayloadTree implements VisitablePayload {
 
     /**
      * Gets the root node of this PayloadTree.
-     * 
+     *
      * @return The root
      */
     public PayloadTreeNode getRoot() {
@@ -108,7 +108,7 @@ public class PayloadTree implements VisitablePayload {
 
     /**
      * Sets the root node of this PayloadTree.
-     * 
+     *
      * @param root The root to set
      */
     public void setRoot(PayloadTreeNode root) {
@@ -117,7 +117,7 @@ public class PayloadTree implements VisitablePayload {
 
     /**
      * Get the ElementPath of the root TreeNode
-     * 
+     *
      * @return the ElementPath of the root TreeNode.
      * @throws IllegalStateException if no roo node was is set.
      */
@@ -130,7 +130,7 @@ public class PayloadTree implements VisitablePayload {
 
     /**
      * Check if this PayloadTreeNode is empty.
-     * 
+     *
      * @return true if the root node is null, false otherwise.
      */
     public boolean isEmpty() {
@@ -139,7 +139,7 @@ public class PayloadTree implements VisitablePayload {
 
     /**
      * Get the number of nodes forming this PayloadTree.
-     * 
+     *
      * @return The number of nodes forming this PayloadTree.
      */
     public int getNumberOfNodes() {
@@ -155,7 +155,7 @@ public class PayloadTree implements VisitablePayload {
 
     /**
      * Recursively count the number of nodes below a given PayloadTreeNode.
-     * 
+     *
      * @param node The node where we start counting
      * @return The number of nodes below a given PayloadTreeNode
      */
@@ -171,7 +171,7 @@ public class PayloadTree implements VisitablePayload {
 
     /**
      * Get the namespaces of all PayloadElements found in this PayloadTree.
-     * 
+     *
      * @return An empty Collection if the PayloadElements don't contain namespaces or the namespaces of of the PayloadElements associated
      *         with this tree
      */
@@ -185,7 +185,7 @@ public class PayloadTree implements VisitablePayload {
 
     /**
      * Recursively get the namespaces of PayloadElements contained in PaloadTreeNodes below a given node.
-     * 
+     *
      * @param node The PayloadTreeNode where the search should start, must not be null.
      * @return An empty Collection if the PayloadElements don't contain namespaces or the namespaces of the PayloadElements below the given
      *         node
@@ -208,7 +208,7 @@ public class PayloadTree implements VisitablePayload {
 
     /**
      * Search PayloadTreeNodes with PayloadElements matching a given ElementPath identifying the PayloadElements in this PayloadTree.
-     * 
+     *
      * @param elementPath ElementPath identifying the PayloadElements
      * @return An empty Collection if no node with matching payloads can be found, a Collection containing the PayloadTreeNodes otherwise.
      * @throws IllegalArgumentException If obligatory parameter is missing.
@@ -227,7 +227,7 @@ public class PayloadTree implements VisitablePayload {
 
     /**
      * Recursively find PayloadTreeNodes with PayloadElements matching a given ElementPath identifying the PayloadElements.
-     * 
+     *
      * @param node The PayloadTreeNode where the recursive find starts. The node is inclued in the search, must not be null
      * @param elementPath ElementPath identifying the PayloadElements, must not be null
      * @return An empty Collection if no node with matching payloads can be found, a Collection containing the PayloadTreeNodes otherwise.

@@ -67,7 +67,7 @@ import com.openexchange.user.copy.internal.tasks.TaskCopyTask;
  * @param <T>
  */
 public class TaskCopyActivator implements BundleActivator {
-    
+
     private ServiceTracker<UserService, UserService> tracker;
 
     /**
@@ -79,7 +79,7 @@ public class TaskCopyActivator implements BundleActivator {
 
     public void start(final BundleContext context) throws Exception {
         tracker = new ServiceTracker<UserService, UserService>(context, UserService.class.getName(), new ServiceTrackerCustomizer<UserService, UserService>() {
-            
+
             private ServiceRegistration<CopyUserTaskService> registration;
 
             public UserService addingService(final ServiceReference<UserService> reference) {

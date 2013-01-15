@@ -55,16 +55,16 @@ import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 
 public interface OXUserPluginInterface {
     public void create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials cred) throws PluginException;
-    
+
     public void delete(final Context ctx, final User[] user, final Credentials cred) throws PluginException;
-    
+
     public void change(final Context ctx, final User usrdata, final Credentials auth) throws PluginException;
-    
+
     public User[] getData(final Context ctx, final User[] users, final Credentials cred);
-    
+
     /**
      * This Method is used for each plugin to check if it makes sense to run as admin
-     * 
+     *
      * @return
      */
     public boolean canHandleContextAdmin();

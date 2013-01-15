@@ -76,12 +76,12 @@ public class RdbReminderStorage extends ReminderStorage {
     public RdbReminderStorage() {
         super();
     }
-    
+
     @Override
     public ReminderObject[] selectReminder(final Context ctx, final Connection con, final User user, final Date end) throws OXException {
         return selectReminder(ctx, con, user.getId(), end);
     }
-    
+
     @Override
     public ReminderObject[] selectReminder(final Context ctx, final Connection con, final int userId, final Date end) throws OXException {
         PreparedStatement stmt = null;
@@ -137,7 +137,7 @@ public class RdbReminderStorage extends ReminderStorage {
         reminder.setFolder(result.getInt(pos++));
         reminder.setLastModified(new Date(result.getLong(pos++)));
     }
-    
+
     @Override
     public void writeReminder(final Connection con, final int ctxId, final ReminderObject reminder) throws OXException {
         PreparedStatement stmt = null;
@@ -147,7 +147,7 @@ public class RdbReminderStorage extends ReminderStorage {
             stmt.setInt(2, ctxId);
             stmt.setInt(3, reminder.getTargetId());
             stmt.setInt(4, reminder.getModule());
-            stmt.setInt(5, reminder.getUser());           
+            stmt.setInt(5, reminder.getUser());
             stmt.setTimestamp(6, new Timestamp(reminder.getDate().getTime()));
             stmt.setInt(7, reminder.getRecurrencePosition());
             stmt.setLong(8, reminder.getLastModified().getTime());

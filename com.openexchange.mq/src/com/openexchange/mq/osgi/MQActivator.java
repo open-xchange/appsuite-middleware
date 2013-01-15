@@ -62,7 +62,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link MQActivator} - The {@link BundleActivator activator} for Message Queue bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MQActivator extends HousekeepingActivator {

@@ -53,7 +53,7 @@ package com.openexchange.loxandra.impl.cassandra.transaction;
  */
 public enum OperationAction {
 	INSERT, UPDATE, DELETE, INCREMENT, DECREMENT;
-	
+
 	public static OperationAction getByString(String s) {
 		if (s.equals(INSERT.toString())) {
 			return INSERT;

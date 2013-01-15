@@ -85,7 +85,7 @@ public final class ThreadPools {
 
     /**
      * Gets registered thread pool.
-     * 
+     *
      * @return The thread pool or <code>null</code>
      */
     public static ThreadPoolService getThreadPool() {
@@ -94,7 +94,7 @@ public final class ThreadPools {
 
     /**
      * Gets registered timer service.
-     * 
+     *
      * @return The timer service or <code>null</code>
      */
     public static TimerService getTimerService() {
@@ -103,7 +103,7 @@ public final class ThreadPools {
 
     /**
      * Handles specified unexpectedly interrupted thread.
-     * 
+     *
      * @param t The unexpectedly interrupted thread
      */
     public static void unexpectedlyInterrupted(final Thread t) {
@@ -121,7 +121,7 @@ public final class ThreadPools {
 
     /**
      * Appends specified stack trace to given {@link StringBuilder} instance.
-     * 
+     *
      * @param trace The stack trace
      * @param sb The string builder to write to
      */
@@ -156,7 +156,7 @@ public final class ThreadPools {
 
     /**
      * Appends current thread's stack trace to given {@link StringBuilder} instance.
-     * 
+     *
      * @param sb The string builder to write to
      */
     public static void appendCurrentStackTrace(final StringBuilder sb) {

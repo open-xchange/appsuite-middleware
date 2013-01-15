@@ -13,9 +13,9 @@ import com.openexchange.admin.soap.reseller.user.soap.dataobjects.User;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -30,8 +30,8 @@ import com.openexchange.admin.soap.reseller.user.soap.dataobjects.User;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -54,11 +54,11 @@ public class CreateByModuleAccessName {
 
     /**
      * Ruft den Wert der ctx-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ResellerContext }
-     *     
+     *
      */
     public ResellerContext getCtx() {
         return ctx;
@@ -66,11 +66,11 @@ public class CreateByModuleAccessName {
 
     /**
      * Legt den Wert der ctx-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ResellerContext }
-     *     
+     *
      */
     public void setCtx(ResellerContext value) {
         this.ctx = value;
@@ -78,11 +78,11 @@ public class CreateByModuleAccessName {
 
     /**
      * Ruft den Wert der usrdata-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link User }
-     *     
+     *
      */
     public User getUsrdata() {
         return usrdata;
@@ -90,11 +90,11 @@ public class CreateByModuleAccessName {
 
     /**
      * Legt den Wert der usrdata-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link User }
-     *     
+     *
      */
     public void setUsrdata(User value) {
         this.usrdata = value;
@@ -102,11 +102,11 @@ public class CreateByModuleAccessName {
 
     /**
      * Ruft den Wert der accessCombinationName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAccessCombinationName() {
         return accessCombinationName;
@@ -114,11 +114,11 @@ public class CreateByModuleAccessName {
 
     /**
      * Legt den Wert der accessCombinationName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAccessCombinationName(String value) {
         this.accessCombinationName = value;
@@ -126,11 +126,11 @@ public class CreateByModuleAccessName {
 
     /**
      * Ruft den Wert der auth-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Credentials }
-     *     
+     *
      */
     public Credentials getAuth() {
         return auth;
@@ -138,11 +138,11 @@ public class CreateByModuleAccessName {
 
     /**
      * Legt den Wert der auth-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Credentials }
-     *     
+     *
      */
     public void setAuth(Credentials value) {
         this.auth = value;

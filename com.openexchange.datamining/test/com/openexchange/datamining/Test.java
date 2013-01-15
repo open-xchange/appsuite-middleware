@@ -61,77 +61,78 @@ import junit.framework.TestCase;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Test extends TestCase {
-    
+
     PrintStream out;
-    
+
+    @Override
     public void setUp(){
         String printString = new String();
         out = new PrintStream(new ByteArrayOutputStream());
         System.setOut(out);
     }
-    
+
     public void shutDown(){
-        
+
     }
-    
+
     public static void testWithoutParameters(){
         String[] array = {};
         Datamining.main(array);
     }
-    
+
     public static void testWithOnlyVerboseParameter(){
         String[] array = {"-v"};
         Datamining.main(array);
-    }    
-    
+    }
+
     public static void testWitOnlyHelpParameter(){
         String[] array = {"-h"};
         Datamining.main(array);
     }
-    
+
     public static void testWithParametersForVM(){
         String[] array = {"-n", "172.16.119.135", "-u", "openexchange", "-p", "db_password", "-v", "--reportfilePath", "/Users/karstenwill/Desktop/"};
         Datamining.main(array);
     }
-    
+
     public static void testWithParametersForQADB(){
         String[] array = {"-hostname", "10.20.30.214", "-dbName", "configdb", "-dbUser", "openexchange", "-dbPassword", "secret", "-v"};
         Datamining.main(array);
     }
-    
+
     public static void testWithParametersForSteffensMaster(){
         String[] array = {"-hostname", "10.20.31.104", "-dbName", "configdb", "-dbUser", "openexchange", "-dbPassword", "secret", "-v"};
         Datamining.main(array);
     }
-    
+
     public static void testWithParametersForSteffensSlave(){
         String[] array = {"-hostname", "10.20.31.103", "-dbName", "configdb", "-dbUser", "openexchange", "-dbPassword", "secret", "-v"};
         Datamining.main(array);
     }
-    
+
     public static void testWithIncorrectParameters(){
         String[] array = {"-hostname", "172.16.119.128", "-dbUser", "openexchange", "-dbPassword", "db_password", "-v", "-dbPort", "9999"};
         Datamining.main(array);
     }
-    
+
     public static void testWithMissingParameter(){
         String[] array = { "-dbUser", "openexchange", "-dbPassword", "db_password", "-v"};
         Datamining.main(array);
     }
-    
+
     public static void testParameterWithoutValue(){
         String[] array = {"-hostname", "-dbUser", "openexchange", "-dbPassword", "db_password", "-v", "-dbPort", "9999"};
         Datamining.main(array);
     }
-    
+
     public static void testThatFilepathStillWorksEvenIfNoOtherParametersAreGiven(){
         String[] array = {"-v","--reportfilePath", "/Users/karstenwill/Desktop/"};
         Datamining.main(array);
         boolean exists = (new File("/Users/karstenwill/Desktop/"+Datamining.getFilename()).exists());
         assertTrue("report file is not there", exists);
     }
-    
-    public static void testThatHelpIsReallyPrinted(){        
+
+    public static void testThatHelpIsReallyPrinted(){
     }
 
 }

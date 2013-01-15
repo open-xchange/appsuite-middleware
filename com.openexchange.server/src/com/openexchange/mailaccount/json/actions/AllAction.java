@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.GET, name = "all", description = "Get all mail accounts", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for mail account's are defined in mail account data.") 
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for mail account's are defined in mail account data.")
 }, responseDescription = "An array with attachment data. Each array element describes one mail account and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class AllAction extends AbstractMailAccountAction {
 

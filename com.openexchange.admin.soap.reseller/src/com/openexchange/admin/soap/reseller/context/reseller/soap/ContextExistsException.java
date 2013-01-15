@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -39,11 +39,11 @@ public class ContextExistsException {
 
     /**
      * Ruft den Wert der contextExistsException-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link com.openexchange.admin.soap.reseller.context.rmi.exceptions.ContextExistsException }
-     *     
+     *
      */
     public com.openexchange.admin.soap.reseller.context.rmi.exceptions.ContextExistsException getContextExistsException() {
         return contextExistsException;
@@ -51,11 +51,11 @@ public class ContextExistsException {
 
     /**
      * Legt den Wert der contextExistsException-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link com.openexchange.admin.soap.reseller.context.rmi.exceptions.ContextExistsException }
-     *     
+     *
      */
     public void setContextExistsException(com.openexchange.admin.soap.reseller.context.rmi.exceptions.ContextExistsException value) {
         this.contextExistsException = value;

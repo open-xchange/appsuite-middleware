@@ -57,7 +57,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link MQExceptionCodes} - Enumeration of all {@link OXException}s known in Message Queue (MQ) module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum MQExceptionCodes implements OXExceptionCode {
@@ -107,7 +107,7 @@ public enum MQExceptionCodes implements OXExceptionCode {
 
     /**
      * Handles specified {@link JMSException} instance and generates an appropriate {@link OXException} instance for it.
-     * 
+     *
      * @param jmsException The JMS error to handle
      * @return The appropriate {@link OXException} instance
      */
@@ -168,7 +168,7 @@ public enum MQExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -177,7 +177,7 @@ public enum MQExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -187,7 +187,7 @@ public enum MQExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

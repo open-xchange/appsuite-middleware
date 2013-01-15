@@ -66,27 +66,27 @@ public interface IndexManagementService {
      *   <li>every method call on the corresponding {@link IndexAccess} object.</li>
      *   <li>trying to acquire it via {@link IndexFacadeService#acquireIndexAccess}.</li>
      * </ul>
-     * 
+     *
      * @param contextId The context id.
      * @param userId The user id.
      * @param module The module.
      * @throws OXException
      */
     void lockIndex(int contextId, int userId, int module) throws OXException;
-    
+
     /**
      * Unlocks the modules index for a given user.
-     * 
+     *
      * @param contextId The context id.
      * @param userId The user id.
      * @param module The module.
      * @throws OXException
      */
     void unlockIndex(int contextId, int userId, int module) throws OXException;
-    
+
     /**
      * Returns whether an modules index is locked for a given user.
-     * 
+     *
      * @param contextId The context id.
      * @param userId The user id.
      * @param module The module.

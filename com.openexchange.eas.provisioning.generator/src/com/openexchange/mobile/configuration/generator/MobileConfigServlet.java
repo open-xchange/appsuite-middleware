@@ -101,7 +101,7 @@ public class MobileConfigServlet extends HttpServlet {
 
     /**
      * Splits the given login into a username and a domain part
-     * 
+     *
      * @param username
      * @return An array. Index 0 is the username. Index 1 is the domain
      * @throws ConfigurationException
@@ -238,7 +238,7 @@ public class MobileConfigServlet extends HttpServlet {
 
     /**
      * Reads the language from the header, returns either ENGLISH or GERMAN. No other value can be returned
-     * 
+     *
      * @param req
      * @return
      */

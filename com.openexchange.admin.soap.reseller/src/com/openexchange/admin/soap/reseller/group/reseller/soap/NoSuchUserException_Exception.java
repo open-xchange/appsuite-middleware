@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "NoSuchUserException", targetNamespace = "http://soap.reseller.admin.openexchange.com")
 public class NoSuchUserException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.reseller.group.reseller.soap.NoSuchUserException noSuchUserException;
 
     public NoSuchUserException_Exception() {
         super();
     }
-    
+
     public NoSuchUserException_Exception(String message) {
         super(message);
     }
-    
+
     public NoSuchUserException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

@@ -115,15 +115,15 @@ public class ResellerContextFilter implements Filter<Integer, Integer> {
             stmt.setInt(1, admin.getId());
             rs = stmt.executeQuery();
             String GET_CIDS_SQL = "SELECT cid FROM context2subadmin WHERE sid IN (";
-            GET_CIDS_SQL += admin.getId() + ","; 
+            GET_CIDS_SQL += admin.getId() + ",";
             while( rs.next() ) {
-                GET_CIDS_SQL += rs.getInt(1) + ","; 
+                GET_CIDS_SQL += rs.getInt(1) + ",";
             }
             GET_CIDS_SQL = GET_CIDS_SQL.substring(0, GET_CIDS_SQL.length()-1);
             GET_CIDS_SQL += ") AND cid IN (";
             stmt.close();
             rs.close();
-            
+
             stmt = con.prepareStatement(getIN(GET_CIDS_SQL, cids.size()));
             int pos = 1;
             for (Integer cid : cids) {

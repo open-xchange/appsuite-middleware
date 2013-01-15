@@ -56,7 +56,7 @@ import java.util.Map;
 
 /**
  * {@link Indexes} - Utility class.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Indexes {
@@ -97,7 +97,7 @@ public final class Indexes {
 
     /**
      * Gets the empty <b>IndexResult</b> (immutable). This <b>IndexResult</b> is serializable.
-     * 
+     *
      * @return The empty <b>IndexResult</b>
      */
     @SuppressWarnings("unchecked")

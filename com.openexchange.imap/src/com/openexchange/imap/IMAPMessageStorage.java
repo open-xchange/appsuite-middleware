@@ -198,7 +198,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
  * {@link IMAPMessageStorage} - The IMAP implementation of message storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure {
@@ -307,7 +307,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Initializes a new {@link IMAPMessageStorage}.
-     * 
+     *
      * @param imapStore The IMAP store
      * @param imapAccess The IMAP access
      * @param session The session providing needed user data
@@ -545,7 +545,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Composes part's sequence ID from given prefix and part's count
-     * 
+     *
      * @param prefix The prefix (may be <code>null</code>)
      * @param partCount The part count
      * @return The sequence ID
@@ -828,7 +828,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 //                return null;
 //            }
 //            imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-//                
+//
 //                @Override
 //                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
 //                    final StringBuilder cmd = new StringBuilder(32);
@@ -859,8 +859,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 //                            return null;
 //                        }
 //                        new MimeBodyPart(new UnsynchronizedByteArrayInputStream(body.data.getBytes()));
-//                        
-//                        
+//
+//
 //                    } else if (response.isBAD()) {
 //                        if (ImapUtility.isInvalidMessageset(response)) {
 //                            return null;
@@ -879,9 +879,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 //                    }
 //                }
 //            });
-//            
-//            
-//            
+//
+//
+//
 //            final IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
 //            Part p = examinePart(msg, contentId);
 //            if (null == p) {
@@ -905,8 +905,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 //        } catch (final RuntimeException e) {
 //            throw handleRuntimeException(e);
 //        }
-//        
-//        
+//
+//
 //        return super.getAttachmentLong(fullName, msgUID, sectionId);
 //    }
 
@@ -1536,7 +1536,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         final IMAPFolder sent = sentFolder;
                         final Props props = LogProperties.optLogProperties(Thread.currentThread());
                         future = ThreadPools.getThreadPool().submit(new AbstractTrackableTask<ThreadableResult>() {
-    
+
                             @Override
                             public ThreadableResult call() throws Exception {
                                 return getThreadableFor(sent, false, cache, limit, accountId, session);
@@ -1609,7 +1609,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*-
              * --------------------------------------------------------------------------------------------------------
              * Returned messages shall include body
-             * 
+             *
              * Include body
              */
             final List<MessageInfo> messageIds = ThreadSortUtil.fromThreadResponse(threadList);
@@ -1716,7 +1716,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, final Locale locale) {
         final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale);
         final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
-   
+
             @Override
             public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
                 int result = comparator.compare(o1.get(0), o2.get(0));
@@ -3278,7 +3278,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Performs the FETCH command on currently active IMAP folder on all messages using the 1:* sequence range argument.
-     * 
+     *
      * @param fullName The IMAP folder's full name
      * @param lowCostFields The low-cost fields
      * @param order The order direction (needed to possibly flip the results)
@@ -3428,7 +3428,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Determines the corresponding UIDs in destination folder
-     * 
+     *
      * @param msgUIDs The UIDs in source folder
      * @param destFullName The destination folder's full name
      * @return The corresponding UIDs in destination folder
@@ -3562,7 +3562,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Checks and converts specified APPENDUID response.
-     * 
+     *
      * @param appendUIDs The APPENDUID response
      * @return An array of long for each valid {@link AppendUID} element or a zero size array of long if an invalid {@link AppendUID}
      *         element was detected.
@@ -3586,7 +3586,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Removes all user flags from given message's flags
-     * 
+     *
      * @param message The message whose user flags shall be removed
      * @throws MessagingException If removing user flags fails
      */
@@ -3610,7 +3610,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     /**
      * Generates a UUID using {@link UUID#randomUUID()}; e.g.:<br>
      * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i>
-     * 
+     *
      * @return A UUID string
      */
     private static String randomUUID() {
@@ -3619,7 +3619,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Sets account ID and name in given instance of {@link MailMessage}.
-     * 
+     *
      * @param mailMessages The {@link MailMessage} instance
      * @return The given instance of {@link MailMessage} with account ID and name set
      * @throws OXException If mail account cannot be obtained
@@ -3636,7 +3636,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Sets account ID and name in given instances of {@link MailMessage}.
-     * 
+     *
      * @param mailMessages The {@link MailMessage} instances
      * @return The given instances of {@link MailMessage} each with account ID and name set
      * @throws OXException If mail account cannot be obtained
@@ -3657,7 +3657,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Sets account ID and name in given instances of {@link MailMessage}.
-     * 
+     *
      * @param mailMessages The {@link MailMessage} instances
      * @return The given instances of {@link MailMessage} each with account ID and name set
      * @throws OXException If mail account cannot be obtained
@@ -3677,7 +3677,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Sets account ID and name in given instances of {@link MailMessage}.
-     * 
+     *
      * @param mailMessages The {@link MailMessage} instances
      * @return The given instances of {@link MailMessage} each with account ID and name set
      * @throws OXException If mail account cannot be obtained
@@ -3748,7 +3748,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             throw ThreadPools.launderThrowable(e, OXException.class);
         }
-        
+
     }
 
     private static void closeSafe(final IMAPFolder sentFolder) {

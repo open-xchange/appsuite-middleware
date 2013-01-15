@@ -79,8 +79,8 @@ final class BasicPropertyImpl implements BasicProperty {
 
     /**
      * Initializes a new {@link BasicPropertyImplementation}.
-     * 
-     * @throws OXException If initialization fails 
+     *
+     * @throws OXException If initialization fails
      */
     BasicPropertyImpl(final String property, final int userId, final int contextId, final ServiceLookup services) throws OXException {
         super();

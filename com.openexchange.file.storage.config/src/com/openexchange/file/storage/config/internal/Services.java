@@ -55,7 +55,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link Services} - Provides static access to {@link ServiceLookup} reference.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Services {
@@ -71,7 +71,7 @@ public final class Services {
 
     /**
      * Sets the {@link ServiceLookup} reference.
-     * 
+     *
      * @param services The reference
      */
     public static void setServices(final ServiceLookup services) {
@@ -80,7 +80,7 @@ public final class Services {
 
     /**
      * Gets the {@link ServiceLookup} reference.
-     * 
+     *
      * @return The reference
      */
     public static ServiceLookup getServices() {
@@ -89,7 +89,7 @@ public final class Services {
 
     /**
      * Gets the service of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      * @throws IllegalStateException If an error occurs while returning the demanded service
@@ -104,7 +104,7 @@ public final class Services {
 
     /**
      * Gets the optional service of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      */

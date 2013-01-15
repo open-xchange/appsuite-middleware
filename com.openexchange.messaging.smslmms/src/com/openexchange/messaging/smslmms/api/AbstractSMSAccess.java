@@ -85,5 +85,5 @@ public abstract class AbstractSMSAccess implements SMSAccess {
     }
 
     protected abstract MessagingFolderAccess getFolderAccessInternal() throws OXException;
-    
+
 }

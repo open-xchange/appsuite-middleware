@@ -263,12 +263,12 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
 	public boolean wasAdjusted() {
 		return wasAdjusted;
 	}
-	
+
 	@Override
     public void setWasAdjusted(boolean wasAdjusted) {
 		this.wasAdjusted = wasAdjusted;
 	}
-	
-	
+
+
 
 }

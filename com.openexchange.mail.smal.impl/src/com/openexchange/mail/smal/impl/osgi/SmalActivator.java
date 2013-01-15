@@ -81,7 +81,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link SmalActivator} - The activator for Super-MAL bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SmalActivator extends HousekeepingActivator {

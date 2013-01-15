@@ -71,7 +71,7 @@ import com.openexchange.log.LogFactory;
 public class ChatHandler implements AtmosphereHandler {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(ChatHandler.class));
-    
+
     @Override
     public void destroy() {
         if(LOG.isInfoEnabled()) {
@@ -80,9 +80,9 @@ public class ChatHandler implements AtmosphereHandler {
     }
 
     /*
-     * The AtmosphereHandler.onRequest is invoked every time a new connection 
-     * is made to an application. An application must take action and decide 
-     * what to do with the AtmosphereResource, e.g. suspend, resume or 
+     * The AtmosphereHandler.onRequest is invoked every time a new connection
+     * is made to an application. An application must take action and decide
+     * what to do with the AtmosphereResource, e.g. suspend, resume or
      * broadcast events. You can also write String or bytes back to the client
      * from that method.
      */
@@ -91,34 +91,34 @@ public class ChatHandler implements AtmosphereHandler {
 
         // Log all events on the console, including WebSocket events.
         resource.addEventListener(new WebSocketEventListenerAdapter());
-        
+
         AtmosphereRequest request = resource.getRequest();
         String method = request.getMethod();
         AtmosphereResponse response = resource.getResponse();
-        
+
         if(method.equalsIgnoreCase("GET")) {
             /*
-             * GET requests can be handled via Continuations. Suspend the request 
+             * GET requests can be handled via Continuations. Suspend the request
              * and use it for bidirectional communication.
              * "negotiating" header is used to list all supported transports
              */
-            
-            
+
+
             if(request.getHeader("negotiating") == null) {
                 LOG.info(">>>> Going to suspend request: "+ request);
                 resource.suspend();
             } else {
                 response.getWriter().write("OK");
             }
-            
-            
+
+
         } else if (method.equalsIgnoreCase("POST")) {
             /*
-             * Use POST request to synchronously send data over the server 
+             * Use POST request to synchronously send data over the server
              */
             String message = request.getReader().readLine().trim();
             LOG.info(">>>> Got message: "+ message);
-            
+
             /*
              * The default Broadcaster of an AtmosphereResource is always "/*"
              * so if you broadcast a message it will reach all
@@ -129,7 +129,7 @@ public class ChatHandler implements AtmosphereHandler {
             Broadcaster defaultBroadcaster = resource.getBroadcaster();
             defaultBroadcaster.broadcast(message);
         }
-        
+
     }
 
     /*
@@ -139,7 +139,7 @@ public class ChatHandler implements AtmosphereHandler {
     public void onStateChange(AtmosphereResourceEvent event) throws IOException {
         AtmosphereResource resource = event.getResource();
         AtmosphereResponse response = resource.getResponse();
-        
+
         //Did we suspend the AtmosphereResource earlier?
         if(event.isSuspended()) {
             String body = event.getMessage().toString();
@@ -160,14 +160,14 @@ public class ChatHandler implements AtmosphereHandler {
                 default:
                     response.getWriter().flush();
                     break;
-            }   
+            }
         } else if (!event.isResuming()) {// remote connection got closed by proxy or browser
             LOG.info(">>>> Event wasn't resuming.");
             Data message = new Data("Someone","say bye bye!");
             event.broadcaster().broadcast(message);
         }
     }
-    
+
     private final static class Data {
 
         private final String text;

@@ -165,7 +165,7 @@ public final class MIMEStructure2ComposedMailParser {
      * Parses specified JSON message structure & returns the resulting {@link ComposedMailMessage} instances.
      *
      * @param jsonMessage The JSON message structure
-     * @param warnings 
+     * @param warnings
      * @return The resulting {@link ComposedMailMessage} instances.
      * @throws OXException If parsing fails
      */

@@ -81,7 +81,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link NotifyingCalendar}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class NotifyingCalendar extends ITipCalendarWrapper implements AppointmentSQLInterface {
@@ -97,7 +97,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     private final CalendarCollection calendarCollection;
 
 	private final AttachmentMemory attachmentMemory;
-	
+
 	private static class AppointmentAddress {
 		private final int id;
 		private final int cid;
@@ -134,9 +134,9 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
             }
 			return true;
 		}
-		
+
 	}
-	
+
 	private static ConcurrentHashMap<AppointmentAddress, AppointmentAddress> createNewLimbo = new ConcurrentHashMap<AppointmentAddress, AppointmentAddress>();
 
 
@@ -146,14 +146,14 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
         this.generators = generators;
         this.sender = sender;
         this.attachmentMemory = attachmentMemory;
-        
+
         calendarCollection = new CalendarCollection();
     }
 
     @Override
     public long attachmentAction(final int folderId, final int objectId, final int userId, final Session session, final Context c, final int numberOfAttachments) throws OXException {
     	attachmentMemory.rememberAttachmentChange(objectId, c.getContextId());
-    	
+
     	final long retval = delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments);
     	// Trigger Update Mail unless attachment is in create new limbo
     	if (!createNewLimbo.containsKey(new AppointmentAddress(objectId, c.getContextId()))) {
@@ -176,7 +176,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     		}
     	}
     	return retval;
-    	
+
     }
 
     @Override
@@ -208,7 +208,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
             // IGNORE
         }
         delegate.deleteAppointmentObject(appointmentObject, inFolder, clientLastModified, checkPermissions);
-			
+
         if (original == null) {
             return;
         }
@@ -410,10 +410,10 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
                         default:
                             type = State.Type.NONE_ACCEPTED;
                         }
-                        
+
                         mail.setStateType(type);
                 	}
-                    
+
                     sender.sendMail(mail, session);
                 }
             }
@@ -433,8 +433,8 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     public CalendarDataObject getObjectById(final int objectId) throws OXException, SQLException {
         return delegate.getObjectById(objectId);
     }
-    
-    
+
+
 
     @Override
     public List<Appointment> getAppointmentsWithExternalParticipantBetween(

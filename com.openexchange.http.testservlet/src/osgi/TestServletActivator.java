@@ -8,7 +8,7 @@ import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link TestServletActivator} - Registers an instance of TestServlet at /servlet/TestServlet.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class TestServletActivator extends HousekeepingActivator {

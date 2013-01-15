@@ -57,14 +57,14 @@ import com.openexchange.realtime.packet.Stanza;
 
 /**
  * {@link StanzaHandlerSelector} - Select a StanzaHandler suitable for the given type of Stanza.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class StanzaHandlerSelector {
 
     /**
      * Select a StanzaHandler suitable for the given type of Stanza.
-     * 
+     *
      * @param stanza The Stanza that has to be handled
      * @return a StanzaHandler suitable for the given type of Stanza
      * @throws OXException If no suitable StanzaHandler can be found

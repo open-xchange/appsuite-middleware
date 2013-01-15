@@ -53,7 +53,7 @@ import java.util.regex.Pattern;
 
 /**
  * {@link IPAddressUtil}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IPAddressUtil {
@@ -68,7 +68,7 @@ public final class IPAddressUtil {
 
     /**
      * Converts IPv4 address in its textual presentation form into its numeric binary form.
-     * 
+     *
      * @param src a String representing an IPv4 address in standard format
      * @return a byte array representing the IPv4 numeric address
      */
@@ -161,7 +161,7 @@ public final class IPAddressUtil {
     /**
      * Convert IPv6 presentation level address to network order binary form. credit: Converted from C code from Solaris 8 (inet_pton) Any
      * component of the string following a per-cent % is ignored.
-     * 
+     *
      * @param src a String representing an IPv6 address in textual format
      * @return a byte array representing the IPv6 numeric address
      */
@@ -302,7 +302,7 @@ public final class IPAddressUtil {
 
     /**
      * Convert IPv4-Mapped address to IPv4 address. Both input and returned value are in network order binary form.
-     * 
+     *
      * @param src a String representing an IPv4-Mapped address in textual format
      * @return a byte array representing the IPv4 numeric address
      */
@@ -317,7 +317,7 @@ public final class IPAddressUtil {
 
     /**
      * Converts specified IPv4 to a mapped IPv6.
-     * 
+     *
      * @param ipv4 The IPv4 string representation
      * @return The mapped IPv6 or <code>null</code>
      */
@@ -335,7 +335,7 @@ public final class IPAddressUtil {
 
     /**
      * Converts specified IPv4 to a mapped IPv6.
-     * 
+     *
      * @param octets The IPv4 bytes
      * @return The mapped IPv6 or <code>null</code>
      */
@@ -355,7 +355,7 @@ public final class IPAddressUtil {
 
     /**
      * Utility routine to check if the InetAddress is an IPv4 mapped IPv6 address.
-     * 
+     *
      * @return a <code>boolean</code> indicating if the InetAddress is an IPv4 mapped IPv6 address; or false if address is IPv4 address.
      */
     private static boolean isIPv4MappedAddress(final byte[] addr) {

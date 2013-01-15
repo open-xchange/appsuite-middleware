@@ -51,7 +51,7 @@ package com.openexchange.mq;
 
 /**
  * {@link MQConstants} - Provides useful Message Queue (MQ) constants.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MQConstants {
@@ -100,7 +100,7 @@ public interface MQConstants {
      * <p>
      * The selector defines what JMS message selector the predefined queue will have. Only messages that match the selector will be added to
      * the queue. This is an optional element with a default of <code>null</code> when omitted.
-     * 
+     *
      * <pre>
      *  &lt;queue name="selectorQueue"&gt;
      *       &lt;entry name="/queue/selectorQueue"/&gt;
@@ -115,7 +115,7 @@ public interface MQConstants {
      * The name of the durable flag parameter.
      * <p>
      * The durable flag specifies whether the queue will be persisted. This again is optional and defaults to <code>false</code> if omitted.
-     * 
+     *
      * <pre>
      *  &lt;queue name="selectorQueue"&gt;
      *       &lt;entry name="/queue/selectorQueue"/&gt;

@@ -52,7 +52,7 @@ package com.openexchange.admin.soap.dataobjects;
 
 /**
  * This class represents a database.
- * 
+ *
  */
 public class Database {
 
@@ -150,7 +150,7 @@ public class Database {
         }
     }
     /**
-     * 
+     *
      */
     public Database() {
         super();

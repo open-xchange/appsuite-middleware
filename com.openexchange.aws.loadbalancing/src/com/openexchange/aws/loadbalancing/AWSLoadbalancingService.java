@@ -54,14 +54,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link AWSLoadbalancingService}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public interface AWSLoadbalancingService {
 
     /**
      * Register a new instance with the loadbalancer
-     * 
+     *
      * @param instanceId The id of the instance to register with the loadbalancer
      * @throws OXException On registration error
      */
@@ -69,7 +69,7 @@ public interface AWSLoadbalancingService {
 
     /**
      * Deregister an instance from the loadbalancer
-     * 
+     *
      * @param instanceId The id of the instance to deregister from the loadbalancer
      * @throws OXException
      */
@@ -77,7 +77,7 @@ public interface AWSLoadbalancingService {
 
     /**
      * Get a list of instanceIds currently registered with the loadbalancer
-     * 
+     *
      * @return A list of instanceIds currently registered with the loadbalancer
      */
     public List<String> getInstances();

@@ -55,7 +55,7 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
 
 /**
  * {@link OXResponse} OX specific additions to the Grizzly Response like altered cookie handling.
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class OXResponse extends Response {

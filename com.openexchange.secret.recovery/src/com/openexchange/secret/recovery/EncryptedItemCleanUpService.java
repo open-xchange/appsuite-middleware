@@ -54,7 +54,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link EncryptedItemCleanUpService} - Cleans-up non-working encrypted items.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface EncryptedItemCleanUpService {

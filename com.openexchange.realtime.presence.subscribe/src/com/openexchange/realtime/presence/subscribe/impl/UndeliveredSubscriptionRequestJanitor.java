@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 public class UndeliveredSubscriptionRequestJanitor implements PresenceChangeListener {
 
     public static final Log LOG = com.openexchange.log.Log.loggerFor(UndeliveredSubscriptionRequestJanitor.class);
-    
+
     @Override
     public void initialPresence(Presence presence, ServerSession serveSession) {
         LOG.info("\nHÄLP I NEED IMPLEMENTATION\n");

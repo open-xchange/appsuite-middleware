@@ -63,14 +63,14 @@ import com.openexchange.user.copy.internal.attachment.AttachmentCopyTask;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class AttachmentCopyRegisterer implements ServiceTrackerCustomizer<QuotaFileStorageFactory, QuotaFileStorageFactory> {    
-    
+public class AttachmentCopyRegisterer implements ServiceTrackerCustomizer<QuotaFileStorageFactory, QuotaFileStorageFactory> {
+
     private final BundleContext context;
-    
+
     private ServiceRegistration<CopyUserTaskService> registration;
-    
+
     private AttachmentCopyTask task;
-    
+
 
     public AttachmentCopyRegisterer(final BundleContext context) {
         super();
@@ -84,14 +84,14 @@ public class AttachmentCopyRegisterer implements ServiceTrackerCustomizer<QuotaF
         final QuotaFileStorageFactory service = context.getService(reference);
         task = new AttachmentCopyTask(service);
         registration = context.registerService(CopyUserTaskService.class, task, null);
-        
+
         return service;
     }
 
     /**
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
-    public void modifiedService(final ServiceReference<QuotaFileStorageFactory> reference, final QuotaFileStorageFactory service) {        
+    public void modifiedService(final ServiceReference<QuotaFileStorageFactory> reference, final QuotaFileStorageFactory service) {
     }
 
     /**

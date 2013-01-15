@@ -56,14 +56,14 @@ import com.openexchange.tools.session.ServerSession;
  * {@link PresenceChangeListener} - Interface for PresenceChangeListeners. Classes interested in notifications of initial (coming online),
  * normal (e.g. change from online to away) or final (going offline) changes of the PresenceStatus of clients can register instances of
  * PresenceChangeListeners at the PresenceStatusService being used.
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public interface PresenceChangeListener {
 
     /**
      * Called when a client sends his initial Presence to the server iow. comes online.
-     * 
+     *
      * @param presence The initial Presence Stanza sent by the client.
      * @param serveSession The associated ServerSession
      */
@@ -78,7 +78,7 @@ public interface PresenceChangeListener {
 
     /**
      * Called when a client sends his final Presence to the server iow. goes offline.
-     * 
+     *
      * @param presence The final Presence Stanza sent by the client.
      * @param serveSession The associated ServerSession
      */

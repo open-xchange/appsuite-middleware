@@ -195,7 +195,7 @@ public class MailAttachment extends AJAXServlet {
                     attachmentInputStream = checkedDownload.getInputStream();
                     /*-
                      * Check for Android client
-                     * 
+                     *
                     final boolean isAndroid = (null != userAgent && userAgent.toLowerCase(Locale.ENGLISH).indexOf("android") >= 0);
                     if (isAndroid) {
                         final ManagedFileManagement service = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
@@ -221,7 +221,7 @@ public class MailAttachment extends AJAXServlet {
                             attachmentInputStream = new FileInputStream(file);
                         }
                     }
-                     * 
+                     *
                      */
                 }
                 /*

@@ -1820,7 +1820,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     /**
      * Gathers all folders which are allowed to be deleted in a recursive manner
-     * @param specials 
+     * @param specials
      */
     private void gatherDeleteableSubfoldersRecursively(final int folderID, final int userId, final UserConfiguration userConfig, final String permissionIDs, final TIntObjectMap<TIntObjectMap<?>> deleteableIDs, final int initParent, final Integer[] specials) throws OXException, OXException, SQLException {
         final FolderObject delFolder = getOXFolderAccess().getFolderObject(folderID);

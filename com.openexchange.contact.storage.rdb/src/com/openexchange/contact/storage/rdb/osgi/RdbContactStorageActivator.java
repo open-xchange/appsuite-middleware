@@ -91,19 +91,19 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
             registerService(ContactStorage.class, new RdbContactStorage());
             DatabaseService dbService = getService(DatabaseService.class);
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
-                new AddFilenameColumnTask(dbService), 
+                new AddFilenameColumnTask(dbService),
                 new CorrectNumberOfImagesTask(dbService)
             ));
         } catch (Exception e) {
             LOG.error("error starting \"com.openexchange.contact.storage.rdb\"", e);
-            throw e;            
+            throw e;
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.contact.storage.rdb");
-        RdbServiceLookup.set(null);            
+        RdbServiceLookup.set(null);
         super.stopBundle();
     }
 

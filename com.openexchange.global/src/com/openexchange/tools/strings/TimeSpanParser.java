@@ -87,7 +87,7 @@ public class TimeSpanParser  implements StringParser {
      * </ul>
      *
      * So, for example <tt>&quot;2D 1h 12ms&quot;</tt> would be 2 days and one hour and 12 milliseconds
-     * 
+     *
      * @param span The span string
      * @return The parsed <tt>Long</tt> value
      */

@@ -52,8 +52,8 @@ import java.io.Serializable;
 
 /**
  * @author choeger
- * 
+ *
  */
 public interface OXUserExtensionInterface extends OXCommonExtensionInterface, Serializable {
-    
+
 }

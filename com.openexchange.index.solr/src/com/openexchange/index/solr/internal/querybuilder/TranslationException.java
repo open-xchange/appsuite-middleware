@@ -51,7 +51,7 @@ package com.openexchange.index.solr.internal.querybuilder;
 
 /**
  * {@link TranslationException}
- * 
+ *
  * @author Sven Maurmann
  */
 @SuppressWarnings("serial")

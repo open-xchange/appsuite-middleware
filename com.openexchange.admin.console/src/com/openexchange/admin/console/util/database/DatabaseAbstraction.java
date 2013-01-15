@@ -58,7 +58,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  * This is an abstract class for all common attributes and methods of database related command line tools
- * 
+ *
  * @author d7
  *
  */
@@ -89,7 +89,7 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
     protected final static String OPT_NAME_HOSTNAME_LONG = "hostname";
     protected final static char OPT_NAME_IS_MASTER_SHORT = 'm';
     protected final static String OPT_NAME_IS_MASTER_LONG = "master";
-    
+
     protected CLIOption databaseIdOption = null;
     protected CLIOption databaseUsernameOption = null;
     protected CLIOption databaseDriverOption = null;
@@ -103,25 +103,25 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
     protected CLIOption poolHardlimitOption = null;
     protected CLIOption poolInitialOption = null;
     protected CLIOption poolMaxOption = null;
-    
+
     // Needed for right error output
     protected String dbid = null;
     protected String dbname = null;
-    
+
     protected void parseAndSetDatabaseID(final AdminParser parser, final Database db) {
         dbid = (String) parser.getOptionValue(this.databaseIdOption);
         if (null != dbid) {
             db.setId(Integer.parseInt(dbid));
         }
     }
-    
+
     protected void parseAndSetDatabasename(final AdminParser parser, final Database db) {
         dbname = (String) parser.getOptionValue(this.databaseNameOption);
         if (null != dbname) {
             db.setName(dbname);
         }
     }
-    
+
     private void parseAndSetHostname(final AdminParser parser, final Database db) {
         final String hostname = (String)parser.getOptionValue(this.hostnameOption);
         if (null != hostname) {
@@ -232,7 +232,7 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
     }
 
     protected void setDatabaseHostnameOption(final AdminParser parser,final boolean required){
-        this.hostnameOption =  setShortLongOpt(parser, OPT_NAME_HOSTNAME_SHORT,OPT_NAME_HOSTNAME_LONG,"Hostname of the server",true, convertBooleantoTriState(required)); 
+        this.hostnameOption =  setShortLongOpt(parser, OPT_NAME_HOSTNAME_SHORT,OPT_NAME_HOSTNAME_LONG,"Hostname of the server",true, convertBooleantoTriState(required));
     }
 
     protected void setDatabaseUsernameOption(final AdminParser parser,final boolean required){
@@ -285,7 +285,7 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
     }
 
     protected void setDatabaseNameOption(final AdminParser parser, final NeededQuadState required){
-        this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, required); 
+        this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, required);
     }
 
     @Override
@@ -295,21 +295,21 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
 
     protected void parseAndSetMandatoryOptions(final AdminParser parser, final Database db) throws InvalidDataException {
         parseAndSetHostname(parser, db);
-        
+
         parseAndSetDriver(parser, db);
-    
+
         parseAndSetDBUsername(parser, db);
-        
+
         parseAndSetPasswd(parser, db);
-    
+
         parseAndSetMaxUnits(parser, db);
-    
+
         parseAndSetPoolHardLimit(parser, db);
-    
+
         parseAndSetPoolInitial(parser, db);
-    
+
         parseAndSetPoolmax(parser, db);
-    
+
         parseAndSetDatabaseWeight(parser, db);
     }
 }

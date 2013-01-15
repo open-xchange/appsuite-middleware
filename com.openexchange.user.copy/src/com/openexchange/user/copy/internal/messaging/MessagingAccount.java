@@ -54,7 +54,7 @@ import com.openexchange.user.copy.internal.genconf.ConfAttribute;
 
 /**
  * {@link MessagingAccount}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MessagingAccount {
@@ -66,11 +66,11 @@ public class MessagingAccount {
     private int confId;
 
     private String displayName;
-    
+
     private List<ConfAttribute> boolAttributes;
 
     private List<ConfAttribute> stringAttributes;
-    
+
 
     public MessagingAccount() {
         super();
@@ -107,7 +107,7 @@ public class MessagingAccount {
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
-    
+
     public List<ConfAttribute> getBoolAttributes() {
         return boolAttributes;
     }

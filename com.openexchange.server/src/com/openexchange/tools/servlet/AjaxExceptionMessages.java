@@ -114,10 +114,10 @@ public final class AjaxExceptionMessages implements LocalizableStrings {
 
     // The action "%1$s" is disabled due to server configuration
     public static final String DisabledAction_MSG = "The action \"%1$s\" is disabled due to server configuration";
-    
+
     // No permission for module: %1$s.
     public static final String NO_PERMISSION_FOR_MODULE = "No permission for module: %1$s.";
-    
+
     // Object has been changed in the meantime.
     public static final String CONFLICT = "Object has been changed in the meantime.";
 
@@ -126,10 +126,10 @@ public final class AjaxExceptionMessages implements LocalizableStrings {
 
     // Too many concurrent requests. Please try again later.
     public static final String TOO_MANY_REQUESTS = "Too many concurrent requests. Please try again later.";
-    
+
     // Bad request. The server is unable to handle the request.
     public static final String BAD_REQUEST = "Bad request. The server is unable to handle the request.";
-    
+
     // The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.
     public static final String NO_IMAGE_FILE_MSG = "The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.";
 

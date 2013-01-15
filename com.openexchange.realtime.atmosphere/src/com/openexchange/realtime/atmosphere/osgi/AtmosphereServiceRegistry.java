@@ -54,7 +54,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AtmospherePresenceServiceRegistry} - Singleton that acts as central accesspoint for classes of the Atmosphere bundle.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AtmosphereServiceRegistry implements ServiceLookup {
@@ -70,7 +70,7 @@ public class AtmosphereServiceRegistry implements ServiceLookup {
 
     /**
      * Get the Registry singleton.
-     * 
+     *
      * @return the Registry singleton
      */
     public static AtmosphereServiceRegistry getInstance() {

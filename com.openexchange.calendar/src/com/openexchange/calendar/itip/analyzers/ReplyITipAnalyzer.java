@@ -57,7 +57,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
@@ -101,7 +100,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link ReplyITipAnalyzer}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
  *         Laguna</a>
  */
@@ -130,7 +129,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 				}
 			}
 		}
-		
+
 		analysis.setUid(uid);
 
 		final CalendarDataObject original = util.resolveUid(uid, session);
@@ -200,21 +199,21 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		if (services == null) {
 			return;
 		}
-		
+
 		final ContextService contexts = services.getService(ContextService.class);
 		final UserService users = services.getService(UserService.class);
-		
+
 		final Context ctx = contexts.getContext(session.getContextId());
 		final User user = users.getUser(session.getUserId(), ctx);
 		final Locale locale = user.getLocale();
 		final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
-		
+
 		if (message.getMethod() == ITipMethod.COUNTER) {
-			
+
 			final AppointmentDiff diff = change.getDiff();
 			String displayName = null;
 			ConfirmStatus newStatus = null;
-			
+
 			// TODO
 
 			FieldUpdate update = diff
@@ -244,7 +243,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 					newStatus = ConfirmStatus.byId(chng.getNewStatus());
 				}
 			}
-			
+
 			String stateChange = "";
 			if (newStatus != null) {
 				switch (newStatus) {
@@ -256,12 +255,12 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 				.add(displayName, ArgumentType.PARTICIPANT)
 				.add(stateChange, ArgumentType.STATUS, newStatus).getMessage(wrapper, locale));
 			}
-			
+
 			final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(),
 					new Details(), new ShownAs());
-			
+
 			change.setDiffDescription(cd.getChanges(ctx, change.getCurrentAppointment(), change.getNewAppointment(), diff, wrapper, locale, tz));
-			
+
 		} else {
 			describeDiff(change, wrapper, session);
 		}
@@ -279,20 +278,20 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
 	private ParticipantChange applyParticipantChange(final Appointment update,
 			final Appointment original, final ITipMethod method, final ITipMessage message) {
-		
+
 		discardAllButFirst(update);
-		
+
 		final ParticipantChange pChange = new ParticipantChange();
 		boolean noChange = true;
-		
+
 		if (method == ITipMethod.COUNTER) {
 			// Alright, the counter may overwrite any field
 			final AppointmentDiff diff = AppointmentDiff.compare(original, update,
 					CalendarObject.PARTICIPANTS, CalendarObject.USERS,
 					CalendarObject.CONFIRMATIONS);
 			final Set<Integer> skipFields = skipFieldsInCounter(message);
-			
-			
+
+
 			for(final int field : Appointment.ALL_COLUMNS) {
 				if (skipFields.contains(field)) {
 					continue; // Skip
@@ -303,7 +302,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 					}
 				}
 			}
-			
+
 			if (message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
 				// Explicitely ignore title update
 				update.setTitle(original.getTitle());
@@ -317,7 +316,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 				update.set(upd.getFieldNumber(), upd.getNewValue());
 			}
 		}
-		
+
 		final List<Participant> newParticipants = new ArrayList<Participant>();
 		final Participant[] participants = original.getParticipants();
 		Set<String> notFound = new HashSet<String>();
@@ -537,7 +536,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
 	private Set<Integer> skipFieldsInCounter(final ITipMessage message) {
 		final Set<Integer> skipList = new HashSet<Integer>();
-		skipList.add(CommonObject.NUMBER_OF_LINKS); 
+		skipList.add(CommonObject.NUMBER_OF_LINKS);
 		if (message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
 			skipList.add(CalendarObject.TITLE);
 		}
@@ -550,13 +549,13 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			participants = new Participant[]{participants[0]};
 			update.setParticipants(participants);
 		}
-		
+
 		UserParticipant[] users = update.getUsers();
 		if (users != null && users.length > 1) {
 			users = new UserParticipant[]{users[0]};
 			update.setUsers(users);
 		}
-		
+
 		ConfirmableParticipant[] confirmations = update.getConfirmations();
 		if (confirmations != null && confirmations.length > 1) {
 			confirmations = new ConfirmableParticipant[]{confirmations[0]};

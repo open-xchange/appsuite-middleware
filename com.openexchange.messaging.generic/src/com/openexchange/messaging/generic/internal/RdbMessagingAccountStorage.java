@@ -699,7 +699,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
     }
 
     private static final String ACCOUNT_EXISTS = "SELECT 1 FROM messagingAccount WHERE cid = ? AND user = ? LIMIT 1";
-    
+
     public boolean hasAccount(final MessagingService parentService, final Session session) throws OXException {
         final Set<String> secretProperties = parentService.getSecretProperties();
         if (secretProperties.isEmpty()) {

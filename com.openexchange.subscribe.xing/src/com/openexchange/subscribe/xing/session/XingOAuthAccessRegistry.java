@@ -57,7 +57,7 @@ import com.openexchange.subscribe.xing.Services;
 
 /**
  * {@link XingOAuthAccessRegistry}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class XingOAuthAccessRegistry {
@@ -66,7 +66,7 @@ public final class XingOAuthAccessRegistry {
 
     /**
      * Gets the registry instance.
-     * 
+     *
      * @return The registry instance
      */
     public static XingOAuthAccessRegistry getInstance() {
@@ -85,7 +85,7 @@ public final class XingOAuthAccessRegistry {
 
     /**
      * Adds specified XING OAuth access.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -107,7 +107,7 @@ public final class XingOAuthAccessRegistry {
 
     /**
      * Check presence of the XING OAuth access associated with given user-context-pair.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -120,7 +120,7 @@ public final class XingOAuthAccessRegistry {
 
     /**
      * Gets the XING OAuth access associated with given user-context-pair.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -133,7 +133,7 @@ public final class XingOAuthAccessRegistry {
 
     /**
      * Removes the OAuth access associated with given user-context-pair, if no more user-associated accesses are present.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return <code>true</code> if a XING OAuth access for given user-context-pair was found and removed; otherwise <code>false</code>
@@ -158,7 +158,7 @@ public final class XingOAuthAccessRegistry {
 
     /**
      * Purges specified user's XING OAuth access.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -182,7 +182,7 @@ public final class XingOAuthAccessRegistry {
 
     /**
      * Gets a {@link Iterator iterator} over the XING OAuth access instances in this registry.
-     * 
+     *
      * @return A {@link Iterator iterator} over the XING OAuth access instances in this registry.
      */
     Iterator<ConcurrentMap<Integer, XingOAuthAccess>> iterator() {

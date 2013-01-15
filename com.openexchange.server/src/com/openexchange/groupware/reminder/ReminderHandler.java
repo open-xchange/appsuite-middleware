@@ -455,7 +455,7 @@ public class ReminderHandler implements ReminderService {
             DBPool.closeReaderSilent(context, con);
         }
     }
-    
+
     @Override
     public ReminderObject[] loadReminders(final int[] targetIds, final int userId, final int module, final Connection connection) throws OXException {
         Connection con = null;
@@ -466,7 +466,7 @@ public class ReminderHandler implements ReminderService {
             con = connection;
             externalConnection = true;
         }
-    
+
         try {
             return loadReminder(targetIds, userId, module, con);
         } finally {

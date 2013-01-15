@@ -60,7 +60,7 @@ public interface AnnotatedServices {
 
     /**
      * Gets the supported services, which may be decorated with {@link Action} annotations.
-     * 
+     *
      * @return The supported services
      */
     Collection<?> getSupportedServices();

@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AJAXRequestDataTools} - Tools for parsing AJAX requests.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXRequestDataTools {
@@ -82,7 +82,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Gets the default instance
-     * 
+     *
      * @return The default instance
      */
     public static AJAXRequestDataTools getInstance() {
@@ -107,7 +107,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
-     * 
+     *
      * @param req The HTTP Servlet request
      * @param preferStream Whether to prefer request's stream instead of parsing its body data to an appropriate (JSON) object
      * @param isFileUpload Whether passed request is considered as a file upload
@@ -215,7 +215,7 @@ public class AJAXRequestDataTools {
      * <p>
      * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
      * "1".
-     * 
+     *
      * @param name The parameter's name
      * @param requestData The request data to parse from
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
@@ -236,7 +236,7 @@ public class AJAXRequestDataTools {
      * <p>
      * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
      * "1".
-     * 
+     *
      * @param parameter The parameter
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
      */
@@ -246,7 +246,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Parses host name, secure and AJP route.
-     * 
+     *
      * @param request The AJAX request data
      * @param req The HTTP Servlet request
      * @param session The associated session
@@ -288,7 +288,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Gets the module from specified HTTP request.
-     * 
+     *
      * @param prefix The dispatcher's default prefix to strip from request's {@link HttpServletRequest#getPathInfo() path info}.
      * @param req The HTTP request
      * @return The determined module
@@ -309,7 +309,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Gets the action from specified HTTP request.
-     * 
+     *
      * @param req The HTTP request
      * @return The determined action
      */

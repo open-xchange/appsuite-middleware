@@ -63,7 +63,7 @@ import com.openexchange.java.StringAllocator;
 
 /**
  * {@link AbstractFile} - An abstract file.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractFile implements File {
@@ -155,7 +155,7 @@ public abstract class AbstractFile implements File {
 
     /**
      * Converts specified wildcard string to a regular expression
-     * 
+     *
      * @param wildcard The wildcard string to convert
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */

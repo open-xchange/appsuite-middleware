@@ -59,19 +59,19 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 
 public class AddressComparator implements Comparator<IndexDocument<MailMessage>> {
-    
+
     private final SolrMailField sortField;
-    
+
     private final Order order;
-    
+
     public AddressComparator(SolrMailField sortField, Order order) throws OXException {
         super();
         this.order = order;
         this.sortField = sortField;
     }
-    
+
     @Override
-    public int compare(IndexDocument<MailMessage> firstDocument, IndexDocument<MailMessage> secondDocument) {            
+    public int compare(IndexDocument<MailMessage> firstDocument, IndexDocument<MailMessage> secondDocument) {
         MailMessage firstMail = firstDocument.getObject();
         MailMessage secondMail = secondDocument.getObject();
         InternetAddress[] firstAddrs;
@@ -81,37 +81,37 @@ public class AddressComparator implements Comparator<IndexDocument<MailMessage>>
                 firstAddrs = firstMail.getFrom();
                 secondAddrs = secondMail.getFrom();
                 break;
-                
+
             case TO:
                 firstAddrs = firstMail.getTo();
                 secondAddrs = secondMail.getTo();
                 break;
-                
+
             case CC:
                 firstAddrs = firstMail.getCc();
                 secondAddrs = secondMail.getCc();
                 break;
-                
+
             case BCC:
                 firstAddrs = firstMail.getBcc();
                 secondAddrs = secondMail.getBcc();
                 break;
-                
+
             default:
                 firstAddrs = null;
-                secondAddrs = null;                 
+                secondAddrs = null;
         }
-        
+
         if (firstAddrs != null
             && secondAddrs != null
             && firstAddrs.length != 0
             && secondAddrs.length != 0) {
-            
+
             String firstHighest = getHighest(firstAddrs);
             String secondHighest = getHighest(secondAddrs);
-            return compare(firstHighest, secondHighest);            
+            return compare(firstHighest, secondHighest);
         }
-        
+
         if ((firstAddrs == null || firstAddrs.length == 0) && (secondAddrs == null || secondAddrs.length == 0))  {
             return 0;
         } else if (firstAddrs == null || firstAddrs.length == 0) {
@@ -119,10 +119,10 @@ public class AddressComparator implements Comparator<IndexDocument<MailMessage>>
         } else if (secondAddrs == null || secondAddrs.length == 0) {
             return -1;
         }
-        
+
         return 0;
     }
-    
+
     private String getHighest(InternetAddress[] addrs) {
         String highest = null;
         for (InternetAddress addr : addrs) {
@@ -136,17 +136,17 @@ public class AddressComparator implements Comparator<IndexDocument<MailMessage>>
                 }
             }
         }
-        
+
         return highest;
     }
-    
+
     private String getSortString(InternetAddress addr) {
         if (addr == null) {
             return null;
         }
-        
+
         String toCompare = null;
-        if (addr instanceof QuotedInternetAddress) {                
+        if (addr instanceof QuotedInternetAddress) {
             toCompare = ((QuotedInternetAddress) addr).getPersonal();
             if (toCompare == null) {
                 toCompare = ((QuotedInternetAddress) addr).getIDNAddress();
@@ -159,7 +159,7 @@ public class AddressComparator implements Comparator<IndexDocument<MailMessage>>
                     if (toCompare == null) {
                         toCompare = ((QuotedInternetAddress) addr).getIDNAddress();
                     }
-                }                    
+                }
             } catch (AddressException e) {
                 toCompare = addr.getPersonal();
                 if (toCompare == null) {
@@ -167,14 +167,14 @@ public class AddressComparator implements Comparator<IndexDocument<MailMessage>>
                 }
             }
         }
-        
+
         if (toCompare != null && toCompare.startsWith("\"")) {
             int end = toCompare.endsWith("\"") ? toCompare.length() : toCompare.length() + 1;
             toCompare = toCompare.substring(1, end);
         }
         return toCompare;
     }
-//    
+//
 //    private boolean isFirstHigherThanSecond(String first, String second) {
 //        if (first == null) {
 //            return false;
@@ -182,24 +182,24 @@ public class AddressComparator implements Comparator<IndexDocument<MailMessage>>
 //        if (second == null) {
 //            return true;
 //        }
-//        
+//
 //        if ((first.compareToIgnoreCase(second) > 0 && order.equals(Order.ASC))
 //            || (first.compareToIgnoreCase(second) < 0 && order.equals(Order.DESC))) {
 //            return false;
 //        }
-//        
+//
 //        return true;
 //    }
-    
+
     private int compare(String first, String second) {
         if (first == null) {
             return 1;
         }
-        
+
         if (second == null) {
             return -1;
         }
-        
+
         int compare = first.compareToIgnoreCase(second);
         if (compare < 0 && order.equals(Order.ASC)) {
             return -1;
@@ -210,8 +210,8 @@ public class AddressComparator implements Comparator<IndexDocument<MailMessage>>
         } else if (compare > 0 && order.equals(Order.DESC)) {
             return -1;
         }
-        
+
         return 0;
     }
-    
+
 }

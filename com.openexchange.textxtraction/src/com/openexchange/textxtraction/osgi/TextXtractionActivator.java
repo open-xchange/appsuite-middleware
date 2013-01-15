@@ -60,7 +60,7 @@ import com.openexchange.textxtraction.internal.TikaTextXtractService;
 
 /**
  * {@link TextXtractionActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TextXtractionActivator extends HousekeepingActivator {

@@ -65,22 +65,22 @@ public class DocumentationExceptionMessage implements LocalizableStrings {
     private DocumentationExceptionMessage() {
         super();
     }
-    
+
     // Module '%s' already registered.
     public final static String MODULE_ALREADY_REGISTERED_MSG = "Module '%s' is already registered.";
-    
+
     // Container '%s' already registered.
     public final static String CONTAINER_ALREADY_REGISTERED_MSG = "Container '%s' is already registered.";
-    
+
     // The module name is missing in the module description.
     public final static String MODULE_NAME_MISSING_MSG = "The module name is missing in the module description.";
-    
+
     // The container name is missing in the container description.
     public final static String CONTAINER_NAME_MISSING_MSG = "The container name is missing in the container description.";
-    
+
     // The module '%s' is not known in the registry.
     public final static String MODULE_NOT_REGISTERED_MSG = "The module '%s' is not known in the registry.";
-    
+
     // The container '%s' is not known in the registry.
     public final static String CONTAINER_NOT_REGISTERED_MSG = "The container '%s' is not known in the registry.";
 

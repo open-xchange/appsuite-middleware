@@ -207,7 +207,7 @@ public abstract class PasswordChangeService {
         final int userId = session.getUserId();
         UserStorage.getInstance().invalidateUser(event.getContext(), userId);
         final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
-        /*  
+        /*
          * Update password in session
          */
         final SessiondService sessiondService = serviceRegistry.getService(SessiondService.class);

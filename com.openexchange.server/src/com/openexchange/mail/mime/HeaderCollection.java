@@ -139,7 +139,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Gets the case-sensitive header name as per RFC2822.
-     * 
+     *
      * @param name The header name to check
      * @return The case-sensitive header name
      */

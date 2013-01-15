@@ -99,7 +99,7 @@ public abstract class AbstractClassLoaderAware implements ClassLoaderAware {
 
     /**
      * Applies specified class' class loader
-     * 
+     *
      * @param classLoaderSource The class providing the class loader
      */
     protected void applyClassLoader(final Class<?> classLoaderSource) {
@@ -112,7 +112,7 @@ public abstract class AbstractClassLoaderAware implements ClassLoaderAware {
 
     /**
      * Wraps specified object with a serializable container object; either based on Kryo or not.
-     * 
+     *
      * @param obj The object to wrap
      * @return The serializable object
      */

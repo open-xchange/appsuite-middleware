@@ -58,13 +58,13 @@ import com.openexchange.tools.pipesnfilters.Filter;
 
 /**
  * @author choeger
- * 
+ *
  */
 public interface OXContextPluginInterface {
 
     /**
      * Define the operations which should be done before the real change process.
-     * 
+     *
      * @param ctx
      * @param auth
      * @throws PluginException
@@ -73,8 +73,8 @@ public interface OXContextPluginInterface {
 
     /**
      * Define the operations which should be done before the real context creation process.
-     * 
-     * @param ctx 
+     *
+     * @param ctx
      * @param admin_user
      * @param auth
      * @return An {@link Context} object must be returned. If nothing is done
@@ -86,7 +86,7 @@ public interface OXContextPluginInterface {
 
     /**
      * Define the operations which should be done after the real context creation process.
-     * 
+     *
      * @param ctx
      * @param admin_user
      * @param access
@@ -100,7 +100,7 @@ public interface OXContextPluginInterface {
 
     /**
      * Define the operations which should be done before the real context delete process.
-     * 
+     *
      * @param ctx
      * @param auth
      * @throws PluginException
@@ -109,7 +109,7 @@ public interface OXContextPluginInterface {
 
     /**
      * Define the operations which should be done before the real context disable process.
-     * 
+     *
      * @param ctx
      * @param auth
      * @throws PluginException
@@ -118,7 +118,7 @@ public interface OXContextPluginInterface {
 
     /**
      * Define the operations which should be done before the real context disableAll process.
-     * 
+     *
      * @param auth
      * @throws PluginException
      */
@@ -126,7 +126,7 @@ public interface OXContextPluginInterface {
 
     /**
      * Define the operations which should be done before the real context enable process.
-     * 
+     *
      * @param ctx
      * @param auth
      * @throws PluginException
@@ -136,7 +136,7 @@ public interface OXContextPluginInterface {
     /**
      * Define the operations which should be done instead of the enableAll
      * process if the credentials given are those from the master admin
-     * 
+     *
      * @param auth
      * @throws PluginException
      */
@@ -147,7 +147,7 @@ public interface OXContextPluginInterface {
      * getData process.
      * Note that the real context getData process will only be called if
      * the context object wasn't filled by a list operation before.
-     * 
+     *
      * @param ctx
      * @param auth
      * @return A {@link List} containing {@link OXCommonExtension} objects,
@@ -158,7 +158,7 @@ public interface OXContextPluginInterface {
 
     /**
      * Return a {@link Filter} to load plugin specific data or null in case no specific data available
-     *  
+     *
      * @param search_pattern
      * @param auth
      * @return
@@ -168,23 +168,23 @@ public interface OXContextPluginInterface {
 
     /**
      * Return a {@link Filter} to optionally filter out contexts
-     *  
+     *
      * @param auth
      * @return
      * @throws PluginException
      */
     public Filter<Integer, Integer> filter(final Credentials auth) throws PluginException;
-    
+
     /**
      * Define the operations which should be done before the real context
      * changeModuleAccess process.
-     * 
+     *
      * @param ctx
      * @param access
      * @param auth
      * @throws PluginException
      */
-    public void changeModuleAccess(final Context ctx, final UserModuleAccess access,final Credentials auth) throws PluginException; 
+    public void changeModuleAccess(final Context ctx, final UserModuleAccess access,final Credentials auth) throws PluginException;
 
     /**
      * Define the operations which should be done before the real context
@@ -200,7 +200,7 @@ public interface OXContextPluginInterface {
     /**
      * Define the operations which should be done before the real context
      * downgrade process.
-     * 
+     *
      * @param ctx
      * @param auth
      * @throws PluginException
@@ -210,7 +210,7 @@ public interface OXContextPluginInterface {
     /**
      * Define the operations which should be done before the real context
      * getAccessCombinationName process.
-     * 
+     *
      * @param ctx
      * @param auth
      * @return Currently not used, so can be null
@@ -221,23 +221,23 @@ public interface OXContextPluginInterface {
     /**
      * Define the operations which should be done before the real context
      * getModuleAccess process.
-     * 
+     *
      * @param ctx
      * @param auth
      * @return Currently not used, so can be null
      * @throws PluginException
      */
     public UserModuleAccess getModuleAccess(final Context ctx, final Credentials auth) throws PluginException;
-    
+
     /**
      * Define if the mandatory members for a context create should be checked or not
-     * 
+     *
      * @param ctx
      * @return If null or false are set, the check is ommitted otherwise the check is made
      * @throws PluginException
      */
     public Boolean checkMandatoryMembersContextCreate(final Context ctx) throws PluginException;
-    
+
     /**
      * @param ctx
      * @param auth
@@ -245,7 +245,7 @@ public interface OXContextPluginInterface {
      * @throws PluginException
      */
     public void exists(Context ctx, Credentials auth) throws PluginException;
-    
+
     /**
      * @param ctx
      * @param auth

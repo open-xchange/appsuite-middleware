@@ -61,21 +61,21 @@ public interface MQQueueListener extends MQCloseable {
 
     /**
      * Passes sent text to the listener.
-     * 
+     *
      * @param text The text passed to the listener
      */
     void onText(String text);
 
     /**
      * Passes sent Java object wrapped by an {@link ObjectMessage} to the listener.
-     * 
+     *
      * @param objectMessage The object message passed to the listener
      */
     void onObjectMessage(ObjectMessage objectMessage);
 
     /**
      * Passes sent bytes to the listener.
-     * 
+     *
      * @param bytes The bytes passed to the listener
      */
     void onBytes(byte[] bytes);

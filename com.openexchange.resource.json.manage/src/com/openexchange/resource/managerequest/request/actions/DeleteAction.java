@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DeleteAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.PUT, name = "delete", description = "Delete a resource", parameters = {
@@ -77,7 +77,7 @@ public final class DeleteAction extends AbstractResourceAction {
 
     /**
      * Initializes a new {@link DeleteAction}.
-     * 
+     *
      * @param services
      */
     public DeleteAction(final ServiceLookup services) {

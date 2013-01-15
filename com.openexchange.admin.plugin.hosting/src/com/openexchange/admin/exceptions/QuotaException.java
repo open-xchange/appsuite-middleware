@@ -54,8 +54,8 @@ package com.openexchange.admin.exceptions;
  * @author cutmasta
  */
 public class QuotaException extends Exception{
-    
-    
+
+
     /**
 	 * For serialization
 	 */
@@ -64,5 +64,5 @@ public class QuotaException extends Exception{
 	public QuotaException(String s) {
         super( s );
     }
-    
+
 }

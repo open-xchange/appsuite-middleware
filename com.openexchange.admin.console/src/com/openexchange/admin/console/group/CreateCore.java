@@ -59,7 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 
 public abstract class CreateCore extends GroupAbstraction {
-    
+
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
 
@@ -67,7 +67,7 @@ public abstract class CreateCore extends GroupAbstraction {
         setGroupNameOption(parser, NeededQuadState.needed);
         setGroupDisplayNameOption(parser, true);
         setAddMembersOption(parser, false);
-        
+
         setFurtherOptions(parser);
     }
 
@@ -78,13 +78,13 @@ public abstract class CreateCore extends GroupAbstraction {
 
         try {
             parser.ownparse(args);
-            
+
             final Context ctx = contextparsing(parser);
 
             final Credentials auth = credentialsparsing(parser);
 
             final OXGroupInterface oxgrp = getGroupInterface();
-            
+
             final Group grp = new Group();
 
             final String members = (String) parser.getOptionValue(this.addMemberOption);
@@ -98,9 +98,9 @@ public abstract class CreateCore extends GroupAbstraction {
             parseAndSetGroupAndDisplayName(parser, grp);
 
             maincall(parser, oxgrp, ctx, grp, auth);
-            
+
             final Integer id = oxgrp.create(ctx, grp, auth).getId();
-            
+
             displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);
             sysexit(0);
         } catch (final Exception e) {

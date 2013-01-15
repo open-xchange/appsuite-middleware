@@ -890,7 +890,7 @@ public final class IMAPException extends OXException {
         private static final String PREFIX = IMAPProvider.PROTOCOL_IMAP.getName().toUpperCase();
 
         private final Category category;
-        
+
         private IMAPCode(final String message, final Category category, final int detailNumber) {
             this.message = message;
             extend = null;

@@ -68,10 +68,10 @@ public abstract class DefaultDbMapping<T, O> extends DefaultMapping<T, O> implem
 	private final String columnLabel;
 	private final String readableName;
 	private final int sqlType;
-	
+
 	/**
 	 * Initializes a new {@link DefaultDbMapping}.
-	 * 
+	 *
 	 * @param columnLabel the column label
 	 * @param sqlType the SQL type
 	 */
@@ -81,7 +81,7 @@ public abstract class DefaultDbMapping<T, O> extends DefaultMapping<T, O> implem
 
 	/**
 	 * Initializes a new {@link DefaultDbMapping}.
-	 * 
+	 *
 	 * @param columnLabel the column label
 	 * @param readableName the readable label
 	 * @param sqlType the SQL type
@@ -134,5 +134,5 @@ public abstract class DefaultDbMapping<T, O> extends DefaultMapping<T, O> implem
 	public String toString() {
 		return String.format("[%s] %s", this.getColumnLabel(), this.getReadableName());
 	}
-	
+
 }

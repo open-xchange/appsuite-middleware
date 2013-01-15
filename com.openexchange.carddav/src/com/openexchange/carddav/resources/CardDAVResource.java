@@ -76,7 +76,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
  * {@link CardDAVResource} - Abstract base class for CardDAV resources.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -99,7 +99,7 @@ public abstract class CardDAVResource extends AbstractResource {
         this.url = url;
         LOG.debug(getUrl() + ": initialized.");
     }
-    
+
     protected WebdavProtocolException protocolException(Throwable t) {
     	return protocolException(t, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
@@ -118,7 +118,7 @@ public abstract class CardDAVResource extends AbstractResource {
 
 	protected abstract void applyVersitObject(VersitObject versitObject) throws WebdavProtocolException;
 	protected abstract String generateVCard() throws WebdavProtocolException;
-	protected abstract String getUID();	
+	protected abstract String getUID();
 
 	private String getVCard() throws WebdavProtocolException {
 		if (null == this.cachedVCard) {
@@ -126,7 +126,7 @@ public abstract class CardDAVResource extends AbstractResource {
 		}
 		return this.cachedVCard;
 	}
-	
+
     private VersitObject readBody(InputStream body) throws WebdavProtocolException {
         ByteArrayOutputStream outputStream = null;
     	try {
@@ -152,7 +152,7 @@ public abstract class CardDAVResource extends AbstractResource {
             Streams.close(outputStream);
             Streams.close(body);
         }
-    }	
+    }
 
 	@Override
 	protected WebdavFactory getFactory() {
@@ -179,8 +179,8 @@ public abstract class CardDAVResource extends AbstractResource {
 			String vCard = this.getVCard();
 			if (null != vCard && 0 < vCard.length()) {
 				return new Long(vCard.getBytes().length);
-			}			
-		}		
+			}
+		}
 		return 0L;
 	}
 

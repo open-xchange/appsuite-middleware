@@ -147,7 +147,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     /**
      * Gets the context.
-     * 
+     *
      * @return The context
      * @throws OXException If context cannot be returned
      */
@@ -346,7 +346,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         } catch (final OXException e) {
             /*-
              * Expect creation failed because already existent
-             * 
+             *
              * Ensure folder is unsubscribed in primary account
              */
             unsubscribe(realFullname);

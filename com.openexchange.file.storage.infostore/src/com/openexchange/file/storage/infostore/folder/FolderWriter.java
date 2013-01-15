@@ -63,7 +63,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link FolderWriter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderWriter {
@@ -77,7 +77,7 @@ public final class FolderWriter {
 
     /**
      * Writes a folder.
-     * 
+     *
      * @param folder The folder
      * @return The written folder
      * @throws OXException If writing folder fails
@@ -111,7 +111,7 @@ public final class FolderWriter {
 
     /**
      * Parses given permission.
-     * 
+     *
      * @param permission The permission to parse
      * @return The parsed permission
      * @throws OXException If parsing fails
@@ -139,7 +139,7 @@ public final class FolderWriter {
 
     /**
      * Parses given permissions.
-     * 
+     *
      * @param permissions The permissions to parse
      * @return The parsed permissions
      * @throws OXException If parsing fails

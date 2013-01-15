@@ -58,7 +58,7 @@ import com.openexchange.index.IndexField;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public enum AttachmentIndexField implements IndexField {
-    
+
     MODULE,
     SERVICE,
     ACCOUNT,

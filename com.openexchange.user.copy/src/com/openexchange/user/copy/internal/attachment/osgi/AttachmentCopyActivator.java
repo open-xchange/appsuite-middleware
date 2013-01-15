@@ -61,9 +61,9 @@ import com.openexchange.tools.file.external.QuotaFileStorageFactory;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class AttachmentCopyActivator implements BundleActivator {
-    
+
     private ServiceTracker<QuotaFileStorageFactory, QuotaFileStorageFactory> tracker;
-    
+
 
     public AttachmentCopyActivator() {
         super();

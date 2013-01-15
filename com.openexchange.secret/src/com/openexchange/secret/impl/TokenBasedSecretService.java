@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link TokenBasedSecretService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -103,7 +103,7 @@ public class TokenBasedSecretService implements RankingAwareSecretService {
 
     /**
      * Sets the token list
-     * 
+     *
      * @param tokenList The token list to set
      */
     public void setTokenList(final List<Token> tokenList) {

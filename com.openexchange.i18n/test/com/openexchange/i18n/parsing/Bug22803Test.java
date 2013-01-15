@@ -70,7 +70,7 @@ public class Bug22803Test {
         assertEquals("Translation is wrong.", "Zakres dat w wyszukiwaniu musi zawiera\u0107 dwie warto\u015bci. Aktualna liczba warto\u015bci: %d. \\t", actual);
     }
 
-    private static final String PO_CONTENTS = "msgid \"\"\n" 
+    private static final String PO_CONTENTS = "msgid \"\"\n"
         + "msgstr \"\"\n"
         + "\"Content-Type: text/plain; charset=UTF-8\\n\"\n"
         + "\n"

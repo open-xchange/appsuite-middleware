@@ -100,12 +100,12 @@ public class AllAction extends AbstractFileAction {
             final SearchIterator<File> iter = CreatedByComparator.resort(documents.results(), comparator);
             final TimedResult<File> delegate = documents;
             documents = new TimedResult<File>() {
-                
+
                 @Override
                 public long sequenceNumber() throws OXException {
                     return delegate.sequenceNumber();
                 }
-                
+
                 @Override
                 public SearchIterator<File> results() throws OXException {
                     return iter;

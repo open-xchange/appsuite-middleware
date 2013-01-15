@@ -72,7 +72,7 @@ public final class IMAPSessionStorageAccess {
 
     /**
      * Checks if enabled.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public static boolean isEnabled() {

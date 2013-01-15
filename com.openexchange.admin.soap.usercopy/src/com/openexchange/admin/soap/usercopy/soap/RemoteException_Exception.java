@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "RemoteException", targetNamespace = "http://soap.copy.user.admin.openexchange.com")
 public class RemoteException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.usercopy.soap.RemoteException remoteException;
 
     public RemoteException_Exception() {
         super();
     }
-    
+
     public RemoteException_Exception(String message) {
         super(message);
     }
-    
+
     public RemoteException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

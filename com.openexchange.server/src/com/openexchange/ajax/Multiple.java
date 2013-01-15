@@ -120,7 +120,7 @@ public class Multiple extends SessionServlet {
 
     /**
      * Sets the dispatcher instance.
-     * 
+     *
      * @param dispatcher The dispatcher to set
      */
     public static void setDispatcher(final Dispatcher dispatcher) {
@@ -129,7 +129,7 @@ public class Multiple extends SessionServlet {
 
     /**
      * Gets the dispatcher instance
-     * 
+     *
      * @return The dispatcher instance or <code>null</code>
      */
     private static Dispatcher getDispatcher() {
@@ -175,7 +175,7 @@ public class Multiple extends SessionServlet {
         writeTo(respArr, writer);
         writer.flush();
     }
-    
+
     public static JSONArray perform(JSONArray dataArray, HttpServletRequest req, ServerSession session) throws OXException, JSONException {
     	final int length = dataArray.length();
         final JSONArray respArr = new JSONArray(length);
@@ -239,7 +239,7 @@ public class Multiple extends SessionServlet {
                 for (int pos = 0; pos < length; pos++) {
                     final JsonInOut jsonInOut = mapping.get(pos);
                     if (null != jsonInOut) {
-                        respArr.put(jsonInOut.getOutputObject());                        
+                        respArr.put(jsonInOut.getOutputObject());
                     }
                 }
             } finally {
@@ -580,7 +580,7 @@ public class Multiple extends SessionServlet {
             this.pos = pos;
             this.inObject = inObject;
         }
-        
+
         /**
          * Gets the (zero-based) position.
          *
@@ -589,7 +589,7 @@ public class Multiple extends SessionServlet {
         public int getPos() {
             return pos;
         }
-        
+
         /**
          * Gets the input object
          *
@@ -598,7 +598,7 @@ public class Multiple extends SessionServlet {
         public JSONObject getInputObject() {
             return inObject;
         }
-        
+
         /**
          * Gets the output object
          *
@@ -610,7 +610,7 @@ public class Multiple extends SessionServlet {
 
         /**
          * Sets the output object
-         * 
+         *
          * @param outObject The output object to set
          */
         public void setOutputObject(final JSONValue outObject) {

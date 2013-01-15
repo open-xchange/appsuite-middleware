@@ -59,7 +59,7 @@ public interface IMAPValidity {
 
     /**
      * Gets the current validity.
-     * 
+     *
      * @return The current validity
      */
     long getCurrentValidity();

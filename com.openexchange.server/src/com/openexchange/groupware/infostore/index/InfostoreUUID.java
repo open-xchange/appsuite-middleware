@@ -50,7 +50,6 @@
 package com.openexchange.groupware.infostore.index;
 
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.index.IndexDocument;
 
 /**
  * {@link InfostoreUUID}
@@ -60,28 +59,28 @@ import com.openexchange.index.IndexDocument;
 public class InfostoreUUID {
 
     private final String fileUUID;
-    
-    
+
+
     private InfostoreUUID(int contextId, int userId, long folderId, int fileId) {
         super();
         StringBuilder tmp = new StringBuilder(64);
         tmp.append("infostore/").append(contextId).append('/').append(userId).append('/').append(folderId).append('/').append(fileId);
         fileUUID = tmp.toString();
     }
-    
+
     public static InfostoreUUID newUUID(int contextId, int userId, DocumentMetadata document) {
         return newUUID(contextId, userId, document.getFolderId(), document.getId());
     }
-    
+
     public static InfostoreUUID newUUID(int contextId, int userId, long folderId, int fileId) {
         return new InfostoreUUID(contextId, userId, folderId, fileId);
     }
-    
+
     @Override
     public String toString() {
         return fileUUID;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -92,18 +91,23 @@ public class InfostoreUUID {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         InfostoreUUID other = (InfostoreUUID) obj;
         if (fileUUID == null) {
-            if (other.fileUUID != null)
+            if (other.fileUUID != null) {
                 return false;
-        } else if (!fileUUID.equals(other.fileUUID))
+            }
+        } else if (!fileUUID.equals(other.fileUUID)) {
             return false;
+        }
         return true;
     }
 

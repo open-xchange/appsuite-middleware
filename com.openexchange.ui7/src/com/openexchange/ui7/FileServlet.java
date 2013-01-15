@@ -59,7 +59,7 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 
 /**
  * {@link FileServlet}
- * 
+ *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class FileServlet extends HttpServlet {

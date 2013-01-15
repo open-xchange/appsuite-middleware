@@ -74,7 +74,7 @@ import com.openexchange.user.json.field.UserField;
 import com.openexchange.user.json.mapping.UserMapper;
 
 /**
- * {@link UserContact} - Wraps {@link User}s and {@link Contact}s together for 
+ * {@link UserContact} - Wraps {@link User}s and {@link Contact}s together for
  * serialization.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -82,7 +82,7 @@ import com.openexchange.user.json.mapping.UserMapper;
 public class UserContact {
 
 	public static final String ALL_ATTRIBUTES = "*";
-	
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserContact.class));
 
 	private final User user;
@@ -90,7 +90,7 @@ public class UserContact {
 
 	/**
 	 * Initializes a new {@link UserContact}.
-	 * 
+	 *
 	 * @param contact the contact
 	 * @param user the user
 	 */
@@ -99,10 +99,10 @@ public class UserContact {
         this.contact = contact;
         this.user = user;
     }
-    
+
     /**
      * Serializes the user- and contact data into a JSON object.
-     * 
+     *
      * @param contactFields the contact fields to consider
      * @param userFields the user fields to consider
      * @param timeZoneID the client timezone ID
@@ -121,10 +121,10 @@ public class UserContact {
 		}
     	return jsonObject;
     }
-    
+
     /**
      * Serializes the user- and contact data into a JSON object.
-     * 
+     *
      * @param timeZoneID the client timezone ID
      * @return the serialized user contact
      * @throws OXException
@@ -144,17 +144,17 @@ public class UserContact {
 		}
     	return jsonObject;
     }
-    
+
     /**
      * Serializes the user- and contact data into a JSON array.
-     * 
-     * @param columnIDs the column identifiers of the corresponding fields to serialize 
+     *
+     * @param columnIDs the column identifiers of the corresponding fields to serialize
      * @param timeZoneID the client timezone ID
      * @param attributeParameters the attribute parameters to append to the array
      * @return the serialized user contact
      * @throws OXException
      */
-    public JSONArray serialize(final int[] columnIDs, final String timeZoneID, final Map<String, List<String>> attributeParameters) 
+    public JSONArray serialize(final int[] columnIDs, final String timeZoneID, final Map<String, List<String>> attributeParameters)
     		throws OXException {
     	final JSONArray jsonArray = new JSONArray();
 		final UserField[] userFields = UserMapper.getInstance().getFields(columnIDs);
@@ -188,7 +188,7 @@ public class UserContact {
 		}
     	return jsonArray;
     }
-    
+
     private void appendUserAttribute(final JSONArray jsonArray, final String attributePrefix, final List<String> attributes) throws JSONException {
         if (null != attributes && 0 < attributes.size()) {
         	final Map<String, Set<String>> userAttributes = user.getAttributes();
@@ -218,7 +218,7 @@ public class UserContact {
             }
         }
     }
-    
+
     private static Object toJSONValue(final Set<String> values) {
         if (null == values || values.isEmpty()) {
             return JSONObject.NULL;
@@ -244,7 +244,7 @@ public class UserContact {
     public static Comparator<UserContact> getComparator(final UserField userField, final Locale sessionLocale, final boolean descending) {
     	final Comparator<User> userComparator = Comparators.getComparator(userField, sessionLocale, descending);
     	return new Comparator<UserContact>() {
-			
+
 			@Override
 			public int compare(UserContact o1, UserContact o2) {
 				return userComparator.compare(o1.user, o2.user);

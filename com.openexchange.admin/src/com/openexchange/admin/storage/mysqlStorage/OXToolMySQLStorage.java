@@ -114,14 +114,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     private static final String FALLBACK_COUNTRY_CREATE = "US";
 
     @Override
-    public boolean domainInUse(final Context ctx, final String domain) throws StorageException {        
+    public boolean domainInUse(final Context ctx, final String domain) throws StorageException {
         Connection con = null;
         try {
             con = cache.getConnectionForContext(ctx.getId().intValue());
             final Resource[] res =  getDomainUsedbyResource(ctx, domain, con);
             final Group[] grp =  getDomainUsedbyGroup(ctx, domain, con);
             final User[] usr =  getDomainUsedbyUser(ctx, domain, con);
-            return (res!=null || grp!=null || usr!=null);             
+            return (res!=null || grp!=null || usr!=null);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e.toString());
@@ -199,10 +199,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean existsContextLoginMappings(final Context ctx) throws StorageException {
         Connection con= null;
-        
+
         try{
             con = cache.getConnectionForContext(ctx.getId().intValue());
-            return existsContextLoginMappings(ctx,con); 
+            return existsContextLoginMappings(ctx,con);
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -218,18 +218,18 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     public boolean existsContextLoginMappings(final Context ctx,final Connection configdb_connection) throws StorageException {
         if (ctx.getLoginMappings() != null) {
             boolean retval = false;
-            // check if any sent mapping entry already exists            
+            // check if any sent mapping entry already exists
             PreparedStatement prep_check = null;
             ResultSet rs = null;
             try {
                 final HashSet<String> logmaps = ctx.getLoginMappings();
-                
+
                 for (final String mpi : logmaps) {
                     prep_check = configdb_connection.prepareStatement("SELECT cid from login2context where login_info = ?");
                     prep_check.setString(1, mpi);
                     rs = prep_check.executeQuery();
                     if (rs.next()) {
-                        retval = true;                        
+                        retval = true;
                     }
                     rs.close();
                     prep_check.close();
@@ -237,7 +237,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                         break;
                     }
                 }
-                return retval;              
+                return retval;
             } catch (final SQLException e) {
                 log.error("SQL Error",e);
                 throw new StorageException(e.toString());
@@ -246,7 +246,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 closePreparedStatement(prep_check);
             }
         }
-        return false;       
+        return false;
     }
 
     /**
@@ -277,7 +277,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             stmt.setInt(3, FolderObject.SYSTEM_LDAP_FOLDER_ID);
             rs = stmt.executeQuery();
             while (!foundOther && rs.next()) {
-                foundOther = user.getDisplay_name().equals(rs.getString(1)) && (userId == 0 || userId != rs.getInt(2)); 
+                foundOther = user.getDisplay_name().equals(rs.getString(1)) && (userId == 0 || userId != rs.getInt(2));
             }
         } catch (final SQLException e) {
             log.error("SQL Error", e);
@@ -454,7 +454,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
         return existsGroupMember(ctx, group_ID, ids);
     }
-    
+
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsReason(int)
      */
@@ -483,15 +483,15 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
         try {
             con = cache.getConnectionForContext(ctx.getId().intValue());
-           
+
             prep_check = con.prepareStatement("SELECT id FROM resource WHERE cid = ? AND id = ?");
             prep_check.setInt(1, ctx.getId().intValue());
-            prep_check.setInt(2, resource_id);            
+            prep_check.setInt(2, resource_id);
             rs = prep_check.executeQuery();
             return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
-            throw new StorageException(e);            
+            throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e.toString());
@@ -512,18 +512,18 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     @Override
     public boolean existsResourceAddress(final Context ctx, final String address) throws StorageException {
-        
+
         final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         try {
-            
+
             con = cache.getConnectionForContext(ctx.getId().intValue());
-           
+
             prep_check = con.prepareStatement("SELECT mail FROM resource WHERE cid = ? AND mail = ?");
             prep_check.setInt(1, ctx.getId().intValue());
-            prep_check.setString(2, address);            
+            prep_check.setString(2, address);
             rs = prep_check.executeQuery();
             return rs.next();
         } catch (final PoolException e) {
@@ -554,10 +554,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
         try {
             con = cache.getConnectionForContext(ctx.getId().intValue());
-           
+
             prep_check = con.prepareStatement("SELECT id from resource where cid = ? and mail = ? AND id != ?");
             prep_check.setInt(1, ctx.getId().intValue());
-            prep_check.setString(2, address);      
+            prep_check.setString(2, address);
             prep_check.setInt(3, resource_id.intValue());
             rs = prep_check.executeQuery();
             return rs.next();
@@ -589,7 +589,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         return selectwithint(-1, "SELECT server_id FROM server WHERE server_id = ?", server_id);
     }
 
-    
+
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServerID(int,
      *      java.lang.String, java.lang.String)
@@ -598,7 +598,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     public boolean existsServerID(final int check_ID, final String table, final String field) throws StorageException {
         return selectwithint(-1, "SELECT server_id FROM " + table + " WHERE " + field + " = ?;", check_ID);
     }
-    
+
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsStore(int)
      */
@@ -627,10 +627,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
         try {
             con = cache.getConnectionForContext(ctx.getId());
-           
+
             prep_check = con.prepareStatement("SELECT id FROM user WHERE cid = ? AND id = ?;");
             prep_check.setInt(1, ctx.getId().intValue());
-            prep_check.setInt(2, uid);            
+            prep_check.setInt(2, uid);
             rs = prep_check.executeQuery();
             return rs.next();
         } catch (final PoolException e) {
@@ -650,7 +650,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             } catch (final PoolException e) {
                 log.error("Error pushing configdb write connection to pool!", e);
             }
-        }      
+        }
     }
 
     /**
@@ -772,7 +772,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             } catch (final SQLException e) {
                 log.error("Error closing statement", e);
             }
-            
+
             if (null != con) {
                 try {
                     cache.pushConnectionForContext(ctxid.intValue(), con);
@@ -799,7 +799,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        try {            
+        try {
             stmt = con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid = ?");
             stmt.setInt(1, ctx.getId().intValue());
             rs = stmt.executeQuery();
@@ -823,18 +823,18 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
         return admin_id;
     }
-   
+
     @Override
-	public int getAdminForContext(final Context ctx) throws StorageException {    	
+	public int getAdminForContext(final Context ctx) throws StorageException {
     	Connection con = null;
-    	
+
     	try{
     		con = cache.getConnectionForContext(ctx.getId().intValue());
-    		return getAdminForContext(ctx, con);	
+    		return getAdminForContext(ctx, con);
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
-        } finally {            
+        } finally {
             try {
                 if (con != null) {
                     cache.pushConnectionForContext(ctx.getId().intValue(), con);
@@ -842,7 +842,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             } catch (final PoolException e) {
                 log.error("Error pushing oxdb read connection to pool!", e);
             }
-    	
+
         }
     }
 
@@ -903,7 +903,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws StorageException {
         int group_id = 0;
         Connection con = null;
-        
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -1023,7 +1023,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setInt(2, group_id);
             rs = prep_check.executeQuery();
             if (rs.next()) {
-                // grab username and return 
+                // grab username and return
                 return rs.getString("identifier");
             }else{
                 throw new StorageException("No such group "+group_id+" in context "+ctx.getId().intValue()+"");
@@ -1092,7 +1092,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setInt(2, resource_id);
             rs = prep_check.executeQuery();
             if (rs.next()) {
-                // grab username and return 
+                // grab username and return
                 return rs.getString("identifier");
             }else{
                 throw new StorageException("No such resource "+resource_id+" in context "+ctx.getId().intValue()+"");
@@ -1137,7 +1137,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             stmt.setString(2, userName);
             rs = stmt.executeQuery();
             if (rs.next()) {
-                // grab user id and return 
+                // grab user id and return
                 return rs.getInt(1);
             }
             throw new NoSuchUserException("No such user " + userName + " in context " + ctx.getId());
@@ -1166,7 +1166,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setInt(2, user_id);
             rs = prep_check.executeQuery();
             if (rs.next()) {
-                // grab username and return 
+                // grab username and return
                 return rs.getString("uid");
             }else{
                 throw new StorageException("No such user "+user_id+" in context "+ctx.getId().intValue()+"");
@@ -1192,7 +1192,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 //    /**
 //     * This function is used for all sql queries which insert an integer
 //     * followed by a string followed by an integer as option
-//     * 
+//     *
 //     * @param sql_select_string
 //     * @param firstnumber
 //     *            the first integer
@@ -1498,7 +1498,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
         return false;
     }
-    
+
     private boolean condCheckAndUpdateSchemaIfRequired(final int writePoolId, final String schema, final boolean doUpdate, final Context ctx) throws StorageException {
         Updater updater;
         try {
@@ -1673,15 +1673,15 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         // groups are currently not used with mail addresses in the core
         return null;
 //        ArrayList<Group> data = new ArrayList<Group>();
-//        
+//
 //        if(data.size()==0){
 //            return null;
 //        }else{
 //            return data.toArray(new Group[data.size()]);
-//        }        
+//        }
     }
 
-    
+
     private Resource[] getDomainUsedbyResource(final Context ctx,final String domain,final Connection oxcon) throws SQLException{
         final ArrayList<Resource> data = new ArrayList<Resource>();
         PreparedStatement prep_check = null;
@@ -1701,14 +1701,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
         }
-        
+
         if (data.size() == 0) {
             return null;
         } else {
             return data.toArray(new Resource[data.size()]);
-        }        
+        }
     }
-    
+
     private User[] getDomainUsedbyUser(final Context ctx,final String domain,final Connection oxcon) throws SQLException{
         final ArrayList<User> data = new ArrayList<User>();
         PreparedStatement prep_check = null;
@@ -1735,25 +1735,25 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             rs.close();
             prep_check.close();
-            
-            // if we had time we could resolv the complete user object in db but at the moment we only need the ids of the user            
+
+            // if we had time we could resolv the complete user object in db but at the moment we only need the ids of the user
             final Iterator<Integer> ids_itr =  usr_ids.iterator();
             while (ids_itr.hasNext()) {
                 final Integer id  = ids_itr.next();
                 data.add(new User(id.intValue()));
-            }            
+            }
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
         }
-        
+
         if (data.size() == 0) {
             return null;
         } else {
             return data.toArray(new User[data.size()]);
-        }        
+        }
     }
-    
+
     private void returnConnection(final int ctxid, final Connection con) {
         try {
             if (con != null) {
@@ -1766,7 +1766,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     /**
      * This function is used for all sql queries which insert an integer
-     * 
+     *
      * @param sql_select_string
      * @param context_id
      *            if -1 we use configbd connection for query, else ox db
@@ -1823,7 +1823,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     /**
      * This function is used for all sql queries which check for some data to exist.
-     * 
+     *
      * @param con readable database connection to use.
      * @param sql SQL statement to execute with inserted sqlInts.
      * @param sqlInts numbers to insert into the sql query.
@@ -1856,7 +1856,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     /**
      * This function is used for all sql queries which insert a string
-     * 
+     *
      * @param sql_select_string
      * @param ins_Strings
      * @return
@@ -1913,15 +1913,15 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
-        
+
         try {
             con = ClientAdminThread.cache.getConnectionForConfigDB();
             prep_check = con.prepareStatement("SELECT cid FROM context WHERE name = ? and cid !=?");
-            prep_check.setString(1, ctx.getName());            
+            prep_check.setString(1, ctx.getName());
             prep_check.setInt(2,ctx.getId().intValue());
-            
+
             rs = prep_check.executeQuery();
-            
+
             return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
@@ -1940,7 +1940,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         }
     }
-    
+
     @Override
     public boolean existsContextName(final String contextName) throws StorageException {
         final Context ctx = new Context(-1,contextName);
@@ -1952,16 +1952,16 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
-        
+
         try {
             con = ClientAdminThread.cache.getConnectionForConfigDB();
-            
+
             prep_check = con.prepareStatement("SELECT db_pool_id FROM db_pool WHERE name = ? AND db_pool_id !=?");
             prep_check.setString(1, db.getName());
             prep_check.setInt(2, db.getId().intValue());
-            
+
             rs = prep_check.executeQuery();
-            
+
             return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
@@ -1980,7 +1980,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         }
     }
-    
+
     @Override
     public boolean existsDatabaseName(final String db_name) throws StorageException {
         final Database db = new Database(-1);
@@ -1993,7 +1993,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
-        
+
         try {
             con = ClientAdminThread.cache.getConnectionForContext(ctx.getId().intValue());
             prep_check = con.prepareStatement("SELECT id FROM groups WHERE cid = ? AND identifier = ? AND id !=?");
@@ -2001,7 +2001,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setString(2, grp.getName());
             prep_check.setInt(3, grp.getId().intValue());
             rs = prep_check.executeQuery();
-            
+
             return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
@@ -2020,7 +2020,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         }
     }
-    
+
     @Override
     public boolean existsGroupName(final Context ctx, final String identifier) throws StorageException {
         final Group grp = new Group(I(-1));
@@ -2033,16 +2033,16 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
-        
+
         try {
             con = ClientAdminThread.cache.getConnectionForContext(ctx.getId().intValue());
             prep_check = con.prepareStatement("SELECT id FROM resource WHERE cid = ? AND identifier = ? AND id != ?");
             prep_check.setInt(1, ctx.getId().intValue());
             prep_check.setString(2, res.getName());
             prep_check.setInt(3, res.getId().intValue());
-            
+
             rs = prep_check.executeQuery();
-            
+
             return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
@@ -2061,7 +2061,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         }
     }
-    
+
     @Override
     public boolean existsResourceName(final Context ctx, final String identifier) throws StorageException {
         final Resource res = new Resource(I(-1));
@@ -2074,14 +2074,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
-        
+
         try {
             con = ClientAdminThread.cache.getConnectionForConfigDB();
             prep_check = con.prepareStatement("SELECT server_id FROM server WHERE name = ? AND server_id != ?");
             prep_check.setString(1, srv.getName());
             prep_check.setInt(2, srv.getId().intValue());
             rs = prep_check.executeQuery();
-            
+
             return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
@@ -2103,7 +2103,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         }
     }
-    
+
     @Override
     public boolean existsServerName(final String server_name) throws StorageException {
         final Server srv = new Server();
@@ -2111,7 +2111,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         srv.setName(server_name);
         return existsServerName(srv);
     }
-    
+
     @Override
     public boolean existsUserName(Context ctx, User user) throws StorageException {
         final int contextId = ctx.getId().intValue();
@@ -2147,7 +2147,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
         return foundOther;
     }
-    
+
     @Override
     public boolean existsUserName(final Context ctx, final String username) throws StorageException {
         final User tmp = new User(-1);
@@ -2237,7 +2237,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                             lang = property.get();
                         }
                     }
-                    
+
                     if (lang != null) {
                         if (lang.indexOf('_') == -1) {
                             throw new InvalidDataException("language must contain an underscore, e.g. en_US");
@@ -2248,7 +2248,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 } catch (final OXException e) {
                     throw new InvalidDataException(e.getMessage());
                 }
-                
+
             }
             user.setLanguage(FALLBACK_LANGUAGE_CREATE + '_' + FALLBACK_COUNTRY_CREATE);
         } else {
@@ -2262,7 +2262,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     public void validateUserName(String userName) throws InvalidDataException {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
-        String usrUidRegexp = prop.getUserProp("CHECK_USER_UID_REGEXP", "[$@%\\.+a-zA-Z0-9_-]");        
+        String usrUidRegexp = prop.getUserProp("CHECK_USER_UID_REGEXP", "[$@%\\.+a-zA-Z0-9_-]");
         String illegal = userName.replaceAll(usrUidRegexp,"");
         if (illegal.length() > 0) {
             throw new InvalidDataException("Illegal chars: \"" + illegal + "\"");
@@ -2286,7 +2286,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     @Override
     public void changeAccessCombination(int filter, int addAccess, int removeAccess) throws StorageException {
-        
+
         //Collecting ONE Context id for each schema
         Set<Integer> contextIdsForSchema = new HashSet<Integer>();
         try {
@@ -2305,7 +2305,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("Internal Error", e);
             throw new StorageException(e);
         }
-        
+
         //Execute once for each schema
         for (int cid : contextIdsForSchema) {
             changeAccessCombination(cid, filter, addAccess, removeAccess);
@@ -2316,15 +2316,15 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         Connection con = null;
         Table table = new Table("user_configuration");
         Column column = new Column("permissions");
-        
+
         try {
             con = cache.getConnectionForContextNoTimeout(cid);
             UPDATE update = new UPDATE(table).SET(column, new BitAND(new BitOR(column, PLACEHOLDER), new INVERT(PLACEHOLDER)));
-            
+
             List<Object> values = new ArrayList<Object>();
             values.add(addAccess);
             values.add(removeAccess);
-            
+
             if (filter != -1) {
                 update.WHERE(new EQUALS(column, PLACEHOLDER));
                 values.add(filter);
@@ -2354,10 +2354,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
         try {
             con = ClientAdminThread.cache.getConnectionForConfigDB();
-            
+
             prep_check = con.prepareStatement("SELECT read_db_pool_id FROM db_pool JOIN db_cluster ON write_db_pool_id=db_pool_id WHERE db_pool_id=?");
             prep_check.setInt(1, id);
-            
+
             rs = prep_check.executeQuery();
             if( rs.next() ) {
                 ret = new Database();
@@ -2366,7 +2366,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             } else {
                 ret = null;
             }
-            
+
             return ret;
         } catch (final PoolException e) {
             log.error("Pool Error",e);

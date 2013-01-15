@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -39,11 +39,11 @@ public class RemoteException {
 
     /**
      * Ruft den Wert der remoteException-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link com.openexchange.admin.soap.reseller.resource.rmi.RemoteException }
-     *     
+     *
      */
     public com.openexchange.admin.soap.reseller.resource.rmi.RemoteException getRemoteException() {
         return remoteException;
@@ -51,11 +51,11 @@ public class RemoteException {
 
     /**
      * Legt den Wert der remoteException-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link com.openexchange.admin.soap.reseller.resource.rmi.RemoteException }
-     *     
+     *
      */
     public void setRemoteException(com.openexchange.admin.soap.reseller.resource.rmi.RemoteException value) {
         this.remoteException = value;

@@ -54,13 +54,13 @@ import java.util.LinkedList;
 
 /**
  * Simple FIFO Queue implementation
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class FIFOQueue<E> extends AbstractQueue<E> {
-	
+
 	private final LinkedList<E> list;
-	
+
 	/**
 	 * Default constructor
 	 */
@@ -85,10 +85,11 @@ public class FIFOQueue<E> extends AbstractQueue<E> {
 	 */
 	@Override
 	public E poll() {
-		if (list.isEmpty())
-			return null;
-		else
-			return list.removeFirst();
+		if (list.isEmpty()) {
+            return null;
+        } else {
+            return list.removeFirst();
+        }
 	}
 
 	/*
@@ -97,10 +98,11 @@ public class FIFOQueue<E> extends AbstractQueue<E> {
 	 */
 	@Override
 	public E peek() {
-		if (list.isEmpty())
-			return null;
-		else
-			return list.getFirst();
+		if (list.isEmpty()) {
+            return null;
+        } else {
+            return list.getFirst();
+        }
 	}
 
 	/*

@@ -67,7 +67,7 @@ import com.openexchange.groupware.links.LinksEventHandler;
 public class LinkActivator implements BundleActivator {
 
     private ServiceRegistration<EventHandler> linksHandlerRegistration;
-    
+
 
     public LinkActivator() {
         super();

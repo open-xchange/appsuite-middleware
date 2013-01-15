@@ -49,7 +49,6 @@
 package com.openexchange.loxandra.json.action;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -66,14 +65,14 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@Action(method = RequestMethod.PUT, 
-		name = "new", 
-		description = "Create an EAV Contact.", 
+@Action(method = RequestMethod.PUT,
+		name = "new",
+		description = "Create an EAV Contact.",
 		parameters = { @Parameter(name = "") } )
 public class NewAction extends AbstractAction {
 
 	private static final Log log = com.openexchange.log.Log.loggerFor(NewAction.class);
-	
+
 	/**
 	 * Constructor
 	 * @param serviceLookup
@@ -91,7 +90,7 @@ public class NewAction extends AbstractAction {
 		EAVContactParser parser = new EAVContactParser();
 		final EAVContact c = parser.parse(jsonData);
 		getContactService().getEAVContactService().insertContact(c);
-		
+
 		return new AJAXRequestResult(c.getUUID());
 	}
 }

@@ -94,7 +94,7 @@ import com.openexchange.xing.exception.XingUnlinkedException;
 
 /**
  * {@link XingSubscribeService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class XingSubscribeService extends AbstractSubscribeService {
@@ -106,7 +106,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
 
     /**
      * Initializes a new {@link XingSubscribeService}.
-     * 
+     *
      * @param services The service look-up
      */
     public XingSubscribeService(final ServiceLookup services) {
@@ -439,7 +439,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
     /**
      * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
      * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
-     * 
+     *
      * @param contact The contact container to fill
      * @param url The URI parameter's value
      * @throws OXException If converting image's data fails
@@ -455,7 +455,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
     /**
      * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
      * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
-     * 
+     *
      * @param contact The contact container to fill
      * @param url The image URL
      * @throws OXException If converting image's data fails

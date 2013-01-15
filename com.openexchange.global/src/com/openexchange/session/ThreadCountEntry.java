@@ -60,7 +60,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * {@link ThreadCountEntry} - A thread count entry.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadCountEntry implements Comparable<ThreadCountEntry> {
@@ -107,7 +107,7 @@ public final class ThreadCountEntry implements Comparable<ThreadCountEntry> {
 
     /**
      * Gets the session identifier.
-     * 
+     *
      * @return The session identifier
      */
     public String getSessionId() {
@@ -116,7 +116,7 @@ public final class ThreadCountEntry implements Comparable<ThreadCountEntry> {
 
     /**
      * Gets the current count.
-     * 
+     *
      * @return The current count.
      */
     public int get() {
@@ -131,7 +131,7 @@ public final class ThreadCountEntry implements Comparable<ThreadCountEntry> {
 
     /**
      * Gets the available threads at invocation time.
-     * 
+     *
      * @return The available threads
      */
     public Set<Thread> getThreads() {
@@ -146,7 +146,7 @@ public final class ThreadCountEntry implements Comparable<ThreadCountEntry> {
 
     /**
      * Gets the available threads if total number is equal to or greater than specified threshold at invocation time.
-     * 
+     *
      * @param threshold The threshold
      * @return The available threads
      */
@@ -179,7 +179,7 @@ public final class ThreadCountEntry implements Comparable<ThreadCountEntry> {
 
     /**
      * Atomically increments by one the current count.
-     * 
+     *
      * @return The updated value
      */
     public int incrementAndGet() {
@@ -197,7 +197,7 @@ public final class ThreadCountEntry implements Comparable<ThreadCountEntry> {
 
     /**
      * Atomically decrements by one the current count.
-     * 
+     *
      * @return The updated value
      */
     public int decrementAndGet() {

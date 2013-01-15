@@ -91,7 +91,7 @@ public final class RemoveUnnecessaryIndexes2 extends SimpleUpdateTask {
                 closeSQLStuff(null, stmt);
             }
         }
-        
+
         {
             Statement stmt = null;
             try {

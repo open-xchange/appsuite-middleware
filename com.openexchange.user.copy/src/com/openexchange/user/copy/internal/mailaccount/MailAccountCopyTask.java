@@ -122,7 +122,7 @@ public class MailAccountCopyTask implements CopyUserTaskService {
         }
         /*
          * Get (sorted) mail account identifiers
-         * 
+         *
          * Every mail account has an optional transport account
          */
         final int[] ids = srcMailAccounts.keys();
@@ -135,7 +135,7 @@ public class MailAccountCopyTask implements CopyUserTaskService {
         }
         return null;
     }
-    
+
     private void writeDataToDB(final int newId, final MailAccountData data, final TransportAccountData optData, final int user, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -183,9 +183,9 @@ public class MailAccountCopyTask implements CopyUserTaskService {
             setStringOrNull(pos++, data.getReplyTo(), stmt);
             stmt.executeUpdate();
             /*-
-             * 
+             *
              * ------------------ Transport data ------------------
-             * 
+             *
              */
             if (null != optData) {
                 DBUtils.closeSQLStuff(stmt);

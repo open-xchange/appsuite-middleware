@@ -74,20 +74,20 @@ import com.openexchange.index.IndexManagementMBean;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexCLI {
-    
+
     private static final String JMX_URL = "service:jmx:rmi:///jndi/rmi://localhost:9999/server";
-    
+
     private static final String ACTION_LOCK = "lockindex";
-    
+
     private static final String ACTION_UNLOCK = "unlockindex";
-    
-    
+
+
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
             System.out.println("Missing argument 'action'.");
             System.exit(1);
         }
-        
+
         String[] actionArgs;
         if (args.length > 1) {
             actionArgs = new String[args.length - 1];
@@ -95,14 +95,14 @@ public class IndexCLI {
         } else {
             actionArgs = new String[0];
         }
-        
+
         try {
             String action = args[0];
             int pos;
             if ((pos = action.lastIndexOf('/')) >= 0) {
                 action = action.substring(pos + 1);
             }
-            
+
             int retval = 0;
             if (action.equals(ACTION_LOCK)) {
                 retval = lockIndex(actionArgs);
@@ -112,7 +112,7 @@ public class IndexCLI {
                 System.out.println("Unknown action '" + action + "'.");
                 System.exit(1);
             }
-            
+
             System.exit(retval);
         } catch (MalformedObjectNameException e) {
             System.out.println("An internal error occurred: " + e.getMessage());
@@ -125,7 +125,7 @@ public class IndexCLI {
             System.exit(1);
         }
     }
-    
+
     private static int unlockIndex(String args[]) throws IOException, MalformedObjectNameException, NullPointerException, MBeanException {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
@@ -136,7 +136,7 @@ public class IndexCLI {
             printHelp(ACTION_UNLOCK, options);
             return 1;
         }
-        
+
         CommandLineParser parser = new PosixParser();
         try {
             CommandLine cmd = parser.parse(options, args, true);
@@ -144,7 +144,7 @@ public class IndexCLI {
                 printHelp(ACTION_UNLOCK, options);
                 return 0;
             }
-            
+
             JMXServiceURL url = new JMXServiceURL(JMX_URL);
             JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
             try {
@@ -154,7 +154,7 @@ public class IndexCLI {
                 int userId = Integer.parseInt(cmd.getOptionValue('u'));
                 int module = Integer.parseInt(cmd.getOptionValue('m'));
                 indexMBean.unlockIndex(contextId, userId, module);
-                
+
                 System.out.println("Index was unlocked.");
                 return 0;
             } finally {
@@ -172,7 +172,7 @@ public class IndexCLI {
             return 1;
         }
     }
-    
+
     private static int lockIndex(String args[]) throws IOException, MalformedObjectNameException, NullPointerException, MBeanException {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
@@ -183,7 +183,7 @@ public class IndexCLI {
             printHelp(ACTION_LOCK, options);
             return 1;
         }
-        
+
         CommandLineParser parser = new PosixParser();
         try {
             CommandLine cmd = parser.parse(options, args, true);
@@ -191,7 +191,7 @@ public class IndexCLI {
                 printHelp(ACTION_LOCK, options);
                 return 0;
             }
-            
+
             JMXServiceURL url = new JMXServiceURL(JMX_URL);
             JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
             try {
@@ -201,7 +201,7 @@ public class IndexCLI {
                 int userId = Integer.parseInt(cmd.getOptionValue('u'));
                 int module = Integer.parseInt(cmd.getOptionValue('m'));
                 indexMBean.lockIndex(contextId, userId, module);
-                
+
                 System.out.println("Index was locked.");
                 return 0;
             } finally {
@@ -219,7 +219,7 @@ public class IndexCLI {
             return 1;
         }
     }
-    
+
     private static IndexManagementMBean indexMBean(MBeanServerConnection mbsc) throws MalformedObjectNameException {
         IndexManagementMBean proxyInstance = MBeanServerInvocationHandler.newProxyInstance(
             mbsc,
@@ -228,12 +228,12 @@ public class IndexCLI {
             false);
         return proxyInstance;
     }
-    
+
     private static void printHelp(String action, Options options) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp(action, options, false);
     }
-    
+
     private static Option createOption(String shortArg, String longArg, boolean hasArg, String description, boolean required) {
         Option option = new Option(shortArg, longArg, hasArg, description);
         option.setRequired(required);

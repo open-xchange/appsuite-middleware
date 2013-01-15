@@ -73,13 +73,12 @@ import com.hazelcast.core.LifecycleListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.hazelcast.init.HazelcastInitializer.InitMode;
 import com.openexchange.hazelcast.mbean.HazelcastMBean;
 import com.openexchange.hazelcast.osgi.HazelcastActivator;
 
 /**
  * {@link HazelcastInitializer}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HazelcastInitializer {
@@ -113,7 +112,7 @@ public final class HazelcastInitializer {
 
     /**
      * Re-initializes the {@link HazelcastInstance} by removing the supplied nodes from the list of known members.
-     * 
+     *
      * @param nodes The nodes that should be removed
      * @param force <code>true</code> to enforce a restart of a running {@code HazelcastInstance}; otherwise <code>false</code>
      * @param logger The logger instance
@@ -144,7 +143,7 @@ public final class HazelcastInitializer {
                 return InitMode.NONE;
             }
             if (logger.isInfoEnabled()) {
-                logger.info("\nHazelcast:\n\tRe-initializing Hazelcast instance:\n\tExisting members: " + cur + 
+                logger.info("\nHazelcast:\n\tRe-initializing Hazelcast instance:\n\tExisting members: " + cur +
                     "\n\tDisappeared members: " + members + "\n");
             }
             final long st = System.currentTimeMillis();
@@ -164,7 +163,7 @@ public final class HazelcastInitializer {
 
     /**
      * (Re-)Initializes the {@link HazelcastInstance} by adding the supplied nodes to the list of known members.
-     * 
+     *
      * @param nodes The pre-known nodes
      * @param force <code>true</code> to enforce a restart of a running {@code HazelcastInstance}; otherwise <code>false</code>
      * @param stamp The start-up time stamp
@@ -217,7 +216,7 @@ public final class HazelcastInitializer {
             if (infoEnabled) {
                 LOG.info("\nHazelcast:\n\tCreating new hazelcast instance...");
             }
-            long hzStart = infoEnabled ? System.currentTimeMillis() : 0L; 
+            long hzStart = infoEnabled ? System.currentTimeMillis() : 0L;
             final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
             if (infoEnabled) {
                 LOG.info("\nHazelcast:\n\tNew hazelcast instance successfully created in " + (System.currentTimeMillis() - hzStart) + "msec.\n");
@@ -280,7 +279,7 @@ public final class HazelcastInitializer {
                 return InitMode.NONE;
             }
             if (logger.isInfoEnabled()) {
-                logger.info("\nHazelcast:\n\tRe-configuring Hazelcast instance:\n\tExisting members: " + cur + "\n\tNew members: " + 
+                logger.info("\nHazelcast:\n\tRe-configuring Hazelcast instance:\n\tExisting members: " + cur + "\n\tNew members: " +
                     members + "\n");
             }
             if (!cur.addAll(members)) {
@@ -309,11 +308,11 @@ public final class HazelcastInitializer {
             }
         }
     }
-    
+
     private static final Pattern SPLIT = Pattern.compile("\\%");
 
     private static Set<String> resolve2Members(final List<InetAddress> nodes) {
-        Set<String> localHost = getLocalHost(); 
+        Set<String> localHost = getLocalHost();
         final Set<String> members = new LinkedHashSet<String>(nodes.size());
         for (final InetAddress inetAddress : nodes) {
             final String[] addressArgs = SPLIT.split(inetAddress.getHostAddress(), 0);

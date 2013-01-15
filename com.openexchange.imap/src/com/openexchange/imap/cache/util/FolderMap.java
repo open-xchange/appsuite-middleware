@@ -52,8 +52,6 @@ package com.openexchange.imap.cache.util;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.mail.dataobjects.MailFolder;

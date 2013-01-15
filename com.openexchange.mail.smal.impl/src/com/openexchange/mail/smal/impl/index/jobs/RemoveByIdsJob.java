@@ -66,7 +66,7 @@ import com.openexchange.service.indexing.impl.internal.Services;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class RemoveByIdsJob extends AbstractMailJob {    
+public class RemoveByIdsJob extends AbstractMailJob {
 
     @Override
     public void execute(JobInfo jobInfo) throws OXException {
@@ -74,25 +74,25 @@ public class RemoveByIdsJob extends AbstractMailJob {
             if (!(jobInfo instanceof MailJobInfo)) {
                 throw new IllegalArgumentException("Job info must be an instance of MailJobInfo.");
             }
-            
+
             MailJobInfo info = (MailJobInfo) jobInfo;
             long start = System.currentTimeMillis();
             if (LOG.isDebugEnabled()) {
                 LOG.debug(this.getClass().getSimpleName() + " started performing. " + info.toString());
             }
-            
+
             checkJobInfo();
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
             final IndexAccess<MailMessage> mailIndex = indexFacade.acquireIndexAccess(Types.EMAIL, info.userId, info.contextId);
             final IndexAccess<Attachment> attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, info.userId, info.contextId);
-            try {       
+            try {
                 String[] ids = (String[]) info.getProperty(IDS);
                 final List<String> toAdd = Arrays.asList(ids);
                 deleteMails(info, toAdd, mailIndex, attachmentIndex);
             } finally {
                 closeIndexAccess(mailIndex);
                 closeIndexAccess(attachmentIndex);
-                
+
                 if (LOG.isDebugEnabled()) {
                     long diff = System.currentTimeMillis() - start;
                     LOG.debug(this.getClass().getSimpleName() + " lasted " + diff + "ms. " + info.toString());
@@ -105,6 +105,6 @@ public class RemoveByIdsJob extends AbstractMailJob {
 
     private void checkJobInfo() {
         // Nothing to do
-        
+
     }
 }

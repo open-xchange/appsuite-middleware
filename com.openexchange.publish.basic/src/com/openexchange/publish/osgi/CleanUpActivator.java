@@ -63,7 +63,7 @@ import com.openexchange.publish.impl.InfostoreCleanUpEventHandler;
 
 /**
  * {@link CleanUpActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CleanUpActivator extends HousekeepingActivator {

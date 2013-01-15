@@ -190,7 +190,7 @@ final class Reminder {
                 .getDate());
         }
     }
-    
+
     static void loadReminder(final Context ctx, final int userId,
         final Collection<Task> tasks, final Connection con) throws OXException {
             final ReminderService remStor = new ReminderHandler(ctx);

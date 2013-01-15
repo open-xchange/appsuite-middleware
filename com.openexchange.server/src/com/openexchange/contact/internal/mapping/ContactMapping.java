@@ -64,14 +64,14 @@ public abstract class ContactMapping<T> extends com.openexchange.groupware.tools
 	/**
 	 * Validates the property in a contact, throwing exceptions if validation
 	 * fails.
-	 * 
+	 *
 	 * @param contact the contact to validate the property for
-	 * @throws OXException 
+	 * @throws OXException
 	 */
 	public void validate(final Contact contact) throws OXException {
-		
+
 	}
-	
+
 	@Override
 	public int compare(final Contact object1, final Contact object2) {
 		return this.compare(object1, object2, (Comparator<Object>) null);

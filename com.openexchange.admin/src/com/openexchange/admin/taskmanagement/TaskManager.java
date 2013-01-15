@@ -74,9 +74,9 @@ public class TaskManager {
     private final ExecutorService executor;
 
     private int lastID = 0;
-    
+
     private int runningjobs = 0;
-    
+
     private final ArrayList<Integer> finishedJobs = new ArrayList<Integer>();
 
     private static class JobManagerSingletonHolder {
@@ -121,11 +121,11 @@ public class TaskManager {
         this.executor.execute(job);
         return lastID;
     }
-    
+
     public boolean jobsRunning() {
         return (runningjobs > 0);
     }
-    
+
     public void shutdown() {
         this.executor.shutdown();
     }
@@ -133,7 +133,7 @@ public class TaskManager {
     public ExtendedFutureTask<?> getTask(final int jid) throws TaskManagerException {
         return getTask(jid, null);
     }
-    
+
     public ExtendedFutureTask<?> getTask(final int jid, final Integer cid) throws TaskManagerException {
         synchronized (this.jobs) {
             final ExtendedFutureTask<?> job = this.jobs.get(Integer.valueOf(jid));
@@ -154,7 +154,7 @@ public class TaskManager {
     public String getJobList(final Integer cid) {
         final StringBuffer buf = new StringBuffer();
         final Enumeration<Integer> jids = this.jobs.keys();
-    
+
         final String TFORMAT = "%-5s %-20s %-10s %-40s \n";
         final String VFORMAT = "%-5s %-20s %-10s %-40s \n";
         if (jids.hasMoreElements()) {
@@ -172,11 +172,11 @@ public class TaskManager {
         }
         return buf.toString();
     }
-    
+
     public void deleteJob(int id) throws TaskManagerException {
         deleteJob(id, null);
     }
-    
+
     public void deleteJob(int id, final Integer cid) throws TaskManagerException {
         final ExtendedFutureTask<?> job = this.jobs.get(id);
         if( null != cid && job.cid != cid ) {
@@ -188,11 +188,11 @@ public class TaskManager {
             throw new TaskManagerException("The job with the id " + id + " is currently running and cannot be deleted");
         }
     }
-    
+
     public void flush() throws TaskManagerException {
         flush(null);
     }
-    
+
     public void flush(final Integer cid) throws TaskManagerException {
         while(!finishedJobs.isEmpty()) {
             final Integer jobid = finishedJobs.get(0);
@@ -214,5 +214,5 @@ public class TaskManager {
             return "Waiting";
         }
     }
-    
+
 }

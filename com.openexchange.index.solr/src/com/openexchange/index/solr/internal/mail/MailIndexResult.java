@@ -58,7 +58,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link MailIndexResult} - The mail <code>IndexResult</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailIndexResult implements IndexResult<MailMessage> {
@@ -78,7 +78,7 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
 
     /**
      * Initializes a new {@link MailIndexResult}.
-     * 
+     *
      * @param numFound The <code>numFound</code> to set
      */
     public MailIndexResult(final int numFound) {
@@ -93,7 +93,7 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
 
     /**
      * Sets the <code>numFound</code>
-     * 
+     *
      * @param numFound The <code>numFound</code> to set
      */
     public void setNumFound(final int numFound) {
@@ -107,7 +107,7 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
 
     /**
      * Sets the mails
-     * 
+     *
      * @param mails The mails to set
      */
     public void setResults(final List<IndexDocument<MailMessage>> mails) {
@@ -118,7 +118,7 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
     public Map<IndexField, Map<String, Long>> getFacetCounts() {
         return facetCounts;
     }
-    
+
     /**
      * Sets the facet counts
      *

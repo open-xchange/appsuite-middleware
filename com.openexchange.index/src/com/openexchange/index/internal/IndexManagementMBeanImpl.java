@@ -63,9 +63,9 @@ import com.openexchange.index.IndexManagementService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexManagementMBeanImpl extends StandardMBean implements IndexManagementMBean {
-    
+
     private final IndexManagementService managementService;
-    
+
 
     public IndexManagementMBeanImpl(IndexManagementService managementService) throws NotCompliantMBeanException {
         super(IndexManagementMBean.class);

@@ -64,7 +64,7 @@ import com.openexchange.mq.MQService;
 
 /**
  * {@link MQQueueResource}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MQQueueResource implements MQCloseable {
@@ -113,28 +113,28 @@ public abstract class MQQueueResource implements MQCloseable {
      * Gets the acknowledge mode that indicates whether the consumer or the client will acknowledge any messages it receives; ignored if
      * {@link #isTransacted()} is <code>true</code>. Legal values are {@link Session#AUTO_ACKNOWLEDGE}, {@link Session#CLIENT_ACKNOWLEDGE},
      * and {@link Session#DUPS_OK_ACKNOWLEDGE}.
-     * 
+     *
      * @return The acknowledge mode
      */
     protected abstract int getAcknowledgeMode();
 
     /**
      * Checks if this resource is transacted.
-     * 
+     *
      * @return <code>true</code> if transacted; otherwise false
      */
     protected abstract boolean isTransacted();
 
     /**
      * Initializes the resource.
-     * 
+     *
      * @throws JMSException If initialization fails
      */
     protected abstract void initResource(Queue queue, Object arg) throws JMSException, OXException;
 
     /**
      * Gets the name of the queue associated with this receiver.
-     * 
+     *
      * @return The queue name
      */
     public String getQueueName() {

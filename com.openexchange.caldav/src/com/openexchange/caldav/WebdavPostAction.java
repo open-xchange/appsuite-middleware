@@ -63,20 +63,20 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
- * {@link WebdavPostAction} 
+ * {@link WebdavPostAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class WebdavPostAction extends AbstractAction {
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavPostAction.class));
 
     protected final GroupwareCaldavFactory factory;
-    
+
     public WebdavPostAction(GroupwareCaldavFactory factory) {
 	    this.factory = factory;
 	}
-    
+
 	@Override
 	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
 		WebdavResource resource = request.getResource();
@@ -96,7 +96,7 @@ public class WebdavPostAction extends AbstractAction {
 			throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		}
 		/*
-		 * put request body 
+		 * put request body
 		 */
 		try {
 			resource.putBodyAndGuessLength(request.getBody());

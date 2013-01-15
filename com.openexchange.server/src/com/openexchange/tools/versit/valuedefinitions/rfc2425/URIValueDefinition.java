@@ -68,7 +68,7 @@ public class URIValueDefinition extends ValueDefinition {
     public static final URIValueDefinition Default = new URIValueDefinition();
 
     private static final Pattern URIPattern = Pattern.compile("[^,]+");
-    
+
     /** Turn off URI validation (bug #23046) */
     private static final boolean RFC_2396_CONFORMANCE = false;
 

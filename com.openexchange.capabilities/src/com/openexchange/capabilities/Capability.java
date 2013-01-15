@@ -54,7 +54,7 @@ import java.util.Map;
 
 /**
  * {@link Capability} - Represents a capability.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Capability {

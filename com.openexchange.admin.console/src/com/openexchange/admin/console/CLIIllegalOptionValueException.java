@@ -5,7 +5,7 @@ import java.text.MessageFormat;
 
 /**
  * {@link CLIIllegalOptionValueException} - Indicates an illegal or missing value.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CLIIllegalOptionValueException extends CLIOptionException {
@@ -32,7 +32,7 @@ public class CLIIllegalOptionValueException extends CLIOptionException {
 
     /**
      * Gets the name of the option whose value was illegal.
-     * 
+     *
      * @return The name of the option whose value was illegal (e.g. "-u")
      */
     public CLIOption getOption() {
@@ -41,7 +41,7 @@ public class CLIIllegalOptionValueException extends CLIOptionException {
 
     /**
      * Gets the illegal value.
-     * 
+     *
      * @return The illegal value
      */
     public String getValue() {

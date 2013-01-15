@@ -102,7 +102,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
  * The {@link CaldavPerformer} contains all the wiring for caldav actions. This is the central entry point for caldav requests.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CaldavPerformer implements SessionHolder {
@@ -119,7 +119,7 @@ public class CaldavPerformer implements SessionHolder {
 
     /**
      * Gets the instance of {@link InfostorePerformer}.
-     * 
+     *
      * @return The instance of {@link InfostorePerformer}.
      */
     public static CaldavPerformer getInstance() {
@@ -302,7 +302,7 @@ public class CaldavPerformer implements SessionHolder {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Executing " + action);
             }
-            
+
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final WebdavProtocolException x) {
             resp.setStatus(x.getStatus());

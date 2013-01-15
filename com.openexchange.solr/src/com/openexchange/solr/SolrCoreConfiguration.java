@@ -62,14 +62,14 @@ import com.openexchange.exception.OXException;
 public class SolrCoreConfiguration {
 
     private final SolrCoreIdentifier identifier;
-    
+
     private final String coreDirPath;
-    
+
     private final String coreName;
-    
+
     private final String dataDirPath;
-    
-    
+
+
     public SolrCoreConfiguration(final URI coreStoreUri, final SolrCoreIdentifier identifier) throws OXException {
         super();
         this.identifier = identifier;
@@ -77,15 +77,15 @@ public class SolrCoreConfiguration {
         coreDirPath = coreStoreUri.getPath() + File.separator + coreName;
         dataDirPath = coreDirPath + File.separator + "data";
     }
-    
+
     public String getCoreName() {
         return coreName;
     }
-    
+
     public String getCoreDirPath() {
         return coreDirPath;
     }
-    
+
     public String getDataDirPath() {
         return dataDirPath;
     }

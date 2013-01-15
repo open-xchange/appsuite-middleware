@@ -64,7 +64,7 @@ public class UpdateRestrictions extends ResellerAbstraction {
     }
 
     /**
-     * 
+     *
      */
     public UpdateRestrictions() {
     }

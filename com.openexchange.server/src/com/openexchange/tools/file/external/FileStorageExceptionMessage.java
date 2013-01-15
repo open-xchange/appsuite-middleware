@@ -65,37 +65,37 @@ public class FileStorageExceptionMessage implements LocalizableStrings {
     private FileStorageExceptionMessage() {
         super();
     }
-    
+
     // An IO error occurred: %s
     public final static String IOERROR_MSG = "An IO error occurred: %s";
-    
+
     // May be used to turn the IOException of getInstance into a proper OXException
     public final static String INSTANTIATIONERROR_MSG = "File store could not be accessed: %s";
-    
+
     // Cannot create directory \"%1$s\" for FileStorage.
     public final static String CREATE_DIR_FAILED_MSG = "Cannot create directory \"%1$s\" for FileStorage.";
-    
+
     // Unsupported encoding.
     public final static String ENCODING_MSG = "Unsupported encoding.";
-    
+
     // Number parsing problem.
     public final static String NO_NUMBER_MSG = "Number parsing problem.";
-    
+
     // File storage is full.
     public final static String STORE_FULL_MSG = "File storage is full.";
-    
+
     // Depth mismatch while computing next entry.
     public final static String DEPTH_MISMATCH_MSG = "'Depth' mismatch while computing next entry.";
-    
+
     // Cannot remove lock file.
     public final static String UNLOCK_MSG = "Cannot remove lock file.";
-    
+
     // Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the filestore.
     public final static String LOCK_MSG = "Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the file store.";
-    
+
     // Eliminating the FileStorage failed.
     public final static String NOT_ELIMINATED_MSG = "Eliminating the FileStorage failed.";
-    
+
     // File does not exist in filestore \"%1$s\". Consider running consistency tool.
     public final static String FILE_NOT_FOUND_MSG = "File does not exist in file store \"%1$s\". Consider running the consistency tool.";
 

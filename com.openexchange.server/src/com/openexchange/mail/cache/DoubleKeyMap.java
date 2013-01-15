@@ -84,7 +84,7 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
         out.defaultWriteObject();
         out.flush();
     }
-    
+
     private void readObject(final java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         // Read in size

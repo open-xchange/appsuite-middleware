@@ -59,7 +59,7 @@ import com.openexchange.mq.queue.MQQueueSender;
  * {@link SimQueueSender} - A queue sender for testing purpose.
  * <p>
  * Obtain via {@link SimQueueReceiver#createSimSender()}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SimQueueSender implements MQQueueSender {
@@ -112,13 +112,13 @@ public class SimQueueSender implements MQQueueSender {
     @Override
     public void commit() throws OXException {
         // Nothing to do
-        
+
     }
 
     @Override
     public void rollback() throws OXException {
         // Nothing to do
-        
+
     }
 
 }

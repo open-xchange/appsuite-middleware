@@ -117,7 +117,7 @@ public class DynamicAttributesLoader implements Filter<Context, Context> {
     }
 
     private static final String SQL = "SELECT cid, name, value FROM contextAttribute";
-    
+
     private Collection<Context> loadAttributes(Map<Integer, Context> contexts) throws StorageException {
         int cid = contexts.values().iterator().next().getId().intValue();
         Connection con;

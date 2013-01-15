@@ -74,7 +74,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
  * {@link Patches}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Patches {
@@ -82,35 +82,35 @@ public class Patches {
     private Patches() {
     	// prevent instantiation
     }
-    
+
     /**
      * {@link Incoming}
-     * 
+     *
      * Patches for incoming iCal files.
-     * 
+     *
      * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
      */
     public static final class Incoming {
-    	
+
         private Incoming() {
         	// prevent instantiation
         }
-        
+
         /**
-         * Adds the user to the list of participants if needed, i.e. the 
+         * Adds the user to the list of participants if needed, i.e. the
          * appointment not yet has any internal user participants.
-         * 
+         *
          * @param appointment
          */
         public static void addUserParticipantIfEmpty(int userID, Appointment appointment) {
             if (null == appointment.getParticipants() || 0 == appointment.getParticipants().length) {
                 UserParticipant user = new UserParticipant(userID);
-                user.setConfirm(Appointment.ACCEPT);                
+                user.setConfirm(Appointment.ACCEPT);
                 appointment.setParticipants(new UserParticipant[] { user });
             } else {
                 boolean hasSomethingInternal = false;
                 for (Participant participant : appointment.getParticipants()) {
-                    if (Participant.GROUP == participant.getType() || Participant.RESOURCE == participant.getType() || 
+                    if (Participant.GROUP == participant.getType() || Participant.RESOURCE == participant.getType() ||
                         Participant.USER == participant.getType() || Participant.RESOURCEGROUP == participant.getType()) {
                         hasSomethingInternal = true;
                         break;
@@ -119,27 +119,27 @@ public class Patches {
                 if (false == hasSomethingInternal) {
                     Participant[] participants = Arrays.copyOf(appointment.getParticipants(), 1 + appointment.getParticipants().length);
                     UserParticipant user = new UserParticipant(userID);
-                    user.setConfirm(Appointment.ACCEPT);                
-                    participants[participants.length - 1] = user; 
+                    user.setConfirm(Appointment.ACCEPT);
+                    participants[participants.length - 1] = user;
                     appointment.setParticipants(participants);
                 }
             }
         }
-    	
+
         /**
-         * Tries to restore the participant- and user-arrays in the updated 
-         * appointment from the original information found in the original 
-         * appointment, preserving any updated participant states. This way, 
+         * Tries to restore the participant- and user-arrays in the updated
+         * appointment from the original information found in the original
+         * appointment, preserving any updated participant states. This way,
          * group- and resource-information that has been excluded for CalDAV-
          * synchronization is restored implicitly.
-         * 
-         * Note: As this only works when there are no changes to the individual 
+         *
+         * Note: As this only works when there are no changes to the individual
          * participants in the update at the moment, there might be other other
-         * steps necessary when restoring fails. 
-         * 
+         * steps necessary when restoring fails.
+         *
          * @param original the original appointment
          * @param update the updated appointment
-         * @return <code>true</code>, if restoring participants was successful, 
+         * @return <code>true</code>, if restoring participants was successful,
          * <code>false</code>, otherwise
          */
         public static boolean tryRestoreParticipants(Appointment original, Appointment update) {
@@ -151,7 +151,7 @@ public class Patches {
         	//if (originalIndividualParticipants.equals(updateIndividualParticipants)) {
         	if (ParticipantTools.equals(originalIndividualParticipants, updateIndividualParticipants, false)) {
         		/*
-        		 * no changes in individual participants, restore participants from original 
+        		 * no changes in individual participants, restore participants from original
         		 */
         		Participant[] restoredParticipants = Arrays.copyOf(original.getParticipants(), original.getParticipants().length);
         		UserParticipant[] restoredUsers = Arrays.copyOf(original.getUsers(), original.getUsers().length);
@@ -161,14 +161,14 @@ public class Patches {
         			 */
         			for (int i = 0; i < restoredUsers.length; i++) {
         				// we have adequate equals overrides here
-        				if (updatedParticipant.equals(restoredUsers[i])) { 
+        				if (updatedParticipant.equals(restoredUsers[i])) {
         					restoredUsers[i] = (UserParticipant)updatedParticipant;
-        				}					
+        				}
     				}
         			for (int i = 0; i < restoredParticipants.length; i++) {
         				if (ParticipantTools.equals(updatedParticipant, restoredParticipants[i])) {
         					restoredParticipants[i] = updatedParticipant;
-        				}        				
+        				}
     				}
     			}
         		/*
@@ -186,9 +186,9 @@ public class Patches {
         }
 
         /**
-         * Adds all ResourceParticipants from the oldAppointment to the update, 
+         * Adds all ResourceParticipants from the oldAppointment to the update,
          * effectively disallowing modification of resources
-         * 
+         *
          * @param original
          * @param update
          */
@@ -220,9 +220,9 @@ public class Patches {
         }
 
         /**
-         * Removes duplicate users from the appointment's participant list, 
+         * Removes duplicate users from the appointment's participant list,
          * based on the user identifiers.
-         * 
+         *
          * @param appointmnet
          */
         public static void patchParticipantListRemovingDoubleUsers(Appointment appointmnet) {
@@ -246,9 +246,9 @@ public class Patches {
         }
 
         /**
-         * Removes duplicate users from the appointment's participant list, 
-         * based on the known user aliases. 
-         * 
+         * Removes duplicate users from the appointment's participant list,
+         * based on the known user aliases.
+         *
          * @param factory
          * @param update
          * @throws WebdavProtocolException
@@ -284,18 +284,18 @@ public class Patches {
                 }
             }
         }
-        
+
     }
-    
+
     /**
      * {@link Outgoing}
-     * 
+     *
      * Patches for outgoing iCal files.
-     * 
+     *
      * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
      */
     public static final class Outgoing {
-    	
+
         private static final Pattern EMPTY_RDATE = Pattern.compile("^RDATE:\\r\\n", Pattern.MULTILINE);
 
         private Outgoing() {
@@ -303,19 +303,19 @@ public class Patches {
         }
 
         /**
-         * Removes empty RDATE components without information in iCal strings 
+         * Removes empty RDATE components without information in iCal strings
          * (those are generated by the {@link VTimeZone} onsets)
-         * 
+         *
          * @param iCal
          * @return
          */
         public static String removeEmptyRDates(final String iCal) {
         	return EMPTY_RDATE.matcher(iCal).replaceAll("");
-        }    
-        
+        }
+
         /**
          * Sets the correct start- and enddate in a recurring appointment.
-         * 
+         *
          * @param factory
          * @param appointment
          */
@@ -328,7 +328,7 @@ public class Patches {
 
         /**
          * If not yet set, sets the organizer's participant status to "accepted".
-         * 
+         *
          * @param appointment
          */
         public static void setOrganizersParticipantStatus(Appointment appointment) {
@@ -343,7 +343,7 @@ public class Patches {
                     }
                     userMap.put(identifier, userParticipant);
                 }
-        
+
                 Participant[] participants = appointment.getParticipants();
                 if (null != participants) {
                     for (Participant participant : participants) {
@@ -364,11 +364,11 @@ public class Patches {
                 }
             }
         }
-        
+
         /**
-         * Adds all user participants to the participants list and removes all 
+         * Adds all user participants to the participants list and removes all
          * group participants.
-         * 
+         *
          * @param appointment
          */
         public static void resolveGroupParticipants(Appointment appointment) {
@@ -384,7 +384,7 @@ public class Patches {
                     } else if (false == GroupParticipant.class.isInstance(participant)) {
                         newParticipants.add(participant);
                     }
-                }            
+                }
                 UserParticipant[] users = appointment.getUsers();
                 if (null != users) {
                     for (UserParticipant userParticipant : users) {
@@ -392,28 +392,28 @@ public class Patches {
                             newParticipants.add(userParticipant);
                         }
                     }
-                }            
+                }
                 appointment.setParticipants(newParticipants);
-            }        
+            }
         }
-        
+
         /**
-         * Removes the appointment's alarm property if the folder is a 
+         * Removes the appointment's alarm property if the folder is a
          * shared one.
-         * 
+         *
          * @param folder
          * @param appointment
          */
         public static void removeAlarmInSharedFolder(UserizedFolder folder, Appointment appointment) {
             if (SharedType.getInstance().equals(folder.getType())) {
-               appointment.removeAlarm(); 
+               appointment.removeAlarm();
             }
         }
 
         /**
-         * Sets the appointment's organizer using the appointment's 
+         * Sets the appointment's organizer using the appointment's
          * 'created-by' information if not yet set.
-         * 
+         *
          * @param factory
          * @param appointment
          * @throws WebdavProtocolException

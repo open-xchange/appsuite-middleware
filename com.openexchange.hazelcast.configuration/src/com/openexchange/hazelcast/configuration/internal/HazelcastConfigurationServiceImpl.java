@@ -32,16 +32,16 @@ import com.openexchange.tools.strings.TimeSpanParser;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class HazelcastConfigurationServiceImpl implements HazelcastConfigurationService {
-    
+
     /** Named logger instance */
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastConfigurationServiceImpl.class);
-    
+
     /** Name of the subdirectory containing the hazelcast data structure properties */
     private static final String DIRECTORY_NAME = "hazelcast";
-    
+
     /**
      * Initializes a new {@link HazelcastConfigurationServiceImpl}.
-     * 
+     *
      * @param configService A reference to the configuration service
      */
     public HazelcastConfigurationServiceImpl() {
@@ -54,7 +54,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
     }
 
     @Override
-    public Config getConfig() throws OXException {  
+    public Config getConfig() throws OXException {
         ConfigurationService configService = Services.getService(ConfigurationService.class);
         Config config = new Config();
         /*
@@ -80,13 +80,13 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
          */
         config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD, "10");
         /*
-         * configure merge run intervals 
+         * configure merge run intervals
          */
         String mergeFirstRunDelay = configService.getProperty("com.openexchange.hazelcast.mergeFirstRunDelay", "120s");
-        config.setProperty(GroupProperties.PROP_MERGE_FIRST_RUN_DELAY_SECONDS, 
+        config.setProperty(GroupProperties.PROP_MERGE_FIRST_RUN_DELAY_SECONDS,
             String.valueOf(TimeSpanParser.parseTimespan(mergeFirstRunDelay).longValue() / 1000));
         String mergeRunDelay = configService.getProperty("com.openexchange.hazelcast.mergeRunDelay", "120s");
-        config.setProperty(GroupProperties.PROP_MERGE_NEXT_RUN_DELAY_SECONDS, 
+        config.setProperty(GroupProperties.PROP_MERGE_NEXT_RUN_DELAY_SECONDS,
             String.valueOf(TimeSpanParser.parseTimespan(mergeRunDelay).longValue() / 1000));
         /*
          * set interfaces
@@ -110,7 +110,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         applyDataStructures(config, listPropertyFiles());
         return config;
     }
-    
+
     private static void applyDataStructures(Config config, File[] propertyFiles) throws OXException {
         if (null != propertyFiles && 0 < propertyFiles.length) {
             for (File file : propertyFiles) {
@@ -118,7 +118,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             }
         }
     }
-    
+
     private static void applyDataStructure(Config config, Properties properties) throws OXException {
         if (null != properties && 0 < properties.size()) {
             String propertyName = (String)properties.keys().nextElement();
@@ -143,7 +143,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                         }
                     }
                 }
-                config.addMapConfig(mapConfig);                
+                config.addMapConfig(mapConfig);
             } else if (propertyName.startsWith("com.openexchange.hazelcast.configuration.topic")) {
                 config.addTopicConfig(createDataConfig(properties, TopicConfig.class));
             } else if (propertyName.startsWith("com.openexchange.hazelcast.configuration.queue")) {
@@ -155,7 +155,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             }
         }
     }
-    
+
     private static <T> T createDataConfig(Properties properties, Class<T> dataConfigType) throws OXException {
         T dataConfig = null;
         try {
@@ -170,7 +170,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         for (String propertyName : properties.stringPropertyNames()) {
             Field field = findMatching(declaredFields, propertyName);
             if (null != field) {
-                try {                    
+                try {
                     field.setAccessible(true);
                     field.set(dataConfig, stringParser.parse(properties.getProperty(propertyName), field.getType()));
                 } catch (SecurityException e) {
@@ -186,7 +186,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         }
         return dataConfig;
     }
-    
+
     private static Field findMatching(Field[] declaredFields, String propertyName) {
         if (null != declaredFields && 0 < declaredFields.length) {
             int idx = propertyName.lastIndexOf('.');
@@ -195,16 +195,16 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                 if (field.getName().equalsIgnoreCase(fieldName)) {
                     return field;
                 }
-            }            
+            }
         }
         return null;
     }
-    
+
     private static File[] listPropertyFiles() throws OXException {
         File directory = Services.getService(ConfigurationService.class).getDirectory(DIRECTORY_NAME);
         if (null != directory) {
             return directory.listFiles(new FilenameFilter() {
-                
+
                 @Override
                 public boolean accept(File dir, String name) {
                     return null != name && name.toLowerCase().endsWith(".properties");
@@ -229,7 +229,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         }
         return properties;
     }
-    
+
     private static boolean isEmpty(String string) {
         if (null == string) {
             return true;
@@ -241,5 +241,5 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         }
         return true;
     }
-    
+
 }

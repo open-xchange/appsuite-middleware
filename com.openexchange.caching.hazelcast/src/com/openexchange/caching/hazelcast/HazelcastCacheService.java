@@ -79,7 +79,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link HazelcastCacheService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HazelcastCacheService extends DefaultCacheKeyService implements CacheService {
@@ -95,7 +95,7 @@ public final class HazelcastCacheService extends DefaultCacheKeyService implemen
 
     /**
      * Gets Hazelcast's name for specified region name.
-     * 
+     *
      * @param name The region name
      * @return The Hazelcast's name
      */
@@ -141,7 +141,7 @@ public final class HazelcastCacheService extends DefaultCacheKeyService implemen
         }
         regionNames.clear();
     }
-    
+
     private boolean imTheOnlyOne() {
         final Set<Member> members = hazelcastInstance.getCluster().getMembers();
         if (members.size() > 1) {
@@ -157,7 +157,7 @@ public final class HazelcastCacheService extends DefaultCacheKeyService implemen
 
     /**
      * Gets the map of known local caches.
-     * 
+     *
      * @return The local caches
      */
     public ConcurrentMap<String, LocalCache> getLocalOnlyCaches() {

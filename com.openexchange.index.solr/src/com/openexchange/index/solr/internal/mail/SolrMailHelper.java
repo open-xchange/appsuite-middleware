@@ -67,7 +67,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
  * {@link SolrMailHelper} - Helper for <code>SolrInputDocument</code> to <code>MailMessage</code> conversion and vice versa.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SolrMailHelper {
@@ -76,7 +76,7 @@ public final class SolrMailHelper {
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     public static SolrMailHelper getInstance() {
@@ -92,7 +92,7 @@ public final class SolrMailHelper {
 
     /**
      * Reads a <code>IndexDocument&lt;MailMessage&gt;</code> from given <code>SolrDocument</code>.
-     * 
+     *
      * @param document The Solr document
      * @param mailFillers The fillers to use
      * @return The filled <code>IndexDocument&lt;MailMessage&gt;</code> instance
@@ -112,7 +112,7 @@ public final class SolrMailHelper {
         if (fullNameField != null && document.containsKey(fullNameField)) {
             mail.setFolder(document.getFieldValue(fullNameField).toString());
         }
-        if (accountField != null && document.containsKey(accountField)) {           
+        if (accountField != null && document.containsKey(accountField)) {
             try {
                 String fieldValue = (String) MailFillers.getFieldValue(accountField, document);
                 mail.setAccountId(Integer.parseInt(fieldValue));
@@ -134,7 +134,7 @@ public final class SolrMailHelper {
 
     /**
      * Gets the {@link SolrInputDocument} for specified {@link MailMessage} instance.
-     * 
+     *
      * @param mail The mail message
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -155,7 +155,7 @@ public final class SolrMailHelper {
 
         return documents;
     }
-    
+
     private static List<Object> createAddressHeader(final InternetAddress[] addrs) {
         if (addrs == null || addrs.length == 0) {
             return null;
@@ -171,7 +171,7 @@ public final class SolrMailHelper {
                 } catch (final AddressException e) {
                     quoted = addr.toUnicodeString();
                 }
-                
+
                 retval.add(quoted);
             }
         }
@@ -192,11 +192,11 @@ public final class SolrMailHelper {
          * Envelope data
          */
         setFieldInDocument(inputDocument, SolrMailField.FULL_NAME, mail.getFolder());
-        setFieldInDocument(inputDocument, SolrMailField.ID, mail.getMailId());        
-        addFieldInDocument(inputDocument, SolrMailField.FROM, createAddressHeader(mail.getFrom()));        
+        setFieldInDocument(inputDocument, SolrMailField.ID, mail.getMailId());
+        addFieldInDocument(inputDocument, SolrMailField.FROM, createAddressHeader(mail.getFrom()));
         addFieldInDocument(inputDocument, SolrMailField.TO, createAddressHeader(mail.getTo()));
         addFieldInDocument(inputDocument, SolrMailField.CC, createAddressHeader(mail.getCc()));
-        addFieldInDocument(inputDocument, SolrMailField.BCC, createAddressHeader(mail.getBcc()));        
+        addFieldInDocument(inputDocument, SolrMailField.BCC, createAddressHeader(mail.getBcc()));
         setFieldInDocument(inputDocument, SolrMailField.ATTACHMENT, mail.hasAttachment());
         setFieldInDocument(inputDocument, SolrMailField.COLOR_LABEL, mail.getColorLabel());
         setFieldInDocument(inputDocument, SolrMailField.SIZE, mail.getSize());
@@ -241,7 +241,7 @@ public final class SolrMailHelper {
             inputDocument.addField(field.solrName(), value);
         }
     }
-    
+
     public static void addFieldInDocument(final SolrInputDocument inputDocument, final SolrMailField field, final List<Object> values) {
         final String fieldName = field.solrName();
         if (fieldName != null && values != null && !values.isEmpty()) {

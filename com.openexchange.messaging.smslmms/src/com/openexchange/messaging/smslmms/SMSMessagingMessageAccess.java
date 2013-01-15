@@ -65,7 +65,7 @@ import com.openexchange.messaging.smslmms.api.SMSMessageAccess;
 
 /**
  * {@link SMSMessagingMessageAccess} - The messaging-based access to SMS/MMS messages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SMSMessagingMessageAccess implements MessagingMessageAccess, SMSMessageAccess {
@@ -74,7 +74,7 @@ public class SMSMessagingMessageAccess implements MessagingMessageAccess, SMSMes
 
     /**
      * Initializes a new {@link SMSMessagingMessageAccess}.
-     * 
+     *
      * @param smsMessageAccess The SMS/MMS message access
      */
     public SMSMessagingMessageAccess(final SMSMessageAccess smsMessageAccess) {

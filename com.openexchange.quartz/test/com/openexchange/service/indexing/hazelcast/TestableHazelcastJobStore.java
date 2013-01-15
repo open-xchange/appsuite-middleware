@@ -64,9 +64,9 @@ import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
-    
+
     private HazelcastInstance hazelcast = null;
-    
+
     @Override
     public void shutdown() {
         Collection<Instance> instances = hazelcast.getInstances();
@@ -74,20 +74,20 @@ public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
             instance.destroy();
         }
     }
-    
+
     @Override
     protected HazelcastInstance getHazelcast() throws JobPersistenceException {
         if (hazelcast == null) {
             hazelcast = Hazelcast.getDefaultInstance();
         }
-        
+
         return hazelcast;
     }
-    
+
     public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
         return locallyAcquiredTriggers;
     }
-    
+
     public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
         return locallyExecutingTriggers;
     }

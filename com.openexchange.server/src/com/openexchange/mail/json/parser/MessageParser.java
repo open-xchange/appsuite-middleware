@@ -158,7 +158,7 @@ public final class MessageParser {
      * @param uploadEvent The upload event containing the uploaded files to attach
      * @param session The session
      * @param accountId The account ID
-     * @param warnings 
+     * @param warnings
      * @return A corresponding instance of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
@@ -175,7 +175,7 @@ public final class MessageParser {
      * @param session The session
      * @param accountId The account ID
      * @param protocol The server's protocol
-     * @param warnings 
+     * @param warnings
      * @param hostname The server's host name
      * @return The corresponding instances of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
@@ -196,7 +196,7 @@ public final class MessageParser {
      * @param hostname The server's host name
      * @param prepare4Transport <code>true</code> to parse with the intention to transport returned mail later on; otherwise
      *            <code>false</code>
-     * @param warnings 
+     * @param warnings
      * @return The corresponding instances of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */

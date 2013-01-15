@@ -59,7 +59,7 @@ public interface MDNSServiceListener {
 
     /**
      * Invoked if a new service has been discovered or updated.
-     * 
+     *
      * @param serviceId The service identifier
      * @param entry The associated service entry
      */
@@ -67,7 +67,7 @@ public interface MDNSServiceListener {
 
     /**
      * Invoked if an existing service disappeared.
-     * 
+     *
      * @param serviceId The service identifier
      * @param entry The associated service entry
      */

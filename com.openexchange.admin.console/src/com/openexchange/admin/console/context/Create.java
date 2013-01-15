@@ -66,11 +66,11 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Create extends CreateCore {
-	
+
     private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
-    
+
     private OXContextInterface csv_oxctx;
-    
+
     public Create(final String[] args2) {
 
         final AdminParser parser = new AdminParser("createcontext");
@@ -90,7 +90,7 @@ public class Create extends CreateCore {
     	 ctxabs.setDestinationDatabaseIdOption(parser, false);
     	 setAddAccessRightCombinationNameOption(parser);
     	 setModuleAccessOptions(parser);
-    	 
+
     }
 
     @Override
@@ -109,28 +109,28 @@ public class Create extends CreateCore {
         if( null != db ) {
             ctx.setWriteDatabase(new Database(db));
         }
-        
+
         Context createdctx = null;
-        
+
         // needed for comparison
         UserModuleAccess NO_RIGHTS_ACCESS = new UserModuleAccess();
         NO_RIGHTS_ACCESS.disableAll();
-        
-        // now check which create method we must call, 
+
+        // now check which create method we must call,
         // this depends on the access rights supplied by the client
         UserModuleAccess parsed_access = new UserModuleAccess();
         parsed_access.disableAll();
-        
+
         // parse access options
         setModuleAccessOptions(parser, parsed_access);
-        
+
         String accessCombinationName = parseAndSetAccessCombinationName(parser);
-        
+
         if(!parsed_access.equals(NO_RIGHTS_ACCESS) && null != accessCombinationName){
         	// BOTH WAYS TO SPECIFY ACCESS RIGHTS ARE INVALID!
         	throw new InvalidDataException(ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR);
         }
-        
+
         if (null != accessCombinationName ) {
         	// Client supplied access combination name. create context with this name
         	createdctx = oxctx.create(ctx, usr, accessCombinationName, auth);
@@ -140,7 +140,7 @@ public class Create extends CreateCore {
         }else{
         	createdctx = oxctx.create(ctx, usr, auth);
         }
-        
+
         // TODO: We have to add a cleanup here. If creation of mappings fails the context should be deleted
         return createdctx;
     }
@@ -149,7 +149,7 @@ public class Create extends CreateCore {
     protected void lookupRMI() throws MalformedURLException, RemoteException, NotBoundException {
         this.csv_oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
     }
-    
+
     @Override
     protected Context simpleMainCall(Context ctx, User usr, String accessCombiName, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         return this.csv_oxctx.create(ctx, usr, accessCombiName, auth);

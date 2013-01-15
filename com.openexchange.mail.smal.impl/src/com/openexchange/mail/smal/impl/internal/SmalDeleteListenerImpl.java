@@ -69,9 +69,9 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SmalDeleteListenerImpl implements DeleteListener {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalDeleteListenerImpl.class);
-    
+
 
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
@@ -92,7 +92,7 @@ public class SmalDeleteListenerImpl implements DeleteListener {
         } catch (Throwable t) {
             LOG.warn("Error while deleting jobs for context " + contextId + ".", t);
         }
-        
+
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement("DELETE FROM indexedFolders WHERE cid = ?");
@@ -116,9 +116,9 @@ public class SmalDeleteListenerImpl implements DeleteListener {
         } catch (Throwable t) {
             LOG.warn("Error while deleting jobs for user " + userId + " in context " + contextId + ".", t);
         }
-        
+
         PreparedStatement stmt = null;
-        try {            
+        try {
             stmt = writeCon.prepareStatement("DELETE FROM indexedFolders WHERE cid = ? AND uid = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);

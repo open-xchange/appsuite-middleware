@@ -68,7 +68,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 public class QuartzActivator extends HousekeepingActivator {
 
     private volatile ServiceRegistration<QuartzService> quartzServiceRegistration;
-    
+
     private QuartzServiceImpl quartzServiceImpl;
 
 
@@ -90,20 +90,20 @@ public class QuartzActivator extends HousekeepingActivator {
         } catch (final Exception e) {
             log.error("Failed starting bundle: org.quartz", e);
             throw e;
-        }        
+        }
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         final Log log = LogFactory.getLog(QuartzActivator.class);
         log.info("Stopping bundle: org.quartz");
-        try {            
+        try {
             final ServiceRegistration<QuartzService> quartzServiceRegistration = this.quartzServiceRegistration;
             if (null != quartzServiceRegistration) {
                 quartzServiceRegistration.unregister();
                 this.quartzServiceRegistration = null;
             }
-            
+
             if (quartzServiceImpl != null) {
                 quartzServiceImpl.shutdown();
             }

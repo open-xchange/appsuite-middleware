@@ -65,7 +65,7 @@ public class Entity2ACLExceptionMessage implements LocalizableStrings {
     private Entity2ACLExceptionMessage() {
         super();
     }
-    
+
     // Implementing class could not be found
     public final static String CLASS_NOT_FOUND_MSG = "Implementing class could not be found";
 
@@ -77,7 +77,7 @@ public class Entity2ACLExceptionMessage implements LocalizableStrings {
 
     // An I/O error occurred: %1$s
     public final static String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-    
+
     // Missing property %1$s in system.properties.
     public final static String MISSING_SETTING_MSG = "Missing property %1$s in imap.properties.";
 

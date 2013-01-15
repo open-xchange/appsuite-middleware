@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class EnterAppAction extends AbstractLibertyAction {
-	
+
 	public EnterAppAction(ServiceLookup services) {
 		super(services);
 	}
@@ -73,7 +73,7 @@ public class EnterAppAction extends AbstractLibertyAction {
 	@Override
 	public AJAXRequestResult perform(AJAXRequestData requestData,
 			ServerSession session) throws OXException {
-		
+
 		try {
 			return new AJAXRequestResult(new JSONObject().put("location", getConfig(session).getAppLink(requestData.getParameter("app"), requestData.getParameter("path"))), "json");
 		} catch (JSONException e) {

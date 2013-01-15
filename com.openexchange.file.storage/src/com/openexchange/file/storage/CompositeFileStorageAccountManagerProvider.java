@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link CompositeFileStorageAccountManagerProvider} - Wrapping multiple providers.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CompositeFileStorageAccountManagerProvider implements FileStorageAccountManagerProvider {
@@ -78,7 +78,7 @@ public final class CompositeFileStorageAccountManagerProvider implements FileSto
 
     /**
      * Checks if this composite {@link FileStorageAccountManagerProvider provider} has any providers assigned.
-     * 
+     *
      * @return <code>true</code> if there are any providers; otherwise <code>false</code>
      */
     public boolean hasAnyProvider() {
@@ -87,7 +87,7 @@ public final class CompositeFileStorageAccountManagerProvider implements FileSto
 
     /**
      * Gets a collection of known providers.
-     * 
+     *
      * @return The providers
      */
     public Collection<FileStorageAccountManagerProvider> providers() {
@@ -96,7 +96,7 @@ public final class CompositeFileStorageAccountManagerProvider implements FileSto
 
     /**
      * Adds specified provider.
-     * 
+     *
      * @param provider The provider
      * @return <code>true</code> if added; otherwise <code>false</code>
      */
@@ -113,7 +113,7 @@ public final class CompositeFileStorageAccountManagerProvider implements FileSto
 
     /**
      * Removes specified provider
-     * 
+     *
      * @param provider The provider
      */
     public void removeProvider(final FileStorageAccountManagerProvider provider) {

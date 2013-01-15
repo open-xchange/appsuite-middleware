@@ -60,7 +60,7 @@ import com.hazelcast.monitor.LocalQueueStats;
 
 /**
  * {@link ClassLoaderAwareIQueue}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ClassLoaderAwareIQueue<E extends Serializable> extends AbstractClassLoaderAware implements IQueue<E> {

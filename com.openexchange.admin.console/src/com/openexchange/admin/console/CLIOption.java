@@ -19,7 +19,7 @@ public abstract class CLIOption {
 
     /**
      * Initializes a new {@link CLIOption}.
-     * 
+     *
      * @param longForm The long form
      * @param wantsValue <code>true</code> if this option expects a value; otherwise <code>false</code>
      */
@@ -29,7 +29,7 @@ public abstract class CLIOption {
 
     /**
      * Initializes a new {@link CLIOption}.
-     * 
+     *
      * @param shortForm The short form
      * @param longForm The long form
      * @param wantsValue <code>true</code> if this option expects a value; otherwise <code>false</code>
@@ -40,7 +40,7 @@ public abstract class CLIOption {
 
     /**
      * Initializes a new {@link CLIOption}.
-     * 
+     *
      * @param shortForm The short form
      * @param longForm The long form
      * @param wantsValue <code>true</code> if this option expects a value; otherwise <code>false</code>
@@ -57,7 +57,7 @@ public abstract class CLIOption {
 
     /**
      * Gets option's short form.
-     * 
+     *
      * @return The short form
      */
     public String shortForm() {
@@ -66,7 +66,7 @@ public abstract class CLIOption {
 
     /**
      * Gets option's long form.
-     * 
+     *
      * @return The long form
      */
     public String longForm() {
@@ -82,7 +82,7 @@ public abstract class CLIOption {
 
     /**
      * Parses the specified option's value.
-     * 
+     *
      * @param value The option's value
      * @param locale The locale
      * @return The option's value
@@ -100,7 +100,7 @@ public abstract class CLIOption {
 
     /**
      * Override to parse option's value.
-     * 
+     *
      * @param value The option's value
      * @param locale The locale
      * @return The parsed option's value

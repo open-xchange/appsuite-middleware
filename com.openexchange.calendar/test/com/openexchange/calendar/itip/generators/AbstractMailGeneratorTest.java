@@ -70,13 +70,13 @@ public class AbstractMailGeneratorTest {
     protected MockITipIntegrationUtility util = new MockITipIntegrationUtility();
     protected SimSession session = new SimSession(12, 1337);
     protected SimUser user = new SimUser(12);
-    
+
     protected void addParticipant(Appointment appointment, String email, int id) {
         List<Participant> p = new ArrayList<Participant>(Arrays.asList(appointment.getParticipants()));
         p.add(ep(email, id));
         appointment.setParticipants(p);
     }
-    
+
     protected void removeExternalParticipant(Appointment appointment, String mail) {
         List<Participant> newParticipants = new ArrayList<Participant>();
         for (Participant participant : appointment.getParticipants()) {
@@ -91,13 +91,13 @@ public class AbstractMailGeneratorTest {
         }
         appointment.setParticipants(newParticipants);
     }
-    
+
     protected UserParticipant up(int id, String mail) {
         UserParticipant userParticipant = new UserParticipant(id);
         userParticipant.setEmailAddress(mail);
         return userParticipant;
     }
-    
+
     protected ExternalUserParticipant ep(String mail, int id) {
         ExternalUserParticipant ep = new ExternalUserParticipant(mail);
         ep.setIdentifier(id);
@@ -105,4 +105,4 @@ public class AbstractMailGeneratorTest {
     }
 
 
-}   
+}

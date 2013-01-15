@@ -63,11 +63,11 @@ import com.openexchange.tools.StringCollection;
 
 /**
  * {@link PushMQObject} - The push object.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class PushMQObject extends AbstractPushMQObject implements Serializable {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMQObject.class));
 
     private static final long serialVersionUID = -8490584616201401142L;
@@ -83,14 +83,14 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
     private final int hash;
 
     private final long timestamp;
-    
+
     private final String topicName;
-    
+
     private String hostname;
 
     /**
      * Initializes a new {@link PushMQObject}.
-     * 
+     *
      * @param folderId The folder ID
      * @param module The module
      * @param contextId The context ID
@@ -113,7 +113,7 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
             LOG.error(e.getMessage(), e);
         }
     }
-    
+
     public PushMQObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp, final String topicName, String hostname) {
         super(contextId, isRemote);
         this.folderId = folderId;
@@ -136,7 +136,7 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
 
     /**
      * Gets the folder ID.
-     * 
+     *
      * @return The folder ID
      */
     public int getFolderId() {
@@ -145,7 +145,7 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
 
     /**
      * Gets the module.
-     * 
+     *
      * @return The module
      */
     public int getModule() {
@@ -154,7 +154,7 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
 
     /**
      * Gets the user IDs as an array.
-     * 
+     *
      * @return The user IDs as an array
      */
     public int[] getUsers() {
@@ -163,7 +163,7 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
 
     /**
      * Gets the creation date.
-     * 
+     *
      * @return The creation date
      */
     public Date getCreationDate() {
@@ -172,17 +172,17 @@ public class PushMQObject extends AbstractPushMQObject implements Serializable {
 
     /**
      * Gets the time stamp or <code>0</code> if not available.
-     * 
+     *
      * @return The time stamp or <code>0</code> if not available
      */
     public long getTimestamp() {
         return timestamp;
     }
-    
+
     public String getTopicName() {
         return topicName;
     }
-    
+
     public String getHostname() {
         return hostname;
     }

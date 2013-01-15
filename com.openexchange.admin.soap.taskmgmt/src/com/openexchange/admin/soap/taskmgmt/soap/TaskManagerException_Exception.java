@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "TaskManagerException", targetNamespace = "http://soap.admin.openexchange.com")
 public class TaskManagerException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.taskmgmt.soap.TaskManagerException taskManagerException;
 
     public TaskManagerException_Exception() {
         super();
     }
-    
+
     public TaskManagerException_Exception(String message) {
         super(message);
     }
-    
+
     public TaskManagerException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

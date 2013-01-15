@@ -51,7 +51,7 @@ package com.openexchange.threadpool;
 
 /**
  * {@link TrackableTask} - A trackable task being submitted to thread pool.
- * 
+ *
  * @see Task
  * @see Trackable
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>

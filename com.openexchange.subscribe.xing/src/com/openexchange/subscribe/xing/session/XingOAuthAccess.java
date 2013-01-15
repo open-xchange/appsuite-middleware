@@ -123,7 +123,7 @@ public final class XingOAuthAccess {
         try {
             /*-
              * Retrieve information about the user's XING account.
-             * 
+             *
              * See: https://www.dropbox.com/developers/reference/api#account-info
              */
             final OAuthServiceMetaData xingOAuthServiceMetaData = Services.getService(OAuthServiceMetaData.class);
@@ -142,7 +142,7 @@ public final class XingOAuthAccess {
             throw XingSubscribeExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     /**
      * Gets the XING API reference
      *

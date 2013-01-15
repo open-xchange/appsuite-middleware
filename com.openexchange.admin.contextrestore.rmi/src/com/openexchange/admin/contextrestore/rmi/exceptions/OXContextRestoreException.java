@@ -53,7 +53,7 @@ import java.util.IllegalFormatException;
 
 /**
  * OXContextRestore exception class
- * 
+ *
  */
 public class OXContextRestoreException extends Exception {
 
@@ -61,38 +61,38 @@ public class OXContextRestoreException extends Exception {
      * For serialization
      */
     private static final long serialVersionUID = 2597458638173191174L;
-    
+
     public enum Code {
         /**
          * The version tables are incompatible
          */
         VERSION_TABLES_INCOMPATIBLE("The version tables are incompatible"),
-        
+
         /**
          * No version information found in dump
          */
         NO_VERSION_INFORMATION_FOUND("No version information found in dump"),
-        
+
         /**
          * Couldn't convert pool value
          */
         COULD_NOT_CONVERT_POOL_VALUE("Couldn't convert pool value"),
-        
+
         /**
          * No entries in version table
          */
         NO_ENTRIES_IN_VERSION_TABLE("No entries in version table"),
-        
+
         /**
          * Error during database operation: %s
          */
         DATABASE_OPERATION_ERROR("Error during database operation: %s"),
-        
+
         /**
          * Error during rollback: %s
          */
         ROLLBACK_ERROR("Error during rollback: %s"),
-        
+
         /**
          * No values found for the filestore in the database
          */
@@ -112,17 +112,17 @@ public class OXContextRestoreException extends Exception {
          * One of the given filenames cannot be found
          */
         FILE_NOT_FOUND("One of the given filenames cannot be found"),
-        
+
         /**
          * An IO Exception has occurred, see the log files for details
          */
         IO_EXCEPTION("An IO Exception has occurred, see the log files for details"),
-        
+
         /**
          * The context id wasn't found in the context_server2db_pool table
          */
         CONTEXT_NOT_FOUND_IN_POOL_MAPPING("The context id wasn't found in the context_server2db_pool table"),
-        
+
         /**
          * The updateTask tables are incompatible
          */
@@ -137,9 +137,9 @@ public class OXContextRestoreException extends Exception {
          * No entries in updateTask table
          */
         NO_ENTRIES_IN_UPDATE_TASK_TABLE("No entries in updateTask table"),
-        
+
         ;
-        
+
         private final String text;
 
         /**
@@ -155,10 +155,10 @@ public class OXContextRestoreException extends Exception {
     }
 
     private String[] msgArgs;
-    
+
     /**
      * Default constructor
-     * 
+     *
      */
     public OXContextRestoreException(final Code code) {
         super(code.getText());
@@ -166,7 +166,7 @@ public class OXContextRestoreException extends Exception {
 
     /**
      * Constructor with parameters
-     * 
+     *
      */
     public OXContextRestoreException(final Code code, final String... msgArgs) {
         super(code.getText());
@@ -175,7 +175,7 @@ public class OXContextRestoreException extends Exception {
 
     /**
      * Constructor with parameters
-     * 
+     *
      */
     public OXContextRestoreException(final Code code, final Throwable cause, final String... msgArgs) {
         super(code.getText(), cause);
@@ -216,5 +216,5 @@ public class OXContextRestoreException extends Exception {
         }
 
     }
-    
+
 }

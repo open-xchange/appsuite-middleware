@@ -67,7 +67,7 @@ import com.hazelcast.query.Predicate;
 
 /**
  * {@link ClassLoaderAwareIMap}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ClassLoaderAwareIMap<K extends Serializable, V extends Serializable> extends AbstractClassLoaderAware implements IMap<K, V> {
@@ -103,7 +103,7 @@ public class ClassLoaderAwareIMap<K extends Serializable, V extends Serializable
 
     /**
      * Initializes a new {@link ClassLoaderAwareIMap}.
-     * 
+     *
      * @param delegate The {@link IMap} to delegate to
      */
     public ClassLoaderAwareIMap(final IMap<Serializable, Serializable> delegate, final boolean kryorize) {

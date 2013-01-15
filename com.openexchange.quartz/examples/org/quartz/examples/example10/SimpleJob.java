@@ -1,18 +1,18 @@
-/* 
- * Copyright 2005 - 2009 Terracotta, Inc. 
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
- * use this file except in compliance with the License. You may obtain a copy 
- * of the License at 
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations 
+/*
+ * Copyright 2005 - 2009 Terracotta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
  * under the License.
- * 
+ *
  */
 
 package org.quartz.examples.example10;
@@ -31,7 +31,7 @@ import org.quartz.JobKey;
  * <p>
  * This is just a simple job that gets fired off many times by example 1
  * </p>
- * 
+ *
  * @author Bill Kratzer
  */
 public class SimpleJob implements Job {
@@ -48,7 +48,7 @@ public class SimpleJob implements Job {
      * <code>{@link org.quartz.Trigger}</code> fires that is associated with
      * the <code>Job</code>.
      * </p>
-     * 
+     *
      * @throws JobExecutionException
      *             if there is an exception while executing the job.
      */
@@ -61,7 +61,7 @@ public class SimpleJob implements Job {
         // date and time that it is running
         JobKey jobKey = context.getJobDetail().getKey();
         System.out.println("Executing job: " + jobKey + " executing at " + new Date() + ", fired by: " + context.getTrigger().getKey());
-        
+
         if(context.getMergedJobDataMap().size() > 0) {
             Set<String> keys = context.getMergedJobDataMap().keySet();
             for(String key: keys) {
@@ -69,7 +69,7 @@ public class SimpleJob implements Job {
                 System.out.println(" - jobDataMap entry: " + key + " = " + val);
             }
         }
-        
+
         context.setResult("hello");
     }
 

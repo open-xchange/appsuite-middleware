@@ -217,7 +217,7 @@ public final class FolderServiceDecorator {
      * <p>
      * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
      * "1".
-     * 
+     *
      * @param name The parameter
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
      */
@@ -238,7 +238,7 @@ public final class FolderServiceDecorator {
         final Object permissionsHandling = properties.get("permissions");
         return null != permissionsHandling && "inherit".equalsIgnoreCase(permissionsHandling.toString());
     }
-    
+
     /**
      * Gets this decorator's properties.
      *

@@ -54,7 +54,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 /**
- * {@link IntegerMapping} - Database mapping for <code>Types.INTEGER</code>. 
+ * {@link IntegerMapping} - Database mapping for <code>Types.INTEGER</code>.
  *
  * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -64,10 +64,10 @@ public abstract class IntegerMapping<O> extends DefaultDbMapping<Integer, O> {
 	public IntegerMapping(final String columnName, final String readableName) {
 		super(columnName, readableName, Types.INTEGER);
 	}
-	
+
 	@Override
 	public Integer get(final ResultSet resultSet) throws SQLException {
 		return resultSet.getInt(this.getColumnLabel());
 	}
-	
+
 }

@@ -235,7 +235,7 @@ public class Activator extends HousekeepingActivator {
             System.arraycopy(path, 0, metadataPath, 1, path.length);
             metadataPath[metadataPath.length-1] = metadataName;
             metadataPath[0] = METADATA_PREFIX;
-            
+
 
             final PreferencesItemService metadataItem = new PreferencesItemService() {
 

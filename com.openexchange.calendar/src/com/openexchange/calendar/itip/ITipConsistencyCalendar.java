@@ -371,7 +371,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 		setPrincipal(cdao);
 		return delegate.insertAppointmentObject(cdao);
 	}
-	
+
 	private void setPrincipal(final CalendarDataObject cdao) throws OXException {
 		loadContext();
 		if (cdao.getPrincipal() == null) {
@@ -400,7 +400,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
             cdao.setOrganizer(user.getMail().toLowerCase());
             cdao.setOrganizerId(user.getId());
         } else {
-        	
+
         	String organizer = cdao.getOrganizer().toLowerCase();
     		if (organizer.startsWith("mailto:")) {
     			organizer = organizer.substring(7);
@@ -412,7 +412,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
     		} catch (final OXException e) {
     		}
         }
-		
+
 	}
 
 
@@ -536,7 +536,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 		return delegate.getAppointmentsBetween(user_uid, start, end, cols,
 				orderBy, order);
 	}
-	
+
     @Override
     public SearchIterator<Appointment> getAppointmentsBetween(Date start, Date end, int cols[], int orderBy, Order order) throws OXException, SQLException {
         return delegate.getAppointmentsBetween(start, end, cols, orderBy, order);
@@ -556,8 +556,8 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
     public int getFolder(final int objectId) throws OXException {
 		return delegate.getFolder(objectId);
 	}
-	
-	
+
+
 
 	@Override
     public List<Appointment> getAppointmentsWithExternalParticipantBetween(

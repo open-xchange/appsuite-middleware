@@ -52,8 +52,8 @@ package com.openexchange.authentication.imap.osgi;
 import com.openexchange.osgi.ServiceRegistry;
 
 /**
-* {@link ImapAuthServiceRegistry} - A registry for services 
-* 
+* {@link ImapAuthServiceRegistry} - A registry for services
+*
 */
 public final class ImapAuthServiceRegistry {
 
@@ -61,7 +61,7 @@ public final class ImapAuthServiceRegistry {
 
 	/**
 	 * Gets the service registry
-	 * 
+	 *
 	 * @return The service registry
 	 */
 	public static ServiceRegistry getServiceRegistry() {

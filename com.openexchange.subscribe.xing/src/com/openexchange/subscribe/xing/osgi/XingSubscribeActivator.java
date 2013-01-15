@@ -131,7 +131,7 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
 
     /**
      * Adds given service.
-     * 
+     *
      * @param authServiceMetaData The service to add
      */
     public void setOAuthServiceMetaData(final OAuthServiceMetaData oAuthServiceMetaData) {

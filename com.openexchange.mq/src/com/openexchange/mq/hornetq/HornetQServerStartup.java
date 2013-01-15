@@ -95,7 +95,7 @@ import com.openexchange.mq.serviceLookup.MQServiceLookup;
 
 /**
  * {@link HornetQServerStartup} - The start-up implementation for HornetQ message queue.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HornetQServerStartup implements MQServerStartup {
@@ -160,7 +160,7 @@ public final class HornetQServerStartup implements MQServerStartup {
                         /*configuration.setPersistenceEnabled(false);*/
                         configuration.setSecurityEnabled(false);
                         configuration.setJournalSyncNonTransactional(false);
-    
+
                         final FileConfigurationParser parser = new FileConfigurationParser();
                         parser.setValidateAIO(true);
                         parser.parseMainConfig(e, configuration);
@@ -201,7 +201,7 @@ public final class HornetQServerStartup implements MQServerStartup {
                         } else {
                             hornetqJmsXml = PATTERN_CONFIGPATH.matcher(hornetqJmsXml).replaceAll(configPath);
                             final Element e = stringToElement(XMLUtil.replaceSystemProps(hornetqJmsXml));
-    
+
                             final JMSServerConfigParser jmsServerConfigParser = new JMSServerConfigParserImpl();
                             jmsConfiguration = jmsServerConfigParser.parseConfiguration(e);
                             if (!configuration.isClustered()) {
@@ -214,12 +214,12 @@ public final class HornetQServerStartup implements MQServerStartup {
                             }
 
                             /*-
-                             * 
+                             *
                             for (final ConnectionFactoryConfiguration connectionFactoryConfiguration : jmsConfiguration.getConnectionFactoryConfigurations()) {
                                 connectionFactoryConfiguration.setBlockOnDurableSend(false);
                                 connectionFactoryConfiguration.setBlockOnNonDurableSend(false);
                             }
-                             * 
+                             *
                              */
                             hornetqJmsXml = null; // Help GC
                         }
@@ -294,18 +294,18 @@ public final class HornetQServerStartup implements MQServerStartup {
              */
 
             final Reader reader =
-                new UnsynchronizedStringReader("" + 
-                    "<configuration xmlns=\"urn:hornetq\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"urn:hornetq /schema/hornetq-configuration.xsd\">" + 
-                    "  <broadcast-groups>\n" + 
-                    "   <broadcast-group name=\"my-broadcast-group\">\n" + 
-                    "       <local-bind-address>172.16.9.3</local-bind-address>\n" + 
-                    "       <local-bind-port>5432</local-bind-port>\n" + 
-                    "       <group-address>231.7.7.7</group-address>\n" + 
-                    "       <group-port>9876</group-port>\n" + 
-                    "       <broadcast-period>2000</broadcast-period>\n" + 
-                    "       <connector-ref>netty-connector</connector-ref>\n" + 
-                    "   </broadcast-group>\n" + 
-                    "  </broadcast-groups>\n" + 
+                new UnsynchronizedStringReader("" +
+                    "<configuration xmlns=\"urn:hornetq\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"urn:hornetq /schema/hornetq-configuration.xsd\">" +
+                    "  <broadcast-groups>\n" +
+                    "   <broadcast-group name=\"my-broadcast-group\">\n" +
+                    "       <local-bind-address>172.16.9.3</local-bind-address>\n" +
+                    "       <local-bind-port>5432</local-bind-port>\n" +
+                    "       <group-address>231.7.7.7</group-address>\n" +
+                    "       <group-port>9876</group-port>\n" +
+                    "       <broadcast-period>2000</broadcast-period>\n" +
+                    "       <connector-ref>netty-connector</connector-ref>\n" +
+                    "   </broadcast-group>\n" +
+                    "  </broadcast-groups>\n" +
                     "</configuration>");
             String xml = org.hornetq.utils.XMLUtil.readerToString(reader);
             xml = XMLUtil.replaceSystemProps(xml);

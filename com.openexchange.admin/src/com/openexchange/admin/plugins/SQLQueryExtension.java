@@ -11,7 +11,7 @@ package com.openexchange.admin.plugins;
 public class SQLQueryExtension {
 
     private final String tablename;
-    
+
     private final String querypart;
 
     /**
@@ -25,14 +25,14 @@ public class SQLQueryExtension {
         this.querypart = querypart;
     }
 
-    
+
     public final String getTablename() {
         return tablename;
     }
 
-    
+
     public final String getQuerypart() {
         return querypart;
     }
-    
+
 }

@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class StaticIDResolver extends DefaultLdapIDResolver {
-    
+
     public StaticIDResolver(int contextID, int folderID) {
         super(contextID, folderID);
     }

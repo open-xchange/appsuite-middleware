@@ -84,7 +84,7 @@ import com.openexchange.user.json.services.ServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Action(method = RequestMethod.GET, name = "all", description = "Get all users.", parameters = { 
+@Action(method = RequestMethod.GET, name = "all", description = "Get all users.", parameters = {
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
 		@Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for users are defined in Common object data, Detailed contact data and Detailed user data."),
 		@Parameter(name = "sort", optional = true, type = Type.NUMBER, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
@@ -123,19 +123,19 @@ public final class AllAction extends AbstractUserAction {
         final UserField orderByUserField = UserMapper.getInstance().getMappedField(orderBy);
         if (null == orderByUserField) {
         	final ContactField orderByContactField = ContactMapper.getInstance().getMappedField(orderBy);
-        	if (null != orderByContactField) {        			
+        	if (null != orderByContactField) {
         		// Sort field is a contact field: pass as it is
         		sortOptions.setOrderBy(new SortOrder[] { SortOptions.Order(orderByContactField, order) });
         	}
         }
         /*
          * Get contacts and users
-         */        	
+         */
         Date lastModified = new Date(0);
         final List<UserContact> userContacts = new ArrayList<UserContact>();
         final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class);
-        final ContactField[] contactFields = ContactMapper.getInstance().getFields(columns, 
-        		ContactField.INTERNAL_USERID, ContactField.LAST_MODIFIED);            
+        final ContactField[] contactFields = ContactMapper.getInstance().getFields(columns,
+        		ContactField.INTERNAL_USERID, ContactField.LAST_MODIFIED);
         final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
         SearchIterator<Contact> searchIterator = null;
         try {
@@ -150,7 +150,7 @@ public final class AllAction extends AbstractUserAction {
             	 */
             	if (contact.getLastModified().after(lastModified)) {
             		lastModified = contact.getLastModified();
-            	}                	
+            	}
             	/*
             	 * Get corresponding user
             	 */
@@ -174,5 +174,5 @@ public final class AllAction extends AbstractUserAction {
          */
         return new AJAXRequestResult(userContacts, lastModified, "usercontact");
     }
-    
+
 }

@@ -60,7 +60,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link QuotaActionFactory}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Module(name = "quota", description = "The quota module allows accesssing information about the use and quota of the filestore/mailstorage.")
@@ -70,7 +70,7 @@ public class QuotaActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Initializes a new {@link QuotaActionFactory}.
-     * 
+     *
      * @param services The service look-up
      */
     public QuotaActionFactory(final ServiceLookup services) {

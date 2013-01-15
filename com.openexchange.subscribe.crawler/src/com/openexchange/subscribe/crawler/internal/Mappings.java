@@ -81,13 +81,13 @@ public class Mappings {
                 contact.setGivenName(fn);
                 contact.setDisplayName(fn);
             }
-    
+
             final String ln = map.get("last_name");
             if (!isEmpty(ln)) {
                 contact.setSurName(ln);
                 contact.setDisplayName(ln);
             }
-    
+
             if (!isEmpty(fn) && !isEmpty(ln)) {
                 contact.setDisplayName(fn + " " + ln);
             }

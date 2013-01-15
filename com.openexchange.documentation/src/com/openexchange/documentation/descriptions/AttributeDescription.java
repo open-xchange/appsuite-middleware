@@ -58,7 +58,7 @@ import com.openexchange.documentation.Type;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface AttributeDescription extends Description {
-	
+
 	/**
 	 * Specifies whether the attribute is mandatory or not. Defaults to <code>false</code>.
 	 * @return <code>true</code>, if it is mandatory, <code>false</code>, otherwise

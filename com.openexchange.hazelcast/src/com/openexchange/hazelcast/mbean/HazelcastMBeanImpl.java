@@ -72,8 +72,8 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
 
     /**
      * Initializes a new {@link HazelcastMBeanImpl}.
-     * 
-     * @throws NotCompliantMBeanException 
+     *
+     * @throws NotCompliantMBeanException
      */
     public HazelcastMBeanImpl() throws NotCompliantMBeanException {
         super(HazelcastMBean.class);
@@ -125,9 +125,9 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
                 getHazelcastInstance().getConfig().getNetworkConfig().getJoin().getTcpIpConfig().clear();
                 getHazelcastInstance().getConfig().getNetworkConfig().getJoin().getTcpIpConfig().setMembers(members);
             }
-        }        
+        }
     }
-    
+
     @Override
     public List<String> listClusterMembers() throws MBeanException {
         Set<Member> members = getHazelcastInstance().getCluster().getMembers();
@@ -142,7 +142,7 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
 
     /**
      * Gets the current Hazelcast instance, throwing an exception if there is none.
-     * 
+     *
      * @return The Hazelcast instance
      * @throws MBeanException If there's no Hazelcast instance
      */

@@ -346,17 +346,17 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         try {
             con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
-            
+
             final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id);
             DeleteRegistry.getInstance().fireDeleteEvent(delev, con, con);
-            
+
             createRecoveryData(resource_id, ctx, con);
-            
+
             prep_del = con.prepareStatement("DELETE FROM resource WHERE cid=? AND id=?;");
             prep_del.setInt(1, context_id);
             prep_del.setInt(2, resource_id);
             prep_del.executeUpdate();
-            
+
             con.commit();
             log.info("Resource " + resource_id + " deleted!");
         } catch (final SQLException e) {
@@ -380,12 +380,12 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 log.error("Error closing  PreparedStatement", ex);
             }
             try {
-                
+
                 cache.pushConnectionForContext(context_id, con);
             } catch (final PoolException e) {
                 log.error("Error pushing ox write connection to pool!", e);
             }
-            
+
         }
     }
 
@@ -395,7 +395,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         PreparedStatement prep_list = null;
         final int context_id = ctx.getId();
         try {
-            
+
             con = cache.getConnectionForContext(context_id);
 
             prep_list = con.prepareStatement("SELECT cid,id,identifier,displayName,available,description,mail FROM resource WHERE resource.cid = ? AND resource.id = ?");
@@ -410,9 +410,9 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 final String disp = rs.getString("displayName");
                 final Boolean aval = rs.getBoolean("available");
                 final String desc = rs.getString("description");
-                
+
                 final Resource retval = (Resource) resource.clone();
-                
+
                 retval.setId(id);
                 if (null != mail) {
                     retval.setEmail(mail);
@@ -433,11 +433,11 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                     retval.setAvailable(aval);
                 }
                 return retval;
-               
+
             }else{
-               throw new StorageException("No such resource"); 
+               throw new StorageException("No such resource");
             }
-            
+
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             dorollback(con);
@@ -525,7 +525,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } catch (final PoolException e) {
-            log.error("Pool Error", e);         
+            log.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
             try {

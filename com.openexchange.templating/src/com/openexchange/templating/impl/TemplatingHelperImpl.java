@@ -85,10 +85,10 @@ public class TemplatingHelperImpl implements TemplatingHelper {
         } else {
             template = templateService.loadTemplate(templateName);
         }
-        
+
         AllocatingStringWriter writer = new AllocatingStringWriter();
         template.process(rootObject, writer);
-        
+
         return writer.toString();
     }
 

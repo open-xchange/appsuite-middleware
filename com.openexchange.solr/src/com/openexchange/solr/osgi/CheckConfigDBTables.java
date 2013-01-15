@@ -79,7 +79,7 @@ public final class CheckConfigDBTables {
 
     /**
      * Checks needed OAuth provider tables in configDB.
-     * 
+     *
      * @throws OXException If check fails
      */
     public void checkTables() throws OXException {
@@ -101,16 +101,16 @@ public final class CheckConfigDBTables {
     }
 
     private void checkNonce(final Connection con) throws SQLException {
-        final String createSql = "CREATE TABLE `solrCoreStores` (\n" + 
-        		" `id` INT4 UNSIGNED NOT NULL," + 
-        		" `uri` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL," + 
-        		" `maxCores` INT4 UNSIGNED NOT NULL," + 
-        		" `numCores` INT4 UNSIGNED NOT NULL," + 
-        		" PRIMARY KEY (`id`)" + 
+        final String createSql = "CREATE TABLE `solrCoreStores` (\n" +
+        		" `id` INT4 UNSIGNED NOT NULL," +
+        		" `uri` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL," +
+        		" `maxCores` INT4 UNSIGNED NOT NULL," +
+        		" `numCores` INT4 UNSIGNED NOT NULL," +
+        		" PRIMARY KEY (`id`)" +
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         createIfAbsent("solrCoreStores", createSql, con);
     }
-  
+
     private void createIfAbsent(final String name, final String createSql, final Connection con) throws SQLException {
         if (!tableExists(con, name)) {
             Statement stmt = null;

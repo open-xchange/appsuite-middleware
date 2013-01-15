@@ -511,7 +511,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets transport server URI
-     * 
+     *
      * @param transportServer The transport server URI
      */
     public void setTransportServer(final URI transportServer) {

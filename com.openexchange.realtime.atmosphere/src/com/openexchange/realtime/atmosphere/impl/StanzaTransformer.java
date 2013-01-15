@@ -60,7 +60,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link StanzaTransformer} - Transforms a Stanza "from" one representation "to" another by transforming all the PayloadTrees found in the
  * Stanza.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -69,7 +69,7 @@ public class StanzaTransformer {
 
     /**
      * Transform an incoming {@link Stanza} by transforming every PayloadTree of the Stanza.
-     * 
+     *
      * @param stanza The incoming stanza to process
      * @param session The currently active session
      * @throws OXException When transformation of the Stanza fails
@@ -90,7 +90,7 @@ public class StanzaTransformer {
 
     /**
      * Transform an outgoing {@link Stanza} by transforming every PayloadTree of the Stanza.
-     * 
+     *
      * @param stanza The outgoing stanza to process
      * @param session The currently active session
      * @throws OXException When transformation of the Stanza fails

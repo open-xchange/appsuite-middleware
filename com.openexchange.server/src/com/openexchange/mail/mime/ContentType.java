@@ -593,7 +593,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Checks if this Content-Type has specified base type.
-     * 
+     *
      * @param primaryType The primary type; e.g. <code>"text"</code>
      * @param subType The secondary type; e.g. <code>"plain"</code>
      * @return <code>true</code> if matches given base type; otherwise <code>false</code>

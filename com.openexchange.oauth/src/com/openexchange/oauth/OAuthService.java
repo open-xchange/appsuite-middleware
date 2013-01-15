@@ -183,7 +183,7 @@ public interface OAuthService {
      * @param api The API type
      * @param session The session
      * @return The default account for this API type
-     * @throws OXException 
+     * @throws OXException
      */
 	OAuthAccount getDefaultAccount(API api, Session session) throws OXException;
 

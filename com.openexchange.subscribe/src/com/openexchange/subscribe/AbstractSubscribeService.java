@@ -89,7 +89,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     public static final AtomicReference<FolderService> FOLDERS = new AtomicReference<FolderService>();
 
     public static final AtomicReference<UserConfigurationService> USER_CONFIGS = new AtomicReference<UserConfigurationService>();
-    
+
     @Override
     public Collection<Subscription> loadSubscriptions(final Context ctx, final String folderId, final String secret) throws OXException {
         final List<Subscription> allSubscriptions = STORAGE.get().getSubscriptions(ctx, folderId);
@@ -168,7 +168,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     public void modifyIncoming(final Subscription subscription) throws OXException {
     	Object accountIDObject = subscription.getConfiguration().get("account");
         Integer accountId = null;
-        if (JSONObject.NULL == accountIDObject) { 
+        if (JSONObject.NULL == accountIDObject) {
         	throw new OXException(90111, SubscriptionErrorStrings.NO_OAUTH_ACCOUNT_GIVEN);
     	}
     }
@@ -328,10 +328,10 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     protected void removeWhereConfigMatches(final Context context, final Map<String, Object> query) throws OXException {
         STORAGE.get().deleteAllSubscriptionsWhereConfigMatches(query, getSubscriptionSource().getId(), context);
     }
-    
-    
+
+
     // Permission Checks
-    
+
     public void checkCreate(final Subscription subscription) throws OXException {
     	if (canWrite(subscription)) {
     		return;
@@ -344,31 +344,31 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     	}
     	throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
-    
+
     public void checkDelete(final Subscription subscription) throws OXException {
     	if (subscription.getSession().getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
     		return;
     	}
     	throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
-    
+
     private boolean canWrite(final Subscription subscription) throws OXException {
     	final OCLPermission permission = loadFolderPermission(subscription);
     	return permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION ||  ( permission.getFolderPermission() >= OCLPermission.CREATE_OBJECTS_IN_FOLDER && permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS);
     }
-    
+
     private boolean isFolderAdmin(final Subscription subscription) throws OXException {
     	final OCLPermission permission = loadFolderPermission(subscription);
     	return  permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION;
     }
-    
+
     private OCLPermission loadFolderPermission(final Subscription subscription) throws OXException {
         final int folderId = Integer.valueOf(subscription.getFolderId());
         final int userId = subscription.getSession().getUserId();
         final Context ctx = subscription.getContext();
         final UserConfiguration userConfig = USER_CONFIGS.get().getUserConfiguration(userId, ctx);
-        
-        
+
+
         return new OXFolderAccess(ctx).getFolderPermission(folderId, userId, userConfig);
     }
 

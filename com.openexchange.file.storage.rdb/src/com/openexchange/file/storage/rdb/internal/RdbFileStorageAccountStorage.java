@@ -193,7 +193,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
 
     /**
      * Gets the first account matching specified account identifier.
-     * 
+     *
      * @param accountId The account identifier
      * @param session The session
      * @return The matching account or <code>null</code>

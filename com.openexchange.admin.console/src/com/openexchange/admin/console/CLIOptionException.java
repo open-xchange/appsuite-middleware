@@ -10,7 +10,7 @@ public abstract class CLIOptionException extends Exception {
 
     /**
      * Initializes a new {@link CLIOptionException}.
-     * 
+     *
      * @param msg The error message
      */
     CLIOptionException(final String msg) {
@@ -19,7 +19,7 @@ public abstract class CLIOptionException extends Exception {
 
     /**
      * Initializes a new {@link CLIOptionException}.
-     * 
+     *
      * @param msg The error message
      * @param cause The cause
      */

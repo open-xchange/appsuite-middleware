@@ -62,7 +62,7 @@ import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
  * {@link SessionStorageServiceTracker}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<SessionStorageService, SessionStorageService> {

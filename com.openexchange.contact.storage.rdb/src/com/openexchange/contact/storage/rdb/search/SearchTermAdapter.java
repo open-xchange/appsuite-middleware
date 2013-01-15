@@ -70,18 +70,18 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.tools.StringCollection;
 
 /**
- * {@link SearchAdapter} - Helps constructing the database statement for a 
+ * {@link SearchAdapter} - Helps constructing the database statement for a
  * search term.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SearchTermAdapter extends DefaultSearchAdapter {
-	
+
 	private final com.openexchange.java.StringAllocator stringBuilder;
-	
+
 	/**
 	 * Initializes a new {@link SearchAdapter}.
-	 * 
+	 *
 	 * @param term
 	 * @param charset
 	 * @throws OXException
@@ -91,21 +91,21 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 		this.stringBuilder = new com.openexchange.java.StringAllocator();
 		this.append(term);
 	}
-    
+
 	/**
 	 * Initializes a new {@link SearchAdapter}.
-	 * 
+	 *
 	 * @param term
 	 * @throws OXException
 	 */
 	public SearchTermAdapter(SearchTerm<?> term) throws OXException {
 		this(term, null);
 	}
-    
+
 	/**
 	 * Gets the constructed <code>WHERE</code>-clause for the search term to be
-	 * used in the database statement, without the leading <code>WHERE</code>.  
-	 * 
+	 * used in the database statement, without the leading <code>WHERE</code>.
+	 *
 	 * @return the search clause
 	 */
 	@Override
@@ -117,7 +117,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 			return "TRUE";
 		}
 	}
-	
+
 	private void append(final SearchTerm<?> term) throws OXException {
 		if (SingleSearchTerm.class.isInstance(term)) {
 			this.append((SingleSearchTerm)term);
@@ -127,14 +127,14 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 			throw new IllegalArgumentException("Need either an 'SingleSearchTerm' or 'CompositeSearchTerm'.");
 		}
 	}
-	
+
 	private void append(SingleSearchTerm term) throws OXException {
 		final Operand<?>[] operands = term.getOperands();
 		final Operation operation = term.getOperation();
 		this.stringBuilder.append(" ( ");
 		for (int i = 0; i < operands.length; i++) {
 			if (OperationPosition.BEFORE.equals(operation.getSqlPosition())) {
-				stringBuilder.append(operation.getSqlRepresentation());				
+				stringBuilder.append(operation.getSqlRepresentation());
 			}
 			append(operands[i]);
 			if (OperationPosition.AFTER.equals(operation.getSqlPosition())) {
@@ -146,7 +146,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 		}
 		stringBuilder.append(" ) ");
 	}
-	
+
 	private void append(CompositeSearchTerm term) throws OXException {
 		stringBuilder.append(" ( ");
 		if (false == appendAsInClause(term)) {
@@ -167,15 +167,15 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 		}
 		stringBuilder.append(" ) ");
 	}
-	
+
 	/**
 	 * Tries to interpret and append a composite term as <code>IN</code>-
-	 * clause, so that a composite 'OR' term where each nested 'EQUALS' 
-	 * operation targets the same column gets optimized to a suitable 
+	 * clause, so that a composite 'OR' term where each nested 'EQUALS'
+	 * operation targets the same column gets optimized to a suitable
 	 * <code>column IN (value1,value2,...)</code>.
-	 * 
+	 *
 	 * @param compositeTerm the composite term
-	 * @return <code>true</code>, if the term was appended as 'IN' clause, <code>false</code>, otherwise 
+	 * @return <code>true</code>, if the term was appended as 'IN' clause, <code>false</code>, otherwise
 	 * @throws OXException
 	 */
 	private boolean appendAsInClause(CompositeSearchTerm compositeTerm) throws OXException {
@@ -230,7 +230,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 		}
 		if (null == commonColumnValue || 2 > constantValues.size()) {
 			return false;
-		}		
+		}
 		/*
 		 * all checks passed, build IN clause
 		 */
@@ -243,9 +243,9 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 			this.appendConstantOperand(constantValues.get(i), dbMapping.getSqlType());
 		}
 		this.stringBuilder.append(") ");
-		return true; 
+		return true;
 	}
-	
+
     private void append(Operand<?> operand) throws OXException {
 		final Object value = operand.getValue();
 		if (null == value) {
@@ -271,9 +271,9 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 			} else {
 				String preparedPattern = StringCollection.prepareForSearch((String)value, false, true);
 				if (containsWildcards(preparedPattern)) {
-					// use "LIKE" search 
+					// use "LIKE" search
 					final int index = stringBuilder.lastIndexOf("=");
-					stringBuilder.replace(index, index + 1, "LIKE");		
+					stringBuilder.replace(index, index + 1, "LIKE");
 				}
 				parameters.add(preparedPattern);
 			}
@@ -285,7 +285,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 
 	/**
 	 * Appends a value as column operand.
-	 * 
+	 *
 	 * @param value the value
 	 * @return the sql type of the column
 	 * @throws OXException
@@ -301,7 +301,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 			stringBuilder.append(dbMapping.getColumnLabel());
 		}
 	}
-	
+
 	private void appendColumnOperand(DbMapping<? extends Object, Contact> dbMapping) throws OXException {
 		if (null != this.charset && Types.VARCHAR == dbMapping.getSqlType()) {
 			stringBuilder.append("CONVERT(").append(dbMapping.getColumnLabel()).append(" USING ").append(this.charset).append(')');
@@ -309,7 +309,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 			stringBuilder.append(dbMapping.getColumnLabel());
 		}
 	}
-	
+
 	private static DbMapping<? extends Object, Contact> getMapping(Object value) throws OXException {
 		return Mappers.CONTACT.get(getField(value));
 	}
@@ -323,8 +323,8 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 			field = ContactField.getByAjaxName(value.toString());
 			if (null == field) {
 				// try column name
-				field = Mappers.CONTACT.getMappedField(value.toString());					
-			}				
+				field = Mappers.CONTACT.getMappedField(value.toString());
+			}
 		}
 		if (null == field) {
 			throw new IllegalArgumentException("unable to determine contact field for column operand value: " + value);

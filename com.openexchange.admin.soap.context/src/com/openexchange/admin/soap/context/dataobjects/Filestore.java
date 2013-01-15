@@ -9,9 +9,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse f\u00fcr Filestore complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="Filestore">
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Filestore", propOrder = {
@@ -61,11 +61,11 @@ public class Filestore {
 
     /**
      * Ruft den Wert der currentContexts-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getCurrentContexts() {
         return currentContexts;
@@ -73,11 +73,11 @@ public class Filestore {
 
     /**
      * Legt den Wert der currentContexts-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setCurrentContexts(Integer value) {
         this.currentContexts = value;
@@ -85,11 +85,11 @@ public class Filestore {
 
     /**
      * Ruft den Wert der id-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getId() {
         return id;
@@ -97,11 +97,11 @@ public class Filestore {
 
     /**
      * Legt den Wert der id-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setId(Integer value) {
         this.id = value;
@@ -109,11 +109,11 @@ public class Filestore {
 
     /**
      * Ruft den Wert der maxContexts-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getMaxContexts() {
         return maxContexts;
@@ -121,11 +121,11 @@ public class Filestore {
 
     /**
      * Legt den Wert der maxContexts-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setMaxContexts(Integer value) {
         this.maxContexts = value;
@@ -133,11 +133,11 @@ public class Filestore {
 
     /**
      * Ruft den Wert der reserved-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getReserved() {
         return reserved;
@@ -145,11 +145,11 @@ public class Filestore {
 
     /**
      * Legt den Wert der reserved-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setReserved(Long value) {
         this.reserved = value;
@@ -157,11 +157,11 @@ public class Filestore {
 
     /**
      * Ruft den Wert der size-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getSize() {
         return size;
@@ -169,11 +169,11 @@ public class Filestore {
 
     /**
      * Legt den Wert der size-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setSize(Long value) {
         this.size = value;
@@ -181,11 +181,11 @@ public class Filestore {
 
     /**
      * Ruft den Wert der url-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUrl() {
         return url;
@@ -193,11 +193,11 @@ public class Filestore {
 
     /**
      * Legt den Wert der url-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUrl(String value) {
         this.url = value;
@@ -205,11 +205,11 @@ public class Filestore {
 
     /**
      * Ruft den Wert der used-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getUsed() {
         return used;
@@ -217,11 +217,11 @@ public class Filestore {
 
     /**
      * Legt den Wert der used-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setUsed(Long value) {
         this.used = value;

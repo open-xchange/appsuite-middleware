@@ -436,10 +436,10 @@ public abstract class ParticipantStorage {
         }
         return retval;
     }
-    
+
     /**
      * Reads the participants of several task.
-     * 
+     *
      * @param ctx Context.
      * @param tasks unique identifier of the tasks.
      * @param type type of participant that should be selected.

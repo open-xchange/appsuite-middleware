@@ -55,7 +55,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link SimpleConverter} A simple conversion service to convert Object "data"
  * from a certain format to a certain format.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -71,5 +71,5 @@ public interface SimpleConverter {
 	 * @throws OXException if something goes horribly wrong
 	 */
 	public Object convert(String from, String to, Object data, ServerSession session) throws OXException;
-	
+
 }

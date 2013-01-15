@@ -68,7 +68,7 @@ import gnu.trove.set.TLongSet;
 
 /**
  * {@link ConcurrentTLongObjectHashMap}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConcurrentTLongObjectHashMap<V> extends TLongObjectHashMap<V> {
@@ -86,7 +86,7 @@ public final class ConcurrentTLongObjectHashMap<V> extends TLongObjectHashMap<V>
 
     /**
      * Initializes a new {@link ConcurrentTLongObjectHashMap}.
-     * 
+     *
      * @param initialCapacity
      */
     public ConcurrentTLongObjectHashMap(final int initialCapacity) {
@@ -96,7 +96,7 @@ public final class ConcurrentTLongObjectHashMap<V> extends TLongObjectHashMap<V>
 
     /**
      * Initializes a new {@link ConcurrentTLongObjectHashMap}.
-     * 
+     *
      * @param map
      */
     public ConcurrentTLongObjectHashMap(final TLongObjectMap<? extends V> map) {
@@ -106,7 +106,7 @@ public final class ConcurrentTLongObjectHashMap<V> extends TLongObjectHashMap<V>
 
     /**
      * Initializes a new {@link ConcurrentTLongObjectHashMap}.
-     * 
+     *
      * @param initialCapacity
      * @param loadFactor
      */
@@ -117,7 +117,7 @@ public final class ConcurrentTLongObjectHashMap<V> extends TLongObjectHashMap<V>
 
     /**
      * Initializes a new {@link ConcurrentTLongObjectHashMap}.
-     * 
+     *
      * @param initialCapacity
      * @param loadFactor
      * @param noEntryKey

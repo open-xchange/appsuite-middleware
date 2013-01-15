@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link SpamhandlerSpamassassinExceptionMessage}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class SpamhandlerSpamassassinExceptionMessage implements LocalizableStrings {

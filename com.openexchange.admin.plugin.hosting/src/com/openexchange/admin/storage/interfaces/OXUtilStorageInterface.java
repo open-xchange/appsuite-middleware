@@ -68,10 +68,10 @@ import com.openexchange.admin.tools.PropertyHandlerExtended;
 
 /**
  * This interface provides an abstraction to the storage of the util information
- * 
+ *
  * @author d7
  * @author cutmasta
- * 
+ *
  */
 public abstract class OXUtilStorageInterface {
 
@@ -81,7 +81,7 @@ public abstract class OXUtilStorageInterface {
     private static Class<? extends OXUtilStorageInterface> implementingClass;
 
     private static final Log log = LogFactory.getLog(OXUtilStorageInterface.class);
-    
+
     protected static AdminCacheExtended cache = null;
 
     protected static PropertyHandler prop = null;
@@ -141,7 +141,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * Register filestore in configbdb.
-     * 
+     *
      * @param fstore
      *            filestore object
      * @return the id of the created filestore as a long.
@@ -151,7 +151,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * Changes a given filestore
-     * 
+     *
      * @param fstore
      *            filestore object
      * @throws StorageException
@@ -160,7 +160,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * List all registered filestores
-     * 
+     *
      * @param search_pattern
      *            a pattern to search for
      * @return an array of filestore objects
@@ -182,13 +182,13 @@ public abstract class OXUtilStorageInterface {
      * @param filestoreId
      * @param loadUsage - Whether the usage must be determined. Note: This is very slow.
      * @return
-     * @throws StorageException 
+     * @throws StorageException
      */
     public abstract Filestore getFilestore(int filestoreId, boolean loadUsage) throws StorageException;
-    
+
     /**
      * Unregister filestore from configbdb
-     * 
+     *
      * @param store_id
      *            the id of the filestore
      * @throws StorageException
@@ -205,7 +205,7 @@ public abstract class OXUtilStorageInterface {
     /**
      * Create a new maintenance reason in configdb.They are needed to disable a
      * context.
-     * 
+     *
      * @param reason
      *            the MaintenanceReason
      * @return the id as a long of the new created reason
@@ -215,7 +215,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * Delete reason from configdb
-     * 
+     *
      * @param reason
      *            the MaintenanceReason
      * @throws StorageException
@@ -244,7 +244,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * Register a new Database in configdb
-     * 
+     *
      * @param db
      *            a database object to register
      * @return long with the id of the database
@@ -255,7 +255,7 @@ public abstract class OXUtilStorageInterface {
     /**
      * Creates a new database from scratch on the given database host. Is used
      * ONLY internally at the moment.
-     * 
+     *
      * @param db
      *            a database object to create
      * @throws StorageException
@@ -265,7 +265,7 @@ public abstract class OXUtilStorageInterface {
     /**
      * Delete a complete database(scheme) from the given database host. Is used
      * ONYL internally at the moment.
-     * 
+     *
      * @param db
      *            a database object to be deleted
      * @throws StorageException
@@ -282,7 +282,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * Registers a new server in the configdb
-     * 
+     *
      * @param serverName
      *            a server name to be registered
      * @return long with the id of the server
@@ -292,7 +292,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * Unregister a database from configdb
-     * 
+     *
      * @param db_id
      *            a database id which is unregistered
      * @throws StorageException
@@ -301,7 +301,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * Unregister a server from configdb
-     * 
+     *
      * @param server_id
      *            a server id which is unregistered
      * @throws StorageException
@@ -310,7 +310,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * Searches for databases matching search_pattern
-     * 
+     *
      * @param search_pattern
      *            a pattern to search for
      * @return a database array
@@ -320,7 +320,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * Searchs for server matching given search_pattern
-     * 
+     *
      * @param search_pattern
      *            a pattern to search for
      * @return Server array with found servers
@@ -328,5 +328,5 @@ public abstract class OXUtilStorageInterface {
      */
     public abstract Server[] searchForServer(final String search_pattern) throws StorageException;
 
-   
+
 }

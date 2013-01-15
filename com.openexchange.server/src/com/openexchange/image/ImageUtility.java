@@ -140,7 +140,7 @@ public final class ImageUtility {
         il.setRegistrationName(registrationName);
         return il;
     }
-    
+
     public static ImageLocation parseImageLocationFrom(final AJAXRequestData requestData) {
         if (requestData == null) {
             return null;

@@ -66,7 +66,7 @@ import com.openexchange.log.Props;
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
  * and creates a new HttpSession if needed to achieve feature parity with the ajp based implementation.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class WrappingFilter implements Filter {
@@ -83,10 +83,10 @@ public class WrappingFilter implements Filter {
         HttpServletRequestWrapper httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         HttpServletResponseWrapper httpServletResponseWrapper = new HttpServletResponseWrapper(httpServletResponse);
-        
+
         // Create a Session if needed
         httpServletRequest.getSession(true);
-        
+
         // Set LogProperties
         if(LogProperties.isEnabled()) {
             Props logProperties = LogProperties.getLogProperties();
@@ -95,16 +95,16 @@ public class WrappingFilter implements Filter {
             logProperties.put(LogProperties.Name.GRIZZLY_REQUEST_URI, httpServletRequest.getRequestURI());
             logProperties.put(LogProperties.Name.GRIZZLY_SERVLET_PATH, httpServletRequest.getServletPath());
             logProperties.put(LogProperties.Name.GRIZZLY_PATH_INFO, httpServletRequest.getPathInfo());
-            
+
             // Remote infos
             logProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, httpServletRequest.getRemotePort());
             logProperties.put(LogProperties.Name.GRIZZLY_REQUEST_IP, httpServletRequest.getRemoteAddr());
-            
+
             // Names, addresses
             logProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, Thread.currentThread().getName());
             logProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpServletRequest.getServerName());
         }
-        
+
         chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
     }
 

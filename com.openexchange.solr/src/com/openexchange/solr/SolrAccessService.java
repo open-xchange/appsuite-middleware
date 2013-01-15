@@ -66,101 +66,101 @@ import com.openexchange.exception.OXException;
 public interface SolrAccessService {
     /**
      * See {@link SolrServer#add(SolrInputDocument)} for details.
-     * 
+     *
      * @param identifier The cores name.
      * @param commit <code>true</code> If the document should be committed. Otherwise <code>false</code>.
      * @throws OXException in case of solr errors.
      */
     public UpdateResponse add(SolrCoreIdentifier identifier, SolrInputDocument document, boolean commit) throws OXException;
-    
+
     /**
      * See {@link SolrServer#add(Collection)} for details.
-     * 
+     *
      * @param identifier The cores name.
      * @param commit <code>true</code> If the documents should be committed. Otherwise <code>false</code>.
      * @throws OXException in case of solr errors.
      */
     public UpdateResponse add(SolrCoreIdentifier identifier, Collection<SolrInputDocument> documents, boolean commit) throws OXException;
-        
+
     /**
      * See {@link SolrServer#deleteById(String)} for details.
-     * 
+     *
      * @param identifier The cores name.
      * @param commit <code>true</code> If the deletion should be committed. Otherwise <code>false</code>.
      * @throws OXException in case of solr errors.
      */
     public UpdateResponse deleteById(SolrCoreIdentifier identifier, String id, boolean commit) throws OXException;
-    
+
     /**
      * See {@link SolrServer#deleteByQuery(String)} for details.
-     * 
+     *
      * @param identifier The cores name.
      * @param commit <code>true</code> If the deletion should be committed. Otherwise <code>false</code>.
      * @throws OXException in case of solr errors.
      */
     public UpdateResponse deleteByQuery(SolrCoreIdentifier identifier, String query, boolean commit) throws OXException;
-    
+
     /**
      * See {@link SolrServer#commit()} for details.
-     * 
+     *
      * @param identifier The cores name.
      * @throws OXException in case of solr errors.
      */
     public UpdateResponse commit(SolrCoreIdentifier identifier) throws OXException;
-    
+
     /**
      * See {@link SolrServer#commit(boolean, boolean)} for details.
-     * 
+     *
      * @param identifier The cores name.
      * @throws OXException in case of solr errors.
      */
     public UpdateResponse commit(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws OXException;
-    
+
     /**
      * See {@link SolrServer#rollback()} for details.
-     * 
+     *
      * @param identifier The cores name.
      * @throws OXException in case of solr errors.
      */
     public UpdateResponse rollback(SolrCoreIdentifier identifier) throws OXException;
-    
+
     /**
      * See {@link SolrServer#optimize()} for details.
-     * 
+     *
      * @param identifier The cores name.
      * @throws OXException in case of solr errors.
      */
     public UpdateResponse optimize(SolrCoreIdentifier identifier) throws OXException;
-    
+
     /**
      * See {@link SolrServer#optimize(boolean, boolean)} for details.
-     * 
+     *
      * @param identifier The cores name.
      * @throws OXException in case of solr errors.
      */
     public UpdateResponse optimize(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws OXException;
-    
+
     /**
      * See {@link SolrServer#optimize(boolean, boolean, int)} for details.
-     * 
+     *
      * @param identifier The cores name.
      * @throws OXException in case of solr errors.
      */
     public UpdateResponse optimize(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher, int maxSegments) throws OXException;
-    
+
     /**
      * See {@link SolrServer#query(SolrParams)} for details.
-     * 
+     *
      * @param identifier The cores name.
      * @throws OXException in case of solr errors.
      */
     public QueryResponse query(SolrCoreIdentifier identifier, SolrParams params) throws OXException;
-    
+
     /**
      * Releases all resources hold for a core.
-     * 
+     *
      * @param identifier The cores identifier.
      */
     public void freeResources(SolrCoreIdentifier identifier);
-    
+
 }

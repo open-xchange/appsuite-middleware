@@ -64,7 +64,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 public class CassandraEAVStorageActivator extends HousekeepingActivator {
 
 	private static Log log = com.openexchange.log.Log.loggerFor(CassandraEAVStorageActivator.class);
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
@@ -81,21 +81,21 @@ public class CassandraEAVStorageActivator extends HousekeepingActivator {
 	@Override
 	protected void startBundle() throws Exception {
 		log.info("Starting bundle: com.openexchange.eav.storage.cassandra");
-		
+
 		CassandraEAVStorageServiceLookup.set(this);
-        
+
         ConfigurationService config = CassandraEAVStorageServiceLookup.getService(ConfigurationService.class);
-        
+
         final File file = config.getFileByName("eavstorage.properties");
         if (null != file) {
             System.setProperty("eavstorage.config", file.getAbsolutePath().toString());
         }
-		
+
 		EAVStorage eav = new CassandraEAVStorageImpl();
 		registerService(EAVStorage.class, eav);
-		
+
 		openTrackers();
-		
+
 		log.info("Cassandra Storage Service started successfully.");
 	}
 }

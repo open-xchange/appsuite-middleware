@@ -283,7 +283,7 @@ public class VCardExporter implements Exporter {
 
             final int folderId = Integer.parseInt(folder);
             //final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-            
+
             ContactField[] fields = ContactMapper.getInstance().getFields(
                 null != fieldsToBeExported ? fieldsToBeExported : _contactFields, null, (ContactField[])null);
             final Contact contactObj = ImportExportServices.getContactService().getContact(sessObj, Integer.toString(folderId), Integer.toString(objectId), fields);

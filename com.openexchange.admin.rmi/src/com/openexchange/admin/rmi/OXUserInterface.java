@@ -64,38 +64,38 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 /**
  * This class defines the Open-Xchange API Version 2 for creating and
  * manipulating OX Users within an OX context.<br><br>
- * 
+ *
  * <b>Example:</b>
  * <pre>
  * final OXUserInterface iface = (OXUserInterface)Naming.lookup("rmi:///oxhost/"+OXUserInterface.RMI_NAME);
- * 
+ *
  * final Context ctx = new Context(1);
- * 
+ *
  * User usr = new User();
  * usr.setDisplay_name("display name");
  * usr.setName("name");
- * usr.setPassword("secret");  
- * usr.setMailenabled(true);       
+ * usr.setPassword("secret");
+ * usr.setMailenabled(true);
  * usr.setPrimaryEmail("primaryemail@example.org");
  * usr.setEmail1("primaryemail@example.org");
  * usr.setGiven_name("Givenname");
  * usr.setSur_name("Lastname");
- * 
- * final UserModuleAccess access = new UserModuleAccess();  
+ *
+ * final UserModuleAccess access = new UserModuleAccess();
  * access.access.enableAll();  // give access to all modules.
- * 
+ *
  * final Credentials auth = new Credentials();
  * auth.setLogin("admin");
  * auth.setPassword("secret");
- * 
+ *
  * User created = iface.create(ctx,usr,access,auth);
- *  
+ *
  * </pre>
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- * 
+ *
  */
 public interface OXUserInterface extends Remote {
 
@@ -106,7 +106,7 @@ public interface OXUserInterface extends Remote {
 
     /**
      * Creates a new user within the given context.
-     * 
+     *
      * @param context
      *            Context in which the new user will exist.
      * @param usrdata
@@ -116,7 +116,7 @@ public interface OXUserInterface extends Remote {
      * @param access
      *            UserModuleAccess containing module access for the user.
      * @return int containing the id of the new user.
-     * 
+     *
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
@@ -130,11 +130,11 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      */
     public User create(final Context ctx, final User usrdata, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
-    
-    
+
+
     /**
      * Creates a new user within the given context.
-     * 
+     *
      * @param context
      *            Context in which the new user will exist.
      * @param usrdata
@@ -142,10 +142,10 @@ public interface OXUserInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @param access_combination_name
-     *            Access combination name identifying the module rights for the new user. 
-     *            
-     * @return int containing the id of the new user. 
-     * 
+     *            Access combination name identifying the module rights for the new user.
+     *
+     * @return int containing the id of the new user.
+     *
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
@@ -159,21 +159,21 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      */
     public User create(final Context ctx, final User usrdata, final String access_combination_name, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
-    
-    
+
+
     /**
      * Creates a new user within the given context.<br>
-     * Default context access rights are used! 
-     * 
+     * Default context access rights are used!
+     *
      * @param context
      *            Context in which the new user will exist.
      * @param usrdata
      *            User containing user data.
      * @param auth
-     *            Credentials for authenticating against server.     
-     *            
-     * @return int containing the id of the new user. 
-     * 
+     *            Credentials for authenticating against server.
+     *
+     * @return int containing the id of the new user.
+     *
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
@@ -187,18 +187,18 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      */
     public User create(final Context ctx, final User usrdata, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
-    
-    
+
+
     /**
-     * Returns the module access rights of the context-admin  
-     * 
+     * Returns the module access rights of the context-admin
+     *
      * @param context
      *            Context
      * @param auth
-     *            Credentials for authenticating against server.     
-     *            
-     * @return int containing the id of the new user. 
-     * 
+     *            Credentials for authenticating against server.
+     *
+     * @return int containing the id of the new user.
+     *
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
@@ -215,7 +215,7 @@ public interface OXUserInterface extends Remote {
 
     /**
      * Returns the Context admin {@link User} object
-     * 
+     *
      * @param ctx
      * @param auth
      * @return
@@ -228,14 +228,14 @@ public interface OXUserInterface extends Remote {
 
     /**
      * Manipulate user data within the given context.
-     * 
+     *
      * @param context
      *            Context in which the new user will be modified.
      * @param usrdata
      *            User containing user data.
      * @param auth
      *            Credentials for authenticating against server.
-     * 
+     *
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
@@ -253,14 +253,14 @@ public interface OXUserInterface extends Remote {
 
     /**
      * Delete user from given context.
-     * 
+     *
      * @param context
      *            Context in which the new user will be deleted.
      * @param users
      *            user array containing user object.
      * @param auth
      *            Credentials for authenticating against server.
-     * 
+     *
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
@@ -278,14 +278,14 @@ public interface OXUserInterface extends Remote {
 
     /**
      * Delete user from given context.
-     * 
+     *
      * @param context
      *            Context in which the new user will be deleted.
      * @param user
      *            user object.
      * @param auth
      *            Credentials for authenticating against server.
-     * 
+     *
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
@@ -303,7 +303,7 @@ public interface OXUserInterface extends Remote {
 
     /**
      * Retrieve the ModuleAccess for an user.
-     * 
+     *
      * @param context
      *            Context
      * @param user_id
@@ -311,7 +311,7 @@ public interface OXUserInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @return UserModuleAccess containing the module access rights.
-     * 
+     *
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
@@ -327,12 +327,12 @@ public interface OXUserInterface extends Remote {
      */
     public UserModuleAccess getModuleAccess(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
-    
+
     /**
      * Get current access combination name of an user!
-     * 
+     *
      * @param ctx
-     * @param user 
+     * @param user
      * @param auth
      * @return Access combination name or null if current access rights cannot be mapped to an access combination name.
      * @throws RemoteException
@@ -343,11 +343,11 @@ public interface OXUserInterface extends Remote {
      */
     public String getAccessCombinationName(final Context ctx,final User user,final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,
 	InvalidDataException, DatabaseUpdateException, NoSuchUserException;
-    
-    
+
+
     /**
      * Manipulate user module access within the given context.
-     * 
+     *
      * @param ctx
      *            Context object.
      * @param user_id
@@ -356,7 +356,7 @@ public interface OXUserInterface extends Remote {
      *            UserModuleAccess containing module access.
      * @param auth
      *            Credentials for authenticating against server.
-     * 
+     *
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
@@ -371,10 +371,10 @@ public interface OXUserInterface extends Remote {
      * @throws NoSuchUserException
      */
     public void changeModuleAccess(final Context ctx, final User user, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
-    
+
     /**
      * Manipulate user module access within the given context.
-     * 
+     *
      * @param ctx
      *            Context object.
      * @param user_id
@@ -383,7 +383,7 @@ public interface OXUserInterface extends Remote {
      *            String containing access combination name.
      * @param auth
      *            Credentials for authenticating against server.
-     * 
+     *
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
@@ -402,7 +402,7 @@ public interface OXUserInterface extends Remote {
     /**
      * This method changes module Permissions for all (!) users in all (!) contexts. This can be filtered by already existing access combinations.
      * If no filter is given, all users are changed.
-     * 
+     *
      * @param filter The call affects only users with exactly this access combination. This is either a String representing a defined module access combination or an Integer (masked as String) for direct definitions. null for no filter.
      * @param addAccess Access rights to be added
      * @param removeAccess Access rights to be removed
@@ -416,9 +416,9 @@ public interface OXUserInterface extends Remote {
 
     /**
      * Retrieve user objects for a range of users by username or id.
-     * 
+     *
      * @see User.getUsername().
-     * 
+     *
      * @param context
      *            Context object.
      * @param users
@@ -426,7 +426,7 @@ public interface OXUserInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @return User[] containing result objects.
-     * 
+     *
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
@@ -444,9 +444,9 @@ public interface OXUserInterface extends Remote {
 
     /**
      * Retrieve user objects for a range of users by username or id.
-     * 
+     *
      * @see User.getUsername().
-     * 
+     *
      * @param context
      *            Context object.
      * @param user
@@ -454,7 +454,7 @@ public interface OXUserInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @return User containing result object.
-     * 
+     *
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
@@ -475,7 +475,7 @@ public interface OXUserInterface extends Remote {
      * The search pattern is directly transformed into a SQL LIKE string comparison, where<br>
      * a * is transformed into a %<br>
      * a % and a _ must be escaped by a \ (e.g. if you want to search for _doe, use the pattern \_doe
-     * 
+     *
      * @param ctx
      *            Context object.
      * @param search_pattern
@@ -483,7 +483,7 @@ public interface OXUserInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @return User[] with currently ONLY id set in each User.
-     * 
+     *
      * @throws RemoteException
      * @throws StorageException
      * @throws InvalidCredentialsException
@@ -498,7 +498,7 @@ public interface OXUserInterface extends Remote {
      * The search pattern is directly transformed into a SQL LIKE string comparison, where<br>
      * a * is transformed into a %<br>
      * a % and a _ must be escaped by a \ (e.g. if you want to search for _doe, use the pattern \_doe
-     * 
+     *
      * @param ctx
      *            Context object.
      * @param search_pattern
@@ -506,7 +506,7 @@ public interface OXUserInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @return User[] with currently ONLY id set in each User.
-     * 
+     *
      * @throws RemoteException
      * @throws StorageException
      * @throws InvalidCredentialsException
@@ -518,13 +518,13 @@ public interface OXUserInterface extends Remote {
 
     /**
      * Retrieve all users for a given context. The same as calling list with a search_pattern of "*"
-     * 
+     *
      * @param ctx
      *            Context object.
      * @param auth
      *            Credentials for authenticating against server.
      * @return User[] with currently ONLY id set in each User.
-     * 
+     *
      * @throws RemoteException
      * @throws StorageException
      * @throws InvalidCredentialsException
@@ -536,16 +536,16 @@ public interface OXUserInterface extends Remote {
 
     /**
      * Check whether the given user exists. Either users id or name must be set.
-     * 
+     *
      * @param ctx
      * @param user
      * @return
      * @throws RemoteException
-     * @throws InvalidDataException 
-     * @throws InvalidCredentialsException 
-     * @throws StorageException 
-     * @throws DatabaseUpdateException 
-     * @throws NoSuchContextException 
+     * @throws InvalidDataException
+     * @throws InvalidCredentialsException
+     * @throws StorageException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchContextException
      */
     public boolean exists(final Context ctx, final User user, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, DatabaseUpdateException, NoSuchContextException;
 }

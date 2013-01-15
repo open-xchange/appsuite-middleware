@@ -62,18 +62,18 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 
 public class ContextConsoleListImpl implements ContextConsoleListInterface {
-    
+
     private static final ArrayList<String> columnnames = new ArrayList<String>();
 
     private static final ArrayList<String> columnnamesCSV = new ArrayList<String>();
-    
+
     static {
         columnnames.add("CustomID");
         columnnames.add("Owner");
         columnnamesCSV.addAll(columnnames);
         columnnamesCSV.add("Restrictions");
     }
-    
+
     @Override
     public void addExtensionOptions(final AdminParser parser) throws OXConsolePluginException {
     }
@@ -117,7 +117,7 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
         } else {
             retval.add(null);
         }
-        
+
         return retval;
     }
 

@@ -13,9 +13,9 @@ import com.openexchange.admin.soap.context.dataobjects.Database;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import com.openexchange.admin.soap.context.dataobjects.Database;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -50,11 +50,11 @@ public class MoveContextDatabase {
 
     /**
      * Ruft den Wert der ctx-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Context }
-     *     
+     *
      */
     public Context getCtx() {
         return ctx;
@@ -62,11 +62,11 @@ public class MoveContextDatabase {
 
     /**
      * Legt den Wert der ctx-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Context }
-     *     
+     *
      */
     public void setCtx(Context value) {
         this.ctx = value;
@@ -74,11 +74,11 @@ public class MoveContextDatabase {
 
     /**
      * Ruft den Wert der dstDatabaseId-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Database }
-     *     
+     *
      */
     public Database getDstDatabaseId() {
         return dstDatabaseId;
@@ -86,11 +86,11 @@ public class MoveContextDatabase {
 
     /**
      * Legt den Wert der dstDatabaseId-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Database }
-     *     
+     *
      */
     public void setDstDatabaseId(Database value) {
         this.dstDatabaseId = value;
@@ -98,11 +98,11 @@ public class MoveContextDatabase {
 
     /**
      * Ruft den Wert der auth-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Credentials }
-     *     
+     *
      */
     public Credentials getAuth() {
         return auth;
@@ -110,11 +110,11 @@ public class MoveContextDatabase {
 
     /**
      * Legt den Wert der auth-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Credentials }
-     *     
+     *
      */
     public void setAuth(Credentials value) {
         this.auth = value;

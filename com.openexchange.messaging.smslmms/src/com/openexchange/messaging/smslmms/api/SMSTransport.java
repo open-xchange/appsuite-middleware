@@ -62,7 +62,7 @@ public interface SMSTransport {
 
     /**
      * Connects this SMS/MMS transport.
-     * 
+     *
      * @throws OXException If the SMS/MMS transport could not be opened for various reasons
      */
     void connectTransport() throws OXException;
@@ -74,7 +74,7 @@ public interface SMSTransport {
 
     /**
      * Transports specified SMS/MMS message.
-     * 
+     *
      * @param smsMessage The SMS/MMS message
      * @param recipients The optional recipients; if <code>null</code> or empty the recipients from SMS/MMS message are taken
      * @throws OXException If transport fails

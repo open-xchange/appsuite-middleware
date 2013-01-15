@@ -51,11 +51,11 @@ package com.openexchange.freebusy.publisher.ews.lookup;
 
 /**
  * {@link DirectoryEntry}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DirectoryEntry {
-    
+
     private String mail;
     private String legacyExchangeDN;
     private String nameInNameSpace;

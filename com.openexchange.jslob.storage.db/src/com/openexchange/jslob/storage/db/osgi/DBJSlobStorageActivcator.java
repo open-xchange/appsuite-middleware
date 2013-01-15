@@ -63,7 +63,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link DBJSlobStorageActivcator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DBJSlobStorageActivcator extends HousekeepingActivator {

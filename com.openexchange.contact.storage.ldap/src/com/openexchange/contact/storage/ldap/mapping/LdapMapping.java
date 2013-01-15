@@ -65,11 +65,11 @@ import com.openexchange.groupware.tools.mappings.DefaultMapping;
  * @param <T>
  */
 public abstract class LdapMapping<T> extends DefaultMapping<T, Contact> implements Cloneable {
-    
+
     protected String ldapAttributeName;
     protected String alternativeLdapAttributeName;
     protected boolean binary;
-    
+
     /**
      * Initializes a new {@link LdapMapping}.
      */
@@ -79,16 +79,16 @@ public abstract class LdapMapping<T> extends DefaultMapping<T, Contact> implemen
 
     /**
      * Initializes a new {@link LdapMapping}.
-     * 
+     *
      * @param ldapAttributeName the name of the LDAP attribute
      */
     public LdapMapping(String ldapAttributeName) {
         this(ldapAttributeName, null);
     }
-    
+
     /**
      * Initializes a new {@link LdapMapping}.
-     * 
+     *
      * @param ldapAttributeName the name of the LDAP attribute
      * @param alternativeLdapAttributeName the alternative name of the LDAP attribute
      */
@@ -97,7 +97,7 @@ public abstract class LdapMapping<T> extends DefaultMapping<T, Contact> implemen
         this.ldapAttributeName = ldapAttributeName;
         this.alternativeLdapAttributeName = alternativeLdapAttributeName;
     }
-    
+
     protected Object getValue(LdapResult result) throws OXException {
         Attribute attribute = getAttribute(result);
         if (null != attribute) {
@@ -109,7 +109,7 @@ public abstract class LdapMapping<T> extends DefaultMapping<T, Contact> implemen
         }
         return null;
     }
-    
+
     protected Attribute getAttribute(LdapResult result) {
         if (null != result && null != result.getAttributes()) {
             Attribute attribute = result.getAttributes().get(getLdapAttributeName());
@@ -128,45 +128,45 @@ public abstract class LdapMapping<T> extends DefaultMapping<T, Contact> implemen
             this.set(contact, value);
         }
     }
-    
+
     public String getLdapAttributeName() {
         return this.ldapAttributeName;
     }
-    
+
     public String getAlternativeLdapAttributeName() {
         return this.alternativeLdapAttributeName;
     }
-    
+
     public String getAlternativeLdapAttributeName(boolean suppressOptions) {
-        return null != alternativeLdapAttributeName && suppressOptions ? 
+        return null != alternativeLdapAttributeName && suppressOptions ?
             this.alternativeLdapAttributeName.split(";")[0] : this.alternativeLdapAttributeName;
     }
-    
+
     public boolean isBinary() {
         return this.binary;
     }
-    
+
     public String getLdapAttributeName(boolean suppressOptions) {
         return null != ldapAttributeName && suppressOptions ? this.ldapAttributeName.split(";")[0] : this.ldapAttributeName;
     }
-    
+
     public void setLdapAttributeName(String ldapAttributeName) {
         this.ldapAttributeName = ldapAttributeName;
         this.binary = null != ldapAttributeName && ldapAttributeName.contains(";binary");
     }
-    
+
     public void setAlternativeLdapAttributeName(String alternativeLdapAttributeName) {
         this.alternativeLdapAttributeName = alternativeLdapAttributeName;
     }
-    
+
     public abstract T get(LdapResult result, LdapIDResolver idResolver) throws OXException;
-    
+
     protected abstract String encode(T value, LdapIDResolver idResolver) throws OXException;
 
     /**
      * Prepares the supplied value to be used in search filters for LDAP-
      * attribute based comparisons.
-     * 
+     *
      * @param value the value
      * @param idResolver
      * @return
@@ -190,10 +190,10 @@ public abstract class LdapMapping<T> extends DefaultMapping<T, Contact> implemen
         clone.setLdapAttributeName(this.ldapAttributeName);
         return clone;
     }
-    
+
     @Override
     public String toString() {
         return null == alternativeLdapAttributeName ? ldapAttributeName : ldapAttributeName + "/" + alternativeLdapAttributeName;
     }
-    
+
 }

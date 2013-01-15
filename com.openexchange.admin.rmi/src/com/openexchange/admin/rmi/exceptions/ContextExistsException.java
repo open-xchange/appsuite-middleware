@@ -61,9 +61,9 @@ public class ContextExistsException extends Exception {
          * For serialization
          */
         private static final long serialVersionUID = 1991615694615324164L;
-    
+
         /**
-	 * 
+	 *
 	 */
 	public ContextExistsException() {
 		super("Context already exists");
@@ -74,7 +74,7 @@ public class ContextExistsException extends Exception {
 	 */
 	public ContextExistsException(String message) {
 		super(message);
-		
+
 	}
 
 	/**
@@ -82,7 +82,7 @@ public class ContextExistsException extends Exception {
 	 */
 	public ContextExistsException(Throwable cause) {
 		super(cause);
-		
+
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class ContextExistsException extends Exception {
 	 * @param cause
 	 */
 	public ContextExistsException(String message, Throwable cause) {
-		super(message, cause);		
+		super(message, cause);
 	}
 
 }

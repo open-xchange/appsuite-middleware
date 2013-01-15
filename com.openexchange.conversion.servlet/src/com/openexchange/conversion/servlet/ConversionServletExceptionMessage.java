@@ -65,13 +65,13 @@ public class ConversionServletExceptionMessage implements LocalizableStrings {
     private ConversionServletExceptionMessage() {
         super();
     }
-    
+
     // A JSON error occurred: %1$s
     public final static String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
 
     // Missing parameter %1$s
     public final static String MISSING_PARAM_MSG = "Missing parameter %1$s";
-    
+
     // Unsupported value in parameter %1$s: %2$s
     public final static String UNSUPPORTED_PARAM_MSG = "Unsupported value in parameter %1$s: %2$s";
 

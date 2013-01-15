@@ -63,7 +63,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 
 /**
- * {@link DefaultSearchAdapter} 
+ * {@link DefaultSearchAdapter}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -78,7 +78,7 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
 	protected String charset;
 
 	/**
-	 * 
+	 *
 	 * @param charset
 	 */
 	public DefaultSearchAdapter(String charset) {
@@ -87,23 +87,23 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
 		this.parameters = new ArrayList<Object>();
 
 	}
-	
+
 	@Override
 	public Object[] getParameters() {
 		return this.parameters.toArray(new Object[parameters.size()]);
 	}
-	
+
 	@Override
 	public void setParameters(PreparedStatement stmt, int parameterIndex) throws SQLException {
 		for (Object parameter : parameters) {
 			stmt.setObject(parameterIndex++, parameter);
-		}		
+		}
 	}
-	
+
 	protected boolean containsWildcards(String pattern) {
 		return WILDCARD_PATTERN.matcher(pattern).find();
 	}
-	
+
 	protected boolean isTextColumn(ContactField field) throws OXException {
 		return isTextColumn(Mappers.CONTACT.get(field));
 	}

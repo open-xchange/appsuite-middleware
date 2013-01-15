@@ -59,7 +59,7 @@ import java.util.Locale;
 
 /**
  * {@link AsianReplacementCharsetProvider} - A charset provider which returns the "CP50220" charset when "ISO-2022-JP" is requested.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AsianReplacementCharsetProvider extends CharsetProvider {
@@ -115,7 +115,7 @@ public final class AsianReplacementCharsetProvider extends CharsetProvider {
 
     /**
      * Initializes a new {@link AsianReplacementCharsetProvider}.
-     * 
+     *
      * @throws UnsupportedCharsetException If "CP50220" charset cannot be found
      */
     public AsianReplacementCharsetProvider(final CharsetProvider standardProvider) {

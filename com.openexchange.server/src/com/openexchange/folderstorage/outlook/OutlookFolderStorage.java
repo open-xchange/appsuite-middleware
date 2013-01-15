@@ -166,7 +166,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OutlookFolderStorage} - The MS Outlook folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OutlookFolderStorage implements FolderStorage {
@@ -315,7 +315,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     /**
      * Removes specified folder from TCM map.
-     * 
+     *
      * @param fullname The folder full name
      * @param user The user identifier
      * @param contextId The context identifier
@@ -336,7 +336,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     /**
      * Gets the Outlook folder storage instance.
-     * 
+     *
      * @return The instance
      */
     public static OutlookFolderStorage getInstance() {
@@ -447,7 +447,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     /**
      * Gets the public mail folder path.
-     * 
+     *
      * @return The public mail folder path
      */
     public String getPublicMailFolderPath() {
@@ -477,7 +477,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                             // Check if that folder has subfolders
                             final boolean restore = memoryTree.hasSubfolderIds(folderId);
                             if (restore) {
-                                folderStorage.restore(realTreeId, folderId, storageParameters);                            
+                                folderStorage.restore(realTreeId, folderId, storageParameters);
                             } else {
                                 deleteFolder(treeId, folderId, storageParameters, DatabaseFolderType.getInstance().servesFolderId(folderId), memoryTable);
                             }
@@ -2698,7 +2698,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     /**
      * Gets the locale for given session
-     * 
+     *
      * @param session The session
      * @return The locale
      */
@@ -2794,7 +2794,7 @@ public final class OutlookFolderStorage implements FolderStorage {
      * Combines Callable and Trackable
      */
     private static abstract class TrackableCallable<V> implements Callable<V>, Trackable {
-        
+
         private final Map<String, Object> props;
         TrackableCallable() {
             super();

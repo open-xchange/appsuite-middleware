@@ -82,7 +82,7 @@ public class SyncCollection extends WebdavPropfindAction {
     public SyncCollection(Protocol protocol) {
         super(protocol);
     }
-    
+
     @Override
     public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
         final Element response = new Element("multistatus", DAV_NS);
@@ -107,11 +107,11 @@ public class SyncCollection extends WebdavPropfindAction {
 
         String token = getSyncToken(req, requestBody);
         Syncstatus<WebdavResource> syncStatus = ((CardDAVCollection)req.getResource()).getSyncStatus(token);
-        
+
         List<Element> all = new ArrayList<Element>();
         int[] statusCodes = syncStatus.getStatusCodes();
         PropertiesMarshaller helper = new PropertiesMarshaller(req.getURLPrefix(), req.getCharset());
-        
+
         for (int sc : statusCodes) {
             if (sc == 404) {
                 for(WebdavStatus<WebdavResource> status : syncStatus.toIterable(sc)) {
@@ -132,7 +132,7 @@ public class SyncCollection extends WebdavPropfindAction {
         syncToken.setText(syncStatus.getToken());
         response.addContent(syncToken);
         response.addContent(all);
-        
+
         try {
             res.setStatus(Protocol.SC_MULTISTATUS);
             res.setContentType("text/xml; charset=UTF-8");
@@ -142,7 +142,7 @@ public class SyncCollection extends WebdavPropfindAction {
         }
 
     }
-    
+
     private String getSyncToken(WebdavRequest req, Document requestBody) throws WebdavProtocolException {
     	return requestBody.getRootElement().getChildText("sync-token", DAV_NS);
     }

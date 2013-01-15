@@ -140,7 +140,7 @@ import net.bitform.api.elements.WeakProtectionsElement;
 
 /**
  * {@link TextAppendingElementHandler}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TextAppendingElementHandler implements ElementHandler {
@@ -156,7 +156,7 @@ public final class TextAppendingElementHandler implements ElementHandler {
     }
 
     private static final Pattern P = Pattern.compile("\\s+");
-    
+
     /**
      * Gets the extracted text
      *

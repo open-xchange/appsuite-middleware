@@ -129,7 +129,7 @@ public class UserModuleAccess {
         super();
         SOAPUtils.moduleAccess2SoapModuleAccess(access, this);
     }
-    
+
     public Boolean getEditGroup() {
         return EditGroup;
     }

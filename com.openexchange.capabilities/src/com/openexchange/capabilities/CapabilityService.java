@@ -62,12 +62,12 @@ public interface CapabilityService {
 
 	/**
 	 * Gets the capabilities associated with given session.
-	 * 
+	 *
 	 * @param session The session
 	 * @return The capabilities
 	 * @throws OXException If capabilities cannot be determined
 	 */
 	public Set<Capability> getCapabilities(ServerSession session) throws OXException;
-	
+
 	public void declareCapability(String capability);
 }

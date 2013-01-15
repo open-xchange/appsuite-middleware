@@ -138,7 +138,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             secretService = new WhiteboardSecretService(context);
             secretService.open();
             AbstractOAuthAJAXActionService.setSecretService(secretService);
-            
+
             getService(CapabilityService.class).declareCapability("oauth");
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);

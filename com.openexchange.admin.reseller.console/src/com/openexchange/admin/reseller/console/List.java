@@ -73,7 +73,7 @@ public class List extends ResellerAbstraction {
     }
 
     /**
-     * 
+     *
      */
     public List() {
     }
@@ -112,7 +112,7 @@ public class List extends ResellerAbstraction {
             } else {
                 sysoutOutput(Arrays.asList(adms));
             }
-            
+
             sysexit(0);
         } catch (final InvalidDataException e) {
             printError(null, null, "Invalid data : " + e.getMessage(), parser);
@@ -153,7 +153,7 @@ public class List extends ResellerAbstraction {
 
     /**
      * Generate data which can be processed by the csv output method.
-     * 
+     *
      * @param group
      * @param members
      * @return

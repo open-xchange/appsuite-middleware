@@ -57,7 +57,7 @@ import java.io.Writer;
  * {@link AsciiWriter} - A simple ASCII byte writer.
  * <p>
  * This is an optimized writer for writing only 7-bit ASCII characters to byte streams.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AsciiWriter extends Writer {

@@ -119,7 +119,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     }
 
     private static volatile Boolean DEBUG_ENABLED;
-    
+
     /**
      * @param debugEnabled the debugEnabled to set
      */
@@ -669,7 +669,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
         /**
          * Initializes a new {@link MissingSessionException}.
-         * 
+         *
          * @param message The message
          */
         public MissingSessionException(final String message) {

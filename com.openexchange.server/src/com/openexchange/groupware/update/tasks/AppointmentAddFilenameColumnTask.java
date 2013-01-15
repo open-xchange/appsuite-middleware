@@ -67,7 +67,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link AppointmentAddFilenameColumnTask}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class AppointmentAddFilenameColumnTask extends UpdateTaskAdapter {

@@ -53,7 +53,7 @@ import java.util.Comparator;
 
 /**
  * {@link InverseComparator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class InverseComparator<T> implements Comparator<T> {
@@ -62,7 +62,7 @@ public final class InverseComparator<T> implements Comparator<T> {
 
     /**
      * Initializes a new {@link InverseComparator}.
-     * 
+     *
      * @param comparator
      */
     public InverseComparator(final Comparator<T> comparator) {

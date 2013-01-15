@@ -59,7 +59,7 @@ import java.util.Set;
 
 /**
  * CommonObject
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
@@ -177,7 +177,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
      * Gets the extended properties.
      * <p>
      * <b>Note</b>: A clone is returned.
-     * 
+     *
      * @return The extended properties
      */
     public Map<String, Object> getExtendedProperties() {
@@ -190,7 +190,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     /**
      * Gets the marker
-     * 
+     *
      * @return The marker
      */
     public Marker getMarker() {
@@ -232,7 +232,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     // SET METHODS
     /**
      * Sets extended properties.
-     * 
+     *
      * @param extendedProperties The extended properties to set
      */
     public void setExtendedProperties(final Map<? extends String, ? extends Serializable> extendedProperties) {
@@ -246,7 +246,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     /**
      * Adds extended properties. Existing mappings are replaced.
-     * 
+     *
      * @param extendedProperties The extended properties to add
      */
     public void addExtendedProperties(final Map<? extends String, ? extends Serializable> extendedProperties) {
@@ -263,7 +263,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     /**
      * Adds extended property. Existing mapping is replaced.
-     * 
+     *
      * @param name The property name
      * @param value The property value
      */
@@ -275,7 +275,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
      * Adds extended property. Existing mapping is replaced.
      * <p>
      * Method is equal to {@link #addExtendedProperty(String, Serializable)}
-     * 
+     *
      * @param name The property name
      * @param value The property value
      */
@@ -297,7 +297,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     /**
      * Sets the marker
-     * 
+     *
      * @param marker The marker to set
      */
     public void setMarker(final Marker marker) {

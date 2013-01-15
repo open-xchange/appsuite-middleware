@@ -66,7 +66,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DBJSlobCreateTableTask}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DBJSlobCreateTableTask extends UpdateTaskAdapter {
@@ -75,7 +75,7 @@ public class DBJSlobCreateTableTask extends UpdateTaskAdapter {
 
     /**
      * Initializes a new {@link DBJSlobCreateTableTask}.
-     * 
+     *
      * @param services The service look-up
      */
     public DBJSlobCreateTableTask(final ServiceLookup services) {

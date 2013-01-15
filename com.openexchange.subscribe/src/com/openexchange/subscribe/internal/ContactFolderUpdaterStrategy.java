@@ -91,7 +91,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     private static final int SESSION = 3;
 
     private static final ContactField[] COMPARISON_FIELDS = {
-        ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.GIVEN_NAME, ContactField.SUR_NAME, ContactField.BIRTHDAY, 
+        ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.GIVEN_NAME, ContactField.SUR_NAME, ContactField.BIRTHDAY,
         ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.USERFIELD20 };
 
     private static final int[] MATCH_COLUMNS = I2i(Arrays.remove(i2I(Contact.CONTENT_COLUMNS), I(Contact.USERFIELD20)));
@@ -137,11 +137,11 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     }
 
     private boolean isReasonablyEmpty(Contact c) {
-		return !(c.containsEmail1() 
-		|| c.containsEmail2() 
-		|| c.containsEmail3() 
-		|| c.containsSurName() 
-		|| c.containsGivenName() 
+		return !(c.containsEmail1()
+		|| c.containsEmail2()
+		|| c.containsEmail3()
+		|| c.containsSurName()
+		|| c.containsGivenName()
 		|| c.containsYomiFirstName()
 		|| c.containsYomiLastName()
 		|| c.containsCompany()
@@ -254,7 +254,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
             update.setLastModified(new Date(System.currentTimeMillis()));
             // We need to carry over the UUID to keep existing relations
             update.setUserField20(original.getUserField20());
-            ((ContactService)sqlInterface).updateContact((TargetFolderSession)targetFolderSession, 
+            ((ContactService)sqlInterface).updateContact((TargetFolderSession)targetFolderSession,
                 String.valueOf(update.getParentFolderID()), String.valueOf(update.getObjectID()), update, update.getLastModified());
         }
     }

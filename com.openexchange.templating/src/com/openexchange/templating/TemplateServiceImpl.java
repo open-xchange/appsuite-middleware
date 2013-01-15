@@ -162,7 +162,7 @@ public class TemplateServiceImpl implements TemplateService {
     		final String defaultTemplateName, final Session session) throws OXException {
     	return loadTemplate(templateName, defaultTemplateName, session, true);
     }
-    
+
     @Override
     public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final Session sess, final boolean createCopy) throws OXException {
     	final ServerSession session = ServerSessionAdapter.valueOf(sess);
@@ -421,7 +421,7 @@ public class TemplateServiceImpl implements TemplateService {
         setExceptionHandler(exceptionHandler);
         return loadTemplate(templateName, defaultTemplateName, session);
     }
-    
+
     @Override
     public TemplatingHelper createHelper(final Object rootObject, final Session session, boolean createCopy) {
         return new TemplatingHelperImpl(rootObject, session, this, createCopy);

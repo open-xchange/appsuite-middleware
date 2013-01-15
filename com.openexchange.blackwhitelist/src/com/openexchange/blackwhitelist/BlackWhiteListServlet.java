@@ -68,13 +68,13 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link BlackWhiteListServlet}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class BlackWhiteListServlet extends DataServlet {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -929748663411398165L;
 
@@ -114,7 +114,7 @@ public class BlackWhiteListServlet extends DataServlet {
             } else {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAMETER_MODULE, module);
             }
-            
+
 
             if (action.equalsIgnoreCase(ADD)) {
                 doAdd(session, type, req, response);

@@ -70,13 +70,13 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link SolrIndexMysql}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrIndexMysql {
 
     private static final SolrIndexMysql INSTANCE = new SolrIndexMysql();
-    
+
 
     private SolrIndexMysql() {
         super();
@@ -556,7 +556,7 @@ public class SolrIndexMysql {
                 final int id = rs.getInt(1);
                 ustmt = con.prepareStatement("UPDATE solrCoreStores SET numCores = numCores + 1 WHERE id = ?");
                 ustmt.setInt(1, id);
-                
+
                 ustmt.executeUpdate();
                 con.commit();
                 return id;
@@ -574,7 +574,7 @@ public class SolrIndexMysql {
             dbService.backWritable(con);
         }
     }
-    
+
     private void decrementCoreStore(final int storeId) throws OXException {
         final DatabaseService dbService = getDbService();
         final Connection con = dbService.getWritable();
@@ -582,7 +582,7 @@ public class SolrIndexMysql {
         try {
             stmt = con.prepareStatement("UPDATE solrCoreStores SET numCores = numCores - 1 WHERE id = ?");
             stmt.setInt(1, storeId);
-            
+
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());

@@ -53,7 +53,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.groupware.attach.index.AttachmentIndexField;
-import com.openexchange.groupware.infostore.index.InfostoreIndexField;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.solr.internal.FieldMapper;
 import com.openexchange.index.solr.internal.SolrField;
@@ -67,12 +66,12 @@ import com.openexchange.index.solr.internal.SolrField;
 public class AttachmentFieldMapper implements FieldMapper {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AttachmentFieldMapper.class);
-    
+
     private static final AttachmentFieldMapper INSTANCE = new AttachmentFieldMapper();
-    
+
     private final Map<AttachmentIndexField, SolrAttachmentField> fieldMapping;
-    
-    
+
+
     private AttachmentFieldMapper() {
         super();
         fieldMapping = new EnumMap<AttachmentIndexField, SolrAttachmentField>(AttachmentIndexField.class);
@@ -83,22 +82,22 @@ public class AttachmentFieldMapper implements FieldMapper {
             }
         }
     }
-    
+
     public static AttachmentFieldMapper getInstance() {
         return INSTANCE;
     }
-        
+
     @Override
     public SolrField solrFieldFor(IndexField indexField) {
         if (indexField == null) {
             return null;
         }
-        
+
         if (!(indexField instanceof AttachmentIndexField)) {
             LOG.warn("Parameter 'indexField' must be of type " + AttachmentIndexField.class.getName() + "!");
             return null;
         }
-        
+
         return fieldMapping.get(indexField);
     }
 

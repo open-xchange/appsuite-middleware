@@ -70,7 +70,7 @@ import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 
 /**
  * {@link SecretActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -144,7 +144,7 @@ public class SecretActivator extends HousekeepingActivator {
             // Checks if SecretService is configured to use a password
             final boolean usesPassword = tokenList.isUsesPassword();
             registerService(SecretUsesPasswordChecker.class, new SecretUsesPasswordChecker() {
-                
+
                 @Override
                 public boolean usesPassword() {
                     return usesPassword;

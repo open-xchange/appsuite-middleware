@@ -237,7 +237,7 @@ public final class SOAPUtils {
         }
         return ret;
     }
-    
+
     /**
      * @param g
      * @return
@@ -250,7 +250,7 @@ public final class SOAPUtils {
         ret.setMembers(g.getMembers());
         return ret;
     }
-    
+
     /**
      * @param grps
      * @return
@@ -262,7 +262,7 @@ public final class SOAPUtils {
         }
         return ret;
     }
-    
+
     /**
      * @param grps
      * @return
@@ -274,7 +274,7 @@ public final class SOAPUtils {
         }
         return ret;
     }
-    
+
     public static void user2SoapUser(com.openexchange.admin.rmi.dataobjects.User in, User out) {
         HashSet<String> aliases = in.getAliases();
         if( null != aliases && aliases.size() > 0 ) {
@@ -633,7 +633,7 @@ public final class SOAPUtils {
         }
         out.setContextadmin(in.isContextadmin());
     }
-    
+
     /**
      * @param u
      * @return
@@ -1007,7 +1007,7 @@ public final class SOAPUtils {
         ret.setContextadmin(u.isContextadmin());
         return ret;
     }
-    
+
     /**
      * @param users
      * @return
@@ -1024,7 +1024,7 @@ public final class SOAPUtils {
         }
         return rusers;
     }
-    
+
     /**
      * @param users
      * @return
@@ -1068,7 +1068,7 @@ public final class SOAPUtils {
         }
         return ret;
     }
-    
+
     /**
      * @param resources
      * @return
@@ -1104,7 +1104,7 @@ public final class SOAPUtils {
         ret.setScheme(db.getScheme());
         return ret;
     }
-    
+
     public static com.openexchange.admin.rmi.dataobjects.Filestore soapFilestore2Filestore(Filestore fs) {
         com.openexchange.admin.rmi.dataobjects.Filestore ret = new com.openexchange.admin.rmi.dataobjects.Filestore();
         ret.setId(fs.getId());
@@ -1116,7 +1116,7 @@ public final class SOAPUtils {
         ret.setUsed(fs.getUsed());
         return ret;
     }
-    
+
     public static Database[] databases2SoapDatabases(com.openexchange.admin.rmi.dataobjects.Database []dbs) {
         Database ret[] = new Database[dbs.length];
         for(int i=0; i<dbs.length; i++) {
@@ -1124,7 +1124,7 @@ public final class SOAPUtils {
         }
         return ret;
     }
-    
+
     public static Filestore[] filestores2SoapFilestores(com.openexchange.admin.rmi.dataobjects.Filestore []fss) {
         Filestore ret[] = new Filestore[fss.length];
         for(int i=0; i<fss.length; i++) {
@@ -1132,7 +1132,7 @@ public final class SOAPUtils {
         }
         return ret;
     }
-    
+
     public static Server[] servers2SoapServers(com.openexchange.admin.rmi.dataobjects.Server []srvs) {
         Server ret[] = new Server[srvs.length];
         for(int i=0; i<srvs.length; i++) {
@@ -1140,7 +1140,7 @@ public final class SOAPUtils {
         }
         return ret;
     }
-    
+
     public static com.openexchange.admin.rmi.dataobjects.Server soapServer2Server(Server s) {
         com.openexchange.admin.rmi.dataobjects.Server ret = new com.openexchange.admin.rmi.dataobjects.Server();
         ret.setId(s.getId());

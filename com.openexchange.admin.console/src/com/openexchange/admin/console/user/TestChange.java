@@ -20,15 +20,15 @@ public class TestChange {
 
     /**
      * @param args
-     * @throws NotBoundException 
-     * @throws RemoteException 
-     * @throws MalformedURLException 
-     * @throws NoSuchUserException 
-     * @throws DatabaseUpdateException 
-     * @throws InvalidDataException 
-     * @throws NoSuchContextException 
-     * @throws InvalidCredentialsException 
-     * @throws StorageException 
+     * @throws NotBoundException
+     * @throws RemoteException
+     * @throws MalformedURLException
+     * @throws NoSuchUserException
+     * @throws DatabaseUpdateException
+     * @throws InvalidDataException
+     * @throws NoSuchContextException
+     * @throws InvalidCredentialsException
+     * @throws StorageException
      */
     public static void main(String[] args) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         final User user = new User();

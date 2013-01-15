@@ -53,7 +53,7 @@ import java.text.MessageFormat;
 
 /**
  * {@link CLIUnknownSuboptionException} - Indicates an unknown sub-option.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CLIUnknownSuboptionException extends CLIUnknownOptionException {
@@ -69,7 +69,7 @@ public final class CLIUnknownSuboptionException extends CLIUnknownOptionExceptio
 
     /**
      * Gets the unknown sub-option.
-     * 
+     *
      * @return The unknown sub-option
      */
     public char getSuboption() {

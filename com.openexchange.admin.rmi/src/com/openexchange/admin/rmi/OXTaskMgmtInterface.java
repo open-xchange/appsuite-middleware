@@ -60,7 +60,7 @@ import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 
 /**
  * This interface defines the methods of the task management which are accessibly through RMI.
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
@@ -75,7 +75,7 @@ public interface OXTaskMgmtInterface extends Remote {
 
     /**
      * Gets the result from the task with the specified id
-     * 
+     *
      * @param ctx
      * @param cred
      * @param id
@@ -90,40 +90,40 @@ public interface OXTaskMgmtInterface extends Remote {
      */
     public Object getTaskResults(final Context ctx, final Credentials cred, final int id)
         throws RemoteException, InvalidCredentialsException, StorageException, InterruptedException, ExecutionException, InvalidDataException;
-    
+
     /**
      * @return
      * @throws RemoteException
-     * @throws InvalidDataException 
-     * @throws StorageException 
-     * @throws InvalidCredentialsException 
+     * @throws InvalidDataException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
      */
     public String getJobList(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException;
 
     /**
      * This method is used to delete finished jobs (jobs != running) from the list
-     * 
+     *
      * @param ctx
      * @param auth
      * @param i
      * @throws RemoteException
      * @throws InvalidDataException
      * @throws InvalidCredentialsException
-     * @throws StorageException 
-     * @throws TaskManagerException 
+     * @throws StorageException
+     * @throws TaskManagerException
      */
     public void deleteJob(final Context ctx, final Credentials auth, final int i) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException;
 
     /**
      * Flushes all jobs from the queue which are finished ( != running)
-     * 
+     *
      * @param ctx
      * @param auth
      * @throws RemoteException
      * @throws InvalidDataException
      * @throws InvalidCredentialsException
      * @throws StorageException
-     * @throws TaskManagerException 
+     * @throws TaskManagerException
      */
     public void flush(final Context ctx, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException;
 }

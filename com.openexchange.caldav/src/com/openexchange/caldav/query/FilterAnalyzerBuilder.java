@@ -61,11 +61,11 @@ import java.util.Stack;
  */
 public class FilterAnalyzerBuilder {
     private final List<AnalyzerElement> analyzers = new ArrayList<AnalyzerElement>();
-    
+
     private AnalyzerElement top;
     private final Stack<AnalyzerElement> stack = new Stack<AnalyzerElement>();
-    
-    
+
+
     public FilterAnalyzerBuilder compFilter(String name) {
         CompAnalyzer compAnalyzer = new CompAnalyzer(name);
         if (top != null) {
@@ -106,5 +106,5 @@ public class FilterAnalyzerBuilder {
     public FilterAnalyzer build() {
         return new FilterAnalyzer(analyzers);
     }
-    
+
 }

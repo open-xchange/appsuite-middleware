@@ -72,13 +72,13 @@ import com.openexchange.log.LogFactory;
 
 /**
  * {@link ManifestJSONActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ManifestJSONActivator extends AJAXModuleActivator {
     private static final Log LOG = LogFactory.getLog(ManifestJSONActivator.class);
 
-	
+
 	@Override
 	protected Class<?>[] getNeededServices() {
 		return new Class<?>[]{ConfigurationService.class, CapabilityService.class, SimpleConverter.class};
@@ -88,9 +88,9 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 	protected void startBundle() throws Exception {
 		final ServiceTracker<ServerConfigMatcherService, ServerConfigMatcherService> matcherTracker = track(ServerConfigMatcherService.class);
 		final ServiceTracker<ComputedServerConfigValueService, ComputedServerConfigValueService> computedValueTracker = track(ComputedServerConfigValueService.class);
-		
+
 		registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
-			
+
 			@Override
 			public List<ServerConfigMatcherService> getMatchers() {
 				List<ServerConfigMatcherService> services = new ArrayList<ServerConfigMatcherService>();
@@ -103,7 +103,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 				}
 				return services;
 			}
-			
+
 			@Override
 			public List<ComputedServerConfigValueService> getComputed() {
 				List<ComputedServerConfigValueService> services = new ArrayList<ComputedServerConfigValueService>();
@@ -117,7 +117,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 				return services;
 			}
 		}), "apps/manifests");
-		
+
 		openTrackers();
 	}
 
@@ -126,7 +126,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
         if (null == property) {
             return new JSONArray(0);
         }
-        
+
         JSONArray array = new JSONArray();
         for(String path: property.split(":")) {
             File file = new File(path);

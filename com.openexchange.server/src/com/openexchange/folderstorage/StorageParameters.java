@@ -66,7 +66,7 @@ public interface StorageParameters {
 
     /**
      * The parameter name to indicate fast access to storage.
-     * 
+     *
      * @type java.lang.Boolean
      */
     public static final String PARAM_ACCESS_FAST = "__accessFast";

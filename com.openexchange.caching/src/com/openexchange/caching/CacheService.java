@@ -89,7 +89,7 @@ public interface CacheService extends CacheKeyService {
      * </p>
      * </li>
      * </ul>
-     * 
+     *
      * @return <code>true</code> if this cache has a distributed nature; otherwise <code>false</code> (a replicated nature)
      */
     public boolean isDistributed();
@@ -98,7 +98,7 @@ public interface CacheService extends CacheKeyService {
      * Indicates if this cache is replicated.
      * <p>
      * Data is kept redundantly on every linked node.
-     * 
+     *
      * @return <code>true</code> if this cache has a replicated nature; otherwise <code>false</code> (a distributed nature)
      */
     public boolean isReplicated();
@@ -154,7 +154,7 @@ public interface CacheService extends CacheKeyService {
     public void loadConfiguration(InputStream inputStream) throws OXException;
 
     /**
-     * Additionally feeds the cache manager with specified configuration properties. 
+     * Additionally feeds the cache manager with specified configuration properties.
      * <p>
      * The cache manager reads a default configuration - defined through property "com.openexchange.caching.configfile" in
      * 'system.properties' file - on initialization automatically. Therefore this method is useful to extend or overwrite the loaded default

@@ -63,21 +63,21 @@ public interface SessionHolder {
 
 	/**
 	 * Gets the <tt>Session</tt> instance.
-	 * 
+	 *
 	 * @return The <tt>Session</tt> instance
 	 */
 	public Session getSessionObject();
 
 	/**
 	 * Gets the context reference.
-	 * 
+	 *
 	 * @return The context reference
 	 */
 	public Context getContext();
 
 	/**
      * Gets the user reference.
-     * 
+     *
      * @return The user reference
      */
 	public User getUser();

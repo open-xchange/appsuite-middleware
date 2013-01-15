@@ -72,16 +72,16 @@ public abstract class OXSOAPRMIMapper {
     private static final String THREAD_INTERRUPTED_ERROR = "Thread was interrupted while trying to get lock";
 
     private static final String CRLF = "\r\n";
-    
+
     /*
      * RMI connection attempts should only be done once at a time, because
      * else every Instance of OXSOAPRMIMapper does a (re)connect at the same
      * time which multiplies the time to wait for the remote end
      */
     protected static final Lock LOCK = new ReentrantLock(true);
-    
+
     protected final String RMI_CONNECT_ERROR = "failed to reconnect to RMI port of admin daemon";
-    
+
     private final String MAX_RMI_CONNECT_ATTEMPTS_PROP = "MAX_RMI_CONNECT_ATTEMPTS";
     public int MAX_RMI_CONNECT_ATTEMPTS    = 2;
 
@@ -92,28 +92,28 @@ public abstract class OXSOAPRMIMapper {
     public int CONNECT_ATTEMPTS_DELAY_TIME = 1;
 
     /**
-     * time in seconds to wait for a lock 
+     * time in seconds to wait for a lock
      */
     private final String LOCK_WAIT_TIME_PROP = "LOCK_WAIT_TIME";
     public int LOCK_WAIT_TIME = 10;
-    
+
     private final String RMI_HOSTNAME_PROP = "RMI_HOSTNAME";
     public String RMI_HOSTNAME = "rmi://localhost:1099/";
-    
+
     protected Object rmistub = null;
-    
+
 
     private Class<?> clazz = null;
-    
-    protected static final Log log = org.apache.commons.logging.LogFactory.getLog(OXSOAPRMIMapper.class);    
+
+    protected static final Log log = org.apache.commons.logging.LogFactory.getLog(OXSOAPRMIMapper.class);
 
     /**
-     * @throws RemoteException 
-     * 
+     * @throws RemoteException
+     *
      */
     public OXSOAPRMIMapper(final Class<?> clazz) throws RemoteException{
         this.clazz = clazz;
-        
+
         final String classContainer = this.getClass().getProtectionDomain().getCodeSource().getLocation().toString();
         final URL manifestUrl;
         try {
@@ -169,7 +169,7 @@ public abstract class OXSOAPRMIMapper {
      * @throws RemoteException
      */
     protected void reconnect(final boolean force) throws RemoteException {
-        
+
         try {
             if( ! LOCK.tryLock(LOCK_WAIT_TIME, TimeUnit.SECONDS) ) {
                 throw new RemoteException("Could get lock within " + LOCK_WAIT_TIME + " seconds");
@@ -233,7 +233,7 @@ public abstract class OXSOAPRMIMapper {
             LOCK.unlock();
         }
     }
-    
+
     /**
      * @throws RemoteException
      */

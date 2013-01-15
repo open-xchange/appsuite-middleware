@@ -56,7 +56,7 @@ import org.json.JSONObject;
 
 /**
  * {@link XingApiException} - As specified <a href="https://dev.xing.com/docs#error-responses">here</a>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class XingApiException extends XingException {
@@ -68,7 +68,7 @@ public class XingApiException extends XingException {
 
     /**
      * Initializes a new {@link XingApiException}.
-     * 
+     *
      * @param errorObject The JSON error object
      */
     public XingApiException(final JSONObject errorObject) {
@@ -85,7 +85,7 @@ public class XingApiException extends XingException {
 
     /**
      * Gets the error name
-     * 
+     *
      * @return The error name
      */
     public String getErrorName() {
@@ -94,7 +94,7 @@ public class XingApiException extends XingException {
 
     /**
      * Gets the properties
-     * 
+     *
      * @return The properties
      */
     public Map<String, Object> getProperties() {

@@ -108,7 +108,7 @@ public abstract class DocumentationAction implements AJAXActionService {
     protected DocumentationRegistry getRegistry() {
         return this.getService(DocumentationRegistry.class);
     }
-    
+
     /**
      * Gets the service of specified type
      *
@@ -118,7 +118,7 @@ public abstract class DocumentationAction implements AJAXActionService {
     protected <S> S getService(final Class<? extends S> clazz) {
         return services.getService(clazz);
     }
-    
+
     /**
      * Writes the given module description as a JSON object.
      *
@@ -142,7 +142,7 @@ public abstract class DocumentationAction implements AJAXActionService {
             for (final ActionDescription action : actions) {
             	jsonArray.put(write(action));
     		}
-        	jsonObject.put("actions", jsonArray);       	
+        	jsonObject.put("actions", jsonArray);
         }
         return jsonObject;
     }
@@ -162,7 +162,7 @@ public abstract class DocumentationAction implements AJAXActionService {
             for (final AttributeDescription attribute : attributes) {
             	jsonArray.put(write(attribute));
     		}
-        	jsonObject.put("attributes", jsonArray);       	
+        	jsonObject.put("attributes", jsonArray);
         }
         return jsonObject;
     }
@@ -182,7 +182,7 @@ public abstract class DocumentationAction implements AJAXActionService {
             for (final ParameterDescription parameter : parameters) {
             	jsonArray.put(write(parameter));
     		}
-        	jsonObject.put("parameters", jsonArray);       	
+        	jsonObject.put("parameters", jsonArray);
         }
     	jsonObject.put("method", action.getMethod().toString());
     	jsonObject.put("defaultFormat", action.getDefaultFormat());
@@ -232,8 +232,8 @@ public abstract class DocumentationAction implements AJAXActionService {
         jsonObject.put("name", description.getName());
         jsonObject.put("description", description.getDescription());
         return jsonObject;
-    }   
-    
+    }
+
     /**
      * Performs specified AJAX request.
      *

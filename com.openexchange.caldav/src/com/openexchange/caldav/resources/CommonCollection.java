@@ -70,15 +70,15 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class CommonCollection extends AbstractCollection {
-    
+
     protected static Log LOG = com.openexchange.log.Log.loggerFor(CommonCollection.class);
-    
+
     private final WebdavFactory factory;
     private final WebdavPath url;
 
     /**
      * Initializes a new {@link CommonCollection}.
-     * 
+     *
      * @param factory the factory
      */
     public CommonCollection(WebdavFactory factory, WebdavPath url) {
@@ -87,7 +87,7 @@ public abstract class CommonCollection extends AbstractCollection {
         this.url = url;
         LOG.debug(getUrl() + ": initialized.");
     }
-    
+
     protected WebdavProtocolException protocolException(Throwable t) {
         return protocolException(t, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
@@ -96,15 +96,15 @@ public abstract class CommonCollection extends AbstractCollection {
         LOG.error(this.getUrl() + ": " + t.getMessage(), t);
         return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
     }
-    
+
     protected WebdavProtocolException protocolException(int statusCode) {
         return protocolException(new Throwable(), statusCode);
     }
-    
+
     /**
-     * Gets a child resource from this collection by name. If the resource 
+     * Gets a child resource from this collection by name. If the resource
      * does not yet exists, a placeholder resource is created.
-     * 
+     *
      * @param name the name of the resource
      * @return the child resource
      * @throws WebdavProtocolException
@@ -112,21 +112,21 @@ public abstract class CommonCollection extends AbstractCollection {
     public abstract AbstractResource getChild(String name) throws WebdavProtocolException;
 
     /**
-     * Constructs a {@link WebdavPath} for a child resource of this 
+     * Constructs a {@link WebdavPath} for a child resource of this
      * collection with the supplied file name.
-     * 
+     *
      * @param fileName the file name of the resource
      * @return the path
      */
     protected WebdavPath constructPathForChildResource(String fileName) {
-        return this.getUrl().dup().append(fileName);      
+        return this.getUrl().dup().append(fileName);
     }
 
     @Override
     public WebdavPath getUrl() {
         return this.url;
     }
-    
+
     @Override
     protected WebdavFactory getFactory() {
         return this.factory;
@@ -136,7 +136,7 @@ public abstract class CommonCollection extends AbstractCollection {
     protected boolean isset(Property p) {
         int id = p.getId();
         return Protocol.GETCONTENTLANGUAGE != id && Protocol.GETCONTENTLENGTH != id && Protocol.GETETAG != id;
-    }   
+    }
 
     @Override
     public String getSource() throws WebdavProtocolException {

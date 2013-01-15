@@ -74,36 +74,36 @@ import com.openexchange.session.Session;
 
 /**
  * {@link EWSFreeBusyProvider}
- * 
+ *
  * Provider of free/busy information.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class EWSFreeBusyProvider implements FreeBusyProvider {
-    
+
     /**
-     * The maximum value for this time period is 42 days. Any requests for user availability information beyond the maximum value will 
+     * The maximum value for this time period is 42 days. Any requests for user availability information beyond the maximum value will
      * return an error.
      * @see http://msdn.microsoft.com/en-us/library/exchangewebservices.freebusyviewoptionstype.timewindow.aspx
      */
     private static final int MAX_DAYS = 42;
     private static final Log LOG = com.openexchange.log.Log.loggerFor(EWSFreeBusyProvider.class);
-    
+
     private final ExchangeWebService ews;
     private String[] emailSuffixes;
     private Boolean validEmailsOnly;
     private Boolean detailedData;
-    
+
     /**
      * Initializes a new {@link EWSFreeBusyProvider}.
-     * 
-     * @throws OXException 
+     *
+     * @throws OXException
      */
     public EWSFreeBusyProvider() throws OXException {
         super();
         this.ews = createWebService();
     }
-    
+
     @Override
     public Map<String, FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until) {
         /*
@@ -115,7 +115,7 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
             FreeBusyData freeBusyData = new FreeBusyData(participant, from, until);
             freeBusyInformation.put(participant, freeBusyData);
             if (hasAllowedEmailSuffix(participant) && isValidEmail(participant)) {
-                filteredParticipants.add(participant);                
+                filteredParticipants.add(participant);
             } else {
                 freeBusyData.addWarning(FreeBusyExceptionCodes.DATA_NOT_AVAILABLE.create(participant));
             }
@@ -127,13 +127,13 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
             for (Date currentFrom = from; currentFrom.before(until); currentFrom = addDays(currentFrom, MAX_DAYS)) {
                 Date maxUntil = addDays(currentFrom, MAX_DAYS);
                 Date currentUntil = until.before(maxUntil) ? until : maxUntil;
-                List<FreeBusyResponseType> freeBusyResponses = null;                
+                List<FreeBusyResponseType> freeBusyResponses = null;
                 try {
                     freeBusyResponses = getFreeBusyResponses(filteredParticipants, currentFrom, currentUntil);
                     if (null == freeBusyResponses || 0 == freeBusyResponses.size()) {
                         throw EWSExceptionCodes.NO_RESPONSE.create();
                     } else if (freeBusyResponses.size() != filteredParticipants.size()) {
-                        throw EWSExceptionCodes.UNEXPECTED_RESPONSE_COUNT.create(filteredParticipants.size(), freeBusyResponses.size()); 
+                        throw EWSExceptionCodes.UNEXPECTED_RESPONSE_COUNT.create(filteredParticipants.size(), freeBusyResponses.size());
                     }
                 } catch (OXException e) {
                     for (int i = 0; i < filteredParticipants.size(); i++) {
@@ -142,7 +142,7 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
                         freeBusyData.addWarning(e);
                     }
                     continue;
-                }                
+                }
                 /*
                  * add data from all filtered participants
                  */
@@ -167,11 +167,11 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
         }
         return freeBusyInformation;
     }
-        
+
     private List<FreeBusyResponseType> getFreeBusyResponses(List<String> emailAddresses, Date from, Date until) throws OXException {
         return ews.getAvailability().getFreeBusy(emailAddresses, from, until, isDetailedData());
     }
-    
+
     private boolean hasAllowedEmailSuffix(String participant) {
         String[] emailSuffixes = getEmailSuffixes();
         if (null != emailSuffixes && 0 < emailSuffixes.length) {
@@ -184,18 +184,18 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
         }
         return true;
     }
-    
+
     private boolean isValidEmail(String participant) {
         if (isValidEmailsOnly()) {
             try {
                 new QuotedInternetAddress(participant).validate();
             } catch (AddressException e) {
                 return false;
-            }          
+            }
         }
         return true;
     }
-    
+
     private String[] getEmailSuffixes() {
         if (null == this.emailSuffixes) {
             String value = null;
@@ -206,10 +206,10 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
                 LOG.warn("error reading 'com.openexchange.freebusy.provider.ews.emailSuffixes'", e);
             }
             this.emailSuffixes = null == value || 0 == value.trim().length() ? new String[0] : value.trim().split(",");
-        }    
+        }
         return this.emailSuffixes;
     }
-    
+
     private boolean isValidEmailsOnly() {
         if (null == this.validEmailsOnly) {
             boolean value = true;
@@ -220,7 +220,7 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
                 LOG.warn("error reading 'com.openexchange.freebusy.provider.ews.validEmailsOnly'", e);
             }
             this.validEmailsOnly = Boolean.valueOf(value);
-        }    
+        }
         return this.validEmailsOnly.booleanValue();
     }
 
@@ -234,29 +234,29 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
                 LOG.warn("error reading 'com.openexchange.freebusy.provider.ews.detailed'", e);
             }
             this.detailedData = Boolean.valueOf(value);
-        }    
+        }
         return this.detailedData.booleanValue();
     }
 
     private static ExchangeWebService createWebService() throws OXException {
         ConfigurationService configService = EWSFreeBusyProviderLookup.getService(ConfigurationService.class);
         ExchangeWebService ews = EWSFreeBusyProviderLookup.getService(EWSFactoryService.class).create(
-            configService.getProperty("com.openexchange.freebusy.provider.ews.url"), 
-            configService.getProperty("com.openexchange.freebusy.provider.ews.userName"), 
+            configService.getProperty("com.openexchange.freebusy.provider.ews.url"),
+            configService.getProperty("com.openexchange.freebusy.provider.ews.userName"),
             configService.getProperty("com.openexchange.freebusy.provider.ews.password"));
-        ews.getConfig().setExchangeVersion(ExchangeVersionType.valueOf(ExchangeVersionType.class, 
+        ews.getConfig().setExchangeVersion(ExchangeVersionType.valueOf(ExchangeVersionType.class,
             configService.getProperty("com.openexchange.freebusy.provider.ews.exchangeVersion", "EXCHANGE_2010").toUpperCase()));
         ews.getConfig().setIgnoreHostnameValidation(configService.getBoolProperty(
             "com.openexchange.freebusy.provider.ews.skipHostVerification", false));
         ews.getConfig().setTrustAllCerts(configService.getBoolProperty("com.openexchange.freebusy.provider.ews.trustAllCerts", false));
         return ews;
     }
-    
+
     private static Date addDays(Date date, int days) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.add(Calendar.DATE, days);
         return calendar.getTime();
     }
-    
+
 }

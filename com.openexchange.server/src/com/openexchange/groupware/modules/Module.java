@@ -57,7 +57,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link Module} - A module known to Open-Xchange Server.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

@@ -93,7 +93,7 @@ public final class MimeProcessingUtility {
 
     /**
      * Gets denoted folder's owner if it is shared.
-     * 
+     *
      * @param fullName The full name
      * @param accountId The account identifier
      * @param session The session

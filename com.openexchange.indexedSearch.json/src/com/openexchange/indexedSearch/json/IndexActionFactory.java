@@ -79,9 +79,9 @@ public class IndexActionFactory implements AJAXActionServiceFactory {
 
         final AbstractIndexAction action = new com.openexchange.indexedSearch.json.action.SearchAction(services, registry);
         actions.put(action.getAction(), action);
-        
+
         final AbstractIndexAction action2 = new IsIndexedAction(services, registry);
-        actions.put(action2.getAction(), action2);        
+        actions.put(action2.getAction(), action2);
     }
 
     @Override

@@ -56,7 +56,7 @@ import com.openexchange.ui7.FileCache;
 
 /**
  * {@link AppsAction}
- * 
+ *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public abstract class AppsAction implements AJAXActionService {

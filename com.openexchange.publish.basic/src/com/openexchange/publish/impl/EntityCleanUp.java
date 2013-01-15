@@ -76,6 +76,6 @@ public class EntityCleanUp {
             for (Publication publication : publications) {
                 storage.forgetPublication(publication);
             }
-        }        
+        }
     }
 }

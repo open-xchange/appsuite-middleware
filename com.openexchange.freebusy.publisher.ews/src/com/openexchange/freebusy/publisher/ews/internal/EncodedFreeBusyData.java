@@ -65,16 +65,16 @@ import com.openexchange.freebusy.FreeBusyInterval;
 
 /**
  * {@link EncodedFreeBusyData}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class EncodedFreeBusyData {
-    
+
     /**
      * Number of milliseconds between 1601 (~ Windows) and 1970 (~ Unix)
      */
     private static final long MILLIS_BETWEEN_EPOCHS = 11644473600000L;
-    
+
     private final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     private final Map<Integer, List<Byte>> busyData;
     private final Map<Integer, List<Byte>> tentativeData;
@@ -85,7 +85,7 @@ public class EncodedFreeBusyData {
 
     /**
      * Initializes a new {@link EncodedFreeBusyData}.
-     * 
+     *
      * @param freeBusyData The free/busy data to encode
      */
     public EncodedFreeBusyData(FreeBusyData freeBusyData) {
@@ -97,52 +97,52 @@ public class EncodedFreeBusyData {
         this.publishStart = getMinutesSince1601(freeBusyData.getFrom());
         this.publishEnd = getMinutesSince1601(freeBusyData.getUntil());
     }
-    
+
     /**
      * Gets the encoded busy times.
-     * 
+     *
      * @return The busy times.
      */
     public List<String> getBusyTimes() {
         return getTimes(busyData);
     }
-    
+
     public List<Integer> getBusyMonths() {
         return getMonths(busyData);
     }
-    
+
     public List<String> getTentativeTimes() {
         return getTimes(tentativeData);
     }
-    
+
     public List<Integer> getTentativeMonths() {
         return getMonths(tentativeData);
     }
-    
+
     public List<String> getAwayTimes() {
         return getTimes(awayData);
     }
-    
+
     public List<Integer> getAwayMonths() {
         return getMonths(awayData);
     }
-    
+
     public List<String> getMergedTimes() {
         return getTimes(mergedData);
     }
-    
+
     public List<Integer> getMergedMonths() {
         return getMonths(mergedData);
     }
-    
+
     public long getPublishStart() {
         return publishStart;
     }
-    
+
     public long getPublishEnd() {
         return publishEnd;
     }
-    
+
     private Map<Integer, List<Byte>> createFreeBusyData(List<FreeBusyInterval> intervals) {
         Map<Integer, List<Byte>> map = new HashMap<Integer, List<Byte>>();
         for (FreeBusyInterval interval : intervals) {
@@ -150,7 +150,7 @@ public class EncodedFreeBusyData {
         }
         return map;
     }
-    
+
     private List<FreeBusyInterval> normalize(FreeBusyData freeBusyData, BusyStatus...status) {
         /*
          * collect matching time ranges
@@ -159,8 +159,8 @@ public class EncodedFreeBusyData {
         for (FreeBusyInterval interval : freeBusyData.getIntervals()) {
             if (matches(interval, status) && null != interval.getEndTime() && interval.getEndTime().after(freeBusyData.getFrom()) &&
                     null != interval.getStartTime() && interval.getStartTime().before(freeBusyData.getUntil())) {
-                Date start = interval.getStartTime().before(freeBusyData.getFrom()) ? freeBusyData.getFrom() : interval.getStartTime(); 
-                Date end = interval.getEndTime().after(freeBusyData.getUntil()) ? freeBusyData.getUntil() : interval.getEndTime(); 
+                Date start = interval.getStartTime().before(freeBusyData.getFrom()) ? freeBusyData.getFrom() : interval.getStartTime();
+                Date end = interval.getEndTime().after(freeBusyData.getUntil()) ? freeBusyData.getUntil() : interval.getEndTime();
                 intervals.add(new FreeBusyInterval(start, end, interval.getStatus()));
             }
         }
@@ -170,9 +170,9 @@ public class EncodedFreeBusyData {
              */
             Collections.sort(intervals);
             /*
-             * merge ranges 
+             * merge ranges
              */
-            List<FreeBusyInterval> mergedIntervals = new ArrayList<FreeBusyInterval>();      
+            List<FreeBusyInterval> mergedIntervals = new ArrayList<FreeBusyInterval>();
             Iterator<FreeBusyInterval> iterator = intervals.iterator();
             FreeBusyInterval current = iterator.next();
             while (iterator.hasNext()) {
@@ -191,23 +191,23 @@ public class EncodedFreeBusyData {
             intervals = mergedIntervals;
         }
         /*
-         * expand at month boundaries if needed 
+         * expand at month boundaries if needed
          */
-        List<FreeBusyInterval> expandedIntervals = new ArrayList<FreeBusyInterval>(); 
+        List<FreeBusyInterval> expandedIntervals = new ArrayList<FreeBusyInterval>();
         for (FreeBusyInterval interval : intervals) {
             addMonthWise(expandedIntervals, interval);
         }
         return expandedIntervals;
     }
-    
+
     private void addMonthWise(List<FreeBusyInterval> intervals, FreeBusyInterval interval) {
         Date start = interval.getStartTime();
         for (; false == isSameMonth(start, interval.getEndTime()); start = getStartOfNextMonth(start)) {
-            intervals.add(new FreeBusyInterval(start, getEndOfMonth(start), interval.getStatus()));         
+            intervals.add(new FreeBusyInterval(start, getEndOfMonth(start), interval.getStatus()));
         }
-        intervals.add(new FreeBusyInterval(start, interval.getEndTime(), interval.getStatus()));           
+        intervals.add(new FreeBusyInterval(start, interval.getEndTime(), interval.getStatus()));
     }
-        
+
     private boolean isSameMonth(Date date1, Date date2) {
         calendar.setTime(date1);
         int month1 = calendar.get(Calendar.MONTH);
@@ -217,7 +217,7 @@ public class EncodedFreeBusyData {
         int year2 = calendar.get(Calendar.YEAR);
         return month1 == month2 && year1 == year2;
     }
-    
+
     private static boolean matches(FreeBusyInterval interval, BusyStatus[] status) {
         for (BusyStatus s : status) {
             if (s.equals(interval.getStatus())) {
@@ -226,7 +226,7 @@ public class EncodedFreeBusyData {
         }
         return false;
     }
-    
+
     private Date getStartOfNextMonth(Date date) {
         calendar.setTime(date);
         calendar.add(Calendar.MONTH, 1);
@@ -237,7 +237,7 @@ public class EncodedFreeBusyData {
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime();
     }
-    
+
     private Date getEndOfMonth(Date date) {
         calendar.setTime(date);
         calendar.add(Calendar.MONTH, 1);
@@ -249,7 +249,7 @@ public class EncodedFreeBusyData {
         calendar.add(Calendar.MILLISECOND, -1);
         return calendar.getTime();
     }
-    
+
     private void append(Date start, Date end, Map<Integer, List<Byte>> data) {
         Integer month = Integer.valueOf(getFreeBusyMonth(start));
         List<Byte> bytes = data.get(month);
@@ -270,9 +270,9 @@ public class EncodedFreeBusyData {
     }
 
     /**
-     * Gets the number of minutes since the first day of the month as 
+     * Gets the number of minutes since the first day of the month as
      * represented by the supplied time.
-     * 
+     *
      * @param date the date
      * @return the free busy time
      */
@@ -283,22 +283,22 @@ public class EncodedFreeBusyData {
         int minutes = calendar.get(Calendar.MINUTE);
         return 60 * hours + minutes;
     }
-    
+
     /**
      * Gets the free busy month representation for the supplied date.
-     * 
+     *
      * @param date the date
      * @return the free busy month
      */
     private int getFreeBusyMonth(Date date) {
         calendar.setTime(date);
-        return calendar.get(Calendar.YEAR) * 16 + (calendar.get(Calendar.MONTH) + 1);   
+        return calendar.get(Calendar.YEAR) * 16 + (calendar.get(Calendar.MONTH) + 1);
     }
-    
+
     private static List<Integer> getMonths(Map<Integer, List<Byte>> data) {
-        return null != data && 0 < data.size() ? new ArrayList<Integer>(data.keySet()) : null; 
+        return null != data && 0 < data.size() ? new ArrayList<Integer>(data.keySet()) : null;
     }
-    
+
     private static List<String> getTimes(Map<Integer, List<Byte>> data) {
         if (null != data && 0 < data.size()) {
             List<String> times = new ArrayList<String>(data.size());
@@ -309,7 +309,7 @@ public class EncodedFreeBusyData {
         }
         return null;
     }
-    
+
     private static String encode(List<Byte> data) {
         if (null != data) {
             byte[] bytes = new byte[data.size()];
@@ -321,7 +321,7 @@ public class EncodedFreeBusyData {
             return null;
         }
     }
-    
+
     private static long getMinutesSince1601(Date date) {
         return (MILLIS_BETWEEN_EPOCHS + date.getTime()) / (60 * 1000);
     }

@@ -717,7 +717,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 try {
                     /*-
                      * Update DB, too
-                     * 
+                     *
                      * 1. Create dummy entry to check DB schema consistency
                      * 2. Delete existing
                      * 3. Make dummy entry the real entry

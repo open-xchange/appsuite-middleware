@@ -129,7 +129,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         }
         /*-
          * Should collect, or not explicitly set, so create folder
-         * 
+         *
          * Create folder
          */
         int collectFolderID = 0;

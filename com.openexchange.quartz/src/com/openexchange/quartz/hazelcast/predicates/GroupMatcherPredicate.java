@@ -55,7 +55,7 @@ import com.hazelcast.core.MapEntry;
 import com.hazelcast.query.Predicate;
 
 /**
- * 
+ *
  * {@link GroupMatcherPredicate}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -63,12 +63,12 @@ import com.hazelcast.query.Predicate;
  * @param <V>
  */
 public class GroupMatcherPredicate<K extends Key<K>, V> implements Predicate<K, V> {
-    
+
     private static final long serialVersionUID = -7009678330098161960L;
-    
+
     private GroupMatcher<K> groupMatcher;
-    
-    
+
+
     public GroupMatcherPredicate(GroupMatcher<K> groupMatcher) {
         super();
         this.groupMatcher = groupMatcher;
@@ -78,11 +78,11 @@ public class GroupMatcherPredicate<K extends Key<K>, V> implements Predicate<K, 
     public boolean apply(MapEntry<K, V> mapEntry) {
         return groupMatcher.isMatch(mapEntry.getKey());
     }
-    
+
     public void setGroupMatcher(GroupMatcher<K> groupMatcher) {
         this.groupMatcher = groupMatcher;
     }
-    
+
     public GroupMatcher<K> getGroupMatcher() {
         return groupMatcher;
     }

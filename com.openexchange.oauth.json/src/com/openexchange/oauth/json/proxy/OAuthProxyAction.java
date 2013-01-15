@@ -22,23 +22,23 @@ public class OAuthProxyAction implements AJAXActionService {
 
 	private final OAuthService oauthService;
 	private final OAuthHTTPClientFactory clients;
-	
+
 	public OAuthProxyAction(OAuthService service, OAuthHTTPClientFactory clients){
 		oauthService = service;
 		this.clients = clients;
 	}
-	
+
 	@Override
 	public AJAXRequestResult perform(AJAXRequestData requestData,
 			ServerSession session) throws OXException {
-		
+
 		OAuthProxyRequest proxyRequest = new OAuthProxyRequest(requestData, session, oauthService);
 
 		HTTPClient client = clients.create(proxyRequest.getAccount());
-		
+
 		HTTPMethod method = proxyRequest.getMethod();
 		HTTPRequest httpRequest = null;
-		
+
 		switch (method) {
 		case GET:
 			httpRequest = buildGet(proxyRequest, client);
@@ -61,18 +61,18 @@ public class OAuthProxyAction implements AJAXActionService {
 	}
 
 	private HTTPRequest buildPost(OAuthProxyRequest proxyRequest, HTTPClient client) throws OXException {
-		
+
 		HTTPPostRequestBuilder builder = client.getBuilder().post();
-		
+
 		buildCommon(proxyRequest, builder);
 
 		return builder.build();
 	}
 
 	private HTTPRequest buildPut(OAuthProxyRequest proxyRequest, HTTPClient client) throws OXException {
-		
+
 		HTTPPutRequestBuilder builder = client.getBuilder().put();
-		
+
 		buildCommon(proxyRequest, builder);
 		builder.body(proxyRequest.getBody());
 		return builder.build();
@@ -80,29 +80,29 @@ public class OAuthProxyAction implements AJAXActionService {
 
 	private HTTPRequest buildGet(OAuthProxyRequest proxyRequest,
 			HTTPClient client) throws OXException {
-		
+
 		HTTPGetRequestBuilder builder = client.getBuilder().get();
-		
+
 		buildCommon(proxyRequest, builder);
-		
+
 		return builder.build();
-		
+
 	}
-	
+
 	private HTTPRequest buildDelete(OAuthProxyRequest proxyRequest,
 			HTTPClient client) throws OXException {
-		
+
 		HTTPDeleteRequestBuilder builder = client.getBuilder().delete();
-		
+
 		buildCommon(proxyRequest, builder);
-		
+
 		return builder.build();
-		
+
 	}
 
 	private void buildCommon(OAuthProxyRequest proxyRequest,
 			HTTPGenericRequestBuilder<?> builder) throws OXException {
 		builder.url(proxyRequest.getUrl()).headers(proxyRequest.getHeaders()).parameters(proxyRequest.getParameters());
 	}
-	
+
 }

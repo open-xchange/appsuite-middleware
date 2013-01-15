@@ -90,8 +90,8 @@ public class BinaryValueDefinition extends ValueDefinition {
             final Encoding encoding = getEncoding(enc_name);
             if (encoding == null) {
                 throw new IOException("Unknown encoding: " + enc_name);
-            }           
-            final Object propValue = property.getValue(); 
+            }
+            final Object propValue = property.getValue();
             if (null != propValue && BASE64Encoding.class.equals(encoding.getClass()) && byte[].class.equals(propValue.getClass())) {
             	// no need to encode to Latin-1 and back
             	value = Base64.encode((byte[])propValue);
@@ -104,7 +104,7 @@ public class BinaryValueDefinition extends ValueDefinition {
         }
         fw.writeln(value);
     }
-    
+
     @Override
     public Object parse(final Scanner s, final Property property) throws IOException {
         final StringBuilder sb = new StringBuilder();
@@ -128,6 +128,6 @@ public class BinaryValueDefinition extends ValueDefinition {
             }
         } else {
         	return createValue(new StringScanner(s, text), property);
-        }    	
+        }
     }
 }

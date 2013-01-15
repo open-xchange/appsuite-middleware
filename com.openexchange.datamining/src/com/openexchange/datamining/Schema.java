@@ -56,17 +56,17 @@ package com.openexchange.datamining;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Schema {
-    
-    private String schemaname;
-    
-    private String db_pool_id;
-    
-    private String url;
-    
-    private String login;
-    
-    private String password;
-    
+
+    private final String schemaname;
+
+    private final String db_pool_id;
+
+    private final String url;
+
+    private final String login;
+
+    private final String password;
+
     public Schema(String schemaname, String read_db_pool_id, String url, String login, String password) {
         this.schemaname = schemaname;
         this.db_pool_id = read_db_pool_id;
@@ -78,27 +78,27 @@ public class Schema {
 
     public String getSchemaname() {
         return schemaname;
-    }        
+    }
 
-    
+
     public String getDb_pool_id() {
         return db_pool_id;
     }
 
-    
+
     public String getUrl() {
         return url;
     }
 
-    
+
     public String getLogin() {
         return login;
     }
 
-    
+
     public String getPassword() {
         return password;
-    }    
+    }
 
-    
+
 }

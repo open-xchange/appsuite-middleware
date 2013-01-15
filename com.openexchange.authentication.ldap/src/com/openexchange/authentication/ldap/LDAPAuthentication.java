@@ -110,7 +110,7 @@ public class LDAPAuthentication implements AuthenticationService {
         PROXY_USER("proxyUser"),
         PROXY_DELIMITER("proxyDelimiter"),
         REFERRAL("referral");
-        
+
         public String name;
 
         private PropertyNames(String name) {
@@ -131,9 +131,9 @@ public class LDAPAuthentication implements AuthenticationService {
     private String uidAttribute, baseDN, ldapReturnField, searchFilter, bindDN, bindDNPassword, proxyUser, proxyDelimiter, referral;
 
     private boolean subtreeSearch;
-    
+
     private boolean adsbind;
-    
+
     /**
      * Default constructor.
      * @throws LoginException if setup fails.

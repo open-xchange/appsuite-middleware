@@ -60,7 +60,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link SolrActivator}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrActivator extends HousekeepingActivator {
@@ -77,7 +77,7 @@ public class SolrActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, 
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class,
             ThreadPoolService.class, HazelcastInstance.class, HttpService.class };
     }
 
@@ -91,7 +91,7 @@ public class SolrActivator extends HousekeepingActivator {
         DelegationSolrAccessImpl accessService = this.delegationAccess = new DelegationSolrAccessImpl(embeddedAccess);
         registerService(SolrAccessService.class, accessService);
         addService(SolrAccessService.class, accessService);
-        
+
         /*
          * Servlet
          */
@@ -108,7 +108,7 @@ public class SolrActivator extends HousekeepingActivator {
                 LOG.warn("Could not register SolrServlet.", e);
             }
         }
-        
+
         SolrCoreConfigServiceImpl coreService = new SolrCoreConfigServiceImpl();
         registerService(SolrCoreConfigService.class, coreService);
         addService(SolrCoreConfigService.class, coreService);
@@ -124,17 +124,17 @@ public class SolrActivator extends HousekeepingActivator {
             createTableService)));
         registerService(LoginHandlerService.class, new SolrCoreLoginHandler(embeddedAccess));
         registerMBean(coreService);
-        
+
         /*
          * Consistency stuff
          */
-        HazelcastInstance hazelcast = getService(HazelcastInstance.class);        
+        HazelcastInstance hazelcast = getService(HazelcastInstance.class);
         boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         if (isSolrNode) {
             IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
             String memberAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
             solrNodes.put(memberAddress, new Integer(0));
-            
+
             track(QuartzService.class, new SimpleRegistryListener<QuartzService>() {
                 @Override
                 public void added(ServiceReference<QuartzService> ref, QuartzService service) {
@@ -145,20 +145,20 @@ public class SolrActivator extends HousekeepingActivator {
                                 .newJob(SolrConsistencyJob.class)
                                 .withIdentity("com.openexchange.solr", "consistencyJob")
                                 .build();
-                            
+
                             SimpleScheduleBuilder scheduleBuilder = SimpleScheduleBuilder
                                 .simpleSchedule()
                                 .withIntervalInMinutes(15)
                                 .repeatForever()
                                 .withMisfireHandlingInstructionFireNow();
-                            
+
                             SimpleTrigger trigger = TriggerBuilder
                                 .newTrigger()
                                 .withIdentity("com.openexchange.solr", "consistencyJobTrigger")
                                 .forJob(jobDetail)
                                 .withSchedule(scheduleBuilder)
                                 .build();
-                            
+
                             scheduler.scheduleJob(jobDetail, trigger);
                         }
                     } catch (OXException e) {
@@ -174,7 +174,7 @@ public class SolrActivator extends HousekeepingActivator {
                 }
             });
         }
-        
+
         hazelcast.getCluster().addMembershipListener(new SolrNodeListener(hazelcast));
         openTrackers();
     }

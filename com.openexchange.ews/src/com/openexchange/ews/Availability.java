@@ -56,21 +56,21 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link Availability}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface Availability {
-    
+
     /**
      * Gets the free/busy responses of an {@link Availability} request made from the supplied parameters.
-     * 
+     *
      * @param emailAddresses The e-mail addresses to query the availability
-     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param from The lower (inclusive) limit of the requested time-range
      * @param until The upper (exclusive) limit of the requested time-range
      * @param detailed Whether detailed data should be queried or not
      * @return The free/busy responses
      * @throws OXException
      */
     List<FreeBusyResponseType> getFreeBusy(List<String> emailAddresses, Date from, Date until, boolean detailed) throws OXException;
-    
+
 }

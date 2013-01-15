@@ -96,10 +96,10 @@ public class AnniversariesAction extends ContactAction {
         Date lastModified;
         if (null != folderID) {
             List<String> folderIDs = Arrays.asList(new String[] { folderID });
-            lastModified = addContacts(contacts, getContactService().searchContactsWithAnniversary(request.getSession(), folderIDs, 
+            lastModified = addContacts(contacts, getContactService().searchContactsWithAnniversary(request.getSession(), folderIDs,
                 request.getStart(), request.getEnd(), request.getFields(ContactField.ANNIVERSARY), request.getSortOptions()));
         } else {
-            lastModified = addContacts(contacts, getContactService().searchContactsWithAnniversary(request.getSession(), 
+            lastModified = addContacts(contacts, getContactService().searchContactsWithAnniversary(request.getSession(),
                 request.getStart(), request.getEnd(), request.getFields(ContactField.ANNIVERSARY), request.getSortOptions()));
         }
         request.sortInternalIfNeeded(contacts, ContactField.ANNIVERSARY, request.getStart());

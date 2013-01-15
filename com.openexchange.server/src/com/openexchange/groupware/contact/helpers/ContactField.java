@@ -233,7 +233,7 @@ public enum ContactField{
 
 	/**
 	 * Gets the field name
-	 * 
+	 *
 	 * @return the field name
 	 */
     @Deprecated
@@ -248,7 +248,7 @@ public enum ContactField{
 
 	/**
 	 * Gets the name of the corresponding database columns
-	 * 
+	 *
 	 * @return the database name, or <code>""</code> if there's no database column associated with this field
 	 */
     @Deprecated
@@ -280,7 +280,7 @@ public enum ContactField{
 	public String getVCardElementName(){
 		return readableName; //TODO get real VCard element name
 	}
-	
+
     @Deprecated
 	public int getSQLType() {
         return sqlType;
@@ -516,13 +516,13 @@ public enum ContactField{
         default: return null;
         }
     }
-    
+
     private static final EnumSet<ContactField> VIRTUAL_FIELDS = EnumSet.of(IMAGE1_URL);
     @Deprecated
     public boolean isVirtual() {
         return VIRTUAL_FIELDS.contains(this);
     }
-    
+
     private static final EnumSet<ContactField> NON_DB_FIELDS = EnumSet.of(IMAGE1_URL, IMAGE1_CONTENT_TYPE, IMAGE_LAST_MODIFIED, IMAGE1, DISTRIBUTIONLIST, LINKS);
     @Deprecated
     public boolean isDBField() {

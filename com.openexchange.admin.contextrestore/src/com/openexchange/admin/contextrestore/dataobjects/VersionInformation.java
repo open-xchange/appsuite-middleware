@@ -1,19 +1,19 @@
 /**
- * 
+ *
  */
 package com.openexchange.admin.contextrestore.dataobjects;
 
 public class VersionInformation {
     private final int version;
-    
+
     private final int locked;
-    
+
     private final int gw_compatible;
-    
+
     private final int admin_compatible;
-    
+
     private final String server;
-    
+
     /**
      * @param admin_compatible
      * @param gw_compatible

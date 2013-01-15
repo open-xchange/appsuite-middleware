@@ -53,7 +53,7 @@ import com.openexchange.mail.MailSessionParameterNames;
 
 /**
  * {@link MailSessionParameterNames}
- * 
+ *
  * Constants used as keys for session parameters.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -62,7 +62,7 @@ public final class ContactSessionParameterNames {
 
     private static final String PARAM_READONLY_CONNECTION = "contact.rconn";
     private static final String PARAM_WRITABLE_CONNECTION = "contact.wconn";
-    
+
     /**
      * Prevent instantiation.
      */
@@ -78,7 +78,7 @@ public final class ContactSessionParameterNames {
     public static String getParamReadOnlyConnection() {
         return PARAM_READONLY_CONNECTION;
     }
-    
+
     /**
      * Gets the parameter name for a writable database connection
      *
@@ -87,5 +87,5 @@ public final class ContactSessionParameterNames {
     public static String getParamWritableConnection() {
         return PARAM_WRITABLE_CONNECTION;
     }
-    
+
 }

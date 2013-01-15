@@ -53,14 +53,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ProcessorStrategy} - The strategy for the {@link Processor processor}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ProcessorStrategy {
 
     /**
      * Determines if specified folder is considered as a folder with high attention; e.g. INBOX folder
-     * 
+     *
      * @param folderInfo The information about the folder to check
      * @return <code>true</code> for high attention folder; otherwise <code>false</code>
      * @throws OXException If an error occurs
@@ -69,7 +69,7 @@ public interface ProcessorStrategy {
 
     /**
      * Signals whether contained messages shall be completely added to index immediately.
-     * 
+     *
      * @param messageCount The message count or <code>-1</code> to consider folder's message count
      * @param folderInfo The information about the folder
      * @return <code>true</code> to fully add messages to index; otherwise <code>false</code>
@@ -79,7 +79,7 @@ public interface ProcessorStrategy {
 
     /**
      * Signals whether contained messages shall be added with its contents to index immediately.
-     * 
+     *
      * @param messageCount The message count or <code>-1</code> to consider folder's message count
      * @param folderInfo The information about the folder
      * @return <code>true</code> to add messages with contents to index; otherwise <code>false</code>
@@ -89,7 +89,7 @@ public interface ProcessorStrategy {
 
     /**
      * Signals whether contained messages shall be added to index immediately only considering headers.
-     * 
+     *
      * @param messageCount The message count or <code>-1</code> to consider folder's message count
      * @param folderInfo The information about the folder
      * @return <code>true</code> to perform a header-only add to index; otherwise <code>false</code>

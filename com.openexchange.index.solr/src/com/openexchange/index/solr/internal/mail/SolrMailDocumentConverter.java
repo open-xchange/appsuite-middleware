@@ -71,7 +71,7 @@ import com.openexchange.mail.text.TextFinder;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrMailDocumentConverter implements SolrResultConverter<MailMessage> {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrMailDocumentConverter.class);
 
     @Override
@@ -83,7 +83,7 @@ public class SolrMailDocumentConverter implements SolrResultConverter<MailMessag
     public IndexResult<MailMessage> createIndexResult(List<IndexDocument<MailMessage>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
         return new SolrIndexResult<MailMessage>(documents.size(), documents, facetCounts);
     }
-    
+
     public static SolrInputDocument convertStatic(int contextId, int userId, IndexDocument<MailMessage> document) throws OXException {
         MailMessage message = document.getObject();
         SolrInputDocument inputDocument = SolrMailHelper.getInstance().inputDocumentFor(message, userId, contextId);
@@ -103,23 +103,23 @@ public class SolrMailDocumentConverter implements SolrResultConverter<MailMessag
         } catch (Throwable t) {
             LOG.warn("Error during text extraction. Setting content to null.", t);
         }
-        
-        
+
+
         if (null != text) {
             String contentField = SolrMailField.CONTENT.solrName();
             if (contentField != null) {
                 inputDocument.setField(contentField, text);
             }
         }
-        
+
         String contentFlagField = SolrMailField.CONTENT_FLAG.solrName();
         if (contentFlagField != null) {
-            inputDocument.setField(contentFlagField, Boolean.TRUE);    
+            inputDocument.setField(contentFlagField, Boolean.TRUE);
         }
-        
+
         return inputDocument;
     }
-    
+
     public static IndexDocument<MailMessage> convertStatic(SolrDocument document) throws OXException {
         return SolrMailHelper.getInstance().readDocument(document, MailFillers.allFillers());
     }

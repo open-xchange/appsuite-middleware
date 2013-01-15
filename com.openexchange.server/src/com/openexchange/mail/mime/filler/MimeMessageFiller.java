@@ -228,7 +228,7 @@ public class MimeMessageFiller {
         this.ctx = ctx;
         this.usm = usm;
     }
-    
+
     /**
      * Sets the account identifier
      *
@@ -238,7 +238,7 @@ public class MimeMessageFiller {
         this.accountId = accountId;
         return this;
     }
-    
+
     /**
      * Gets the account identifier
      *
@@ -1298,7 +1298,7 @@ public class MimeMessageFiller {
             if (null != header && 0 < header.length && header[0].toLowerCase(Locale.US).startsWith("image/")) {
                 header = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_ID);
                 if (null != header && 0 < header.length) {
-                    contentIds.add(header[0]);   
+                    contentIds.add(header[0]);
                 }
             }
         }

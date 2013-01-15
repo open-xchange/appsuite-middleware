@@ -70,7 +70,7 @@ import com.openexchange.java.Streams;
  * <code>name{suffix1,suffix2,...suffixn}</code><br>
  * The latter form is expanded into a series of fields of the form<br>
  * <code>name_suffix1</code> to <code>name_suffixn</code>.
- * 
+ *
  * @author Sven Maurmann
  */
 public class SimpleConfiguration implements Configuration {

@@ -94,7 +94,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link SessionHandler} - Provides access to sessions
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -144,7 +144,7 @@ public final class SessionHandler {
 
     /**
      * Initializes the {@link SessionHandler session handler}
-     * 
+     *
      * @param newConfig The appropriate configuration
      */
     public static void init(final SessiondConfigInterface config) {
@@ -168,7 +168,7 @@ public final class SessionHandler {
 
     /**
      * Removes all sessions associated with given user in specified context
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @param propagate <code>true</code> for remote removal; otherwise <code>false</code>
@@ -198,7 +198,7 @@ public final class SessionHandler {
         if (storageService != null) {
             try {
                 final Task<Session[]> c = new AbstractTask<Session[]>() {
-                    
+
                     @Override
                     public Session[] call() throws Exception {
                         return storageService.removeUserSessions(userId, contextId);
@@ -218,7 +218,7 @@ public final class SessionHandler {
 
     /**
      * Removes all sessions associated with given context.
-     * 
+     *
      * @param contextId The context ID
      * @param propagate <code>true</code> for remote removal; otherwise <code>false</code>
      */
@@ -242,7 +242,7 @@ public final class SessionHandler {
         if (storageService != null) {
             try {
                 final Task<Void> c = new AbstractTask<Void>() {
-                    
+
                     @Override
                     public Void call() throws Exception {
                         storageService.removeContextSessions(contextId);
@@ -261,7 +261,7 @@ public final class SessionHandler {
 
     /**
      * Checks for any active session for specified context.
-     * 
+     *
      * @param contextId The context identifier
      * @return <code>true</code> if at least one active session is found; otherwise <code>false</code>
      */
@@ -277,7 +277,7 @@ public final class SessionHandler {
             if (storageService != null) {
                 try {
                     final Task<Boolean> c = new AbstractTask<Boolean>() {
-                        
+
                         @Override
                         public Boolean call() throws Exception {
                             return Boolean.valueOf(storageService.hasForContext(contextId));
@@ -294,7 +294,7 @@ public final class SessionHandler {
 
     /**
      * Gets all sessions associated with given user in specified context
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @return The wrapper objects for sessions
@@ -311,7 +311,7 @@ public final class SessionHandler {
             if (storageService != null) {
                 try {
                     final Task<Session[]> c = new AbstractTask<Session[]>() {
-                        
+
                         @Override
                         public Session[] call() throws Exception {
                             return storageService.getUserSessions(userId, contextId);
@@ -332,7 +332,7 @@ public final class SessionHandler {
 
     /**
      * Gets an active session of an user if available.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @param includeLongTerm <code>true</code> to also lookup the long term sessions, <code>false</code>, otherwise
@@ -351,7 +351,7 @@ public final class SessionHandler {
             if (storageService != null) {
                 try {
                     final Task<Session> c = new AbstractTask<Session>() {
-                        
+
                         @Override
                         public Session call() throws Exception {
                             return storageService.getAnyActiveSessionForUser(userId, contextId);
@@ -381,7 +381,7 @@ public final class SessionHandler {
             if (null != storageService) {
                 try {
                     final Task<Session> c = new AbstractTask<Session>() {
-                        
+
                         @Override
                         public Session call() throws Exception {
                             return storageService.findFirstSessionForUser(userId, contextId);
@@ -398,7 +398,7 @@ public final class SessionHandler {
 
     /**
      * Adds a new session containing given attributes to session container(s)
-     * 
+     *
      * @param userId The user ID
      * @param loginName The user's login name
      * @param password The user's password
@@ -444,7 +444,7 @@ public final class SessionHandler {
 
     /**
      * Stores specified session.
-     * 
+     *
      * @param session The session to store
      * @param sessionStorageService The storage service
      * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code>
@@ -458,7 +458,7 @@ public final class SessionHandler {
 
     /**
      * Stores specified session.
-     * 
+     *
      * @param session The session to store
      * @param sessionStorageService The storage service
      */
@@ -488,7 +488,7 @@ public final class SessionHandler {
         if (storageService != null) {
             try {
                 final Task<Integer> c = new AbstractTask<Integer>() {
-                    
+
                     @Override
                     public Integer call() throws Exception {
                         return Integer.valueOf(storageService.getUserSessions(userId, contextId).length);
@@ -525,7 +525,7 @@ public final class SessionHandler {
             if (maxSessPerClient > 0) {
                 try {
                     final Task<Session[]> c = new AbstractTask<Session[]>() {
-                        
+
                         @Override
                         public Session[] call() throws Exception {
                             return storageService.getUserSessions(userId, contextId);
@@ -566,7 +566,7 @@ public final class SessionHandler {
 
     /**
      * Clears the session denoted by given session ID from session container(s)
-     * 
+     *
      * @param sessionid The session ID
      * @return <code>true</code> if a session could be removed; otherwise <code>false</code>
      */
@@ -587,7 +587,7 @@ public final class SessionHandler {
 
     /**
      * Changes the password stored in session denoted by given session ID
-     * 
+     *
      * @param sessionid The session ID
      * @param newPassword The new password
      * @throws OXException If changing the password fails
@@ -610,7 +610,7 @@ public final class SessionHandler {
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
             final Task<Void> c = new AbstractTask<Void>() {
-                
+
                 @Override
                 public Void call() throws Exception {
                     sessionStorageService.changePassword(sessionid, newPassword);
@@ -633,7 +633,7 @@ public final class SessionHandler {
             if (storageService != null) {
                 try {
                     final Task<Session> c = new AbstractTask<Session>() {
-                        
+
                         @Override
                         public Session call() throws Exception {
                             return storageService.getSessionByRandomToken(randomToken, newIP);
@@ -690,7 +690,7 @@ public final class SessionHandler {
 
     /**
      * Gets the session associated with given session ID
-     * 
+     *
      * @param sessionId The session ID
      * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
      */
@@ -748,7 +748,7 @@ public final class SessionHandler {
 
     /**
      * Gets the session associated with given alternative identifier
-     * 
+     *
      * @param alternative identifier The alternative identifier
      * @return The session associated with given alternative identifier; otherwise <code>null</code> if expired or none found
      */
@@ -767,7 +767,7 @@ public final class SessionHandler {
             if (storageService != null) {
                 try {
                     final Task<Session> c = new AbstractTask<Session>() {
-                        
+
                         @Override
                         public Session call() throws Exception {
                             return storageService.getSessionByAlternativeId(altId);
@@ -805,7 +805,7 @@ public final class SessionHandler {
      * Gets (and removes) the session bound to given session identifier in cache.
      * <p>
      * Session is going to be added to local session containers on a cache hit.
-     * 
+     *
      * @param sessionId The session identifier
      * @return A wrapping instance of {@link SessionControl} or <code>null</code>
      */
@@ -832,7 +832,7 @@ public final class SessionHandler {
         if (storageService != null) {
             try {
                 final Task<Session> c = new AbstractTask<Session>() {
-                    
+
                     @Override
                     public Session call() throws Exception {
                         return storageService.getCachedSession(sessionId);
@@ -851,7 +851,7 @@ public final class SessionHandler {
 
     /**
      * Gets all available instances of {@link SessionControl}
-     * 
+     *
      * @return All available instances of {@link SessionControl}
      */
     public static List<SessionControl> getSessions() {
@@ -868,7 +868,7 @@ public final class SessionHandler {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 final Task<List<Session>> c = new AbstractTask<List<Session>>() {
-                    
+
                     @Override
                     public List<Session> call() throws Exception {
                         return storageService.getSessions();
@@ -953,7 +953,7 @@ public final class SessionHandler {
 
     /**
      * Post event that a single session has been put into {@link SessionStorageService session storage}.
-     * 
+     *
      * @param session The stored session
      */
     protected static void postSessionStored(final Session session) {
@@ -962,7 +962,7 @@ public final class SessionHandler {
 
     /**
      * Post event that a single session has been put into {@link SessionStorageService session storage}.
-     * 
+     *
      * @param session The stored session
      * @param optEventAdmin The optional {@link EventAdmin} instance
      */
@@ -999,7 +999,7 @@ public final class SessionHandler {
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
             ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
-    
+
                 @Override
                 public Void call() {
                     try {
@@ -1115,7 +1115,7 @@ public final class SessionHandler {
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
             ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
-    
+
                 @Override
                 public Void call() {
                     try {

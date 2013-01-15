@@ -11,9 +11,9 @@ import com.openexchange.admin.soap.util.dataobjects.Credentials;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -26,8 +26,8 @@ import com.openexchange.admin.soap.util.dataobjects.Credentials;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -44,11 +44,11 @@ public class ListFilestore {
 
     /**
      * Ruft den Wert der searchPattern-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSearchPattern() {
         return searchPattern;
@@ -56,11 +56,11 @@ public class ListFilestore {
 
     /**
      * Legt den Wert der searchPattern-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSearchPattern(String value) {
         this.searchPattern = value;
@@ -68,11 +68,11 @@ public class ListFilestore {
 
     /**
      * Ruft den Wert der auth-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Credentials }
-     *     
+     *
      */
     public Credentials getAuth() {
         return auth;
@@ -80,11 +80,11 @@ public class ListFilestore {
 
     /**
      * Legt den Wert der auth-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Credentials }
-     *     
+     *
      */
     public void setAuth(Credentials value) {
         this.auth = value;

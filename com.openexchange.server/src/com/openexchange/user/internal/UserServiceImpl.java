@@ -102,7 +102,7 @@ public final class UserServiceImpl implements UserService {
     public User getUser(final int uid, final Context context) throws OXException {
         return UserStorage.getInstance().getUser(uid, context);
     }
-    
+
     @Override
     public User getUser(final Connection con, final int uid, final Context context) throws OXException {
         return UserStorage.getInstance().getUser(context, uid, con);
@@ -117,13 +117,13 @@ public final class UserServiceImpl implements UserService {
     public User[] getUser(final Context context) throws OXException {
         return UserStorage.getInstance().getUser(context);
     }
-    
+
     @Override
     public int createUser(final Context context, final User user) throws OXException {
         checkUser(user);
         return UserStorage.getInstance().createUser(context, user);
     }
-    
+
     @Override
     public int createUser(final Connection con, final Context context, final User user) throws OXException {
         checkUser(user);
@@ -177,32 +177,32 @@ public final class UserServiceImpl implements UserService {
     public boolean authenticate(final User user, final String password) throws OXException {
         return UserStorage.authenticate(user, password);
     }
-    
-    private void checkUser(final User user) throws OXException {        
+
+    private void checkUser(final User user) throws OXException {
         final String mail = user.getMail();
         final String language = user.getPreferredLanguage();
         final String timeZone = user.getTimeZone();
         final String passwordMech = user.getPasswordMech();
-        
+
         /*
          * Mail address
          */
         if (mail == null) {
             throw UserExceptionCode.MISSING_PARAMETER.create("mail address");
-        }    
-        
+        }
+
         /*
          * Preferred language
          */
-        if (language == null || LocaleTools.getLocale(language) == null) { 
+        if (language == null || LocaleTools.getLocale(language) == null) {
             throw UserExceptionCode.MISSING_PARAMETER.create("preferred language");
         } else {
             final Locale locale = LocaleTools.getLocale(language);
             if (locale == null) {
                 throw UserExceptionCode.INVALID_LOCALE.create(language);
-            }            
+            }
         }
-        
+
         /*
          * Time zone
          */
@@ -217,12 +217,12 @@ public final class UserServiceImpl implements UserService {
                     break;
                 }
             }
-            
+
             if (!found) {
                 throw UserExceptionCode.INVALID_TIMEZONE.create(timeZone);
             }
         }
-        
+
         /*
          * Password mech
          */
@@ -233,7 +233,7 @@ public final class UserServiceImpl implements UserService {
                 throw UserExceptionCode.MISSING_PASSWORD_MECH.create(passwordMech);
             }
         }
-        
+
         // TODO: Maybe we have to check the contact id here.
     }
 

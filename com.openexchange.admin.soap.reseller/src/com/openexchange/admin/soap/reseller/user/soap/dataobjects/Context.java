@@ -13,9 +13,9 @@ import com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.Resel
 
 /**
  * <p>Java-Klasse f\u00fcr Context complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="Context">
  *   &lt;complexContent>
@@ -38,8 +38,8 @@ import com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.Resel
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Context", propOrder = {
@@ -88,11 +88,11 @@ public class Context {
 
     /**
      * Ruft den Wert der averageSize-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getAverageSize() {
         return averageSize;
@@ -100,11 +100,11 @@ public class Context {
 
     /**
      * Legt den Wert der averageSize-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setAverageSize(Long value) {
         this.averageSize = value;
@@ -112,11 +112,11 @@ public class Context {
 
     /**
      * Ruft den Wert der enabled-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isEnabled() {
         return enabled;
@@ -124,11 +124,11 @@ public class Context {
 
     /**
      * Legt den Wert der enabled-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setEnabled(Boolean value) {
         this.enabled = value;
@@ -136,11 +136,11 @@ public class Context {
 
     /**
      * Ruft den Wert der filestoreId-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getFilestoreId() {
         return filestoreId;
@@ -148,11 +148,11 @@ public class Context {
 
     /**
      * Legt den Wert der filestoreId-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setFilestoreId(Integer value) {
         this.filestoreId = value;
@@ -160,11 +160,11 @@ public class Context {
 
     /**
      * Ruft den Wert der filestoreName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFilestoreName() {
         return filestoreName;
@@ -172,11 +172,11 @@ public class Context {
 
     /**
      * Legt den Wert der filestoreName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFilestoreName(String value) {
         this.filestoreName = value;
@@ -184,11 +184,11 @@ public class Context {
 
     /**
      * Ruft den Wert der id-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getId() {
         return id;
@@ -196,11 +196,11 @@ public class Context {
 
     /**
      * Legt den Wert der id-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setId(Integer value) {
         this.id = value;
@@ -208,25 +208,25 @@ public class Context {
 
     /**
      * Gets the value of the loginMappings property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the loginMappings property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getLoginMappings().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getLoginMappings() {
         if (loginMappings == null) {
@@ -237,11 +237,11 @@ public class Context {
 
     /**
      * Ruft den Wert der maxQuota-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getMaxQuota() {
         return maxQuota;
@@ -249,11 +249,11 @@ public class Context {
 
     /**
      * Legt den Wert der maxQuota-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setMaxQuota(Long value) {
         this.maxQuota = value;
@@ -261,11 +261,11 @@ public class Context {
 
     /**
      * Ruft den Wert der name-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -273,11 +273,11 @@ public class Context {
 
     /**
      * Legt den Wert der name-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -285,11 +285,11 @@ public class Context {
 
     /**
      * Ruft den Wert der readDatabase-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Database }
-     *     
+     *
      */
     public Database getReadDatabase() {
         return readDatabase;
@@ -297,11 +297,11 @@ public class Context {
 
     /**
      * Legt den Wert der readDatabase-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Database }
-     *     
+     *
      */
     public void setReadDatabase(Database value) {
         this.readDatabase = value;
@@ -309,11 +309,11 @@ public class Context {
 
     /**
      * Ruft den Wert der usedQuota-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getUsedQuota() {
         return usedQuota;
@@ -321,11 +321,11 @@ public class Context {
 
     /**
      * Legt den Wert der usedQuota-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setUsedQuota(Long value) {
         this.usedQuota = value;
@@ -333,11 +333,11 @@ public class Context {
 
     /**
      * Ruft den Wert der userAttributes-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link SOAPStringMapMap }
-     *     
+     *
      */
     public SOAPStringMapMap getUserAttributes() {
         return userAttributes;
@@ -345,11 +345,11 @@ public class Context {
 
     /**
      * Legt den Wert der userAttributes-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link SOAPStringMapMap }
-     *     
+     *
      */
     public void setUserAttributes(SOAPStringMapMap value) {
         this.userAttributes = value;
@@ -357,11 +357,11 @@ public class Context {
 
     /**
      * Ruft den Wert der writeDatabase-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Database }
-     *     
+     *
      */
     public Database getWriteDatabase() {
         return writeDatabase;
@@ -369,11 +369,11 @@ public class Context {
 
     /**
      * Legt den Wert der writeDatabase-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Database }
-     *     
+     *
      */
     public void setWriteDatabase(Database value) {
         this.writeDatabase = value;

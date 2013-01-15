@@ -55,8 +55,8 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link InternalFreeBusyProviderLookup} 
- * 
+ * {@link InternalFreeBusyProviderLookup}
+ *
  * Provides access to services.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -84,7 +84,7 @@ public class InternalFreeBusyProviderLookup {
     public static <S extends Object> S getService(Class<? extends S> c) throws OXException {
         return InternalFreeBusyProviderLookup.getService(c, true);
     }
-    
+
     public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
         ServiceLookup serviceLookup = ref.get();
         S service = null == serviceLookup ? null : serviceLookup.getService(c);

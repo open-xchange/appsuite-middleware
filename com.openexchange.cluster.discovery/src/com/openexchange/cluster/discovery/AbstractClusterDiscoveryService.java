@@ -70,14 +70,14 @@ public abstract class AbstractClusterDiscoveryService extends ServiceTracker<Clu
 
     /**
      * Initializes a new {@link AbstractClusterDiscoveryService}.
-     * 
+     *
      * @param context The bundle context
      */
     protected AbstractClusterDiscoveryService(final BundleContext context) {
         super(context, ClusterListener.class, null);
         listeners = new CopyOnWriteArrayList<ClusterListener>();
     }
-    
+
     /**
      * Gets the listeners currently contained.
      *

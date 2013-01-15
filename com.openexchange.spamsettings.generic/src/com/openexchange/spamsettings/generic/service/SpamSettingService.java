@@ -8,14 +8,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SpamSettingService}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public interface SpamSettingService {
 
     /**
      * Provides the Form Description to be displayed in the Configuration part of the User Interface.
-     * 
+     *
      * @param session a Session
      * @return The Form Description
      */
@@ -23,7 +23,7 @@ public interface SpamSettingService {
 
     /**
      * The current settings of the Spam Configuration.
-     * 
+     *
      * @param session a Session
      * @return The setting pairs
      */
@@ -31,7 +31,7 @@ public interface SpamSettingService {
 
     /**
      * Writes the settings of the Spam Configuration.
-     * 
+     *
      * @param session a Session
      * @param settings The setting pairs to be written
      */

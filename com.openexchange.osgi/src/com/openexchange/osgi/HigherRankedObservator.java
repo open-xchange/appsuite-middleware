@@ -59,7 +59,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * {@link HigherRankedObservator} - An observator for possibly appearing higher-ranked service(s).
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @see HigherRankedObservatorCallback
  */
@@ -72,7 +72,7 @@ public class HigherRankedObservator<S> implements ServiceTrackerCustomizer<S, S>
 
         /**
          * Invoked if first service appeared with a ranking higher than observator's one.
-         * 
+         *
          * @param reference The service reference
          * @param service The service
          */
@@ -80,7 +80,7 @@ public class HigherRankedObservator<S> implements ServiceTrackerCustomizer<S, S>
 
         /**
          * Invoked if last service disappeared with a ranking higher than observator's one.
-         * 
+         *
          * @param reference The service reference
          * @param service The service
          */
@@ -97,7 +97,7 @@ public class HigherRankedObservator<S> implements ServiceTrackerCustomizer<S, S>
 
     /**
      * Initializes a new {@link HigherRankedObservator}.
-     * 
+     *
      * @param ranking This observator's ranking
      * @param context The bundle context to acquire higher-ranked service(s)
      */
@@ -111,7 +111,7 @@ public class HigherRankedObservator<S> implements ServiceTrackerCustomizer<S, S>
 
     /**
      * Adds specified callback to this observator.
-     * 
+     *
      * @param callback The callback to add
      * @return This observator with callback added
      */
@@ -124,7 +124,7 @@ public class HigherRankedObservator<S> implements ServiceTrackerCustomizer<S, S>
 
     /**
      * Removes specified callback from this observator.
-     * 
+     *
      * @param callback The callback to remove
      * @return This observator with callback removed
      */

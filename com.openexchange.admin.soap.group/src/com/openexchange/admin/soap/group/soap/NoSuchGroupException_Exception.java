@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "NoSuchGroupException", targetNamespace = "http://soap.admin.openexchange.com")
 public class NoSuchGroupException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.group.soap.NoSuchGroupException noSuchGroupException;
 
     public NoSuchGroupException_Exception() {
         super();
     }
-    
+
     public NoSuchGroupException_Exception(String message) {
         super(message);
     }
-    
+
     public NoSuchGroupException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

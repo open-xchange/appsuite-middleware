@@ -89,7 +89,7 @@ public final class MailProviderRegistry {
 
     /**
      * Gets registered mail providers' protocols
-     * 
+     *
      * @return The protocols
      */
     public static List<Protocol> getProtocols() {
@@ -183,7 +183,7 @@ public final class MailProviderRegistry {
 
     /**
      * Gets the real mail provider for specified protocol name.
-     * 
+     *
      * @param protocolName The protocol name
      * @return The mail provider or <code>null</code>
      */

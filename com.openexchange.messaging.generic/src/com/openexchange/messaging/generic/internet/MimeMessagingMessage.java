@@ -65,7 +65,7 @@ import com.openexchange.messaging.generic.internal.InternalUtility.ParsedFlags;
 
 /**
  * {@link MimeMessagingMessage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -128,7 +128,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
 
     /**
      * Initializes a new {@link MimeMessagingMessage}.
-     * 
+     *
      * @param mimeMessage The MIME message
      */
     protected MimeMessagingMessage(final MimeMessage mimeMessage) {
@@ -151,7 +151,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
 
     /**
      * Sets the color label.
-     * 
+     *
      * @param colorLabel The color label
      * @throws OXException If setting color label fails
      */
@@ -189,7 +189,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
 
     /**
      * Sets the flags.
-     * 
+     *
      * @param flags The flags
      * @throws OXException If given flags cannot be set
      */
@@ -226,7 +226,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
 
     /**
      * Sets specified user flags.
-     * 
+     *
      * @param userFlags The user flags to set
      * @throws OXException If setting user flags fails
      */
@@ -274,7 +274,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
 
     /**
      * Sets the folder fullname.
-     * 
+     *
      * @param folder The folder fullname to set
      */
     public void setFolder(final String folder) {
@@ -288,7 +288,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
 
     /**
      * Sets the received date.
-     * 
+     *
      * @param receivedDate The received date
      */
     public void setReceivedDate(final long receivedDate) {
@@ -302,7 +302,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
 
     /**
      * Sets the thread level.
-     * 
+     *
      * @param threadLevel The thread level
      */
     public void setThreadLevel(final int threadLevel) {
@@ -316,7 +316,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
 
     /**
      * Sets the message identifier.
-     * 
+     *
      * @param id The message identifier
      */
     public void setId(final String id) {
@@ -330,7 +330,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
 
     /**
      * Sets the picture
-     * 
+     *
      * @param picture The picture url
      */
     public void setPicture(final String picture) {

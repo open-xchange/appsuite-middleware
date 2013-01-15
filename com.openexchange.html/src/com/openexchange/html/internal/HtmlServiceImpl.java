@@ -99,7 +99,7 @@ import com.openexchange.proxy.ProxyRegistry;
 
 /**
  * {@link HtmlServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HtmlServiceImpl implements HtmlService {
@@ -126,7 +126,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     /**
      * Initializes a new {@link HtmlServiceImpl}.
-     * 
+     *
      * @param tidyConfiguration The jTidy configuration
      * @param htmlCharMap The HTML entity to string map
      * @param htmlEntityMap The string to HTML entity map
@@ -371,7 +371,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     /**
      * Checks if specified URL needs to be converted to its ASCII form.
-     * 
+     *
      * @param url The URL to check
      * @return The checked URL
      * @throws MalformedURLException If URL is malformed
@@ -417,7 +417,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     /**
      * Checks whether the specified string's characters are ASCII 7 bit
-     * 
+     *
      * @param s The string to check
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
@@ -573,7 +573,7 @@ public final class HtmlServiceImpl implements HtmlService {
         }
     }
 
-    private String extractFrom(final InputStream inputStream) throws OXException {  
+    private String extractFrom(final InputStream inputStream) throws OXException {
         try {
             final Metadata metadata = new Metadata();
             metadata.set(Metadata.CONTENT_ENCODING, "ISO-8859-1");
@@ -794,7 +794,7 @@ public final class HtmlServiceImpl implements HtmlService {
      * <p>
      * This is just a convenience method which invokes <code>{@link #htmlFormat(String, boolean)}</code> with latter parameter set to
      * <code>true</code>.
-     * 
+     *
      * @param plainText The plain text
      * @return The properly escaped HTML content
      * @see #htmlFormat(String, boolean)
@@ -821,7 +821,7 @@ public final class HtmlServiceImpl implements HtmlService {
      * <code>\(?\b(?:https?://|ftp://|mailto:|news\\.|www\.)[-\p{L}\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\p{L}\p{Sc}0-9+&@#/%=~_()|]</code>
      * <p>
      * Parentheses, if present, are allowed in the URL -- The leading one is absorbed, too.
-     * 
+     *
      * <pre>
      * String s = matcher.group();
      * int mlen = s.length() - 1;
@@ -852,7 +852,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     /**
      * Maps specified HTML entity - e.g. <code>&amp;uuml;</code> - to corresponding unicode character.
-     * 
+     *
      * @param entity The HTML entity
      * @return The corresponding unicode character or <code>null</code>
      */
@@ -1253,7 +1253,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     /**
      * Removes unnecessary CDATA from CSS or JavaScript <code>style</code> elements:
-     * 
+     *
      * <pre>
      * &lt;style type=&quot;text/css&quot;&gt;
      * /*&lt;![CDATA[&#42;/
@@ -1263,9 +1263,9 @@ public final class HtmlServiceImpl implements HtmlService {
      * /*]]&gt;&#42;/
      * &lt;/style&gt;
      * </pre>
-     * 
+     *
      * is turned to
-     * 
+     *
      * <pre>
      * &lt;style type=&quot;text/css&quot;&gt;
      * &lt;!--
@@ -1273,7 +1273,7 @@ public final class HtmlServiceImpl implements HtmlService {
      * --&gt;
      * &lt;/style&gt;
      * </pre>
-     * 
+     *
      * @param htmlContent The (X)HTML content possibly containing CDATA in CSS or JavaScript <code>style</code> elements
      * @return The (X)HTML content with CDATA removed
      */
@@ -1348,7 +1348,7 @@ public final class HtmlServiceImpl implements HtmlService {
         final String ret = processDownlevelRevealedConditionalComments0(htmlContent, PATTERN_CC2);
         return processDownlevelRevealedConditionalComments0(ret, PATTERN_CC);
     }
-    
+
     private static String processDownlevelRevealedConditionalComments0(final String htmlContent, final Pattern p) {
         final Matcher m = p.matcher(htmlContent);
         if (!m.find()) {
@@ -1393,7 +1393,7 @@ public final class HtmlServiceImpl implements HtmlService {
     /**
      * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library and falls back using <a
      * href="http://htmlcleaner.sourceforge.net/">HtmlCleaner</a> if any error occurs.
-     * 
+     *
      * @param htmlContent The HTML content
      * @return The validated HTML content
      */
@@ -1441,7 +1441,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     /**
      * Pre-process specified HTML content with <a href="http://jsoup.org/">jsoup</a> library.
-     * 
+     *
      * @param htmlContent The HTML content
      * @return The safe HTML content according to JSoup processing
      */

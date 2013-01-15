@@ -49,24 +49,17 @@
 
 package com.openexchange.realtime.atmosphere.presence.handler;
 
-import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.StanzaSender;
 import com.openexchange.realtime.atmosphere.impl.StanzaTransformer;
 import com.openexchange.realtime.atmosphere.presence.initializer.PresenceInitializer;
 import com.openexchange.realtime.atmosphere.presence.osgi.AtmospherePresenceServiceRegistry;
 import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
-import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
-import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.presence.PresenceChangeListener;
-import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.realtime.presence.PresenceStatusService;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
-import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -78,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  * <li>Get a list of IDs you are subscribed to and their status</li>
  * <li>Change my status</li>
  * </ul>
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class OXRTPresenceHandler implements StanzaHandler {
@@ -117,7 +110,7 @@ public class OXRTPresenceHandler implements StanzaHandler {
     /**
      * Handle the incoming request of userA to subscribe to the presence of userB. This transforms the payload of the incoming stanza and
      * passes it to the PresenceSubscriptionService.
-     * 
+     *
      * <pre>
      * {
      *   "session" : "$session",
@@ -128,9 +121,9 @@ public class OXRTPresenceHandler implements StanzaHandler {
      *     "message" : "Hello marens, please let me subscribe to your presence, WBR., Mr. X"
      *   }
      * }
-     * 
+     *
      * </pre>
-     * 
+     *
      * @param stanza the incoming Stanza representing the subscribe request
      * @throws OXException if the subscription fails, e.g. Stanza can't be read
      */
@@ -142,7 +135,7 @@ public class OXRTPresenceHandler implements StanzaHandler {
 
     /**
      * Handle userB's incoming approval to prior subscription request of userA.
-     * 
+     *
      * <pre>
      * {
      *   "session" : "$session",
@@ -154,7 +147,7 @@ public class OXRTPresenceHandler implements StanzaHandler {
      *   }
      * }
      * </pre>
-     * 
+     *
      * @param stanza the incoming Stanza representing the approval
      * @throws OXException If stanza conversion fails or the subscription can't be approved
      */
@@ -166,7 +159,7 @@ public class OXRTPresenceHandler implements StanzaHandler {
 
     /**
      * Handle userA's request to unsubscribe from the Presence of userB.
-     * 
+     *
      * <pre>
      * {
      *   "session" : "$session",
@@ -175,7 +168,7 @@ public class OXRTPresenceHandler implements StanzaHandler {
      *   "type" : "unsubscribe"
      * }
      * </pre>
-     * 
+     *
      * @param stanza
      * @throws OXException
      */
@@ -191,7 +184,7 @@ public class OXRTPresenceHandler implements StanzaHandler {
      * <li>by userB to deny a prior subscription request made by userA</li>
      * <li>by userB to cancel the previously granted subscription to userA</li>
      * </ul>
-     * 
+     *
      * <pre>
      * {
      *   "session" : "$session",
@@ -203,7 +196,7 @@ public class OXRTPresenceHandler implements StanzaHandler {
      *   }
      * }
      * </pre>
-     * 
+     *
      * @param stanza the Stanza representing the unsubscribed request.
      * @throws OXException If stanza conversion fails or the subscription can't be denied/canceled
      */
@@ -219,14 +212,14 @@ public class OXRTPresenceHandler implements StanzaHandler {
      * <li>Change the Status in the PresenceStatusService</li>
      * <li>Check if the Status changes from offline to * and send status of the IDs contacts back to the ID</li>
      * </ol>
-     * 
+     *
      * @param stanza Stanza containing the new Presence Status
      * @throws OXException If stanza conversion fails or the status can't be changed
      */
     private void handlePresence(Presence stanza, ServerSession session) throws OXException {
         AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
         PresenceStatusService presenceStatusService = serviceRegistry.getService(PresenceStatusService.class);
-        
+
         // TODO: add delay from last statusChange to presenceStanza
         // Change the status of the incoming Stanza's client
         presenceStatusService.changePresenceStatus(stanza, session);

@@ -86,15 +86,15 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         final IDBasedFileAccess fileAccess = request.getFileAccess();
 
         final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
-        
-        
+
+
         final InputStream documentData = new BufferedInputStream(fileAccess.getDocument(request.getId(), request.getVersion()));
 
         final FileHolder fileHolder = new FileHolder(documentData, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
 
         AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         createAndSetETag(fileMetadata, request, result);
-        
+
 		return result;
     }
 

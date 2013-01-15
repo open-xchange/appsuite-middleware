@@ -57,14 +57,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SearchHandler}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SearchHandler {
 
     /**
      * Searches with specified arguments.
-     * 
+     *
      * @param jsonQuery The JSON body
      * @param range The range
      * @param columns The columns to load

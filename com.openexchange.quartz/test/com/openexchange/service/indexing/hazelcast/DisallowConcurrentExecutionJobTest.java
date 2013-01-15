@@ -1,16 +1,16 @@
-/* 
- * Copyright 2001-2011 Terracotta, Inc. 
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
- * use this file except in compliance with the License. You may obtain a copy 
- * of the License at 
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations 
+/*
+ * Copyright 2001-2011 Terracotta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
  * under the License.
  */
 
@@ -56,7 +56,7 @@ import com.openexchange.service.indexing.hazelcast.TestJobs.TestJob;
 
 /**
  * Integration test for using DisallowConcurrentExecution annot.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author Zemian Deng <saltnlight5@gmail.com>
  */
@@ -101,17 +101,17 @@ public class DisallowConcurrentExecutionJobTest {
             }
         }
     }
-    
+
     public static class SleepingJobListener extends JobListenerSupport {
-        
+
         private final AtomicInteger count = new AtomicInteger(0);
 
-        
+
         @Override
         public String getName() {
             return "SleepingJobListener";
         }
-        
+
         @Override
         public synchronized void jobToBeExecuted(JobExecutionContext context) {
             try {
@@ -119,12 +119,12 @@ public class DisallowConcurrentExecutionJobTest {
             } catch (SchedulerException e) {
                 throw new AssertionError(e.getMessage());
             }
-            
+
             if (!count.compareAndSet(0, 1)) {
                 throw new AssertionError("Concurrent job count was not 0 but " + count.get());
             }
         }
-        
+
         @Override
         public synchronized void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
             try {
@@ -136,10 +136,10 @@ public class DisallowConcurrentExecutionJobTest {
                 }
             } catch (SchedulerException e) {
                 throw new AssertionError("Error while counting down the latch.");
-            }            
-        }        
+            }
+        }
     }
-    
+
     @Test
     public void testStartingAndStopping() throws Exception {
         JobStore jobStore = new TestableHazelcastJobStore();
@@ -150,7 +150,7 @@ public class DisallowConcurrentExecutionJobTest {
         scheduler.start();
         scheduler.shutdown();
     }
-    
+
     @Test
 
     public void testDataPersistence() throws Exception {
@@ -159,43 +159,43 @@ public class DisallowConcurrentExecutionJobTest {
         DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
         Scheduler scheduler = DirectSchedulerFactory.getInstance().getScheduler("sched1");
         scheduler.start();
-        
-        
+
+
         CountDownLatch latch = new CountDownLatch(2);
         scheduler.getContext().put(BARRIER, latch);
         JobDetail job = JobBuilder.newJob(ChangingDetailJob.class)
                 .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
                 .build();
-        
+
         Trigger trigger = TriggerBuilder.newTrigger()
                 .forJob(job)
                 .withIdentity("testTrigger")
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(1000L).withRepeatCount(2))
                 .startNow()
                 .build();
-        
+
         scheduler.scheduleJob(job, trigger);
-        
+
         latch.await(10, TimeUnit.SECONDS);
         Assert.assertEquals("Latch was not 0", 0, latch.getCount());
-        
+
         scheduler.shutdown();
     }
-    
+
     @Test
     public void testConsistencyTaskCausesConcurrentExecution() throws Exception {
         TestableHazelcastJobStore jobStore = new TestableHazelcastJobStore();
         DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
         Scheduler scheduler1 = DirectSchedulerFactory.getInstance().getScheduler("sched1");
         scheduler1.start();
-        
+
         CyclicBarrier barrier = new CyclicBarrier(2);
         scheduler1.getContext().put(BARRIER, barrier);
-        
+
         JobDetail job = JobBuilder.newJob(LongRunningJob.class)
             .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
             .build();
-        
+
         Trigger trigger = TriggerBuilder.newTrigger()
             .forJob(job)
             .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/withInterval/5000")
@@ -206,7 +206,7 @@ public class DisallowConcurrentExecutionJobTest {
             .startNow()
             .build();
         scheduler1.scheduleJob(job, trigger);
-        
+
         barrier.await();
         barrier.reset();
         ConsistencyTask consistencyTask = new ConsistencyTask(jobStore, jobStore.getLocallyAcquiredTriggers(), jobStore.getLocallyExecutingTriggers());
@@ -216,21 +216,21 @@ public class DisallowConcurrentExecutionJobTest {
         Assert.assertFalse("Jobs were running concurrently!", currentlyExecutingJobs.size() > 1);
         scheduler1.shutdown(true);
     }
-    
+
     @Test
     public void testConcurrentRunIFJobIsRemovedAndReaddedDuringRuntime() throws Exception {
         JobStore jobStore = new TestableHazelcastJobStore();
         DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
         Scheduler scheduler1 = DirectSchedulerFactory.getInstance().getScheduler("sched1");
         scheduler1.start();
-        
+
         CyclicBarrier barrier = new CyclicBarrier(2);
         scheduler1.getContext().put(BARRIER, barrier);
-        
+
         JobDetail job = JobBuilder.newJob(LongRunningJob.class)
             .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
             .build();
-        
+
         Trigger trigger = TriggerBuilder.newTrigger()
             .forJob(job)
             .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/withInterval/5000")
@@ -241,22 +241,22 @@ public class DisallowConcurrentExecutionJobTest {
             .startNow()
             .build();
         scheduler1.scheduleJob(job, trigger);
-        
+
         barrier.await();
         System.out.println("Job started. We have 30 seconds from now.");
         Set<JobKey> jobKeys = scheduler1.getJobKeys(GroupMatcher.jobGroupEquals("testJobs/1/2"));
         List<JobExecutionContext> currentlyExecutingJobs = scheduler1.getCurrentlyExecutingJobs();
         Assert.assertTrue("Wrong number of jobs in store", jobKeys.size() == 1);
         Assert.assertTrue("Wrong number of executing jobs", currentlyExecutingJobs.size() == 1);
-        
+
         scheduler1.deleteJob(job.getKey());
         jobKeys = scheduler1.getJobKeys(GroupMatcher.jobGroupEquals("testJobs/1/2"));
         currentlyExecutingJobs = scheduler1.getCurrentlyExecutingJobs();
         Assert.assertTrue("Wrong number of jobs in store", jobKeys.size() == 0);
         Assert.assertTrue("Wrong number of executing jobs", currentlyExecutingJobs.size() == 1);
-        
+
         Thread.sleep(5000L);
-        
+
         barrier.reset();
         job = JobBuilder.newJob(LongRunningJob.class)
             .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
@@ -272,19 +272,19 @@ public class DisallowConcurrentExecutionJobTest {
             .build();
         scheduler1.scheduleJob(job, trigger);
         barrier.await();
-        
+
         // Now look if both threads are running
         currentlyExecutingJobs = scheduler1.getCurrentlyExecutingJobs();
         Assert.assertFalse("Jobs were running concurrently!", currentlyExecutingJobs.size() > 1);
         scheduler1.shutdown(true);
     }
-    
+
     @Test
     public void testClusterSchedulerConcurrency() throws Exception {
         JobStore jobStore = new TestableHazelcastJobStore();
 //        RAMJobStore jobStore = new RAMJobStore();
         DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
-        DirectSchedulerFactory.getInstance().createScheduler("sched2", "2", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);    
+        DirectSchedulerFactory.getInstance().createScheduler("sched2", "2", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
         Scheduler scheduler1 = DirectSchedulerFactory.getInstance().getScheduler("sched1");
         Scheduler scheduler2 = DirectSchedulerFactory.getInstance().getScheduler("sched2");
         CountDownLatch latch = new CountDownLatch(9);
@@ -298,8 +298,8 @@ public class DisallowConcurrentExecutionJobTest {
 
         JobDetail job1 = JobBuilder.newJob(ReschedulingTestJob.class)
             .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
-            .build();        
-        
+            .build();
+
         SimpleTrigger trigger1 = TriggerBuilder.newTrigger()
             .forJob(job1)
             .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/withInterval/5000")
@@ -310,9 +310,9 @@ public class DisallowConcurrentExecutionJobTest {
             .repeatForever()
             .withMisfireHandlingInstructionFireNow())
             .build();
-        
+
         scheduler1.scheduleJob(job1, trigger1);
-        
+
         Thread.sleep(10);
         scheduler2.scheduleJob(TriggerBuilder.newTrigger()
             .forJob(job1)
@@ -320,7 +320,7 @@ public class DisallowConcurrentExecutionJobTest {
             .startAt(new Date(System.currentTimeMillis()))
             .withPriority(5)
             .build());
-        
+
         Thread.sleep(10);
         scheduler1.scheduleJob(TriggerBuilder.newTrigger()
             .forJob(job1)
@@ -328,7 +328,7 @@ public class DisallowConcurrentExecutionJobTest {
             .startAt(new Date(System.currentTimeMillis()))
             .withPriority(5)
             .build());
-        
+
         Thread.sleep(10);
         scheduler2.scheduleJob(TriggerBuilder.newTrigger()
             .forJob(job1)
@@ -336,7 +336,7 @@ public class DisallowConcurrentExecutionJobTest {
             .startAt(new Date(System.currentTimeMillis()))
             .withPriority(5)
             .build());
-        
+
         latch.await(30, TimeUnit.SECONDS);
         if (latch.getCount() > 0L) {
             Assert.fail("Count was " + latch.getCount());
@@ -345,7 +345,7 @@ public class DisallowConcurrentExecutionJobTest {
         scheduler1.shutdown(true);
         scheduler2.shutdown(true);
     }
-    
+
     @Test
     public void testSomething() throws Exception {
         CountDownLatch latch = new CountDownLatch(2);
@@ -356,7 +356,7 @@ public class DisallowConcurrentExecutionJobTest {
         Scheduler scheduler = new StdSchedulerFactory(props).getScheduler();
         scheduler.getContext().put(BARRIER, latch);
         scheduler.getListenerManager().addJobListener(new SleepingJobListener());
-        
+
         Date startTime = new Date(System.currentTimeMillis() + 100);
         JobDetail job1 = JobBuilder.newJob(SleepingTestJob.class).withIdentity("job1").build();
         Trigger trigger1 = TriggerBuilder.newTrigger()
@@ -369,11 +369,11 @@ public class DisallowConcurrentExecutionJobTest {
             .startAt(new Date(startTime.getTime() + 100))
             .forJob(job1.getKey())
             .build();
-        
+
         scheduler.scheduleJob(job1, trigger1);
         scheduler.scheduleJob(trigger2);
         scheduler.start();
-        
+
         latch.await(125, TimeUnit.SECONDS);
         scheduler.shutdown(true);
     }

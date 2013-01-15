@@ -140,7 +140,7 @@ public final class ContactDataSource implements DataSource {
 //                true);
 //            final TIntObjectMap<ContactInterface> tmp = new TIntObjectHashMap<ContactInterface>(len);
             for (int i = 0; i < len; i++) {
-            	contacts[i] = contactService.getContact(session, Integer.toString(folderIds[i]), Integer.toString(objectIds[i]));            	
+            	contacts[i] = contactService.getContact(session, Integer.toString(folderIds[i]), Integer.toString(objectIds[i]));
 //                final int folderId = folderIds[i];
 //                ContactInterface contactInterface = tmp.get(folderId);
 //                if (null == contactInterface) {

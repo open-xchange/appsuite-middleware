@@ -87,7 +87,7 @@ public class RssAction implements AJAXActionService {
 	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RssAction.class));
 	private final HttpURLFeedFetcher fetcher;
 	private final HashMapFeedInfoCache feedCache;
-	
+
 	public RssAction () {
 		feedCache = new HashMapFeedInfoCache();
 		fetcher = new HttpURLFeedFetcher(feedCache);

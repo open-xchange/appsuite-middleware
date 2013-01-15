@@ -77,8 +77,8 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class AdditionalCopyTask implements CopyUserTaskService {
-    
-    private static final String UPDATE_USER = 
+
+    private static final String UPDATE_USER =
         "UPDATE " +
             "user " +
         "SET " +
@@ -87,7 +87,7 @@ public class AdditionalCopyTask implements CopyUserTaskService {
             "cid = ? " +
         "AND " +
             "id = ?";
-    
+
 
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#getAlreadyCopied()
@@ -121,23 +121,23 @@ public class AdditionalCopyTask implements CopyUserTaskService {
         final Integer dstUsrId = copyTools.getDestinationUserId();
         final User srcUsr = copyTools.getSourceUser();
         final Connection dstCon = copyTools.getDestinationConnection();
-        
+
         final ObjectMapping<Integer> contactMapping = copyTools.checkAndExtractGenericMapping(Contact.class.getName());
         final Integer srcContact = contactMapping.getSource(srcUsr.getContactId());
         if (srcContact == null) {
             throw UserCopyExceptionCodes.USER_CONTACT_MISSING.create(srcUsr.getId(), srcCtxId);
         }
-        
+
         final Integer dstContact = contactMapping.getDestination(srcContact);
         if (dstContact == null) {
             throw UserCopyExceptionCodes.USER_CONTACT_MISSING.create(srcUsr.getId(), dstCtxId);
         }
-        
+
         correctUsersContactId(dstCon, i(dstUsrId), i(dstCtxId), i(dstContact));
-        
+
         return null;
     }
-    
+
     private void correctUsersContactId(final Connection con, final int uid, final int cid, final int contact) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -145,7 +145,7 @@ public class AdditionalCopyTask implements CopyUserTaskService {
             stmt.setInt(1, contact);
             stmt.setInt(2, cid);
             stmt.setInt(3, uid);
-            
+
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);

@@ -294,11 +294,11 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
 		case NOT_FOUND:
 			exc.setGeneric(Generic.NOT_FOUND);
 		}
-		
+
 		if (exc.getCategories().contains(Category.CATEGORY_CONFLICT)) {
 			exc.setGeneric(Generic.CONFLICT);
 		}
-		
+
 		if (exc.getCategories().contains(Category.CATEGORY_PERMISSION_DENIED)) {
 			exc.setGeneric(Generic.NO_PERMISSION);
 		}

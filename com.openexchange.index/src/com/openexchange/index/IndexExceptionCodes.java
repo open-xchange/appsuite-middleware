@@ -79,7 +79,7 @@ public enum IndexExceptionCodes implements OXExceptionCode {
      * The index for module %1$d for user %2$d in context %3$d is currently locked.
      */
     INDEX_LOCKED(IndexExceptionMessages.INDEX_LOCKED, Category.CATEGORY_ERROR, 4),
-    
+
     ;
 
     /**

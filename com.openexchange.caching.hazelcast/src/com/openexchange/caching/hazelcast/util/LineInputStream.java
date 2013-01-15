@@ -48,7 +48,7 @@ import java.io.PushbackInputStream;
 /**
  * {@link LineInputStream} - This class is to support reading CRLF terminated lines that contain only US-ASCII characters from an input
  * stream.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class LineInputStream extends FilterInputStream {

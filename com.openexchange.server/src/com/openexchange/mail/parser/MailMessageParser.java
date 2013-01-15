@@ -237,7 +237,7 @@ public final class MailMessageParser {
 
     /**
      * Adds specified MIME filter.
-     * 
+     *
      * @param mimeFilter The MIME filter
      * @return This parser with MIME filter applied
      */

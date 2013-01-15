@@ -63,7 +63,7 @@ public interface AppointmentEventInterface {
 
     /**
      * Invoked when a new appointment is created.
-     * 
+     *
      * @param appointmentObj The appointment
      * @param sessionObj The user session
      */
@@ -71,7 +71,7 @@ public interface AppointmentEventInterface {
 
     /**
      * Invoked when a new appointment is modified.
-     * 
+     *
      * @param appointmentObj The appointment
      * @param sessionObj The user session
      */

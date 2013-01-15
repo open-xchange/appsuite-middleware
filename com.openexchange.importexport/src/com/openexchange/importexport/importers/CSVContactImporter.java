@@ -113,7 +113,7 @@ public class CSVContactImporter extends AbstractImporter {
 
 	private ContactFieldMapper currentMapper;
 
-	
+
     @Override
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         if (!isResponsibleFor(format)) {
@@ -403,7 +403,7 @@ public class CSVContactImporter extends AbstractImporter {
             this.contact = contact;
         }
     }
-    
+
 	public boolean checkFields(final List<String> fields) {
 		currentMapper = null;
         int highestAmountOfMappedFields = 0;
@@ -423,7 +423,7 @@ public class CSVContactImporter extends AbstractImporter {
         }
         return getCurrentMapper() != null;
     }
-    
+
     protected boolean passesSanityTestForDisplayName(List<String> headers) {
         return Collections.any(
             headers,
@@ -459,7 +459,7 @@ public class CSVContactImporter extends AbstractImporter {
 		}
 		return mappers;
 	}
-	
+
     protected ContactField getRelevantField(final String name) {
         return getCurrentMapper().getFieldByName(name);
     }

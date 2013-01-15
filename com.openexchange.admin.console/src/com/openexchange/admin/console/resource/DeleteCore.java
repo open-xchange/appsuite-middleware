@@ -59,7 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 
 public abstract class DeleteCore extends ResourceAbstraction {
-    
+
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         setIdOption(parser);
@@ -74,16 +74,16 @@ public abstract class DeleteCore extends ResourceAbstraction {
             parser.ownparse(args);
 
             final Resource res = new Resource();
-            
+
             parseAndSetResourceId(parser, res);
             parseAndSetResourceName(parser, res);
-            
+
             successtext = nameOrIdSet(this.resourceid, this.resourcename, "resource");
-            
+
             final Context ctx = contextparsing(parser);
 
             final Credentials auth = credentialsparsing(parser);
-            
+
             final OXResourceInterface oxres = getResourceInterface();
 
             maincall(parser, oxres, ctx, res, auth);

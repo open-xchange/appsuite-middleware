@@ -94,10 +94,6 @@ import com.openexchange.folderstorage.filestorage.contentType.FileStorageContent
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.dataobjects.MailFolderDescription;
-import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;

@@ -190,7 +190,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Removes denoted folder from global cache.
-     * 
+     *
      * @param folderId The folder identifier
      * @param treeId The tree identifier
      * @param contextId The context identifier
@@ -591,7 +591,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Puts specified folder into appropriate cache.
-     * 
+     *
      * @param folder The folder
      * @param treeId The tree identifier
      * @param storageParameters The storage parameters
@@ -1187,7 +1187,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Gets the folder reference from cache.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param params The storage parameters
@@ -1714,7 +1714,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Loads denoted folder from un-cached storage.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param storageType The storage type

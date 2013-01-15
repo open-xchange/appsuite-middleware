@@ -51,7 +51,7 @@ package com.openexchange.messaging;
 
 /**
  * {@link CaptchaParams} - Simple container class for captcha parameters,
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CaptchaParams {
@@ -71,7 +71,7 @@ public final class CaptchaParams {
 
     /**
      * Gets the challenge.
-     * 
+     *
      * @return The challenge
      */
     public String getChallenge() {
@@ -80,7 +80,7 @@ public final class CaptchaParams {
 
     /**
      * Sets the challenge.
-     * 
+     *
      * @param challenge The challenge
      */
     public void setChallenge(final String challenge) {
@@ -89,7 +89,7 @@ public final class CaptchaParams {
 
     /**
      * Gets the response string.
-     * 
+     *
      * @return The response string
      */
     public String getResponse() {
@@ -98,7 +98,7 @@ public final class CaptchaParams {
 
     /**
      * Sets the response string.
-     * 
+     *
      * @param response The response string.
      */
     public void setResponse(final String response) {
@@ -107,7 +107,7 @@ public final class CaptchaParams {
 
     /**
      * Gets the host; either an IP address or a host name.
-     * 
+     *
      * @return The host name
      */
     public String getHost() {
@@ -116,7 +116,7 @@ public final class CaptchaParams {
 
     /**
      * Sets the remote address.
-     * 
+     *
      * @param address The remote address
      */
     public void setAddress(final String address) {

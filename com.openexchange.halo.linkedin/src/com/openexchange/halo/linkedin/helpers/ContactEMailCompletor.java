@@ -23,7 +23,7 @@ public class ContactEMailCompletor {
 	protected void completeFromContactData(Contact contact) throws OXException {
 		final ContactField[] mailFields = new ContactField[] { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
 		try {
-			final Contact fullContact = contactService.getContact(session, Integer.toString(contact.getParentFolderID()), 
+			final Contact fullContact = contactService.getContact(session, Integer.toString(contact.getParentFolderID()),
 					Integer.toString(contact.getObjectID()), mailFields);
 			if(fullContact.containsEmail1()) {
 	            contact.setEmail1(fullContact.getEmail1());

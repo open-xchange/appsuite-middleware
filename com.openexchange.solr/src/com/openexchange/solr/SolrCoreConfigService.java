@@ -58,11 +58,11 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SolrCoreConfigService { 
-    
+public interface SolrCoreConfigService {
+
     /**
      * Gets a core store by its id.
-     * 
+     *
      * @param id The core store id.
      * @return The core store.
      * @throws OXException
@@ -71,61 +71,61 @@ public interface SolrCoreConfigService {
 
     /**
      * Gets a list of all available core stores.
-     * 
+     *
      * @return The store list.
      * @throws OXException
      */
     List<SolrCoreStore> getAllStores() throws OXException;
-    
+
     /**
      * Registers a new solr core store.
-     * 
+     *
      * @param store The store.
      * @return The stores id.
      * @throws OXException
      */
     int registerCoreStore(SolrCoreStore store) throws OXException;
-    
+
     /**
      * Modifies an existing core.
-     * 
+     *
      * @param store The store to modify. Must contain id!
      * @throws OXException
      */
     void modifyCoreStore(SolrCoreStore store) throws OXException;
-    
+
     /**
      * Unregisters a core store.
-     * 
+     *
      * @param storeId The id of the store to unregister.
      * @throws OXException
      */
     void unregisterCoreStore(int storeId) throws OXException;
-    
+
     /**
      * Returns if a core environment already exists.
      */
     boolean coreEnvironmentExists(SolrCoreIdentifier identifier) throws OXException;
-    
+
     /**
      * Creates a new solr core. The core will be inactive after creation.
      * Returns if the creation was successful or not.
-     * 
+     *
      * @param contextId
      * @param userId
      * @param module
      * @throws OXException
      */
     boolean createCoreEnvironment(SolrCoreIdentifier identifier) throws OXException;
-    
+
     /**
      * Deletes a core. If the core is running, it will be stopped first.
-     * 
+     *
      * @param contextId
      * @param userId
      * @param module
      * @throws OXException
      */
     void removeCoreEnvironment(SolrCoreIdentifier identifier) throws OXException;
-    
+
 }

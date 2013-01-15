@@ -64,7 +64,7 @@ public class InitRestrictions extends ResellerAbstraction {
     }
 
     /**
-     * 
+     *
      */
     public InitRestrictions() {
     }

@@ -66,17 +66,17 @@ import org.cliffc.high_scale_lib.NonBlockingHashMap;
 public final class CachingCharsetProvider extends CharsetProvider {
 
     private static final Charset NULL = new Charset("x-null", new String[0]) {
-        
+
         @Override
         public CharsetEncoder newEncoder() {
             return null;
         }
-        
+
         @Override
         public CharsetDecoder newDecoder() {
             return null;
         }
-        
+
         @Override
         public boolean contains(final Charset cs) {
             return false;

@@ -138,7 +138,7 @@ public class OXExceptionFactory {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with specified code's attributes.
-     * 
+     *
      * @param code The exception code
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message

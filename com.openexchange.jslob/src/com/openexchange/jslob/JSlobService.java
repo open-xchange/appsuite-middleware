@@ -56,28 +56,28 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link JSlobService} - The JSlob service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface JSlobService {
 
     /**
      * Gets the service identifier.
-     * 
+     *
      * @return The service identifier
      */
     String getIdentifier();
 
     /**
      * Gets the aliases for this service.
-     * 
+     *
      * @return The aliases for this service.
      */
     List<String> getAliases();
 
     /**
      * Gets the JSlob associated with given user in given context.
-     * 
+     *
      * @param id The identifier of the JSlob
      * @param userId session An active session
      * @return The JSlob
@@ -87,7 +87,7 @@ public interface JSlobService {
 
     /**
      * Gets the shared JSlob.
-     * 
+     *
      * @param id The identifier of the JSlob
      * @return The JSlob
      * @throws OXException If JSlob cannot be returned
@@ -96,7 +96,7 @@ public interface JSlobService {
 
     /**
      * Gets the JSlobs associated with given user in given context.
-     * 
+     *
      * @param session an active session
      * @return The JSlobs
      * @throws OXException If JSlobs cannot be returned
@@ -105,7 +105,7 @@ public interface JSlobService {
 
     /**
      * Gets the shared JSlobs.
-     * 
+     *
      * @return The JSlobs
      * @throws OXException If JSlobs cannot be returned
      */
@@ -115,7 +115,7 @@ public interface JSlobService {
      * Sets the JSlob associated with given user in given context.
      * <p>
      * If passed JSlob is <code>null</code>, a delete is performed.
-     * 
+     *
      * @param id The path of the JSlob
      * @param jsonJSlob The JSlob or <code>null</code> for deletion
      * @param session an active session
@@ -127,7 +127,7 @@ public interface JSlobService {
      * Sets the shared JSlob.
      * <p>
      * If passed JSlob is <code>null</code>, a delete is performed.
-     * 
+     *
      * @param id The path of the JSlob
      * @param jsonJSlob The JSlob or <code>null</code> for deletion
      * @throws OXException If JSlob cannot be set
@@ -136,7 +136,7 @@ public interface JSlobService {
 
     /**
      * Updates the JSlob associated with given user in given context.
-     * 
+     *
      * @param id The path of the JSlob
      * @param jsonUpdate The JSON update providing the data to update
      * @param session an active session

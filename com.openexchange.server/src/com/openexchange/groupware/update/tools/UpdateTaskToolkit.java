@@ -171,7 +171,7 @@ public final class UpdateTaskToolkit {
                     new UpdateProcess(contextId).run();
                 }
             }
-        }        
+        }
     }
 
     /**

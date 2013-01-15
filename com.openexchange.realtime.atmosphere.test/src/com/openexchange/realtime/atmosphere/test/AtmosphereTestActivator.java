@@ -9,7 +9,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 public class AtmosphereTestActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(AtmosphereTestActivator.class));
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[]{HttpService.class, AtmosphereService.class};
@@ -21,7 +21,7 @@ public class AtmosphereTestActivator extends HousekeepingActivator {
         track(HttpService.class);
         trackService(AtmosphereService.class);
         openTrackers();
-        
+
         /*
          * Register the package specific payload converters. The
          * SimpleConverterActivator listens for registrations of new
@@ -31,7 +31,7 @@ public class AtmosphereTestActivator extends HousekeepingActivator {
          * (as the DispatcherActivator is listening for new ResultConverter
          * services) which then can be used by the {@link Payload} to convert
          * itself via the conversion service offered by the
-         * {@link DefaultConverter} 
+         * {@link DefaultConverter}
          */
 //        registerService(SimplePayloadConverter.class, new ChatMessageToJSONConverter());
 //        registerService(SimplePayloadConverter.class, new JSONToChatMessageConverter());
@@ -44,12 +44,12 @@ public class AtmosphereTestActivator extends HousekeepingActivator {
          * elements from the namespace default and transform them to ChatMessage POJOS.
          */
 //        registerService(PayloadTransformer.class,  new OXRTConversionHandler(Message.class, "chatMessage"));
-        
+
         //Add the atmosphere chat handler
         AtmosphereService service = getService(AtmosphereService.class);
         service.addAtmosphereHandler("/chat", new ChatHandler());
         LOG.info("added \"/chat\" AtmosphereHandler");
-        
+
         HttpService httpService = getService(HttpService.class);
         httpService.registerResources("/atmosphere/originalChat", "/originalAtmosphereChat", null);
         httpService.registerResources("/atmosphere/chat", "/chat", null);

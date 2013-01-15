@@ -13,9 +13,9 @@ import com.openexchange.admin.soap.user.dataobjects.User;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -30,8 +30,8 @@ import com.openexchange.admin.soap.user.dataobjects.User;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -54,11 +54,11 @@ public class ChangeByModuleAccessName {
 
     /**
      * Ruft den Wert der ctx-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Context }
-     *     
+     *
      */
     public Context getCtx() {
         return ctx;
@@ -66,11 +66,11 @@ public class ChangeByModuleAccessName {
 
     /**
      * Legt den Wert der ctx-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Context }
-     *     
+     *
      */
     public void setCtx(Context value) {
         this.ctx = value;
@@ -78,11 +78,11 @@ public class ChangeByModuleAccessName {
 
     /**
      * Ruft den Wert der user-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link User }
-     *     
+     *
      */
     public User getUser() {
         return user;
@@ -90,11 +90,11 @@ public class ChangeByModuleAccessName {
 
     /**
      * Legt den Wert der user-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link User }
-     *     
+     *
      */
     public void setUser(User value) {
         this.user = value;
@@ -102,11 +102,11 @@ public class ChangeByModuleAccessName {
 
     /**
      * Ruft den Wert der accessCombinationName-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAccessCombinationName() {
         return accessCombinationName;
@@ -114,11 +114,11 @@ public class ChangeByModuleAccessName {
 
     /**
      * Legt den Wert der accessCombinationName-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAccessCombinationName(String value) {
         this.accessCombinationName = value;
@@ -126,11 +126,11 @@ public class ChangeByModuleAccessName {
 
     /**
      * Ruft den Wert der auth-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Credentials }
-     *     
+     *
      */
     public Credentials getAuth() {
         return auth;
@@ -138,11 +138,11 @@ public class ChangeByModuleAccessName {
 
     /**
      * Legt den Wert der auth-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Credentials }
-     *     
+     *
      */
     public void setAuth(Credentials value) {
         this.auth = value;

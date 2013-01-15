@@ -62,7 +62,7 @@ import com.openexchange.user.copy.internal.additional.AdditionalCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class AdditionalCopyActivator implements BundleActivator {
-    
+
     private ServiceRegistration<CopyUserTaskService> registration;
 
     /**

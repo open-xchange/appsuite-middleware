@@ -61,14 +61,14 @@ import com.openexchange.image.ImageActionFactory;
  * <li>&lt;img src="/ajax/image/...uid=xyz"&gt; and</li>
  * <li>&lt;img src="/ajax/file/...id=xyz"&gt;</li>
  * </ul>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageMatcher {
 
     /**
      * Creates a new image matcher from given content.
-     * 
+     *
      * @param content The content
      * @return The appropriate matcher
      */
@@ -86,7 +86,7 @@ public final class ImageMatcher {
 
     /**
      * The pattern to look-up Open-Xchange image URLs inside HTML content.
-     * 
+     *
      * <pre>
      * final Matcher m = ImageMatcher.matcher(s);
      * if (m.find()) {
@@ -99,7 +99,7 @@ public final class ImageMatcher {
 
     /**
      * Sets the prefix service.
-     * 
+     *
      * @param prefixService The prefix service to set
      */
     /**
@@ -141,7 +141,7 @@ public final class ImageMatcher {
 
     /**
      * Returns the matching image tag.
-     * 
+     *
      * @return The matching image tag.
      * @throws IllegalStateException If no match has yet been attempted, or if the previous match operation failed
      */
@@ -151,7 +151,7 @@ public final class ImageMatcher {
 
     /**
      * Returns the input subsequence captured by the given group during the previous match operation.
-     * 
+     *
      * @param group The index of a capturing group in this matcher's pattern
      * @return The (possibly empty) subsequence captured by the group during the previous match, or <tt>null</tt> if the group failed to
      *         match part of the input
@@ -170,7 +170,7 @@ public final class ImageMatcher {
      * Any non-negative integer smaller than or equal to the value returned by this method is guaranteed to be a valid group index for this
      * matcher.
      * </p>
-     * 
+     *
      * @return The number of capturing groups in this matcher's pattern
      */
     public int groupCount() {
@@ -182,7 +182,7 @@ public final class ImageMatcher {
      * <p>
      * If the match succeeds then more information can be obtained via the <tt>start</tt>, <tt>end</tt>, and <tt>group</tt> methods.
      * </p>
-     * 
+     *
      * @return <tt>true</tt> if, and only if, the entire region sequence matches this matcher's pattern
      */
     public boolean matches() {
@@ -197,7 +197,7 @@ public final class ImageMatcher {
      * <p>
      * If the match succeeds then more information can be obtained via the <tt>start</tt>, <tt>end</tt>, and <tt>group</tt> methods.
      * </p>
-     * 
+     *
      * @return <tt>true</tt> if, and only if, a subsequence of the input sequence matches this matcher's pattern
      */
     public boolean find() {
@@ -206,7 +206,7 @@ public final class ImageMatcher {
 
     /**
      * Gets the managed file identifier.
-     * 
+     *
      * @return The identifier
      */
     public String getManagedFileId() {
@@ -215,7 +215,7 @@ public final class ImageMatcher {
 
     /**
      * Gets the image identifier
-     * 
+     *
      * @return The identifier
      */
     public String getImageId() {
@@ -224,7 +224,7 @@ public final class ImageMatcher {
 
     /**
      * Gets the start index of the previous match.
-     * 
+     *
      * @return The start index
      */
     public int start() {
@@ -233,7 +233,7 @@ public final class ImageMatcher {
 
     /**
      * Gets the end index of the previous match.
-     * 
+     *
      * @return The end index
      */
     public int end() {

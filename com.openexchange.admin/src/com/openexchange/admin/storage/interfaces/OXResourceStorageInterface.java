@@ -65,7 +65,7 @@ import com.openexchange.admin.tools.PropertyHandler;
 /**
  * This interface provides an abstraction to the storage of the resource
  * information
- * 
+ *
  * @author d7
  * @author cutmasta
  */
@@ -75,7 +75,7 @@ public abstract class OXResourceStorageInterface {
      * Proxy attribute for the class implementing this interface.
      */
     private static Class<? extends OXResourceStorageInterface> implementingClass;
-    
+
     private static final Log log = LogFactory.getLog(OXResourceStorageInterface.class);
 
     protected static AdminCache cache = null;
@@ -147,7 +147,7 @@ public abstract class OXResourceStorageInterface {
     public abstract void delete(final Context ctx, final Resource resource) throws StorageException;
 
     public abstract Resource getData(final Context ctx, final Resource resource) throws StorageException;
-    
+
     /**
      * fetch data from resource and insert in del_resource
      */

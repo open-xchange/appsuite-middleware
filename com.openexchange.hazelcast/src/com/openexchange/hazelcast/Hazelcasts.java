@@ -62,7 +62,7 @@ import com.openexchange.hazelcast.init.HazelcastInitializer;
  * {@link Hazelcasts} - Utility class for&nbsp;<a href="http://www.hazelcast.com/">Hazelcast</a><br>
  * <img src="http://www.assemblive.com/static/img/hazelcast-logo.gif" />
  * </div>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Hazelcasts {
@@ -72,7 +72,7 @@ public final class Hazelcasts {
      * bundle. Inspired by <a href="https://groups.google.com/forum/?fromgroups#!topic/hazelcast/zJavJ1ouMnk">OSGi support of Hazelcast</a>
      * <p>
      * <b>Usage:</b>
-     * 
+     *
      * <pre>
      * // Switch current thread's class loader
      * ClassLoaderModifier modifier = new ClassLoaderModifier();
@@ -101,7 +101,7 @@ public final class Hazelcasts {
          * Hazelcast</a>
          * <p>
          * <b>Usage:</b>
-         * 
+         *
          * <pre>
          * // Switch current thread's class loader
          * ClassLoaderModifier modifier = new ClassLoaderModifier();
@@ -112,7 +112,7 @@ public final class Hazelcasts {
          *     modifier.restoreClassLoader();
          * }
          * </pre>
-         * 
+         *
          * @param clazz A class from target bundle; e.g. the activator
          */
         public void setClassLoader(final Class<?> clazz) {
@@ -155,7 +155,7 @@ public final class Hazelcasts {
 
     /**
      * Sets the paused flag.
-     * 
+     *
      * @param paused The paused flag
      */
     public static void setPaused(final boolean paused) {
@@ -164,7 +164,7 @@ public final class Hazelcasts {
 
     /**
      * Tests whether associated {@link #getHazelcastInstance() HazelcastInstance} is currently paused.
-     * 
+     *
      * @return <code>true</code> if paused; otherwise <code>false</code>
      */
     public static boolean isPaused() {
@@ -173,7 +173,7 @@ public final class Hazelcasts {
 
     /**
      * Gets registered <tt>HazelcastInstance</tt>.
-     * 
+     *
      * @return The <tt>HazelcastInstance</tt> or <code>null</code> if not initialized, yet
      */
     public static HazelcastInstance getHazelcastInstance() {
@@ -187,7 +187,7 @@ public final class Hazelcasts {
      * bundle.
      * <p>
      * <b>Usage:</b>
-     * 
+     *
      * <pre>
      * // Switch current thread's class loader
      * Hazelcasts.setClassLoader(this.getClass());
@@ -197,7 +197,7 @@ public final class Hazelcasts {
      *     Hazelcasts.restoreClassLoader();
      * }
      * </pre>
-     * 
+     *
      * @param clazz A class from target bundle; e.g. the activator
      * @throws IllegalStateException If current thread's class loader has already been modified (and not yet {@link #restoreClassLoader()
      *             restored})
@@ -220,7 +220,7 @@ public final class Hazelcasts {
 
     /**
      * Restores the previously removed class loader in current thread.
-     * 
+     *
      * @see #setClassLoader(Class)
      */
     public static void restoreClassLoader() {
@@ -234,7 +234,7 @@ public final class Hazelcasts {
     /**
      * Wraps a class-loading-aware proxy around passed delegate. The {@link ClassLoader class loader} is chosen from
      * <tt>classLoaderSource</tt>.
-     * 
+     *
      * @param classLoaderSource {@link Class#getClassLoader() The class loader source}
      * @param type The delegatee's type
      * @param delegate The delegate object

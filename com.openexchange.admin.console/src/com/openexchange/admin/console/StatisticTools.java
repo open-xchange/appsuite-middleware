@@ -443,7 +443,7 @@ public class StatisticTools extends AbstractJMXTools {
 
     /**
      * Print Grizzly related management info to stdout if Grizzly's MBeans can be found.
-     * 
+     *
      * @param mbeanServerConnection The MBeanServerConnection to be used for querying MBeans.
      * @throws IOException
      * @throws MalformedObjectNameException
@@ -501,7 +501,7 @@ public class StatisticTools extends AbstractJMXTools {
 
     /**
      * {@link GrizzlyMBean} Enum of MBeans we are interested in. Each containing the ObjectName and the attributes to query.
-     * 
+     *
      * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
      */
     private enum GrizzlyMBean {
@@ -525,7 +525,7 @@ public class StatisticTools extends AbstractJMXTools {
 
         /**
          * Initializes a new {@link GrizzlyMBean}.
-         * 
+         *
          * @param objectName The object name needed to query for this MBean
          * @param attributes The attributes of the MBean we are interested in.
          */
@@ -536,7 +536,7 @@ public class StatisticTools extends AbstractJMXTools {
 
         /**
          * Gets the object name of the MBean we are interested in.
-         * 
+         *
          * @return The object name
          */
         public String getObjectName() {
@@ -545,7 +545,7 @@ public class StatisticTools extends AbstractJMXTools {
 
         /**
          * Gets the attributes of the MBean we are interested in.
-         * 
+         *
          * @return The attributes
          */
         public String[] getAttributes() {

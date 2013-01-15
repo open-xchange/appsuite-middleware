@@ -65,14 +65,14 @@ import com.openexchange.mail.dataobjects.MailPart;
 
 /**
  * {@link MimeFilter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MimeFilter {
 
     /**
      * Gets the MIME filter for specified alias.
-     * 
+     *
      * @param alias The alias
      * @return The appropriate MIME filter or <code>null</code> if alias is unknown
      */
@@ -85,7 +85,7 @@ public class MimeFilter {
 
     /**
      * Gets the MIME filter for specified ignorable <code>Content-Type</code>s
-     * 
+     *
      * @param ignorableContentTypes The ignorable <code>Content-Type</code>s
      * @return The appropriate MIME filter
      */
@@ -95,7 +95,7 @@ public class MimeFilter {
 
     /**
      * Gets the MIME filter for specified ignorable <code>Content-Type</code>s
-     * 
+     *
      * @param ignorableContentTypes The ignorable <code>Content-Type</code>s
      * @return The appropriate MIME filter
      */
@@ -119,7 +119,7 @@ public class MimeFilter {
 
     /**
      * Gets the ignorable <code>Content-Type</code>s
-     * 
+     *
      * @return The ignorable <code>Content-Type</code>s
      */
     public List<String> getIgnorableContentTypes() {
@@ -128,7 +128,7 @@ public class MimeFilter {
 
     /**
      * Filters matching parts from specified MIME message.
-     * 
+     *
      * @param mimeMessage The MIME message to filter
      * @return The filtered MIME message
      * @throws OXException If filter operation fails
@@ -156,7 +156,7 @@ public class MimeFilter {
 
     /**
      * Invoked to detect if passed body part should be ignored.
-     * 
+     *
      * @param contentType The part's Content-Type
      * @param bodyPart The body part
      * @return <code>true</code> to ignore; otherwise <code>false</code>
@@ -172,7 +172,7 @@ public class MimeFilter {
 
     /**
      * Invoked to detect if passed body part should be ignored.
-     * 
+     *
      * @param contentType The part's Content-Type
      * @param bodyPart The body part
      * @return <code>true</code> to ignore; otherwise <code>false</code>

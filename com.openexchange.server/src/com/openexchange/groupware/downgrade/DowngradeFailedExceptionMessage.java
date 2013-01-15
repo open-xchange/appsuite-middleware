@@ -65,7 +65,7 @@ public class DowngradeFailedExceptionMessage implements LocalizableStrings {
     private DowngradeFailedExceptionMessage() {
         super();
     }
-    
+
     // A SQL error occurred: %1$s
     public final static String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
 

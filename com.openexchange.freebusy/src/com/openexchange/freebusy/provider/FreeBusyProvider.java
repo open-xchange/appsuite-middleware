@@ -58,23 +58,23 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FreeBusyProvider}
- * 
+ *
  * Provider of free/busy information.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface FreeBusyProvider {
-    
+
     /**
      * Gets the available free/busy data for a list participants.
-     * 
+     *
      * @param session The session
-     * @param participants A list of participants, identified either by their internal user-/resource-ID or e-mail address. 
-     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param participants A list of participants, identified either by their internal user-/resource-ID or e-mail address.
+     * @param from The lower (inclusive) limit of the requested time-range
      * @param until The upper (exclusive) limit of the requested time-range
-     * @return A map of free/busy data, with each entry representing the free/busy data of one requested participant  
+     * @return A map of free/busy data, with each entry representing the free/busy data of one requested participant
      * @throws OXException
      */
     Map<String, FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until);
-    
+
 }

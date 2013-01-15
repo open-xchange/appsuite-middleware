@@ -63,7 +63,7 @@ public interface SMSAccess {
 
     /**
      * Connects this SMS/MMS access.
-     * 
+     *
      * @throws OXException If the SMS/MMS access could not be opened for various reasons
      */
     void connectAccess() throws OXException;

@@ -64,7 +64,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.config.ConfigurationService;
 
 public class PropertyHandler {
-    
+
     protected Hashtable<String, Object>       allPropValues       = null;
     private Hashtable<String, String>       userPropValues      = null;
     protected Hashtable<String, String>       groupPropValues     = null;
@@ -75,7 +75,7 @@ public class PropertyHandler {
 
     private String configdirname;
     private final Properties sysprops;
-    
+
     //private static final String PROPERTIES_USER             = "USER_PROP_CONFIG";
     //private static final String PROPERTIES_GROUP            = "GROUP_PROP_CONFIG";
     //private static final String PROPERTIES_RESOURCE         = "RESOURCE_PROP_CONFIG";
@@ -98,30 +98,30 @@ public class PropertyHandler {
             log.error(e.getMessage(), e);
         }
     }
-    
+
     /**
      * Get String value from Properties-File. If not set or not found, use given fallback!
-     * 
+     *
      * @param key
      * @param fallBack
      * @return
      */
     public String getProp( final String key, final String fallBack ) {
         String retString = fallBack;
-        
+
         if ( this.allPropValues.containsKey( key ) ) {
-            retString = this.allPropValues.get( key ).toString(); 
+            retString = this.allPropValues.get( key ).toString();
         } else {
             log.error("Property '" + key + "' not found in file " + this.configdirname +"! Using fallback :" + fallBack );
         }
-        
-        return retString; 
+
+        return retString;
     }
-    
-    
-    
+
+
+
     /**
-     * 
+     *
      * @param key
      * @param fallBack
      * @return
@@ -130,20 +130,20 @@ public class PropertyHandler {
         String retString = fallBack;
         final Properties syprops = new Properties( this.sysprops );
         retString = syprops.getProperty( key );
-        
+
         if ( retString == null ) {
             if(log.isDebugEnabled()){
                 log.debug( "Property '" + key + "' not found in the run script! Using fallback :" + fallBack );
             }
             retString = fallBack;
         }
-        
-        return retString; 
+
+        return retString;
     }
-    
+
     public String getGroupProp( final String key, final String fallBack ) {
         String retBool = fallBack;
-        
+
         synchronized (this) {
             if ( this.groupPropValues == null ) {
                 ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -163,7 +163,7 @@ public class PropertyHandler {
                 }
             }
         }
-        
+
         if ( this.groupPropValues != null && this.groupPropValues.containsKey( key ) ) {
             retBool =  this.groupPropValues.get( key ).toString();
         } else {
@@ -171,19 +171,19 @@ public class PropertyHandler {
                 log.debug( "Property '" + key + "' not found in file 'Group.properties'! Using fallback :" + fallBack );
             }
         }
-        
-        return retBool; 
+
+        return retBool;
     }
-    
+
     /**
-     * 
+     *
      * @param key
      * @param fallBack
      * @return
      */
     public boolean getGroupProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
-        
+
         synchronized (this) {
             if ( this.groupPropValues == null ) {
                 ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -203,27 +203,27 @@ public class PropertyHandler {
                 }
             }
         }
-        
+
         if ( this.groupPropValues != null && this.groupPropValues.containsKey( key ) ) {
-            retBool = Boolean.parseBoolean( this.groupPropValues.get( key ).toString() ); 
+            retBool = Boolean.parseBoolean( this.groupPropValues.get( key ).toString() );
         } else {
             if(log.isDebugEnabled()){
                 log.debug("Property '" + key + "' not found in file 'Group.properties'! Using fallback :" + fallBack );
             }
         }
-        
-        return retBool; 
+
+        return retBool;
     }
-    
+
     /**
-     * 
+     *
      * @param key
      * @param fallBack
      * @return
      */
     public boolean getUserProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
-        
+
         synchronized (this) {
             if ( this.userPropValues == null ) {
                 ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -243,28 +243,28 @@ public class PropertyHandler {
                 }
             }
         }
-        
+
         if ( this.userPropValues != null && this.userPropValues.containsKey( key ) ) {
             final String val = this.userPropValues.get( key ).toString();
-            retBool = Boolean.parseBoolean( val ); 
+            retBool = Boolean.parseBoolean( val );
         } else {
             if(log.isDebugEnabled()){
                 log.debug( "Property '" + key + "' not found in file 'AdminUser.properties'! Using fallback :" + fallBack );
             }
         }
-        
-        return retBool; 
+
+        return retBool;
     }
-    
+
     /**
-     * 
+     *
      * @param key
      * @param fallBack
      * @return
      */
     public String getUserProp( final String key, final String fallBack ) {
         String retBool = fallBack;
-        
+
         synchronized (this) {
             if ( this.userPropValues == null ) {
                 ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -284,7 +284,7 @@ public class PropertyHandler {
                 }
             }
         }
-        
+
         if ( this.userPropValues != null && this.userPropValues.containsKey( key ) ) {
             retBool =  this.userPropValues.get( key ).toString();
         } else {
@@ -292,21 +292,21 @@ public class PropertyHandler {
                 log.debug( "Property '" + key + "' not found in file 'AdminUser.properties'! Using fallback :" + fallBack );
             }
         }
-        return retBool; 
+        return retBool;
     }
-    
-    
-    
-    
+
+
+
+
     /**
-     * 
+     *
      * @param key
      * @param fallBack
      * @return
      */
     public boolean getResourceProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
-        
+
         synchronized (this) {
             if ( this.resPropValues == null ) {
                 ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -326,28 +326,28 @@ public class PropertyHandler {
                 }
             }
         }
-        
+
         if ( this.resPropValues != null && this.resPropValues.containsKey( key ) ) {
-            retBool = Boolean.parseBoolean( this.resPropValues.get( key ).toString() ); 
+            retBool = Boolean.parseBoolean( this.resPropValues.get( key ).toString() );
         } else {
             if(log.isDebugEnabled()){
                 log.debug( "Property '" + key + "' not found in file 'Resource.properties'! Using fallback :" + fallBack );
             }
         }
-        
-        return retBool; 
+
+        return retBool;
     }
-    
-    
+
+
     /**
-     * 
+     *
      * @param key
      * @param fallBack
      * @return
      */
     public int getRmiProp( final String key, final int fallBack ) {
         int retInt = fallBack;
-        
+
         synchronized (this) {
             if ( this.rmiPropValues == null ) {
                 ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -367,21 +367,21 @@ public class PropertyHandler {
                 }
             }
         }
-        
+
         if ( this.rmiPropValues != null && this.rmiPropValues.containsKey( key ) ) {
-            retInt = Integer.parseInt( this.rmiPropValues.get( key ).toString() ); 
+            retInt = Integer.parseInt( this.rmiPropValues.get( key ).toString() );
         } else {
             if(log.isDebugEnabled()){
                 log.debug( "Property '" + key + "' not found in file 'RMI.properties'! Using fallback :" + fallBack );
             }
         }
-        
-        return retInt; 
+
+        return retInt;
     }
-    
+
     private void loadProps(final Properties sysprops) throws FileNotFoundException, IOException {
         this.allPropValues.put( AdminProperties.Prop.ADMINDAEMON_LOGLEVEL, "ALL" );
-        
+
         if ( sysprops.getProperty( "openexchange.propdir" ) != null ) {
             this.configdirname = sysprops.getProperty("openexchange.propdir");
             addpropsfromfile(this.configdirname + File.separatorChar + "AdminDaemon.properties");
@@ -390,11 +390,11 @@ public class PropertyHandler {
             log.error("Now, using default parameter!");
         }
     }
-    
+
     protected void addpropsfromfile(final String file) throws FileNotFoundException, IOException {
         final Properties configprops  = new Properties();
         configprops.load( new FileInputStream(file) );
-        
+
         final Enumeration<?> enumi = configprops.propertyNames();
         while ( enumi.hasMoreElements() ) {
             final String param = (String)enumi.nextElement();
@@ -405,9 +405,9 @@ public class PropertyHandler {
                 // A new File without any content point to the current working dir
                 value = stringReplacer( value, "$PWD", new File( "" ).getAbsolutePath() );
             }
-            
+
             this.allPropValues.put( param, value );
-            
+
             if ( param.toLowerCase().endsWith( "_prop" ) ) {
                 final Properties customprops = new Properties();
                 customprops.load( new FileInputStream( value ) );
@@ -427,7 +427,7 @@ public class PropertyHandler {
                     }
                     if ( value_.endsWith( "\"" ) ) {
                         value_ = value_.substring( 0 , value_.length() - 1 );
-                        
+
                     }
                     custconfig.put( param_, value_ );
                 }
@@ -435,7 +435,7 @@ public class PropertyHandler {
             }
         }
     }
-    
+
     private String stringReplacer(final String source, final String find, final String replacement ) {
         int i = 0;
         int j;
@@ -445,11 +445,11 @@ public class PropertyHandler {
         String src = source;
         while ( i < src.length() ) {
             j = src.indexOf( find, i );
-            
+
             if ( j == -1 ) {
                 break;
             }
-            
+
             if ( j == 0 ) {
                 src = replacement + src.substring( j + k );
             } else if ( j + k == src.length() ) {
@@ -459,7 +459,7 @@ public class PropertyHandler {
             }
             i = j + m;
         }
-        
+
         return src;
     }
 
@@ -484,9 +484,9 @@ public class PropertyHandler {
                 }
             }
         }
-        
+
         if ( this.resPropValues != null && this.resPropValues.containsKey( key ) ) {
-            retval = this.resPropValues.get( key ).toString(); 
+            retval = this.resPropValues.get( key ).toString();
         } else {
             if(log.isDebugEnabled()){
                 log.debug("Property '" + key + "' not found in file 'Resource.properties'! Using fallback :" + fallback );
@@ -494,9 +494,9 @@ public class PropertyHandler {
         }
         return retval;
     }
-    
+
     /**
-     * 
+     *
      * @param key
      * @param fallBack
      * @return

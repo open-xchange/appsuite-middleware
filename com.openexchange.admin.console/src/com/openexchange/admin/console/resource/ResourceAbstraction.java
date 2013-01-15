@@ -60,7 +60,7 @@ import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 
 public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
-    
+
     protected static final String _OPT_NAME_LONG = "name";
     protected static final char _OPT_NAME_SHORT = 'n';
     protected static final String _OPT_DISPNAME_LONG = "displayname";
@@ -75,7 +75,7 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     protected static final String _OPT_RESOURCEID_LONG = "resourceid";
     protected static final String OPT_RECIPIENT_LONG = "mailrecipients";
     protected static final char OPT_RECIPIENT_SHORT = 'm';
-    
+
     protected CLIOption resourceDisplayNameOption = null;
     protected CLIOption resourceNameOption = null;
     protected CLIOption resourceAvailableOption = null;
@@ -84,37 +84,37 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     protected CLIOption resourceIdOption = null;
 
     protected CLIOption resourceRecipientOption = null;
-    
+
     // For right error output
     protected String resourceid = null;
     protected String resourcename = null;
-    
+
     protected void setDisplayNameOption(final AdminParser admp,final boolean required){
-        resourceDisplayNameOption = setShortLongOpt(admp, _OPT_DISPNAME_SHORT,_OPT_DISPNAME_LONG,"The resource display name",true, convertBooleantoTriState(required));        
+        resourceDisplayNameOption = setShortLongOpt(admp, _OPT_DISPNAME_SHORT,_OPT_DISPNAME_LONG,"The resource display name",true, convertBooleantoTriState(required));
     }
-    
+
     protected void setRecipientOption(final AdminParser admp,final boolean required){
-        resourceRecipientOption = setShortLongOpt(admp, OPT_RECIPIENT_SHORT,OPT_RECIPIENT_LONG,"Recipient who should receive mail addressed to the resource",true, convertBooleantoTriState(required));        
+        resourceRecipientOption = setShortLongOpt(admp, OPT_RECIPIENT_SHORT,OPT_RECIPIENT_LONG,"Recipient who should receive mail addressed to the resource",true, convertBooleantoTriState(required));
     }
-    
+
     protected void setNameOption(final AdminParser admp,final NeededQuadState required){
-        resourceNameOption =  setShortLongOpt(admp, _OPT_NAME_SHORT,_OPT_NAME_LONG,"The resource name",true, required); 
+        resourceNameOption =  setShortLongOpt(admp, _OPT_NAME_SHORT,_OPT_NAME_LONG,"The resource name",true, required);
     }
-    
+
     protected void setAvailableOption(final AdminParser admp,final boolean required){
         resourceAvailableOption = setShortLongOpt(admp, _OPT_AVAILABLE_SHORT, _OPT_AVAILABLE_LONG, "true/false", "Toggle resource availability", required);
     }
-    
+
     protected void setDescriptionOption(final AdminParser admp,final boolean required){
-        resourceDescriptionOption =   setShortLongOpt(admp,_OPT_DESCRIPTION_SHORT,_OPT_DESCRIPTION_LONG,"Description of this resource", true, convertBooleantoTriState(required));        
+        resourceDescriptionOption =   setShortLongOpt(admp,_OPT_DESCRIPTION_SHORT,_OPT_DESCRIPTION_LONG,"Description of this resource", true, convertBooleantoTriState(required));
     }
-    
+
     protected void setEmailOption(final AdminParser admp,final boolean required){
-        resourceEmailOption =  setShortLongOpt(admp,_OPT_EMAIL_SHORT,_OPT_EMAIL_LONG,"Email of this resource", true, convertBooleantoTriState(required)); 
+        resourceEmailOption =  setShortLongOpt(admp,_OPT_EMAIL_SHORT,_OPT_EMAIL_LONG,"Email of this resource", true, convertBooleantoTriState(required));
     }
-    
+
     protected void setIdOption(final AdminParser admp){
-        resourceIdOption = setShortLongOpt(admp,_OPT_RESOURCEID_SHORT,_OPT_RESOURCEID_LONG,"Id of this resource", true, NeededQuadState.eitheror); 
+        resourceIdOption = setShortLongOpt(admp,_OPT_RESOURCEID_SHORT,_OPT_RESOURCEID_LONG,"Id of this resource", true, NeededQuadState.eitheror);
     }
 
     protected final OXResourceInterface getResourceInterface() throws NotBoundException, MalformedURLException, RemoteException {
@@ -165,13 +165,13 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
 
     protected void parseAndSetMandatoryFields(final AdminParser parser, final Resource res) {
         parseAndSetResourceAvailable(parser, res);
-    
+
         parseAndSetResourceDescription(parser, res);
-    
+
         parseAndSetResourceDisplayName(parser, res);
-    
+
         parseAndSetResourceEmail(parser, res);
-    
+
         parseAndSetResourceName(parser, res);
     }
 

@@ -428,7 +428,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             throw new PluginException(e);
         }
     }
-    
+
     private void applyRestrictionsPerContext(final Context ctx) throws PluginException {
         // Handle the extension...
         final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
@@ -444,7 +444,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
 
     /**
      * Check whether context is owned by owner specified in {@link Credentials}. Throw {@link PluginException} if not.
-     * 
+     *
      * @param ctx
      * @param auth
      * @throws PluginException
@@ -458,13 +458,13 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             throw new PluginException(e);
         }
     }
-    
+
     /**
      * Check whether creator supplied any {@link Restriction} and check if those exist within the database. If, add the corresponding
      * Restriction id. Check whether Restrictions can be applied to context. If not, throw {@link InvalidDataException} or
      * {@link StorageException} if there are no Restrictions defined within the database. Check whether Restrictions contain duplicate
      * Restriction entries and throws {@link InvalidDataException} if that is the case.
-     * 
+     *
      * @param restrictions
      * @param storageInterface TODO
      * @throws StorageException

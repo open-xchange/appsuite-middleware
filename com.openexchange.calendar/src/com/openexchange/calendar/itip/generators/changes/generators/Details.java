@@ -75,14 +75,14 @@ import static com.openexchange.ajax.fields.AppointmentFields.*;
 public class Details implements ChangeDescriptionGenerator {
 
     private static final String[] FIELDS = {TITLE, LOCATION, NOTE};
-    
+
     private static final Map<String, String> MESSAGE_MAP = new HashMap<String, String>(){{
         put(TITLE, Messages.HAS_CHANGED_TITLE);
         put(LOCATION, Messages.HAS_CHANGED_LOCATION);
         put(NOTE, Messages.HAS_CHANGED_NOTE);
         put(TIMEZONE, Messages.HAS_CHANGED_TIMEZONE);
     }};
-        
+
     @Override
     public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) {
         List<Sentence> changes = new ArrayList<Sentence>();
@@ -90,7 +90,7 @@ public class Details implements ChangeDescriptionGenerator {
         add(LOCATION, diff, changes, true);
         add(TIMEZONE, diff, changes, true);
         add(NOTE, diff, changes, false);
-        
+
         return changes;
     }
 
@@ -100,7 +100,7 @@ public class Details implements ChangeDescriptionGenerator {
         if (update == null) {
             return;
         }
-        
+
         Sentence changeDescription = new Sentence(message);
         if (includeNewValue) {
             changeDescription.add(update.getNewValue(), ArgumentType.UPDATED);

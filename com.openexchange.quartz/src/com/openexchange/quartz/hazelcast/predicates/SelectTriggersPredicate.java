@@ -55,7 +55,7 @@ import com.hazelcast.query.Predicate;
 import com.openexchange.quartz.hazelcast.TriggerStateWrapper;
 
 /**
- * 
+ *
  * {@link SelectTriggersPredicate}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>

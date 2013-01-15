@@ -50,7 +50,6 @@
 package com.openexchange.calendar.itip.generators.changes.generators;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -69,22 +68,22 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link Rescheduling}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Rescheduling implements ChangeDescriptionGenerator {
     //TODO: Series Description
-    
+
     private static enum Format {
         SAME_DAY, DIFFERENT_DAYS
     }
 
     private final String[] FIELDS = new String[] { "start_date", "end_date" };
-    
+
     @Override
     public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) {
         String msg = Messages.HAS_RESCHEDULED;
-      
+
         return Arrays.asList(
             new Sentence(msg)
             .add(timeString(original, diff, locale, timezone), ArgumentType.ORIGINAL)
@@ -99,7 +98,7 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         }
         return time(format, appointment, locale, timezone);
     }
-    
+
     private String updatedTimeString(Appointment appointment, AppointmentDiff diff, Locale locale, TimeZone timezone) {
         Format format = chooseFormat(diff, timezone);
         if (differentDays(appointment.getStartDate(), appointment.getEndDate(), timezone)) {
@@ -107,7 +106,7 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         }
         return updatedTime(format, appointment, locale, timezone);
     }
-    
+
     private String updatedTime(Format format, Appointment updated, Locale locale, TimeZone timezone) {
         Date startDate = updated.getStartDate();
 		Date endDate = updated.getEndDate();
@@ -118,7 +117,7 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         	longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
         	endDate = forceCorrectDay(endDate);
         }
-        
+
         DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
         time.setTimeZone(timezone);
 		switch (format) {
@@ -135,7 +134,7 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         		return String.format("%s - %s", longDate.format(startDate) + " " +time.format(startDate), longDate.format(endDate) + " " + time.format(endDate));
         	}
         }
-        return ""; // Won't happen 
+        return ""; // Won't happen
     }
 
     private String time(Format format, Appointment original, Locale locale, TimeZone timezone) {
@@ -149,10 +148,10 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         } else {
             longDate.setTimeZone(timezone);
         }
-        
+
         DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
         time.setTimeZone(timezone);
-        
+
 		switch (format) {
         case SAME_DAY:
         	if (original.getFullTime()) {
@@ -184,7 +183,7 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         }
 
         update = diff.getUpdateFor("end_date");
-        
+
         if (update != null) {
             if (differentDays(update.getOriginalValue(), update.getNewValue(), timezone)) {
                 return Format.DIFFERENT_DAYS;
@@ -200,11 +199,11 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         GregorianCalendar cal1 = new GregorianCalendar();
         cal1.setTimeZone(timezone);
         cal1.setTime(o);
-        
+
         GregorianCalendar cal2 = new GregorianCalendar();
         cal2.setTimeZone(timezone);
         cal2.setTime(n);
-        
+
         return cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR) || cal1.get(Calendar.DAY_OF_YEAR) != cal2.get(Calendar.DAY_OF_YEAR);
     }
 

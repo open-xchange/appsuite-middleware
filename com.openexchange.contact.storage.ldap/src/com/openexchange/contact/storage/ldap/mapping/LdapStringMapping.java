@@ -65,10 +65,10 @@ public abstract class LdapStringMapping extends LdapMapping<String> {
     public String get(LdapResult result, LdapIDResolver idResolver) throws OXException {
         return (String)super.getValue(result);
     }
-    
+
     @Override
     public String encode(String value, LdapIDResolver idResolver) throws OXException {
         return null != value ? Tools.escapeLDAPSearchFilter(value) : null;
     }
-    
+
 }

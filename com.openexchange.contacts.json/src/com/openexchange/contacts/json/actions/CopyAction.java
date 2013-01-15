@@ -120,7 +120,7 @@ public class CopyAction extends ContactAction {
         if (hasAttachments) {
             contact.removeNumberOfAttachments();
 	        contactService.createContact(request.getSession(), folderID, contact);
-	        copyAttachments(Integer.parseInt(folderID), request.getSession(), request.getSession().getContext(), 
+	        copyAttachments(Integer.parseInt(folderID), request.getSession(), request.getSession().getContext(),
 	        		contact, originalObjectID, originalFolderID, request.getSession().getUser(), request.getSession().getUserConfiguration());
         } else {
 	        contactService.createContact(request.getSession(), folderID, contact);

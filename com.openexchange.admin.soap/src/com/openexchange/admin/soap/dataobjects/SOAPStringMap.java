@@ -32,13 +32,13 @@ public class SOAPStringMap {
         }
         return retval;
     }
-    
+
     public final Entry[] getEntries() {
         return entries;
     }
-    
+
     public final void setEntries(Entry[] entries) {
         this.entries = entries;
     }
-    
+
 }

@@ -517,7 +517,7 @@ public final class MimeMessageConverter {
 
     /**
      * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong Content-Type header.
-     * 
+     *
      * @param mimeMessage The message
      * @throws OXException If an error occurs
      */

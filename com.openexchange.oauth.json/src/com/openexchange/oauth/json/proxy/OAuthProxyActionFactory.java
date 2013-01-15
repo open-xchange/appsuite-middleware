@@ -10,13 +10,13 @@ import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 
 public class OAuthProxyActionFactory implements AJAXActionServiceFactory {
-	
+
 	private final AJAXActionService proxyAction;
 
 	public OAuthProxyActionFactory(OAuthService service, OAuthHTTPClientFactory clients){
 		proxyAction = new OAuthProxyAction(service, clients);
 	}
-	
+
 	@Override
 	public Collection<?> getSupportedServices() {
 		return Arrays.asList("PUT", "POST");

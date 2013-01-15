@@ -737,13 +737,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final boolean retry = !capabilities.hasThreadReferences();
         /*-
          * 1. Send 'all' request with id, folder_id, level, and received_date - you need all that data.
-         * 
+         *
          * 2. Whenever level equals 0, a new thread starts (new array)
-         * 
+         *
          * 3. Add all objects (id, folder_id, received_date) to that list until level !== 0.
-         * 
+         *
          * 4. Order by received_date (ignore the internal level structure), so that the newest mails show up first.
-         * 
+         *
          * 5. Generate the real list of all threads. This must be again ordered by received_date, so that the most recent threads show up
          *    first. id and folder_id refer to the most recent mail.
          */
@@ -794,7 +794,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
             final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
             final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
-                
+
                 @Override
                 public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
                     return comparator.compare(o1.get(0), o2.get(0));
@@ -2474,7 +2474,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Get user's contact
                  */
-                final Contact contact = contactService.getUser(session, userId, new ContactField[] { 
+                final Contact contact = contactService.getUser(session, userId, new ContactField[] {
                 		ContactField.SUR_NAME, ContactField.GIVEN_NAME });
                 /*
                  * Determine locale

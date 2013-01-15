@@ -58,7 +58,7 @@ import java.util.Set;
 
 /**
  * {@link AbstractRootFolder} - Abstract root folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractRootFolder implements FileStorageFolder {

@@ -54,18 +54,18 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
  * The {@link ScheduleInboxURL}
- * 
- * This property allows a client to determine where the scheduling Inbox 
- * collection of the current user is located so that processing of 
- * scheduling messages can occur. If not present, then the associated 
- * calendar user is not enabled for reception of scheduling messages on the 
+ *
+ * This property allows a client to determine where the scheduling Inbox
+ * collection of the current user is located so that processing of
+ * scheduling messages can occur. If not present, then the associated
+ * calendar user is not enabled for reception of scheduling messages on the
  * server.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ScheduleInboxURL extends SingleXMLPropertyMixin {
-	
-	public static final String SCHEDULE_INBOX = "schedule-inbox"; 
+
+	public static final String SCHEDULE_INBOX = "schedule-inbox";
 
     public ScheduleInboxURL() {
         super(CaldavProtocol.CAL_NS.getURI(), "schedule-inbox-URL");

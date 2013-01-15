@@ -73,7 +73,7 @@ public class FreeBusyActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Initializes a new {@link FreeBusyActionFactory}.
-     * 
+     *
      * @param serviceLookup The service lookup to use.
      */
     public FreeBusyActionFactory(ServiceLookup serviceLookup) {

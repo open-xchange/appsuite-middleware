@@ -53,9 +53,9 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 
 /**
- * 
+ *
  * This class represents a maintenance reason.
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
@@ -68,11 +68,11 @@ public class MaintenanceReason implements Serializable{
     private static final long serialVersionUID = -7581806972771279403L;
 
     private Integer id;
-    
+
     private boolean idset;
 
     private String text;
-    
+
     private boolean textset;
 
     public MaintenanceReason () {
@@ -127,7 +127,7 @@ public class MaintenanceReason implements Serializable{
         this.text = val;
         this.textset = true;
     }
-    
+
     @Override
     public String toString() {
         StringBuilder ret = new StringBuilder();

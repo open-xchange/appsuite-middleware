@@ -61,7 +61,7 @@ import com.openexchange.xing.exception.XingException;
 /**
  * {@link Message} - Represent a single XING message.
  * <p>
- * 
+ *
  * <pre>
  * {
  *   "id": "104401_09361f",
@@ -73,7 +73,7 @@ import com.openexchange.xing.exception.XingException;
  *   "display_name": "Hans"
  * }
  * </pre>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Message {
@@ -87,7 +87,7 @@ public class Message {
 
     /**
      * Gets the messaging date format.
-     * 
+     *
      * @return The date format.
      */
     public static DateFormat getDateFormat() {
@@ -102,7 +102,7 @@ public class Message {
 
     /**
      * Initializes a new {@link Message}.
-     * 
+     *
      * @throws XingException If initialization fails
      */
     public Message(final JSONObject messageInformation) throws XingException {
@@ -134,7 +134,7 @@ public class Message {
 
     /**
      * Gets the identifier
-     * 
+     *
      * @return The identifier
      */
     public String getId() {
@@ -143,7 +143,7 @@ public class Message {
 
     /**
      * Gets the created-at time stamp.
-     * 
+     *
      * @return The created-at time stamp
      */
     public Date getCreatedAt() {
@@ -152,7 +152,7 @@ public class Message {
 
     /**
      * Gets the content
-     * 
+     *
      * @return The content
      */
     public String getContent() {
@@ -161,7 +161,7 @@ public class Message {
 
     /**
      * Gets the read
-     * 
+     *
      * @return The read
      */
     public boolean isRead() {
@@ -170,7 +170,7 @@ public class Message {
 
     /**
      * Gets the sender
-     * 
+     *
      * @return The sender
      */
     public User getSender() {

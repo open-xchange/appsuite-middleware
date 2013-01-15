@@ -56,7 +56,7 @@ import com.hazelcast.config.MapConfig;
 
 /**
  * {@link LocalCacheGenerator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LocalCacheGenerator {
@@ -70,7 +70,7 @@ public final class LocalCacheGenerator {
 
     /**
      * Creates a local cache.
-     * 
+     *
      * @param mapConfig The map configuration source (expiry etc.)
      * @return The resulting local cache
      */

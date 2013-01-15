@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.GET, name = "get", description = "Get a mail account", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "The ID of the account to return.") 
+    @Parameter(name = "id", description = "The ID of the account to return.")
 }, responseDescription = "A JSON object representing the desired mail account. See mail account data.")
 public final class GetAction extends AbstractMailAccountAction {
 

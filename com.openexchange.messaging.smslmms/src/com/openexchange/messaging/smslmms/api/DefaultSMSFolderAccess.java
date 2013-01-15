@@ -76,7 +76,7 @@ import com.openexchange.session.Session;
  *     - Drafts
  *     - Sent
  * </pre>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DefaultSMSFolderAccess implements MessagingFolderAccess {

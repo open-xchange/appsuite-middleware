@@ -61,11 +61,11 @@ public class GetAccessCombinationName extends UserAbstraction {
     public static void main(final String[] args) {
         new GetAccessCombinationName(args);
     }
-    
+
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         setIdOption(parser);
-        setUsernameOption(parser, NeededQuadState.eitheror);        
+        setUsernameOption(parser, NeededQuadState.eitheror);
     }
 
     public GetAccessCombinationName(final String[] args2) {
@@ -76,13 +76,13 @@ public class GetAccessCombinationName extends UserAbstraction {
         setOptions(parser);
 
         String successtext = null;
-        
+
         try {
             parser.ownparse(args2);
 
             // create user obj
             final User usr = new User();
-            
+
             parseAndSetUserId(parser, usr);
             parseAndSetUsername(parser, usr);
 
@@ -94,14 +94,14 @@ public class GetAccessCombinationName extends UserAbstraction {
 
             // rmi interface
             final OXUserInterface oxusr = getUserInterface();
-            
+
             // printout access name
             System.out.println(oxusr.getAccessCombinationName(ctx, usr, auth));
-            
+
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, ctxid, e, parser);
         }
     }
-   
+
 }

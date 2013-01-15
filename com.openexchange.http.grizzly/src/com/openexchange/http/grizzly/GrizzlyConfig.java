@@ -49,7 +49,6 @@
 
 package com.openexchange.http.grizzly;
 
-import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
@@ -60,7 +59,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link GrizzlyConfig} Collects and exposes configuration parameters needed by GrizzlOX
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class GrizzlyConfig implements Initialization {
@@ -114,16 +113,16 @@ public class GrizzlyConfig implements Initialization {
 
     /** Default encoding for incoming Http Requests, this value must be equal to the web server's default encoding */
     private String defaultEncoding = "UTF-8";
-    
+
     /** The name of the protocolHeader used to decide if we are dealing with a in-/secure Request */
     private String protocolHeader = "X-Forwarded-Proto";
-    
-    /** The value indicating secure http communication */ 
+
+    /** The value indicating secure http communication */
     private String httpsProtoValue = "https";
-    
+
     /** The port used for http communication */
     private int httpProtoPort = 80;
-    
+
     /** The port used for https communication */
     private int httpsProtoPort = 443;
 
@@ -170,7 +169,7 @@ public class GrizzlyConfig implements Initialization {
         this.httpsProtoValue = configService.getProperty("com.openexchange.server.httpsProtoValue", "https");
         this.httpProtoPort = configService.getIntProperty("com.openexchange.server.httpProtoPort", 80);
         this.httpsProtoPort = configService.getIntProperty("com.openexchange.server.httpsProtoPort", 443);
-        
+
         this.httpHost = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
         // keep backwards compatibility with ajp config
         if(httpHost.equals("*")) {
@@ -187,7 +186,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the started
-     * 
+     *
      * @return The started
      */
     public AtomicBoolean getStarted() {
@@ -196,7 +195,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the defaultEncoding used for incoming http requests
-     * 
+     *
      * @return The defaultEncoding
      */
     public String getDefaultEncoding() {
@@ -205,7 +204,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the httpHost
-     * 
+     *
      * @return The httpHost
      */
     public String getHttpHost() {
@@ -214,7 +213,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the httpPort
-     * 
+     *
      * @return The httpPort
      */
     public int getHttpPort() {
@@ -223,7 +222,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the hasJMXEnabled
-     * 
+     *
      * @return The hasJMXEnabled
      */
     public boolean isJMXEnabled() {
@@ -232,7 +231,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the hasWebsocketsEnabled
-     * 
+     *
      * @return The hasWebsocketsEnabled
      */
     public boolean isWebsocketsEnabled() {
@@ -241,7 +240,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the hasCometEnabled
-     * 
+     *
      * @return The hasCometEnabled
      */
     public boolean isCometEnabled() {
@@ -250,7 +249,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the maxRequestParameters
-     * 
+     *
      * @return The maxRequestParameters
      */
     public int getMaxRequestParameters() {
@@ -259,7 +258,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the backendRoute
-     * 
+     *
      * @return The backendRoute
      */
     public String getBackendRoute() {
@@ -268,7 +267,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the cookieMaxAge
-     * 
+     *
      * @return The cookieMaxAge
      */
     public int getCookieMaxAge() {
@@ -277,7 +276,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the cookieMaxInactivityInterval
-     * 
+     *
      * @return The cookieMaxInactivityInterval
      */
     public int getCookieMaxInactivityInterval() {
@@ -286,7 +285,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the isCookieForceHttps
-     * 
+     *
      * @return The isCookieForceHttps
      */
     public boolean isCookieForceHttps() {
@@ -295,7 +294,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the isCookieHttpOnly
-     * 
+     *
      * @return The isCookieHttpOnly
      */
     public boolean isCookieHttpOnly() {
@@ -304,14 +303,14 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the isSessionAutologin
-     * 
+     *
      * @return The isSessionAutologin
      */
     public boolean isSessionAutologin() {
         return instance.isSessionAutologin;
     }
 
-    
+
     /**
      * Gets the log
      *
@@ -321,7 +320,7 @@ public class GrizzlyConfig implements Initialization {
         return LOG;
     }
 
-    
+
     /**
      * Gets the protocolHeader
      *
@@ -331,7 +330,7 @@ public class GrizzlyConfig implements Initialization {
         return protocolHeader;
     }
 
-    
+
     /**
      * Gets the httpsProtoValue
      *
@@ -341,7 +340,7 @@ public class GrizzlyConfig implements Initialization {
         return httpsProtoValue;
     }
 
-    
+
     /**
      * Gets the httpProtoPort
      *
@@ -351,7 +350,7 @@ public class GrizzlyConfig implements Initialization {
         return httpProtoPort;
     }
 
-    
+
     /**
      * Gets the httpsProtoPort
      *

@@ -66,7 +66,7 @@ public class Change extends ChangeCore {
     public Change(final String[] args2) {
 
         final AdminParser parser = new AdminParser("changegroup");
-        
+
         commonfunctions(parser, args2);
     }
 

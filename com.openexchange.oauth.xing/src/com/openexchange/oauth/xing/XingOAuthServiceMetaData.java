@@ -66,7 +66,7 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
 
     /**
      * Initializes a new {@link XingOAuthServiceMetaData}.
-     * 
+     *
      * @param configService The configuration service
      */
     public XingOAuthServiceMetaData(ConfigurationService configService) {

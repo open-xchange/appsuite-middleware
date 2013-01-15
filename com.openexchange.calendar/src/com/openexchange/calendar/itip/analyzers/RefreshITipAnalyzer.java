@@ -93,7 +93,7 @@ public class RefreshITipAnalyzer extends AbstractITipAnalyzer {
         analysis.setMessage(message);
 
         CalendarDataObject appointment = message.getDataObject();
-        
+
         Appointment refreshed = null;
         boolean isException = false;
         if (appointment == null) {
@@ -102,27 +102,27 @@ public class RefreshITipAnalyzer extends AbstractITipAnalyzer {
                 appointment = exception;
             }
         }
-        
+
         analysis.setUid(appointment.getUid());
-        
+
         refreshed = util.resolveUid(appointment.getUid(), session);
-        
+
         if (isException) {
             refreshed = findAndRemoveMatchingException(appointment, util.getExceptions(refreshed, session));
         }
-        
+
         if (refreshed == null) {
             analysis.addAnnotation(new ITipAnnotation(Messages.REFRESH_FOR_UNKNOWN, locale));
             analysis.recommendAction(ITipAction.IGNORE);
             return analysis;
         }
-        
+
         ITipAnnotation annotation = new ITipAnnotation(Messages.REQUESTED_A_REFRESHER, locale);
         annotation.setAppointment(refreshed);
         analysis.addAnnotation(annotation);
         analysis.recommendAction(ITipAction.SEND_APPOINTMENT);
-        
-        
+
+
         return analysis;
     }
 

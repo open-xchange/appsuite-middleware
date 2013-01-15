@@ -61,7 +61,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
@@ -826,7 +825,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 } catch (final IllegalStateException stateException) {
                     /*-
                      * Max. number of HTTP sessions reached.
-                     * 
+                     *
                      * Status code (503) indicating that the HTTP server is
                      * temporarily overloaded, and unable to handle the request.
                      */
@@ -1011,7 +1010,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Appends request information.
-     * 
+     *
      * @param builder The builder to append to
      */
     protected void appendRequestInfo(final com.openexchange.java.StringAllocator builder) {
@@ -1585,7 +1584,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             for (int i = length - 1; i > colonPos; i--) {
                 final int charValue = host.charAt(i);
                 /*-
-                 * 
+                 *
                 if (charValue == -1) {
                     // Invalid character
                     error = true;
@@ -1594,7 +1593,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     response.setStatus(400);
                     break;
                 }
-                 * 
+                 *
                  */
                 port = port + (charValue * mult);
                 mult = 10 * mult;
@@ -2402,7 +2401,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Generates URL-encoding of specified text.
-     * 
+     *
      * @param text The text
      * @return The URL-encoded text
      */

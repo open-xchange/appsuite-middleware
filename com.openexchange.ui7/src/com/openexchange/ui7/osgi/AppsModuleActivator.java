@@ -56,7 +56,7 @@ import com.openexchange.ui7.FileCache;
 
 /**
  * {@link AppsModuleActivator}
- * 
+ *
  * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
  */
 public class AppsModuleActivator extends AJAXModuleActivator {

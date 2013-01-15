@@ -61,7 +61,7 @@ import com.openexchange.java.Charsets;
 
 /**
  * {@link JsonCaches} - Utility class for JSON cache.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JsonCaches {
@@ -71,7 +71,7 @@ public final class JsonCaches {
 
     /**
      * The cache reference for fast look-up.
-     * 
+     *
      * @see #getCache()
      */
     public static final AtomicReference<JsonCacheService> CACHE_REFERENCE = new AtomicReference<JsonCacheService>();
@@ -85,7 +85,7 @@ public final class JsonCaches {
 
     /**
      * Gets the cache.
-     * 
+     *
      * @return The cache or <code>null</code> if absent
      */
     public static JsonCacheService getCache() {
@@ -94,7 +94,7 @@ public final class JsonCaches {
 
     /**
      * Gets the MD5 sum of passed arguments.
-     * 
+     *
      * @param args The arguments
      * @return The MD5 sum's hex representation
      */
@@ -107,7 +107,7 @@ public final class JsonCaches {
 
     /**
      * Gets the SHA1 sum of passed arguments.
-     * 
+     *
      * @param args The arguments
      * @return The SHA1 sum's hex representation
      */
@@ -136,7 +136,7 @@ public final class JsonCaches {
 
     /**
      * Turns array of bytes into string representing each byte as unsigned hex number.
-     * 
+     *
      * @param hash Array of bytes to convert to hex-string
      * @return Generated hex string
      */
@@ -152,7 +152,7 @@ public final class JsonCaches {
 
     /**
      * Checks if given JSON values are equal.
-     * 
+     *
      * @param a The first JSON value
      * @param b The second JSON value
      * @return <code>true</code> if considered equal; otherwise <code>false</code>

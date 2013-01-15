@@ -106,7 +106,7 @@ public interface ConfigProviderService {
 
     /**
      * Gets the denoted property.
-     * 
+     *
      * @param property The property name
      * @param contextId The context identifier
      * @param userId The user identifier
@@ -117,7 +117,7 @@ public interface ConfigProviderService {
 
     /**
      * Gets all property names for specified user.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return The property names

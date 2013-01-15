@@ -57,7 +57,7 @@ import com.openexchange.messaging.MessagingAccount;
 
 /**
  * {@link DefaultSMSConfiguration} - The default {@link SMSConfiguration configuration} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultSMSConfiguration implements SMSConfiguration {
@@ -117,7 +117,7 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
 
     /**
      * Sets the addresses
-     * 
+     *
      * @param addresses The addresses to set
      */
     public void setAddresses(final List<String> addresses) {
@@ -135,7 +135,7 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
 
     /**
      * Sets the display string
-     * 
+     *
      * @param displayString The display string to set
      */
     public void setDisplayString(final String displayString) {
@@ -153,7 +153,7 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
 
     /**
      * Sets the length
-     * 
+     *
      * @param length The length to set
      */
     public void setLength(final int length) {
@@ -171,7 +171,7 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
 
     /**
      * Sets the enabled flag.
-     * 
+     *
      * @param enabled The enabled flag to set
      */
     public void setEnabled(final boolean enabled) {
@@ -189,7 +189,7 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
 
     /**
      * Sets the captcha flag.
-     * 
+     *
      * @param captcha The captcha flag to set
      */
     public void setCaptcha(final boolean captcha) {
@@ -207,7 +207,7 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
 
     /**
      * Sets the multiSMS flag.
-     * 
+     *
      * @param multiSMS The multiSMS flag to set
      */
     public void setMultiSMS(final boolean multiSMS) {
@@ -225,7 +225,7 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
 
     /**
      * Sets the MMS flag.
-     * 
+     *
      * @param mms The MMS flag to set
      */
     public void setMms(final boolean mms) {
@@ -243,7 +243,7 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
 
     /**
      * Sets the folder storage flag.
-     * 
+     *
      * @param folderStorage The flag to set
      */
     public void setFolderStorage(final boolean folderStorage) {
@@ -275,7 +275,7 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
 
     /**
      * Sets the upsell link
-     * 
+     *
      * @param upsellLink The upsell link to set
      */
     public void setUpsellLink(final String upsellLink) {

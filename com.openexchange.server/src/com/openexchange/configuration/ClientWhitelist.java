@@ -192,7 +192,7 @@ public final class ClientWhitelist {
 
     /**
      * Checks if specified string is empty.
-     * 
+     *
      * @param str The string
      * @return <code>true</code> if empty; otherwise <code>false</code>
      */
@@ -210,7 +210,7 @@ public final class ClientWhitelist {
 
     /**
      * Removes possible surrounding quotes.
-     * 
+     *
      * @param quoted The possibly quoted string
      * @return The unquoted string
      */

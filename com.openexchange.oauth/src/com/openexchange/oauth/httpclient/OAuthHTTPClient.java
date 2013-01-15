@@ -84,7 +84,7 @@ public class OAuthHTTPClient extends AbstractHTTPClient implements HTTPClient {
 	public HTTPRequestBuilder getBuilder() {
 		return new OAuthHTTPRequestBuilder(this);
 	}
-	
+
 	public <R> R process(String payload, Class<R> targetFormat) throws OXException{
 		if(targetFormat == String.class){
 			return (R) payload;
@@ -97,7 +97,7 @@ public class OAuthHTTPClient extends AbstractHTTPClient implements HTTPClient {
 		} else if(targetFormat == Reader.class) {
 			return (R) new StringReader(payload);
 		}
-		
+
 		for(Class inputType: Arrays.asList(String.class, Reader.class, InputStream.class)) {
 			List<HTTPResponseProcessor> procList = processors.get(inputType);
 			for (HTTPResponseProcessor processor : procList) {
@@ -106,8 +106,8 @@ public class OAuthHTTPClient extends AbstractHTTPClient implements HTTPClient {
 				}
 			}
 		}
-		
-		
+
+
 		throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create();
 	}
 
@@ -142,6 +142,6 @@ public class OAuthHTTPClient extends AbstractHTTPClient implements HTTPClient {
 	public void setSecret(String secret) {
 		this.secret = secret;
 	}
-	
-	
+
+
 }

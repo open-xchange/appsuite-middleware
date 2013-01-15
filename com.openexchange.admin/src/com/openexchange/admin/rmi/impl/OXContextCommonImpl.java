@@ -81,36 +81,36 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
     }
 
     private final static Log log = LogFactory.getLog(OXContextCommonImpl.class);
-    
+
     protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, ContextExistsException, InvalidDataException {
 
         try {
-            final Boolean ret = (Boolean)callPluginMethod("checkMandatoryMembersContextCreate", ctx); 
+            final Boolean ret = (Boolean)callPluginMethod("checkMandatoryMembersContextCreate", ctx);
             if( ret == null || ( ret != null && ret.booleanValue())  ) {
                 if (!ctx.mandatoryCreateMembersSet()) {
-                    throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());               
+                    throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());
                 }
             }
         } catch (final EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
-        }        
+        }
 
         if (tool.existsContext(ctx)) {
             throw new ContextExistsException("Context already exists!");
-        }        
-        
+        }
+
         if(ctx.getName()!=null && tool.existsContextName(ctx.getName())){
             throw new InvalidDataException("Context " + ctx.getName() + " already exists!");
         }
-        
+
         try {
             if (!admin_user.mandatoryCreateMembersSet()) {
-                throw new InvalidDataException("Mandatory fields in admin user not set: " + admin_user.getUnsetMembers());               
+                throw new InvalidDataException("Mandatory fields in admin user not set: " + admin_user.getUnsetMembers());
             }
         } catch (final EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
         }
-        
+
         GenericChecks.checkValidMailAddress(admin_user.getPrimaryEmail());
     }
 
@@ -126,11 +126,11 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         }
 
         new BasicAuthenticator(context).doAuthentication(auth);
-        
+
         if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + admin_user);
         }
-        
+
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             Context ret = ctx;
@@ -154,7 +154,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                 // Add the name of the context to the login mappings and the id
                 ret.addLoginMapping(name);
             }
-            
+
             return createmaincall(ret, admin_user, db, access,auth);
         } catch (final ContextExistsException e) {
             log.error(e.getMessage(),e);
@@ -167,12 +167,12 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             throw e;
         }
     }
-    
+
     /**
-     * Call method <code>method</code> of all bundles registered to the OXContext Service 
+     * Call method <code>method</code> of all bundles registered to the OXContext Service
      * <b>Important:</b> No argument of any args here must be null!
      * Arguments, that are null will cause a {@link StorageException}
-     * 
+     *
      * @param method Name of the method to call
      * @param args All required args of that method
      * @throws StorageException
@@ -196,7 +196,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                                 final Class[] classes = new Class[args.length];
                                 for(int i=0; i<args.length; i++) {
                                     if( args[i] == null ) {
-                                        final String errtxt = "Error calling method " + method + "() for plugin: " + bundlename + ": argument " + (i+1) + " is null"; 
+                                        final String errtxt = "Error calling method " + method + "() for plugin: " + bundlename + ": argument " + (i+1) + " is null";
                                         final StorageException e = new StorageException(errtxt);
                                         log.error(errtxt);
                                         throw e;

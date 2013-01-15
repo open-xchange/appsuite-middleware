@@ -65,7 +65,7 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     private OXFolderExceptionMessage() {
         super();
     }
-    
+
     /**
      * User %1$s has no access to module %2$s in context %3$s due to user configuration
      * <p>

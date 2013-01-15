@@ -54,7 +54,7 @@ import javax.management.MBeanException;
 
 /**
  * {@link HazelcastMBean}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface HazelcastMBean {
@@ -65,14 +65,14 @@ public interface HazelcastMBean {
 
     /**
      * Removes names element.
-     * 
+     *
      * @param name The name
      */
     void remove(String name);
 
     /**
      * Puts named element.
-     * 
+     *
      * @param name The name
      * @param value The value
      * @throws MBeanException If put fails
@@ -81,15 +81,15 @@ public interface HazelcastMBean {
 
     /**
      * Gets names element
-     * 
+     *
      * @param name The name
      * @return The associated value or <code>null</code>
      */
     String get(String name);
-    
+
     /**
      * Gets the list of (possible) cluster members.
-     * 
+     *
      * @return The members
      * @throws MBeanException
      */
@@ -97,7 +97,7 @@ public interface HazelcastMBean {
 
     /**
      * Adds a member to the list of (possible) cluster members.
-     * 
+     *
      * @param member The IP address or hostname of the member to add
      * @throws MBeanException
      */
@@ -105,18 +105,18 @@ public interface HazelcastMBean {
 
     /**
      * Removes a member from the list of (possible) cluster members.
-     * 
+     *
      * @param member The IP address or hostname of the member to add
      * @throws MBeanException
      */
     void removeMember(String member) throws MBeanException;
-    
+
     /**
      * Gets a list of the actual cluster members.
-     * 
+     *
      * @return The members
      * @throws MBeanException
      */
     List<String> listClusterMembers() throws MBeanException;
-    
+
 }

@@ -55,14 +55,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link AWSEC2Service}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public interface AWSEC2Service {
 
     /**
      * Start a new EC2 instance
-     * 
+     *
      * @return Id of started instance
      * @throws OXException When new instance can not start
      */
@@ -70,7 +70,7 @@ public interface AWSEC2Service {
 
     /**
      * Stop instances
-     * 
+     *
      * @param A list of the instanceIds to stop
      * @return A list of changed instances
      * @throws OXException When instances can not stop
@@ -79,7 +79,7 @@ public interface AWSEC2Service {
 
     /**
      * Stop a single instance
-     * 
+     *
      * @param instanceId The id of the instance to stop
      * @return A list of changed instances
      * @throws OXException When instance can not stop
@@ -88,7 +88,7 @@ public interface AWSEC2Service {
 
     /**
      * Stops all instances started by service
-     * 
+     *
      * @throws OXException When instances can not stop
      */
     public void stopAllInstances() throws OXException;

@@ -60,7 +60,7 @@ import com.openexchange.index.solr.internal.SolrField;
 
 /**
  * {@link SolrInfostoreField}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public enum SolrInfostoreField implements SolrField {
@@ -82,20 +82,20 @@ public enum SolrInfostoreField implements SolrField {
     CATEGORIES("categories", InfostoreIndexField.CATEGORIES, "param18"),
     COLOR_LABEL("color_label", InfostoreIndexField.COLOR_LABEL, "param19"),
     VERSION_COMMENT("version_comment", InfostoreIndexField.VERSION_COMMENT, "param20");
-    
+
 
     private String solrName;
 
     private InfostoreIndexField indexField;
 
     private String parameterName;
-    
+
     private static final Map<String, SolrInfostoreField> solrNameMapping = new HashMap<String, SolrInfostoreField>();
-    
+
     private static final Map<InfostoreIndexField, SolrInfostoreField> fieldMapping = new EnumMap<InfostoreIndexField, SolrInfostoreField>(InfostoreIndexField.class);
-    
+
     private static final Set<InfostoreIndexField> indexedFields = EnumSet.noneOf(InfostoreIndexField.class);
-    
+
     static {
         for (SolrInfostoreField field : values()) {
             String name = field.solrName();
@@ -106,26 +106,26 @@ public enum SolrInfostoreField implements SolrField {
             }
         }
     }
-    
+
     public static SolrInfostoreField getBySolrName(String solrName) {
         return solrNameMapping.get(solrName);
     }
-    
+
     public static SolrInfostoreField getByIndexField(InfostoreIndexField indexField) {
         return fieldMapping.get(indexField);
     }
-    
-    public static Set<InfostoreIndexField> getIndexedFields() {        
+
+    public static Set<InfostoreIndexField> getIndexedFields() {
         return Collections.unmodifiableSet(indexedFields);
     }
-    
+
     public static String[] solrNamesFor(Set<SolrInfostoreField> solrFields) {
         String[] names = new String[solrFields.size()];
         int i = 0;
         for (SolrInfostoreField field : solrFields) {
             names[i++] = field.solrName();
         }
-        
+
         return names;
     }
 

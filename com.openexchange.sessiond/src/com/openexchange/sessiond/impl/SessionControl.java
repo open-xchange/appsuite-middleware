@@ -54,7 +54,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SessionControl} - Holds a {@link Session} instance and remembers life-cycle timestamps such as last-accessed, creation-time, etc.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -82,7 +82,7 @@ public class SessionControl {
 
     /**
      * Initializes a new {@link SessionControl}
-     * 
+     *
      * @param session The stored session
      * @param idleTime The session's allowed idle time or <code>-1</code> to use default setting
      */
@@ -96,7 +96,7 @@ public class SessionControl {
 
     /**
      * Checks if this session control is elapsed.
-     * 
+     *
      * @param defaultIdleTime The default idle time
      * @return <code>true</code> if elapsed; otherwise <code>false</code>
      */
@@ -109,7 +109,7 @@ public class SessionControl {
 
     /**
      * Initializes a new {@link SessionControl}
-     * 
+     *
      * @param session The stored session
      */
     public SessionControl(final SessionImpl session) {
@@ -118,7 +118,7 @@ public class SessionControl {
 
     /**
      * Gets the idle time
-     * 
+     *
      * @return The idle time
      */
     public long getIdleTime() {
@@ -127,7 +127,7 @@ public class SessionControl {
 
     /**
      * Gets the last-accessed time stamp.
-     * 
+     *
      * @return The last-accessed time stamp
      */
     public long getLastAccessed() {
@@ -136,7 +136,7 @@ public class SessionControl {
 
     /**
      * Updates last-accessed time stamp.
-     * 
+     *
      * @return This control with last-accessed time stamp updated
      */
     public SessionControl touch() {
@@ -146,7 +146,7 @@ public class SessionControl {
 
     /**
      * Gets the stored session
-     * 
+     *
      * @return The stored session
      */
     public SessionImpl getSession() {
@@ -155,7 +155,7 @@ public class SessionControl {
 
     /**
      * Gets the creation-time time stamp
-     * 
+     *
      * @return The creation-time time stamp
      */
     public long getCreationTime() {

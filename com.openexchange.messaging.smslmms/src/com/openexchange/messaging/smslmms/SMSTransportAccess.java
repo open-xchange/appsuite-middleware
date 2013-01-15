@@ -63,7 +63,7 @@ import com.openexchange.messaging.smslmms.api.SMSTransport;
 
 /**
  * {@link SMSTransportAccess} - The class for a messaging-based SMS/MMS transport.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SMSTransportAccess implements MessagingAccountTransport, SMSTransport {
@@ -74,7 +74,7 @@ public class SMSTransportAccess implements MessagingAccountTransport, SMSTranspo
 
     /**
      * Initializes a new {@link SMSTransportAccess}.
-     * 
+     *
      * @param The SMS/MMS transport
      */
     public SMSTransportAccess(final SMSTransport smsTransport) {

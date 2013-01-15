@@ -66,7 +66,7 @@ import com.openexchange.mq.MQService;
 
 /**
  * {@link MQJmsTopicExample} - Example class for a simple Publish/Subscribe example using JMS classes.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MQJmsTopicExample {
@@ -137,7 +137,7 @@ public final class MQJmsTopicExample {
                             topicConnection.start();
 
                             /*-
-                             * 
+                             *
                             System.out.println("To end program, enter Q or q, " + "then <return>");
                             final InputStreamReader inputStreamReader = new InputStreamReader(System.in);
                             char answer = '\0';
@@ -148,7 +148,7 @@ public final class MQJmsTopicExample {
                                     System.out.println("I/O exception: " + e.toString());
                                 }
                             }
-                             * 
+                             *
                              */
 
                             try {
@@ -180,7 +180,7 @@ public final class MQJmsTopicExample {
             t.start();
 
 
-            
+
             // Now we'll look up the connection factory:
             final TopicConnectionFactory topicConnectionFactory = service.lookupDefaultConnectionFactory();
             // And look up the Queue:

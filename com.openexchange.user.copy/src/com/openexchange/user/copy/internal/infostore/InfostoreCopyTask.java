@@ -94,10 +94,10 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class InfostoreCopyTask implements CopyUserTaskService {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreCopyTask.class));
-    
-    private static final String SELECT_INFOSTORE_MASTERS = 
+
+    private static final String SELECT_INFOSTORE_MASTERS =
         "SELECT " +
             "id, folder_id, version, color_label, creating_date, " +
             "last_modified, created_by, changed_by " +
@@ -107,8 +107,8 @@ public class InfostoreCopyTask implements CopyUserTaskService {
             "cid = ? " +
         "AND " +
             "folder_id IN (#IDS#)";
-    
-    private static final String SELECT_INFOSTORE_VERSIONS = 
+
+    private static final String SELECT_INFOSTORE_VERSIONS =
         "SELECT " +
             "version_number, creating_date, last_modified, title, url, " +
             "description, categories, filename, file_store_location, file_size, " +
@@ -119,16 +119,16 @@ public class InfostoreCopyTask implements CopyUserTaskService {
             "cid = ? " +
         "AND " +
             "infostore_id = ?";
-    
-    private static final String INSERT_INFOSTORE_MASTERS = 
+
+    private static final String INSERT_INFOSTORE_MASTERS =
         "INSERT INTO " +
             "infostore " +
             "(cid, id, folder_id, version, locked_until, color_label, " +
             "creating_date, last_modified, created_by, changed_by) " +
         "VALUES " +
             "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
-    private static final String INSERT_INFOSTORE_VERSIONS = 
+
+    private static final String INSERT_INFOSTORE_VERSIONS =
         "INSERT INTO " +
             "infostore_document " +
             "(cid, infostore_id, version_number, creating_date, last_modified, " +
@@ -138,8 +138,8 @@ public class InfostoreCopyTask implements CopyUserTaskService {
             "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final QuotaFileStorageFactory qfsf;
-    
-    
+
+
     public InfostoreCopyTask(final QuotaFileStorageFactory qfsf) {
         super();
         this.qfsf = qfsf;
@@ -178,22 +178,22 @@ public class InfostoreCopyTask implements CopyUserTaskService {
         final Connection dstCon = copyTools.getDestinationConnection();
         final ObjectMapping<FolderObject> folderMapping = copyTools.getFolderMapping();
         final List<Integer> infostoreFolders = detectInfostoreFolders(folderMapping);
-        
+
         final Map<DocumentMetadata, List<DocumentMetadata>> originDocuments = loadInfostoreDocumentsFromDB(infostoreFolders, srcCon, i(srcCtxId));
         QuotaFileStorage srcFileStorage = null;
-        QuotaFileStorage dstFileStorage = null;         
+        QuotaFileStorage dstFileStorage = null;
         final URI srcFilestoreUri = FilestoreStorage.createURI(srcCtx);
-        final URI dstFilestoreUri = FilestoreStorage.createURI(dstCtx);            
+        final URI dstFilestoreUri = FilestoreStorage.createURI(dstCtx);
         srcFileStorage = qfsf.getQuotaFileStorage(srcCtx, srcFilestoreUri);
         dstFileStorage = qfsf.getQuotaFileStorage(dstCtx, dstFilestoreUri);
-        
+
         copyFiles(originDocuments, srcFileStorage, dstFileStorage);
         exchangeFolderIds(originDocuments, folderMapping, dstCon, i(dstCtxId));
-        writeInfostoreDocumentsToDB(originDocuments, dstCon, i(dstCtxId), i(dstUsrId));        
-        
+        writeInfostoreDocumentsToDB(originDocuments, dstCon, i(dstCtxId), i(dstUsrId));
+
         return null;
     }
-    
+
     private void writeInfostoreDocumentsToDB(final Map<DocumentMetadata, List<DocumentMetadata>> documents, final Connection con, final int cid, final int uid) throws OXException {
         PreparedStatement stmt1 = null;
         PreparedStatement stmt2 = null;
@@ -213,8 +213,8 @@ public class InfostoreCopyTask implements CopyUserTaskService {
                 stmt1.setLong(i++, master.getLastModified().getTime());
                 stmt1.setInt(i++, uid);
                 stmt1.setInt(i++, uid);
-                
-                stmt1.addBatch();                
+
+                stmt1.addBatch();
                 final List<DocumentMetadata> versions = documents.get(master);
                 for (final DocumentMetadata version : versions) {
                     i = 1;
@@ -235,11 +235,11 @@ public class InfostoreCopyTask implements CopyUserTaskService {
                     setStringOrNull(i++, stmt2, version.getFileMIMEType());
                     setStringOrNull(i++, stmt2, version.getFileMD5Sum());
                     setStringOrNull(i++, stmt2, version.getVersionComment());
-                    
+
                     stmt2.addBatch();
                 }
             }
-            
+
             stmt1.executeBatch();
             stmt2.executeBatch();
         } catch (final SQLException e) {
@@ -248,42 +248,42 @@ public class InfostoreCopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(stmt1);
             DBUtils.closeSQLStuff(stmt2);
         }
-        
+
     }
-    
+
     private void exchangeFolderIds(final Map<DocumentMetadata, List<DocumentMetadata>> documents, final ObjectMapping<FolderObject> folderMapping, final Connection con, final int cid) throws OXException {
-        for (final DocumentMetadata master : documents.keySet()) {               
+        for (final DocumentMetadata master : documents.keySet()) {
             final FolderObject source = folderMapping.getSource((int) master.getFolderId());
             final FolderObject target = folderMapping.getDestination(source);
             master.setFolderId(target.getObjectID());
         }
     }
-    
+
     private void copyFiles(final Map<DocumentMetadata, List<DocumentMetadata>> documents, final QuotaFileStorage srcFileStorage, final QuotaFileStorage dstFileStorage) throws OXException {
         for (final DocumentMetadata master : documents.keySet()) {
             final List<DocumentMetadata> versions = documents.get(master);
             for (final DocumentMetadata version : versions) {
                 final String location = version.getFilestoreLocation();
-                if (location != null) {                    
+                if (location != null) {
                     try {
                         final InputStream is = srcFileStorage.getFile(location);
                         if (is == null) {
                             LOG.warn("Did not find file for infostore document " + master.getId() + " (" + master.getFileName() + ").");
                             continue;
                         }
-                        
+
                         final String newId = dstFileStorage.saveNewFile(is);
                         version.setFilestoreLocation(newId);
-                        
-                        is.close();                        
+
+                        is.close();
                     } catch (final IOException e) {
                         LOG.warn("Could not close input stream.", e);
                     }
-                }                
+                }
             }
         }
     }
-    
+
     Map<DocumentMetadata, List<DocumentMetadata>> loadInfostoreDocumentsFromDB(final List<Integer> infostoreFolders, final Connection con, final int cid) throws OXException {
         // TODO: Locks will be ignored.
         final Map<DocumentMetadata, List<DocumentMetadata>> documents = new HashMap<DocumentMetadata, List<DocumentMetadata>>();
@@ -349,18 +349,18 @@ public class InfostoreCopyTask implements CopyUserTaskService {
         }
         return documents;
     }
-    
+
     List<Integer> detectInfostoreFolders(final ObjectMapping<FolderObject> folderMapping) {
         final List<Integer> ids = new ArrayList<Integer>();
         final List<Integer> folderIds = new ArrayList<Integer>(folderMapping.getSourceKeys());
         for (final Integer sourceId : folderIds) {
             final FolderObject source = folderMapping.getSource(sourceId);
-            
+
             if (source.getModule() == FolderObject.INFOSTORE) {
                 ids.add(sourceId);
             }
         }
-        
+
         return ids;
     }
 

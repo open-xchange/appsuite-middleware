@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface IndexSearchEngine {
-    
+
     Map<Integer, IndexResult<?>> search(Session session, String searchTerm) throws OXException;
 
 }

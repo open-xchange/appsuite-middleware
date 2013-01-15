@@ -123,7 +123,7 @@ public final class attachments extends OXServlet {
     protected Interface getInterface() {
         return Interface.WEBDAV_XML;
     }
-    
+
     @Override
     protected boolean isServletDisabled() {
         return true;

@@ -58,7 +58,7 @@ import com.hazelcast.core.ItemListener;
 
 /**
  * {@link ClassLoaderAwareISet}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ClassLoaderAwareISet<E extends Serializable> extends AbstractClassLoaderAware implements ISet<E> {

@@ -10,9 +10,9 @@ import com.openexchange.admin.soap.util.soap.Exception;
 
 /**
  * <p>Java-Klasse f\u00fcr InvalidDataException complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="InvalidDataException">
  *   &lt;complexContent>
@@ -24,8 +24,8 @@ import com.openexchange.admin.soap.util.soap.Exception;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "InvalidDataException", propOrder = {
@@ -40,11 +40,11 @@ public class InvalidDataException
 
     /**
      * Ruft den Wert der objectname-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getObjectname() {
         return objectname;
@@ -52,11 +52,11 @@ public class InvalidDataException
 
     /**
      * Legt den Wert der objectname-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setObjectname(String value) {
         this.objectname = value;

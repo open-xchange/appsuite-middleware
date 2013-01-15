@@ -53,7 +53,7 @@ import java.text.MessageFormat;
 
 /**
  * {@link CLIUnknownOptionException} - Indicates an unknown option.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CLIUnknownOptionException extends CLIOptionException {
@@ -81,7 +81,7 @@ public class CLIUnknownOptionException extends CLIOptionException {
 
     /**
      * Gets the name of the option that was unknown (e.g. <code>"-u"</code>).
-     * 
+     *
      * @return The name of the option that was unknown
      */
     public String getOptionName() {

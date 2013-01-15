@@ -101,7 +101,7 @@ public class UpdateAction extends ContactAction {
         if (containsImage) {
         	RequestTools.setImageData(request, contact);
         }
-        getContactService().updateContact(request.getSession(), request.getFolderID(), request.getObjectID(), contact, 
+        getContactService().updateContact(request.getSession(), request.getFolderID(), request.getObjectID(), contact,
         		new Date(request.getTimestamp()));
         return new AJAXRequestResult(new JSONObject(), contact.getLastModified(), "json");
     }

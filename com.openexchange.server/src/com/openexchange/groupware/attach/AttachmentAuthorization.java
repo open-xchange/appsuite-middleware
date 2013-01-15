@@ -55,9 +55,9 @@ import com.openexchange.tools.session.ServerSession;
 public interface AttachmentAuthorization {
 
     /**
-     * Checks whether a user is allowed to add attachments to objects in a folder or not, throwing an appropriate exception if the 
-     * permission check fails. 
-     * 
+     * Checks whether a user is allowed to add attachments to objects in a folder or not, throwing an appropriate exception if the
+     * permission check fails.
+     *
      * @param session The user's session
      * @param folderId The parent folder ID
      * @param objectId The object ID
@@ -66,9 +66,9 @@ public interface AttachmentAuthorization {
 	void checkMayAttach(ServerSession session, int folderId, int objectId) throws OXException;
 
     /**
-     * Checks whether a user is allowed to remove attachments from objects in a folder or not, throwing an appropriate exception if the 
-     * permission check fails. 
-     * 
+     * Checks whether a user is allowed to remove attachments from objects in a folder or not, throwing an appropriate exception if the
+     * permission check fails.
+     *
      * @param session The user's session
      * @param folderId The parent folder ID
      * @param objectId The object ID
@@ -77,14 +77,14 @@ public interface AttachmentAuthorization {
 	void checkMayDetach(ServerSession session, int folderId, int objectId) throws OXException;
 
     /**
-     * Checks whether a user is allowed to read attachments of objects in a folder or not, throwing an appropriate exception if the 
-     * permission check fails. 
-     * 
+     * Checks whether a user is allowed to read attachments of objects in a folder or not, throwing an appropriate exception if the
+     * permission check fails.
+     *
      * @param session The user's session
      * @param folderId The parent folder ID
      * @param objectId The object ID
      * @throws OXException If reading attachments is not permitted
      */
 	void checkMayReadAttachments(ServerSession session, int folderId, int objectId) throws OXException;
-	
+
 }

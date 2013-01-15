@@ -93,7 +93,7 @@ public class CancelPerformer extends AbstrakterDingeMacher {
     public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         List<Appointment> deleted = new ArrayList<Appointment>();
-        
+
         for (ITipChange change : changes) {
             Appointment appointment = change.getDeletedAppointment();
             appointment.setNotification(true);
@@ -116,7 +116,7 @@ public class CancelPerformer extends AbstrakterDingeMacher {
         }
         return 0;
     }
-    
+
     private long startOfTheDay(Date recurrenceDatePosition) {
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -137,4 +137,4 @@ public class CancelPerformer extends AbstrakterDingeMacher {
         calendar.add(Calendar.DAY_OF_YEAR, 1);
         return calendar.getTimeInMillis();
     }
-}   
+}

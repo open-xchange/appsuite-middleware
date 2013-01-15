@@ -75,7 +75,7 @@ import com.sun.mail.smtp.SMTPSendFailedException;
  * The detail number range in subclasses generated in mail bundles is supposed to start with 2000 and may go up to 2999.
  * <p>
  * The detail number range in subclasses generated in transport bundles is supposed to start with 3000 and may go up to 3999.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MimeMailException extends OXException {
@@ -87,7 +87,7 @@ public class MimeMailException extends OXException {
 
     /**
      * Initializes a new {@link MimeMailException}.
-     * 
+     *
      * @param code
      * @param displayMessage
      * @param displayArgs
@@ -98,7 +98,7 @@ public class MimeMailException extends OXException {
 
     /**
      * Initializes a new {@link MimeMailException}.
-     * 
+     *
      * @param code
      * @param displayMessage
      * @param cause
@@ -113,7 +113,7 @@ public class MimeMailException extends OXException {
      * <p>
      * This is just a convenience method that simply invokes {@link #handleMessagingException(MessagingException, MailConfig)} with the
      * latter parameter set to <code>null</code>.
-     * 
+     *
      * @param e The messaging exception
      * @return An appropriate instance of {@link OXException}
      */
@@ -123,7 +123,7 @@ public class MimeMailException extends OXException {
 
     /**
      * Handles given instance of {@link MessagingException} and creates an appropriate instance of {@link OXException}
-     * 
+     *
      * @param e The messaging exception
      * @param mailConfig The corresponding mail configuration used to add information like mail server etc.
      * @return An appropriate instance of {@link OXException}
@@ -151,7 +151,7 @@ public class MimeMailException extends OXException {
 
     /**
      * Handles given instance of {@link MessagingException} and creates an appropriate instance of {@link OXException}
-     * 
+     *
      * @param e The messaging exception
      * @param mailConfig The corresponding mail configuration used to add information like mail server etc.
      * @param session The session providing user information

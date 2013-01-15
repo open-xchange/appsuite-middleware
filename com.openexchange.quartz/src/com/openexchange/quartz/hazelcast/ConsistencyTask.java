@@ -65,21 +65,21 @@ import com.openexchange.quartz.hazelcast.TriggerStateWrapper;
 import com.openexchange.quartz.hazelcast.predicates.AcquiredAndExecutingTriggersPredicate;
 
 /**
- * 
+ *
  * {@link ConsistencyTask}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public final class ConsistencyTask extends TimerTask {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(ConsistencyTask.class);
 
     private final ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers;
-    
+
     private final ConcurrentMap<TriggerKey, Boolean> locallyExecutingTriggers;
-    
+
     private final ImprovedHazelcastJobStore jobStore;
-    
+
     public ConsistencyTask(final ImprovedHazelcastJobStore jobStore, final ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers, final ConcurrentMap<TriggerKey, Boolean> locallyExecutingTriggers) {
         super();
         this.jobStore = jobStore;
@@ -95,7 +95,7 @@ public final class ConsistencyTask extends TimerTask {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Started consistency task run.");
             }
-            
+
             final String nodeIp = jobStore.getNodeIp();
             ILock lock = jobStore.getClusterLock();
             IMap<TriggerKey, TriggerStateWrapper> triggersByKey = jobStore.getTriggerMap();
@@ -109,11 +109,11 @@ public final class ConsistencyTask extends TimerTask {
             } finally {
                 lock.unlock();
             }
-            
+
             if (clusterKeys == null || clusterKeys.isEmpty()) {
                 return;
             }
-            
+
             for (TriggerKey key : clusterKeys) {
                 TriggerStateWrapper stateWrapper = triggersByKey.get(key);
                 Calendar calendar = null;
@@ -135,7 +135,7 @@ public final class ConsistencyTask extends TimerTask {
                     stateWrapper.resetOwner();
                     triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
                 }
-                
+
                 ISet<JobKey> blockedJobs = jobStore.getBlockedJobs();
                 blockedJobs.remove(stateWrapper.getTrigger().getJobKey());
 

@@ -63,40 +63,40 @@ import javax.management.ObjectName;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface IndexingServiceMBean {
-    
+
     public static final String DOMAIN = "com.openexchange.service.indexing";
-    
+
     public static final String KEY = "type";
-    
+
     public static final String VALUE = "indexingServiceMonitoring";
-    
-    
+
+
     /**
      * Returns the names of all currently running jobs on this node.
-     * 
+     *
      * @return The list of job names.
-     * @throws MBeanException 
+     * @throws MBeanException
      */
     List<String> getAllLocalRunningJobs() throws MBeanException;
-    
+
     /**
      * Returns the names of currently running jobs for the given user on this node.
      *
      * @param contextId The users context id.
      * @param userId The users id.
      * @return The list of job names.
-     * @throws MBeanException 
+     * @throws MBeanException
      */
     List<String> getLocalRunningJobs(int contextId, int userId) throws MBeanException;
-    
+
     /**
      * Gets all jobs that are scheduled in the cluster.
-     * 
+     *
      * @return The list of job names.
      * @throws MBeanException
      */
     List<String> getAllScheduledJobs() throws MBeanException;
-    
+
     /**
      * Gets the jobs that are scheduled in the cluster for the given user.
      *

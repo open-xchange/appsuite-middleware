@@ -74,7 +74,7 @@ import org.quartz.TriggerBuilder;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class TestJobs {
-    
+
     @DisallowConcurrentExecution
     public static class TestJob implements Job {
 
@@ -95,7 +95,7 @@ public class TestJobs {
             }
         }
     }
-    
+
     @DisallowConcurrentExecution
     public static class SleepingTestJob implements Job {
 
@@ -109,7 +109,7 @@ public class TestJobs {
             }
         }
     }
-    
+
     @DisallowConcurrentExecution
     public static class ReschedulingTestJob implements Job {
 
@@ -133,7 +133,7 @@ public class TestJobs {
             }
         }
     }
-    
+
     @DisallowConcurrentExecution
     public static class LongRunningJob implements Job {
 
@@ -153,7 +153,7 @@ public class TestJobs {
             }
         }
     }
-    
+
     @DisallowConcurrentExecution
     @PersistJobDataAfterExecution
     public static class ChangingDetailJob implements Job {
@@ -172,7 +172,7 @@ public class TestJobs {
                 } else {
                     dataMap.put("new", "test");
                 }
-                
+
                 latch.countDown();
             } catch (Throwable e) {
                 throw new JobExecutionException("Error", e);

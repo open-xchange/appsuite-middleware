@@ -70,8 +70,8 @@ import com.openexchange.admin.tools.Bug19733Test;
       Bug19733Test.class
 })
 public class AdminTestSuite {
-    
-    // the class remains completely empty, 
+
+    // the class remains completely empty,
     // being used only as a holder for the above annotations
 
     private AdminTestSuite() {

@@ -61,9 +61,9 @@ import com.openexchange.admin.storage.mysqlStorage.OXAuthMySQLStorage;
  */
 public abstract class OXAuthStorageInterface {
     public abstract boolean authenticate(final Credentials authdata);
-    
+
     public abstract boolean authenticate(final Credentials authdata, final Context ctx) throws StorageException;
-    
+
     public abstract boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException;
 
     public static OXAuthStorageInterface getInstanceSQL() {

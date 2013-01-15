@@ -82,7 +82,7 @@ import com.openexchange.solr.SolrProperties;
 
 /**
  * {@link EmbeddedSolrAccessImpl}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 // FIXME: Use 'catch (Throwable t)' on SolrServer calls and define new error codes.
@@ -115,7 +115,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             LOG.warn("Error while loading core container. Schema cache will not be available...", e);
         }
     }
-    
+
     public void startCore(SolrCoreIdentifier identifier) throws OXException {
         if (identifier == null) {
             throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
@@ -123,7 +123,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         if (coreContainer == null) {
             throw new IllegalStateException(ISE_MSG);
         }
-        
+
         long start = System.currentTimeMillis();
         boolean createdCoreEnvironment = false;
         try {
@@ -141,7 +141,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
                     throw e;
                 }
             }
-            
+
             ConfigurationService config = Services.getService(ConfigurationService.class);
             String libDir = config.getProperty(SolrProperties.LIB_DIR);
             String schemaFile = getSchemaFileByModule(module);
@@ -172,14 +172,14 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         } catch (final RuntimeException e) {
             /*
              * Something really bad happened here. Maybe we ran out of FDs or something like that.
-             * If we created the index directory, we have to delete it again. 
+             * If we created the index directory, we have to delete it again.
              */
             if (createdCoreEnvironment) {
                 LOG.error("RuntimeException during core start. Removing core environment as it might me inconsistent now...", e);
                 SolrCoreConfigService coreService = Services.getService(SolrCoreConfigService.class);
                 coreService.removeCoreEnvironment(identifier);
             }
-            
+
             throw new OXException(e);
         } finally {
             if (LOG.isDebugEnabled()) {
@@ -188,7 +188,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             }
         }
     }
-    
+
     public void stopCore(SolrCoreIdentifier identifier) {
         SolrCore solrCore = coreContainer.remove(identifier.toString());
         if (solrCore != null) {
@@ -505,7 +505,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
 
         stopCore(identifier);
     }
-    
+
     public CoreContainer getCoreContainer() {
         return coreContainer;
     }
@@ -517,11 +517,11 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         case Types.EMAIL:
             configFile = config.getProperty(SolrProperties.CONFIG_FILE_MAIL);
             break;
-            
+
         case Types.INFOSTORE:
             configFile = config.getProperty(SolrProperties.CONFIG_FILE_INFOSTORE);
             break;
-            
+
         case Types.ATTACHMENT:
             configFile = config.getProperty(SolrProperties.CONFIG_FILE_ATTACHMENTS);
             break;
@@ -540,11 +540,11 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         case Types.EMAIL:
             schemaFile = config.getProperty(SolrProperties.SCHEMA_FILE_MAIL);
             break;
-            
+
         case Types.INFOSTORE:
             schemaFile = config.getProperty(SolrProperties.SCHEMA_FILE_INFOSTORE);
             break;
-            
+
         case Types.ATTACHMENT:
             schemaFile = config.getProperty(SolrProperties.SCHEMA_FILE_ATTACHMENTS);
             break;
@@ -616,7 +616,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
 
     /**
      * Checks whether the supplied <tt>Throwable</tt> is one that needs to be rethrown and swallows all others.
-     * 
+     *
      * @param t The <tt>Throwable</tt> to check
      */
     private void handleThrowable(final Throwable t) {

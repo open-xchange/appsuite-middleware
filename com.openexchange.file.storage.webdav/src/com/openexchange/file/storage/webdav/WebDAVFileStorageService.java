@@ -93,7 +93,7 @@ public final class WebDAVFileStorageService implements AccountAware {
 
     /**
      * Creates a new WebDAV file storage service.
-     * 
+     *
      * @param compositeAccountManager The composite account manager
      * @return A new WebDAV file storage service
      */

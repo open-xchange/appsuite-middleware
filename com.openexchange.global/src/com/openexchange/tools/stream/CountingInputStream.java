@@ -56,7 +56,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * {@link CountingInputStream} - An {@link InputStream} that counts the number of bytes read.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CountingInputStream extends FilterInputStream {
@@ -69,7 +69,7 @@ public class CountingInputStream extends FilterInputStream {
 
     /**
      * Wraps another input stream, counting the number of bytes read.
-     * 
+     *
      * @param in the input stream to be wrapped
      */
     public CountingInputStream(final InputStream in, final long max) {
@@ -81,7 +81,7 @@ public class CountingInputStream extends FilterInputStream {
 
     /**
      * Set the byte count back to 0L.
-     * 
+     *
      * @return The count previous to resetting
      */
     public long resetByteCount() {

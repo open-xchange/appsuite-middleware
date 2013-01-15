@@ -65,7 +65,7 @@ import java.util.regex.Pattern;
 
 /**
  * {@link Strings} - A library for performing operations that create Strings
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Strings {
@@ -76,7 +76,7 @@ public class Strings {
 
     /**
      * Gets specified string's ASCII bytes
-     * 
+     *
      * @param str The string
      * @return The ASCII bytes
      */
@@ -86,7 +86,7 @@ public class Strings {
 
     /**
      * Gets specified string's ASCII bytes
-     * 
+     *
      * @param str The string
      * @return The ASCII bytes
      */
@@ -96,7 +96,7 @@ public class Strings {
 
     /**
      * Writes specified string's ASCII bytes to given stream.
-     * 
+     *
      * @param str The string
      * @param out The stream to write to
      * @throws IOException If an I/O error occurs
@@ -108,7 +108,7 @@ public class Strings {
     private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
     /**
      * Splits given string by comma separator.
-     * 
+     *
      * @param s The string to split
      * @return The splitted string
      */
@@ -122,7 +122,7 @@ public class Strings {
     private static final Pattern P_SPLIT_CRLF = Pattern.compile("\r?\n");
     /**
      * Splits given string by CR?LF; yields line-wise output.
-     * 
+     *
      * @param s The string to split
      * @return The splitted string
      */
@@ -136,7 +136,7 @@ public class Strings {
     private static final Pattern P_SPLIT_WHITESPACE = Pattern.compile("\\s+");
     /**
      * Splits given string by whitespaces.
-     * 
+     *
      * @param s The string to split
      * @return The splitted string
      */
@@ -152,7 +152,7 @@ public class Strings {
      * that will work as a literal replacement <code>s</code> in the <code>appendReplacement</code> method of the {@link Matcher} class. The
      * <code>String</code> produced will match the sequence of characters in <code>s</code> treated as a literal sequence. Slashes ('\') and
      * dollar signs ('$') will be given no special meaning.
-     * 
+     *
      * @param s The string to be literalized
      * @return A literal string replacement
      */
@@ -179,7 +179,7 @@ public class Strings {
 
     /**
      * Checks for an empty string.
-     * 
+     *
      * @param string The string
      * @return <code>true</code> if empty; else <code>false</code>
      */
@@ -199,7 +199,7 @@ public class Strings {
      * Fixes possible charset problem in given string.
      * <p>
      * E.g.:&nbsp;&quot;&#195;&#164&quot; instead of &quot;&auml;&quot;
-     * 
+     *
      * @param s The string to check
      * @return The fixed string
      */
@@ -228,7 +228,7 @@ public class Strings {
 
     /**
      * Checks given bytes for valid UTF-8 bytes.
-     * 
+     *
      * @param bytes The bytes to check
      * @return <code>true</code> for valid UTF-8 bytes; otherwise <code>false</code>
      */
@@ -243,7 +243,7 @@ public class Strings {
 
     /**
      * Joins a collection of objects by connecting the results of their #toString() method with a connector
-     * 
+     *
      * @param coll Collection to be connected
      * @param connector Connector place between two objects
      * @return connected strings or null if collection == null or empty string if collection is empty
@@ -289,7 +289,7 @@ public class Strings {
 
     /**
      * Removes byte order marks from UTF8 strings.
-     * 
+     *
      * @return new instance of trimmed string - or reference to old one if unchanged
      */
     public static String trimBOM(final String str) {

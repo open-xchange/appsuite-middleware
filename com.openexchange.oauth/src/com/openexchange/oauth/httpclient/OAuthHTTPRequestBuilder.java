@@ -117,6 +117,6 @@ public class OAuthHTTPRequestBuilder implements HTTPRequestBuilder {
 		return client.getSecret();
 	}
 
-	
-	
+
+
 }

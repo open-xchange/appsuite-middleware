@@ -60,11 +60,11 @@ import com.openexchange.server.impl.OCLPermission;
 final class Permission {
 
     int fuid;
-    
+
     int entity;
-    
+
     boolean admin;
-    
+
     boolean readFolder;
 
     int module;

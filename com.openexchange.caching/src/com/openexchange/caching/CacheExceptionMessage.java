@@ -73,7 +73,7 @@ public class CacheExceptionMessage implements LocalizableStrings {
 
     // An I/O error occurred: %1$s
     public final static String IO_ERROR = "An I/O error occurred: %1$s";
-    
+
     // Missing configuration property: %1$s
     public final static String MISSING_CONFIGURATION_PROPERTY = "Missing configuration property: %1$s";
 

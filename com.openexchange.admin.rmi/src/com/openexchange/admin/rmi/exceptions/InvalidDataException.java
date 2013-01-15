@@ -53,9 +53,9 @@ import java.util.ArrayList;
 
 /**
  * Is thrown when user sends invalid data to the server.
- * 
- * @author cutmasta 
- * 
+ *
+ * @author cutmasta
+ *
  */
 public class InvalidDataException extends Exception {
 
@@ -68,7 +68,7 @@ public class InvalidDataException extends Exception {
      * Contains the name of the object which is affected by this exception
      */
     private String objectname = null;
-    
+
     /**
      * Contains the fieldnames in the object (if available) which are not correct
      */
@@ -79,7 +79,7 @@ public class InvalidDataException extends Exception {
     private static final long serialVersionUID = 5803502090025698411L;
 
     /**
-     * 
+     *
      */
     public InvalidDataException() {
         super("Invalid data sent!");
@@ -111,7 +111,7 @@ public class InvalidDataException extends Exception {
 
     /**
      * Set the fieldname which are not correct in the object
-     * 
+     *
      * @return
      */
     public final ArrayList<String> getFieldnames() {
@@ -120,7 +120,7 @@ public class InvalidDataException extends Exception {
 
     /**
      * Get the fieldnames of the object which aren't correct (maybe null if no fieldnames can be specified)
-     * 
+     *
      * @param fieldnames
      */
     public final void setFieldnames(ArrayList<String> fieldnames) {
@@ -129,7 +129,7 @@ public class InvalidDataException extends Exception {
 
     /**
      * Get the Name of the object which is affected by this exception
-     * 
+     *
      * @return
      */
     public final String getObjectname() {
@@ -137,8 +137,8 @@ public class InvalidDataException extends Exception {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param objectname
      */
     public final void setObjectname(String objectname) {
@@ -151,7 +151,7 @@ public class InvalidDataException extends Exception {
         if (null != fieldnames) {
             sb.append("The following field are invalid:\n");
             sb.append(fieldnames);
-        }        
+        }
         return super.toString();
     }
 

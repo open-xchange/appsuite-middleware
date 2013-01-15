@@ -52,11 +52,11 @@ package com.openexchange.groupware.container;
 
 /**
  * {@link Change}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public interface Change {
-    
+
     public String getIdentifier();
 
 }

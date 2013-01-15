@@ -56,13 +56,13 @@ import java.util.TimeZone;
 
 /**
  * {@link FreeBusyInterval}
- * 
+ *
  * Defines a free/busy interval.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
-    
+
     private Date startTime;
     private Date endTime;
     private BusyStatus status;
@@ -71,10 +71,10 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
     private boolean fullTime;
     private String title;
     private String location;
-    
+
     /**
      * Initializes a new {@link FreeBusyInterval}, based on the supplied interval.
-     * 
+     *
      * @param start The start time
      * @param end The end time
      * @param other Another free/busy slot to copy the values from
@@ -90,7 +90,7 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
 
     /**
      * Initializes a new {@link FreeBusyInterval}.
-     * 
+     *
      * @param start the start time
      * @param end the end time
      * @param status the busy status
@@ -110,7 +110,7 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
     public Date getStartTime() {
         return startTime;
     }
-    
+
     /**
      * Sets the startTime
      *
@@ -119,7 +119,7 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
     public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
-    
+
     /**
      * Gets the endTime
      *
@@ -128,7 +128,7 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
     public Date getEndTime() {
         return endTime;
     }
-    
+
     /**
      * Sets the endTime
      *
@@ -137,7 +137,7 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
-    
+
     /**
      * Gets the status
      *
@@ -146,7 +146,7 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
     public BusyStatus getStatus() {
         return status;
     }
-    
+
     /**
      * Sets the status
      *
@@ -173,7 +173,7 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
     public void setObjectID(String objectID) {
         this.objectID = objectID;
     }
-    
+
     /**
      * Gets the folderID
      *
@@ -182,7 +182,7 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
     public String getFolderID() {
         return folderID;
     }
-    
+
     /**
      * Sets the folderID
      *
@@ -191,7 +191,7 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
     public void setFolderID(String folderID) {
         this.folderID = folderID;
     }
-    
+
     /**
      * Gets the isFullTime
      *
@@ -200,7 +200,7 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
     public boolean isFullTime() {
         return fullTime;
     }
-    
+
     /**
      * Sets the isFullTime
      *
@@ -209,7 +209,7 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
     public void setFullTime(boolean isFullTime) {
         this.fullTime = isFullTime;
     }
-    
+
     /**
      * Gets the title
      *
@@ -245,10 +245,10 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
     public void setLocation(String location) {
         this.location = location;
     }
-    
+
     /**
-     * Gets a value indicating whether this slot equals anohter one, ignoring any differences in the start- and end-time properties. 
-     * 
+     * Gets a value indicating whether this slot equals anohter one, ignoring any differences in the start- and end-time properties.
+     *
      * @param other The free/busy slot to compare
      * @return <code>true</code>, if the intervals are equal ignoring their times, <code>false</code>, otherwise.
      */
@@ -283,7 +283,7 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
     public String toString() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return (null != startTime ? sdf.format(startTime) : "[]") + " - " + (null != endTime ? sdf.format(endTime) : "[]") + " (" + status + ")"; 
+        return (null != startTime ? sdf.format(startTime) : "[]") + " - " + (null != endTime ? sdf.format(endTime) : "[]") + " (" + status + ")";
     }
 
     @Override
@@ -297,5 +297,5 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
         }
         return value;
     }
-    
+
 }

@@ -51,7 +51,7 @@ package com.openexchange.java;
 
 /**
  * {@link DefaultHashKeyGenerator} - The {@link HashKeyGenerator generator} using a salt.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DefaultHashKeyGenerator implements HashKeyGenerator {
@@ -62,7 +62,7 @@ public final class DefaultHashKeyGenerator implements HashKeyGenerator {
 
     /**
      * Initializes a new {@link DefaultHashKeyGenerator}.
-     * 
+     *
      * @param salt The salt
      */
     public DefaultHashKeyGenerator(final String salt) {
@@ -71,7 +71,7 @@ public final class DefaultHashKeyGenerator implements HashKeyGenerator {
 
     /**
      * Initializes a new {@link DefaultHashKeyGenerator}.
-     * 
+     *
      * @param salt The salt
      * @param hashStart The hash start
      */

@@ -75,7 +75,7 @@ public interface LoginCounterMBean {
      * Gets the time stamp of last login for specified user for given client.
      * <p>
      * The number of milliseconds since January 1, 1970, 00:00:00 GMT.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param client The client identifier

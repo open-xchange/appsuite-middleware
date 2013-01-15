@@ -61,19 +61,19 @@ import com.openexchange.tools.session.ServerSession;
  *
  */
 public interface MessagingNewService {
-    
+
     /**
      * Fetch the user configuration for the user identified by the {@link Session} object
-     * 
+     *
      * @param session can't be null
      * @return An implementation of MessagingUserConfigurationInterface
      * @throws OXException if creating the configuration fails in some way.
      */
     public MessagingUserConfigurationInterface getUserConfiguration(final Session session) throws OXException;
-    
+
     /**
      * Gets the account transport for specified account identifier.
-     * 
+     *
      * @param accountId The account identifier (not used now
      * @param session The session providing needed user data
      * @return The account transport for specified account identifier

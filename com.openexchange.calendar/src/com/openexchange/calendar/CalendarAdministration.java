@@ -654,7 +654,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst6 = writecon.prepareStatement(delete_participant_rights.toString());
             pst6.addBatch();
             pst6.executeBatch();
-            
+
             com.openexchange.java.StringAllocator replaceOrganizerId = new com.openexchange.java.StringAllocator();
             replaceOrganizerId.append("UPDATE ");
             replaceOrganizerId.append(CalendarSql.DATES_TABLE_NAME);
@@ -675,7 +675,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst7 = writecon.prepareStatement(replaceOrganizerId.toString());
             pst7.addBatch();
             pst7.executeBatch();
-            
+
             com.openexchange.java.StringAllocator replacePrincipalId = new com.openexchange.java.StringAllocator();
             replacePrincipalId.append("UPDATE ");
             replacePrincipalId.append(CalendarSql.DATES_TABLE_NAME);

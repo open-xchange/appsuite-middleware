@@ -71,10 +71,10 @@ import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Restore extends BasicCommandlineOptions {
-	
+
     CLIOption filenameOption = null;
     CLIOption dryRun = null;
-    
+
     public static void main(final String[] args) {
         final Restore restore = new Restore();
         restore.start(args);
@@ -88,24 +88,24 @@ public class Restore extends BasicCommandlineOptions {
 
     public Restore() {
     }
-    
+
     public void start(final String[] args) {
-        final AdminParser parser = new AdminParser("restorecontext");    
-        
+        final AdminParser parser = new AdminParser("restorecontext");
+
         setOptions(parser);
-        
+
         // parse the command line
         try {
             parser.ownparse(args);
-            
+
             final Context ctx = contextparsing(parser);
-            
+
             final Credentials auth = credentialsparsing(parser);
-            
+
             // get rmi ref
             final OXContextRestoreInterface oxrestore = getContextRestoreInterface();
 
-            
+
             final String filenames = (String) parser.getOptionValue(filenameOption);
 
             final String[] filenamearray = filenames.split(",");
@@ -114,7 +114,7 @@ public class Restore extends BasicCommandlineOptions {
             } else {
                 System.out.println(oxrestore.restore(ctx, filenamearray, auth, true));
             }
-            
+
             sysexit(0);
         } catch (CLIParseException e) {
             printError("Unable to parse the command line: " + e.getMessage(), parser);

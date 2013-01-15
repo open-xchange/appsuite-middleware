@@ -65,10 +65,10 @@ import static com.openexchange.time.TimeTools.D;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FilterParserTest extends TestCase {
-    
-    
+
+
     public void testParseTimeRangeQueryStartAndEnd() throws Exception {
-        String filterDef = 
+        String filterDef =
         "<filter xmlns='urn:ietf:params:xml:ns:caldav'>"+
         "   <comp-filter name='VCALENDAR'>"+
         "       <comp-filter name='VEVENT'>"+
@@ -76,45 +76,45 @@ public class FilterParserTest extends TestCase {
         "       </comp-filter>"+
         "   </comp-filter>"+
         "</filter>";
-        
+
         Filter filter = parse(filterDef);
         assertNotNull(filter);
-        
+
         List<Filter> filters = filter.getFilters();
         assertNotNull(filters);
         assertEquals(1, filters.size());
-        
+
         CompFilter vCalendarQuery = (CompFilter) filters.get(0);
-        
+
         assertEquals("VCALENDAR", vCalendarQuery.getName());
-        
+
         filters = vCalendarQuery.getFilters();
         assertNotNull(filters);
         assertEquals(1, filters.size());
-        
+
         CompFilter vEventQuery = (CompFilter) filters.get(0);
         assertEquals("VEVENT", vEventQuery.getName());
-        
+
         filters = vEventQuery.getFilters();
         assertNotNull(filters);
         assertEquals(1, filters.size());
-        
+
         TimeRange range = (TimeRange) filters.get(0);
-        
+
         assertEquals(D("11.09.2011 22:00").getTime(), range.getStart());
         assertEquals(D("11.09.2012 22:00").getTime(), range.getEnd());
-        
-        
+
+
     }
 
     private Filter parse(String filterDef) throws JDOMException, IOException, WebdavProtocolException {
         Element rootElement = new SAXBuilder().build(new StringReader(filterDef)).getRootElement();
-        
+
         return new FilterParser().parse(rootElement);
     }
 
     public void testParseTimeRangeQueryStartOnly() throws Exception {
-        String filterDef = 
+        String filterDef =
             "<filter xmlns='urn:ietf:params:xml:ns:caldav'>"+
             "   <comp-filter name='VCALENDAR'>"+
             "       <comp-filter name='VEVENT'>"+
@@ -122,31 +122,31 @@ public class FilterParserTest extends TestCase {
             "       </comp-filter>"+
             "   </comp-filter>"+
             "</filter>";
-            
+
             Filter filter = parse(filterDef);
             assertNotNull(filter);
-            
+
             List<Filter> filters = filter.getFilters();
             assertNotNull(filters);
             assertEquals(1, filters.size());
-            
+
             CompFilter vCalendarQuery = (CompFilter) filters.get(0);
-            
+
             assertEquals("VCALENDAR", vCalendarQuery.getName());
-            
+
             filters = vCalendarQuery.getFilters();
             assertNotNull(filters);
             assertEquals(1, filters.size());
-            
+
             CompFilter vEventQuery = (CompFilter) filters.get(0);
             assertEquals("VEVENT", vEventQuery.getName());
-            
+
             filters = vEventQuery.getFilters();
             assertNotNull(filters);
             assertEquals(1, filters.size());
-            
+
             TimeRange range = (TimeRange) filters.get(0);
-            
+
             assertEquals(D("09.08.2011 22:00").getTime(), range.getStart());
             assertEquals(TimeRange.NOT_SET, range.getEnd());
     }
@@ -155,11 +155,11 @@ public class FilterParserTest extends TestCase {
     // We'll build these if and when they are needed
     /*
     public void testParseIsNotDefined() {
-        
+
     }
-    
+
     public void testParsePropFilter() {
-        
+
     }*/
-    
+
 }

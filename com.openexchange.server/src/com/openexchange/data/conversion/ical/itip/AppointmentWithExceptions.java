@@ -57,7 +57,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link AppointmentWithExceptions}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AppointmentWithExceptions {
@@ -66,7 +66,7 @@ public class AppointmentWithExceptions {
     private Appointment appointment;
 
     private final List<CalendarDataObject> exceptions;
-    
+
     /**
      * Initializes a new {@link AppointmentWithExceptions}.
      */
@@ -82,11 +82,11 @@ public class AppointmentWithExceptions {
     public void setAppointment(CalendarDataObject appointment) {
         this.cdao = appointment;
     }
-    
+
     public void setAppointment(Appointment appointment) {
         this.appointment = appointment;
     }
-    
+
     public Appointment getAppointment() {
         if (appointment == null) {
             return cdao;
@@ -97,7 +97,7 @@ public class AppointmentWithExceptions {
     public boolean addException(CalendarDataObject exception) {
         return exceptions.add(exception);
     }
-    
+
     public boolean addException(Appointment exception) {
         CalendarDataObject copy = new CalendarDataObject();
         for (int i : Appointment.ALL_COLUMNS) {

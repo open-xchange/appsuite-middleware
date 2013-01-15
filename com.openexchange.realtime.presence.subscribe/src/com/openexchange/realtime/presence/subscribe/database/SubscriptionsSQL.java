@@ -75,7 +75,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SubscriptionsSQL}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class SubscriptionsSQL {

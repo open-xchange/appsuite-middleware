@@ -56,7 +56,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PresenceStateToJSONConverter}
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresenceStateToJSONConverter extends AbstractPOJOConverter {

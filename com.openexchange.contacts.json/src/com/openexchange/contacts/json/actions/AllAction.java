@@ -98,12 +98,12 @@ public class AllAction extends ContactAction {
         boolean excludeAdmin = request.isExcludeAdmin();
         int adminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
         ContactField[] fields = excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields();
-//        List<String> folderIDs = null != request.optFolderID() ? Arrays.asList(new String[] { request.optFolderID() }) : null; 
+//        List<String> folderIDs = null != request.optFolderID() ? Arrays.asList(new String[] { request.optFolderID() }) : null;
         try {
             if (null == request.optFolderID()) {
                 searchIterator = getContactService().getAllContacts(request.getSession(), fields, request.getSortOptions());
             } else {
-                searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), fields, 
+                searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), fields,
                     request.getSortOptions());
             }
             while (searchIterator.hasNext()) {
@@ -120,5 +120,5 @@ public class AllAction extends ContactAction {
         request.sortInternalIfNeeded(contacts);
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
- 
+
 }

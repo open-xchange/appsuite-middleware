@@ -55,9 +55,9 @@ import com.openexchange.groupware.tools.mappings.DefaultMapping;
 
 
 /**
- * {@link StringMapping} - Mapping implementation with a default 
- * <code>truncate</code> implementation. 
- * 
+ * {@link StringMapping} - Mapping implementation with a default
+ * <code>truncate</code> implementation.
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class StringMapping extends DefaultMapping<String, Contact> {
@@ -73,4 +73,4 @@ public abstract class StringMapping extends DefaultMapping<String, Contact> {
 	}
 
 }
- 
+

@@ -84,10 +84,10 @@ public abstract class SearchTerm<T> implements Serializable {
      * @return The pattern
      */
     public abstract T getPattern();
-    
+
     /**
      * Handles given visitor for this search term.
-     * 
+     *
      * @param visitor The visitor
      */
     public abstract void accept(SearchTermVisitor visitor);

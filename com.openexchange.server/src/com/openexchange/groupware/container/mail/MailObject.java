@@ -512,11 +512,11 @@ public class MailObject {
             if (internalRecipient) {
                 msg.setHeader(HEADER_X_OX_OBJECT, Integer.toString(objectId));
             }
-            
+
             if (internalRecipient && uid != null) {
             	msg.setHeader(HEADER_X_OX_UID, uid);
             }
-            
+
             if (internalRecipient && recurrenceDatePosition != 0) {
             	msg.setHeader(HEADER_X_OX_RECURRENCE_DATE, String.valueOf(recurrenceDatePosition));
             }
@@ -618,11 +618,11 @@ public class MailObject {
     public void setSubject(final String subject) {
         this.subject = subject;
     }
-    
+
     public void setUid(final String uid) {
 		this.uid = uid;
 	}
-    
+
     public String getUid() {
 		return uid;
 	}
@@ -630,7 +630,7 @@ public class MailObject {
     public void setRecurrenceDatePosition(final long time) {
     	this.recurrenceDatePosition = time;
 	}
-    
+
     public long getRecurrenceDatePosition() {
 		return recurrenceDatePosition;
 	}

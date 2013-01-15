@@ -82,7 +82,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
  * {@link CalDAVFolderCollection}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @param <T>
  */
@@ -90,37 +90,37 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
 
     protected static final int NO_ORDER = -1;
     private static final Pattern OBJECT_ID_PATTERN = Pattern.compile("^\\d+$");
-    
+
     protected GroupwareCaldavFactory factory;
 
     public CalDAVFolderCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder) throws OXException {
         this(factory, url, folder, NO_ORDER);
     }
-    
+
     public CalDAVFolderCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder);
         this.factory = factory;
-        includeProperties(new SupportedReportSet(), new MinDateTime(this), new MaxDateTime(this));    
+        includeProperties(new SupportedReportSet(), new MinDateTime(this), new MaxDateTime(this));
         if (NO_ORDER != order) {
             includeProperties(new CalendarOrder(order));
         }
     }
 
     protected abstract boolean isSupported(T object) throws OXException;
-    
+
     @Override
     protected String getFileExtension() {
         return CalDAVResource.EXTENSION_ICS;
-    }    
-    
+    }
+
     public Date getIntervalStart() {
         return factory.getState().getMinDateTime();
     }
-    
+
     public Date getIntervalEnd() {
         return factory.getState().getMaxDateTime();
     }
-    
+
     @Override
     public User getOwner() throws OXException {
         if (PrivateType.getInstance().equals(this.folder.getType())) {
@@ -131,16 +131,16 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
                     return factory.resolveUser(permission.getEntity());
                 }
             }
-        }         
+        }
         return null;
     }
-    
+
     protected static <T extends CalendarObject>boolean isInInterval(T object, Date intervalStart, Date intervalEnd) {
         return null != object &&
             (null == object.getEndDate() || object.getEndDate().after(intervalStart)) &&
             (null == object.getStartDate() || object.getStartDate().before(intervalEnd));
     }
-    
+
     protected List<T> filter(SearchIterator<T> searchIterator) throws OXException {
         List<T> list = new ArrayList<T>();
         if (null != searchIterator) {
@@ -153,7 +153,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
                 }
             } finally {
                 searchIterator.close();
-            } 
+            }
         }
         return list;
     }
@@ -165,7 +165,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             /*
              * try filename and uid properties
              */
-            for (T t : objects) { 
+            for (T t : objects) {
                 if (resourceName.equals(t.getFilename()) || resourceName.equals(t.getUid())) {
                     return t;
                 }
@@ -194,7 +194,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     public String getResourceType() throws WebdavProtocolException {
         return super.getResourceType() + CaldavProtocol.CALENDAR;
     }
-    
+
     @Override
     public String getDisplayName() throws WebdavProtocolException {
         Locale locale = this.factory.getUser().getLocale();
@@ -204,9 +204,9 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             return String.format("%s (%s)", name, ownerName);
         } else {
             return name;
-        }       
+        }
     }
-    
+
     @Override
     public void setDisplayName(String displayName) throws WebdavProtocolException {
         if (false == this.folder.isDefault() && PrivateType.getInstance().equals(this.folder.getType())) {
@@ -220,7 +220,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             throw protocolException(HttpServletResponse.SC_FORBIDDEN);
         }
     }
-    
+
     @Override
     protected void internalDelete() throws WebdavProtocolException {
         if (null == this.folder) {
@@ -229,16 +229,16 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             throw protocolException(HttpServletResponse.SC_FORBIDDEN);
         } else {
             try {
-                factory.getFolderService().deleteFolder(factory.getState().getTreeID(), this.folder.getID(), 
+                factory.getFolderService().deleteFolder(factory.getState().getTreeID(), this.folder.getID(),
                     this.folder.getLastModifiedUTC(), factory.getSession());
             } catch (OXException e) {
                 throw protocolException(HttpServletResponse.SC_FORBIDDEN);
-            }           
-        }        
+            }
+        }
     }
-    
+
     protected abstract List<T> getObjectsInRange(Date from, Date until) throws OXException;
-    
+
     private static FilterAnalyzer VEVENT_RANGE_QUERY_ANALYZER = new FilterAnalyzerBuilder()
         .compFilter("VCALENDAR")
             .compFilter("VEVENT")
@@ -255,7 +255,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         .end()
     .build();
 
-    
+
     @Override
     public List<WebdavResource> filter(Filter filter) throws WebdavProtocolException {
         List<Object> arguments = new ArrayList<Object>(2);
@@ -278,7 +278,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
                         resources.add(createResource(object, constructPathForChildResource(object)));
                     }
                     return resources;
-                }            
+                }
             } catch (OXException e) {
                 throw protocolException(e);
             }
@@ -286,7 +286,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             throw protocolException(HttpServletResponse.SC_NOT_IMPLEMENTED);
         }
     }
-    
+
     private static Date toDate(Object object) {
         long tstamp = (Long) object;
         if (tstamp == -1) {
@@ -294,7 +294,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         }
         return new Date(tstamp);
     }
-    
+
     private String getOwnerName() {
         User owner = null;
         try {

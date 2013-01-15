@@ -94,7 +94,7 @@ public final class SoapResellerActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         final BundleContext context = this.context;
         final ServiceTrackerCustomizer<Remote, Remote> trackerCustomizer = new ServiceTrackerCustomizer<Remote, Remote>() {
-            
+
             @Override
             public void removedService(final ServiceReference<Remote> reference, final Remote service) {
                 if (service instanceof OXResellerInterface) {
@@ -118,12 +118,12 @@ public final class SoapResellerActivator extends HousekeepingActivator {
                     context.ungetService(reference);
                 }
             }
-            
+
             @Override
             public void modifiedService(final ServiceReference<Remote> reference, final Remote service) {
                 // Ignore
             }
-            
+
             @Override
             public Remote addingService(final ServiceReference<Remote> reference) {
                 final Remote service = context.getService(reference);

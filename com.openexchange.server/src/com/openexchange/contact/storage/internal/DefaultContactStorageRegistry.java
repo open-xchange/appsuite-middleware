@@ -64,8 +64,8 @@ import com.openexchange.session.Session;
  */
 public final class DefaultContactStorageRegistry implements ContactStorageRegistry {
 
-    private final List<ContactStorage> knownStorages;    
-    
+    private final List<ContactStorage> knownStorages;
+
     /**
      * Initializes a new {@link DefaultContactStorageRegistry}.
      */
@@ -86,28 +86,28 @@ public final class DefaultContactStorageRegistry implements ContactStorageRegist
         }
         return contactStorage;
     }
-    
+
     @Override
     public List<ContactStorage> getStorages(Session session) throws OXException {
     	return Collections.unmodifiableList(knownStorages);
     }
-    
+
     /**
      * Adds a contact storage to the registry.
-     * 
+     *
      * @param storage the storage to add
      */
     public void addStorage(final ContactStorage storage) {
         this.knownStorages.add(storage);
     }
-    
+
     /**
      * Removes a storage from the registry.
-     * 
+     *
      * @param storage the storage to remove
      */
     public void removeStorage(final ContactStorage storage) {
-        this.knownStorages.remove(storage);        
+        this.knownStorages.remove(storage);
     }
 
 }

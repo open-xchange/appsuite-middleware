@@ -55,7 +55,7 @@ import java.util.concurrent.Semaphore;
 
 /**
  * {@link BoundedExecutor} - Accomplishes the saturation policy to make execute block when the work queue is full.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BoundedExecutor {
@@ -66,7 +66,7 @@ public final class BoundedExecutor {
 
     /**
      * Initializes a new {@link BoundedExecutor}.
-     * 
+     *
      * @param exec The executor to delegate execution to
      * @param bound The capacity boundary; actually the pool size plus the number of queued tasks you want to allow
      */
@@ -78,7 +78,7 @@ public final class BoundedExecutor {
 
     /**
      * Submits specified task to executor; waits if no queue space or worker thread is immediately available.
-     * 
+     *
      * @param command The command to submit
      * @throws InterruptedException If interrupted while waiting for queue space or thread to become available
      * @throws RejectedExecutionException If given command cannot be accepted for execution.

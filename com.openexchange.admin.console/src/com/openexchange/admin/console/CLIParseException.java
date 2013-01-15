@@ -53,7 +53,7 @@ import java.util.Arrays;
 
 /**
  * {@link CLIParseException} - Parsing command line failed.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CLIParseException extends CLIOptionException {
@@ -62,7 +62,7 @@ public class CLIParseException extends CLIOptionException {
 
     /**
      * Initializes a new {@link CLIParseException}.
-     * 
+     *
      * @param commandLine The command line which could not be parsed
      */
     public CLIParseException(final String[] commandLine) {
@@ -71,7 +71,7 @@ public class CLIParseException extends CLIOptionException {
 
     /**
      * Initializes a new {@link CLIParseException}.
-     * 
+     *
      * @param commandLine The command line which could not be parsed
      * @param cause The cause
      */

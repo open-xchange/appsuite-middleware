@@ -196,7 +196,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     private static final String PARTICIPANTS_IDENTIFIER_IN = " AND object_id IN ";
 
     private static final String UNION = " UNION ";
-    
+
     private static final String CAL_TABLE_NAME = "prg_dates";
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarMySQL.class));
@@ -209,7 +209,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     private static volatile AppointmentSqlFactoryService factory;
-    
+
     public static void setApppointmentSqlFactory(final AppointmentSqlFactoryService factory) {
         CalendarMySQL.factory = factory;
     }
@@ -1671,17 +1671,17 @@ public class CalendarMySQL implements CalendarSqlImp {
             pst.setInt(i++, cdao.getShownAs());
             pst.setInt(i++, I(cdao.getFullTime()));
             pst.setInt(i++, cdao.getNumberOfAttachments());
-            
+
             if (cdao.isExternalOrganizer()) {
                 int descMaxLength = DBUtils.getColumnSize(writecon, CAL_TABLE_NAME, "field01");
                 int locMaxLength = DBUtils.getColumnSize(writecon, CAL_TABLE_NAME, "field02");
-                
+
                 if (cdao.getTitle().length() > descMaxLength) {
                     pst.setString(i++, cdao.getTitle().substring(0, descMaxLength));
                 } else {
                     pst.setString(i++, cdao.getTitle());
                 }
-                
+
                 if (cdao.containsLocation()) {
                     if (cdao.getLocation().length() > locMaxLength) {
                         pst.setString(i++, cdao.getLocation().substring(0, locMaxLength));
@@ -1699,7 +1699,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     pst.setNull(i++, java.sql.Types.VARCHAR);
                 }
             }
-            
+
             if (cdao.containsNote()) {
                 pst.setString(i++, cdao.getNote());
             } else {
@@ -1731,19 +1731,19 @@ public class CalendarMySQL implements CalendarSqlImp {
             } else {
                 pst.setNull(i++, java.sql.Types.INTEGER);
             }
-            
+
             if (cdao.containsOrganizerId()) {
                 pst.setInt(i++, cdao.getOrganizerId());
             } else {
                 pst.setNull(i++, java.sql.Types.INTEGER);
             }
-            
+
             if (cdao.containsPrincipal()) {
                 pst.setString(i++, cdao.getPrincipal());
             } else {
                 pst.setNull(i++, java.sql.Types.VARCHAR);
             }
-            
+
             if (cdao.containsPrincipalId()) {
                 pst.setInt(i++, cdao.getPrincipalId());
             } else {
@@ -2496,24 +2496,24 @@ public class CalendarMySQL implements CalendarSqlImp {
     public final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException {
         return updateAppointment(cdao, edao, writecon, so, ctx, inFolder, clientLastModified, true, false);
     }
-    
+
     private boolean isForbiddenPrivateMoveToPublicFolder(CalendarDataObject cdao, CalendarDataObject edao) {
         if (!(cdao.getFolderMove() && cdao.getFolderType() == FolderObject.PUBLIC)) {
             return false;
         }
-        
+
         if (edao.getPrivateFlag() && !cdao.containsPrivateFlag()) {
             return true;
         }
-        
+
         if (edao.getPrivateFlag() && cdao.containsPrivateFlag() && cdao.getPrivateFlag()) {
             return true;
         }
-        
+
         if (!edao.getPrivateFlag() && cdao.containsPrivateFlag() && cdao.getPrivateFlag()) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -5313,19 +5313,19 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public int resolveUid(final Session session, final String uid) throws OXException {
-        return resolveByField(session, "uid", uid);        
+        return resolveByField(session, "uid", uid);
     }
 
     @Override
     public int resolveFilename(Session session, String filename) throws OXException {
-        return resolveByField(session, "filename", filename);        
+        return resolveByField(session, "filename", filename);
     }
-    
+
     /**
-     * Gets the object ID of an appointment whose value in a specific column matches another value. The comparison is case-sensitive, 
-     * and exceptions from recurring appointments are not taken into account. If there are more than one matches, the first one is 
-     * returned. 
-     * 
+     * Gets the object ID of an appointment whose value in a specific column matches another value. The comparison is case-sensitive,
+     * and exceptions from recurring appointments are not taken into account. If there are more than one matches, the first one is
+     * returned.
+     *
      * @param session The current session
      * @param columnName The column name
      * @param value The value to match

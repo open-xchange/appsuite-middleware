@@ -224,7 +224,7 @@ public final class LogProperties {
          * com.openexchange.database.schema
          */
         DATABASE_SCHEMA("com.openexchange.database.schema"),
-        
+
         ;
 
         private final String name;
@@ -234,7 +234,7 @@ public final class LogProperties {
 
         /**
          * Gets the name
-         * 
+         *
          * @return The name
          */
         public String getName() {
@@ -253,7 +253,7 @@ public final class LogProperties {
 
         /**
          * Gets the associated {@code Name} enum.
-         * 
+         *
          * @param sName The name string
          * @return The {@code Name} enum or <code>null</code>
          */
@@ -369,7 +369,7 @@ public final class LogProperties {
 
     /**
      * Clones the thread-local log properties.
-     * 
+     *
      * @param other The other thread
      */
     public static void cloneLogProperties(final Thread other) {
@@ -383,7 +383,7 @@ public final class LogProperties {
 
     /**
      * Gets the thread-local log property associated with specified name.
-     * 
+     *
      * @param name The property name
      * @return The log property or <code>null</code> if absent
      */
@@ -407,7 +407,7 @@ public final class LogProperties {
             getLogProperties().put(name, value);
         }
     }
-    
+
     /**
      * Get the thread local LogProperties and pretty-prints them into a Sting.
      * The String will contain one ore more lines formatted like:
@@ -415,7 +415,7 @@ public final class LogProperties {
      * "propertyName1=propertyValue1"
      * "propertyName2=propertyValue2"
      * "propertyName3=propertyValue3"
-     * </pre> 
+     * </pre>
      * where the properties are sorted alphabetically.
      */
     public static String getAndPrettyPrint() {

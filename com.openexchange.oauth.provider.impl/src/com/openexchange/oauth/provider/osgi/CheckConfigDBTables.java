@@ -81,7 +81,7 @@ public final class CheckConfigDBTables {
 
     /**
      * Checks needed OAuth provider tables in configDB.
-     * 
+     *
      * @throws OXException If check fails
      */
     public void checkTables() throws OXException {
@@ -106,12 +106,12 @@ public final class CheckConfigDBTables {
     }
 
     private void checkServiceProvider(final Connection con) throws SQLException {
-        final String createSql = "CREATE TABLE oauthServiceProvider (\n" + 
-            " id INT4 unsigned NOT NULL,\n" + 
-            " requestTokenUrl varchar(255) NOT NULL,\n" + 
-            " userAuthorizationUrl varchar(255) NOT NULL,\n" + 
-            " accessTokenURL varchar(255) DEFAULT NULL,\n" + 
-            " PRIMARY KEY (id)\n" + 
+        final String createSql = "CREATE TABLE oauthServiceProvider (\n" +
+            " id INT4 unsigned NOT NULL,\n" +
+            " requestTokenUrl varchar(255) NOT NULL,\n" +
+            " userAuthorizationUrl varchar(255) NOT NULL,\n" +
+            " accessTokenURL varchar(255) DEFAULT NULL,\n" +
+            " PRIMARY KEY (id)\n" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         createIfAbsent("oauthServiceProvider", createSql, con);
 
@@ -141,60 +141,60 @@ public final class CheckConfigDBTables {
     }
 
     private void checkConsumer(final Connection con) throws SQLException {
-        String createSql = "CREATE TABLE `oauthConsumer` (\n" + 
-        		" `id` INT4 unsigned NOT NULL,\n" + 
-        		" `providerId` INT4 unsigned NOT NULL,\n" + 
-        		" `key` varchar(255) NOT NULL,\n" + 
-        		" `secret` varchar(255) NOT NULL,\n" + 
-        		" `callbackUrl` varchar(255) DEFAULT NULL,\n" + 
-        		" `name` varchar(127) DEFAULT NULL,\n" + 
-        		" PRIMARY KEY (`id`),\n" + 
-        		" KEY `providerIndex` (`providerId`),\n" + 
-        		" KEY `keyIndex` (`key`)\n" + 
+        String createSql = "CREATE TABLE `oauthConsumer` (\n" +
+        		" `id` INT4 unsigned NOT NULL,\n" +
+        		" `providerId` INT4 unsigned NOT NULL,\n" +
+        		" `key` varchar(255) NOT NULL,\n" +
+        		" `secret` varchar(255) NOT NULL,\n" +
+        		" `callbackUrl` varchar(255) DEFAULT NULL,\n" +
+        		" `name` varchar(127) DEFAULT NULL,\n" +
+        		" PRIMARY KEY (`id`),\n" +
+        		" KEY `providerIndex` (`providerId`),\n" +
+        		" KEY `keyIndex` (`key`)\n" +
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         createIfAbsent("oauthConsumer", createSql, con);
 
-        createSql = "CREATE TABLE `oauthConsumerProperty` (\n" + 
-        		" `id` INT4 unsigned NOT NULL,\n" + 
-        		" `name` varchar(32) NOT NULL,\n" + 
-        		" `value` varchar(255) NOT NULL,\n" + 
-        		" PRIMARY KEY (`id`,`name`)\n" + 
+        createSql = "CREATE TABLE `oauthConsumerProperty` (\n" +
+        		" `id` INT4 unsigned NOT NULL,\n" +
+        		" `name` varchar(32) NOT NULL,\n" +
+        		" `value` varchar(255) NOT NULL,\n" +
+        		" PRIMARY KEY (`id`,`name`)\n" +
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         createIfAbsent("oauthConsumerProperty", createSql, con);
     }
 
     private void checkClient(final Connection con) throws SQLException {
-        String createSql = "CREATE TABLE `oauth2Client` (\n" + 
-                " `id` INT4 unsigned NOT NULL,\n" + 
-                " `providerId` INT4 unsigned NOT NULL,\n" + 
-                " `key` varchar(255) NOT NULL,\n" + 
-                " `secret` varchar(255) NOT NULL,\n" + 
-                " `callbackUrl` varchar(255) DEFAULT NULL,\n" + 
-                " `name` varchar(127) DEFAULT NULL,\n" + 
-                " PRIMARY KEY (`id`),\n" + 
-                " KEY `providerIndex` (`providerId`),\n" + 
-                " KEY `keyIndex` (`key`)\n" + 
+        String createSql = "CREATE TABLE `oauth2Client` (\n" +
+                " `id` INT4 unsigned NOT NULL,\n" +
+                " `providerId` INT4 unsigned NOT NULL,\n" +
+                " `key` varchar(255) NOT NULL,\n" +
+                " `secret` varchar(255) NOT NULL,\n" +
+                " `callbackUrl` varchar(255) DEFAULT NULL,\n" +
+                " `name` varchar(127) DEFAULT NULL,\n" +
+                " PRIMARY KEY (`id`),\n" +
+                " KEY `providerIndex` (`providerId`),\n" +
+                " KEY `keyIndex` (`key`)\n" +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         createIfAbsent("oauth2Client", createSql, con);
 
-        createSql = "CREATE TABLE `oauth2ClientProperty` (\n" + 
-                " `id` INT4 unsigned NOT NULL,\n" + 
-                " `name` varchar(32) NOT NULL,\n" + 
-                " `value` varchar(255) NOT NULL,\n" + 
-                " PRIMARY KEY (`id`,`name`)\n" + 
+        createSql = "CREATE TABLE `oauth2ClientProperty` (\n" +
+                " `id` INT4 unsigned NOT NULL,\n" +
+                " `name` varchar(32) NOT NULL,\n" +
+                " `value` varchar(255) NOT NULL,\n" +
+                " PRIMARY KEY (`id`,`name`)\n" +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         createIfAbsent("oauth2ClientProperty", createSql, con);
     }
 
     private void checkNonce(final Connection con) throws SQLException {
-        final String createSql = "\n" + 
-        		"CREATE TABLE `oauthNonce` (\n" + 
-        		"  `nonce` varchar(255) NOT NULL,\n" + 
-        		"  PRIMARY KEY  (`nonce`)\n" + 
+        final String createSql = "\n" +
+        		"CREATE TABLE `oauthNonce` (\n" +
+        		"  `nonce` varchar(255) NOT NULL,\n" +
+        		"  PRIMARY KEY  (`nonce`)\n" +
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         createIfAbsent("oauthNonce", createSql, con);
     }
-  
+
     private void createIfAbsent(final String name, final String createSql, final Connection con) throws SQLException {
         if (!tableExists(con, name)) {
             Statement stmt = null;

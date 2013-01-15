@@ -458,7 +458,7 @@ public final class vcard extends PermissionServlet {
 
                             final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
                             if (contactObj.containsObjectID()) {
-                            	contactService.updateContact(session, Integer.toString(contactfolder_id), Integer.toString(object_id), 
+                            	contactService.updateContact(session, Integer.toString(contactfolder_id), Integer.toString(object_id),
                             			contactObj, timestamp);
                             } else {
                             	contactService.createContact(session, Integer.toString(contactfolder_id), contactObj);
@@ -470,7 +470,7 @@ public final class vcard extends PermissionServlet {
 
                             final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
                             if (contactObj.containsObjectID()) {
-                            	contactService.updateContact(session, Integer.toString(contactfolder_id), 
+                            	contactService.updateContact(session, Integer.toString(contactfolder_id),
                             			Integer.toString(contactObj.getObjectID()), contactObj, timestamp);
                             } else {
                             	contactService.createContact(session, Integer.toString(contactfolder_id), contactObj);
@@ -506,7 +506,7 @@ public final class vcard extends PermissionServlet {
                     if (enabledelete) {
                     	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
                         try {
-                        	contactService.deleteContact(session, Integer.toString(contactfolder_id), Integer.toString(object_id), 
+                        	contactService.deleteContact(session, Integer.toString(contactfolder_id), Integer.toString(object_id),
                         			timestamp);
                         } catch (final OXException exc) {
                             if (exc.isNotFound()) {

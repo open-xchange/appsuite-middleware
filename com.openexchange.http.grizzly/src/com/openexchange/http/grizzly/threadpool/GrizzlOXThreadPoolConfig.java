@@ -59,7 +59,7 @@ import org.glassfish.grizzly.utils.DelayedExecutor;
 
 /**
  * {@link GrizzlOXThreadPoolConfig} Configuration for the GrizzlOXThreadPool.
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class GrizzlOXThreadPoolConfig extends ThreadPoolConfig {
@@ -80,7 +80,7 @@ public class GrizzlOXThreadPoolConfig extends ThreadPoolConfig {
 
     /**
      * Initializes a new {@link GrizzlOXThreadPoolConfig}.
-     * 
+     *
      * @param poolName The name of pool configured via this ThreadPoolConfing
      * @param corePoolSize The minimum pool size
      * @param maxPoolSize The maximum pool size
@@ -112,7 +112,7 @@ public class GrizzlOXThreadPoolConfig extends ThreadPoolConfig {
 
     /**
      * Gets the default
-     * 
+     *
      * @return The default
      */
     public static ThreadPoolConfig getDefault() {

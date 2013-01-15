@@ -60,7 +60,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Since all data is held in RAM, this class should only be used as a singleton.
  * This pretty much restricts it to only storing publicly accessible files
  * (e.g. the UI).
- * 
+ *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class FileCache {
@@ -117,7 +117,7 @@ public class FileCache {
         }
         return entry.getData();
     }
-    
+
     /**
      * Clears the cache.
      */

@@ -64,7 +64,7 @@ import com.openexchange.java.Streams;
 /**
  * {@link AbstractTextXtractService} - The abstract {@link TextXtractService} class providing default implementation for
  * {@link #extractFrom(String, String)} and {@link #extractFromResource(String, String)}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractTextXtractService implements TextXtractService {

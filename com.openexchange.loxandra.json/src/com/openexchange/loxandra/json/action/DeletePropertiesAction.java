@@ -67,8 +67,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
  */
-@Action(method = RequestMethod.PUT, name = "deleteProperties", description = "Delete unnamed properties of an EAV Contact.", parameters = { 
-		@Parameter(name = "uuid"), 
+@Action(method = RequestMethod.PUT, name = "deleteProperties", description = "Delete unnamed properties of an EAV Contact.", parameters = {
+		@Parameter(name = "uuid"),
 		@Parameter(name = "unnamed", description = "JSONArray with unnamed properties to be deleted from the EAV Contact" )})
 public class DeletePropertiesAction extends AbstractAction {
 
@@ -95,8 +95,8 @@ public class DeletePropertiesAction extends AbstractAction {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
+
 		getContactService().getEAVContactService().deleteProperties(uuid, prop);
 		return new AJAXRequestResult(new JSONObject());
 	}
-} 
+}

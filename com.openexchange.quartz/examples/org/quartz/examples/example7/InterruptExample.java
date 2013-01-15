@@ -1,18 +1,18 @@
-/* 
- * Copyright 2005 - 2009 Terracotta, Inc. 
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
- * use this file except in compliance with the License. You may obtain a copy 
- * of the License at 
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations 
+/*
+ * Copyright 2005 - 2009 Terracotta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
  * under the License.
- * 
+ *
  */
 
 package org.quartz.examples.example7;
@@ -34,7 +34,7 @@ import org.quartz.impl.StdSchedulerFactory;
  * misfire instructions affect the firings of triggers of <code>StatefulJob</code>
  * s - when the jobs take longer to execute that the frequency of the trigger's
  * repitition.
- * 
+ *
  * <p>
  * While the example is running, you should note that there are two triggers
  * with identical schedules, firing identical jobs. The triggers "want" to fire
@@ -49,7 +49,7 @@ import org.quartz.impl.StdSchedulerFactory;
  * missed) - so that it does not refire immediately, but rather at the next
  * scheduled time.
  * </p>
- * 
+ *
  * @author <a href="mailto:bonhamcm@thirdeyeconsulting.com">Chris Bonham</a>
  */
 public class InterruptExample {
@@ -71,8 +71,8 @@ public class InterruptExample {
         JobDetail job = newJob(DumbInterruptableJob.class)
             .withIdentity("interruptableJob1", "group1")
             .build();
-        
-        SimpleTrigger trigger = newTrigger() 
+
+        SimpleTrigger trigger = newTrigger()
             .withIdentity("trigger1", "group1")
             .startAt(startTime)
             .withSchedule(simpleSchedule()
@@ -89,18 +89,18 @@ public class InterruptExample {
         // the scheduler has been started)
         sched.start();
         System.out.println("------- Started Scheduler -----------------");
-        
+
 
         System.out.println("------- Starting loop to interrupt job every 7 seconds ----------");
         for(int i=0; i < 50; i++) {
             try {
-                Thread.sleep(7000L); 
+                Thread.sleep(7000L);
                 // tell the scheduler to interrupt our job
                 sched.interrupt(job.getKey());
             } catch (Exception e) {
             }
         }
-        
+
         System.out.println("------- Shutting Down ---------------------");
 
         sched.shutdown(true);

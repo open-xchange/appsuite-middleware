@@ -51,14 +51,14 @@ package com.openexchange.tools.oxfolder.memory;
 
 /**
  * {@link Condition} - Provides {@link #fulfilled(Permission)} method.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Condition {
 
     /**
      * Checks if specified permission fulfills this condition.
-     * 
+     *
      * @param p The permission to check
      * @return <code>true</code> if permission fulfills this condition; otherwise <code>false</code>
      */

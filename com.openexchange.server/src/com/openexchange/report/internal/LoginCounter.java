@@ -119,7 +119,7 @@ public class LoginCounter implements LoginCounterMBean {
                 stmt.setString(3, "client:" + client);
                 rs = stmt.executeQuery();
             }
-            
+
             stmt = con.prepareStatement("SELECT value FROM user_attribute WHERE cid=? AND id=? AND name=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);

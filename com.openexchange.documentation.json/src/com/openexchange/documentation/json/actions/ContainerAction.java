@@ -66,9 +66,9 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Action(method = RequestMethod.GET, name = "container", description = "Get a container's description.", parameters = { 
+@Action(method = RequestMethod.GET, name = "container", description = "Get a container's description.", parameters = {
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-		@Parameter(name = "name", description = "The name of the container.") 
+		@Parameter(name = "name", description = "The name of the container.")
 }, responseDescription = "An object containing the requested container's description.")
 public final class ContainerAction extends DocumentationAction {
 

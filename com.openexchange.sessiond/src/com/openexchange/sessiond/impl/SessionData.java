@@ -585,7 +585,7 @@ final class SessionData {
 
     /**
      * Adds specified session.
-     * 
+     *
      * @param session The session to add
      * @param noLimit <code>true</code> to add without respect to limitation; otherwise <code>false</code> to honor limitation
      * @return The associated {@link SessionControl} instance
@@ -597,7 +597,7 @@ final class SessionData {
 
     /**
      * Adds specified session.
-     * 
+     *
      * @param session The session to add
      * @param noLimit <code>true</code> to add without respect to limitation; otherwise <code>false</code> to honor limitation
      * @param addIfAbsent <code>true</code> to perform an add-if-absent operation; otherwise <code>false</code> to fail on duplicate session
@@ -1072,7 +1072,7 @@ final class SessionData {
 
     /**
      * Adds the specified timer service.
-     * 
+     *
      * @param service The timer service
      */
     public void addTimerService(final TimerService service) {
@@ -1081,7 +1081,7 @@ final class SessionData {
 
     /**
      * Drops specified volatile session.
-     * 
+     *
      * @param sessionId The session identifier
      */
     protected void dropVolatileSession(final String sessionId) {

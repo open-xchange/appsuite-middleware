@@ -12,9 +12,9 @@ import com.openexchange.solr.internal.Services;
 import com.openexchange.tools.sql.DBUtils;
 
 public class SolrCoresCreateTableTask extends UpdateTaskAdapter {
-	
+
 	private final SolrCoresCreateTableService createTableService;
-	
+
 
 	public SolrCoresCreateTableTask(final SolrCoresCreateTableService createTableService) {
 		super();
@@ -41,7 +41,7 @@ public class SolrCoresCreateTableTask extends UpdateTaskAdapter {
                     } finally {
                         DBUtils.closeSQLStuff(stmt);
                     }
-				}				
+				}
 			}
 			con.commit();
 		} catch (SQLException e) {

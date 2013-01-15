@@ -52,13 +52,13 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  * @author choeger
- * 
+ *
  */
 public class NetUtil {
 
     /**
      * INTERNAL: check if address or mask is a valid dotted decimal notation
-     * 
+     *
      * @param qdot
      * @return
      */
@@ -84,7 +84,7 @@ public class NetUtil {
 
     /**
      * INTERNAL: convert ddn string representation to int array ddn
-     * 
+     *
      * @param ddn
      * @return
      */
@@ -99,7 +99,7 @@ public class NetUtil {
 
     /**
      * INTERNAL: convert ddn to long
-     * 
+     *
      * @param ddn
      * @return
      */
@@ -112,11 +112,11 @@ public class NetUtil {
         }
         return ret;
     }
-    
+
     /**
      * check if broadcast address matches with given network and netmask
      * network could also be an ip address fitting in the network
-     * 
+     *
      * @param broadcast
      * @param net
      * @param mask
@@ -133,19 +133,19 @@ public class NetUtil {
         long lmask  = stringDDN2Long(mask);
         long lnet   = stringDDN2Long(net);
         long lbcast = stringDDN2Long(broadcast);
-        
+
         long invlmask = 0x00000000ffffff & ~lmask;
-        
+
         if( (lnet & lmask | invlmask) == lbcast ) {
             return true;
         }
 
         return false;
     }
-    
+
     /**
      * check if mask is a valid netmask in dotted decimal notation.
-     * 
+     *
      * @param mask
      * @return
      */
@@ -178,7 +178,7 @@ public class NetUtil {
 
     /**
      * check if address is a valid ip address in dotted decimal notation.
-     * 
+     *
      * @param address
      * @return
      */
@@ -192,7 +192,7 @@ public class NetUtil {
     /**
      * check if ipmask is a valid network definition either in cidr or dotted
      * decimal notation.
-     * 
+     *
      * @param ipmask
      * @return
      */
@@ -230,11 +230,11 @@ public class NetUtil {
             throw new InvalidDataException(ipmask+" is not a valid network definition");
         }
     }
-    
+
     /**
      * return dotted decimal notation representation as a String of the CIDR
      * representation of the netmask
-     * 
+     *
      * @param cidr
      * @return
      */

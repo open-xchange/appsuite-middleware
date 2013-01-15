@@ -58,7 +58,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * Error codes for task exceptions.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum TaskExceptionCode implements OXExceptionCode {
@@ -300,7 +300,7 @@ public enum TaskExceptionCode implements OXExceptionCode {
 
     private OXException specials(OXException exc) {
         switch(this) {
-        case TASK_NOT_FOUND: 
+        case TASK_NOT_FOUND:
             exc.setGeneric(Generic.NOT_FOUND);
             break;
         case NO_PERMISSION: case NO_WRITE_PERMISSION:

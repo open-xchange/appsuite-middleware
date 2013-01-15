@@ -68,7 +68,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * {@link ChangeModuleAccessGlobal}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ChangeModuleAccessGlobal extends UserAbstraction {
@@ -99,7 +99,7 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
 
     /**
      * Initializes a new {@link ChangeModuleAccessGlobal}.
-     * 
+     *
      * @param args
      */
     public ChangeModuleAccessGlobal(String[] args) {

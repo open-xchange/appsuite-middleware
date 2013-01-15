@@ -57,7 +57,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link DBJSlobStorageExceptionCode}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum DBJSlobStorageExceptionCode implements OXExceptionCode {

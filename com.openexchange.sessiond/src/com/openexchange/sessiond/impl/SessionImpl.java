@@ -188,7 +188,7 @@ public final class SessionImpl implements PutIfAbsent {
 
     /**
      * Logs differences between this and specified session.
-     * 
+     *
      * @param s The session to compare with
      * @param logger The logger
      */
@@ -215,7 +215,7 @@ public final class SessionImpl implements PutIfAbsent {
 
     /**
      * Whether specified session is considered equal to this one.
-     * 
+     *
      * @param s The other session
      * @return <code>true</code> if equal; otherwise <code>false</code>
      */
@@ -483,7 +483,7 @@ public final class SessionImpl implements PutIfAbsent {
     public void setClient(final String client) {
         this.client = client;
     }
-    
+
     /**
      * Gets the volatile flag
      *
@@ -495,7 +495,7 @@ public final class SessionImpl implements PutIfAbsent {
 
     /**
      * Sets the volatile flag.
-     * 
+     *
      * @param isVolatile The volatile flag
      */
     public void setVolatile(final boolean isVolatile) {

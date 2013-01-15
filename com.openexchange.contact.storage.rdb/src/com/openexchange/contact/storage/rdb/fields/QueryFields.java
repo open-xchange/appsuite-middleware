@@ -57,15 +57,15 @@ import java.util.Set;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * {@link QueryFields} - Determines which {@link ContactField}s are needed in database query statements from each of the database 
- * tables where contact information is stored. By adding the appropriate fields on demand, it also ensures that the 
- * <code>ContactField.NUMBER_OF_IMAGES</code> and <code>ContactField.NUMBER_OF_DISTRIBUTIONLIST</code> are queried automatically when 
- * needed.    
+ * {@link QueryFields} - Determines which {@link ContactField}s are needed in database query statements from each of the database
+ * tables where contact information is stored. By adding the appropriate fields on demand, it also ensures that the
+ * <code>ContactField.NUMBER_OF_IMAGES</code> and <code>ContactField.NUMBER_OF_DISTRIBUTIONLIST</code> are queried automatically when
+ * needed.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class QueryFields {
-    
+
     private ContactField[] contactDataFields;
     private ContactField[] imageDataFields;
     private DistListMemberField[] distListDataFields;
@@ -73,19 +73,19 @@ public class QueryFields {
     private boolean hasContactData;
     private boolean hasDistListData;
     private boolean hasAttachmentData;
-    
+
     /**
      * Initializes a new {@link QueryFields}.
-     * 
+     *
      * @param fields
      */
     public QueryFields(final ContactField[] fields, ContactField...mandatoryFields) {
         this.update(fields, mandatoryFields);
     }
-    
+
     /**
-     * Updates the current instance with the supplied fields. 
-     * 
+     * Updates the current instance with the supplied fields.
+     *
      * @param fields
      */
     public void update(final ContactField[] fields, ContactField...mandatoryFields) {
@@ -128,42 +128,42 @@ public class QueryFields {
         	imageDataFieldsSet.add(ContactField.OBJECT_ID);
         	this.hasImageData = true;
         	this.imageDataFields = imageDataFieldsSet.toArray(new ContactField[imageDataFieldsSet.size()]);
-        	contactDataFieldsSet.add(ContactField.NUMBER_OF_IMAGES);        	
+        	contactDataFieldsSet.add(ContactField.NUMBER_OF_IMAGES);
         }
         /*
          * check distlist data fields
          */
         if (this.hasDistListData) {
         	this.distListDataFields = Fields.DISTLIST_DATABASE_ARRAY;
-        	contactDataFieldsSet.add(ContactField.NUMBER_OF_DISTRIBUTIONLIST);        	
+        	contactDataFieldsSet.add(ContactField.NUMBER_OF_DISTRIBUTIONLIST);
         }
         /*
          * check attachment data fields
          */
         if (this.hasAttachmentData) {
-        	contactDataFieldsSet.add(ContactField.NUMBER_OF_ATTACHMENTS);        	
+        	contactDataFieldsSet.add(ContactField.NUMBER_OF_ATTACHMENTS);
         }
         /*
-         * check contact data fields        
+         * check contact data fields
          */
         if (0 < contactDataFieldsSet.size()) {
         	this.contactDataFields = contactDataFieldsSet.toArray(new ContactField[contactDataFieldsSet.size()]);
         	this.hasContactData = true;
         }
     }
-    
+
     /**
      * Gets the contact data fields.
-     * 
+     *
      * @return the fields
      */
     public ContactField[] getContactDataFields() {
         return this.contactDataFields;
     }
-    
+
     /**
      * Gets the image data fields.
-     * 
+     *
      * @return the fields
      */
     public ContactField[] getImageDataFields() {
@@ -172,8 +172,8 @@ public class QueryFields {
 
     /**
      * Gets the image data fields.
-     * 
-     * @param forUpdate whether the fields should be used for an update or not 
+     *
+     * @param forUpdate whether the fields should be used for an update or not
      * @return the fields
      */
     public ContactField[] getImageDataFields(boolean forUpdate) {
@@ -189,7 +189,7 @@ public class QueryFields {
     		return this.imageDataFields;
     	}
     }
-    
+
     public ContactField[] getContactDataFields(boolean forUpdate) {
     	if (forUpdate) {
     		List<ContactField> updateFields = new ArrayList<ContactField>();
@@ -203,20 +203,20 @@ public class QueryFields {
     		return this.imageDataFields;
     	}
     }
-    
+
     /**
      * Gets the distribution list data fields.
-     * 
+     *
      * @return the fields
      */
     public DistListMemberField[] getDistListDataFields() {
         return this.distListDataFields;
-    }    
-    
+    }
+
     /**
-     * Gets a value indicating whether image data fields are present or not. 
-     *  
-     * @return <code>true</code>, if there are image data fields, 
+     * Gets a value indicating whether image data fields are present or not.
+     *
+     * @return <code>true</code>, if there are image data fields,
      * <code>false</code>, otherwise
      */
     public boolean hasImageData() {
@@ -224,9 +224,9 @@ public class QueryFields {
     }
 
     /**
-     * Gets a value indicating whether contact data fields are present or not. 
-     *  
-     * @return <code>true</code>, if there are contact data fields, 
+     * Gets a value indicating whether contact data fields are present or not.
+     *
+     * @return <code>true</code>, if there are contact data fields,
      * <code>false</code>, otherwise
      */
     public boolean hasContactData() {
@@ -234,10 +234,10 @@ public class QueryFields {
     }
 
     /**
-     * Gets a value indicating whether distribution list data fields are 
-     * present or not. 
-     *  
-     * @return <code>true</code>, if there are distribution list data fields, 
+     * Gets a value indicating whether distribution list data fields are
+     * present or not.
+     *
+     * @return <code>true</code>, if there are distribution list data fields,
      * <code>false</code>, otherwise
      */
     public boolean hasDistListData() {
@@ -245,10 +245,10 @@ public class QueryFields {
     }
 
     /**
-     * Gets a value indicating whether attachment data fields are present or 
-     * not. 
-     *  
-     * @return <code>true</code>, if there are attachment data fields, 
+     * Gets a value indicating whether attachment data fields are present or
+     * not.
+     *
+     * @return <code>true</code>, if there are attachment data fields,
      * <code>false</code>, otherwise
      */
     public boolean hasAttachmentData() {

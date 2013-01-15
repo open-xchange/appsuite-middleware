@@ -71,7 +71,7 @@ import com.openexchange.admin.soap.dataobjects.UserModuleAccess;
 
 /**
  * SOAP Service implementing RMI Interface OXContextInterface
- * 
+ *
  * @author choeger
  *
  */
@@ -87,7 +87,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#change(Context, Credentials)}
-     * 
+     *
      * @param ctx
      * @param auth
      * @throws RemoteException
@@ -108,7 +108,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#changeModuleAccess(Context, UserModuleAccess, Credentials)}
-     * 
+     *
      * @param ctx
      * @param access
      * @param auth
@@ -130,7 +130,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#changeModuleAccess(Context, String, Credentials)}
-     * 
+     *
      * @param ctx
      * @param access_combination_name
      * @param auth
@@ -152,7 +152,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#create(Context, User, Credentials)}
-     * 
+     *
      * @param ctx
      * @param admin_user
      * @param auth
@@ -175,7 +175,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#create(Context, User, String, Credentials)}
-     * 
+     *
      * @param ctx
      * @param admin_user
      * @param access_combination_name
@@ -199,7 +199,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#create(Context, User, UserModuleAccess, Credentials)}
-     * 
+     *
      * @param ctx
      * @param admin_user
      * @param access
@@ -223,7 +223,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#delete(Context, Credentials)}
-     * 
+     *
      * @param ctx
      * @param auth
      * @throws RemoteException
@@ -245,7 +245,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#disable(Context, Credentials)}
-     * 
+     *
      * @param ctx
      * @param auth
      * @throws RemoteException
@@ -268,7 +268,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#disableAll(Credentials)}
-     * 
+     *
      * @param auth
      * @throws RemoteException
      * @throws StorageException
@@ -288,7 +288,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#downgrade(Context, Credentials)}
-     * 
+     *
      * @param ctx
      * @param auth
      * @throws RemoteException
@@ -310,7 +310,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#enable(Context, Credentials)}
-     * 
+     *
      * @param ctx
      * @param auth
      * @throws RemoteException
@@ -331,7 +331,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#enableAll(Credentials)}
-     * 
+     *
      * @param auth
      * @throws RemoteException
      * @throws StorageException
@@ -349,7 +349,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#getAccessCombinationName(Context, Credentials)}
-     * 
+     *
      * @param ctx
      * @param auth
      * @return
@@ -371,7 +371,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#getData(Context, Credentials)}
-     * 
+     *
      * @param ctx
      * @param auth
      * @return
@@ -393,7 +393,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#getModuleAccess(Context, Credentials)}
-     * 
+     *
      * @param ctx
      * @param auth
      * @return
@@ -415,7 +415,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#list(String, Credentials)}
-     * 
+     *
      * @param search_pattern
      * @param auth
      * @return
@@ -436,7 +436,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#listAll(Credentials)}
-     * 
+     *
      * @param auth
      * @return
      * @throws RemoteException
@@ -456,7 +456,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#listByDatabase(Database, Credentials)}
-     * 
+     *
      * @param db
      * @param auth
      * @return
@@ -478,7 +478,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#listByFilestore(Filestore, Credentials)}
-     * 
+     *
      * @param fs
      * @param auth
      * @return
@@ -500,7 +500,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#moveContextDatabase(Context, Database, Credentials)}
-     * 
+     *
      * @param ctx
      * @param dst_database_id
      * @param auth
@@ -525,7 +525,7 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#moveContextFilestore(Context, Filestore, Credentials)}
-     * 
+     *
     * @param ctx
      * @param dst_filestore_id
      * @param auth
@@ -551,14 +551,14 @@ public class OXContext extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXContextInterface#getAdminId(Context, Credentials)}
-     * 
+     *
      * @param ctx
      * @param auth
      * @return
      * @throws RemoteException
      * @throws InvalidCredentialsException
      * @throws StorageException
-     * @throws NoSuchContextException 
+     * @throws NoSuchContextException
      */
     public int getAdminId(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, NoSuchContextException {
         reconnect();

@@ -73,7 +73,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link CMISFileStorageService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CMISFileStorageService implements AccountAware {
@@ -84,7 +84,7 @@ public final class CMISFileStorageService implements AccountAware {
 
     /**
      * Creates a new CMIS file storage service.
-     * 
+     *
      * @return A new CMIS file storage service
      */
     public static CMISFileStorageService newInstance() {
@@ -93,7 +93,7 @@ public final class CMISFileStorageService implements AccountAware {
 
     /**
      * Creates a new CMIS file storage service.
-     * 
+     *
      * @param compositeAccountManager The composite account manager
      * @return A new CMIS file storage service
      */
@@ -138,7 +138,7 @@ public final class CMISFileStorageService implements AccountAware {
     private void applyCompositeAccountManager(final CompositeFileStorageAccountManagerProvider compositeAccountManager) {
         this.compositeAccountManager = compositeAccountManager;
     }
-    
+
     /**
      * Gets the composite account manager.
      *

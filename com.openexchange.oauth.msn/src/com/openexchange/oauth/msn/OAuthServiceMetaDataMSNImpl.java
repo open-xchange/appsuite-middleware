@@ -106,7 +106,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             	.append(getAPIKey())
             	.append("&scope=wl.basic,wl.contacts_birthday,wl.offline_access,wl.contacts_photos,wl.contacts_skydrive,wl.contacts_emails,wl.photos,wl.postal_addresses,wl.skydrive&response_type=code&redirect_uri=")
             	.append(URLEncoder.encode(callbackUrl, "UTF-8")).toString();
-            
+
 
             return new OAuthInteraction() {
 
@@ -149,7 +149,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
         try {
             String verifier = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
             String callback = (String) arguments.get(OAuthConstants.ARGUMENT_CALLBACK);
-            
+
             StringBuilder params = new StringBuilder();
             params.append("?client_id=").append(getAPIKey());
             params.append("&redirect_uri=").append(URLEncoder.encode(callback, "UTF-8"));
@@ -162,7 +162,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             httpClient.getHostConfiguration().setHost("login.live.com", 443, protocol);
             String urlString = accessTokenGrabber;
             PostMethod postMethod = new PostMethod(urlString + params);
-            
+
             addParameter(postMethod, "client_id", getAPIKey());
             addParameter(postMethod,"redirect_uri", callback);
             addParameter(postMethod,"client_secret", getAPISecret());
@@ -195,7 +195,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             return;
         }
 		postMethod.addParameter(param, value);
-		
+
 	}
 
 	@Override

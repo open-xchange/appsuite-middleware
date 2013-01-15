@@ -54,7 +54,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link Parameterized} - Extends by the capability to store arbitrary parameters.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Parameterized {
@@ -76,14 +76,14 @@ public interface Parameterized {
 
     /**
      * Gets the names of contained parameters.
-     * 
+     *
      * @return The parameter names
      */
     Set<String> getParameterNames();
 
     /**
      * Gets the denoted parameter.
-     * 
+     *
      * @param name The name
      * @return The associated value or <code>null</code> if absent
      */
@@ -91,7 +91,7 @@ public interface Parameterized {
 
     /**
      * Stores given parameter.
-     * 
+     *
      * @param name The name
      * @param value The value; if <code>null</code> a remove is performed
      */
@@ -99,7 +99,7 @@ public interface Parameterized {
 
     /**
      * Removes the denoted parameter.
-     * 
+     *
      * @param name The name
      * @return The removed value or <code>null</code> if there was none
      */

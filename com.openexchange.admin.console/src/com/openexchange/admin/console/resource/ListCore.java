@@ -65,7 +65,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class ListCore extends ResourceAbstraction {
-    
+
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         // we need csv output , so we add this option
@@ -84,7 +84,7 @@ public abstract class ListCore extends ResourceAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             String pattern = (String) parser.getOptionValue(this.searchOption);
-            
+
             if (null == pattern) {
                 pattern = "*";
             }
@@ -101,7 +101,7 @@ public abstract class ListCore extends ResourceAbstraction {
             } else {
                 sysoutOutput(resourceList);
             }
-            
+
             sysexit(0);
         } catch (final Exception e) {
             printErrors(null, ctxid, e, parser);
@@ -114,7 +114,7 @@ public abstract class ListCore extends ResourceAbstraction {
             printExtensionsError(resource);
             data.add(makeStandardData(resource));
         }
-        
+
         //doOutput(new String[] { "3r", "30l", "20l", "14l", "9l" },
         doOutput(new String[] { "r", "l", "l", "l", "l" },
                  new String[] { "Id", "Name", "Displayname", "Email", "Available" }, data);
@@ -133,10 +133,10 @@ public abstract class ListCore extends ResourceAbstraction {
         columns.add("available");
         columns.add("description");
         extendscvscolumns(columns);
-    
+
         // Needed for csv output
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-    
+
         for (final Resource my_res : resourceList) {
             final ArrayList<String> makeCsvData = makeCsvData(my_res);
             makeCsvData.add(my_res.getDescription());
@@ -145,52 +145,52 @@ public abstract class ListCore extends ResourceAbstraction {
         }
         doCSVOutput(columns, data);
     }
-    
+
     protected abstract void extendscvscolumns(final ArrayList<String> columns);
 
     private ArrayList<String> makeCsvData(final Resource my_res) {
         final ArrayList<String> res_data = makeStandardData(my_res);
-    
+
         extendmakeCSVData(my_res, res_data);
         return res_data;
     }
 
     private ArrayList<String> makeStandardData(final Resource my_res) {
         final ArrayList<String> res_data = new ArrayList<String>();
-    
+
         res_data.add(String.valueOf(my_res.getId())); // id
-    
+
         final String name = my_res.getName();
         if (name != null && name.trim().length() > 0) {
             res_data.add(name); // name
         } else {
             res_data.add(null); // name
         }
-    
+
         final String displayname = my_res.getDisplayname();
         if (displayname != null && displayname.trim().length() > 0) {
             res_data.add(displayname); // displayname
         } else {
             res_data.add(null); // displayname
         }
-    
+
         final String email = my_res.getEmail();
         if (email != null && email.trim().length() > 0) {
             res_data.add(email); // email
         } else {
             res_data.add(null); // email
         }
-        
+
         final Boolean available = my_res.getAvailable();
         if (available != null) {
             res_data.add(available.toString()); // available
         } else {
             res_data.add(null);
         }
-    
+
         return res_data;
     }
-    
+
     protected abstract void extendmakeCSVData(final Resource my_res, final ArrayList<String> res_data);
 
     @Override

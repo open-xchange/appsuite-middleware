@@ -59,7 +59,7 @@ public interface ClassLoaderAware {
 
     /**
      * Sets the class providing the appropriate class loader via {@link Class#getClassLoader()}.
-     * 
+     *
      * @param classLoaderSource The class providing appropriate class loader
      */
     public void setClassLoaderSource(Class<?> classLoaderSource);

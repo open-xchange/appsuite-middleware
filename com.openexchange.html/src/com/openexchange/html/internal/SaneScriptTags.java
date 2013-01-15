@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
 
 /**
  * {@link SaneScriptTags}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SaneScriptTags {
@@ -69,7 +69,7 @@ public final class SaneScriptTags {
 
     /**
      * Sanitizes specified HTML content by script tags
-     * 
+     *
      * @param html The HTML content
      * @return The sanitized HTML content
      */

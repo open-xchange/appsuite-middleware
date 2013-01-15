@@ -51,14 +51,14 @@ package com.openexchange.java;
 
 /**
  * {@link HashKey} - Uses a safe hash key computation if a <code>String</code> is intended to be used as hash key.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HashKey {
 
     /**
      * Returns the computation-safe hash key for specified <code>String</code> key.
-     * 
+     *
      * @param key The <code>String</code> key
      * @return The computation-safe hash key
      */
@@ -68,7 +68,7 @@ public final class HashKey {
 
     /**
      * Returns the computation-safe hash key for specified <code>String</code> key.
-     * 
+     *
      * @param key The <code>String</code> key
      * @param hashStart The hash start
      * @return The computation-safe hash key
@@ -79,7 +79,7 @@ public final class HashKey {
 
     /**
      * Returns the computation-safe hash key for specified <code>String</code> key.
-     * 
+     *
      * @param key The <code>String</code> key
      * @param hashStart The hash start
      * @param salt The salt
@@ -91,7 +91,7 @@ public final class HashKey {
 
     /**
      * Returns the computation-safe hash key for specified <code>String</code> key.
-     * 
+     *
      * @param key The <code>String</code> key
      * @param hashStart The hash start
      * @param salt The salt

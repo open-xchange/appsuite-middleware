@@ -57,19 +57,19 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.tools.PropertyHandler;
 
 public class PropertyHandlerExtended extends PropertyHandler {
-    
+
     private final static Log log = LogFactory.getLog(PropertyHandlerExtended.class);
-    
+
     // The following lines define the property values for the database implementations
     public static final String RESELLER_STORAGE = "RESELLER_STORAGE";
 
     private PropertyHandlerExtended() {
         super(null);
     }
-    
+
     public PropertyHandlerExtended(final Properties sysprops) {
         super(sysprops);
-        final StringBuilder configfile = new StringBuilder(); 
+        final StringBuilder configfile = new StringBuilder();
         configfile.append(sysprops.getProperty("openexchange.propdir"));
         configfile.append(File.separatorChar);
         configfile.append("plugin");
@@ -83,5 +83,5 @@ public class PropertyHandlerExtended extends PropertyHandler {
             log.error("Problems reading file: " + configfile);
         }
     }
-   
+
 }

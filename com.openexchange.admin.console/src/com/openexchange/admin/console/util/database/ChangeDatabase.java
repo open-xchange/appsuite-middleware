@@ -56,9 +56,9 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 
 /**
- * 
+ *
  * @author d7,cutmasta
- * 
+ *
  */
 public class ChangeDatabase extends DatabaseAbstraction {
 
@@ -76,9 +76,9 @@ public class ChangeDatabase extends DatabaseAbstraction {
 
             parseAndSetDatabaseID(parser, db);
             parseAndSetDatabasename(parser, db);
-            
+
             successtext = nameOrIdSet(this.dbid, this.dbname, "database");
-            
+
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
             // get rmi ref
@@ -89,7 +89,7 @@ public class ChangeDatabase extends DatabaseAbstraction {
 //            parseAndSetMasterAndID(parser, db);
 
             oxutil.changeDatabase(db, auth);
-            
+
             displayChangedMessage(successtext, null, parser);
             sysexit(0);
         } catch (final Exception e) {

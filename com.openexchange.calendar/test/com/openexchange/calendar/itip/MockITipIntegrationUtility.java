@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MockITipIntegrationUtility}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MockITipIntegrationUtility implements ITipIntegrationUtility {

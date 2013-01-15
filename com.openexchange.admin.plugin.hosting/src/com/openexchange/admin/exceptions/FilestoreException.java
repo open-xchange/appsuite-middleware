@@ -55,8 +55,8 @@ package com.openexchange.admin.exceptions;
  * @author koty
  */
 public class FilestoreException extends Exception{
-    
-    
+
+
     /**
 	 * For serialization.
 	 */
@@ -65,5 +65,5 @@ public class FilestoreException extends Exception{
 	public FilestoreException( String s ) {
         super( s );
     }
-    
+
 }

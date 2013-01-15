@@ -274,7 +274,7 @@ public final class SMTPTransport extends MailTransport {
 
     /**
      * Checks if Kerberos authentication is supposed to be performed.
-     * 
+     *
      * @return <code>true</code> for Kerberos authentication; otherwise <code>false</code>
      */
     private boolean isKerberosAuth() {
@@ -314,7 +314,7 @@ public final class SMTPTransport extends MailTransport {
                     this.kerberosSubject = (Subject) session.getParameter(KERBEROS_SESSION_SUBJECT);
                     final boolean kerberosAuth = isKerberosAuth();
                     if (kerberosAuth) {
-                        smtpProps.put("mail.smtp.auth", "true"); 
+                        smtpProps.put("mail.smtp.auth", "true");
                         smtpProps.put("mail.smtp.sasl.enable", "true");
                         smtpProps.put("mail.smtp.sasl.authorizationid", smtpConfig.getLogin());
                         smtpProps.put("mail.smtp.sasl.mechanisms", (kerberosAuth ? "GSSAPI" : "PLAIN"));

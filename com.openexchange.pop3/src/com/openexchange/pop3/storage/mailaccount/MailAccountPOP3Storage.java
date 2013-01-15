@@ -689,7 +689,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     /**
      * Checks if delete-write-through option is enabled.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      * @throws OXException If option cannot be determined
      */
@@ -898,7 +898,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         try {
             final Field messageCacheField = MailAccountPOP3Storage.messageCacheField;
             if (null != messageCacheField) {
-                return (Vector<POP3Message>) messageCacheField.get(inbox);                
+                return (Vector<POP3Message>) messageCacheField.get(inbox);
             }
             throw new NoSuchFieldException("message_cache");
         } catch (final SecurityException e) {

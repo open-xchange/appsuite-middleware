@@ -69,7 +69,7 @@ import com.openexchange.user.json.services.ServiceRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "getAttribute", description = "Get user attribute (available with v6.20).", parameters = { 
+@Action(method = RequestMethod.GET, name = "getAttribute", description = "Get user attribute (available with v6.20).", parameters = {
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
 		@Parameter(name = "id", description = "ID of the user."),
 		@Parameter(name = "name", description = "The attribute name.")

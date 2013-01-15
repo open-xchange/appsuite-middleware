@@ -1289,7 +1289,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     // Filter
                     if (null != mimeFilter) {
                         MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), Streams.newByteArrayInputStream(baos.toByteArray()));
-                        mimeMessage = mimeFilter.filter(mimeMessage);                        
+                        mimeMessage = mimeFilter.filter(mimeMessage);
                         baos.reset();
                         mimeMessage.writeTo(baos);
                     }
@@ -2375,10 +2375,10 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private static final Pattern P = Pattern.compile("^[\\w\\d\\:\\/\\.]+(\\.\\w{3,4})$");
-    
+
     /**
      * Checks if specified file name has a trailing file extension.
-     * 
+     *
      * @param fileName The file name
      * @return The extension (e.g. <code>".txt"</code>) or <code>null</code>
      */

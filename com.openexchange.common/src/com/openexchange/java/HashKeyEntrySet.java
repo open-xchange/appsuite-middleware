@@ -59,7 +59,7 @@ import java.util.Set;
 
 /**
  * {@link HashKeyEntrySet} - A <code>String</code> {@link Entry} set backed by a <code>HashKey</code> {@link Entry} set.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HashKeyEntrySet<V> extends AbstractHashKeyCollection<HashKeyEntrySet<V>> implements Set<Map.Entry<String, V>> {

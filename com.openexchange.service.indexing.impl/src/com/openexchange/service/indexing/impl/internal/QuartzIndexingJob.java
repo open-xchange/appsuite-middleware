@@ -88,15 +88,15 @@ import com.openexchange.solr.SolrCoreIdentifier;
  */
 @DisallowConcurrentExecution
 public class QuartzIndexingJob implements Job {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(QuartzIndexingJob.class);
-    
+
     private static final String FAIL_COUNT = "failCount";
-    
-    
+
+
     public QuartzIndexingJob() {
         super();
-    }    
+    }
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -107,13 +107,13 @@ public class QuartzIndexingJob implements Job {
             String msg = "JobDataMap did not contain valid JobInfo instance.";
             LOG.error(msg);
             throw new JobExecutionException(msg, false);
-        } 
-        
+        }
+
         JobInfo jobInfo = (JobInfo) infoObject;
         if (LOG.isDebugEnabled()) {
             LOG.debug("Started execution of job " + jobInfo.toString() + ". Trigger: " + context.getTrigger().getKey());
         }
-        
+
         boolean error = false;
         try {
             if (jobData.containsKey(FAIL_COUNT)) {
@@ -126,7 +126,7 @@ public class QuartzIndexingJob implements Job {
             } else {
                 jobData.put(FAIL_COUNT, 0);
             }
-            
+
             submitCallable(jobInfo);
         } catch (Throwable e) {
             error = true;
@@ -143,7 +143,7 @@ public class QuartzIndexingJob implements Job {
             }
         }
     }
-    
+
     protected void submitCallable(JobInfo jobInfo) throws Exception {
         ConfigViewFactory config = Services.getService(ConfigViewFactory.class);
         ConfigView view = config.getView(jobInfo.userId, jobInfo.contextId);
@@ -154,19 +154,19 @@ public class QuartzIndexingJob implements Job {
                 OXException e = IndexExceptionCodes.INDEXING_NOT_ENABLED.create(jobInfo.getModule(), jobInfo.userId, jobInfo.contextId);
                 LOG.debug("Skipping job execution because: " + e.getMessage());
             }
-            
+
             return;
         }
-        
+
         IndexManagementService managementService = Services.getService(IndexManagementService.class);
         if (managementService.isLocked(jobInfo.contextId, jobInfo.userId, jobInfo.getModule())) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Skipping job execution because corresponding index is locked. " + jobInfo.toString());
             }
-            
+
             return;
         }
-        
+
         SolrCoreIdentifier identifier = new SolrCoreIdentifier(jobInfo.contextId, jobInfo.userId, jobInfo.getModule());
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         // FIXME: This core handling stuff has to be centralized and hidden by a transparent layer.
@@ -176,13 +176,13 @@ public class QuartzIndexingJob implements Job {
             startUpIndex(jobInfo);
             owner = solrCores.get(identifier.toString());
         }
-        
+
         if (owner == null) {
             LOG.error("Did not find a node holding this index.");
             // TODO: exception
             return;
         }
-        
+
         Member executor = null;
         for (Member member : hazelcast.getCluster().getMembers()) {
             if (owner.equals(resolveSocketAddress(member.getInetSocketAddress()))) {
@@ -190,7 +190,7 @@ public class QuartzIndexingJob implements Job {
                 break;
             }
         }
-        
+
         if (executor == null) {
             LOG.error("Could not find a member to execute this job.");
         } else {
@@ -213,7 +213,7 @@ public class QuartzIndexingJob implements Job {
         indexAccess.query(queryParameters, null);
         indexFacade.releaseIndexAccess(indexAccess);
     }
-    
+
     private String resolveSocketAddress(InetSocketAddress addr) {
         if (addr.isUnresolved()) {
             return addr.getHostName();
@@ -221,14 +221,14 @@ public class QuartzIndexingJob implements Job {
             return addr.getAddress().getHostAddress();
         }
     }
-    
+
     public static final class IndexingJobCallable implements Callable<Object>, Serializable {
 
         private static final long serialVersionUID = -4925442107711497341L;
-        
+
         private final JobInfo jobInfo;
-        
-        
+
+
         public IndexingJobCallable(final JobInfo jobInfo) {
             super();
             this.jobInfo = jobInfo;
@@ -236,7 +236,7 @@ public class QuartzIndexingJob implements Job {
 
         @Override
         public Object call() throws Exception {
-            // TODO: define exception or proper return type            
+            // TODO: define exception or proper return type
             Class<? extends IndexingJob> jobClass = jobInfo.jobClass;
             if (jobClass == null) {
                 String msg = "JobInfo did not contain valid job class. " + jobInfo.toString();
@@ -244,8 +244,8 @@ public class QuartzIndexingJob implements Job {
                 return null;
 //                throw new JobExecutionException(msg, false);
             }
-            
-            
+
+
             IndexingJob indexingJob;
             try {
                 indexingJob = jobClass.newInstance();
@@ -255,7 +255,7 @@ public class QuartzIndexingJob implements Job {
 //                throw new JobExecutionException(msg, t, false);
                 return null;
             }
-            
+
             try {
                 indexingJob.execute(jobInfo);
             } catch (Throwable t) {
@@ -264,10 +264,10 @@ public class QuartzIndexingJob implements Job {
                 return null;
 //                throw new JobExecutionException(msg, t, false);
             }
-            
+
             return null;
         }
-        
+
     }
 
 }

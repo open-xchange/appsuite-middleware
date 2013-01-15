@@ -80,7 +80,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link JCSCache} - A cache implementation that uses the <a href="http://jakarta.apache.org/jcs/">JCS</a> caching system.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JCSCache implements Cache, SupportsLocalOperations {
@@ -90,8 +90,8 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     private final CompositeCache cacheControl;
 
     private volatile Boolean localOnly;
-    
-    private Set<String> groupNames;
+
+    private final Set<String> groupNames;
 
     /**
      * Initializes a new {@link JCSCache}
@@ -290,15 +290,17 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public void removeFromGroup(final Serializable key, final String group) {
-        if (groupNames.contains(group))
+        if (groupNames.contains(group)) {
             groupNames.remove(group);
+        }
         cache.remove(key, group);
     }
 
     @Override
     public void localRemoveFromGroup(final Serializable key, final String group) {
-        if (groupNames.contains(group))
+        if (groupNames.contains(group)) {
             groupNames.remove(group);
+        }
         final GroupAttrName groupAttrName = getGroupAttrName(group, key);
         this.cacheControl.localRemove(groupAttrName);
     }
@@ -344,13 +346,13 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public Set<?> getAllKeys() throws OXException {
         Set<Object> set = new HashSet<Object>();
-        
+
         Object[] keys = cacheControl.getMemoryCache().getKeyArray();
         int i = 0;
         while (i < keys.length) {
             set.add(keys[i++]);
         }
-        
+
         return set;
     }
 
@@ -358,16 +360,16 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     public Set<?> getKeysInRange(int start, int end) throws OXException {
         if (start < 0 || end < 0 || start <= end) {
             Set<Object> set = new HashSet<Object>();
-        
+
             Object[] keys = cacheControl.getMemoryCache().getKeyArray();
             int i = start;
             while (i < end) {
                 set.add(keys[i++]);
             }
-        
+
             return set;
         }
-        
+
         throw new OXException(666, "Illegal start,end range (" + start + ", " + end + ")");
     }
 }
