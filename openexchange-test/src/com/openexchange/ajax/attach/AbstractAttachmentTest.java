@@ -407,6 +407,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
             if (null != exception) {
                 final StringWriter writer = new StringWriter(512);
                 exception.printStackTrace(new PrintWriter(writer));
+                // Let it fail...
                 assertNull("An exception occurred: " + writer.toString(), exception);                
             }
         }
