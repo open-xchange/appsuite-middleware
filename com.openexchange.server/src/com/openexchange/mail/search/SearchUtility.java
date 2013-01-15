@@ -119,17 +119,16 @@ public final class SearchUtility {
         return retval;
     }
 
-    private static boolean isEmptyString(final String str) {
-        if (null == str) {
+    private static boolean isEmptyString(final String string) {
+        if (null == string) {
             return true;
         }
-        final char[] chars = str.toCharArray();
-        for (final char c : chars) {
-            if (!Character.isWhitespace(c)) {
-                return false;
-            }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
         }
-        return true;
+        return isWhitespace;
     }
 
 }

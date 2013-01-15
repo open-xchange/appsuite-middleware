@@ -1217,12 +1217,14 @@ public final class MimeMessageUtility {
      * @return The quoted phrase
      */
     public static String quotePhrase(final String phrase, final boolean encode) {
-        if (null == phrase || phrase.length() == 0) {
+        if (null == phrase) {
             return phrase;
         }
-        final char[] chars = phrase.toCharArray();
-        final int len = chars.length;
-        if ('"' == chars[0] && '"' == chars[len - 1]) {
+        final int len = phrase.length();
+        if (len == 0) {
+            return phrase;
+        }
+        if ('"' == phrase.charAt(0) && '"' == phrase.charAt(len - 1)) {
             /*
              * Already quoted
              */
@@ -1230,7 +1232,7 @@ public final class MimeMessageUtility {
         }
         boolean needQuoting = false;
         for (int i = 0; !needQuoting && i < len; i++) {
-            final char c = chars[i];
+            final char c = phrase.charAt(i);
             needQuoting = (c == '"' || c == '\\' || (c < 32 && c != '\r' && c != '\n' && c != '\t') || c >= 127 || RFC822.indexOf(c) >= 0);
         }
         try {
