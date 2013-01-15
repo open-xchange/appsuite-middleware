@@ -49,13 +49,16 @@
 
 package com.openexchange.log;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -419,6 +422,54 @@ public final class LogProperties {
      * where the properties are sorted alphabetically.
      */
     public static String getAndPrettyPrint() {
+        return getAndPrettyPrint(Collections.<LogProperties.Name> emptySet());
+    }
+
+    /**
+     * Get the thread local LogProperties and pretty-prints them into a Sting.
+     * The String will contain one ore more lines formatted like:
+     * <pre>
+     * "propertyName1=propertyValue1"
+     * "propertyName2=propertyValue2"
+     * "propertyName3=propertyValue3"
+     * </pre>
+     * where the properties are sorted alphabetically.
+     * 
+     * @param nonMatching The property name to ignore
+     */
+    public static String getAndPrettyPrint(final LogProperties.Name nonMatching) {
+        return getAndPrettyPrint(EnumSet.<LogProperties.Name> of(nonMatching));
+    }
+
+    /**
+     * Get the thread local LogProperties and pretty-prints them into a Sting.
+     * The String will contain one ore more lines formatted like:
+     * <pre>
+     * "propertyName1=propertyValue1"
+     * "propertyName2=propertyValue2"
+     * "propertyName3=propertyValue3"
+     * </pre>
+     * where the properties are sorted alphabetically.
+     * 
+     * @param nonMatching The property names to ignore
+     */
+    public static String getAndPrettyPrint(final LogProperties.Name... nonMatching) {
+        return getAndPrettyPrint(EnumSet.<LogProperties.Name> copyOf(Arrays.asList(nonMatching)));
+    }
+
+    /**
+     * Get the thread local LogProperties and pretty-prints them into a Sting.
+     * The String will contain one ore more lines formatted like:
+     * <pre>
+     * "propertyName1=propertyValue1"
+     * "propertyName2=propertyValue2"
+     * "propertyName3=propertyValue3"
+     * </pre>
+     * where the properties are sorted alphabetically.
+     * 
+     * @param nonMatching The property names to ignore
+     */
+    public static String getAndPrettyPrint(final Collection<LogProperties.Name> nonMatching) {
         String logString = "";
         final Props logProperties = getLogProperties();
         // If we have additional log properties from the ThreadLocal add it to the logBuilder
@@ -429,9 +480,11 @@ public final class LogProperties {
             Map<String, String> sorted = new TreeMap<String, String>();
             for (Entry<LogProperties.Name, Object> propertyEntry : propertyMap.entrySet()) {
                 LogProperties.Name propertyName = propertyEntry.getKey();
-                Object value = propertyEntry.getValue();
-                if (null != value) {
-                    sorted.put(propertyName.getName(), value.toString());
+                if (null == nonMatching || !nonMatching.contains(propertyName)) {
+                    Object value = propertyEntry.getValue();
+                    if (null != value) {
+                        sorted.put(propertyName.getName(), value.toString());
+                    }
                 }
             }
             // And add them to the logBuilder
