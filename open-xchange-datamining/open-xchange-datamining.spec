@@ -50,5 +50,5 @@ GLOBIGNORE='*'
 /opt/open-xchange/sbin/*
 
 %changelog
-* Fri Dec 21 2012 Karsten Will <karsten.will@open-xchange.com>
-First release candidate for 7.0.0
+* Tue Jan 15 2013 Karsten Will <karsten.will@open-xchange.com>
+First release candidate for 6.22.1
