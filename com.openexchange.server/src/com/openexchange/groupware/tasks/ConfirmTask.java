@@ -59,13 +59,11 @@ import java.util.Set;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  *
@@ -151,14 +149,7 @@ public final class ConfirmTask {
             // Delegator not participant and participant changed task. Change parent folder of original task to delegators folder identifier
             // so we are able to use that for participant notification.
             Folder delegatorFolder = FolderStorage.extractFolderOfUser(getFolders(), orig.getCreatedBy());
-            if (null != delegatorFolder) {
-                orig.setParentFolderID(delegatorFolder.getIdentifier());
-            } else {
-                final FolderObject defaultFolder = new OXFolderAccess(ctx).getDefaultFolder(orig.getCreatedBy(), FolderObject.TASK);
-                if (null != defaultFolder) {
-                    orig.setParentFolderID(defaultFolder.getObjectID());
-                }
-            }
+            orig.setParentFolderID(delegatorFolder.getIdentifier());
             orig.setUsers(new UserParticipant[0]);
             orig.setParticipants(new Participant[0]);
         }
