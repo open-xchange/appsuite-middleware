@@ -60,7 +60,7 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    CONFFILES="crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties xingsubscribe.properties"
+    CONFFILES="crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties"
     for FILE in ${CONFFILES}; do
 	ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc "$FILE"
     done
