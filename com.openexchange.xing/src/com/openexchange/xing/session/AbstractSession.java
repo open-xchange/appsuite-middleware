@@ -99,7 +99,7 @@ public abstract class AbstractSession implements Session {
 
     private final AppKeyPair appKeyPair;
     private AccessTokenPair accessTokenPair = null;
-    private CommonsHttpOAuthConsumer signer = null;
+    private volatile CommonsHttpOAuthConsumer signer = null;
 
     protected final AtomicReference<HttpClient> client = new AtomicReference<HttpClient>();
 
@@ -139,11 +139,16 @@ public abstract class AbstractSession implements Session {
     private CommonsHttpOAuthConsumer getSigner() {
         CommonsHttpOAuthConsumer tmp = signer;
         if (null == tmp) {
-            tmp = new CommonsHttpOAuthConsumer(appKeyPair.key, appKeyPair.secret);
-            if (null != accessTokenPair) {
-                tmp.setTokenWithSecret(accessTokenPair.key, accessTokenPair.secret);
+            synchronized (this) {
+                tmp = signer;
+                if (null == tmp) {
+                    tmp = new CommonsHttpOAuthConsumer(appKeyPair.key, appKeyPair.secret);
+                    if (null != accessTokenPair) {
+                        tmp.setTokenWithSecret(accessTokenPair.key, accessTokenPair.secret);
+                    }
+                    signer = tmp;
+                }
             }
-            signer = tmp;
         }
         return tmp;
     }
