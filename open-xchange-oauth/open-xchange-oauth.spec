@@ -50,7 +50,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
-CONFFILES="deferrer.properties oauth.properties facebookoauth.properties linkedinoauth.properties msnoauth.properties twitteroauth.properties yahoooauth.properties"
+CONFFILES="deferrer.properties oauth.properties facebookoauth.properties linkedinoauth.properties msnoauth.properties twitteroauth.properties yahoooauth.properties xingoauth.properties"
 for FILE in ${CONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
