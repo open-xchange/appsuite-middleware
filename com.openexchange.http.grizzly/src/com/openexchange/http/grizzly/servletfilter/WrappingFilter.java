@@ -58,6 +58,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
 import com.openexchange.log.LogProperties;
@@ -71,40 +72,72 @@ import com.openexchange.log.Props;
  */
 public class WrappingFilter implements Filter {
 
+    private String protocolHeader;
+
+    private String httpsProtoValue;
+
+    private int httpPort;
+
+    private int httpsPort;
+
     @Override
     public void init(FilterConfig filterConfig) {
-        // nothing to initialize
+        GrizzlyConfig config = GrizzlyConfig.getInstance();
+        this.protocolHeader = config.getProtocolHeader();
+        this.httpsProtoValue = config.getHttpsProtoValue();
+        this.httpPort = config.getHttpProtoPort();
+        this.httpsPort = config.getHttpsProtoPort();
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        // Wrap request and response
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-        HttpServletRequestWrapper httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-        HttpServletResponseWrapper httpServletResponseWrapper = new HttpServletResponseWrapper(httpServletResponse);
-        
+        HttpServletRequestWrapper httpServletRequestWrapper = null;
+        HttpServletResponseWrapper httpServletResponseWrapper = null;
+
+        // Inspect X-Forwarded-Proto header and create HttpServletRequestWrapper accordingly
+        if (protocolHeader != null) {
+            String protocolHeaderValue = httpServletRequest.getHeader(protocolHeader);
+            if (protocolHeader == null) {
+                httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);
+            } else if (httpsProtoValue.equalsIgnoreCase(protocolHeaderValue)) {
+                httpServletRequestWrapper = new HttpServletRequestWrapper(
+                    httpServletRequest,
+                    HttpServletRequestWrapper.HTTPS_SCHEME,
+                    httpsPort);
+            } else {
+                httpServletRequestWrapper = new HttpServletRequestWrapper(
+                    httpServletRequest,
+                    HttpServletRequestWrapper.HTTP_SCHEME,
+                    httpPort);
+            }
+        } else {
+            httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);
+        }
+        httpServletResponseWrapper = new HttpServletResponseWrapper(httpServletResponse);
+
         // Create a Session if needed
         httpServletRequest.getSession(true);
-        
+
         // Set LogProperties
-        if(LogProperties.isEnabled()) {
+        if (LogProperties.isEnabled()) {
             Props logProperties = LogProperties.getLogProperties();
 
             // Servlet related properties
             logProperties.put(LogProperties.Name.GRIZZLY_REQUEST_URI, httpServletRequest.getRequestURI());
             logProperties.put(LogProperties.Name.GRIZZLY_SERVLET_PATH, httpServletRequest.getServletPath());
             logProperties.put(LogProperties.Name.GRIZZLY_PATH_INFO, httpServletRequest.getPathInfo());
-            
+
             // Remote infos
-            logProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, httpServletRequest.getRemotePort());
-            logProperties.put(LogProperties.Name.GRIZZLY_REQUEST_IP, httpServletRequest.getRemoteAddr());
-            
+            logProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, httpServletRequestWrapper.getRemotePort());
+            logProperties.put(LogProperties.Name.GRIZZLY_REQUEST_IP, httpServletRequestWrapper.getRemoteAddr());
+
             // Names, addresses
             logProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, Thread.currentThread().getName());
             logProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpServletRequest.getServerName());
         }
-        
+
         chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
     }
 

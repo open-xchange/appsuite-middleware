@@ -97,6 +97,9 @@ public class GrizzlyConfig implements Initialization {
 
     /** Unique backend route for every single backend behind the load balancer */
     private String backendRoute = "OX0";
+    
+    /** Do we want to send absolute or relative redirects */
+    private boolean isAbsoluteRedirect = false;
 
     // server properties
 
@@ -107,7 +110,7 @@ public class GrizzlyConfig implements Initialization {
     private int cookieMaxInactivityInterval = 1800;
 
     /** Marks cookies as secure although the request is insecure e.g. when the backend is behind a ssl terminating proxy */
-    private boolean isCookieForceHttps = false;
+    private boolean isForceHttps = false;
 
     /** Make the cookie accessible only via http methods. This prevents Javascript access to the cookie / cross site scripting */
     private boolean isCookieHttpOnly = true;
@@ -159,11 +162,12 @@ public class GrizzlyConfig implements Initialization {
         this.isJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", false);
         this.isWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
         this.isCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
+        this.isAbsoluteRedirect = configService.getBoolProperty("com.openexchange.http.grizzly.doAbsoluteRedirect", false);
 
         // server properties
         this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W")));
         this.cookieMaxInactivityInterval = configService.getIntProperty("com.openexchange.servlet.maxInactiveInterval", 1800);
-        this.isCookieForceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", false);
+        this.isForceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", false);
         this.isCookieHttpOnly = configService.getBoolProperty("com.openexchange.cookie.httpOnly", true);
         this.defaultEncoding = configService.getProperty("DefaultEncoding", "UTF-8");
         this.protocolHeader = configService.getProperty("com.openexchange.server.protocolHeader", "X-Forwarded-Proto");
@@ -285,12 +289,12 @@ public class GrizzlyConfig implements Initialization {
     }
 
     /**
-     * Gets the isCookieForceHttps
+     * Gets the isForceHttps
      * 
-     * @return The isCookieForceHttps
+     * @return The isForceHttps
      */
-    public boolean isCookieForceHttps() {
-        return instance.isCookieForceHttps;
+    public boolean isForceHttps() {
+        return instance.isForceHttps;
     }
 
     /**
@@ -359,6 +363,16 @@ public class GrizzlyConfig implements Initialization {
      */
     public int getHttpsProtoPort() {
         return httpsProtoPort;
+    }
+
+    
+    /**
+     * Gets the isAbsoluteRedirect
+     *
+     * @return The isAbsoluteRedirect
+     */
+    public boolean isAbsoluteRedirect() {
+        return isAbsoluteRedirect;
     }
 
 }
