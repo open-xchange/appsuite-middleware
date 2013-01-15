@@ -88,7 +88,6 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.Parameterized;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -149,7 +148,6 @@ public final class LoginPerformer {
     }
 
     private static final Pattern SPLIT = Pattern.compile(" *, *");
-    private static final String PARAM_VOLATILE = Parameterized.PARAM_VOLATILE;
 
     /**
      * Performs the login for specified login request.

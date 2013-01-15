@@ -59,13 +59,11 @@ import java.util.Set;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  *
@@ -144,19 +142,26 @@ public final class ConfirmTask {
         }
     }
 
-
     void sentEvent(final Session session) throws OXException {
         final Task orig = getOrigTask();
-        if (userId != orig.getCreatedBy() && null == ParticipantStorage.getParticipant(ParticipantStorage.extractInternal(getParticipants()), orig.getCreatedBy())) {
-            // Delegator not participant and participant changed task. Change parent folder of original task to delegators folder identifier
-            // so we are able to use that for participant notification.
+        if (userId != orig.getCreatedBy() && null == ParticipantStorage.getParticipant(
+            ParticipantStorage.extractInternal(getParticipants()),
+            orig.getCreatedBy())) {
+            // Delegator is not participant and participant changed task. Change parent folder of original task to delegators folder
+            // identifier so we are able to use that for participant notification.
             Folder delegatorFolder = FolderStorage.extractFolderOfUser(getFolders(), orig.getCreatedBy());
             if (null != delegatorFolder) {
                 orig.setParentFolderID(delegatorFolder.getIdentifier());
             } else {
-                final FolderObject defaultFolder = new OXFolderAccess(ctx).getDefaultFolder(orig.getCreatedBy(), FolderObject.TASK);
-                if (null != defaultFolder) {
-                    orig.setParentFolderID(defaultFolder.getObjectID());
+                // Another user created the task in a shared folder. Normally there can be only one user having the task in its folder who
+                // is not participant. And this is the delegator of the task.
+                Set<Folder> nonParticipantFolder = FolderStorage.extractNonParticipantFolder(
+                    getFolders(),
+                    ParticipantStorage.extractInternal(getParticipants()));
+                if (nonParticipantFolder.size() > 0) {
+                    orig.setParentFolderID(nonParticipantFolder.iterator().next().getIdentifier());
+                } else {
+                    throw TaskExceptionCode.UNKNOWN_DELEGATOR.create(I(orig.getCreatedBy()));
                 }
             }
             orig.setUsers(new UserParticipant[0]);

@@ -219,4 +219,8 @@ public class TaskExceptionMessage implements LocalizableStrings {
     // Into a numeric attribute something non numeric has been entered. %2$s will name the attribute that contains non digit characters.
     public static final String CONTAINS_NON_DIGITS_MSG = "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters.";
 
+    // A participant changed his confirmation state of a delegated task and we are not able to determine who delegated the task. %1$d is
+    // replaced with the identifier of the task for further investigations.
+    public static final String UNKNOWN_DELEGATOR_MSG = "Can not determine delegator of task %1$d.";
+
 }

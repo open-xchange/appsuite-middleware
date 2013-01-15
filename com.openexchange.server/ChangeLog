@@ -1,3 +1,7 @@
+* 2013-01-15 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21930: Trying to determine task delegator in case somebody else created the task in the delegator's shared folder.
+
 * 2013-01-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 24489: Fixed possible visibility scope issue
@@ -9,7 +13,6 @@
 * 2013-01-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 23723: Also check for "null" string prior to setting contact fields
- - Fix for bug 21930: Added null guard & alternative folder look-up
  - Fix for bug 24480: Don't include already contained messaged to conversation thread
 
 * 2013-01-13 - thorben.betten@open-xchange.com

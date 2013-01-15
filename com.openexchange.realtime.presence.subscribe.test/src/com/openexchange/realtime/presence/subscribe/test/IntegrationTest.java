@@ -171,11 +171,6 @@ public class IntegrationTest extends TestCase {
             }
 
             @Override
-            public boolean isVolatile() {
-                return false;
-            }
-
-            @Override
             public String getUserAgent() {
                 return "test";
             }
