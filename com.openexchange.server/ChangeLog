@@ -6,6 +6,7 @@
 
  - Fix for bug 24489: Fixed possible visibility scope issue
  - Fix for bug 24479: Restore original Message-Id when filtering by MIME parts is done
+ - Fix for bug 24496: More lenient comparison of fields during update attempt
 
 * 2013-01-15 - jan.bauerdick@open-xchange.com
 
