@@ -435,7 +435,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             init();
         } catch (final org.osgi.framework.ServiceException e) {
             LOG.error(e.getMessage(), e);
-            // Do not rethrow!
+            // Do not re-throw!
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
