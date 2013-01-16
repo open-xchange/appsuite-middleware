@@ -58,11 +58,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.pooling.PoolingException;
+import com.openexchange.log.LogFactory;
+import com.openexchange.log.LogProperties;
 
 /**
  * Implements the database service to the config database.
@@ -85,51 +85,27 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     private Connection get(final boolean write) throws OXException {
         final AssignmentImpl assign = assignmentService.getConfigDBAssignment();
-        final int poolId;
-        if (write) {
-            poolId = assign.getWritePoolId();
-        } else {
-            poolId = assign.getReadPoolId();
-        }
-        try {
-            final Connection retval = pools.getPool(poolId).get();
-            ReplicationMonitor.incrementFetched(assign, write);
-            return retval;
-        } catch (final PoolingException e) {
-            throw DBPoolingExceptionCodes.NO_CONFIG_DB.create(e);
-        }
+        LogProperties.putLogProperty("com.openexchange.database.schema", null);
+        return ReplicationMonitor.checkFallback(pools, assign, false, write);
         // TODO Enable the following if the configuration database gets a table replicationMonitor.
         // return ReplicationMonitor.checkActualAndFallback(pools, assign, false, write);
     }
 
-    private void back(final Connection con, final boolean write) {
-        final AssignmentImpl assign = assignmentService.getConfigDBAssignment();
-        final int poolId;
-        if (write) {
-            poolId = assign.getWritePoolId();
-        } else {
-            poolId = assign.getReadPoolId();
-        }
-        final ConnectionPool pool;
-        try {
-            pool = pools.getPool(poolId);
-        } catch (final OXException e) {
+    private void back(final Connection con) {
+        if (null == con) {
+            LogProperties.putLogProperty("com.openexchange.database.schema", null);
+            final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
             LOG.error(e.getMessage(), e);
             return;
         }
         try {
-            pool.back(con);
-        } catch (final PoolingException e) {
-            final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
+            con.close();
+        } catch (SQLException e) {
+            OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error(e1.getMessage(), e1);
+        } finally {
+            LogProperties.putLogProperty("com.openexchange.database.schema", null);
         }
-        // TODO enable the following if the configuration database gets a table replicationMonitor.
-        // try {
-        //     con.close();
-        // } catch (SQLException e) {
-        //     OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        //     LOG.error(e1.getMessage(), e1);
-        // }
     }
 
     @Override
@@ -144,12 +120,12 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     @Override
     public void backReadOnly(final Connection con) {
-        back(con, false);
+        back(con);
     }
 
     @Override
     public void backWritable(final Connection con) {
-        back(con, true);
+        back(con);
     }
 
     @Override
