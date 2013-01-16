@@ -54,9 +54,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.indexedSearch.json.action.AbstractIndexAction;
 import com.openexchange.indexedSearch.json.action.IsIndexedAction;
+import com.openexchange.indexedSearch.json.action.PersonsAndTopicsAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -82,10 +82,13 @@ public class IndexActionFactory implements AJAXActionServiceFactory {
 
         final AbstractIndexAction action2 = new IsIndexedAction(services, registry);
         actions.put(action2.getAction(), action2);
+        
+        final AbstractIndexAction action3 = new PersonsAndTopicsAction(services, registry);
+        actions.put(action3.getAction(), action3);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
+    public AJAXActionService createActionService(final String action) {
         return actions.get(action);
     }
 

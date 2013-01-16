@@ -177,6 +177,7 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         Set<SolrMailField> solrFields = checkAndConvert(fields);
         setFieldList(solrQuery, solrFields);
         List<IndexDocument<MailMessage>> results = queryChunkWise(
+            SolrMailField.UUID,
             new SolrMailDocumentConverter(),
             solrQuery,
             newParameters.getOff(),

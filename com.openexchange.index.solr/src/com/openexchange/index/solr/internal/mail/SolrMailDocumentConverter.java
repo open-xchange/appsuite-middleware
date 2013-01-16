@@ -58,6 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
+import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.index.solr.internal.SolrResultConverter;
 import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
@@ -77,6 +78,42 @@ public class SolrMailDocumentConverter implements SolrResultConverter<MailMessag
     @Override
     public IndexDocument<MailMessage> convert(SolrDocument document) throws OXException {
         return convertStatic(document);
+    }
+    
+    @Override
+    public IndexDocument<MailMessage> convert(SolrDocument document, Map<String, List<String>> highlightFields) throws OXException {
+        StandardIndexDocument<MailMessage> indexDocument = convertStatic(document);
+        
+        // FIXME: Now it gets ugly. This MUST be changed before deployment...
+        if (!highlightFields.isEmpty()) {
+            boolean inPersons = false;
+            boolean inSubject = false;
+            for (String field : highlightFields.keySet()) {
+                if (!inPersons && (field.equals(SolrMailField.FROM.solrName())
+                    || field.equals(SolrMailField.TO.solrName())
+                    || field.equals(SolrMailField.CC.solrName())
+                    || field.equals(SolrMailField.BCC.solrName()))) {
+                    
+                    inPersons = true;
+                }
+                
+                if (!inSubject && field.startsWith(SolrMailField.SUBJECT.solrName())) {
+                    inSubject = true;
+                }
+            }
+            
+            if (inPersons || inSubject) {
+                if (inPersons && inSubject) {
+                    indexDocument.addExtendedAttribute("foundIn", "both");
+                } else if (inPersons) {
+                    indexDocument.addExtendedAttribute("foundIn", "persons");
+                } else {
+                    indexDocument.addExtendedAttribute("foundIn", "topics");
+                }
+            }
+        }
+        
+        return indexDocument;
     }
 
     @Override
@@ -120,8 +157,14 @@ public class SolrMailDocumentConverter implements SolrResultConverter<MailMessag
         return inputDocument;
     }
 
-    public static IndexDocument<MailMessage> convertStatic(SolrDocument document) throws OXException {
-        return SolrMailHelper.getInstance().readDocument(document, MailFillers.allFillers());
+    public static StandardIndexDocument<MailMessage> convertStatic(SolrDocument document) throws OXException {
+        StandardIndexDocument<MailMessage> indexDocument = SolrMailHelper.getInstance().readDocument(document, MailFillers.allFillers());
+        Object foundIn = document.get("foundIn");
+        if (foundIn != null && foundIn instanceof String) {
+            indexDocument.addExtendedAttribute("foundIn", foundIn);
+        }
+        
+        return indexDocument;
     }
 
 }

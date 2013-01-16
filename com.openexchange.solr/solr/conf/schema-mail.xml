@@ -129,7 +129,7 @@
 
     <fields>
         <!-- Common Fields -->
-        <field name="uuid" type="string" stored="true" indexed="true" />
+        <field name="uuid" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.UUID" />
         <field name="timestamp" type="long" stored="true" indexed="true" />
         <field name="account" type="string" stored="true" indexed="true" />
         <field name="full_name" type="string" stored="true" indexed="true" />
@@ -167,7 +167,7 @@
         <field name="subject_de" type="text_de" stored="true" indexed="true" />
         <field name="subject_en" type="text_en" stored="true" indexed="true" />
         <field name="subject_fr" type="text_fr" stored="true" indexed="true" />
-        <field name="subject_it" type="text_it" stored="true" indexed="true" />        
+        <field name="subject_it" type="text_it" stored="true" indexed="true" />
         
         <field name="content" type="text" stored="false" indexed="false" />  
         <field name="content_gen" type="text" stored="false" indexed="true" />
@@ -176,7 +176,7 @@
         <field name="content_fr" type="text_fr" stored="false" indexed="true" />
         <field name="content_it" type="text_it" stored="false" indexed="true" /> 
         
-        <field name="locale" type="string" stored="true" indexed="false" />     
+        <field name="locale" type="string" stored="true" indexed="false" />
     </fields>
 
     <uniqueKey>uuid</uniqueKey>

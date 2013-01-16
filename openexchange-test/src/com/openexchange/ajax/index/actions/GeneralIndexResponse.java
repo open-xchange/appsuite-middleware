@@ -47,50 +47,35 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.ajax.index.actions;
+
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 
 /**
- * {@link SearchHandler} - This enum defines possible search handlers.
- * A search handler takes part in {@link QueryParameters} and is an abstract definition of how
- * a search is being performed, meaning what pattern will be searched within which fields.
- * A search handler may define some additional parameters that have to be set within
- * {@link QueryParameters}.
+ * {@link GeneralIndexResponse}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum SearchHandler {
+public class GeneralIndexResponse extends AbstractAJAXResponse {
 
     /**
-     * This handler performs a simple search.
-     * Mandatory parameters: pattern
-     * Optional parameters: folder, sort, order
-     * Module dependent: module, account, service
+     * Initializes a new {@link GeneralIndexResponse}.
+     * @param response
      */
-    SIMPLE,
-    /**
-     * The custom search handler allows to define the fields to search in.
-     * Mandatory parameters: search term
-     * Optional parameters: folder, sort, order
-     * Module dependent: module, account, service
-     */
-    CUSTOM,
-    /**
-     * This one searches for all items within a folder.
-     * Mandatory parameters: folder.
-     * Optional parameters: sort, order
-     * Module dependent: module, account, service
-     */
-    ALL_REQUEST,
-    /**
-     * This one searches for a list of index uuids.
-     * Mandatory parameters: ids - A string-array of index uuids.
-     * Optional parameters: sort, order
-     */
-    GET_REQUEST,
-    /**
-     * 
-     */
-    PERSONS_AND_TOPICS
+    protected GeneralIndexResponse(Response response) {
+        super(response);
+    }
+    
+    public JSONObject getJSON() {
+        Object data = getData();
+        if (data == null) {
+            return null;
+        }
+        
+        return (JSONObject) data;
+    }
 
 }

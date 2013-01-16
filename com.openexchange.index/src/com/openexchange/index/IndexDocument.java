@@ -49,6 +49,8 @@
 
 package com.openexchange.index;
 
+import java.util.Map;
+
 
 /**
  * {@link IndexDocument} - Represents an indexed document.
@@ -63,4 +65,10 @@ public interface IndexDocument<V> {
      * @return The associated object
      */
     public V getObject();
+    
+    /**
+     * @return An optional {@link Map<String, Object>} with extended Attributes for this document.
+     * May be <code>null</code>.
+     */
+    public Map<String, Object> getExtendedAttributes();
 }

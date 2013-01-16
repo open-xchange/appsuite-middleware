@@ -47,50 +47,14 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.solr;
 
 
 /**
- * {@link SearchHandler} - This enum defines possible search handlers.
- * A search handler takes part in {@link QueryParameters} and is an abstract definition of how
- * a search is being performed, meaning what pattern will be searched within which fields.
- * A search handler may define some additional parameters that have to be set within
- * {@link QueryParameters}.
+ * {@link NoEnum}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum SearchHandler {
-
-    /**
-     * This handler performs a simple search.
-     * Mandatory parameters: pattern
-     * Optional parameters: folder, sort, order
-     * Module dependent: module, account, service
-     */
-    SIMPLE,
-    /**
-     * The custom search handler allows to define the fields to search in.
-     * Mandatory parameters: search term
-     * Optional parameters: folder, sort, order
-     * Module dependent: module, account, service
-     */
-    CUSTOM,
-    /**
-     * This one searches for all items within a folder.
-     * Mandatory parameters: folder.
-     * Optional parameters: sort, order
-     * Module dependent: module, account, service
-     */
-    ALL_REQUEST,
-    /**
-     * This one searches for a list of index uuids.
-     * Mandatory parameters: ids - A string-array of index uuids.
-     * Optional parameters: sort, order
-     */
-    GET_REQUEST,
-    /**
-     * 
-     */
-    PERSONS_AND_TOPICS
+public class NoEnum {
 
 }

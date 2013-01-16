@@ -66,6 +66,8 @@ import com.openexchange.index.IndexResult;
 public interface SolrResultConverter<V> {
 
     IndexDocument<V> convert(SolrDocument document) throws OXException;
+    
+    IndexDocument<V> convert(SolrDocument document, Map<String, List<String>> highlightFields) throws OXException;
 
     IndexResult<V> createIndexResult(List<IndexDocument<V>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException;
 

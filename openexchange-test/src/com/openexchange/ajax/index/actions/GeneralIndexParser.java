@@ -47,39 +47,31 @@
  *
  */
 
-package com.openexchange.index.solr.internal.mail;
+package com.openexchange.ajax.index.actions;
 
-import java.util.List;
-import java.util.Map;
-import org.apache.solr.common.SolrDocument;
-import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexField;
-import com.openexchange.index.IndexResult;
-import com.openexchange.index.solr.internal.SolrResultConverter;
-import com.openexchange.mail.dataobjects.MailMessage;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link SolrMailMessageConverter}
+ * {@link GeneralIndexParser}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrMailMessageConverter implements SolrResultConverter<MailMessage> {
+public class GeneralIndexParser extends AbstractAJAXParser<GeneralIndexResponse> {
 
-    @Override
-    public IndexDocument<MailMessage> convert(SolrDocument document) throws OXException {
-        IndexDocument<MailMessage> converted = SolrMailHelper.getInstance().readDocument(document, MailFillers.allFillers());
-        return converted;
+    /**
+     * Initializes a new {@link GeneralIndexParser}.
+     * @param failOnError
+     */
+    protected GeneralIndexParser(boolean failOnError) {
+        super(failOnError);
     }
 
     @Override
-    public IndexResult<MailMessage> createIndexResult(List<IndexDocument<MailMessage>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
-        MailIndexResult result = new MailIndexResult(documents.size());
-        result.setResults(documents);
-        result.setFacetCounts(facetCounts);
-
-        return result;
+    protected GeneralIndexResponse createResponse(Response response) throws JSONException {
+        return new GeneralIndexResponse(response);
     }
 
 }

@@ -64,7 +64,6 @@ import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.solr.internal.FieldMapper;
-import com.openexchange.index.solr.internal.SolrField;
 
 /**
  * {@link SimpleQueryBuilder}
@@ -78,17 +77,17 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
 
     private Map<String, QueryTranslator> translators;
 
-    private SolrField moduleField;
+    private String moduleField;
 
-    private SolrField accountField;
+    private String accountField;
 
-    private SolrField folderField;
+    private String folderField;
 
     private FieldMapper fieldMapper;
 
     private static Log log = com.openexchange.log.Log.loggerFor(SimpleQueryBuilder.class);
 
-    public SimpleQueryBuilder(String configPath, SolrField moduleField, SolrField accountField, SolrField folderField, FieldMapper fieldMapper) throws BuilderException {
+    public SimpleQueryBuilder(String configPath, String moduleField, String accountField, String folderField, FieldMapper fieldMapper) throws BuilderException {
         config = new SimpleConfiguration(configPath);
         translators = new HashMap<String, QueryTranslator>();
 
@@ -118,12 +117,13 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
             }
             log.debug("[buildQuery]: Handler is \'" + searchHandler.toString() + "\'");
 
+            String handlerId = searchHandler.toString().toLowerCase();
+            String handlerName = config.getRawMapping().get(Configuration.HANDLER + '.' + handlerId);
+            QueryTranslator translator = translators.get(handlerId);
             Object searchTerm = parameters.getSearchTerm();
-            QueryTranslator translator = translators.get(searchHandler.toString().toLowerCase());
             SolrQuery solrQuery = new SolrQuery();
-            String handlerName = config.getRawMapping().get(Configuration.HANDLER + '.' + searchHandler.toString().toLowerCase());
             if (handlerName == null) {
-                throw new IllegalArgumentException("No solr search handler is configured for '" + searchHandler.toString().toLowerCase() + "'");
+                throw new IllegalArgumentException("No solr search handler is configured for '" + handlerId + "'");
             }
             switch (searchHandler) {
                 case SIMPLE: {
@@ -168,8 +168,25 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
                     break;
                 }
 
-                default:
-                    throw new IllegalArgumentException("Search handler '" + searchHandler.toString() + "' is not valid for this action.");
+                default: {
+                    if (searchTerm == null) {
+                        throw new IllegalArgumentException("Parameter 'search term' must not be null!");
+                    }
+                    
+                    String finalTerm;
+                    if (translator == null) {
+                        if (!(searchTerm instanceof String)) {
+                            throw new IllegalArgumentException("Parameter 'search term' must be of type java.lang.String!");
+                        }
+                        finalTerm = (String) searchTerm;
+                    } else {
+                        finalTerm = translator.translate(searchTerm);
+                    }
+                    
+                    solrQuery.setQuery(finalTerm);
+                    solrQuery.setQueryType(handlerName);
+                    break;
+                }
             }
 
             log.debug("[buildQuery]: Search term is \'" + solrQuery.getQuery() + "\'");
@@ -179,7 +196,6 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
         } catch (Exception e) {
             log.warn("[buildQuery]: Exception occurred: " + e.getMessage());
             throw new OXException(e);
-        } finally {
         }
     }
 
@@ -244,7 +260,7 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
             if (accountField == null) {
                 AccountFolders accountFolders = all.iterator().next();
                 Set<String> folders = accountFolders.getFolders();
-                String stringWithOr = buildQueryStringWithOr(folderField.solrName(), folders);
+                String stringWithOr = buildQueryStringWithOr(folderField, folders);
                 if (stringWithOr != null) {
                     queries.add(stringWithOr);
                 }
@@ -252,7 +268,7 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
                 if (folderField == null) {
                     AccountFolders accountFolders = all.iterator().next();
                     String account = accountFolders.getAccount();
-                    String queryString = buildQueryString(accountField.solrName(), account);
+                    String queryString = buildQueryString(accountField, account);
                     if (queryString != null) {
                         queries.add(queryString);
                     }
@@ -261,13 +277,13 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
                         String account = accountFolders.getAccount();
                         Set<String> folders = accountFolders.getFolders();
                         if (folders.isEmpty()) {
-                            String queryString = buildQueryString(accountField.solrName(), account);
+                            String queryString = buildQueryString(accountField, account);
                             if (queryString != null) {
                                 queries.add(queryString);
                             }
                         } else {
-                            String folderQuery = buildQueryStringWithOr(folderField.solrName(), folders);
-                            String accountQuery = buildQueryString(accountField.solrName(), account);
+                            String folderQuery = buildQueryStringWithOr(folderField, folders);
+                            String accountQuery = buildQueryString(accountField, account);
                             String finalQuery = catenateQueriesWithAnd(folderQuery, accountQuery);
                             if (finalQuery != null) {
                                 queries.add(finalQuery);
@@ -285,7 +301,7 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
 
         if (moduleField != null) {
             Integer module = parameters.getModule() < 0 ? null : new Integer(parameters.getModule());
-            String moduleQuery = buildQueryString(moduleField.solrName(), module);
+            String moduleQuery = buildQueryString(moduleField, module);
             if (moduleQuery != null) {
                 solrQuery.addFilterQuery(moduleQuery);
             }

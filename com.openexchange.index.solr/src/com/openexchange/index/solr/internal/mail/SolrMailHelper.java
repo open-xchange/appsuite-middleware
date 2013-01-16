@@ -98,7 +98,7 @@ public final class SolrMailHelper {
      * @return The filled <code>IndexDocument&lt;MailMessage&gt;</code> instance
      * @throws OXException If reading <code>MailMessage</code> from given <code>SolrDocument</code> fails
      */
-    public IndexDocument<MailMessage> readDocument(final SolrDocument document, final List<MailFiller> mailFillers) throws OXException {
+    public StandardIndexDocument<MailMessage> readDocument(final SolrDocument document, final List<MailFiller> mailFillers) throws OXException {
         /*
          * Parse id, full name and account id
          */

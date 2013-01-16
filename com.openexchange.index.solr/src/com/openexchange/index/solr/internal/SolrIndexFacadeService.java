@@ -50,12 +50,14 @@
 package com.openexchange.index.solr.internal;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
+import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -164,6 +166,18 @@ public class SolrIndexFacadeService implements IndexFacadeService {
         try {
             ConfigurationService config = Services.getService(ConfigurationService.class);
             String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
+            String mailSchema = config.getProperty(SolrProperties.SCHEMA_FILE_MAIL);
+            String mailConfig = config.getProperty(SolrProperties.CONFIG_FILE_MAIL);
+            
+            try {
+                FieldConfiguration mailFieldConfig = new XMLBasedFieldConfiguration(mailConfig, mailSchema);
+                
+            } catch (SAXException e) {
+                throw new IllegalStateException("Error while initializing FieldConfiguration: " + e.getMessage(), e);
+            } catch (IOException e) {
+                throw new IllegalStateException("Error while initializing FieldConfiguration: " + e.getMessage(), e);
+            }
+            
             attachmentBuilder = new SimpleQueryBuilder(
                 configDir + File.separatorChar + "attachment-querybuilder.properties",
                 SolrAttachmentField.MODULE,

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="com/openexchange/index/solr/internal/mail/SolrMailField.java|com/openexchange/index/solr/internal/SolrField.java" kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="sim"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>

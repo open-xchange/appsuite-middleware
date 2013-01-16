@@ -47,50 +47,36 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.ajax.index.actions;
+
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 
 /**
- * {@link SearchHandler} - This enum defines possible search handlers.
- * A search handler takes part in {@link QueryParameters} and is an abstract definition of how
- * a search is being performed, meaning what pattern will be searched within which fields.
- * A search handler may define some additional parameters that have to be set within
- * {@link QueryParameters}.
+ * {@link AbstractIndexRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum SearchHandler {
+public abstract class AbstractIndexRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+    /**
+     * URL of the tasks AJAX interface.
+     */
+    private static final String CONFIG_URL = "/ajax/indexedSearch";
+    
+    
+    protected AbstractIndexRequest() {
+        super();
+    }
+    
+    @Override
+    public String getServletPath() {
+        return CONFIG_URL;
+    }
 
-    /**
-     * This handler performs a simple search.
-     * Mandatory parameters: pattern
-     * Optional parameters: folder, sort, order
-     * Module dependent: module, account, service
-     */
-    SIMPLE,
-    /**
-     * The custom search handler allows to define the fields to search in.
-     * Mandatory parameters: search term
-     * Optional parameters: folder, sort, order
-     * Module dependent: module, account, service
-     */
-    CUSTOM,
-    /**
-     * This one searches for all items within a folder.
-     * Mandatory parameters: folder.
-     * Optional parameters: sort, order
-     * Module dependent: module, account, service
-     */
-    ALL_REQUEST,
-    /**
-     * This one searches for a list of index uuids.
-     * Mandatory parameters: ids - A string-array of index uuids.
-     * Optional parameters: sort, order
-     */
-    GET_REQUEST,
-    /**
-     * 
-     */
-    PERSONS_AND_TOPICS
-
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
 }

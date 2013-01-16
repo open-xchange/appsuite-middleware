@@ -49,6 +49,9 @@
 
 package com.openexchange.index;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * {@link StandardIndexDocument}
@@ -56,20 +59,39 @@ package com.openexchange.index;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class StandardIndexDocument<V> implements IndexDocument<V> {
+    
+    private Map<String, Object> extendedAttributes = null;
 
     private final V object;
-
-
-    /**
-     * Initializes a new {@link StandardIndexDocument}.
-     */
+    
+    
     public StandardIndexDocument(final V object) {
+        this(object, null);
+    }
+    
+    public StandardIndexDocument(final V object, final Map<String, Object> extendedAttributes) {
         super();
         this.object = object;
+        if (extendedAttributes != null) {
+            this.extendedAttributes = new HashMap<String, Object>(extendedAttributes);
+        }
     }
 
     @Override
     public V getObject() {
         return object;
+    }
+
+    @Override
+    public Map<String, Object> getExtendedAttributes() {
+        return extendedAttributes;
+    }
+    
+    public void addExtendedAttribute(String name, Object value) {
+        if (extendedAttributes == null) {
+            extendedAttributes = new HashMap<String, Object>();
+        }
+        
+        extendedAttributes.put(name, value);
     }
 }

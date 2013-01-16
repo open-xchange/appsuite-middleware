@@ -310,7 +310,7 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         }
     }
 
-    protected List<IndexDocument<V>> queryChunkWise(SolrResultConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize) throws OXException {
+    protected List<IndexDocument<V>> queryChunkWise(SolrField uuidField, SolrResultConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize) throws OXException {
         List<IndexDocument<V>> indexDocuments = new ArrayList<IndexDocument<V>>();
         int fetched = 0;
         int maxRows = len;
@@ -324,8 +324,23 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
             }
             solrQuery.setRows(maxRows);
             QueryResponse queryResponse = query(solrQuery);
+            Map<String, Map<String, List<String>>> highlighting = queryResponse.getHighlighting();
+            
+            
+            
             SolrDocumentList results = queryResponse.getResults();
             for (SolrDocument document : results) {
+                if (highlighting != null && document.containsKey(uuidField.solrName())) {
+                    String uuid = (String) document.getFieldValue(uuidField.solrName());
+                    if (uuid != null) {
+                        Map<String, List<String>> highlightFields = highlighting.get(uuid);
+                        if (highlightFields != null) {
+                            indexDocuments.add(converter.convert(document, highlightFields));
+                            continue;
+                        }
+                    }
+                }
+                
                 indexDocuments.add(converter.convert(document));
             }
 
