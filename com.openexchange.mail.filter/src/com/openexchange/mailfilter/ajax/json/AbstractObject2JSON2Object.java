@@ -143,8 +143,8 @@ public abstract class AbstractObject2JSON2Object<T> {
         final int fieldsLength = fields.length;
         for (final T t : objs) {
             final JSONObject tmpo = new JSONObject(fieldsLength);
-            for (final String order : fields) {
-                final Mapper<T> mapper = getMapper(order);
+            for (final String field : fields) {
+                final Mapper<T> mapper = getMapper(field);
                 if (!mapper.isNull(t)) {
                     tmpo.put(mapper.getAttrName(), mapper.getAttribute(t));
                 }
