@@ -611,7 +611,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * BitSet of www-form-url safe characters.
      */
     protected static final BitSet WWW_FORM_URL;
-    protected static final BitSet WWW_FORM_URL_SLASH;
+    protected static final BitSet WWW_FORM_URL_ANCHOR;
     // Static initializer for www_form_url
     static {
         BitSet bitSet = new BitSet(256);
@@ -636,7 +636,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         WWW_FORM_URL = bitSet;
         bitSet = (BitSet) bitSet.clone();
         bitSet.set('/');
-        WWW_FORM_URL_SLASH = bitSet;
+        bitSet.set('#');
+        bitSet.set('%');
+        bitSet.set('?');
+        bitSet.set('&');
+        WWW_FORM_URL_ANCHOR = bitSet;
     }
 
     /**
@@ -653,9 +657,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      */
-    public static String encodeUrl(final String s, final boolean allowSlash) {
+    public static String encodeUrl(final String s, final boolean forAnchor) {
         try {
-            return isEmpty(s) ? s : Charsets.toAsciiString(URLCodec.encodeUrl(allowSlash ? WWW_FORM_URL_SLASH : WWW_FORM_URL, s.getBytes(Charsets.ISO_8859_1)));
+            return isEmpty(s) ? s : Charsets.toAsciiString(URLCodec.encodeUrl(forAnchor ? WWW_FORM_URL_ANCHOR : WWW_FORM_URL, s.getBytes(Charsets.ISO_8859_1)));
         } catch (final RuntimeException e) {
             LOG.error("A runtime error occurred.", e);
             return s;
