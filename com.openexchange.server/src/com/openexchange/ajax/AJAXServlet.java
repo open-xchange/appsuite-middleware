@@ -658,33 +658,56 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     protected static final BitSet WWW_FORM_URL_ANCHOR;
     // Static initializer for www_form_url
     static {
-        BitSet bitSet = new BitSet(256);
-        // alpha characters
-        for (int i = 'a'; i <= 'z'; i++) {
-            bitSet.set(i);
+        {
+            final BitSet bitSet = new BitSet(256);
+            // alpha characters
+            for (int i = 'a'; i <= 'z'; i++) {
+                bitSet.set(i);
+            }
+            for (int i = 'A'; i <= 'Z'; i++) {
+                bitSet.set(i);
+            }
+            // numeric characters
+            for (int i = '0'; i <= '9'; i++) {
+                bitSet.set(i);
+            }
+            // special chars
+            bitSet.set('-');
+            bitSet.set('_');
+            bitSet.set('.');
+            bitSet.set('*');
+            // blank to be replaced with +
+            bitSet.set(' ');
+            WWW_FORM_URL = bitSet;
         }
-        for (int i = 'A'; i <= 'Z'; i++) {
-            bitSet.set(i);
+        {
+            final BitSet bitSet = new BitSet(256);
+            // alpha characters
+            for (int i = 'a'; i <= 'z'; i++) {
+                bitSet.set(i);
+            }
+            for (int i = 'A'; i <= 'Z'; i++) {
+                bitSet.set(i);
+            }
+            // numeric characters
+            for (int i = '0'; i <= '9'; i++) {
+                bitSet.set(i);
+            }
+            // special chars
+            bitSet.set('-');
+            bitSet.set('_');
+            bitSet.set('.');
+            bitSet.set('*');
+            // blank to be replaced with +
+            bitSet.set(' ');
+            // Anchor characters
+            bitSet.set('/');
+            bitSet.set('#');
+            bitSet.set('%');
+            bitSet.set('?');
+            bitSet.set('&');
+            WWW_FORM_URL_ANCHOR = bitSet;
         }
-        // numeric characters
-        for (int i = '0'; i <= '9'; i++) {
-            bitSet.set(i);
-        }
-        // special chars
-        bitSet.set('-');
-        bitSet.set('_');
-        bitSet.set('.');
-        bitSet.set('*');
-        // blank to be replaced with +
-        bitSet.set(' ');
-        WWW_FORM_URL = bitSet;
-        bitSet = (BitSet) bitSet.clone();
-        bitSet.set('/');
-        bitSet.set('#');
-        bitSet.set('%');
-        bitSet.set('?');
-        bitSet.set('&');
-        WWW_FORM_URL_ANCHOR = bitSet;
     }
 
     /**
