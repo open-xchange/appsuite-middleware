@@ -117,7 +117,7 @@ public class TestServlet extends HttpServlet {
             page.append(": ");
             final Enumeration<?> valueEnum = req.getHeaders(headerName);
             while (valueEnum.hasMoreElements()) {
-                page.append(valueEnum.nextElement());
+                page.append(saneScriptTags(valueEnum.nextElement().toString()));
                 page.append(valueEnum.hasMoreElements() ? ", " : "");
             }
             page.append("<br>");
@@ -170,7 +170,7 @@ public class TestServlet extends HttpServlet {
             page.append(": ");
             final Enumeration<?> valueEnum = req.getHeaders(headerName);
             while (valueEnum.hasMoreElements()) {
-                page.append(valueEnum.nextElement());
+                page.append(saneScriptTags(valueEnum.nextElement().toString()));
                 page.append(valueEnum.hasMoreElements() ? ", " : "");
             }
             page.append("<br>");
