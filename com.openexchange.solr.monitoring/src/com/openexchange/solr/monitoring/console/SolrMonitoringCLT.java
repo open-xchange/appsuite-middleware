@@ -85,7 +85,7 @@ public class SolrMonitoringCLT {
     private static int listCores(String[] args) {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
-        options.addOption(createOption("d", "details", false, "Lists the names of all active Solr Cores.", false));
+        options.addOption(createOption("d", "details", false, "Lists also the names of all active Solr Cores.", false));
         CommandLineParser parser = new PosixParser();
         JMXConnector jmxConnector = null;
         try {
@@ -138,7 +138,7 @@ public class SolrMonitoringCLT {
     
     private static void printHelp(Options options) {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("listactivesolrcores", options, false);
+        formatter.printHelp("listactivesolrcores", "Lists the number of Solr Cores that are active on this node.", options, null, false);
     }
 
     private static Option createOption(String shortArg, String longArg, boolean hasArg, String description, boolean required) {

@@ -91,7 +91,7 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
         ConfigurationService config = Services.getService(ConfigurationService.class);
         boolean isNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         if (isNode) {
-            return new ArrayList<String>(solrServer.getEmbeddedServerAccess().getActiveCores());            
+            return new ArrayList<String>(solrServer.getEmbeddedServerAccess().getActiveCores());
         }        
 
         throw new MBeanException(null, "This node is not a solr node.");
@@ -122,7 +122,7 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
             int i = 1;
             while (it.hasNext()) {
                 SolrDocument next = it.next();
-                sb.append("\n").append("    ").append(i++).append(". ");            
+                sb.append("\n").append("    ").append(i++).append(". ");
                 for (String fieldName : next.keySet()) {
                     sb.append(fieldName).append(": ").append(String.valueOf(next.get(fieldName)));
                     sb.append("\n        ");
