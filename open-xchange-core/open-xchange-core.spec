@@ -450,8 +450,6 @@ ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 %doc docs/
 %doc com.openexchange.server/doc/examples
 %doc com.openexchange.server/ChangeLog
-%config(noreplace) /opt/open-xchange/etc/contextSets/index.yml
-%config(noreplace) /opt/open-xchange/etc/requestwatcher.properties
 
 %changelog
 * Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
