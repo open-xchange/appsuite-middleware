@@ -143,7 +143,13 @@ public class DefaultMailSenderService implements MailSenderService {
 
     private void send(NotificationMail mail, Session session, State.Type type) {
         Appointment app = (mail.getOriginal() == null || mail.getAppointment().getObjectID() > 0) ? mail.getAppointment() : mail.getOriginal();
-        MailObject message = new MailObject(session, app.getObjectID(), mail.getRecipient().getFolderId(), Types.APPOINTMENT, type.toString());
+        MailObject message;
+        {
+            final int appointmentId = app.getObjectID();
+            final int folderId = mail.getRecipient().getFolderId();
+            final String sType = type.toString();
+            message = new MailObject(session, appointmentId, folderId, Types.APPOINTMENT, sType);
+        }
         message.setInternalRecipient(!mail.getRecipient().isExternal() && !mail.getRecipient().isResource());
 
         message.setFromAddr(getSenderAddress(mail.getSender(), session));
