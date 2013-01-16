@@ -135,9 +135,14 @@ public abstract class AbstractObject2JSON2Object<T> {
      * @throws JSONException
      */
     public JSONArray write(final T[] objs, final String[] fields) throws JSONException {
-        final JSONArray array = new JSONArray();
+        final int objsLen = objs.length;
+        if (objsLen <= 0) {
+            return new JSONArray(0);
+        }
+        final JSONArray array = new JSONArray(objsLen);
+        final int fieldsLength = fields.length;
         for (final T t : objs) {
-            final JSONObject tmpo = new JSONObject();
+            final JSONObject tmpo = new JSONObject(fieldsLength);
             for (final String order : fields) {
                 final Mapper<T> mapper = getMapper(order);
                 if (!mapper.isNull(t)) {
