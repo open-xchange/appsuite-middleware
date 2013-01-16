@@ -127,12 +127,10 @@ public class TaskRecurrenceTest extends AbstractTaskTestForAJAXClient {
         runInsertAndUpdateTest(trainingDays, laterTrainingDays, Task.DAYS);
     }
 
-
     //monthly
     @Test public void testMonthlyRecurrence() {
         Task myAAMeeting = getNewTask("my AA meeting")
-            .startsThisWeek(Task.MONDAY)
-            .startsWeekOfMonth(1)
+            .startsWeekOfMonthOnDay(1, Task.MONDAY)
             .everyMonthOnNthWeekday(1, Task.MONDAY)
             .everyOtherMonth()
             .checkConsistencyOf(TestTask.DATES, TestTask.RECURRENCES);
