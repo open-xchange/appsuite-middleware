@@ -655,7 +655,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * BitSet of www-form-url safe characters.
      */
     protected static final BitSet WWW_FORM_URL;
+
+    /**
+     * BitSet of www-form-url safe characters including safe characters for an anchor.
+     */
     protected static final BitSet WWW_FORM_URL_ANCHOR;
+
     // Static initializer for www_form_url
     static {
         {
