@@ -707,7 +707,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
     };
 
     static {
-        final Map<String, Mapper<Rule>> tmp = new HashMap<String, Mapper<Rule>>();
+        final Map<String, Mapper<Rule>> tmp = new HashMap<String, Mapper<Rule>>(mappers.length);
         for (final Mapper<Rule> mapper : mappers) {
             tmp.put(mapper.getAttrName(), mapper);
         }
