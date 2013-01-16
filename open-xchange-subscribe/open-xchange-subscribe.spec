@@ -65,6 +65,15 @@ if [ ${1:-0} -eq 2 ]; then
 	ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc "$FILE"
     done
 
+    #SoftwareChange_Request-1284
+    pfile=/opt/open-xchange/etc/crawler.properties
+    for prop in com.openexchange.subscribe.crawler.yahoocom \
+                com.openexchange.subscribe.xing; do
+        if ox_exists_property $prop $pfile; then
+            ox_remove_property $prop $pfile
+        fi
+    done
+
     #SoftwareChange_Request-1091
     pfile=/opt/open-xchange/etc/crawler.properties
     if grep -E '^com.openexchange.subscribe.crawler.path.*/' $pfile >/dev/null; then
