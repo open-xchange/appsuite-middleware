@@ -49,6 +49,7 @@
 
 package com.openexchange.http.testservlet;
 
+import static com.openexchange.http.testservlet.SaneScriptTags.saneScriptTags;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -121,7 +122,7 @@ public class TestServlet extends HttpServlet {
             }
             page.append("<br>");
         }
-        page.append("</p><p>The content: ").append(getBody(req));
+        page.append("</p><p>The content: ").append(saneScriptTags(getBody(req)));
         page.append("</p></body>\n</html>");
         resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
@@ -174,7 +175,7 @@ public class TestServlet extends HttpServlet {
             }
             page.append("<br>");
         }
-        page.append("</p><p>The content: ").append(getBody(req));
+        page.append("</p><p>The content: ").append(saneScriptTags(getBody(req)));
         page.append("</p></body>\n</html>");
         resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
