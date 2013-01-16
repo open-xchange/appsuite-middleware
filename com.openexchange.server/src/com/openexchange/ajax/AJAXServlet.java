@@ -60,6 +60,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -75,7 +76,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -734,6 +734,38 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.ISO_8859_1);
+    
+    /**
+     * BitSet of www-form-url safe characters.
+     */
+    protected static final BitSet WWW_FORM_URL;
+    protected static final BitSet WWW_FORM_URL_SLASH;
+    // Static initializer for www_form_url
+    static {
+        BitSet bitSet = new BitSet(256);
+        // alpha characters
+        for (int i = 'a'; i <= 'z'; i++) {
+            bitSet.set(i);
+        }
+        for (int i = 'A'; i <= 'Z'; i++) {
+            bitSet.set(i);
+        }
+        // numeric characters
+        for (int i = '0'; i <= '9'; i++) {
+            bitSet.set(i);
+        }
+        // special chars
+        bitSet.set('-');
+        bitSet.set('_');
+        bitSet.set('.');
+        bitSet.set('*');
+        // blank to be replaced with +
+        bitSet.set(' ');
+        WWW_FORM_URL = bitSet;
+        bitSet = (BitSet) bitSet.clone();
+        bitSet.set('/');
+        WWW_FORM_URL_SLASH = bitSet;
+    }
 
     /**
      * URL encodes given string.
@@ -741,9 +773,19 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      */
     public static String encodeUrl(final String s) {
+        return encodeUrl(s, false);
+    }
+
+    /**
+     * URL encodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     */
+    public static String encodeUrl(final String s, final boolean allowSlash) {
         try {
-            return isEmpty(s) ? s : URL_CODEC.encode(s);
-        } catch (final EncoderException e) {
+            return isEmpty(s) ? s : Charsets.toAsciiString(URLCodec.encodeUrl(allowSlash ? WWW_FORM_URL_SLASH : WWW_FORM_URL, s.getBytes(Charsets.ISO_8859_1)));
+        } catch (final RuntimeException e) {
+            LOG.error("A runtime error occurred.", e);
             return s;
         }
     }
