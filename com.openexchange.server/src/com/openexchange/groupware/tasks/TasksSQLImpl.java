@@ -49,12 +49,12 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
@@ -64,6 +64,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -193,10 +194,8 @@ public class TasksSQLImpl implements TasksSQLInterface {
             final int folderId = task.getParentFolderID();
             folder = Tools.getFolder(ctx, folderId);
             Permission.checkCreate(ctx, user, userConfig, folder);
-            if (task.getPrivateFlag() && (Tools.isFolderPublic(folder)
-                || Tools.isFolderShared(folder, user))) {
-                throw TaskExceptionCode.PRIVATE_FLAG.create(Integer
-                    .valueOf(folderId));
+            if (task.getPrivateFlag() && (Tools.isFolderPublic(folder) || Tools.isFolderShared(folder, user))) {
+                throw TaskExceptionCode.PRIVATE_FLAG.create(I(folderId));
             }
             // TODO create insert class
             // Create folder mappings
@@ -204,14 +203,12 @@ public class TasksSQLImpl implements TasksSQLInterface {
             if (Tools.isFolderPublic(folder)) {
                 folders = TaskLogic.createFolderMapping(folderId, task.getCreatedBy(), InternalParticipant.EMPTY_INTERNAL);
             } else {
-                Tools.fillStandardFolders(ctx, ParticipantStorage
-                    .extractInternal(parts));
+                Tools.fillStandardFolders(ctx, ParticipantStorage.extractInternal(parts));
                 int creator = userId;
                 if (Tools.isFolderShared(folder, user)) {
                     creator = folder.getCreator();
                 }
-                folders = TaskLogic.createFolderMapping(folderId, creator,
-                    ParticipantStorage.extractInternal(parts));
+                folders = TaskLogic.createFolderMapping(folderId, creator,ParticipantStorage.extractInternal(parts));
             }
             // Insert task
             TaskLogic.insertTask(ctx, task, parts, folders);
