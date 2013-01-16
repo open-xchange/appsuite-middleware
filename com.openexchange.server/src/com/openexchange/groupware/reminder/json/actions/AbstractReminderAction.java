@@ -186,7 +186,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         final RecurringResultsInterface recurringResults = recColl.calculateRecurring(
             calendarDataObject,
             calendar.getTimeInMillis(),
-            endRange.getTime(),
+            endRange.getTime() + calendarDataObject.getAlarm() * 60 * 1000,
             0);
         boolean retval = false;
         if (recurringResults != null && recurringResults.size() > 0) {
