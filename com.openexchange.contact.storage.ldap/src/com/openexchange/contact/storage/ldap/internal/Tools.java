@@ -76,14 +76,14 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class Tools  {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Tools.class));
-    private static final String DIRECTORY_NAME = "contact-storage-ldap"; 
+    private static final String DIRECTORY_NAME = "contact-storage-ldap";
 
     private Tools() {
         super();
     }
-    
+
     public static Properties loadProperties(String fileName) throws OXException {
         Properties properties = new Properties();
         FileInputStream in = null;
@@ -98,16 +98,16 @@ public final class Tools  {
         }
         return properties;
     }
-    
+
     private static File getFile(String fileName) throws OXException {
         File file = new File(fileName);
         if (false == file.isAbsolute()) {
             File directory = LdapServiceLookup.getService(ConfigurationService.class).getDirectory(DIRECTORY_NAME);
-            return new File(directory, fileName);            
-        }        
+            return new File(directory, fileName);
+        }
         return file;
     }
-    
+
     public static Properties loadProperties(File file) throws OXException {
         Properties properties = new Properties();
         FileInputStream in = null;
@@ -122,11 +122,11 @@ public final class Tools  {
         }
         return properties;
     }
-    
+
     public static File[] listPropertyFiles() throws OXException {
         File directory = LdapServiceLookup.getService(ConfigurationService.class).getDirectory(DIRECTORY_NAME);
         return directory.listFiles(new FilenameFilter() {
-            
+
             @Override
             public boolean accept(File dir, String name) {
                 return null != name && name.toLowerCase().endsWith(".properties");
@@ -143,7 +143,7 @@ public final class Tools  {
             }
         }
     }
- 
+
     public static void close(LdapContext ldapContext) {
         if (null != ldapContext) {
             try {
@@ -153,7 +153,7 @@ public final class Tools  {
             }
         }
     }
-    
+
     public static void close(SearchIterator<?> searchIterator) {
         if (null != searchIterator) {
             try {
@@ -163,19 +163,19 @@ public final class Tools  {
             }
         }
     }
-    
+
     public static Locale getLocale(SortOptions sortOptions) {
         if (null != sortOptions.getCollation()) {
             SuperCollator collator = SuperCollator.get(sortOptions.getCollation());
             if (null != collator) {
                 return collator.getJavaLocale();
-            }                        
+            }
         }
         return null;
     }
-    
+
     /**
-     * 
+     *
      * @param ldapfilter
      * @return
      */
@@ -222,9 +222,9 @@ public final class Tools  {
     }
 
     /**
-     * Parses a numerical identifier from a string, wrapping a possible 
+     * Parses a numerical identifier from a string, wrapping a possible
      * NumberFormatException into an OXException.
-     * 
+     *
      * @param id the id string
      * @return the parsed identifier
      * @throws OXException
@@ -233,7 +233,7 @@ public final class Tools  {
         try {
             return Integer.parseInt(id);
         } catch (NumberFormatException e) {
-            throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id); 
+            throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id);
         }
     }
 

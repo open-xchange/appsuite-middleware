@@ -83,11 +83,11 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ItemsImpl}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ItemsImpl extends Common implements Items {
-        
+
     public ItemsImpl(ExchangeWebService service, ExchangeServicePortType port) {
         super(service, port);
     }
@@ -103,7 +103,7 @@ public class ItemsImpl extends Common implements Items {
         port.deleteItem(request, getRequestVersion(), responseHolder, getVersionHolder());
         check(getResponseMessages(responseHolder));
     }
-    
+
     @Override
     public void deleteItem(ItemIdType itemId, DisposalType disposal) throws OXException {
         NonEmptyArrayOfBaseItemIdsType itemIdsArray = new NonEmptyArrayOfBaseItemIdsType();
@@ -115,8 +115,8 @@ public class ItemsImpl extends Common implements Items {
         port.deleteItem(request, getRequestVersion(), responseHolder, getVersionHolder());
         ResponseMessageType responseMessage = getResponseMessage(responseHolder);
         check(responseMessage);
-    }   
-    
+    }
+
     @Override
     public void createItems(FolderIdType targetFolderID, List<? extends ItemType> items, MessageDispositionType messageDisposition) throws OXException {
         NonEmptyArrayOfAllItemsType itemsArray = new NonEmptyArrayOfAllItemsType();
@@ -142,13 +142,13 @@ public class ItemsImpl extends Common implements Items {
         RestrictionType restriction = getIsEqualRestriction(UnindexedFieldURIType.ITEM_SUBJECT, subject);
         return findItems(parentFolderID, restriction, traversal, shape);
     }
-    
+
     @Override
     public List<ItemType> findItemsBySubject(BaseFolderIdType parentFolderID, List<String> subjects, ItemQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException {
         RestrictionType restriction = getIsEqualRestriction(UnindexedFieldURIType.ITEM_SUBJECT, subjects);
         return findItems(parentFolderID, restriction, traversal, shape);
     }
-    
+
     @Override
     public ItemType findItemBySubject(BaseFolderIdType parentFolderID, String subject, ItemQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException {
         RestrictionType restriction = getIsEqualRestriction(UnindexedFieldURIType.ITEM_SUBJECT, subject);
@@ -161,7 +161,7 @@ public class ItemsImpl extends Common implements Items {
             return items.get(0);
         }
     }
-    
+
     private List<ItemType> findItems(BaseFolderIdType parentFolderID, RestrictionType restriction, ItemQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException {
         NonEmptyArrayOfBaseFolderIdsType parentFolderIDs = new NonEmptyArrayOfBaseFolderIdsType();
         parentFolderIDs.getFolderIdOrDistinguishedFolderId().add(parentFolderID);
@@ -177,7 +177,7 @@ public class ItemsImpl extends Common implements Items {
         FindItemResponseMessageType responseMessage = (FindItemResponseMessageType)getResponseMessage(responseHolder);
         check(responseMessage);
         return null != responseMessage.getRootFolder() && null != responseMessage.getRootFolder().getItems() &&
-            null != responseMessage.getRootFolder().getItems() ? 
+            null != responseMessage.getRootFolder().getItems() ?
                 responseMessage.getRootFolder().getItems().getItemOrMessageOrCalendarItem() : null;
     }
 

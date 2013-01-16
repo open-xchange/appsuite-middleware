@@ -58,7 +58,7 @@ import com.openexchange.groupware.tools.mappings.Mapping;
 
 
 /**
- * {@link DbMapping} - Extends the generic mapping by database specific 
+ * {@link DbMapping} - Extends the generic mapping by database specific
  * operations.
  *
  * @param <T> the type of the property
@@ -66,55 +66,55 @@ import com.openexchange.groupware.tools.mappings.Mapping;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface DbMapping<T, O> extends Mapping<T, O> {
-	
+
 	/**
 	 * Gets the value of the mapped property from a result set.
-	 * 
+	 *
 	 * @param resultSet the result set to get the property from
 	 * @return the value
 	 * @throws SQLException
 	 */
 	T get(ResultSet resultSet) throws SQLException;
-	
+
 	/**
 	 * Gets the column label of the mapped property.
-	 *  
+	 *
 	 * @return the column label
 	 */
 	String getColumnLabel();
-	
+
 	/**
 	 * Gets the readable name of the mapped property.
-	 *  
+	 *
 	 * @return the readable name
 	 */
 	String getReadableName();
-	
+
 	/**
 	 * Gets the underlying SQL type of the database column.
-	 *  
+	 *
 	 * @return the SQL type
 	 */
 	int getSqlType();
-	
+
 	/**
 	 * Sets the value of the mapped property in a prepared statement.
-	 * 
+	 *
 	 * @param statement the prepared statement to populate
 	 * @param parameterIndex the parameter index in the statement
 	 * @param object the object to read the value from
 	 * @throws SQLException
 	 */
 	void set(PreparedStatement statement, int parameterIndex, O object) throws SQLException;
-	
+
 	/**
 	 * Sets the value of the mapped property in an object.
-	 * 
+	 *
 	 * @param resultSet the result set to read out the value from
 	 * @param object the object to set the value
 	 * @throws SQLException
 	 * @throws OXException
 	 */
 	void set(ResultSet resultSet, O object) throws SQLException, OXException;
-	
+
 }

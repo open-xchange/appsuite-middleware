@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "InvalidDataException", targetNamespace = "http://soap.copy.user.admin.openexchange.com")
 public class InvalidDataException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.usercopy.soap.InvalidDataException invalidDataException;
 
     public InvalidDataException_Exception() {
         super();
     }
-    
+
     public InvalidDataException_Exception(String message) {
         super(message);
     }
-    
+
     public InvalidDataException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

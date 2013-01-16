@@ -68,7 +68,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link DefaultSMSMessage} - The default implementation of a SMS/MMS message.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DefaultSMSMessage implements SMSMessage {
@@ -77,7 +77,7 @@ public final class DefaultSMSMessage implements SMSMessage {
 
     /**
      * Sets the service look-up.
-     * 
+     *
      * @param serviceLookup The service look-up
      */
     public static void setServiceLookup(final ServiceLookup serviceLookup) {
@@ -86,7 +86,7 @@ public final class DefaultSMSMessage implements SMSMessage {
 
     /**
      * Gets the service look-up.
-     * 
+     *
      * @return The service look-up
      */
     public static ServiceLookup getServiceLookup() {
@@ -128,7 +128,7 @@ public final class DefaultSMSMessage implements SMSMessage {
 
     /**
      * Sets the message
-     * 
+     *
      * @param message The message to set
      */
     public void setMessage(final String message) {
@@ -142,7 +142,7 @@ public final class DefaultSMSMessage implements SMSMessage {
 
     /**
      * Sets the sender
-     * 
+     *
      * @param sender The sender to set
      */
     public void setSender(final String sender) {
@@ -156,7 +156,7 @@ public final class DefaultSMSMessage implements SMSMessage {
 
     /**
      * Sets the recipients
-     * 
+     *
      * @param recipients The recipients to set
      */
     public void setRecipients(final Set<String> recipients) {
@@ -174,7 +174,7 @@ public final class DefaultSMSMessage implements SMSMessage {
 
     /**
      * Sets the id
-     * 
+     *
      * @param id The id to set
      */
     public void setId(final String id) {
@@ -188,7 +188,7 @@ public final class DefaultSMSMessage implements SMSMessage {
 
     /**
      * Sets the full name
-     * 
+     *
      * @param fullName The full name to set
      */
     public void setFullName(final String fullName) {
@@ -202,7 +202,7 @@ public final class DefaultSMSMessage implements SMSMessage {
 
     /**
      * Sets the size
-     * 
+     *
      * @param size The size to set
      */
     public void setSize(final long size) {
@@ -245,7 +245,7 @@ public final class DefaultSMSMessage implements SMSMessage {
 
     /**
      * Sets the captcha parameters
-     * 
+     *
      * @param params The captcha parameters
      */
     @Override
@@ -256,7 +256,7 @@ public final class DefaultSMSMessage implements SMSMessage {
 
     /**
      * Gets the captcha parameters
-     * 
+     *
      * @return The captcha parameters
      */
     @Override
@@ -289,7 +289,7 @@ public final class DefaultSMSMessage implements SMSMessage {
 
     /**
      * Gets the associated files.
-     * 
+     *
      * @return The files.
      */
     @Override

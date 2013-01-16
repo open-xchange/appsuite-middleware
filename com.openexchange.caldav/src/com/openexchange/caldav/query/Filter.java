@@ -70,5 +70,5 @@ public class Filter {
         filters.add(filter);
         return this;
     }
-    
+
 }

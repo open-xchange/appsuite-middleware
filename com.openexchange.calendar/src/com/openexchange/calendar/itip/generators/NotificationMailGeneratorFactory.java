@@ -68,12 +68,12 @@ import com.openexchange.user.UserService;
 public class NotificationMailGeneratorFactory implements ITipMailGeneratorFactory {
     private final NotificationParticipantResolver resolver;
     private final ITipIntegrationUtility util;
-    
+
     private final AttachmentMemory attachmentMemory;
     private final ServiceLookup services;
-    
-    
-    
+
+
+
     public NotificationMailGeneratorFactory(NotificationParticipantResolver resolver, ITipIntegrationUtility util, ServiceLookup services, AttachmentMemory attachmentMemory) {
         super();
         this.resolver = resolver;
@@ -89,9 +89,9 @@ public class NotificationMailGeneratorFactory implements ITipMailGeneratorFactor
         Context ctx = services.getService(ContextService.class).getContext(session.getContextId());
         User user = services.getService(UserService.class).getUser(session.getUserId(), ctx);
         User onBehalfOf = (onBehalfOfId <= 0) ? user : services.getService(UserService.class).getUser(onBehalfOfId, ctx);
-        
+
         NotificationMailGenerator generator = new NotificationMailGenerator(services, attachmentMemory, resolver, util, original, appointment, user, onBehalfOf, ctx, session);
-        
+
         return generator;
     }
 

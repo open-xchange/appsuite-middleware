@@ -189,6 +189,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
         final List<ImportResult> results = importStuff(file, "utf-8"); //test-problem: Outlook 2007 German is usually cp1252, but of course not in this test.
         assertEquals("Only one result" , 1, results.size());
         final ImportResult res = results.get(0);
+        assertTrue("An exception occurred: " + res.getException(), null == res.getException());
         final String objectId = res.getObjectId();
         assertNotNull("Identifier of imported object is missing", objectId);
         final Contact conObj = getEntry(Integer.parseInt(objectId));

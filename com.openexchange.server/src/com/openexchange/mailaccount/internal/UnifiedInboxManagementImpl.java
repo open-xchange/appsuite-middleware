@@ -248,38 +248,34 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
 
     @Override
     public int getUnifiedINBOXAccountID(final int userId, final int contextId, final Connection con) throws OXException {
+        final DatabaseService databaseService;
+        final Connection connection;
+        final boolean releaseConnection;
+        if (null == con) {
+            databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+            connection = databaseService.getReadOnly(contextId);
+            releaseConnection = true;
+        } else {
+            databaseService = null;
+            connection = con;
+            releaseConnection = false;
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            final DatabaseService databaseService;
-            final Connection connection;
-            final boolean releaseConnection;
-            if (null == con) {
-                databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
-                connection = databaseService.getReadOnly(contextId);
-                releaseConnection = true;
-            } else {
-                databaseService = null;
-                connection = con;
-                releaseConnection = false;
+            stmt = connection.prepareStatement("SELECT id FROM user_mail_account WHERE cid = ? AND user = ? AND url LIKE ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX + '%');
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : -1;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            if (releaseConnection && null != databaseService) {
+                databaseService.backReadOnly(contextId, connection);
             }
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                stmt = connection.prepareStatement("SELECT id FROM user_mail_account WHERE cid = ? AND user = ? AND url LIKE ?");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, userId);
-                stmt.setString(3, UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX + '%');
-                rs = stmt.executeQuery();
-                return rs.next() ? rs.getInt(1) : -1;
-            } catch (final SQLException e) {
-                throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
-                if (releaseConnection && null != databaseService) {
-                    databaseService.backReadOnly(contextId, connection);
-                }
-            }
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 
@@ -288,12 +284,8 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
      */
 
     private static String getUserLogin(final int userId, final Context ctx) throws OXException {
-        try {
-            final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-            return userService.getUser(userId, ctx).getLoginInfo();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+        return userService.getUser(userId, ctx).getLoginInfo();
     }
 
 }

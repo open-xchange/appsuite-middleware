@@ -62,12 +62,12 @@ public interface Decrypter {
 
     /**
      * Gets decrypted string.
-     * 
+     *
      * @param session The session
      * @param encrypted The encrypted string
      * @return The decrypted string
      * @throws OXException If operation fails
      */
     public String getDecrypted(Session session, String encrypted) throws OXException;
-    
+
 }

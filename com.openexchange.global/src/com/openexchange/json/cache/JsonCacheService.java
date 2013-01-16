@@ -54,14 +54,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link JsonCacheService} - A simple persistent JSON cache.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface JsonCacheService {
 
     /**
      * Locks for specified entry.
-     * 
+     *
      * @param id The identifier
      * @param userId The user identifier
      * @param contextId The user's context identifier
@@ -72,7 +72,7 @@ public interface JsonCacheService {
 
     /**
      * Unlocks for specified entry.
-     * 
+     *
      * @param id The identifier
      * @param userId The user identifier
      * @param contextId The user's context identifier
@@ -82,7 +82,7 @@ public interface JsonCacheService {
 
     /**
      * Gets denoted JSON value from cache.
-     * 
+     *
      * @param id The identifier
      * @param userId The user identifier
      * @param contextId The user's context identifier
@@ -93,7 +93,7 @@ public interface JsonCacheService {
 
     /**
      * Gets (optionally) denoted JSON value from cache.
-     * 
+     *
      * @param id The identifier
      * @param userId The user identifier
      * @param contextId The user's context identifier
@@ -106,7 +106,7 @@ public interface JsonCacheService {
      * Puts specified JSON value into cache.
      * <p>
      * A <code>null</code> value performs a delete.
-     * 
+     *
      * @param id The identifier
      * @param jsonValue The JSON value to put
      * @param duration The processing duration
@@ -120,7 +120,7 @@ public interface JsonCacheService {
      * Puts specified JSON value into cache if it differs from possibly existing one.
      * <p>
      * A <code>null</code> value performs a delete.
-     * 
+     *
      * @param id The identifier
      * @param jsonValue The JSON value to put
      * @param duration The processing duration
@@ -133,7 +133,7 @@ public interface JsonCacheService {
 
     /**
      * Deletes denoted JSON value from cache.
-     * 
+     *
      * @param id The identifier
      * @param userId The user identifier
      * @param contextId The user's context identifier

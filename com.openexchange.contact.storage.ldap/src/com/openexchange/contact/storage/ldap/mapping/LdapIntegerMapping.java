@@ -73,7 +73,7 @@ public abstract class LdapIntegerMapping extends LdapMapping<Integer> {
         }
         return null;
     }
-    
+
     @Override
     public String encode(Integer value, LdapIDResolver idResolver) throws OXException {
         return null != value ? value.toString() : null;

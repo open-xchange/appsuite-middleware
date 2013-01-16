@@ -56,9 +56,9 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 /**
  * This class defines all those methods which make and object capable of being dynamically extended by other
  * attributes.<p>
- * 
+ *
  * To implement this in our class simply extend from this class.
- * 
+ *
  * @author d7
  *
  */
@@ -69,16 +69,16 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
     private Hashtable<String, OXCommonExtension> extensions = null;
 
     private final boolean extensionsset = false;
-    
+
     /**
      * This field is used to show if all extension have run fine and inserted their
      * data correctly
      */
     private boolean extensionsok = true;
-    
+
     /**
      * Adds an extension to an object
-     * 
+     *
      * @param extension An {@link OXCommonExtension} object
      * @throws DuplicateExtensionException
      */
@@ -92,30 +92,30 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
 
     /**
      * Returns a {@link Hashtable} of all extensions with the name of the extensions as key
-     * 
+     *
      * @return A {@link Hashtable}
      */
     public Hashtable<String, OXCommonExtension> getAllExtensionsAsHash() {
         return this.extensions;
     }
-    
+
     /**
      * A convenience method for getting the first extension in a list of equal extension names. The
      * use of this method is not recommended because you won't get notifications how many extensions
      * of the same name exist.
-     * 
+     *
      * @param extname
      * @return
      */
     public OXCommonExtension getFirstExtensionByName(final String extname) {
         return this.extensions.get(extname);
     }
-    
+
     /**
      * Shows if an error occurred in any of the extensions of this object. If you get {@code true} here everything
      * is fine. Otherwise an error occurred and you have to go through all extensions to find out in which one this
      * was happening
-     * 
+     *
      * @return A {@link boolean} value
      */
     public boolean isExtensionsok() {
@@ -124,7 +124,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
 
     /**
      * This method will be used in the future
-     * 
+     *
      * @return
      */
     public boolean isExtensionsset() {
@@ -134,7 +134,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
     /**
      * Removes the given extension from this object. Note that only the name of the Class is interesting here
      * so you don't have to provide the exact Object but only an Object from the fitting type.
-     * 
+     *
      * @param extension An {@link OXCommonExtension} object specifying the extension to be removed
      * @return
      */
@@ -149,7 +149,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
     public final void setExtensionsok(boolean extensionsok) {
         this.extensionsok = extensionsok;
     }
-    
+
     protected void initExtendable() {
         this.extensions = new Hashtable<String, OXCommonExtension>(3);
     }

@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * {@link DefaultIMAPValidity} - The default implementation of <tt>IMAPValidity</tt> backed by a {@link AtomicLong} instance.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultIMAPValidity implements IMAPValidity {
@@ -72,7 +72,7 @@ public class DefaultIMAPValidity implements IMAPValidity {
 
     /**
      * Atomically increments by one the current value.
-     * 
+     *
      * @return the previous value
      */
     public long getAndIncrement() {
@@ -81,7 +81,7 @@ public class DefaultIMAPValidity implements IMAPValidity {
 
     /**
      * Atomically increments by one the current value.
-     * 
+     *
      * @return the updated value
      */
     public long incrementAndGet() {

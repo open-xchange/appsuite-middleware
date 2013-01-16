@@ -68,7 +68,7 @@ public enum SolrExceptionCodes implements OXExceptionCode {
      */
     ERROR(SolrExceptionMessages.ERROR_MSG, Category.CATEGORY_ERROR, 1000),
     /**
-     * Could not find solr core entry for user %1$s and module %2$s in context %3$s. 
+     * Could not find solr core entry for user %1$s and module %2$s in context %3$s.
      */
     CORE_ENTRY_NOT_FOUND(SolrExceptionMessages.CORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1001),
     /**
@@ -80,7 +80,7 @@ public enum SolrExceptionCodes implements OXExceptionCode {
      */
     NO_FREE_CORE_STORE(SolrExceptionMessages.NO_FREE_CORE_STORE_MSG, Category.CATEGORY_ERROR, 1003),
     /**
-     * This cores instance directory (%1$s) already exists and its structure is inconsistent. 
+     * This cores instance directory (%1$s) already exists and its structure is inconsistent.
      */
     INSTANCE_DIR_EXISTS(SolrExceptionMessages.INSTANCE_DIR_EXISTS_MSG, Category.CATEGORY_ERROR, 1004),
     /**
@@ -119,7 +119,7 @@ public enum SolrExceptionCodes implements OXExceptionCode {
      * %1$s is not a valid field for sorting.
      */
     INVALID_SORT_FIELD(SolrExceptionMessages.INVALID_SORT_FIELD_MSG, Category.CATEGORY_ERROR, 1013);
-    
+
     ;
 
     private final String message;

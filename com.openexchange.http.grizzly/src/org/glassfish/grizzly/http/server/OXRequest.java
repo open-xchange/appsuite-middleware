@@ -55,12 +55,15 @@ import java.nio.charset.Charset;
 import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.Buffer;
 import org.glassfish.grizzly.ThreadCache;
+import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.http.Cookie;
+import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.Method;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.server.Session;
 import org.glassfish.grizzly.http.server.util.Globals;
+import org.glassfish.grizzly.http.util.DataChunk;
 import org.glassfish.grizzly.utils.Charsets;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.log.LogProperties;
@@ -69,12 +72,16 @@ import com.openexchange.tools.servlet.http.Cookies;
 
 /**
  * {@link OXRequest}
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class OXRequest extends Request {
 
     private static Log LOG = com.openexchange.log.Log.loggerFor(OXRequest.class);
+
+    private String XForwardProto = null;
+
+    private int XForwardPort = 0;
 
     private static GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
 
@@ -90,8 +97,67 @@ public class OXRequest extends Request {
         return oxRequest;
     }
 
+    @Override
+    protected void recycle() {
+        XForwardProto = null;
+        XForwardPort = 0;
+        super.recycle();
+    }
+
     protected OXRequest(Response response) {
         super(response);
+    }
+
+    /**
+     * Gets the XForwardProto e.g. http/s
+     * 
+     * @return The XForwardProto
+     */
+    public String getXForwardProto() {
+        return XForwardProto;
+    }
+
+    /**
+     * Sets the xForwardProto e.g. http/s
+     * 
+     * @param XForwardProto The XForwardProto to set
+     */
+    public void setxForwardProto(String XForwardProto) {
+        this.XForwardProto = XForwardProto;
+    }
+
+    /**
+     * Gets the XForwardPort
+     * 
+     * @return The XForwardPort
+     */
+    public int getXForwardPort() {
+        return XForwardPort;
+    }
+
+    /**
+     * Sets the XForwardPort
+     * 
+     * @param XForwardPort The XForwardPort to set
+     */
+    public void setXForwardPort(int XForwardPort) {
+        this.XForwardPort = XForwardPort;
+    }
+
+    @Override
+    public String getScheme() {
+        if (XForwardProto != null) {
+            return XForwardProto;
+        }
+        return super.getScheme();
+    }
+
+    @Override
+    public int getServerPort() {
+        if (XForwardPort > 0) {
+            return XForwardPort;
+        }
+        return super.getServerPort();
     }
 
     /**
@@ -144,13 +210,13 @@ public class OXRequest extends Request {
 
     /**
      * Register a new Session in the list of sessions, add it as Cookie to the Response and add the string value to the LogProperties.
-     * 
+     *
      * @param sessionId The new SessionId that has to be registered
      */
     private void registerNewSession(String sessionId) {
         session = new Session(sessionId);
         session.setTimestamp(System.currentTimeMillis());
-        session.setSessionTimeout(grizzlyConfig.getCookieMaxInactivityInterval()*1000);
+        session.setSessionTimeout(grizzlyConfig.getCookieMaxInactivityInterval() * 1000);
         sessions.put(sessionId, session);
         response.addCookie(createSessionCookie(sessionId));
         if (LogProperties.isEnabled()) {
@@ -161,7 +227,7 @@ public class OXRequest extends Request {
 
     /**
      * Remove invalid JSession cookie used in the Request. Cookies are invalid when:
-     * 
+     *
      * @param invalidSessionId The invalid sessionId requested by the browser/cookie
      */
     private void removeInvalidSessionCookie(String invalidSessionId) {
@@ -184,7 +250,7 @@ public class OXRequest extends Request {
 
     /**
      * Generate a invalidation Cookie that can be added to the response to prompt the browser to remove that cookie.
-     * 
+     *
      * @param invalidCookie The invalid Cookie from the incoming request
      * @return an invalidation Cookie that can be added to the response to prompt the browser to remove that cookie.
      */
@@ -198,7 +264,7 @@ public class OXRequest extends Request {
     /**
      * Generate a invalidation Cookie with domain that can be added to the response to prompt the browser to remove that cookie. The domain
      * is needed for IE to change/remove cookies.
-     * 
+     *
      * @param invalidCookie The invalid Cookie from the incoming request
      * @param domain The domain to set in the invalidation cookie
      * @return an invalidation Cookie that can be added to the response to prompt the browser to remove that cookie.
@@ -212,7 +278,7 @@ public class OXRequest extends Request {
     /**
      * Create a new JSessioID String that consists of a (random)-(the urlencoded domain of this server with dots and dashes
      * encoded).(backendRoute).
-     * 
+     *
      * @return A new JSessionId value as String
      */
     private String createSessionID() {
@@ -231,7 +297,7 @@ public class OXRequest extends Request {
 
     /**
      * Creates a new JSessionIdCookie based on a sessionID and the server configuration.
-     * 
+     *
      * @param sessionID The sessionId to use for cookie generation
      * @return The new JSessionId Cookie
      */
@@ -249,7 +315,7 @@ public class OXRequest extends Request {
          * Toggle the security of the cookie on when we are dealing with a https request or the forceHttps config option is true e.g. when A
          * proxy like apache terminates ssl in front of the backend. The exception from forced https is a request from the local LAN.
          */
-        boolean isCookieSecure = request.isSecure() || (grizzlyConfig.isCookieForceHttps() && !Cookies.isLocalLan(getServerName()));
+        boolean isCookieSecure = request.isSecure() || (grizzlyConfig.isForceHttps() && !Cookies.isLocalLan(getServerName()));
         jSessionIdCookie.setSecure(isCookieSecure);
 
         /*

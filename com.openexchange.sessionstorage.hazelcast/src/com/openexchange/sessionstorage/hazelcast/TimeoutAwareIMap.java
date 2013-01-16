@@ -72,7 +72,7 @@ import com.openexchange.threadpool.behavior.AbortBehavior;
 
 /**
  * {@link TimeoutAwareIMap} - Delegates to a given {@link IMap} with respect to timeout setting.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSession> {
@@ -83,7 +83,7 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     /**
      * Initializes a new {@link TimeoutAwareIMap}.
-     * 
+     *
      * @param map The map to delegate to
      * @param timeout The timeout
      * @param behavior The refused execution behavior to use
@@ -94,11 +94,11 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     /**
      * Initializes a new {@link TimeoutAwareIMap}.
-     * 
+     *
      * @param map The map to delegate to
      * @param timeout The timeout
      * @param behavior The refused execution behavior to use
-     * @param nativeIfNonPaused <code>true</code> to simply delegate if not currently paused; otherwise <code>false</code> 
+     * @param nativeIfNonPaused <code>true</code> to simply delegate if not currently paused; otherwise <code>false</code>
      */
     public TimeoutAwareIMap(final IMap<String, HazelcastStoredSession> map, final long timeout, final boolean nativeIfNonPaused) {
         super();

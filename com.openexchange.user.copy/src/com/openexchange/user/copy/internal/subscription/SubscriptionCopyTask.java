@@ -84,8 +84,8 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SubscriptionCopyTask implements CopyUserTaskService {
-    
-   private static final String SELECT_SUBSCRIPTIONS = 
+
+   private static final String SELECT_SUBSCRIPTIONS =
        "SELECT " +
            "id, configuration_id, source_id, folder_id, " +
            "last_update, enabled, created, lastModified " +
@@ -95,7 +95,7 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
            "cid = ? " +
        "AND " +
            "user_id = ?";
-   
+
    private static final String INSERT_SUBSCRIPTION =
        "INSERT INTO " +
            "subscriptions " +
@@ -103,7 +103,7 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
        "VALUES " +
            "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-   
+
    public SubscriptionCopyTask() {
        super();
    }
@@ -140,33 +140,33 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
         final Integer dstUsrId = copyTools.getDestinationUserId();
         final Connection srcCon = copyTools.getSourceConnection();
         final Connection dstCon = copyTools.getDestinationConnection();
-        final ObjectMapping<FolderObject> folderMapping = copyTools.getFolderMapping();           
-        
+        final ObjectMapping<FolderObject> folderMapping = copyTools.getFolderMapping();
+
         try {
             final boolean hasSubscriptions = DBUtils.tableExists(srcCon, "subscriptions");
-            if (hasSubscriptions) {                
-                final ObjectMapping<Integer> accountMapping = copyTools.checkAndExtractGenericMapping(OAuthAccount.class.getName());     
+            if (hasSubscriptions) {
+                final ObjectMapping<Integer> accountMapping = copyTools.checkAndExtractGenericMapping(OAuthAccount.class.getName());
                 final Map<Integer, Subscription> subscriptions = loadSubscriptionsFromDB(srcCon, i(srcUsrId), i(srcCtxId));
                 fillSubscriptionsWithAttributes(subscriptions, srcCon, i(srcCtxId));
                 setAccountIdsForSubscriptions(subscriptions, accountMapping);
-                exchangeSubscriptionIds(subscriptions, dstCon, dstCtx, folderMapping);                
+                exchangeSubscriptionIds(subscriptions, dstCon, dstCtx, folderMapping);
                 writeSubscriptionsToDB(subscriptions, dstCon, i(dstUsrId), i(dstCtxId));
             }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         }
-        
+
         return null;
     }
-    
+
     private void writeSubscriptionsToDB(final Map<Integer, Subscription> subscriptions, final Connection con, final int uid, final int cid) throws OXException {
         PreparedStatement stmt = null;
-        try {            
+        try {
             stmt = con.prepareStatement(INSERT_SUBSCRIPTION);
             for (final Subscription subscription : subscriptions.values()) {
                 GenconfCopyTool.writeAttributesToDB(subscription.getBoolAttributes(), con, subscription.getConfigId(), cid, ConfAttribute.BOOL);
                 GenconfCopyTool.writeAttributesToDB(subscription.getStringAttributes(), con, subscription.getConfigId(), cid, ConfAttribute.STRING);
-                
+
                 int i = 1;
                 stmt.setInt(i++, subscription.getId());
                 stmt.setInt(i++, cid);
@@ -178,10 +178,10 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
                 stmt.setInt(i++, subscription.getEnabled());
                 stmt.setLong(i++, subscription.getCreated());
                 stmt.setLong(i++, subscription.getLastModified());
-                
+
                 stmt.addBatch();
             }
-            
+
             stmt.executeBatch();
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
@@ -189,7 +189,7 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(stmt);
         }
     }
-    
+
     private void exchangeSubscriptionIds(final Map<Integer, Subscription> subscriptions, final Connection con, final Context ctx, final ObjectMapping<FolderObject> folderMapping) throws OXException {
         for (final Subscription subscription : subscriptions.values()) {
             try {
@@ -207,13 +207,13 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
                     }
                 } catch (final NumberFormatException e) {
                     // Keep the old folder
-                }                
+                }
             } catch (final SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             }
         }
     }
-    
+
     void setAccountIdsForSubscriptions(final Map<Integer, Subscription> subscriptions, final ObjectMapping<Integer> accountMapping) {
         for (final Subscription subscription : subscriptions.values()) {
             final List<ConfAttribute> stringAttributes = subscription.getStringAttributes();
@@ -228,13 +228,13 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
                     } catch (final NumberFormatException e) {
                         // Skip this one
                     }
-                    
+
                     break;
                 }
             }
         }
     }
-    
+
     Map<Integer, Subscription> loadSubscriptionsFromDB(final Connection con, final int uid, final int cid) throws OXException {
         final Map<Integer, Subscription> subscriptions = new HashMap<Integer, Subscription>();
         PreparedStatement stmt = null;
@@ -243,7 +243,7 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
             stmt = con.prepareStatement(SELECT_SUBSCRIPTIONS);
             stmt.setInt(1, cid);
             stmt.setInt(2, uid);
-            
+
             rs = stmt.executeQuery();
             while (rs.next()) {
                 int i = 1;
@@ -257,7 +257,7 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
                 subscription.setEnabled(rs.getInt(i++));
                 subscription.setCreated(rs.getLong(i++));
                 subscription.setLastModified(rs.getLong(i++));
-                
+
                 subscriptions.put(id, subscription);
             }
         } catch (final SQLException e) {
@@ -265,10 +265,10 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
-        
+
         return subscriptions;
     }
-    
+
     void fillSubscriptionsWithAttributes(final Map<Integer, Subscription> subscriptions, final Connection con, final int cid) throws OXException {
         for (final Subscription subscription : subscriptions.values()) {
             final List<ConfAttribute> boolAttributes = GenconfCopyTool.loadAttributesFromDB(con, subscription.getConfigId(), cid, ConfAttribute.BOOL);

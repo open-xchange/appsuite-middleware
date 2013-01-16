@@ -56,6 +56,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.tools.Collections;
@@ -593,7 +594,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Checks if this Content-Type has specified base type.
-     * 
+     *
      * @param primaryType The primary type; e.g. <code>"text"</code>
      * @param subType The secondary type; e.g. <code>"plain"</code>
      * @return <code>true</code> if matches given base type; otherwise <code>false</code>
@@ -799,12 +800,13 @@ public class ContentType extends ParameterizedHeader {
         throw MailExceptionCode.INVALID_CONTENT_TYPE.create(mimeType);
     }
 
-    private static final String toLowerCase(final String str) {
-        final char[] chars = str.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            chars[i] = Character.toLowerCase(chars[i]);
+    private static String toLowerCase(final String s) {
+        final int length = s.length();
+        final StringAllocator sb = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            sb.append(Character.toLowerCase(s.charAt(i)));
         }
-        return new String(chars);
+        return sb.toString();
     }
 
     /**

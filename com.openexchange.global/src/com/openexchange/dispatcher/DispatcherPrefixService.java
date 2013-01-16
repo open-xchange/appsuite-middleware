@@ -51,7 +51,7 @@ package com.openexchange.dispatcher;
 
 /**
  * {@link DispatcherPrefixService} - Provides the dispatcher prefix
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface DispatcherPrefixService {
@@ -65,7 +65,7 @@ public interface DispatcherPrefixService {
      * Gets the prefix for dispatcher; e.g. <tt>"/ajax/"</tt> (default).
      * <p>
      * All requests starting with this prefix are directed to dispatcher framework.
-     * 
+     *
      * @return The prefix
      */
     public String getPrefix();

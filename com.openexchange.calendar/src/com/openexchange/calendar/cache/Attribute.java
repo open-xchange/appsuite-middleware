@@ -54,7 +54,7 @@ import com.openexchange.caching.ElementAttributes;
 
 /**
  * {@link Attribute} - An attribute for an element which should be put into {@link CalendarVolatileCache cache}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Attribute<V> {
@@ -82,7 +82,7 @@ public final class Attribute<V> {
 
         /**
          * Gets the type.
-         * 
+         *
          * @return The type
          */
         protected Class<? extends Object> getClazz() {
@@ -93,7 +93,7 @@ public final class Attribute<V> {
 
     /**
      * Gets the max-life attribute for specified <code>maxLifeSeconds</code>.
-     * 
+     *
      * @param maxLifeSeconds The max-life seconds
      * @return The max-life attribute
      */
@@ -103,7 +103,7 @@ public final class Attribute<V> {
 
     /**
      * Gets the idle-time attribute for specified <code>idleTimeSeconds</code>.
-     * 
+     *
      * @param idleTimeSeconds The idle-time seconds
      * @return The idle-time attribute
      */
@@ -113,7 +113,7 @@ public final class Attribute<V> {
 
     /**
      * Creates the attribute for specified arguments.
-     * 
+     *
      * @param type The type
      * @param value The value
      * @return The attribute
@@ -145,7 +145,7 @@ public final class Attribute<V> {
 
     /**
      * Applies this attribute to specified element attributes.
-     * 
+     *
      * @param elementAttributes The element {@link Attributes} to apply to
      */
     protected void applyToElementAttaributes(final ElementAttributes elementAttributes) {
@@ -163,7 +163,7 @@ public final class Attribute<V> {
 
     /**
      * Gets the type
-     * 
+     *
      * @return The type
      */
     public Type getType() {
@@ -172,7 +172,7 @@ public final class Attribute<V> {
 
     /**
      * Gets the value
-     * 
+     *
      * @return The value
      */
     public V getValue() {

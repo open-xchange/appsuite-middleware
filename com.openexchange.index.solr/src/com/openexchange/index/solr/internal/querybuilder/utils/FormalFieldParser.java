@@ -57,7 +57,7 @@ import org.apache.commons.logging.Log;
 
 /**
  * {@link FormalFieldParser}
- * 
+ *
  * @author Sven Maurmann
  */
 public class FormalFieldParser {
@@ -78,7 +78,7 @@ public class FormalFieldParser {
      * The method creates a list of terms from a string of the following form: <br>
      * <code>field1:term1 field1:"term2 AND term3" field2:term4</code> <br>
      * The members of the list are
-     * 
+     *
      * @param source
      * @return
      */
@@ -111,7 +111,9 @@ public class FormalFieldParser {
         StringBuilder b = new StringBuilder();
         log.trace("[split]: Starting to split \'" + source + "\'");
 
-        for (char ch : source.toCharArray()) {
+        final int length = source.length();
+        for (int i = 0; i < length; i++) {
+            final char ch = source.charAt(i);
             log.trace("[split]: \'" + ch + "\'");
             switch (ch) {
                 case '\\':
@@ -223,7 +225,7 @@ public class FormalFieldParser {
         if (log.isDebugEnabled()) {
             log.debug("[parseTerm]: result is \'" + b.toString() + "\'");
         }
-        
+
         return b.toString();
     }
 

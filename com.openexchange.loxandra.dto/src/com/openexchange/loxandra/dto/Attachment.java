@@ -58,7 +58,7 @@ public class Attachment {
 	private String mimetype;
 
 	private ByteBuffer data;
-	
+
 	/**
 	 * @return the filename
 	 */

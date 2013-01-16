@@ -60,7 +60,7 @@ import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
  * {@link CropTransformation}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CropTransformation implements ImageTransformation {
@@ -68,7 +68,7 @@ public class CropTransformation implements ImageTransformation {
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CropTransformation.class));
 
     private final int x, y, width, height;
-    
+
     public CropTransformation(int x, int y, int width, int height) {
         super();
         this.x = x;
@@ -76,13 +76,13 @@ public class CropTransformation implements ImageTransformation {
         this.width = width;
         this.height = height;
     }
-    
+
     @Override
     public BufferedImage perform(BufferedImage sourceImage, ImageInformation imageInformation) throws IOException {
         /*
          * prepare target image
          */
-        BufferedImage targetImage = null; 
+        BufferedImage targetImage = null;
         if (0 <= x && sourceImage.getWidth() > x && sourceImage.getWidth() >= x + width &&
                 0 <= y && sourceImage.getHeight() > y && sourceImage.getHeight() >= y + height) {
             /*

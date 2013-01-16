@@ -211,13 +211,7 @@ public final class MessageWriter {
         } else {
             mailPath = MailPath.NULL;
         }
-        final UserSettingMail usm;
-        try {
-            usm =
-                null == settings ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()) : settings;
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final UserSettingMail usm = null == settings ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()) : settings;
         /*
          * Add log properties
          */
@@ -531,8 +525,6 @@ public final class MessageWriter {
                     }
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-                } catch (final OXException e) {
-                    throw new OXException(e);
                 }
             }
         });
@@ -560,8 +552,6 @@ public final class MessageWriter {
                     }
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-                } catch (final OXException e) {
-                    throw new OXException(e);
                 }
             }
         });

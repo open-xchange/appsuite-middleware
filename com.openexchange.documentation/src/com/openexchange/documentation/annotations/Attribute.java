@@ -65,17 +65,17 @@ public @interface Attribute {
 
 	/**
 	 * Specifies the name. Required.
-	 * 
+	 *
 	 * @return The name
 	 */
 	String name();
 
 	/**
 	 * Specifies the description. Defaults to <code>""</code>.
-	 * 
+	 *
 	 * @return the description
 	 */
-	String description() default "";		
+	String description() default "";
 
 	/**
 	 * Specifies whether the {@link Attribute} is mandatory or not. Defaults to <code>false</code>.

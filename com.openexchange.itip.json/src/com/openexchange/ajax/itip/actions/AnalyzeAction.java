@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AnalyzeAction}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AnalyzeAction extends AbstractITipAction {
@@ -90,7 +90,7 @@ public class AnalyzeAction extends AbstractITipAction {
        return array;
     }
 
-   
-    
+
+
 
 }

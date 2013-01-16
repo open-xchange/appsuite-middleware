@@ -54,14 +54,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link CoverExtractor} - Extracts cover image from a file.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface CoverExtractor {
 
     /**
      * Checks if this cover extractor handles specified file.
-     * 
+     *
      * @param file The file
      * @return <code>true</code> if this cover extractor handles specified file; otherwise <code>false</code>
      */
@@ -69,7 +69,7 @@ public interface CoverExtractor {
 
     /**
      * Extracts the cover image from specified file.
-     * 
+     *
      * @param file The file
      * @return The extracted cover image as file
      * @throws OXException If extract attempt fails

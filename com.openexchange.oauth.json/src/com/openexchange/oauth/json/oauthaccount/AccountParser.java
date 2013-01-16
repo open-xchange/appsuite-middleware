@@ -70,31 +70,27 @@ public class AccountParser {
     }
 
     public static OAuthAccount parse(final JSONObject accountJSON, int user, int contextId) throws OXException, JSONException {
-        try {
-            final DefaultOAuthAccount account = new DefaultOAuthAccount();
+        final DefaultOAuthAccount account = new DefaultOAuthAccount();
 
-            if (accountJSON.hasAndNotNull(AccountField.ID.getName())) {
-                account.setId(accountJSON.getInt(AccountField.ID.getName()));
-            }
-            if (accountJSON.hasAndNotNull(AccountField.DISPLAY_NAME.getName())) {
-                account.setDisplayName(accountJSON.getString(AccountField.DISPLAY_NAME.getName()));
-            }
-            if (accountJSON.hasAndNotNull(AccountField.TOKEN.getName())) {
-                account.setToken(accountJSON.getString(AccountField.TOKEN.getName()));
-            }
-            if (accountJSON.hasAndNotNull(AccountField.SECRET.getName())) {
-                account.setSecret(accountJSON.getString(AccountField.SECRET.getName()));
-            }
-            if (accountJSON.hasAndNotNull(AccountField.SERVICE_ID.getName())) {
-                final String serviceId = accountJSON.getString(AccountField.SERVICE_ID.getName());
-                final OAuthServiceMetaDataRegistry registry = ServiceRegistry.getInstance().getService(OAuthService.class, true).getMetaDataRegistry();
-                account.setMetaData(registry.getService(serviceId, user, contextId));
-            }
-
-            return account;
-        } catch (final OXException e) {
-            throw new OXException(e);
+        if (accountJSON.hasAndNotNull(AccountField.ID.getName())) {
+            account.setId(accountJSON.getInt(AccountField.ID.getName()));
         }
+        if (accountJSON.hasAndNotNull(AccountField.DISPLAY_NAME.getName())) {
+            account.setDisplayName(accountJSON.getString(AccountField.DISPLAY_NAME.getName()));
+        }
+        if (accountJSON.hasAndNotNull(AccountField.TOKEN.getName())) {
+            account.setToken(accountJSON.getString(AccountField.TOKEN.getName()));
+        }
+        if (accountJSON.hasAndNotNull(AccountField.SECRET.getName())) {
+            account.setSecret(accountJSON.getString(AccountField.SECRET.getName()));
+        }
+        if (accountJSON.hasAndNotNull(AccountField.SERVICE_ID.getName())) {
+            final String serviceId = accountJSON.getString(AccountField.SERVICE_ID.getName());
+            final OAuthServiceMetaDataRegistry registry = ServiceRegistry.getInstance().getService(OAuthService.class, true).getMetaDataRegistry();
+            account.setMetaData(registry.getService(serviceId, user, contextId));
+        }
+
+        return account;
     }
 
 }

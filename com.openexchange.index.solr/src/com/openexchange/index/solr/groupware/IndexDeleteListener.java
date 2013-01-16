@@ -68,11 +68,11 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexDeleteListener implements DeleteListener {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexDeleteListener.class);
-    
+
     private final int[] coreTypes;
-    
+
 
     public IndexDeleteListener() {
         super();
@@ -85,26 +85,26 @@ public class IndexDeleteListener implements DeleteListener {
         if (event.getType() == DeleteEvent.TYPE_USER) {
             final int cid = event.getContext().getContextId();
             final int uid = event.getId();
-            
+
             deleteAllCores(cid, uid);
         } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
             final int cid = event.getContext().getContextId();
             final UserService userService = Services.getService(UserService.class);
             final User[] users = userService.getUser(event.getContext());
-            
+
             for (final User user : users) {
                 deleteAllCores(cid, user.getId());
             }
         }
     }
-    
+
     private void deleteAllCores(final int cid, final int uid) throws OXException {
         final SolrCoreConfigService indexService = Services.getService(SolrCoreConfigService.class);
         for (final int type : coreTypes) {
             SolrCoreIdentifier identifier = new SolrCoreIdentifier(cid, uid, type);
             try {
                 if (indexService.coreEnvironmentExists(identifier)) {
-                    indexService.removeCoreEnvironment(identifier); 
+                    indexService.removeCoreEnvironment(identifier);
                 }
             } catch (Exception e) {
                 LOG.warn("Error during clean up of core environment for core " + identifier.toString() + ".", e);

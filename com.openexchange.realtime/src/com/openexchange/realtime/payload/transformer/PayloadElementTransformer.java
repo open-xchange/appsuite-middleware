@@ -58,31 +58,31 @@ import com.openexchange.tools.session.ServerSession;
  * {@link PayloadElementTransformer} Transform single PayloadElements found in a PayloadTreeNode by converting its data and adjusting the
  * format of the PayloadElement to reflect the conversion. Transformation happens when PayloadTrees of incoming Requests or outgoing
  * Responses have to be changed so that client/server can handle them.
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public interface PayloadElementTransformer {
 
     /**
      * Get the complete path to an element in a namespace that this PayloadTransformer is able to process.
-     * 
+     *
      * @return the elementPath of elements this PayloadTransformer is able to process.
      */
     ElementPath getElementPath();
-    
+
     /**
      * Transform an incoming Payload.
-     * 
+     *
      * @param paylaod The incoming Payload to process
      * @param session The currently active session
      * @return
      * @throws OXException When transformation fails
      */
     public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException;
-    
+
     /**
      * Transform an outgoing Payload.
-     * 
+     *
      * @param payload The Payload to process
      * @param session The currently active session
      * @throws OXException

@@ -53,7 +53,7 @@ import com.openexchange.datatypes.genericonf.storage.osgi.Activator;
 
 /**
  * {@link GenericConfigurationUtility} - Utility class for generic configuration.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GenericConfigurationUtility {
@@ -67,7 +67,7 @@ public final class GenericConfigurationUtility {
 
     /**
      * Gets the default storage service.
-     * 
+     *
      * @return The default storage service or <code>null</code>
      */
     public static GenericConfigurationStorageService getDefaultGenericConfigurationStorageService() {

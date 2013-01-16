@@ -8,7 +8,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link SpamSettingExceptionCodes} - Enumeration of all {@link SpamSettingException}s.
- * 
+ *
  * @author francisco.laguna@open-xchange.com
  */
 public enum SpamSettingExceptionCodes implements OXExceptionCode {
@@ -63,7 +63,7 @@ public enum SpamSettingExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates an {@link OXException} instance using this error code.
-     * 
+     *
      * @return The newly created {@link OXException} instance.
      */
     public OXException create() {
@@ -72,7 +72,7 @@ public enum SpamSettingExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates an {@link OXException} instance using this error code.
-     * 
+     *
      * @param logArguments The arguments for log message.
      * @return The newly created {@link OXException} instance.
      */
@@ -82,7 +82,7 @@ public enum SpamSettingExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates an {@link OXException} instance using this error code.
-     * 
+     *
      * @param cause The initial cause for {@link OXException}
      * @param arguments The arguments for message.
      * @return The newly created {@link OXException} instance.

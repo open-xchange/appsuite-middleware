@@ -238,7 +238,7 @@ public class FolderProperties {
     private int pooltimeout;
 
     private DerefAliases derefAliases;
-    
+
     private int storagePriority;
 
     public static FolderProperties getFolderPropertiesFromProperties(final ConfigurationService configuration, final String name, final String folder, final String contextnr, final StringBuilder logBuilder) throws OXException {
@@ -693,10 +693,10 @@ public class FolderProperties {
     public SearchScope getUserSearchScope() {
         return this.userSearchScope;
     }
-    
+
     /**
      * Gets the storage priority.
-     * 
+     *
      * @return the priority
      */
     public int getStoragePriority() {
@@ -853,7 +853,7 @@ public class FolderProperties {
     private void setUserSearchScope(final SearchScope userSearchScope) {
         this.userSearchScope = userSearchScope;
     }
-    
+
     private void setStoragePriority(int priority) {
         this.storagePriority = priority;
     }

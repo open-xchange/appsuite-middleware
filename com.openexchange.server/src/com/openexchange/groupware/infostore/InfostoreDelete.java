@@ -68,14 +68,10 @@ public class InfostoreDelete implements DeleteListener {
         if (event.getType() != DeleteEvent.TYPE_USER) {
             return;
         }
-        try {
-            InfostoreFacade database = new InfostoreFacadeImpl(new SimpleDBProvider(readCon, writeCon));
-            database.setTransactional(true);
-            database.setCommitsTransaction(false);
-            database.removeUser(event.getId(), event.getContext(), ServerSessionAdapter.valueOf(event
-                    .getSession(), event.getContext()));
-        } catch (OXException e) {
-            throw new OXException(e);
-        }
+        InfostoreFacade database = new InfostoreFacadeImpl(new SimpleDBProvider(readCon, writeCon));
+        database.setTransactional(true);
+        database.setCommitsTransaction(false);
+        database.removeUser(event.getId(), event.getContext(), ServerSessionAdapter.valueOf(event
+                .getSession(), event.getContext()));
     }
 }

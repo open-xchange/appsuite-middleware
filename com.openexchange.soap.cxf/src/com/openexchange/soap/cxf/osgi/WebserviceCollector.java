@@ -71,7 +71,7 @@ import com.openexchange.soap.cxf.WebserviceName;
 
 /**
  * {@link WebserviceCollector}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -89,7 +89,7 @@ public class WebserviceCollector implements ServiceListener {
 
     /**
      * Initializes a new {@link WebserviceCollector}.
-     * 
+     *
      * @param context The bundle context
      */
     public WebserviceCollector(final BundleContext context) {

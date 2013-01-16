@@ -135,8 +135,6 @@ public final class RdbSnippetDeleteListener implements DeleteListener {
             if (null != e) {
                 throw e;
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {

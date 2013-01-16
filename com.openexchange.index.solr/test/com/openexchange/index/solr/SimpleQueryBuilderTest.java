@@ -64,7 +64,7 @@ import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SimpleQueryBuilderTest extends SimpleQueryBuilder {
-    
+
     /**
      * Initializes a new {@link SimpleQueryBuilderTest}.
      * @param configPath
@@ -86,17 +86,17 @@ public class SimpleQueryBuilderTest extends SimpleQueryBuilder {
         Set<String> value2 = new HashSet<String>();
         value2.add("value2");
         value2.add("value3");
-        
+
         String q1 = buildQueryString(field1, value1);
         Assert.assertEquals("Queries were not equal.", "(field1:\"value1\")", q1);
-        
+
         String q2 = buildQueryStringWithOr(field2, value2);
         Assert.assertTrue("Queries were not equal.", q2.equals("((field2:\"value2\") OR (field2:\"value3\"))") || q2.equals("((field2:\"value3\") OR (field2:\"value2\"))"));
 
         String query = catenateQueriesWithAnd(q1, q2);
         Assert.assertTrue("Wrong query.", query.contains(q1) && query.contains(q2) && query.contains(" AND "));
         Assert.assertEquals("Wrong query size.", q1.length() + q2.length() + "( AND )".length(), query.length());
-        
+
         Assert.assertNull(buildQueryString("abs", null));
         Assert.assertNull(buildQueryString(null, "abc"));
         Assert.assertNull(buildQueryStringWithOr("abs", null));

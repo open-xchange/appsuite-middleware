@@ -63,7 +63,7 @@ import com.openexchange.jslob.registry.JSlobServiceRegistry;
 
 /**
  * {@link JSlobServiceRegistryImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JSlobServiceRegistryImpl implements JSlobServiceRegistry {
@@ -72,7 +72,7 @@ public class JSlobServiceRegistryImpl implements JSlobServiceRegistry {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static JSlobServiceRegistryImpl getInstance() {

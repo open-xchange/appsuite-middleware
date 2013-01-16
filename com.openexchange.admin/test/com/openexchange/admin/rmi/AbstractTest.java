@@ -57,17 +57,17 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
  * @author cutmasta
  */
 public abstract class AbstractTest {
-    
+
     protected  static String TEST_DOMAIN = "example.org";
     protected  static String change_suffix = "-changed";
-    
+
     protected static String getRMIHostUrl(){
         String host = "localhost";
-        
+
         if(System.getProperty("rmi_test_host")!=null){
             host = System.getProperty("rmi_test_host");
-        }        
-        
+        }
+
         if(!host.startsWith("rmi://")){
             host = "rmi://"+host;
         }
@@ -76,11 +76,11 @@ public abstract class AbstractTest {
         }
         return host;
     }
-    
+
     public static Credentials DummyCredentials(){
         return new Credentials("oxadmin","secret");
-    }    
-    
+    }
+
     // The throwing of the exception is necessary to be able to let methods which override
     // this one throw exceptions. So don't remove this
     public static Context getTestContextObject(final Credentials cred) throws Exception {
@@ -92,7 +92,7 @@ public abstract class AbstractTest {
     }
 
     public static Context getTestContextObject(final int context_id, final long quota_max_in_mb) {
-        final Context ctx = new Context(context_id);        
+        final Context ctx = new Context(context_id);
         final Filestore filestore = new Filestore();
         filestore.setSize(quota_max_in_mb);
         ctx.setFilestoreId(filestore.getId());
@@ -107,7 +107,7 @@ public abstract class AbstractTest {
         String mpw = "secret";
         if(System.getProperty("rmi_test_masterpw")!=null){
             mpw = System.getProperty("rmi_test_masterpw");
-        }        
+        }
         return new Credentials("oxadminmaster",mpw);
     }
 

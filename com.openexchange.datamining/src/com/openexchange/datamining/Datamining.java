@@ -64,7 +64,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Properties;
@@ -85,13 +84,13 @@ import org.apache.commons.cli.PosixParser;
  * text-file. The filename starts with "open-xchange_datamining" and includes the current date in YYYY-MM-DD format. The content of the file
  * is camelCased-Parameters, unique and one per line. This should make using these files as input, for example for a visualization, pretty
  * easy.
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Datamining {
 
     /**
-     * 
+     *
      */
     private static final String AVERAGE_FILESTORE_SIZE = "averageFilestoreSize";
 
@@ -105,7 +104,7 @@ public class Datamining {
 
     private static MySQLConnection instance = null;
 
-    private static Connection configdbConnection = null;    
+    private static Connection configdbConnection = null;
 
     private static String configDBURL = "";
 
@@ -128,20 +127,21 @@ public class Datamining {
     private static HashMap<String, String> allTheAnswers = new HashMap<String, String>();
 
     private static ArrayList<Schema> allSchemata;
-    
+
     private static Options staticOptions;
 
-    public static void main(String[] args) {        
+    public static void main(String[] args) {
         Calendar rightNow = Calendar.getInstance();
         final long before = rightNow.getTime().getTime();
 
         setReportFilename();
         readProperties();
         readParameters(args);
-                   
+
         if (configDBURL.equals("") || configDBUser.equals("") || configDBPassword.equals("")) {
-            if (!helpPrinted)
+            if (!helpPrinted) {
                 printHelp();
+            }
         } else if (!helpPrinted) {
             configdbConnection = getDBConnection(configDBURL, configDBUser, configDBPassword);
             allSchemata = getAllSchemata();
@@ -186,7 +186,7 @@ public class Datamining {
             Questions.reportNumberOfUsersWhoSelectedHSplitViewAsTasksDefault();
             Questions.reportNumberOfUsersWhoSelectedListViewAsInfostoreDefault();
             Questions.reportNumberOfUsersWhoSelectedHSplitViewAsInfostoreDefault();
-            Questions.reportNumberOfUsersWhoActivatedMiniCalendar();                        
+            Questions.reportNumberOfUsersWhoActivatedMiniCalendar();
 
             rightNow = Calendar.getInstance();
             final long after = rightNow.getTime().getTime();
@@ -230,7 +230,7 @@ public class Datamining {
             System.out.println("\nEither specify these parameters manually or use this tool on an Open-Xchange application server where all necessary info\n is automatically found in the file /opt/open-xchange/etc/configdb.properties");
             System.out.println("Even then it is possible to override parameters from configdb.properties by setting them manually.");
             System.out.println("Please note that if you want to override hostname / dbName / dbPort at least hostname must be given (no default) and defaults will apply for the other 2.");
-            
+
             helpPrinted = true;
 //        } catch (IOException io) {
 //            io.printStackTrace();
@@ -261,14 +261,14 @@ public class Datamining {
         return allTheAnswers.get(parameter);
     }
 
-    private static void readParameters(String[] args) { 
-    	
+    private static void readParameters(String[] args) {
+
     	boolean mandatoryOptionsSet = !configDBURL.equals("") && !configDBUser.equals("") && !configDBPassword.equals("");
-    	
+
     	String hostname, dbPort, dbName;
-    	
+
     	Options options = new Options();
-    	
+
 //    	options.addOption("n", "hostname", true, "Host where the Open-Xchange MySQL-database is running");
 //    	options.addOption("u", "dbUser", true, "Name of the MySQL-User for configdb");
 //    	options.addOption("p", "dbPassword", true, "Password for the user specified with \"-dbUser\"");
@@ -277,7 +277,7 @@ public class Datamining {
 //    	options.addOption("v", "verbose", false, "With this the tool prints what it is doing live");
 //    	options.addOption("o", "dbPort", true, "Port where MySQL is running on the host specified with \"-hostname\"");
 //    	options.addOption("h", "help", false, "Print this helpfile");
-    	
+
     	options.addOption(OptionBuilder.withLongOpt("hostname").isRequired(!mandatoryOptionsSet).hasArg().withDescription("Host where the Open-Xchange MySQL-database is running").create("n"));
     	options.addOption(OptionBuilder.withLongOpt("dbUser").isRequired(!mandatoryOptionsSet).hasArg().withDescription("Name of the MySQL-User for configdb").create("u"));
     	options.addOption(OptionBuilder.withLongOpt("dbPassword").isRequired(!mandatoryOptionsSet).hasArg().withDescription("Password for the user specified with \"-dbUser\"").create("p"));
@@ -286,47 +286,47 @@ public class Datamining {
     	options.addOption(OptionBuilder.withLongOpt("verbose").withDescription("Print the results to the console as well as into the report file").create("v"));
     	options.addOption(OptionBuilder.withLongOpt("dbPort").hasArg().withDescription("Port where MySQL is running on the host specified with \"-hostname\" (default: \"3306\")").create("o"));
     	options.addOption(OptionBuilder.withLongOpt("help").withDescription("Print this helpfile").create("h"));
-    	
+
     	staticOptions = options;
-    	
+
     	CommandLineParser parser = new PosixParser();
-    	
+
     	try {
 			CommandLine cl = parser.parse(options, args);
-			
+
 			if (cl.hasOption("hostname")){
 				hostname = cl.getOptionValue("hostname");
 				dbName = (cl.hasOption("dbName")) ? cl.getOptionValue("dbName") : "configDB";
 				dbPort = (cl.hasOption("dbPort")) ? cl.getOptionValue("dbPort") : "3306";
-				
+
 				configDBURL = "jdbc:mysql://" + hostname + ":" + dbPort + "/" + dbName;
 			}
-			
+
 			if (cl.hasOption("dbUser")){
 				configDBUser = cl.getOptionValue("dbUser");
 			}
-			
+
 			if (cl.hasOption("dbPassword")){
 				configDBPassword = cl.getOptionValue("dbPassword");
 			}
-			
+
 			if (cl.hasOption("reportfilePath")){
 				reportfilePath = cl.getOptionValue("reportfilePath");
 			}
-			
+
 			if (cl.hasOption("verbose")){
 				verbose = true;
 			}
-			
+
 			if (cl.hasOption("help")){
 				printHelp();
 			}
-			
-			
+
+
 		} catch (ParseException e) {
 			System.out.println(e.getMessage());
 		}
-    	
+
         // mandatory
 //        optionParser.acceptsAll(Arrays.asList("hostname", "n"), "Host where the Open-Xchange MySQL-database is running").withRequiredArg().describedAs(
 //            "hostname").ofType(String.class);
@@ -369,7 +369,7 @@ public class Datamining {
 //                hostname = getValueForOption("hostname", options);
 //                dbName = getValueForOption("dbName", options);
 //                dbPort = (String) options.valueOf("dbPort");
-//                
+//
 //                if (!getValueForOption("dbUser", options).equals("")){
 //                	configDBUser = getValueForOption("dbUser", options);
 //                }
@@ -377,7 +377,7 @@ public class Datamining {
 //                	configDBPassword = getValueForOption("dbPassword", options);
 //                }
 //                verbose = options.has("verbose");
-//                
+//
 //                if (!hostname.equals("") && !dbName.equals("") && !dbPort.equals("")){
 //                    configDBURL = "jdbc:mysql://" + hostname + ":" + dbPort + "/" + dbName;
 //                }
@@ -389,7 +389,7 @@ public class Datamining {
     }
 
     private static void readProperties() {
-        // Try to read configdb.properties        
+        // Try to read configdb.properties
         Properties configdbProperties = new Properties();
         try {
             configdbProperties.load(new FileInputStream("/opt/open-xchange/etc/configdb.properties"));
@@ -609,7 +609,7 @@ public class Datamining {
             }
         }
         return numberOfObjects;
-    }    
+    }
 
     public static String getFilename(){
         return filename;

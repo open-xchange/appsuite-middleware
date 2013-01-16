@@ -67,9 +67,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
  */
-@Action(method = RequestMethod.PUT, 
-		name = "move", 
-		description = "Move an EAV Contact from one folder to another.", 
+@Action(method = RequestMethod.PUT,
+		name = "move",
+		description = "Move an EAV Contact from one folder to another.",
 		parameters = { @Parameter(name = "") } )
 public class MoveAction extends AbstractAction {
 
@@ -91,7 +91,7 @@ public class MoveAction extends AbstractAction {
 		EAVContact c = new EAVContact();
 		UUID sourceFolderUUID = null;
 		UUID targetFolderUUID = null;
-		
+
 		try {
 			c.setUUID(UUID.fromString(json.getString("uuid")));
 			c.setTimeUUID(UUID.fromString(json.getString("timeuuid")));
@@ -101,9 +101,9 @@ public class MoveAction extends AbstractAction {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
+
 		getContactService().getEAVContactService().moveContactToFolder(c, sourceFolderUUID, targetFolderUUID);
-		
+
 		return new AJAXRequestResult(new JSONObject());
 	}
 

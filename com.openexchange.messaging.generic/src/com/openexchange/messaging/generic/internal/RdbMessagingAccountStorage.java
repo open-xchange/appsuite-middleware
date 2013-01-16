@@ -520,7 +520,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
             wc.commit(); // COMMIT
         } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new OXException(e);
+            throw e;
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -699,7 +699,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
     }
 
     private static final String ACCOUNT_EXISTS = "SELECT 1 FROM messagingAccount WHERE cid = ? AND user = ? LIMIT 1";
-    
+
     public boolean hasAccount(final MessagingService parentService, final Session session) throws OXException {
         final Set<String> secretProperties = parentService.getSecretProperties();
         if (secretProperties.isEmpty()) {

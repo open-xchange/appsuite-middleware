@@ -46,7 +46,6 @@ import org.glassfish.grizzly.Connection;
 import org.glassfish.grizzly.Grizzly;
 import org.glassfish.grizzly.ReadHandler;
 import org.glassfish.grizzly.attributes.Attribute;
-import org.glassfish.grizzly.filterchain.BaseFilter;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.filterchain.NextAction;
 import org.glassfish.grizzly.http.HttpContent;
@@ -62,7 +61,6 @@ import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.server.ServerFilterConfiguration;
 import org.glassfish.grizzly.http.server.SuspendStatus;
-import org.glassfish.grizzly.http.server.Response.SuspendState;
 import org.glassfish.grizzly.http.server.util.HtmlHelper;
 import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.grizzly.memory.MemoryManager;
@@ -91,7 +89,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     private final Attribute<Boolean> reregisterForReadAttr;
     protected final DelayedExecutor.DelayQueue<Response> suspendedResponseQueue;
     private volatile HttpHandler httpHandler;
-    
+
     /**
      * Web server probes
      */
@@ -107,7 +105,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
 
 
     // ------------------------------------------------------------ Constructors
-  
+
     public OXHttpServerFilter(final ServerFilterConfiguration config,
             final DelayedExecutor delayedExecutor) {
         super(config, delayedExecutor);
@@ -117,12 +115,14 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
         reregisterForReadAttr = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.
                 createAttribute("HttpServerFilter.reregisterForReadAttr");
     }
-    
+
+    @Override
     @SuppressWarnings({"UnusedDeclaration"})
     public HttpHandler getHttpHandler() {
         return httpHandler;
     }
 
+    @Override
     public void setHttpHandler(final HttpHandler httpHandler) {
         this.httpHandler = httpHandler;
     }
@@ -140,13 +140,13 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
 
             // Otherwise cast message to a HttpContent
             final HttpContent httpContent = (HttpContent) message;
-            
+
             Request handlerRequest = httpRequestInProcessAttr.get(connection);
 
             if (handlerRequest == null) {
                 // It's a new HTTP request
                 final HttpRequestPacket request = (HttpRequestPacket) httpContent.getHttpHeader();
-                final HttpResponsePacket response = request.getResponse();                
+                final HttpResponsePacket response = request.getResponse();
                 handlerRequest = OXRequest.create();
                 handlerRequest.parameters.setLimit(getConfiguration().getMaxRequestParameters());
                 httpRequestInProcessAttr.set(connection, handlerRequest);
@@ -160,7 +160,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                         handlerRequest);
 
                 boolean wasSuspended = false;
-                
+
                 try {
                     ctx.setMessage(handlerResponse);
 
@@ -175,7 +175,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                     }
                 } catch (Exception t) {
                     handlerRequest.getRequest().getProcessingState().setError(true);
-                    
+
                     if (!response.isCommitted()) {
                         final ByteBuffer b = HtmlHelper.getExceptionErrorPage("Internal Server Error", "Grizzly/2.0", t);
                         handlerResponse.reset();
@@ -193,7 +193,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                     // don't forget to invalidate the suspendStatus
                     wasSuspended = suspendStatus.getAndInvalidate();
                 }
-                
+
                 if (!wasSuspended) {
                     return afterService(ctx, connection,
                             handlerRequest, handlerResponse);
@@ -237,7 +237,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     /**
      * Override the default implementation to notify the {@link ReadHandler},
      * if available, of any read error that has occurred during processing.
-     * 
+     *
      * @param ctx event processing {@link FilterChainContext}
      * @param error error, which occurred during <tt>FilterChain</tt> execution
      */
@@ -272,10 +272,12 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     // ------------------------------------------------------- Protected Methods
 
 
+    @Override
     protected JmxObject createJmxManagementObject() {
         return new org.glassfish.grizzly.http.server.jmx.HttpServerFilter(this);
     }
 
+    @Override
     protected void onTraceRequest(final Request request,
             final Response response) throws IOException {
         if (getConfiguration().isTraceEnabled()) {
@@ -286,7 +288,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
         }
     }
 
-    
+
     // --------------------------------------------------------- Private Methods
 
 
@@ -301,12 +303,12 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
 
         response.finish();
         request.onAfterService();
-        
+
         HttpServerProbeNotifier.notifyRequestComplete(this, connection, response);
-        
+
         final HttpRequestPacket httpRequest = request.getRequest();
         final boolean isBroken = httpRequest.isContentBroken();
-        
+
         // Suspend state is cancelled - it means normal processing might have
         // been broken. We don't want to reuse Request and Response in this state,
         // cause there still might be threads referencing them.
@@ -314,7 +316,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
             response.recycle();
             request.recycle();
         }
-        
+
         if (isBroken) {
             // if content is broken - we're not able to distinguish
             // the end of the message - so stop processing any input data on
@@ -324,7 +326,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
             ctx.completeAndRecycle();
             return suspendNextAction;
         }
-        
+
         return ctx.getStopAction();
     }
 }

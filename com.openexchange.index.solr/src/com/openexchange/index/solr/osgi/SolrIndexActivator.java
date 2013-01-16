@@ -79,18 +79,18 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link SolrIndexActivator} - The activator of the index bundle.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SolrIndexActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexActivator.class));
-    
+
     private SolrIndexFacadeService solrFacadeService;
-    
+
     private BundleActivator fragmentActivator;
-        
+
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -113,20 +113,20 @@ public class SolrIndexActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, createTableService);
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new IndexedFoldersCreateTableTask(createTableService)));
         registerService(DeleteListener.class, new IndexDeleteListener());
-        
+
         IndexManagementService managementService = new SolrIndexManagementService();
         registerService(IndexManagementService.class, managementService);
         this.addService(IndexManagementService.class, managementService);
 //        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
 //        registerService(SolrCoreConfigService.class, indexService);
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         if (solrFacadeService != null) {
             solrFacadeService.shutDown();
         }
-        
+
         try {
             if (fragmentActivator != null) {
                 fragmentActivator.stop(context);
@@ -134,7 +134,7 @@ public class SolrIndexActivator extends HousekeepingActivator {
         } catch (Exception e) {
             // ignore
         }
-        
+
         super.stopBundle();
     }
 }

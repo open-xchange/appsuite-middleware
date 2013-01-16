@@ -53,7 +53,7 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * {@link UsersDiffer}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class UsersDiffer extends Differ<CalendarObject> {
@@ -83,7 +83,7 @@ public class UsersDiffer extends Differ<CalendarObject> {
 
         boolean isDifferent = false;
         Difference difference = new Difference(CalendarObject.USERS);
-        
+
         if (original.getUsers() != null) {
             for (UserParticipant o : original.getUsers()) {
                 boolean found = false;

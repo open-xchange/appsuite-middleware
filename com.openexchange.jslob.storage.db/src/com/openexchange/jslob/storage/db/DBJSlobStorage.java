@@ -77,7 +77,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link DBJSlobStorage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DBJSlobStorage implements JSlobStorage {
@@ -113,7 +113,7 @@ public final class DBJSlobStorage implements JSlobStorage {
 
     /**
      * Drops all JSlob entries associated with specified user.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @throws OXException If deleting all user entries fails

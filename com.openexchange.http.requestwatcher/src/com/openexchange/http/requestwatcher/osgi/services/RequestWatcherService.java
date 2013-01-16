@@ -55,14 +55,14 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * {@link RequestWatcherService} to keep track of incoming HttpServletRequests. Requests are periodically inspected for the duration of
  * processing and a warning is logged if the duration exceeds a configurable amount of time.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public interface RequestWatcherService {
 
     /**
      * Register a request in the request registry.
-     * 
+     *
      * @param request the request to register
      * @param thread the thread associated with the request
      * @return A RequestRegistryEntry wrapping the registered request
@@ -71,7 +71,7 @@ public interface RequestWatcherService {
 
     /**
      * Unregister a request from the request registry
-     * 
+     *
      * @param The RequestRegistryEntry that was received when initially registering the request
      * @return false if the entry couldn't be found
      */
@@ -79,7 +79,7 @@ public interface RequestWatcherService {
 
     /**
      * Stop periodically inspecting the requests in the requestRegistry.
-     * 
+     *
      * @return <code>false</code> if the task could not be canceled, typically because it has already completed normally; <code>true</code>
      *         otherwise
      */

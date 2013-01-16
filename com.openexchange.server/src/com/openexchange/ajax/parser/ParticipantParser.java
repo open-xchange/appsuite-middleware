@@ -208,17 +208,17 @@ public class ParticipantParser {
         public void setType(int type) {
             this.type = type;
         }
-        
+
         @Override
         public JSONParticipant clone() throws CloneNotSupportedException {
             JSONParticipant retval = (JSONParticipant) super.clone();
-            
+
             retval.displayName = this.displayName;
             retval.emailAddress = this.emailAddress;
             retval.identifier = this.identifier;
             retval.ignoreNotification = this.ignoreNotification;
             retval.type = this.type;
-            
+
             return retval;
         }
 

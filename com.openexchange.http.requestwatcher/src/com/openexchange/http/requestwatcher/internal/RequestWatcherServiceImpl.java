@@ -71,7 +71,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link RequestWatcherServiceImpl}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RequestWatcherServiceImpl implements RequestWatcherService {
@@ -149,7 +149,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     trace.setStackTrace(entry.getStackTrace());
                     Props logProperties = LogProperties.optLogProperties(entry.getThread());
                     logBuilder.append("Request\n");
-                    
+
                     // If we have additional log properties from the ThreadLocal add it to the logBuilder
                     if (logProperties != null) {
                         Map<String, Object> propertyMap = logProperties.asMap();
@@ -175,7 +175,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                         .append("with parameters:\n")
                         .append(requestParameters).append("\n");
                     }
-                    
+
                     RequestWatcherServiceImpl.LOG.info(
                         logBuilder
                         .append("with age: ").append(entry.getAge()).append(" ms").append("\n")

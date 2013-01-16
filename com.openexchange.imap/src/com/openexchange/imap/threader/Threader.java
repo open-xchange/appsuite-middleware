@@ -59,7 +59,7 @@ import org.apache.commons.logging.Log;
  * href="http://www.jwz.org/doc/threading.html">http://www.jwz.org/doc/threading.html</a> for details. For his Java implementation, see <a
  * href="http://lxr.mozilla.org/mozilla/source/grendel/sources/grendel/view/Threader.java">http://lxr.mozilla.org/mozilla/source/grendel
  * /sources/grendel/view/Threader.java</a>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Threader {
@@ -88,7 +88,7 @@ public class Threader {
      * of the other.
      * <p>
      * By default exactly that case is prevented:
-     * 
+     *
      * <pre>
      * // - If that container is a non-dummy, and that message's subject begins
      * // with &quot;Re:&quot;, but *this* message's subject does *not*, then make that
@@ -101,9 +101,9 @@ public class Threader {
      * // child of it. This catches the both-are-replies and neither-are-
      * // replies cases, and makes them be siblings instead of asserting a
      * // hierarchical relationship which might not be true.
-     * 
+     *
      * </pre>
-     * 
+     *
      * @param insistOnRe The <code>insistOnRe</code> flag to set
      * @return This threader with new behavior applied
      */
@@ -116,7 +116,7 @@ public class Threader {
      * Threads the set of messages indicated by <tt>threadableRoot</tt>.
      * <p>
      * The <tt>Threadable</tt> returned is the new first element of the root set.
-     * 
+     *
      * @param threadableRoot The start of the list.
      */
     public Threadable thread(final Threadable threadableRoot) {
@@ -181,7 +181,7 @@ public class Threader {
      * <li>For each of the {@code Threadable}'s references, it ensures that there is a {@code ThreadContainer} in the table (an empty one,
      * if necessary.)</li>
      * </ul>
-     * 
+     *
      * @param threadable The {@code Threadable} instance to build container for
      */
     private void buildContainer(final Threadable threadable) {
@@ -300,7 +300,7 @@ public class Threader {
      * Find the root set of the ThreadContainers (and return a root node.)
      * <p>
      * A container is in the root set if it has no parents.
-     * 
+     *
      * @return The root container
      */
     private ThreadContainer findRootSet() {
@@ -322,7 +322,7 @@ public class Threader {
      * Walk through the threads and discard any empty container objects.
      * <p>
      * After calling this, there will only be any empty container objects at depth 0, and those will all have at least two kids.
-     * 
+     *
      * @param parent The parent container
      */
     private void pruneEmptyContainers(final ThreadContainer parent) {

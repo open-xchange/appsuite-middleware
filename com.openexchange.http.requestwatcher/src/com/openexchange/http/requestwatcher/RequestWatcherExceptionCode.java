@@ -62,7 +62,7 @@ import static com.openexchange.http.requestwatcher.RequestWatcherExceptionMessag
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public enum RequestWatcherExceptionCode implements OXExceptionCode {
-    
+
     /** Error while trying to interrupt Request processing. */
     ERROR_WHILE_INTERRUPTING_REQUEST_PROCESSING(ERROR_WHILE_INTERRUPTING_REQUEST_PROCESSING_MSG, CATEGORY_ERROR, 1),
     /** Error while sending the servlet status code. */
@@ -78,7 +78,7 @@ public enum RequestWatcherExceptionCode implements OXExceptionCode {
         number = detailNumber;
         this.category = category;
     }
-    
+
     @Override
     public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
@@ -103,7 +103,7 @@ public enum RequestWatcherExceptionCode implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *

@@ -53,7 +53,7 @@ import java.util.regex.Pattern;
 
 /**
  * {@link IPAddressUtil}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IPAddressUtil {
@@ -68,7 +68,7 @@ public final class IPAddressUtil {
 
     /**
      * Converts IPv4 address in its textual presentation form into its numeric binary form.
-     * 
+     *
      * @param src a String representing an IPv4 address in standard format
      * @return a byte array representing the IPv4 numeric address
      */
@@ -161,7 +161,7 @@ public final class IPAddressUtil {
     /**
      * Convert IPv6 presentation level address to network order binary form. credit: Converted from C code from Solaris 8 (inet_pton) Any
      * component of the string following a per-cent % is ignored.
-     * 
+     *
      * @param src a String representing an IPv6 address in textual format
      * @return a byte array representing the IPv6 numeric address
      */
@@ -175,10 +175,9 @@ public final class IPAddressUtil {
         char ch;
         boolean saw_xdigit;
         int val;
-        final char[] srcb = src.toCharArray();
         final byte[] dst = new byte[INADDR16SZ];
 
-        int srcb_length = srcb.length;
+        int srcb_length = src.length();
         final int pc = src.indexOf('%');
         if (pc == srcb_length - 1) {
             return null;
@@ -191,8 +190,8 @@ public final class IPAddressUtil {
         colonp = -1;
         int i = 0, j = 0;
         /* Leading :: requires some special handling. */
-        if (srcb[i] == ':') {
-            if (srcb[++i] != ':') {
+        if (src.charAt(i) == ':') {
+            if (src.charAt(++i) != ':') {
                 return null;
             }
         }
@@ -200,7 +199,7 @@ public final class IPAddressUtil {
         saw_xdigit = false;
         val = 0;
         while (i < srcb_length) {
-            ch = srcb[i++];
+            ch = src.charAt(i++);
             final int chval = Character.digit(ch, 16);
             if (chval != -1) {
                 val <<= 4;
@@ -302,7 +301,7 @@ public final class IPAddressUtil {
 
     /**
      * Convert IPv4-Mapped address to IPv4 address. Both input and returned value are in network order binary form.
-     * 
+     *
      * @param src a String representing an IPv4-Mapped address in textual format
      * @return a byte array representing the IPv4 numeric address
      */
@@ -317,7 +316,7 @@ public final class IPAddressUtil {
 
     /**
      * Converts specified IPv4 to a mapped IPv6.
-     * 
+     *
      * @param ipv4 The IPv4 string representation
      * @return The mapped IPv6 or <code>null</code>
      */
@@ -335,7 +334,7 @@ public final class IPAddressUtil {
 
     /**
      * Converts specified IPv4 to a mapped IPv6.
-     * 
+     *
      * @param octets The IPv4 bytes
      * @return The mapped IPv6 or <code>null</code>
      */
@@ -355,7 +354,7 @@ public final class IPAddressUtil {
 
     /**
      * Utility routine to check if the InetAddress is an IPv4 mapped IPv6 address.
-     * 
+     *
      * @return a <code>boolean</code> indicating if the InetAddress is an IPv4 mapped IPv6 address; or false if address is IPv4 address.
      */
     private static boolean isIPv4MappedAddress(final byte[] addr) {

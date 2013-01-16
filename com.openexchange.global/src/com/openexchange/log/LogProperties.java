@@ -49,13 +49,16 @@
 
 package com.openexchange.log;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -224,7 +227,7 @@ public final class LogProperties {
          * com.openexchange.database.schema
          */
         DATABASE_SCHEMA("com.openexchange.database.schema"),
-        
+
         ;
 
         private final String name;
@@ -234,7 +237,7 @@ public final class LogProperties {
 
         /**
          * Gets the name
-         * 
+         *
          * @return The name
          */
         public String getName() {
@@ -253,7 +256,7 @@ public final class LogProperties {
 
         /**
          * Gets the associated {@code Name} enum.
-         * 
+         *
          * @param sName The name string
          * @return The {@code Name} enum or <code>null</code>
          */
@@ -369,7 +372,7 @@ public final class LogProperties {
 
     /**
      * Clones the thread-local log properties.
-     * 
+     *
      * @param other The other thread
      */
     public static void cloneLogProperties(final Thread other) {
@@ -383,7 +386,7 @@ public final class LogProperties {
 
     /**
      * Gets the thread-local log property associated with specified name.
-     * 
+     *
      * @param name The property name
      * @return The log property or <code>null</code> if absent
      */
@@ -407,7 +410,7 @@ public final class LogProperties {
             getLogProperties().put(name, value);
         }
     }
-    
+
     /**
      * Get the thread local LogProperties and pretty-prints them into a Sting.
      * The String will contain one ore more lines formatted like:
@@ -415,10 +418,58 @@ public final class LogProperties {
      * "propertyName1=propertyValue1"
      * "propertyName2=propertyValue2"
      * "propertyName3=propertyValue3"
-     * </pre> 
+     * </pre>
      * where the properties are sorted alphabetically.
      */
     public static String getAndPrettyPrint() {
+        return getAndPrettyPrint(Collections.<LogProperties.Name> emptySet());
+    }
+
+    /**
+     * Get the thread local LogProperties and pretty-prints them into a Sting.
+     * The String will contain one ore more lines formatted like:
+     * <pre>
+     * "propertyName1=propertyValue1"
+     * "propertyName2=propertyValue2"
+     * "propertyName3=propertyValue3"
+     * </pre>
+     * where the properties are sorted alphabetically.
+     * 
+     * @param nonMatching The property name to ignore
+     */
+    public static String getAndPrettyPrint(final LogProperties.Name nonMatching) {
+        return getAndPrettyPrint(EnumSet.<LogProperties.Name> of(nonMatching));
+    }
+
+    /**
+     * Get the thread local LogProperties and pretty-prints them into a Sting.
+     * The String will contain one ore more lines formatted like:
+     * <pre>
+     * "propertyName1=propertyValue1"
+     * "propertyName2=propertyValue2"
+     * "propertyName3=propertyValue3"
+     * </pre>
+     * where the properties are sorted alphabetically.
+     * 
+     * @param nonMatching The property names to ignore
+     */
+    public static String getAndPrettyPrint(final LogProperties.Name... nonMatching) {
+        return getAndPrettyPrint(EnumSet.<LogProperties.Name> copyOf(Arrays.asList(nonMatching)));
+    }
+
+    /**
+     * Get the thread local LogProperties and pretty-prints them into a Sting.
+     * The String will contain one ore more lines formatted like:
+     * <pre>
+     * "propertyName1=propertyValue1"
+     * "propertyName2=propertyValue2"
+     * "propertyName3=propertyValue3"
+     * </pre>
+     * where the properties are sorted alphabetically.
+     * 
+     * @param nonMatching The property names to ignore
+     */
+    public static String getAndPrettyPrint(final Collection<LogProperties.Name> nonMatching) {
         String logString = "";
         final Props logProperties = getLogProperties();
         // If we have additional log properties from the ThreadLocal add it to the logBuilder
@@ -429,9 +480,11 @@ public final class LogProperties {
             Map<String, String> sorted = new TreeMap<String, String>();
             for (Entry<LogProperties.Name, Object> propertyEntry : propertyMap.entrySet()) {
                 LogProperties.Name propertyName = propertyEntry.getKey();
-                Object value = propertyEntry.getValue();
-                if (null != value) {
-                    sorted.put(propertyName.getName(), value.toString());
+                if (null == nonMatching || !nonMatching.contains(propertyName)) {
+                    Object value = propertyEntry.getValue();
+                    if (null != value) {
+                        sorted.put(propertyName.getName(), value.toString());
+                    }
                 }
             }
             // And add them to the logBuilder

@@ -56,13 +56,13 @@ import com.openexchange.contact.storage.ldap.internal.Tools;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 
-/** 
+/**
  * {@link LdapIDMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class LdapIDMapping extends LdapMapping<Integer> {
-    
+
     @Override
     public Integer get(LdapResult result, LdapIDResolver idResolver) throws OXException {
         Object value = super.getValue(result);
@@ -71,7 +71,7 @@ public abstract class LdapIDMapping extends LdapMapping<Integer> {
             if (byte[].class.isInstance(value) && UUIDs.UUID_BYTE_LENGTH == ((byte[])value).length) {
                 ldapID = UUIDs.toUUID((byte[])value).toString();
             } else if (String.class.isInstance(value)) {
-                ldapID = (String)value; 
+                ldapID = (String)value;
             } else {
                 ldapID = value.toString();
             }
@@ -79,12 +79,12 @@ public abstract class LdapIDMapping extends LdapMapping<Integer> {
         }
         return null;
     }
-    
+
     @Override
     public String encodeForFilter(Object value, LdapIDResolver idResolver) throws OXException {
         // override to parse numerical IDs if necessary
         if (String.class.isInstance(value)) {
-            return encode(Integer.valueOf(Tools.parse((String)value)), idResolver);            
+            return encode(Integer.valueOf(Tools.parse((String)value)), idResolver);
         } else {
             return super.encodeForFilter(value, idResolver);
         }
@@ -104,7 +104,7 @@ public abstract class LdapIDMapping extends LdapMapping<Integer> {
             return null;
         }
     }
-    
+
     private static final char[] DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
     private static String encodeHex(byte[] bytes) {

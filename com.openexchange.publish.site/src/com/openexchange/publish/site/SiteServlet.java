@@ -85,7 +85,7 @@ import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
 
 /**
  * {@link SiteServlet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SiteServlet extends HttpServlet {

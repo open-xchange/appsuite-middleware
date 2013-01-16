@@ -65,9 +65,9 @@ import com.openexchange.user.copy.internal.UserCopyServiceImpl;
 public class CopyUserServiceRegisterer implements ServiceTrackerCustomizer<CopyUserTaskService, CopyUserTaskService> {
 
     private final BundleContext context;
-    
+
     private volatile UserCopyServiceImpl copyService;
-    
+
     private volatile ServiceRegistration<UserCopyService> registration;
 
     public CopyUserServiceRegisterer(final BundleContext context) {
@@ -84,7 +84,7 @@ public class CopyUserServiceRegisterer implements ServiceTrackerCustomizer<CopyU
             registration = context.registerService(UserCopyService.class, copyService, null);
         }
 
-        copyService.addTask(taskService);            
+        copyService.addTask(taskService);
         return taskService;
     }
 

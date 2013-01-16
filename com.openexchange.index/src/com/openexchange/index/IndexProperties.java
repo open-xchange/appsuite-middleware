@@ -56,7 +56,7 @@ package com.openexchange.index;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexProperties {
-    
+
     public static final String ALLOWED_MODULES = "com.openexchange.index.allowedModules";
 
 }

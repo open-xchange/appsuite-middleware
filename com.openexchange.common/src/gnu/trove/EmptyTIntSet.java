@@ -57,7 +57,7 @@ import java.util.NoSuchElementException;
 
 /**
  * {@link EmptyTIntSet} - The empty {@link TIntSet} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EmptyTIntSet implements TIntSet {
@@ -66,7 +66,7 @@ public final class EmptyTIntSet implements TIntSet {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static EmptyTIntSet getInstance() {

@@ -63,13 +63,13 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AllAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 @Action(
     name = "all"
-    , description = "Gets all JSlobs associated with the current user and context." 
+    , description = "Gets all JSlobs associated with the current user and context."
     , method = RequestMethod.GET
     , parameters = {
         @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
@@ -79,7 +79,7 @@ public final class AllAction extends JSlobAction {
 
     /**
      * Initializes a new {@link AllAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public AllAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {

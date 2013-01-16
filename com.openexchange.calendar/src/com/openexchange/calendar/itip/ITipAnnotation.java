@@ -74,19 +74,19 @@ public class ITipAnnotation {
         this.message = message;
         this.args = Arrays.asList(args);
     }
-    
+
     public void setMessage(String message) {
         this.message = message;
     }
-    
+
     public String getMessage() {
         return message;
     }
-    
+
     public List<Object> getArgs() {
         return args;
     }
-    
+
     public void setArgs(List<Object> args) {
         this.args = args;
     }
@@ -98,7 +98,7 @@ public class ITipAnnotation {
     public Appointment getAppointment() {
         return additional;
     }
-    
+
     public void setAppointment(Appointment additional) {
         this.additional = additional;
     }

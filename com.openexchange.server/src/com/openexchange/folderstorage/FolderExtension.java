@@ -63,5 +63,5 @@ public interface FolderExtension extends Folder {
      * @return The total and unread numbers or <code>null</code>
      */
     int[] getTotalAndUnread();
-    
+
 }

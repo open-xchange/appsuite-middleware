@@ -53,27 +53,27 @@ import java.util.EnumSet;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * {@link QueryFields} - Prepares contact fields to pass-through to the storage. 
+ * {@link QueryFields} - Prepares contact fields to pass-through to the storage.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class QueryFields {
-    
+
     /** Fields for necessary permission checks */
     private static final EnumSet<ContactField> PERMISSION_FIELDS = EnumSet.of(
         ContactField.CREATED_BY, ContactField.PRIVATE_FLAG, ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.CONTEXTID
     );
-	
+
 	private boolean needsAttachmentInfo;
 	private final ContactField[] queriedFields;
-		
+
 	public QueryFields() {
 		this(null);
 	}
-	
+
 	public QueryFields(final ContactField[] fields) {
 		this(fields, null);
-	}	
+	}
 
 	public QueryFields(ContactField[] fields, ContactField[] allowedFields) {
 		super();
@@ -129,11 +129,11 @@ public class QueryFields {
                         }
                     }
                 }
-		    }		    
+		    }
             this.queriedFields = preparedFields.toArray(new ContactField[preparedFields.size()]);
 		}
 	}
-	
+
 	private static boolean contains(final ContactField[] fields, final ContactField field) {
 		for (final ContactField presentField : fields) {
 			if (presentField.equals(field)) {
@@ -156,5 +156,5 @@ public class QueryFields {
 	public ContactField[] getFields() {
 		return queriedFields;
 	}
-	
+
 }

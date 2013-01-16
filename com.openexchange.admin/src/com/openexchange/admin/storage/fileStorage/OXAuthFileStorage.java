@@ -64,7 +64,7 @@ import com.openexchange.admin.tools.UnixCrypt;
 
 /**
  * Default file implementation for admin auth.
- * 
+ *
  * @author choeger
  */
 public class OXAuthFileStorage extends OXAuthStorageInterface {
@@ -76,9 +76,9 @@ public class OXAuthFileStorage extends OXAuthStorageInterface {
     }
 
     /**
-     * 
+     *
      * Authenticates against a textfile
-     * 
+     *
      */
     @Override
     public boolean authenticate(final Credentials authdata) {
@@ -105,7 +105,7 @@ public class OXAuthFileStorage extends OXAuthStorageInterface {
     }
 
     @Override
-    public boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException {        
+    public boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException {
         return false;
     }
 

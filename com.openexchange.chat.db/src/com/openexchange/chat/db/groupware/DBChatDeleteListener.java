@@ -106,7 +106,7 @@ public class DBChatDeleteListener implements DeleteListener {
             stmt.setInt(pos, contextId);
             stmt.executeUpdate();
             DBUtils.closeSQLStuff(stmt);
-            
+
             stmt = writeCon.prepareStatement("DELETE FROM chatChunk WHERE cid = ?");
             stmt.setInt(pos, contextId);
             stmt.executeUpdate();

@@ -52,6 +52,7 @@ package com.openexchange.tools.versit;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.StringAllocator;
 
 /**
  * @author Viktor Pracht
@@ -145,9 +146,11 @@ public class StringScanner extends Scanner {
     }
 
     private String unescape(String substring) {
-        StringBuilder b = new StringBuilder();
         boolean escape = false;
-        for(char c : substring.toCharArray()) {
+        final int length = substring.length();
+        StringAllocator b = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = substring.charAt(i);
             switch(c) {
             case '\\' : if (escape) { b.append('\\'); escape = false; } else { escape = true; } break;
             default: b.append(c); escape = false; break;

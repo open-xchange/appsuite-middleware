@@ -100,7 +100,7 @@ public class JSONCoercion {
         }
         return object;
     }
-    
+
     /**
      * Coerces given JSON data to its Java representation.
      *

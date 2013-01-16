@@ -69,26 +69,26 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link CorrectNumberOfImagesTask}
- * 
- * Sets the number of images (intfield04) column in prg_contacts to NULL for 
- * entries without corresponding data in prg_contacts_image. 
- * 
+ *
+ * Sets the number of images (intfield04) column in prg_contacts to NULL for
+ * entries without corresponding data in prg_contacts_image.
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CorrectNumberOfImagesTask extends UpdateTaskAdapter {
-	
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CorrectNumberOfImagesTask.class));
 
-    private static final String UPDATE = 
+    private static final String UPDATE =
         "UPDATE prg_contacts " +
         "SET intfield04 = NULL " +
         "WHERE intfield04 > 0 AND NOT EXISTS " +
             "(SELECT intfield01 FROM prg_contacts_image WHERE " +
             "prg_contacts.intfield01 = prg_contacts_image.intfield01 AND prg_contacts.cid = prg_contacts_image.cid)"
     ;
-    
+
 	private final DatabaseService dbService;
-	
+
 	public CorrectNumberOfImagesTask(DatabaseService dbService) {
 		super();
 		this.dbService = dbService;
@@ -98,7 +98,7 @@ public class CorrectNumberOfImagesTask extends UpdateTaskAdapter {
     public String[] getDependencies() {
         return new String[0];
     }
-    
+
     @Override
     public TaskAttributes getAttributes() {
         return new Attributes(BACKGROUND);
@@ -128,5 +128,5 @@ public class CorrectNumberOfImagesTask extends UpdateTaskAdapter {
             Database.backNoTimeout(contextID, true, connnection);
         }
     }
-    
+
 }

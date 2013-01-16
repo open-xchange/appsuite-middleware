@@ -56,7 +56,7 @@ import com.openexchange.realtime.packet.PresenceState;
 /**
  * {@link PresenceData} - PresenceState with optional message and timestamp of the creation form the PresenceData that allow us to track a
  * clients status and the last time it was changed.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresenceData implements Serializable {
@@ -71,7 +71,7 @@ public class PresenceData implements Serializable {
 
     /**
      * Initializes a new {@link PresenceData} with the current time as creationTime
-     * 
+     *
      * @param state One of the avilable states to choose from
      * @param message The optional user provided message to associate with the current state. May be null.
      * @throws IllegalArgumentException when the state is missing
@@ -88,10 +88,10 @@ public class PresenceData implements Serializable {
         }
         this.timeStamp = new Date();
     }
-    
+
     /**
      * Initializes a new {@link PresenceData}.
-     * 
+     *
      * @param state         One of the avilable states to choose from
      * @param message       The optional user provided message to associate with the current state. May be null.
      * @param creationTime  The date a user set this PresenceData or null when the user didn't publish any PresenceData yet.
@@ -146,25 +146,33 @@ public class PresenceData implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (!(obj instanceof PresenceData))
+        }
+        if (!(obj instanceof PresenceData)) {
             return false;
+        }
         PresenceData other = (PresenceData) obj;
         if (message == null) {
-            if (other.message != null)
+            if (other.message != null) {
                 return false;
-        } else if (!message.equals(other.message))
+            }
+        } else if (!message.equals(other.message)) {
             return false;
-        if (state != other.state)
+        }
+        if (state != other.state) {
             return false;
+        }
         if (timeStamp == null) {
-            if (other.timeStamp != null)
+            if (other.timeStamp != null) {
                 return false;
-        } else if (!timeStamp.equals(other.timeStamp))
+            }
+        } else if (!timeStamp.equals(other.timeStamp)) {
             return false;
+        }
         return true;
     }
 

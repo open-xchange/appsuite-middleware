@@ -165,13 +165,14 @@ public class Helper {
 
     private static boolean isASCII(String fileName) {
         boolean retval = true;
-        final char[] namechars = fileName.toCharArray();
-        for (int i = fileName.length(); retval && --i >= 0;) {
-            retval &= namechars[i] < 0x7f; // non-ascii characters
-            retval &= namechars[i] > 0x21; // space and control characters
-            retval &= namechars[i] != '\u002a'; // *
-            retval &= namechars[i] != '\u0025'; // %
-            retval &= namechars[i] != '\''; // '
+        final int length = fileName.length();
+        for (int i = length; retval && --i >= 0;) {
+            final char c = fileName.charAt(i);
+            retval &= c < 0x7f; // non-ascii characters
+            retval &= c > 0x21; // space and control characters
+            retval &= c != '\u002a'; // *
+            retval &= c != '\u0025'; // %
+            retval &= c != '\''; // '
         }
         return retval;
     }

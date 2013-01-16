@@ -66,18 +66,18 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface ContactService {
-	
+
     /**
-     * Contact fields that may be queried from contacts of the global address 
-     * list, even if the current session's user has no sufficient access 
-     * permissions for that folder. 
+     * Contact fields that may be queried from contacts of the global address
+     * list, even if the current session's user has no sufficient access
+     * permissions for that folder.
      */
-	public static final ContactField[] LIMITED_USER_FIELDS = new ContactField[] { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME, 
+	public static final ContactField[] LIMITED_USER_FIELDS = new ContactField[] { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME,
 			ContactField.SUR_NAME, ContactField.MIDDLE_NAME, ContactField.SUFFIX, ContactField.LAST_MODIFIED };
-	
+
     /**
      * Gets a contact with all fields.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @param id the object ID
@@ -85,10 +85,10 @@ public interface ContactService {
      * @throws OXException
      */
     Contact getContact(Session session, String folderId, String id) throws OXException;
-    
+
     /**
      * Gets a contact with specified fields.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @param id the object ID
@@ -97,10 +97,10 @@ public interface ContactService {
      * @throws OXException
      */
     Contact getContact(Session session, String folderId, String id, ContactField[] fields) throws OXException;
-    
+
     /**
      * Gets all contacts with all fields in a folder.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @return the contacts
@@ -110,10 +110,10 @@ public interface ContactService {
 
     /**
      * Gets all contacts with all fields in a folder.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts
      * @throws OXException
      */
@@ -121,7 +121,7 @@ public interface ContactService {
 
     /**
      * Gets all contacts with specified fields in a folder.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @param fields the contact fields that should be retrieved
@@ -132,11 +132,11 @@ public interface ContactService {
 
     /**
      * Gets all contacts with specified fields in a folder.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts
      * @throws OXException
      */
@@ -144,11 +144,11 @@ public interface ContactService {
 
     /**
      * Gets all contacts from multiple folders.
-     * 
+     *
      * @param session the session
      * @param folderIDs the IDs of the parent folders
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts
      * @throws OXException
      */
@@ -156,10 +156,10 @@ public interface ContactService {
 
     /**
      * Gets all contacts from all visible folders.
-     * 
+     *
      * @param session the session
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts
      * @throws OXException
      */
@@ -167,10 +167,10 @@ public interface ContactService {
 
     /**
      * Gets a list of contacts with all fields.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
-     * @param ids the object IDs 
+     * @param ids the object IDs
      * @return the contacts
      * @throws OXException
      */
@@ -178,11 +178,11 @@ public interface ContactService {
 
     /**
      * Gets a list of contacts with all fields.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
-     * @param ids the object IDs 
-     * @param sortOptions the options to sort the results 
+     * @param ids the object IDs
+     * @param sortOptions the options to sort the results
      * @return the contacts
      * @throws OXException
      */
@@ -190,10 +190,10 @@ public interface ContactService {
 
     /**
      * Gets a list of contacts with specified fields.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
-     * @param ids the object IDs 
+     * @param ids the object IDs
      * @param fields the contact fields that should be retrieved
      * @return the contacts
      * @throws OXException
@@ -202,12 +202,12 @@ public interface ContactService {
 
     /**
      * Gets a list of contacts with specified fields.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
-     * @param ids the object IDs 
+     * @param ids the object IDs
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts
      * @throws OXException
      */
@@ -215,7 +215,7 @@ public interface ContactService {
 
     /**
      * Gets a list of deleted contacts in a folder with all fields.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @param since the exclusive minimum deletion time to consider
@@ -226,7 +226,7 @@ public interface ContactService {
 
     /**
      * Gets a list of deleted contacts in a folder with specified fields.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @param since the exclusive minimum deletion time to consider
@@ -238,12 +238,12 @@ public interface ContactService {
 
     /**
      * Gets a list of deleted contacts in a folder with specified fields.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @param since the exclusive minimum deletion time to consider
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts
      * @throws OXException
      */
@@ -251,7 +251,7 @@ public interface ContactService {
 
     /**
      * Gets a list of modified contacts in a folder with all fields.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @param since the exclusive minimum modification time to consider
@@ -262,7 +262,7 @@ public interface ContactService {
 
     /**
      * Gets a list of modified contacts in a folder with specified fields.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @param since the exclusive minimum modification time to consider
@@ -274,20 +274,20 @@ public interface ContactService {
 
     /**
      * Gets a list of modified contacts in a folder with specified fields.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @param since the exclusive minimum modification time to consider
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts
      * @throws OXException
      */
     SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException;
-    
+
     /**
      * Searches for contacts.
-     * 
+     *
      * @param session the session
      * @param term the search term
      * @return the contacts found with the search
@@ -297,10 +297,10 @@ public interface ContactService {
 
     /**
      * Searches for contacts.
-     * 
+     *
      * @param session the session
      * @param term the search term
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts found with the search
      * @throws OXException
      */
@@ -308,7 +308,7 @@ public interface ContactService {
 
     /**
      * Searches for contacts.
-     * 
+     *
      * @param session the session
      * @param term the search term
      * @param fields the contact fields that should be retrieved
@@ -319,19 +319,19 @@ public interface ContactService {
 
     /**
      * Searches for contacts.
-     * 
+     *
      * @param session the session
      * @param term the search term
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts found with the search
      * @throws OXException
      */
     <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
-    
+
     /**
      * Searches for contacts.
-     * 
+     *
      * @param session the session
      * @param contactSearch the contact search object
      * @return the contacts found with the search
@@ -341,10 +341,10 @@ public interface ContactService {
 
     /**
      * Searches for contacts.
-     * 
+     *
      * @param session the session
      * @param contactSearch the contact search object
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts found with the search
      * @throws OXException
      */
@@ -352,7 +352,7 @@ public interface ContactService {
 
     /**
      * Searches for contacts.
-     * 
+     *
      * @param session the session
      * @param contactSearch the contact search object
      * @param fields the contact fields that should be retrieved
@@ -363,83 +363,83 @@ public interface ContactService {
 
     /**
      * Searches for contacts.
-     * 
+     *
      * @param session the session
      * @param contactSearch the contact search object
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts found with the search
      * @throws OXException
      */
     SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException;
-    
+
     /**
      * Searches for contacts whose birthday falls into the specified period.
-     * 
+     *
      * @param session the session
-     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param from The lower (inclusive) limit of the requested time-range
      * @param until The upper (exclusive) limit of the requested time-range
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts found with the search
      * @throws OXException
      */
     SearchIterator<Contact> searchContactsWithBirthday(Session session, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
-    
+
     /**
      * Searches for contacts whose birthday falls into the specified period.
-     * 
+     *
      * @param session the session
      * @param folderIDs the IDs of the parent folders
-     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param from The lower (inclusive) limit of the requested time-range
      * @param until The upper (exclusive) limit of the requested time-range
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts found with the search
      * @throws OXException
      */
     SearchIterator<Contact> searchContactsWithBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
-    
+
     /**
      * Searches for contacts whose anniversary falls into the specified period.
-     * 
+     *
      * @param session the session
-     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param from The lower (inclusive) limit of the requested time-range
      * @param until The upper (exclusive) limit of the requested time-range
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts found with the search
      * @throws OXException
      */
     SearchIterator<Contact> searchContactsWithAnniversary(Session session, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
-    
+
     /**
      * Searches for contacts whose anniversary falls into the specified period.
-     * 
+     *
      * @param session the session
      * @param folderIDs the IDs of the parent folders
-     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param from The lower (inclusive) limit of the requested time-range
      * @param until The upper (exclusive) limit of the requested time-range
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts found with the search
      * @throws OXException
      */
     SearchIterator<Contact> searchContactsWithAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
-    
+
     /**
      * Creates a new contact in a folder.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @param contact the contact to create
      * @throws OXException
      */
     void createContact(Session session, String folderId, Contact contact) throws OXException;
-    
+
     /**
-     * Updates a contact. 
-     * 
+     * Updates a contact.
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @param id the object ID
@@ -450,10 +450,10 @@ public interface ContactService {
     void updateContact(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException;
 
     /**
-     * Updates a user's contact data, ignoring the folder permissions of the 
+     * Updates a user's contact data, ignoring the folder permissions of the
      * global address book folder. Required to update user data in environments
      * where access to the global address book is restricted.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @param id the object ID
@@ -465,7 +465,7 @@ public interface ContactService {
 
     /**
      * Deletes a contact.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @param id the object ID
@@ -476,7 +476,7 @@ public interface ContactService {
 
     /**
      * Deletes all contacts in a folder.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
      * @throws OXException
@@ -485,10 +485,10 @@ public interface ContactService {
 
     /**
      * Deletes multiple contacts from a folder.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the parent folder
-     * @param ids the object IDs 
+     * @param ids the object IDs
      * @param lastRead the time the objects were last read from the storage
      * @throws OXException
      */
@@ -496,11 +496,11 @@ public interface ContactService {
 
     /**
      * Gets a user's contact with all fields.<p>
-     * 
-     * If the current user has no adequate permissions, no exception is thrown, 
-     * but the queried contact fields are limited to fields defined by 
+     *
+     * If the current user has no adequate permissions, no exception is thrown,
+     * but the queried contact fields are limited to fields defined by
      * <code>ContactService.LIMITED_USER_FIELDS</code>.
-     *  
+     *
      * @param session the session
      * @param userID the user's ID
      * @return the contact
@@ -510,11 +510,11 @@ public interface ContactService {
 
 	/**
      * Gets a user's contact with specified fields.<p>
-     * 
-     * If the current user has no adequate permissions, no exception is thrown, 
-     * but the queried contact fields are limited to the fields defined by 
+     *
+     * If the current user has no adequate permissions, no exception is thrown,
+     * but the queried contact fields are limited to the fields defined by
      * <code>ContactService.LIMITED_USER_FIELDS</code>.
-     * 
+     *
      * @param session the session
      * @param userID the user's ID
      * @param fields the contact fields that should be retrieved
@@ -522,14 +522,14 @@ public interface ContactService {
      * @throws OXException
      */
     Contact getUser(Session session, int userID, ContactField[] fields) throws OXException;
-    
+
     /**
      * Gets user contacts with all fields.<p>
-     * 
-     * If the current user has no adequate permissions, no exception is thrown, 
-     * but the queried contact fields are limited to the fields defined by 
+     *
+     * If the current user has no adequate permissions, no exception is thrown,
+     * but the queried contact fields are limited to the fields defined by
      * <code>ContactService.LIMITED_USER_FIELDS</code>.
-     * 
+     *
      * @param session the session
      * @param userIDs the user IDs
      * @return the contacts
@@ -539,11 +539,11 @@ public interface ContactService {
 
 	/**
      * Gets user contacts with specified fields.<p>
-     * 
-     * If the current user has no adequate permissions, no exception is thrown, 
-     * but the queried contact fields are limited to the fields defined by 
+     *
+     * If the current user has no adequate permissions, no exception is thrown,
+     * but the queried contact fields are limited to the fields defined by
      * <code>ContactService.LIMITED_USER_FIELDS</code>.
-     * 
+     *
      * @param session the session
      * @param userIDs the user IDs
      * @param fields the contact fields that should be retrieved
@@ -551,26 +551,26 @@ public interface ContactService {
      * @throws OXException
      */
     SearchIterator<Contact> getUsers(Session session, int[] userIDs, ContactField[] fields) throws OXException;
-    
+
 	/**
      * Gets all user contacts with specified fields.<p>
-     * 
-     * If the current user has no adequate permissions, no exception is thrown, 
-     * but the queried contact fields are limited to the fields defined by 
+     *
+     * If the current user has no adequate permissions, no exception is thrown,
+     * but the queried contact fields are limited to the fields defined by
      * <code>ContactService.LIMITED_USER_FIELDS</code>.
-     * 
+     *
      * @param session the session
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the contacts
      * @throws OXException
      */
     SearchIterator<Contact> getAllUsers(Session session, ContactField[] fields, SortOptions sortOptions) throws OXException;
-    
+
     /**
      * Gets the value of the <code>ContactField.COMPANY</code> field from the
      * contact representing the current context's mail admin.
-     * 
+     *
      * @param session the session
      * @return the organization
      * @throws OXException
@@ -579,24 +579,24 @@ public interface ContactService {
 
     /**
      * Searches for users.
-     * 
+     *
      * @param session the session
      * @param term the search term
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the user contacts found with the search
      * @throws OXException
      */
 	<O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
-	
-	
+
+
     /**
      * Searches for users.
-     * 
+     *
      * @param session the session
      * @param contactSearch the contact search object
      * @param fields the contact fields that should be retrieved
-     * @param sortOptions the options to sort the results 
+     * @param sortOptions the options to sort the results
      * @return the user contacts found with the search
      * @throws OXException
      */

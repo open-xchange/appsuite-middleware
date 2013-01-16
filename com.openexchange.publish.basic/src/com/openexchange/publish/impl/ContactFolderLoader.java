@@ -90,10 +90,10 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
     public Collection<? extends Object> load(final Publication publication) throws OXException {
         final LinkedList<Contact> list = new LinkedList<Contact>();
         try {
-        	
+
         	SearchIterator<Contact> searchIterator = null;
         	try {
-        		searchIterator = contactService.getAllContacts(new PublicationSession(publication), publication.getEntityId(), 
+        		searchIterator = contactService.getAllContacts(new PublicationSession(publication), publication.getEntityId(),
         				new SortOptions(ContactField.GIVEN_NAME, Order.ASCENDING));
         		while (searchIterator.hasNext()) {
                     final Contact next = searchIterator.next();

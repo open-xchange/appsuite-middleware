@@ -87,7 +87,7 @@ public class DingeMacherAction extends AbstractITipAction {
         ITipAction action = ITipAction.valueOf(request.getParameter("action").toUpperCase());
         ITipDingeMacher macher = factory.getMacher(action);
         List<Appointment> list = macher.perform(action, analysisToProcess, session);
-        
+
         if (list != null) {
             AppointmentWriter writer = new AppointmentWriter(tz);
             JSONArray array = new JSONArray();
@@ -98,12 +98,12 @@ public class DingeMacherAction extends AbstractITipAction {
             }
             return array;
         }
-        
+
         JSONObject object = new JSONObject();
         object.put("msg", "Done");
         return object;
     }
-    
+
 
     private int getIndex(AJAXRequestData request) {
         return 0;
@@ -116,7 +116,7 @@ public class DingeMacherAction extends AbstractITipAction {
         for (ITipAction action : supportedActions) {
             actionNames.add(action.name().toLowerCase());
         }
-        
+
         return actionNames;
     }
 

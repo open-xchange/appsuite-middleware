@@ -59,7 +59,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link IndexDocumentHelper} - Helper to get <code>IndexDocument</code>s from <code>MailMessage</code>s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IndexDocumentHelper {
@@ -73,7 +73,7 @@ public final class IndexDocumentHelper {
 
     /**
      * Gets the message provided by specified document
-     * 
+     *
      * @param documents The document
      * @return The message or <code>null</code>
      */
@@ -86,7 +86,7 @@ public final class IndexDocumentHelper {
 
     /**
      * Gets the messages provided by specified documents
-     * 
+     *
      * @param documents The documents
      * @return The messages
      */
@@ -103,7 +103,7 @@ public final class IndexDocumentHelper {
 
     /**
      * Gets the index documents for given mails.
-     * 
+     *
      * @param mails The mails
      * @param accountId The account identifier
      * @return The index documents
@@ -122,7 +122,7 @@ public final class IndexDocumentHelper {
 
     /**
      * Gets the index document for given mail.
-     * 
+     *
      * @param mail The mail
      * @param accountId The account identifier
      * @return The index document

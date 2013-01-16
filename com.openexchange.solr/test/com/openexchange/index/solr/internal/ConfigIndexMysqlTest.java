@@ -67,66 +67,66 @@ import com.openexchange.tools.sql.SQLTestCase;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ConfigIndexMysqlTest extends SQLTestCase {
-    
+
     private Connection con;
 
     private DBProvider dbProvider;
-    
+
     private SolrIndexMysql indexMysql;
-    
+
     private final int cid = 1;
-    
+
     private final int uid = 2;
-    
+
     private final int module = 3;
-    
+
     private final String server = "http://localhost";
 
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        dbProvider = getDBProvider();        
+        dbProvider = getDBProvider();
         indexMysql = SolrIndexMysql.getInstance();
         con = dbProvider.getWriteConnection(null);
         con.createStatement().executeUpdate("DELETE FROM solrCores");
         con.createStatement().executeUpdate("DELETE FROM solrCoreStores");
     }
-    
+
     public void testHasActiveCoreCreatesCoreEntry() throws Exception {
         createStore();
-        assertFalse("There was an active core although it should not.", indexMysql.hasActiveCore(con, cid, uid, module));        
+        assertFalse("There was an active core although it should not.", indexMysql.hasActiveCore(con, cid, uid, module));
         final SolrCore core = indexMysql.getSolrCore(con, cid, uid, module);
         assertNotNull(core);
         assertNull(core.getServer());
     }
-    
+
     public void testGetSolrCore() throws Exception {
         createStore();
         // Create and activate core
         assertFalse("There was an active core although it should not.", indexMysql.hasActiveCore(con, cid, uid, module));
         assertTrue("Could not activate core.", indexMysql.activateCoreEntry(con, cid, uid, module, server));
-        
+
         SolrCore core = indexMysql.getSolrCore(con, cid, uid, module);
         assertNotNull(core);
-        assertEquals(server, core.getServer());       
-        
+        assertEquals(server, core.getServer());
+
         assertTrue("Could not deactivate core.", indexMysql.deactivateCoreEntry(con, cid, uid, module));
         core = indexMysql.getSolrCore(con, cid, uid, module);
         assertNotNull(core);
         assertNull(core.getServer());
     }
-    
+
     public void testCoreStoreRoundtrip() throws Exception {
         final int sid1 = createStore();
         final int sid2 = createStore();
-        
+
         final List<SolrCoreStore> stores = indexMysql.getCoreStores(con);
         assertEquals("Wrong number of stores.", 2, stores.size());
         for (final SolrCoreStore store : stores) {
             assertTrue(store.getId() == sid1 || store.getId() == sid2);
         }
-        
+
         final SolrCoreStore store = stores.get(0);
         store.setMaxCores(99);
         store.setUri(new URI("file:/sonstwo"));
@@ -134,7 +134,7 @@ public class ConfigIndexMysqlTest extends SQLTestCase {
         final SolrCoreStore reloaded = indexMysql.getCoreStore(con, store.getId());
         assertEquals("MaxCores not equal", store.getMaxCores(), reloaded.getMaxCores());
         assertEquals("Uri not equal", store.getUri(), reloaded.getUri());
-        
+
         indexMysql.removeCoreStoreEntry(con, store.getId());
         try {
             indexMysql.getCoreStore(con, store.getId());
@@ -142,20 +142,20 @@ public class ConfigIndexMysqlTest extends SQLTestCase {
             assertTrue("Wrong exception.", e.similarTo(SolrExceptionCodes.CORE_STORE_ENTRY_NOT_FOUND));
             return;
         }
-        
+
         fail("You should not get here.");
-        
+
     }
-    
+
     public void testChooseOfCoreStore() throws Exception {
         final SolrCoreStore store1 = new SolrCoreStore();
         final int places = 10;
-        
+
         store1.setMaxCores(places);
         store1.setUri(new URI("file:/tmp/nowhere"));
         final int sid1 = indexMysql.createCoreStoreEntry(con, store1);
         store1.setId(sid1);
-        
+
         final SolrCoreStore store2 = new SolrCoreStore();
         store2.setMaxCores(places);
         store2.setUri(new URI("file:/tmp/nowhere/else"));
@@ -166,7 +166,7 @@ public class ConfigIndexMysqlTest extends SQLTestCase {
         for (int i = 0; i < (2 * places); i++) {
             indexMysql.createCoreEntry(con, cid, uid, i);
             final SolrCore core = indexMysql.getSolrCore(con, cid, uid, i);
-            
+
             if (i == 0) {
                 if (core.getStore() == sid1) {
                     otherId = sid2;
@@ -174,11 +174,11 @@ public class ConfigIndexMysqlTest extends SQLTestCase {
                     otherId = sid1;
                 }
             }
-            
+
             final int coreId = core.getStore();
             if ((i % 2) != 0)  {
                 assertEquals("Wrong store.", coreId, otherId);
-            }            
+            }
         }
     }
 
@@ -188,7 +188,7 @@ public class ConfigIndexMysqlTest extends SQLTestCase {
         store.setUri(new URI("file:/tmp/nowhere"));
         return indexMysql.createCoreStoreEntry(con, store);
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
         con.createStatement().executeUpdate("DELETE FROM solrCores");

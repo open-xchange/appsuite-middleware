@@ -65,10 +65,10 @@ public abstract class LdapImageMapping extends LdapMapping<byte[]> {
         Object value = getValue(result);
         return null != value && byte[].class.isInstance(value) ? (byte[])value : null;
     }
-    
+
     @Override
     public String encode(byte[] value, LdapIDResolver idResolver) throws OXException {
         throw new UnsupportedOperationException("unable to encode image data");
     }
-    
+
 }

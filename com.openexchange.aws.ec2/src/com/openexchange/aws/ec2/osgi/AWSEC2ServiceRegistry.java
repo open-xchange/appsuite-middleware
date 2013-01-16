@@ -53,7 +53,7 @@ import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link AWSEC2ServiceRegistry}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AWSEC2ServiceRegistry {

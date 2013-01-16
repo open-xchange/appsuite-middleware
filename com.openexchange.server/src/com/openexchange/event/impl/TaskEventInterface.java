@@ -61,7 +61,7 @@ public interface TaskEventInterface {
 
     /**
      * Invoked if a new task is created.
-     * 
+     *
      * @param taskObj The task
      * @param sessionObj The user session
      */
@@ -69,7 +69,7 @@ public interface TaskEventInterface {
 
     /**
      * Invoked if a new task is modified.
-     * 
+     *
      * @param taskObj The task
      * @param sessionObj The user session
      */

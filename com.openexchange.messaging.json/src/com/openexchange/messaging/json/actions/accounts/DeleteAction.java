@@ -78,7 +78,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.GET, name = "delete", description = "Delete a messaging account", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "messagingService", description = "The messaging service id that the account belongs to."),
-    @Parameter(name = "id", description = "An account ID to delete.") 
+    @Parameter(name = "id", description = "An account ID to delete.")
 }, responseDescription = "A response object containing 1 as its data on success.")
 public class DeleteAction extends AbstractMessagingAccountAction {
 

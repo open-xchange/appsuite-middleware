@@ -52,7 +52,6 @@ package com.openexchange.realtime.packet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadElement;
@@ -69,7 +68,7 @@ import com.openexchange.realtime.util.ElementPath;
  * PayloadTrees. Extensions to Presence Stanza can be queried via the {@link Presence#getExtensions()} function and programmatically
  * extracted from the Stanza via {@link Stanza#getPayload(com.openexchange.realtime.util.ElementPath)} function.
  * </p>
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -89,7 +88,7 @@ public class Presence extends Stanza {
      * <li>none: is used for the initial presence message of a client to signal its availability for communications.</li>
      * <li>pending:</li>
      * </ol>
-     * 
+     *
      * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
      */
     public enum Type {
@@ -139,7 +138,7 @@ public class Presence extends Stanza {
      * Initializes a new {@link Presence} based on another Presence. This will produce a deep copy up to the leafs of the PayloadTreeNode,
      * more exactly the data Portion of the PayloadElement in the PayloadTreeNode as we are dealing with Objects that must not neccessarily
      * implement Cloneable or Serializable.
-     * 
+     *
      * @param other The Presence to copy, must not be null
      * @throws IllegalArgumentException if the other Presence is null
      */
@@ -183,7 +182,7 @@ public class Presence extends Stanza {
 
     /**
      * Gets the type of Presence Stanza
-     * 
+     *
      * @return The state
      */
     public Type getType() {
@@ -192,7 +191,7 @@ public class Presence extends Stanza {
 
     /**
      * Sets the type of the Presence Stanza
-     * 
+     *
      * @param type The state to set
      */
     public void setType(Type type) {
@@ -201,7 +200,7 @@ public class Presence extends Stanza {
 
     /**
      * Gets the message.
-     * 
+     *
      * @return The message
      */
     public String getMessage() {
@@ -218,7 +217,7 @@ public class Presence extends Stanza {
 
     /**
      * Gets the state e.g. online or away
-     * 
+     *
      * @return The state
      */
     public PresenceState getState() {
@@ -227,7 +226,7 @@ public class Presence extends Stanza {
 
     /**
      * Sets the state e.g. online or away
-     * 
+     *
      * @param state The state
      */
     public void setState(PresenceState state) {
@@ -237,7 +236,7 @@ public class Presence extends Stanza {
 
     /**
      * Gets the priority.
-     * 
+     *
      * @return The priority
      */
     public byte getPriority() {
@@ -246,7 +245,7 @@ public class Presence extends Stanza {
 
     /**
      * Sets the priority.
-     * 
+     *
      * @param priority The priority to set
      */
     public void setPriority(byte priority) {
@@ -256,7 +255,7 @@ public class Presence extends Stanza {
 
     /**
      * Get the error element describing the error-type Stanza in more detail.
-     * 
+     *
      * @return Null or the OXException representing the error
      */
     public OXException getError() {
@@ -265,7 +264,7 @@ public class Presence extends Stanza {
 
     /**
      * Set the error element describing the error-type Stanza in more detail.
-     * 
+     *
      * @param error The OXException representing the error
      */
     public void setError(OXException error) {
@@ -275,7 +274,7 @@ public class Presence extends Stanza {
 
     /**
      * Get the default payloads.
-     * 
+     *
      * @return The default payloads as defined in the Presence specification.
      */
     public Collection<PayloadTree> getDefaultPayloads() {
@@ -284,7 +283,7 @@ public class Presence extends Stanza {
 
     /**
      * Get the extension payloads.
-     * 
+     *
      * @return Extension payloads that aren't defined in the Presence specification and not accessible via getters and setters.
      */
     public Collection<PayloadTree> getExtensions() {
@@ -294,7 +293,7 @@ public class Presence extends Stanza {
     /**
      * Write a payload to the PayloadTree identified by the ElementPath. There is only one tree for the default elements which only contains
      * one node so we can set the data by directly writing to the root node.
-     * 
+     *
      * @param path The ElementPath identifying the PayloadTree.
      * @param data The payload data to write into the root node.
      */

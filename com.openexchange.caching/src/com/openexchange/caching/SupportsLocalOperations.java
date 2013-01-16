@@ -57,7 +57,7 @@ package com.openexchange.caching;
  * <li> {@link Cache#localRemove(java.io.Serializable)}<br>&nbsp;</li>
  * <li> {@link Cache#localRemoveFromGroup(java.io.Serializable, String)}<br>&nbsp;</li>
  * </ul>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SupportsLocalOperations {

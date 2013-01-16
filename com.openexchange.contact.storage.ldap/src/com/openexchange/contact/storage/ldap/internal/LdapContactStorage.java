@@ -84,16 +84,16 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link LdapContactStorage} 
- * 
+ * {@link LdapContactStorage}
+ *
  * LDAP storage for contacts.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class LdapContactStorage extends DefaultContactStorage {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LdapContactStorage.class));
-    private static final ContactField[] DISTLISTMEMBER_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, 
+    private static final ContactField[] DISTLISTMEMBER_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3,
         ContactField.OBJECT_ID, ContactField.DISPLAY_NAME,ContactField.SUR_NAME, ContactField.GIVEN_NAME
     };
     private static final Date FALLBACK_DATE = new Date(1000);
@@ -103,11 +103,11 @@ public class LdapContactStorage extends DefaultContactStorage {
     private final LdapFactory factory;
     private LdapIDResolver idResolver;
     private volatile Integer adminID;
-    
+
     /**
      * Initializes a new {@link LdapContactStorage}.
-     * 
-     * @throws OXException 
+     *
+     * @throws OXException
      */
     public LdapContactStorage(LdapConfig config) throws OXException {
     	super();
@@ -116,7 +116,7 @@ public class LdapContactStorage extends DefaultContactStorage {
         this.mapper = new LdapMapper(config.getContactMappingFile(), LdapConfig.CONFIG_PREFIX);
     	LOG.debug("LdapContactStorage initialized.");
     }
-    
+
     public int getFolderID() throws OXException {
         return parse(config.getFolderID());
     }
@@ -171,7 +171,7 @@ public class LdapContactStorage extends DefaultContactStorage {
         check(session.getContextId(), folderID);
         if (null == mapper.opt(ContactField.LAST_MODIFIED)) {
             LOG.warn("No LDAP mapping for " + ContactField.LAST_MODIFIED + ", unable to get modified contacts in period.");
-            return getSearchIterator(null);                        
+            return getSearchIterator(null);
         }
         return doModified(session, folderID, since, fields, sortOptions);
     }
@@ -201,7 +201,7 @@ public class LdapContactStorage extends DefaultContactStorage {
     public void delete(Session session, String folderId, String id, Date lastRead) throws OXException {
         throw LdapExceptionCodes.DELETE_NOT_POSSIBLE.create();
     }
-    
+
     @Override
     public SearchIterator<Contact> searchByBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
         if (null == mapper.opt(ContactField.BIRTHDAY)) {
@@ -212,7 +212,7 @@ public class LdapContactStorage extends DefaultContactStorage {
             return super.searchByBirthday(session, folderIDs, from, until, fields, sortOptions);
         }
     }
-    
+
     @Override
     public SearchIterator<Contact> searchByAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
         if (null == mapper.opt(ContactField.ANNIVERSARY)) {
@@ -223,15 +223,15 @@ public class LdapContactStorage extends DefaultContactStorage {
             return super.searchByAnniversary(session, folderIDs, from, until, fields, sortOptions);
         }
     }
-    
+
     protected Contact doGet(Session session, String folderId, String id, ContactField[] fields) throws OXException {
-        SearchIterator<Contact> searchIterator = null; 
+        SearchIterator<Contact> searchIterator = null;
         try {
             searchIterator = this.list(session, folderId, new String[] { id }, fields);
             if (false == searchIterator.hasNext()) {
                 throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(id), session.getContextId());
             } else {
-                return searchIterator.next();            
+                return searchIterator.next();
             }
         } finally {
             Tools.close(searchIterator);
@@ -252,31 +252,31 @@ public class LdapContactStorage extends DefaultContactStorage {
         }
         return this.search(session, orTerm, fields, sortOptions);
     }
-    
+
     protected SearchIterator<Contact> doDeleted(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
         SingleSearchTerm term = new SingleSearchTerm(SingleOperation.GREATER_THAN);
         term.addOperand(new ContactFieldOperand(ContactField.LAST_MODIFIED));
         term.addOperand(new ConstantOperand<Date>(since));
         return getSearchIterator(search(session, term, fields, sortOptions, true));
-    }   
-    
+    }
+
     protected SearchIterator<Contact> doModified(Session session, String folderID, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
         SingleSearchTerm term = new SingleSearchTerm(SingleOperation.GREATER_THAN);
         term.addOperand(new ContactFieldOperand(ContactField.LAST_MODIFIED));
         term.addOperand(new ConstantOperand<Date>(since));
         return getSearchIterator(search(session, term, fields, sortOptions, false));
     }
-    
+
     protected <O> SearchIterator<Contact> doSearch(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
         return getSearchIterator(search(session, term, fields, sortOptions, false));
     }
-    
+
     protected <O> List<Contact> search(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions, boolean deleted) throws OXException {
         LdapIDResolver idResolver = getIDResolver(session);
         String filter = new SearchTermAdapter(term, mapper, idResolver).getFilter();
         return search(session, fields, filter, sortOptions, deleted);
     }
-    
+
     protected List<Contact> search(Session session, ContactField[] fields, String filter, SortOptions sortOptions, boolean deleted) throws OXException {
         String searchFilter = config.getSearchfilter();
         if (null != filter) {
@@ -289,7 +289,7 @@ public class LdapContactStorage extends DefaultContactStorage {
         return this.search(session, fields, mapper, config.getBaseDN(), config.getSearchfilter(), sortOptions, deleted);
     }
 
-    protected List<Contact> search(Session session, ContactField[] fields, LdapMapper mapper, String baseDN, String filter, 
+    protected List<Contact> search(Session session, ContactField[] fields, LdapMapper mapper, String baseDN, String filter,
         SortOptions sortOptions, boolean deleted) throws OXException {
         SortKey[] sortKeys = null;
         if (Sorting.SERVER.equals(config.getSorting())) {
@@ -307,8 +307,8 @@ public class LdapContactStorage extends DefaultContactStorage {
             return sort(search(session, fields, mapper, baseDN, filter, null, getMaxResults(sortOptions), deleted), mapper, sortOptions);
         }
     }
-    
-    private List<Contact> search(Session session, ContactField[] fields, LdapMapper mapper, String baseDN, String filter, 
+
+    private List<Contact> search(Session session, ContactField[] fields, LdapMapper mapper, String baseDN, String filter,
         SortKey[] sortKeys, int maxResults, boolean deleted) throws OXException {
         LdapIDResolver idResolver = getIDResolver(session);
         LdapExecutor executor = null;
@@ -327,7 +327,7 @@ public class LdapContactStorage extends DefaultContactStorage {
             }
         }
     }
-    
+
     private static int getMaxResults(SortOptions sortOptions) {
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions) && 0 < sortOptions.getLimit()) {
             if (0 < sortOptions.getRangeStart()) {
@@ -366,7 +366,7 @@ public class LdapContactStorage extends DefaultContactStorage {
         }
         return contact;
     }
-    
+
     private static DistributionListEntryObject[] filterInvalidMembers(DistributionListEntryObject[] members) {
         if (null != members && 0 < members.length) {
             List<DistributionListEntryObject> validMembers = new ArrayList<DistributionListEntryObject>(members.length);
@@ -380,10 +380,10 @@ public class LdapContactStorage extends DefaultContactStorage {
             return members;
         }
     }
-    
+
     /**
      * Checks whether a distribution list member is valid, i.e. contains an e-mail address.
-     * 
+     *
      * @param member The distribution list member check
      * @return <code>true</code>, if the member is valid, <code>false</code>, otherwise
      */
@@ -396,22 +396,22 @@ public class LdapContactStorage extends DefaultContactStorage {
             && false == SortOptions.EMPTY.equals(sortOptions) && null != sortOptions.getOrder() && 0 < sortOptions.getOrder().length) {
             Collections.sort(contacts, mapper.getComparator(sortOptions));
         }
-        if (null != contacts && 0 < contacts.size() && null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions) && 
+        if (null != contacts && 0 < contacts.size() && null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions) &&
             (0 < sortOptions.getLimit() || 0 < sortOptions.getRangeStart())) {
             int fromIndex = 0 < sortOptions.getRangeStart() ? sortOptions.getRangeStart() : 0;
             if (fromIndex >= contacts.size()) {
                 return Collections.emptyList();
-            }            
+            }
             int toIndex = 0 < sortOptions.getLimit() ? fromIndex + sortOptions.getLimit() : 0;
             if (0 == toIndex || toIndex >= contacts.size()) {
                 toIndex = contacts.size();
             }
-            return contacts.subList(fromIndex, toIndex);               
+            return contacts.subList(fromIndex, toIndex);
         } else {
             return contacts;
         }
     }
-    
+
     private List<Contact> createContacts(LdapExecutor executor, LdapIDResolver idResolver, LdapMapper mapper, List<LdapResult> results, ContactField[] fields) throws OXException {
         if (null == results) {
             return null;
@@ -425,7 +425,7 @@ public class LdapContactStorage extends DefaultContactStorage {
         }
         return contacts;
     }
-    
+
     private Contact createContact(LdapExecutor executor, LdapIDResolver idResolver, LdapMapper mapper, LdapResult result, ContactField[] fields) throws OXException {
         Contact contact = mapper.createContact(result, idResolver, fields);
         contact.setParentFolderID(getFolderID());
@@ -451,7 +451,7 @@ public class LdapContactStorage extends DefaultContactStorage {
             if (config.isExcludeEmptyLists() && null == contact.getDistributionList() || 0 == contact.getDistributionList().length) {
                 LOG.debug("Skipping empty distribution list '" + result + "'.");
                 return null;
-            }            
+            }
             if (false == contact.containsSurName() && contact.containsDisplayName()) {
                 contact.setSurName(contact.getDisplayName());
             }
@@ -472,7 +472,7 @@ public class LdapContactStorage extends DefaultContactStorage {
                     } else {
                         idResolver = new DbIDResolver(config.getContextID(), getFolderID());
                     }
-                }                
+                }
             }
             return idResolver;
         }
@@ -505,7 +505,7 @@ public class LdapContactStorage extends DefaultContactStorage {
             member.setEmailfield(DistributionListEntryObject.EMAILFIELD3);
         }
     }
-    
+
     private int getAdminID() throws OXException {
         if (null == this.adminID) {
             synchronized (this) {
@@ -513,15 +513,15 @@ public class LdapContactStorage extends DefaultContactStorage {
                     adminID = Integer.valueOf(
                         LdapServiceLookup.getService(ContextService.class).getContext(getContextID()).getMailadmin());
                 }
-            }            
+            }
         }
         return adminID.intValue();
     }
 
     /**
-     * Checks if the supplied context and folder ID match this LDAP storage's 
+     * Checks if the supplied context and folder ID match this LDAP storage's
      * context and folder ID.
-     * 
+     *
      * @param contextID the context ID to check
      * @param folderID the folder ID to check
      * @throws OXException
@@ -530,11 +530,11 @@ public class LdapContactStorage extends DefaultContactStorage {
         checkContext(contextID);
         checkFolder(folderID);
     }
-    
+
     /**
-     * Checks if the supplied context ID matches this LDAP storage's 
+     * Checks if the supplied context ID matches this LDAP storage's
      * context ID.
-     * 
+     *
      * @param contextID the context ID to check
      * @throws OXException
      */
@@ -545,9 +545,9 @@ public class LdapContactStorage extends DefaultContactStorage {
     }
 
     /**
-     * Checks if the supplied folder ID matches this LDAP storage's 
+     * Checks if the supplied folder ID matches this LDAP storage's
      * folder ID.
-     * 
+     *
      * @param folderID the folder ID to check
      * @throws OXException
      */

@@ -60,5 +60,5 @@ public class TargetDatabaseException extends Exception{
     public TargetDatabaseException(String s) {
         super( s );
     }
-    
+
 }

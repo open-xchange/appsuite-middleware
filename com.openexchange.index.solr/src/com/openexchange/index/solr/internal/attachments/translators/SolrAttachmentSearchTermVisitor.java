@@ -67,15 +67,15 @@ import com.openexchange.index.solr.internal.querybuilder.Configuration;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrAttachmentSearchTermVisitor.class);
-    
+
     private final String translatorName;
-    
+
     private final Configuration configuration;
-    
+
     private final StringBuilder queryBuilder;
-    
+
 
     public SolrAttachmentSearchTermVisitor(String translatorName, Configuration configuration) {
         super();
@@ -90,35 +90,35 @@ public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
         if (searchTerms == null || searchTerms.length == 0) {
             return;
         }
-        
+
         SearchTerm<?> firstTerm = searchTerms[0];
         if (searchTerms.length == 1) {
             queryBuilder.append(toQuery(translatorName, configuration, firstTerm));
             return;
-        }        
-        
+        }
+
         queryBuilder.append(" (");
         queryBuilder.append(toQuery(translatorName, configuration, firstTerm));
         for (int i = 1; i < searchTerms.length; i++) {
             queryBuilder.append(" OR ");
-            queryBuilder.append(toQuery(translatorName, configuration, searchTerms[i]));            
+            queryBuilder.append(toQuery(translatorName, configuration, searchTerms[i]));
         }
         queryBuilder.append(")");
     }
-    
+
     @Override
-    public void visit(ANDTerm term) {        
+    public void visit(ANDTerm term) {
         SearchTerm<?>[] searchTerms = term.getPattern();
         if (searchTerms == null || searchTerms.length == 0) {
             return;
         }
-        
+
         SearchTerm<?> firstTerm = searchTerms[0];
         if (searchTerms.length == 1) {
             queryBuilder.append(toQuery(translatorName, configuration, firstTerm));
             return;
-        }        
-        
+        }
+
         queryBuilder.append(" (");
         queryBuilder.append(toQuery(translatorName, configuration, firstTerm));
         for (int i = 1; i < searchTerms.length; i++) {
@@ -127,13 +127,13 @@ public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
         }
         queryBuilder.append(")");
     }
-    
+
     @Override
     public void visit(ObjectIdTerm term) {
         String parameterName = SolrAttachmentField.OBJECT_ID.parameterName();
         appendStringTerm(parameterName, term);
     }
-    
+
     private void appendStringTerm(String parameterName, SearchTerm<String> term) {
         Set<String> keys = configuration.getKeys(Configuration.FIELD);
         if (!keys.contains(Configuration.FIELD + '.' + parameterName)) {
@@ -145,7 +145,7 @@ public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
             LOG.warn("Did not find index fields for parameter " + parameterName + ". Skipping this field in search query...");
             return;
         }
-        
+
         String pattern = term.getPattern();
         queryBuilder.append('(');
         queryBuilder.append(indexFields.get(0)).append(':').append('"').append(pattern).append('"');
@@ -156,16 +156,16 @@ public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
         }
         queryBuilder.append(')');
     }
-    
+
     @Override
     public String toString() {
         return queryBuilder.toString().trim();
     }
-    
+
     public static String toQuery(String translatorName, Configuration configuration, SearchTerm<?> searchTerm) {
         SolrAttachmentSearchTermVisitor visitor = new SolrAttachmentSearchTermVisitor(translatorName, configuration);
         searchTerm.accept(visitor);
-        
+
         return visitor.toString();
     }
 }

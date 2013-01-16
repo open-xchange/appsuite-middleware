@@ -36,7 +36,7 @@
  * and therefore, elected the GPL Version 2 license, then the option applies
  * only if the new code is made subject to such option by the copyright
  * holder.
- * 
+ *
  * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
  */
 
@@ -52,7 +52,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * Grizzly OSGi {@link HttpService} {@link ServiceFactory}.
- * 
+ *
  * @author Hubert Iwaniuk
  * @since Jan 20, 2009
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>

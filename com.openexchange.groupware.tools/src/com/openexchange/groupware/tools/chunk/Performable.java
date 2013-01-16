@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface Performable {
-    
+
     /**
      * Will be called for every chunk.
      * With every call, <code>off</code> will be incremented by the last return value of {@link #perform(int, int)}.
@@ -71,14 +71,14 @@ public interface Performable {
      *  // Your code using the subList here<br>
      *  return subList.size();
      *  </code>
-     *  
+     *
      * @param off The current offset.
      * @param len The length based on the chunk size.
      * @return The value by which <code>off</code> should be increased.
      * @throws OXException in cases of errors.
      */
     int perform(int off, int len) throws OXException;
-    
+
     /**
      * @return The chunk size.
      */

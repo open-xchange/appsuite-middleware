@@ -72,7 +72,7 @@ public class EasySSLSocketFactory implements SocketFactory, LayeredSocketFactory
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static EasySSLSocketFactory getInstance() {

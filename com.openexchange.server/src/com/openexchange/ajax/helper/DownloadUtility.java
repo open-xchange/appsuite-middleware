@@ -223,12 +223,12 @@ public final class DownloadUtility {
 
     /**
      * Appends the <tt>"filename"</tt> parameter to specified {@link StringBuilder} instance; e.g.
-     * 
+     *
      * <pre>
      * "attachment; filename="readme.txt"
      *            ^---------------------^
      * </pre>
-     * 
+     *
      * @param fileName The file name
      * @param baseCT The base content type; e.g <tt>"application/octet-stream"</tt> or <tt>"text/plain"</tt>
      * @param userAgent The user agent identifier
@@ -277,12 +277,12 @@ public final class DownloadUtility {
 
     /**
      * Appends the <tt>"filename"</tt> parameter to specified {@link StringBuilder} instance; e.g.
-     * 
+     *
      * <pre>
      * "attachment; filename="readme.txt"
      *            ^---------------------^
      * </pre>
-     * 
+     *
      * @param fileName The file name
      * @param baseCT The base content type; e.g <tt>"application/octet-stream"</tt> or <tt>"text/plain"</tt>
      * @param userAgent The user agent identifier
@@ -346,10 +346,10 @@ public final class DownloadUtility {
     }
 
     // private static final Pattern P = Pattern.compile("^[\\w\\d\\:\\/\\.]+(\\.\\w{3,4})$");
-    
+
     /**
      * Checks if specified file name has a trailing file extension.
-     * 
+     *
      * @param fileName The file name
      * @return The extension (e.g. <code>".txt"</code>) or <code>null</code>
      */

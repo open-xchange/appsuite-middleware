@@ -60,7 +60,7 @@ import javax.servlet.ServletContext;
  * {@link FrameworkConfig} - ConfigBuilder with fluent interface. Use like: <code>
  * FrameworkConfig.with("Atmosphere Servlet", realtimeContext).and("org.atmosphere.cpr.CometSupport.maxInactiveActivity", "100000").build();
  * </code>
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class FrameworkConfig {
@@ -76,7 +76,7 @@ public class FrameworkConfig {
         this.servletContext = servletContext;
         this.servletName = servletName;
     }
-    
+
     /**
      * Public constructor to create an empty FrameworkConfig.
      * @param servletName the name of the Atmosphere servlet

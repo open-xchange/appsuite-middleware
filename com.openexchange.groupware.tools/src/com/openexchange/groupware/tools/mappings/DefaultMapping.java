@@ -73,9 +73,9 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
 	public void copy(O from, O to) throws OXException {
 		this.set(to, this.get(from));
 	}
-	
+
 	/**
-	 * Default <code>truncate</code> implementation that never truncates, 
+	 * Default <code>truncate</code> implementation that never truncates,
 	 * override if applicable for the mapped property.
 	 */
 	@Override
@@ -84,7 +84,7 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
 	}
 
     /**
-     * Default <code>compare</code> implementation, override if applicable for 
+     * Default <code>compare</code> implementation, override if applicable for
      * the mapped property.
      */
 	@Override
@@ -93,8 +93,8 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
     }
 
 	/**
-	 * Default <code>compare</code> implementation, that uses locale-aware 
-	 * comparison for {@link String}s properties. Override if applicable for 
+	 * Default <code>compare</code> implementation, that uses locale-aware
+	 * comparison for {@link String}s properties. Override if applicable for
 	 * the mapped property.
 	 */
     @Override
@@ -108,12 +108,12 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
         } else if (null == value2) {
             return 1;
         } else if (null != locale && String.class.isInstance(value1)) {
-            return Collator.getInstance(locale).compare((String)value1, (String)value2);                       
+            return Collator.getInstance(locale).compare((String)value1, (String)value2);
         } else if (Comparable.class.isInstance(value1)) {
             return ((Comparable)value1).compareTo(value2);
         } else {
             throw new UnsupportedOperationException("Don't know how to compare two values of class " + value1.getClass().getName());
         }
     }
-	
+
 }

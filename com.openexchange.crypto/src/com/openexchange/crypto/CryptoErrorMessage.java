@@ -76,10 +76,10 @@ public enum CryptoErrorMessage implements OXExceptionCode {
     NoSalt(CATEGORY_USER_INPUT, 4, CryptoExceptionMessage.NO_SALT_HELP, CryptoExceptionMessage.NO_SALT_MSG);
 
     private static final String PREFIX = "CRP";
-    
+
     /**
      * Gets the prefix.
-     * 
+     *
      * @return The prefix
      */
     public static String getPrefixx() {
@@ -128,7 +128,7 @@ public enum CryptoErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -137,7 +137,7 @@ public enum CryptoErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -147,7 +147,7 @@ public enum CryptoErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

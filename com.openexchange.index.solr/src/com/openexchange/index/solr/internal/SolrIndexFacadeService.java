@@ -89,7 +89,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link SolrIndexFacadeService} - The Solr {@link IndexFacadeService} implementation.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrIndexFacadeService implements IndexFacadeService {
@@ -160,7 +160,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
 
             }
         }, SOFT_TIMEOUT, SOFT_TIMEOUT, TimeUnit.MINUTES);
-        
+
         try {
             ConfigurationService config = Services.getService(ConfigurationService.class);
             String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
@@ -172,17 +172,17 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                 AttachmentFieldMapper.getInstance());
 
             infostoreBuilder = new SimpleQueryBuilder(
-                configDir + File.separatorChar + "infostore-querybuilder.properties", 
+                configDir + File.separatorChar + "infostore-querybuilder.properties",
                 null,
-                null, 
-                SolrInfostoreField.FOLDER, 
+                null,
+                SolrInfostoreField.FOLDER,
                 InfostoreFieldMapper.getInstance());
-            
+
             mailBuilder = new SimpleQueryBuilder(
-                configDir + File.separatorChar + "mail-querybuilder.properties", 
+                configDir + File.separatorChar + "mail-querybuilder.properties",
                 null,
-                SolrMailField.ACCOUNT, 
-                SolrMailField.FULL_NAME, 
+                SolrMailField.ACCOUNT,
+                SolrMailField.FULL_NAME,
                 MailFieldMapper.getInstance());
         } catch (BuilderException e) {
             throw new IllegalStateException("Could not initialize query builder." + e);
@@ -209,12 +209,12 @@ public class SolrIndexFacadeService implements IndexFacadeService {
         if (!modules.containsModule(module)) {
             throw IndexExceptionCodes.INDEXING_NOT_ENABLED.create(module, userId, contextId);
         }
-        
+
         IndexManagementService managementService = Services.getService(IndexManagementService.class);
         if (managementService.isLocked(contextId, userId, module)) {
             throw IndexExceptionCodes.INDEX_LOCKED.create(module, userId, contextId);
         }
-        
+
         SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, module);
         AbstractSolrIndexAccess<?> cachedIndexAccess = accessMap.get(identifier);
         if (null == cachedIndexAccess) {

@@ -61,14 +61,13 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.acl.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
  * {@link FolderCollection} - CardDAV collection for contact folders.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class FolderCollection extends CardDAVCollection {
@@ -80,10 +79,10 @@ public class FolderCollection extends CardDAVCollection {
     public FolderCollection(GroupwareCarddavFactory factory, WebdavPath url, UserizedFolder folder) throws WebdavProtocolException {
         super(factory, url);
         this.folder = folder;
-        super.includeProperties(new CurrentUserPrivilegeSet(folder.getOwnPermission()));        
+        super.includeProperties(new CurrentUserPrivilegeSet(folder.getOwnPermission()));
         LOG.debug(getUrl() + ": initialized for folder '" + folder.getName() + "' [" + folder.getID() + "].");
     }
-    
+
 	@Override
     protected Collection<Contact> getModifiedContacts(Date since) throws OXException {
     	return factory.getState().getModifiedContacts(since, this.folder.getID());
@@ -101,7 +100,7 @@ public class FolderCollection extends CardDAVCollection {
 
 	@Override
 	protected String getFolderID() throws OXException {
-		return this.folder.getID();		
+		return this.folder.getID();
 	}
 
 	@Override
@@ -140,7 +139,7 @@ public class FolderCollection extends CardDAVCollection {
                     }
                     break;
                 }
-            }	    		
+            }
     		return String.format("%s (%s)", name, ownerName);
     	} else {
     		return name;
@@ -156,7 +155,7 @@ public class FolderCollection extends CardDAVCollection {
 	public void setCreationDate(Date date) throws WebdavProtocolException {
 		// no
 	}
-    
+
 	@Override
 	public void create() throws WebdavProtocolException {
 		// no

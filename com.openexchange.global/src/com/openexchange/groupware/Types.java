@@ -89,7 +89,7 @@ package com.openexchange.groupware;
  * <td valign="top" colspan="2">...</td>
  * </tr>
  * </table>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Types {

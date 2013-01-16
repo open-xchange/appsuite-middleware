@@ -153,7 +153,7 @@ public final class StringFileHolder implements IFileHolder {
     public void setDisposition(final String disposition) {
         this.disposition = disposition;
     }
-    
+
     /**
      * Sets the delivery
      *

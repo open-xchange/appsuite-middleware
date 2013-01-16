@@ -68,7 +68,7 @@ import com.openexchange.index.solr.internal.SolrField;
 
 /**
  * {@link SimpleQueryBuilder}
- * 
+ *
  * @author Sven Maurmann
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
@@ -219,12 +219,12 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
             if (!keys.contains(Configuration.FIELD + '.' + parameterName)) {
                 return;
             }
-            
+
             List<String> indexFields = config.getIndexFields(Configuration.FIELD + '.' + parameterName);
             if (indexFields == null || indexFields.isEmpty()) {
                 return;
             }
-            
+
             Order orderParam = parameters.getOrder();
             ORDER order = orderParam == null ? ORDER.desc : orderParam.equals(Order.DESC) ? ORDER.desc : ORDER.asc;
             for (String indexField : indexFields) {

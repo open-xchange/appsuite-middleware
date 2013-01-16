@@ -54,7 +54,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link Services} - The static service lookup for Message Queue bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Services {
@@ -70,7 +70,7 @@ public final class Services {
 
     /**
      * Sets the service lookup.
-     * 
+     *
      * @param serviceLookup The service lookup or <code>null</code>
      */
     public static void setServiceLookup(final ServiceLookup serviceLookup) {
@@ -79,7 +79,7 @@ public final class Services {
 
     /**
      * Gets the service lookup.
-     * 
+     *
      * @return The service lookup or <code>null</code>
      */
     public static ServiceLookup getServiceLookup() {
@@ -88,7 +88,7 @@ public final class Services {
 
     /**
      * Gets the service of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service
      * @throws IllegalStateException If an error occurs while returning the demanded service
@@ -104,7 +104,7 @@ public final class Services {
 
     /**
      * (Optionally) Gets the service of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      */

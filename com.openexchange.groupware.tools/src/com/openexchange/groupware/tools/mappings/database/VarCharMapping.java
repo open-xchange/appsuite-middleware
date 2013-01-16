@@ -56,13 +56,13 @@ import java.sql.Types;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link VarCharMapping} - Database mapping for <code>Types.VARCHAR</code>. 
+ * {@link VarCharMapping} - Database mapping for <code>Types.VARCHAR</code>.
  *
  * @param <O> the type of the object *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class VarCharMapping<O> extends DefaultDbMapping<String, O> {
-	
+
 	public VarCharMapping(final String columnName, final String readableName) {
 		super(columnName, readableName, Types.VARCHAR);
 	}

@@ -80,7 +80,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link TransportLoginHandler} - The login handler for mail transport.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TransportLoginHandler implements LoginHandlerService {
@@ -155,12 +155,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
     }
 
     private List<String> getElapsedDocuments(final int folderId, final IDBasedFileAccess fileAccess, final ServerSession serverSession, final long now) throws OXException {
-        final SearchIterator<File> searchIterator;
-        try {
-            searchIterator = fileAccess.getDocuments(String.valueOf(folderId), FIELDS).results();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final SearchIterator<File> searchIterator = fileAccess.getDocuments(String.valueOf(folderId), FIELDS).results();
         try {
             final long timeToLive = TransportProperties.getInstance().getPublishedDocumentTimeToLive();
             final List<String> ret;

@@ -120,8 +120,8 @@ public class ContactJSONResultConverter implements ResultConverter {
              * get requested column IDs
              */
             int[] columnIDs = RequestTools.getColumnsAsIntArray(requestData, "columns");
-            ContactField[] fields = null != columnIDs ? ContactMapper.getInstance().getFields(columnIDs) : 
-            	ContactMapper.getInstance().getAllFields();        
+            ContactField[] fields = null != columnIDs ? ContactMapper.getInstance().getFields(columnIDs) :
+            	ContactMapper.getInstance().getAllFields();
             /*
              * Convert list of contacts
              */
@@ -147,7 +147,7 @@ public class ContactJSONResultConverter implements ResultConverter {
         }
         result.setResultObject(resultObject, "json");
     }
-    
+
     private JSONObject convertSingleContact(Contact contact, String timeZoneID, Session session) throws OXException {
     	try {
     		// always add NUMBER_OF_IMAGES to contact result (bug #13960)

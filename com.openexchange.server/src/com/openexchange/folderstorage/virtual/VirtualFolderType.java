@@ -68,7 +68,7 @@ public final class VirtualFolderType implements FolderType {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static VirtualFolderType getInstance() {

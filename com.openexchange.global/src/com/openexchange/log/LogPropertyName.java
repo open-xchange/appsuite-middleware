@@ -69,7 +69,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
         /**
          * The TRACE log level
          */
-        TRACE, 
+        TRACE,
         /**
          * The DEBUG log level.
          */
@@ -85,17 +85,17 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
         /**
          * The ERROR log level.
          */
-        ERROR, 
+        ERROR,
         /**
          * The FATAL log level.
          */
-        FATAL, 
+        FATAL,
 
         /*
          * Don't log this
          */
         OFF, ;
-        
+
 
         /**
          * Gets the appropriate log level for specified naming.
@@ -122,7 +122,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 			}
 			return other.ordinal() <= ordinal();
 		}
-		
+
 		public static Comparator<LogLevel> getComparator() {
 			return new Comparator<LogLevel>() {
 
@@ -130,10 +130,10 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 				public int compare(LogLevel o1, LogLevel o2) {
 					return o1.ordinal() - o2.ordinal();
 				}
-				
+
 			};
 		}
-		
+
     }
 
     private final LogProperties.Name propertyName;

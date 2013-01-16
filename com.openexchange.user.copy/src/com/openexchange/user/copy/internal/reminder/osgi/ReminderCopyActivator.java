@@ -62,9 +62,9 @@ import com.openexchange.user.copy.internal.reminder.ReminderCopyTask;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class ReminderCopyActivator implements BundleActivator {
-    
+
     private ServiceRegistration<CopyUserTaskService> serviceRegistration;
-    
+
 
     /**
      * Initializes a new {@link ReminderCopyActivator}.
@@ -84,7 +84,7 @@ public class ReminderCopyActivator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(final BundleContext context) throws Exception {
-        if (serviceRegistration != null) { 
+        if (serviceRegistration != null) {
             serviceRegistration.unregister();
         }
     }

@@ -61,7 +61,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 public class OxReadableNameMapper extends AbstractOutlookMapper {
 	public OxReadableNameMapper() {
 		ContactField[] fields = ContactField.values();
-		
+
 		for(ContactField field: fields) {
 			store(field, field.getReadableName());
 		}

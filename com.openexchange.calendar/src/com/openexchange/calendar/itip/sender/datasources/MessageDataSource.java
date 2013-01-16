@@ -119,7 +119,7 @@ public final class MessageDataSource implements DataSource {
 
     /**
      * Create a data source from a String
-     * @throws OXException 
+     * @throws OXException
      */
     public MessageDataSource(final String data, final String contentType) throws UnsupportedEncodingException, OXException {
         final ContentType ct = new ContentType(contentType);

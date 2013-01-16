@@ -99,7 +99,7 @@ import com.openexchange.java.Streams;
 
 /**
  * {@link CMISFileStorageHttpInvoker}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CMISFileStorageHttpInvoker extends AbstractHttpInvoker {
@@ -142,7 +142,7 @@ public class CMISFileStorageHttpInvoker extends AbstractHttpInvoker {
 
             // Create client
             if (HTTPS.equalsIgnoreCase(uri.getScheme())) {
-                httpClient = trustEveryoneSslHttpClient(uri.getPort()); 
+                httpClient = trustEveryoneSslHttpClient(uri.getPort());
             } else {
                 httpClient = new DefaultHttpClient();
             }

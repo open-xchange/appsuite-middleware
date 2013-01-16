@@ -186,21 +186,17 @@ public final class MessagingRemoteServerProvider extends ServiceTracker<MDNSServ
         if (config.isMdnsEnabled()) {
             final MDNSService mdnsService = mdnsServiceRef.get();
             if (null != mdnsService) {
-                try {
-                    final List<MDNSServiceEntry> entries = mdnsService.listByService(Constants.MDNS_SERVICE_ID);
-                    if (entries.isEmpty()) {
-                        return Collections.<InetSocketAddress> emptyList();
-                    }
-                    final List<InetSocketAddress> addrs = new ArrayList<InetSocketAddress>(entries.size());
-                    for (final MDNSServiceEntry entry : entries) {
-                        for (final InetAddress inetAddress : entry.getAddresses()) {
-                            addrs.add(new InetSocketAddress(inetAddress, entry.getPort()));
-                        }
-                    }
-                    return addrs;
-                } catch (final OXException e) {
-                    throw new OXException(e);
+                final List<MDNSServiceEntry> entries = mdnsService.listByService(Constants.MDNS_SERVICE_ID);
+                if (entries.isEmpty()) {
+                    return Collections.<InetSocketAddress> emptyList();
                 }
+                final List<InetSocketAddress> addrs = new ArrayList<InetSocketAddress>(entries.size());
+                for (final MDNSServiceEntry entry : entries) {
+                    for (final InetAddress inetAddress : entry.getAddresses()) {
+                        addrs.add(new InetSocketAddress(inetAddress, entry.getPort()));
+                    }
+                }
+                return addrs;
             }
         }
         /*

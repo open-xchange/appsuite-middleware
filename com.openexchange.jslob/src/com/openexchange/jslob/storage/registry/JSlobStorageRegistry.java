@@ -55,14 +55,14 @@ import com.openexchange.jslob.storage.JSlobStorage;
 
 /**
  * {@link JSlobStorageRegistry} - The registry for JSlob storages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface JSlobStorageRegistry {
 
     /**
      * Gets the JSlob storage associated with given service identifier.
-     * 
+     *
      * @param storageId The storage identifier
      * @return The JSlob storage associated with given service identifier or <code>null</code>
      * @throws OXException If returning the storage fails
@@ -71,7 +71,7 @@ public interface JSlobStorageRegistry {
 
     /**
      * Gets a collection containing all registered JSlob storage
-     * 
+     *
      * @return A collection containing all registered JSlob storage
      * @throws OXException If returning the collection fails
      */
@@ -79,7 +79,7 @@ public interface JSlobStorageRegistry {
 
     /**
      * Puts given JSlob storage into this registry.
-     * 
+     *
      * @param jslobStorage The JSlob storage to put
      * @return <code>true</code> on success; otherwise <code>false</code> if another storage is already bound to the same identifier
      */
@@ -87,7 +87,7 @@ public interface JSlobStorageRegistry {
 
     /**
      * Removes the JSlob storage associated with given service identifier.
-     * 
+     *
      * @param storageId The storage identifier
      * @throws OXException If removing the storage fails
      */

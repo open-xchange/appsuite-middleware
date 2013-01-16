@@ -69,7 +69,7 @@ import com.openexchange.server.ServiceLookup;
 public class ITipActionFactory implements AJAXActionServiceFactory {
 
     public static ITipActionFactory INSTANCE = null;
-    
+
     private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
 
     public ITipActionFactory(final ServiceLookup services) {

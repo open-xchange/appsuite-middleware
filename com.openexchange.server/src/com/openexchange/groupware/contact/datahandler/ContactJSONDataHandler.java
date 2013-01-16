@@ -109,12 +109,7 @@ public final class ContactJSONDataHandler implements DataHandler {
 
     @Override
     public Object processData(final Data<?> data, final DataArguments dataArguments, final Session session) throws OXException {
-        final Context ctx;
-        try {
-            ctx = ContextStorage.getStorageContext(session);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Context ctx = ContextStorage.getStorageContext(session);
         /*
          * Parse input stream
          */

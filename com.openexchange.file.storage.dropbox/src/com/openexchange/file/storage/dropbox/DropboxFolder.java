@@ -63,7 +63,7 @@ import com.openexchange.file.storage.TypeAware;
 
 /**
  * {@link DropboxFolder}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DropboxFolder extends DefaultFileStorageFolder implements TypeAware {
@@ -96,7 +96,7 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
 
     /**
      * Sets the type.
-     * 
+     *
      * @param type The type to set
      * @return This folder with type applied
      */
@@ -112,7 +112,7 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
 
     /**
      * Parses specified Dropbox entry.
-     * 
+     *
      * @param entry The Dropbox entry denoting the directory
      * @throws OXException If parsing Dropbox entry fails
      */

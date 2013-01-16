@@ -79,7 +79,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * {@link UpdateITipAnalyzer}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
@@ -108,13 +108,13 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             uid = message.exceptions().iterator().next().getUid();
         }
         CalendarDataObject original = util.resolveUid(uid, session);
-        
+
         if (original == null && update == null && message.numberOfExceptions() > 0) {
             analysis.addAnnotation(new ITipAnnotation(Messages.ADD_TO_UNKNOWN,  locale));
             analysis.recommendAction(ITipAction.IGNORE);
             return analysis;
         }
-        
+
         if (update == null) {
             update = original;
         }
@@ -161,14 +161,14 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 return analysis;
             }
         }
-        
+
         if (differ && message.getDataObject() != null) {
             CalendarDataObject dataObject = message.getDataObject().clone();
             ensureParticipant(dataObject, session, owner);
             if (original != null) {
                 dataObject.setParentFolderID(original.getParentFolderID());
             }
-            
+
         	change.setNewAppointment(dataObject);
 
             change.setConflicts(util.getConflicts(message.getDataObject(), session));

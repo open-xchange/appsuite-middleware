@@ -101,7 +101,7 @@ public class AppointmentContactHalo extends AbstractContactHalo implements HaloC
 
 		List<Appointment> appointments = null;
 		if (query.getUser() != null && query.getUser().getId() == session.getUser().getId()) {
-			appointments = new LinkedList<Appointment>(); 
+			appointments = new LinkedList<Appointment>();
 		} else if (query.getUser() != null) {
 		    appointments = appointmentService.getAppointmentsWithUserBetween(query.getUser(), columns, start, end, orderBy, order);
 		} else {

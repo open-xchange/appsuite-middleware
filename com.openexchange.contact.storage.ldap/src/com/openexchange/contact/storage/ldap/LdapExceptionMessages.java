@@ -53,8 +53,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link LdapExceptionMessages} 
- * 
+ * {@link LdapExceptionMessages}
+ *
  * Exception messages for {@link OXException} that must be translated.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -78,7 +78,7 @@ public final class LdapExceptionMessages implements LocalizableStrings {
 //    public final static String IMAP_LOGIN_NULL_MSG = "The imap login for user \"%s\" is null";
 //    public final static String PRIMARY_MAIL_NULL_MSG = "The primary mail for user \"%s\" is null";
 
-    
+
     public final static String AUTH_TYPE_WRONG_MSG = "The value given for authtype \"%s\" is invalid";
     public final static String SORTING_WRONG_MSG = "The value given for sorting \"%s\" is invalid";
     public final static String SEARCH_SCOPE_WRONG_MSG = "The value given for searchScope \"%s\" is invalid";
@@ -123,8 +123,8 @@ public final class LdapExceptionMessages implements LocalizableStrings {
     public static final String INVALID_STORAGE_PRIORITY_MSG = "The value given for storagePriority \"%s\" in file \"%s\" is no integer value";
     public static final String UNKNOWN_CONTACT_PROPERTY_MSG = "Unable to map contact property \"%s\"";
 
-    
-    
+
+
     /**
      * Prevent instantiation.
      */

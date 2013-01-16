@@ -65,9 +65,9 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ContactsAttachment}
- * 
+ *
  * Attachment listener and -authorizer for the contacts module.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ContactsAttachment implements AttachmentListener, AttachmentAuthorization {
@@ -81,12 +81,12 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
 
     @Override
     public long attached(AttachmentEvent event) throws OXException {
-        return modifyAttachmentCount(event.getSession(), String.valueOf(event.getFolderId()), String.valueOf(event.getAttachedId()), 1); 
+        return modifyAttachmentCount(event.getSession(), String.valueOf(event.getFolderId()), String.valueOf(event.getAttachedId()), 1);
     }
 
     @Override
     public long detached(AttachmentEvent event) throws OXException {
-        return modifyAttachmentCount(event.getSession(), String.valueOf(event.getFolderId()), String.valueOf(event.getAttachedId()), 
+        return modifyAttachmentCount(event.getSession(), String.valueOf(event.getFolderId()), String.valueOf(event.getAttachedId()),
             -1 * event.getDetached().length);
     }
 
@@ -106,9 +106,9 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
     }
 
     /**
-     * Checks a user's object permissions for a specific contact, throwing appropriate exceptions in case of the requested permissions 
+     * Checks a user's object permissions for a specific contact, throwing appropriate exceptions in case of the requested permissions
      * are not met.
-     * 
+     *
      * @param session The server session of the user to check the permissions for
      * @param folderID The parent folder ID of the contact
      * @param objectID the object ID of the contact
@@ -128,7 +128,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
                 throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(objectID), I(session.getContextId()));
             }
             ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-            Contact contact = contactService.getContact(session, Integer.toString(folderID), Integer.toString(objectID), 
+            Contact contact = contactService.getContact(session, Integer.toString(folderID), Integer.toString(objectID),
                 new ContactField[] { ContactField.CREATED_BY, ContactField.PRIVATE_FLAG });
             if (contact.getCreatedBy() != session.getUserId()) {
                 if (contact.getPrivateFlag() || needsReadAccess && false == permission.canReadAllObjects()) {
@@ -138,12 +138,12 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
                     throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(objectID), I(session.getContextId()));
                 }
             }
-        }        
+        }
     }
-    
+
     /**
      * Increases or decreases the attachment count for a contact.
-     * 
+     *
      * @param session The session
      * @param folderID The parent folder ID
      * @param objectID the object ID
@@ -153,7 +153,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
      */
     private static long modifyAttachmentCount(Session session, String folderID, String objectID, int delta) throws OXException {
         ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-        Contact contact = contactService.getContact(session, folderID, objectID, 
+        Contact contact = contactService.getContact(session, folderID, objectID,
             new ContactField[] { ContactField.NUMBER_OF_ATTACHMENTS, ContactField.LAST_MODIFIED });
         if (0 > contact.getNumberOfAttachments() + delta) {
             throw ContactExceptionCodes.TOO_FEW_ATTACHMENTS.create();
@@ -164,5 +164,5 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
         }
         return contact.getLastModified().getTime();
     }
-    
+
 }

@@ -92,7 +92,7 @@ public class TriggerWrapperTimeComparator implements Comparator<TriggerStateWrap
         if (comp != 0) {
             return comp;
         }
-        
+
         return trig1.getTrigger().getKey().compareTo(trig2.getTrigger().getKey());
     }
 }

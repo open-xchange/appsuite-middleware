@@ -244,9 +244,8 @@ public class Message {
         if (length == 0) {
             throw new IllegalArgumentException("empty topic");
         }
-        final char[] chars = topic.toCharArray();
         for (int i = 0; i < length; i++) {
-            final char ch = chars[i];
+            final char ch = topic.charAt(i);
             if (ch == '/') {
                 /*
                  * Can't start or end with a '/' but anywhere else is okay
@@ -257,7 +256,7 @@ public class Message {
                 /*
                  * Can't have "//" as that implies empty token
                  */
-                if (chars[i - 1] == '/') {
+                if (topic.charAt(i - 1) == '/') {
                     throw new IllegalArgumentException("invalid topic: " + topic);
                 }
                 continue;

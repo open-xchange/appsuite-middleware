@@ -192,7 +192,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
     /**
      * Adds specified IMAP folder to set of maintained opened folders.
-     * 
+     *
      * @param folder The IMAP folder to add
      */
     protected void addOpenedFolder(final IMAPFolder folder) {
@@ -465,7 +465,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         if (null == uidTableField) {
             return;
         }
-        
+
         try {
             final com.sun.mail.imap.MessageCache mc = (com.sun.mail.imap.MessageCache) messageCacheField.get(imapFolder);
             if (null != mc) {
@@ -474,7 +474,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                     Arrays.fill(messages, null);
                 }
             }
-            
+
             final Hashtable<?, ?> uidTable = (Hashtable<?, ?>) uidTableField.get(imapFolder);
             if (null != uidTable) {
                 uidTable.clear();

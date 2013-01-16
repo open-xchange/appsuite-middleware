@@ -69,37 +69,37 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class InMemoryIndex {
-    
+
     private final List<Map<String, Object>> index = new ArrayList<Map<String,Object>>();
 
-    
+
     /**
      * Initializes a new {@link InMemoryIndex}.
      * @param identifier
      * @param triggerType
      */
     public InMemoryIndex() {
-        super();        
+        super();
     }
-    
+
     protected QueryResponse query(SolrParams query) throws OXException {
         int start = Integer.parseInt(query.get("start"));
         int rows = Integer.parseInt(query.get("rows"));
-        int end = start + rows;            
+        int end = start + rows;
         if (start > index.size()) {
             return new MockQueryResponse(Collections.EMPTY_SET);
         }
-        
+
         if (end > index.size()) {
             end = index.size();
         }
-        
+
         Set<Map<String, Object>> entries = new HashSet<Map<String, Object>>();
         List<Map<String, Object>> subList = index.subList(start, end);
-        entries.addAll(subList);            
+        entries.addAll(subList);
         return new MockQueryResponse(entries);
     }
-    
+
     protected UpdateResponse addDocument(SolrInputDocument document) throws OXException {
         UpdateResponse response = new UpdateResponse();
         response.setElapsedTime(0L);
@@ -108,7 +108,7 @@ public class InMemoryIndex {
             indexDocument.put(key, document.get(key).getValue());
         }
         index.add(indexDocument);
-        
+
         return response;
     }
 

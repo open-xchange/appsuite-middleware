@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link CryptoSecretEncryptionFactoryService} - The factory.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -95,7 +95,7 @@ public class CryptoSecretEncryptionFactoryService implements SecretEncryptionFac
 
     /**
      * Initializes a new {@link CryptoSecretEncryptionFactoryService}.
-     * 
+     *
      * @param crypto The crypto service reference
      * @param secretService The fall-back secret service
      * @param patterns The patterns to parse
@@ -111,7 +111,7 @@ public class CryptoSecretEncryptionFactoryService implements SecretEncryptionFac
 
     /**
      * Initializes a new {@link CryptoSecretEncryptionFactoryService}.
-     * 
+     *
      * @param crypto The crypto service reference
      * @param secretService The fall-back secret service
      * @param tokenList The token list

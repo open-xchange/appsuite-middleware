@@ -197,7 +197,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     /**
      * Initializes a new {@link MimeMailPart}.
-     * 
+     *
      * @param multipart The multipart
      * @throws OXException If setting multipart as content fails
      */

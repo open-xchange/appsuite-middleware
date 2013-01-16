@@ -177,7 +177,7 @@ public class LinkedInXMLParser {
                     contacts.add(contact);
                 }
             }
-            
+
             final NodeList errors = root.getElementsByTagName("error");
             if (errors.getLength() > 0) {
             	final Element error = (Element) errors.item(0);
@@ -321,7 +321,7 @@ public class LinkedInXMLParser {
 
     /**
      * Parses given connections.
-     * 
+     *
      * <pre>
      * {
      *   "values": [
@@ -339,7 +339,7 @@ public class LinkedInXMLParser {
      *   "_total": 2
      * }
      * </pre>
-     * 
+     *
      * @param body The received JSON body
      * @return The parsed contacts
      * @throws OXException If operation fails

@@ -83,7 +83,7 @@ public class ContactServiceLookup {
     public static <S extends Object> S getService(final Class<? extends S> c) throws OXException {
         return ContactServiceLookup.getService(c, false);
     }
-    
+
     public static <S extends Object> S getService(final Class<? extends S> c, boolean throwOnAbsence) throws OXException {
         final ServiceLookup serviceLookup = ref.get();
         final S service = null == serviceLookup ? null : serviceLookup.getService(c);

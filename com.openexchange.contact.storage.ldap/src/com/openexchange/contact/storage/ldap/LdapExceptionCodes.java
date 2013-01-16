@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link LdapExceptionCodes}
- * 
+ *
  * Exception codes for the LDAP contact storage.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -177,12 +177,12 @@ public enum LdapExceptionCodes implements OXExceptionCode {
      * The contact object with id "%s" could not be found in folder "%s"
      */
     CONTACT_NOT_FOUND(LdapExceptionMessages.CONTACT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 23),
-    
+
     /**
      * An error occurred: %1$s
      */
     ERROR(LdapExceptionMessages.ERROR_MSG, Category.CATEGORY_ERROR, 100),
-    
+
     /**
      * This storage can't handle context %1$d
      */
@@ -197,12 +197,12 @@ public enum LdapExceptionCodes implements OXExceptionCode {
      * No mapping for object %1$s, folder %2$s, context %3$d found
      */
     NO_MAPPED_LDAP_ID(LdapExceptionMessages.NO_MAPPED_LDAP_ID_MSG, CATEGORY_ERROR, 103),
-    
+
     /**
      * No mapping for LDAP identifier %1$s found
      */
 //    NO_MAPPED_OX_ID(LdapExceptionMessages.NO_MAPPED_OX_ID_MSG, CATEGORY_ERROR, 104),
-    
+
     /**
      * The configuration value %1$s is missing
      */

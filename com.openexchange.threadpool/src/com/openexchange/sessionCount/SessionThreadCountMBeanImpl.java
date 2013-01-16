@@ -61,7 +61,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link SessionThreadCountMBeanImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionThreadCountMBeanImpl extends StandardMBean implements SessionThreadCountMBean {
@@ -71,7 +71,7 @@ public final class SessionThreadCountMBeanImpl extends StandardMBean implements 
 
     /**
      * Initializes a new {@link SessionThreadCountMBeanImpl}.
-     * 
+     *
      * @throws NotCompliantMBeanException If the MBean interface does not follow JMX design patterns for Management Interfaces, or if this
      *             does not implement the specified interface.
      */

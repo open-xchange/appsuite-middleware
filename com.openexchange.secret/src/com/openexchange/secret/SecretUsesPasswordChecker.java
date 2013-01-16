@@ -59,14 +59,14 @@ public interface SecretUsesPasswordChecker {
 
     /**
      * Checks if secret service is configured to use password
-     * 
+     *
      * @return <code>true</code> if secret service is configured to use password; otherwise <code>false</code>
      */
     boolean usesPassword();
 
     /**
      * Gets the password-using secret service.
-     * 
+     *
      * @return The password-using secret service
      */
     SecretService passwordUsingSecretService();

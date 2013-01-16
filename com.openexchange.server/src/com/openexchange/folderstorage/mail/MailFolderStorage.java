@@ -1256,9 +1256,10 @@ public final class MailFolderStorage implements FolderStorage {
                     }
                 } else {
                     // Move to another account
-                    final MailAccess<?, ?> otherAccess = MailAccess.getInstance(session, parentAccountID);
-                    otherAccess.connect();
+                    MailAccess<?, ?> otherAccess = null;
                     try {
+                        otherAccess = MailAccess.getInstance(session, parentAccountID);
+                        otherAccess.connect();
                         final String newParent = mfd.getParentFullname();
                         // Check if parent mail folder exists
                         final MailFolder p = otherAccess.getFolderStorage().getFolder(newParent);
@@ -1305,7 +1306,9 @@ public final class MailFolderStorage implements FolderStorage {
                          */
                         return;
                     } finally {
-                        otherAccess.close(true);
+                        if (null != otherAccess) {
+                            otherAccess.close(true);
+                        }
                     }
                 }
             }

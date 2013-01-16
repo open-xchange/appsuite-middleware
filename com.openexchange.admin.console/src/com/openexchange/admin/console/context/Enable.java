@@ -56,7 +56,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 public class Enable extends ContextAbstraction {
-    
+
     public Enable(final String[] args2) {
 
         final AdminParser parser = new AdminParser("enablecontext");
@@ -67,11 +67,11 @@ public class Enable extends ContextAbstraction {
         try {
             parser.ownparse(args2);
             final Context ctx = contextparsing(parser);
-            
+
             parseAndSetContextName(parser, ctx);
-            
+
             successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
-            
+
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref

@@ -205,7 +205,7 @@ import com.openexchange.xml.spring.SpringParser;
 
 /**
  * {@link ServerActivator} - The activator for server bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ServerActivator extends HousekeepingActivator {
@@ -257,7 +257,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
     /**
      * Gets the bundle context.
-     * 
+     *
      * @return The bundle context or <code>null</code> if not started, yet
      */
     public static BundleContext getContext() {
@@ -376,7 +376,7 @@ public final class ServerActivator extends HousekeepingActivator {
                     final int smallLength = parseInt(0, sa, 1024);
                     final int mediumLength = parseInt(1, sa, 10240);
                     final int largeLength = parseInt(2, sa, 102400);
-                    CharArrayPool.setLengths(smallLength, mediumLength, largeLength);                
+                    CharArrayPool.setLengths(smallLength, mediumLength, largeLength);
                 }
                 JSONObject.initCharPool();
             }
@@ -502,7 +502,7 @@ public final class ServerActivator extends HousekeepingActivator {
          * getNeededServices(), because publishing bundle needs the HttpService which is in turn provided by server
          */
         track(FileMetadataParserService.class, new ServiceAdderTrackerCustomizer(context));
-        
+
         track(IndexFacadeService.class, new IndexFacadeCustomizer(context));
 
         /*

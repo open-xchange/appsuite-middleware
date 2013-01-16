@@ -66,13 +66,13 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link AddFilenameColumnTask}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class AddFilenameColumnTask extends UpdateTaskAdapter {
-	
+
 	private final DatabaseService dbService;
-	
+
 	public AddFilenameColumnTask(DatabaseService dbService) {
 		super();
 		this.dbService = dbService;
@@ -104,5 +104,5 @@ public class AddFilenameColumnTask extends UpdateTaskAdapter {
             Database.backNoTimeout(contextID, true, connnection);
         }
     }
-    
+
 }

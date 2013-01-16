@@ -68,14 +68,14 @@ public class SimSession implements Session {
     private String password;
 
     public SimSession() {
-    	
+
     }
-    
+
     public SimSession(int user, int context) {
     	this.userId = user;
     	this.contextId = context;
     }
-    
+
     @Override
     public boolean containsParameter(final String name) {
         return parameters.containsKey(name);

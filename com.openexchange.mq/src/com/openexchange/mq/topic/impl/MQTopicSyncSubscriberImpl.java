@@ -69,7 +69,7 @@ import com.openexchange.mq.topic.MQTopicSyncSubscriber;
  * listener} to given topic.
  * <p>
  * Invoke {@link #close()} method when done.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MQTopicSyncSubscriberImpl extends MQTopicResource implements MQTopicSyncSubscriber {
@@ -78,7 +78,7 @@ public final class MQTopicSyncSubscriberImpl extends MQTopicResource implements 
 
     /**
      * Initializes a new {@link MQTopicSyncSubscriberImpl}.
-     * 
+     *
      * @param topicName The name of topic to subscribe from
      * @throws OXException If initialization fails
      */

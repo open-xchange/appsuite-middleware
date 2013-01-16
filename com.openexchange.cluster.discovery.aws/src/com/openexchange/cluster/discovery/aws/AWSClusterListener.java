@@ -56,7 +56,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * {@link AWSClusterListener}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AWSClusterListener implements ClusterListener {

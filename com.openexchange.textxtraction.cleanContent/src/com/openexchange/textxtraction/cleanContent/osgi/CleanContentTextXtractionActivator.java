@@ -56,7 +56,7 @@ import com.openexchange.textxtraction.cleanContent.CleanContentTextXtraction;
 
 /**
  * {@link CleanContentTextXtractionActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CleanContentTextXtractionActivator extends HousekeepingActivator {

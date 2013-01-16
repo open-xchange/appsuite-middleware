@@ -116,7 +116,7 @@ public abstract class AbstractIndexAction implements AJAXActionService {
 
     /**
      * Gets the action string.
-     * 
+     *
      * @return The action string.
      */
     public abstract String getAction();

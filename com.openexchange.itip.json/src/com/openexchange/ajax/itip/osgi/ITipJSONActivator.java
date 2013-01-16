@@ -65,7 +65,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link ITipJSONActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ITipJSONActivator extends HousekeepingActivator {

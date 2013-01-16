@@ -69,7 +69,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link AWSLoadbalancingServiceImpl}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AWSLoadbalancingServiceImpl implements AWSLoadbalancingService {

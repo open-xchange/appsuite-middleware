@@ -85,12 +85,12 @@ public class SolrSearchEngine implements IndexSearchEngine {
         IndexAccess<MailMessage> mailIndex = indexService.acquireIndexAccess(Types.EMAIL, session);
         IndexAccess<DocumentMetadata> infostoreIndex = indexService.acquireIndexAccess(Types.INFOSTORE, session);
         IndexAccess<Attachment> attachmentIndex = indexService.acquireIndexAccess(Types.ATTACHMENT, session);
-        
+
         CountDownLatch latch = new CountDownLatch(3);
         Future<IndexResult<MailMessage>> mailFuture = threadPoolService.submit(ThreadPools.task(new SearchCallable<MailMessage>(mailIndex, searchTerm, latch)));
         Future<IndexResult<DocumentMetadata>> infostoreFuture = threadPoolService.submit(ThreadPools.task(new SearchCallable<DocumentMetadata>(infostoreIndex, searchTerm, latch)));
         Future<IndexResult<Attachment>> attachmentFuture = threadPoolService.submit(ThreadPools.task(new SearchCallable<Attachment>(attachmentIndex, searchTerm, latch)));
-        
+
         Map<Integer, IndexResult<?>> result = new HashMap<Integer, IndexResult<?>>(3);
         try {
             latch.await();
@@ -101,31 +101,31 @@ public class SolrSearchEngine implements IndexSearchEngine {
                 result.put(Types.INFOSTORE, infostoreFuture.get());
             }
             if (!attachmentFuture.isCancelled()) {
-                result.put(Types.ATTACHMENT, attachmentFuture.get());   
+                result.put(Types.ATTACHMENT, attachmentFuture.get());
             }
         } catch (InterruptedException e) {
             throw new OXException(e);
         } catch (ExecutionException e) {
             throw new OXException(e);
-        }             
+        }
 
         return result;
     }
-    
+
     private static final class SearchCallable<T> implements Callable<IndexResult<T>> {
-        
+
         private final IndexAccess<T> indexAccess;
-        
+
         private final String searchTerm;
 
         private final CountDownLatch latch;
-        
+
 
         public SearchCallable(IndexAccess<T> indexAccess, String searchTerm, CountDownLatch latch) {
             super();
             this.indexAccess = indexAccess;
             this.searchTerm = searchTerm;
-            this.latch = latch;            
+            this.latch = latch;
         }
 
         @Override
@@ -137,6 +137,6 @@ public class SolrSearchEngine implements IndexSearchEngine {
                 latch.countDown();
             }
         }
-        
+
     }
 }

@@ -49,7 +49,7 @@
 package com.openexchange.index.solr.internal.querybuilder;
 
 /**
- * 
+ *
  * {@link BuilderException}
  *
  * @author Sven Maurmann

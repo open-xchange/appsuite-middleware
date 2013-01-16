@@ -88,7 +88,7 @@ public class NotifyFeature implements CalendarFeature {
     public AppointmentSQLInterface wrap(AppointmentSQLInterface delegate, Session session) {
         return new NotifyingCalendar(generators, sender, delegate, attachmentMemory, services, session);
     }
-    
-    
+
+
 
 }

@@ -72,11 +72,7 @@ public final class UserSettingMailDeleteListener implements DeleteListener {
     @Override
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
         if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
-            try {
-                getInstance().deleteUserSettingMail(deleteEvent.getId(), deleteEvent.getContext(), writeCon);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            getInstance().deleteUserSettingMail(deleteEvent.getId(), deleteEvent.getContext(), writeCon);
         }
     }
 

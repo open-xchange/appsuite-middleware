@@ -101,7 +101,7 @@ public interface PreviewDocument {
 
     /**
      * Determines if the original document contains more content than this preview document provides.
-     * 
+     *
      * @return true, if more content is available, false if not and null if the document does not know anything about more content.
      */
     Boolean isMoreAvailable();

@@ -57,7 +57,7 @@ import com.openexchange.jslob.storage.JSlobStorage;
 
 /**
  * {@link JSlobStorageTracker}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSlobStorageTracker implements ServiceTrackerCustomizer<JSlobStorage, JSlobStorage> {

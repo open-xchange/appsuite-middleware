@@ -84,7 +84,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link MicroformatServlet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - HTML whitelisting, same-origin-policy stuff
  */

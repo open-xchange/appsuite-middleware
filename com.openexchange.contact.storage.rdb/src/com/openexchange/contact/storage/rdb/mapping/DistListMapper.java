@@ -66,11 +66,11 @@ import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemberField> {
-	
+
 	public DistListMapper() {
 		super();
 	}
-	
+
 	@Override
 	public DistListMember newInstance() {
 		return new DistListMember();
@@ -83,13 +83,13 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 
 	@Override
 	protected EnumMap<DistListMemberField, DbMapping<? extends Object, DistListMember>> createMappings() {
-		final EnumMap<DistListMemberField, DbMapping<? extends Object, DistListMember>> mappings = new 
+		final EnumMap<DistListMemberField, DbMapping<? extends Object, DistListMember>> mappings = new
 				EnumMap<DistListMemberField, DbMapping<? extends Object, DistListMember>>(DistListMemberField.class);
 
 		mappings.put(DistListMemberField.PARENT_CONTACT_ID, new IntegerMapping<DistListMember>("intfield01", "Parent contact ID") {
 
             @Override
-            public void set(DistListMember member, Integer value) { 
+            public void set(DistListMember member, Integer value) {
             	member.setParentContactID(value);
             }
 
@@ -99,7 +99,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             }
 
             @Override
-            public Integer get(DistListMember member) { 
+            public Integer get(DistListMember member) {
                 return member.getParentContactID();
             }
 
@@ -108,11 +108,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 				member.removeParentContactID();
 			}
         });
-		
+
 		mappings.put(DistListMemberField.CONTACT_ID, new IntegerMapping<DistListMember>("intfield02", "Contact ID") {
 
             @Override
-            public void set(DistListMember member, Integer value) { 
+            public void set(DistListMember member, Integer value) {
             	member.setEntryID(value);
             }
 
@@ -122,7 +122,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             }
 
             @Override
-            public Integer get(DistListMember member) { 
+            public Integer get(DistListMember member) {
                 return member.getEntryID();
             }
 
@@ -131,11 +131,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 				member.removeEntryID();
 			}
         });
-		
+
 		mappings.put(DistListMemberField.MAIL_FIELD, new IntegerMapping<DistListMember>("intfield03", "Mail Field") {
 
             @Override
-            public void set(DistListMember member, Integer value) { 
+            public void set(DistListMember member, Integer value) {
             	member.setEmailfield(value);
             }
 
@@ -145,7 +145,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             }
 
             @Override
-            public Integer get(DistListMember member) { 
+            public Integer get(DistListMember member) {
                 return member.getEmailfield();
             }
 
@@ -154,11 +154,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 				member.removeEmailfield();
 			}
         });
-		
+
 		mappings.put(DistListMemberField.CONTACT_FOLDER_ID, new IntegerMapping<DistListMember>("intfield04", "Contact Folder ID") {
 
             @Override
-            public void set(DistListMember member, Integer value) { 
+            public void set(DistListMember member, Integer value) {
             	member.setFolderID(value);
             }
 
@@ -168,7 +168,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             }
 
             @Override
-            public Integer get(DistListMember member) { 
+            public Integer get(DistListMember member) {
                 return member.getFolderID();
             }
 
@@ -177,11 +177,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 				member.removeFolderld();
 			}
         });
-		
+
 		mappings.put(DistListMemberField.DISPLAY_NAME, new VarCharMapping<DistListMember>("field01", "Display Name") {
 
             @Override
-            public void set(DistListMember member, String value) { 
+            public void set(DistListMember member, String value) {
             	member.setDisplayname(value);
             }
 
@@ -191,7 +191,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             }
 
             @Override
-            public String get(DistListMember member) { 
+            public String get(DistListMember member) {
                 return member.getDisplayname();
             }
 
@@ -200,11 +200,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 				member.removeDisplayname();
 			}
         });
-		
+
 		mappings.put(DistListMemberField.LAST_NAME, new VarCharMapping<DistListMember>("field02", "Last Name") {
 
             @Override
-            public void set(DistListMember member, String value) { 
+            public void set(DistListMember member, String value) {
             	member.setLastname(value);
             }
 
@@ -214,7 +214,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             }
 
             @Override
-            public String get(DistListMember member) { 
+            public String get(DistListMember member) {
                 return member.getLastname();
             }
 
@@ -223,11 +223,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 				member.removeLastname();
 			}
         });
-		
+
 		mappings.put(DistListMemberField.FIRST_NAME, new VarCharMapping<DistListMember>("field03", "First Name") {
 
             @Override
-            public void set(DistListMember member, String value) { 
+            public void set(DistListMember member, String value) {
             	member.setFirstname(value);
             }
 
@@ -237,7 +237,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             }
 
             @Override
-            public String get(DistListMember member) { 
+            public String get(DistListMember member) {
                 return member.getFirstname();
             }
 
@@ -246,11 +246,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 				member.removeFirstname();
 			}
         });
-		
+
 		mappings.put(DistListMemberField.MAIL, new VarCharMapping<DistListMember>("field04", "Mail") {
 
             @Override
-            public void set(DistListMember member, String value) throws OXException { 
+            public void set(DistListMember member, String value) throws OXException {
             	member.setEmailaddress(value);
             }
 
@@ -260,7 +260,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             }
 
             @Override
-            public String get(DistListMember member) { 
+            public String get(DistListMember member) {
                 return member.getEmailaddress();
             }
 
@@ -269,11 +269,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 				member.removeEmailfield();
 			}
         });
-		
+
 		mappings.put(DistListMemberField.CONTEXT_ID, new IntegerMapping<DistListMember>("cid", "Context ID") {
 
             @Override
-            public void set(DistListMember member, Integer value) { 
+            public void set(DistListMember member, Integer value) {
             	member.setContextID(value);
             }
 
@@ -283,7 +283,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             }
 
             @Override
-            public Integer get(DistListMember member) { 
+            public Integer get(DistListMember member) {
                 return member.getContextID();
             }
 
@@ -292,7 +292,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 				member.removeContextID();
 			}
         });
-		
+
 		return mappings;
 	}
 

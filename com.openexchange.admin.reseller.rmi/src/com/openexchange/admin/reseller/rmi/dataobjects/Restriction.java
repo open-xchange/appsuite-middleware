@@ -71,7 +71,7 @@ public class Restriction extends EnforceableDataObject implements Cloneable {
     /**
      * The maximum number of users a subadmin may create distibuted over all contexts
      * Important: The oxadminuser is also counted as a user which means that when setting
-     *            MaxOverallUser to 10, only 9 additional users can be created 
+     *            MaxOverallUser to 10, only 9 additional users can be created
      */
     public static final String MAX_OVERALL_USER_PER_SUBADMIN = "Subadmin.MaxOverallUser";
 
@@ -81,34 +81,34 @@ public class Restriction extends EnforceableDataObject implements Cloneable {
      * Possible values are: true/false
      */
     public static final String SUBADMIN_CAN_CREATE_SUBADMINS = "Subadmin.CanCreateSubadmin";
-    
+
     /**
      * If {@link Restriction.SUBADMIN_CAN_CREATE_SUBADMINS} is enabled, limit the amount of subadmins
      * to be created by a subadmin to this value. If not set, there's no limit.
      */
     public static final String MAX_SUBADMIN_PER_SUBADMIN = "Subadmin.MaxSubadmin";
-    
+
     /**
      * The maximum number of users with a specific {@link UserModuleAccess} a subadmin may create distibuted over all contexts
      * Important: The oxadminuser is also counted as a user which means that when setting
-     *            MaxOverallUser to 10, only 9 additional users can be created 
+     *            MaxOverallUser to 10, only 9 additional users can be created
      */
     public static final String MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX = "Subadmin.MaxOverallUserByModuleaccess_";
-    
+
     /**
      * The maximum number of users that can be created in this context
      * Important: The oxadminuser is also counted as a user which means that when setting
-     *            MaxOverallUser to 10, only 9 additional users can be created 
+     *            MaxOverallUser to 10, only 9 additional users can be created
      */
     public static final String MAX_USER_PER_CONTEXT = "Context.MaxUser";
-    
+
     /**
      * The maximum number of users with a specific {@link UserModuleAccess} that can be created in this context
      * Important: The oxadminuser is also counted as a user which means that when setting
-     *            MaxOverallUser to 10, only 9 additional users can be created 
+     *            MaxOverallUser to 10, only 9 additional users can be created
      */
     public static final String MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX = "Context.MaxUserByModuleaccess_";
-    
+
     /**
      * All currently existing restrictions <b>except</b> the BY_MODULEACCESS restrictions
      */
@@ -121,24 +121,24 @@ public class Restriction extends EnforceableDataObject implements Cloneable {
         MAX_SUBADMIN_PER_SUBADMIN
         };
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -3767091906243210327L;
-    
+
     private Integer id;
 
     private String name;
-    
+
     private String value;
-    
+
     /**
-     * 
+     *
      */
     public Restriction() {
         super();
         init();
     }
-    
+
     /**
      * Initializes a new {@link Restriction}.
      * @param id
@@ -161,7 +161,7 @@ public class Restriction extends EnforceableDataObject implements Cloneable {
         this.name = name;
         this.value = value;
     }
-    
+
     /**
      * Initializes a new {@link Restriction}.
      * @param id
@@ -200,7 +200,7 @@ public class Restriction extends EnforceableDataObject implements Cloneable {
         }
         return true;
     }
-    
+
     /**
      * @return the id
      */

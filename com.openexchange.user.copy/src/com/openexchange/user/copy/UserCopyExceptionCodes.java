@@ -88,7 +88,7 @@ public enum UserCopyExceptionCodes implements OXExceptionCode {
     private final String message;
     private final Category category;
     private final int number;
-    
+
 
     private UserCopyExceptionCodes(final String message, final Category category, final int number) {
         this.message = message;

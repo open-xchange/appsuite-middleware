@@ -162,7 +162,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
     }
 
     private static final class CountingSmbFileFilter implements SmbFileFilter {
-        
+
         private int fileCount;
         private boolean hasSubdir;
 
@@ -181,11 +181,11 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             }
             return false;
         }
-        
+
         public boolean hasSubdir() {
             return hasSubdir;
         }
-        
+
         public int getFileCount() {
             return fileCount;
         }
@@ -375,7 +375,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                 if (path.endsWith(appendix)) {
                     homeDir = sub;
                 } else {
-                    final SmbFile tmp = recursiveSearch(sub, appendix); 
+                    final SmbFile tmp = recursiveSearch(sub, appendix);
                     if (null != tmp) {
                         homeDir = sub;
                     }
@@ -412,7 +412,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     @Override
     public FileStorageFolder[] getSubfolders(final String parentId, final boolean all) throws OXException {
         try {

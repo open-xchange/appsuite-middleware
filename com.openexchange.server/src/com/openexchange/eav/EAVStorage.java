@@ -56,18 +56,18 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link EAVStorage}
- * 
- * Attribute-value-based storage for extended properties of groupware objects. 
- * 
+ *
+ * Attribute-value-based storage for extended properties of groupware objects.
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface EAVStorage {
-	
+
 	/**
-     * Gets all extended attributes for an object. 
-	 * 
+     * Gets all extended attributes for an object.
+	 *
 	 * @param uuid of the object encoded via the {@link UUIDService}
-     * 
+     *
      * @return a map containing all attribute-values, or <code>null</code> if
      * no extended properties are stored
      * @throws OXException
@@ -78,73 +78,73 @@ public interface EAVStorage {
      * Gets the specified extended attributes for an object.
      * @param uuid of the object encoded via the {@link UUIDService}
      * @param attributes the attribute names
-     * 
-     * @return A map containing the requested attribute-values, or 
-     * <code>null</code> if none of the requested extended properties are 
-     * stored at all. Requested attributes missing from the result are treated 
-     * as not set.  
+     *
+     * @return A map containing the requested attribute-values, or
+     * <code>null</code> if none of the requested extended properties are
+     * stored at all. Requested attributes missing from the result are treated
+     * as not set.
      * @throws OXException
      */
     Map<String, Object> getAttributes(UUID uuid, String...attributes) throws OXException;
-    
+
     /**
-     * Gets all extended attributes for a list of objects in a folder. 
-     * 
-     * @param uuid List with objects' UUIDs which are encoded via the {@link UUIDService} 
-     * 
-     * @return A map representing all attribute-values for all objects in the 
+     * Gets all extended attributes for a list of objects in a folder.
+     *
+     * @param uuid List with objects' UUIDs which are encoded via the {@link UUIDService}
+     *
+     * @return A map representing all attribute-values for all objects in the
      * queried objects in the folder that have stored attributes. Each objects'
-     * ID is mapped to the corresponding extended properties. 
-     * 
+     * ID is mapped to the corresponding extended properties.
+     *
      * @throws OXException
      */
     Map<UUID, Map<String, Object>> getAttributes(List<UUID> uuids) throws OXException;
-    
+
     /**
-     * Gets the specified extended attributes for a list of objects in a folder. 
-     * 
+     * Gets the specified extended attributes for a list of objects in a folder.
+     *
      * @param uuid List with objects' UUIDs which are encoded via the {@link UUIDService}
-     * 
-     * @return A map representing the specified attribute-values for the 
-     * queried objects in the folder that have at least one of the requested 
-     * attributes. Each objects' ID is mapped to the corresponding extended 
-     * properties. Requested attributes missing from an objects' result are 
-     * treated as not set. 
+     *
+     * @return A map representing the specified attribute-values for the
+     * queried objects in the folder that have at least one of the requested
+     * attributes. Each objects' ID is mapped to the corresponding extended
+     * properties. Requested attributes missing from an objects' result are
+     * treated as not set.
      * @throws OXException
      */
     Map<UUID, Map<String, Object>> getAttributes(List<UUID> uuids, String...attributes) throws OXException;
-    
+
     /**
      * Gets a value indicating whether the storage contains extended properties
      * for an object or not.
-     * 
+     *
      * @param uuid of the object encoded via the {@link UUIDService}
-     * 
-     * @return <code>true</code>, if there are any extended properties, 
+     *
+     * @return <code>true</code>, if there are any extended properties,
      * <code>false</code>, otherwise
      * @throws OXException
      */
     boolean hasAttributes(UUID uuid) throws OXException;
-    
+
     /**
      * Deletes all extended properties for an object.
-     * 
+     *
      * @param uuid of the object encoded via the {@link UUIDService}
-     * 
+     *
      * @throws OXException
      */
     void deleteAttributes(UUID uuid) throws OXException;
 
     /**
-     * Sets extended properties for an object. For each mapped attribute, this 
-     * will either lead to adding a new attribute-value-pair, an update of an 
-     * existing attribute-value, or the deletion of the attribute if it is 
-     * mapped to <code>null</code>. 
-     * 
+     * Sets extended properties for an object. For each mapped attribute, this
+     * will either lead to adding a new attribute-value-pair, an update of an
+     * existing attribute-value, or the deletion of the attribute if it is
+     * mapped to <code>null</code>.
+     *
      * @param uuid of the object encoded via the {@link UUIDService}
-     * 
+     *
      * @param attributes the attributes to set
-     * 
+     *
      * @throws OXException
      */
     void setAttributes(UUID uuid, Map<String, Object> attributes) throws OXException;

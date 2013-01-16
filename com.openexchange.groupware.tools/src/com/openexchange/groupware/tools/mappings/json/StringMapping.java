@@ -80,5 +80,5 @@ public abstract class StringMapping<O> extends DefaultJsonMapping<String, O> {
 		}
 		return false;
 	}
-	
+
 }

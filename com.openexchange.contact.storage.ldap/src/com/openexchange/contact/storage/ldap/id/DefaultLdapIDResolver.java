@@ -56,10 +56,10 @@ package com.openexchange.contact.storage.ldap.id;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class DefaultLdapIDResolver implements LdapIDResolver {
-    
+
     protected final int folderID;
     protected final int contextID;
-    
+
     public DefaultLdapIDResolver(int contextID, int folderID) {
         super();
         this.contextID = contextID;

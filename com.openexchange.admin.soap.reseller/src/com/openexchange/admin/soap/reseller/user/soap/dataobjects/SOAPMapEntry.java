@@ -9,9 +9,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse f\u00fcr SOAPMapEntry complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="SOAPMapEntry">
  *   &lt;complexContent>
@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "SOAPMapEntry", propOrder = {
@@ -41,11 +41,11 @@ public class SOAPMapEntry {
 
     /**
      * Ruft den Wert der key-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getKey() {
         return key;
@@ -53,11 +53,11 @@ public class SOAPMapEntry {
 
     /**
      * Legt den Wert der key-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setKey(String value) {
         this.key = value;
@@ -65,11 +65,11 @@ public class SOAPMapEntry {
 
     /**
      * Ruft den Wert der value-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link SOAPStringMap }
-     *     
+     *
      */
     public SOAPStringMap getValue() {
         return value;
@@ -77,11 +77,11 @@ public class SOAPMapEntry {
 
     /**
      * Legt den Wert der value-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link SOAPStringMap }
-     *     
+     *
      */
     public void setValue(SOAPStringMap value) {
         this.value = value;

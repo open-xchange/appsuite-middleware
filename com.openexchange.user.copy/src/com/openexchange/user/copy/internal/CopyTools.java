@@ -80,7 +80,7 @@ public class CopyTools {
     private ObjectMapping<User> userMapping = null;
     private ObjectMapping<Connection> connectionMapping = null;
     private ObjectMapping<FolderObject> folderMapping = null;
-    
+
     public CopyTools(final Map<String, ObjectMapping<?>> copied) {
         super();
         this.copied = copied;
@@ -124,23 +124,23 @@ public class CopyTools {
         checkUserMapping();
         return userMapping.getDestination(getSourceUser());
     }
-    
+
     public Connection getSourceConnection() throws OXException {
         checkConnectionMapping();
         return connectionMapping.getSource(i(getSourceContextId()));
     }
-    
+
     public Connection getDestinationConnection() throws OXException {
         checkConnectionMapping();
         return connectionMapping.getDestination(getSourceConnection());
     }
-    
+
     public ObjectMapping<FolderObject> getFolderMapping() throws OXException {
         checkFolderMapping();
         return folderMapping;
     }
-    
-    
+
+
     /*
      * Static methods
      */
@@ -157,7 +157,7 @@ public class CopyTools {
         final String selectStatement = statement.replaceFirst(placeholder, folderIdString.toString());
         return selectStatement;
     }
-    
+
     public static void setStringOrNull(final int parameter, final PreparedStatement stmt, final String value) throws SQLException {
         if (value == null) {
             stmt.setNull(parameter, java.sql.Types.VARCHAR);
@@ -165,7 +165,7 @@ public class CopyTools {
             stmt.setString(parameter, value);
         }
     }
-    
+
     public static void setIntOrNull(final int parameter, final PreparedStatement stmt, final int value) throws SQLException {
         if (value == -1) {
             stmt.setNull(parameter, java.sql.Types.VARCHAR);
@@ -173,16 +173,16 @@ public class CopyTools {
             stmt.setInt(parameter, value);
         }
     }
-    
+
     public static int getIntOrNegative(final int parameter, final ResultSet rs) throws SQLException {
         int value = rs.getInt(parameter);
         if (rs.wasNull()) {
             value = -1;
         }
-        
+
         return value;
-    } 
-    
+    }
+
     public static void setLongOrNull(final int parameter, final PreparedStatement stmt, final Date date) throws SQLException {
         if (date == null) {
             stmt.setNull(parameter, java.sql.Types.BIGINT);
@@ -190,8 +190,8 @@ public class CopyTools {
             stmt.setLong(parameter, date.getTime());
         }
     }
-    
-    
+
+
     /*
      * Extraction methods
      */
@@ -225,7 +225,7 @@ public class CopyTools {
             userMapping = checkAndExtractGenericMapping(User.class.getName());
         }
     }
-    
+
     private void checkFolderMapping() throws OXException {
         if (folderMapping == null) {
             folderMapping = checkAndExtractGenericMapping(com.openexchange.groupware.container.FolderObject.class.getName());
@@ -240,7 +240,7 @@ public class CopyTools {
 
             return tmp2;
         }
-        
+
         throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create();
     }
 }

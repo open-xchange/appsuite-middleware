@@ -64,6 +64,7 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -109,45 +110,27 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
 
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
-        Connection con = null;
-
         final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        try {
-            con = ds.getForUpdateTask(contextId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = ds.getForUpdateTask(contextId);
 
         PreparedStatement stmt = null;
         try {
-
-            if(!tablesExist(con, "subscriptions", "genconf_attributes_strings", "genconf_attributes_bools")) {
+            if (!tablesExist(con, "subscriptions", "genconf_attributes_strings", "genconf_attributes_bools")) {
                 return;
             }
 
             stmt = con.prepareStatement(DELETE);
-
             stmt.setString(1, subscriptionSourceId);
-
             stmt.executeUpdate();
         } catch (final SQLException x) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(x.getMessage(), x);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(x, x.getMessage());
         } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (final SQLException e) {
-                    // IGNORE
-                }
-            }
-            if(con != null) {
+            DBUtils.closeSQLStuff(stmt);
+            if (con != null) {
                 ds.backForUpdateTask(contextId, con);
             }
         }
     }
-
-
-
 
     /* This is a SQL Test Case for the poor. Do this in an empty database to check the validity of the sql statement */
     /*

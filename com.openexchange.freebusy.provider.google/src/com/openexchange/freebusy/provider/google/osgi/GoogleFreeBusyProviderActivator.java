@@ -86,7 +86,7 @@ public class GoogleFreeBusyProviderActivator extends HousekeepingActivator {
             registerService(FreeBusyProvider.class, new GoogleFreeBusyProvider());
         } catch (Exception e) {
             LOG.error("error starting com.openexchange.freebusy.provider.google", e);
-            throw e;            
+            throw e;
         }
     }
 

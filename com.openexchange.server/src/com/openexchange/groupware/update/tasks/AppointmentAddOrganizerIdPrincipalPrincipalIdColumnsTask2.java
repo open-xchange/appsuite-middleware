@@ -51,7 +51,7 @@ package com.openexchange.groupware.update.tasks;
 
 /**
  * {@link AppointmentAddOrganizerIdPrincipalPrincipalIdColumnsTask2}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AppointmentAddOrganizerIdPrincipalPrincipalIdColumnsTask2 extends AppointmentAddOrganizerIdPrincipalPrincipalIdColumnsTask {

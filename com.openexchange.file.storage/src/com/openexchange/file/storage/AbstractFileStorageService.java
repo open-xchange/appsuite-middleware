@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link AbstractFileStorageService} - The abstract file storage service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractFileStorageService implements FileStorageService {

@@ -295,32 +295,28 @@ public final class DigestUtility {
             return null;
         }
         final String[] splitted = split(userName);
-        try {
-            final ContextStorage contextStorage = ContextStorage.getInstance();
-            final int ctxId = contextStorage.getContextId(splitted[0]);
-            if (ContextStorage.NOT_FOUND == ctxId) {
-                throw WebdavExceptionCode.RESOLVING_USER_NAME_FAILED.create(userName);
-            }
-            final Context ctx = contextStorage.getContext(ctxId);
-            final int userId;
-            final UserStorage userStorage = UserStorage.getInstance();
-            try {
-                userId = userStorage.getUserId(splitted[1], ctx);
-            } catch (final OXException e) {
-                throw WebdavExceptionCode.RESOLVING_USER_NAME_FAILED.create(userName);
-            }
-            final User user = userStorage.getUser(userId, ctx);
-            /*
-             * Lookup encrypted password in user attributes
-             */
-            final String passCrypt = UserAttributeAccess.getDefaultInstance().getAttribute("passcrypt", user, null);
-            final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
-            final CryptoService cryptoService = serviceRegistry.getService(CryptoService.class, true);
-            final String key = serviceRegistry.getService(ConfigurationService.class).getProperty("com.openexchange.passcrypt.key");
-            return cryptoService.decrypt(passCrypt, key);
-        } catch (final OXException e) {
-            throw new OXException(e);
+        final ContextStorage contextStorage = ContextStorage.getInstance();
+        final int ctxId = contextStorage.getContextId(splitted[0]);
+        if (ContextStorage.NOT_FOUND == ctxId) {
+            throw WebdavExceptionCode.RESOLVING_USER_NAME_FAILED.create(userName);
         }
+        final Context ctx = contextStorage.getContext(ctxId);
+        final int userId;
+        final UserStorage userStorage = UserStorage.getInstance();
+        try {
+            userId = userStorage.getUserId(splitted[1], ctx);
+        } catch (final OXException e) {
+            throw WebdavExceptionCode.RESOLVING_USER_NAME_FAILED.create(userName);
+        }
+        final User user = userStorage.getUser(userId, ctx);
+        /*
+         * Lookup encrypted password in user attributes
+         */
+        final String passCrypt = UserAttributeAccess.getDefaultInstance().getAttribute("passcrypt", user, null);
+        final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
+        final CryptoService cryptoService = serviceRegistry.getService(CryptoService.class, true);
+        final String key = serviceRegistry.getService(ConfigurationService.class).getProperty("com.openexchange.passcrypt.key");
+        return cryptoService.decrypt(passCrypt, key);
     }
 
     /**

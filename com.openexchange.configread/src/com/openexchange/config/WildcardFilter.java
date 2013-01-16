@@ -64,7 +64,7 @@ public class WildcardFilter implements Filter {
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
     private static final Filter DUMMY = new Filter() {
-        
+
         @Override
         public boolean accepts(final String value) {
             return true;
@@ -72,7 +72,7 @@ public class WildcardFilter implements Filter {
     };
 
     private static final class PatternBasedFilter implements Filter {
-        
+
         private final Set<Pattern> patterns;
 
         PatternBasedFilter(final Set<Pattern> patterns) {

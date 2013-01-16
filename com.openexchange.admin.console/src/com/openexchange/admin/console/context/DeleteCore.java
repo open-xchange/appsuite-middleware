@@ -80,15 +80,15 @@ public abstract class DeleteCore extends ContextAbstraction {
             Credentials auth = null;
             try {
                 parser.ownparse(args);
-                
+
                 ctx = contextparsing(parser);
-                
+
                 auth = credentialsparsing(parser);
-                
+
                 parseAndSetContextName(parser, ctx);
-                
+
                 successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
-                
+
                 parseAndSetExtensions(parser, ctx, auth);
             } catch (final RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
@@ -107,6 +107,6 @@ public abstract class DeleteCore extends ContextAbstraction {
             sysexit(1);
         }
     }
-    
+
     protected abstract void maincall(final Context ctx, final Credentials auth) throws NotBoundException, MalformedURLException, RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException;
 }

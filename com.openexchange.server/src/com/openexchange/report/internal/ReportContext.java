@@ -6,21 +6,21 @@ import java.util.Map;
 
 public class ReportContext {
     private Integer id;
-    
+
     private Integer adminId;
-    
+
     private Long age;
 
     private Date created;
-    
+
     private Integer adminPermission;
-    
+
     private Integer numUsers;
-    
+
     private Map<Integer,Integer> accessCombinations;
-    
-    private Map<Integer,Integer> inactiveByCombination; 
-    
+
+    private Map<Integer,Integer> inactiveByCombination;
+
     public ReportContext() {
         super();
         this.id = null;
@@ -33,11 +33,11 @@ public class ReportContext {
         this.inactiveByCombination = null;
     }
 
-    
-    
-    
-    
-    
+
+
+
+
+
     /**
      * @return the inactiveByCombination
      */
@@ -49,7 +49,7 @@ public class ReportContext {
 
 
 
-    
+
     /**
      * @param inactiveByCombination the inactiveByCombination to set
      */
@@ -71,8 +71,8 @@ public class ReportContext {
 
 
 
-    
-    
+
+
     /**
      * @return the accessCombinations
      */
@@ -84,7 +84,7 @@ public class ReportContext {
 
 
 
-    
+
     /**
      * @param accessCombinations the accessCombinations to set
      */
@@ -96,7 +96,7 @@ public class ReportContext {
 
 
 
-    
+
     /**
      * @param numUsers the numUsers to set
      */
@@ -116,7 +116,7 @@ public class ReportContext {
 
 
 
-    
+
     /**
      * @param adminPermission the adminPermission to set
      */
@@ -134,7 +134,7 @@ public class ReportContext {
     }
 
 
-    
+
     /**
      * @param created the created to set
      */
@@ -150,7 +150,7 @@ public class ReportContext {
         return id;
     }
 
-    
+
     /**
      * @param id the id to set
      */
@@ -158,7 +158,7 @@ public class ReportContext {
         this.id = id;
     }
 
-    
+
     /**
      * @return the adminId
      */
@@ -166,7 +166,7 @@ public class ReportContext {
         return adminId;
     }
 
-    
+
     /**
      * @param adminId the adminId to set
      */
@@ -174,7 +174,7 @@ public class ReportContext {
         this.adminId = adminId;
     }
 
-    
+
     /**
      * @return the age
      */
@@ -182,12 +182,12 @@ public class ReportContext {
         return age;
     }
 
-    
+
     /**
      * @param age the age to set
      */
     public final void setAge(Long age) {
         this.age = age;
     }
-    
+
 }

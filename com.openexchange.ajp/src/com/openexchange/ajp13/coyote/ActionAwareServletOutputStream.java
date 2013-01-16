@@ -107,7 +107,7 @@ public final class ActionAwareServletOutputStream extends ServletOutputStream {
 
     @Override
     public void write(final int b) throws IOException {
-        if (packetSize <= byteChunk.getLength()) {  
+        if (packetSize <= byteChunk.getLength()) {
             /*-
              * No remaining size
              *
@@ -168,9 +168,9 @@ public final class ActionAwareServletOutputStream extends ServletOutputStream {
     }
 
     /**
-     * Closes this output stream and releases any system resources 
-     * associated with this stream. The general contract of <code>close</code> 
-     * is that it closes the output stream. A closed stream cannot perform 
+     * Closes this output stream and releases any system resources
+     * associated with this stream. The general contract of <code>close</code>
+     * is that it closes the output stream. A closed stream cannot perform
      * output operations and cannot be reopened.
      * <p>
      * The <code>close</code> method of <code>ActionAwareServletOutputStream</code> does nothing.

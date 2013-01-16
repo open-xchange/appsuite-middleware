@@ -65,20 +65,20 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class LdapResult {
-    
+
     private final Attributes attributes;
     private final String name;
 
     public LdapResult(SearchResult result) {
         this(result.getAttributes(), result.getNameInNamespace());
     }
-    
+
     public LdapResult(Attributes attributes, String name) {
         super();
         this.attributes = attributes;
         this.name = name;
     }
-    
+
     public Object getAttribute(String attributeName) throws OXException {
         if (null != this.attributes) {
             Attribute attribute = attributes.get(attributeName);
@@ -92,27 +92,27 @@ public class LdapResult {
         }
         return null;
     }
-    
+
     public Attributes getAttributes() {
         return attributes;
     }
-    
+
     public String getName() {
         return name;
     }
- 
+
     @Override
     public String toString() {
         return this.name;
     }
-    
+
     public static List<LdapResult> getResults(NamingEnumeration<SearchResult> results) throws OXException {
         List<LdapResult> ldapResults = new ArrayList<LdapResult>();
         if (null != results) {
             try {
                 while (results.hasMoreElements()) {
                     ldapResults.add(new LdapResult(results.next()));
-                }            
+                }
             } catch (NamingException e) {
                 throw LdapExceptionCodes.LDAP_ERROR.create(e, e.getMessage());
             } finally {
@@ -120,6 +120,6 @@ public class LdapResult {
             }
         }
         return ldapResults;
-    }    
-    
+    }
+
 }

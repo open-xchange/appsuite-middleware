@@ -221,12 +221,7 @@ public final class CalculatePermission {
     }
 
     public static boolean isVisible(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws OXException {
-        final UserConfiguration userConfiguration;
-        try {
-            userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final UserConfiguration userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), context);
         final Permission underlyingPermission;
         final Type type = folder.getType();
         final ContentType contentType = folder.getContentType();

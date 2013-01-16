@@ -61,7 +61,7 @@ import org.glassfish.grizzly.http.Cookie;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class AbstractCookieInspector {
-    
+
     private static final Pattern JSESSIONID_WITHOUT_ROUTE = Pattern.compile("^\\w*$");
     /** Value of the backendRoute in pattern group 1 */
     private static final Pattern JSESSIONID_ROUTE_MATCHES_PATTERN = Pattern.compile("^\\w+\\.(.+)$");
@@ -69,7 +69,7 @@ public abstract class AbstractCookieInspector {
     private static final Pattern JSESSIONID_REMOVE_ROUTE_PATTERN = Pattern.compile("^(\\w+)(\\.(.+))?$");
     protected String backendRoute;
     protected Map<String, Cookie> cookieMap;
-    
+
     /**
      * Fix the JSessionId
      * The JSessionId has to be fixed when:
@@ -96,9 +96,9 @@ public abstract class AbstractCookieInspector {
         }
         return result;
     }
-    
+
     /**
-     * 
+     *
      * @param cookieValue
      * @return
      */
@@ -115,14 +115,14 @@ public abstract class AbstractCookieInspector {
 
     /**
      * Append the backend route to the JSessionId.
-     * @param jSessionId the current JSessionId value 
+     * @param jSessionId the current JSessionId value
      * @param backendRoute the backend route to append
      * @return JSessionId with backendRoute appended
      */
     private String appendRouteToJSessionId(String jSessionId, String backendRoute) {
         return new StringBuilder(jSessionId).append('.').append(backendRoute).toString();
     }
-    
+
     /**
      * Check if the Cookie: header contains a JSESSIONID Cookie.
      * @return true if a JSESSIONID cookie was found in the header line
@@ -145,18 +145,18 @@ public abstract class AbstractCookieInspector {
         String jSessionIdValue = jSessionIdCookie.getValue();
         return (backendRoute.isEmpty() && isJSessionIdWithoutRoute(jSessionIdValue)) || isJSessionIdWithCorrectRoute(backendRoute, jSessionIdValue);
     }
-    
+
     /**
      * Check the JSessionId for an appended backend route in the form of <code>.[route];</code>
      * @param jSessionId the id to check
-     * @return false if the id doesn't have a route attached, true otherwise 
+     * @return false if the id doesn't have a route attached, true otherwise
      */
     private boolean isJSessionIdWithoutRoute(String jSessionId) {
         return JSESSIONID_WITHOUT_ROUTE.matcher(jSessionId).find();
     }
-    
+
     /**
-     * Check if the appended backend route of the JSessionID matches the current backend configuration. 
+     * Check if the appended backend route of the JSessionID matches the current backend configuration.
      * @param jSessionId the id to check
      * @return
      */
@@ -168,7 +168,7 @@ public abstract class AbstractCookieInspector {
         }
         return result;
     }
-    
+
     /**
      * Get the JSessionid value from the header
      * @return the empty String if no value can be fond, the value otherwise

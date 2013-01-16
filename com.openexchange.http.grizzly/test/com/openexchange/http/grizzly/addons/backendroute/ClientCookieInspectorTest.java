@@ -61,11 +61,11 @@ import com.openexchange.http.grizzly.filter.backendroute.ClientCookieInspector;
 
 /**
  * {@link ClientCookieInspectorTest}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class ClientCookieInspectorTest {
-    
+
     protected final static String OX_PUBLIC_SESSION_COOKIE = "open-xchange-public-session=a6e16d4e09a148bbbbebcc99fa7cfdf7";
 
     protected final static String OX_SECRET_COOKIE = "open-xchange-secret-RuJgKjzyPBBJptrKxlX7A=182873790d25496f98e40086a77a4cb5";
@@ -116,7 +116,7 @@ public class ClientCookieInspectorTest {
         correctJSessionIdRouteBackendRouteInspector = new ClientCookieInspector(httpRequestPacketFromHeaderLine(HEADER_JSESSIONID_CORRECT_ROUTE), BACKENDROUTE_CORRECT);
         wrongJSessionIdRouteNoBackendRouteInspector = new ClientCookieInspector(httpRequestPacketFromHeaderLine(HEADER_JSESSIONID_WRONG_ROUTE), "");
     }
-    
+
     /**
      * Test method for {@link com.openexchange.http.grizzly.filter.backendroute.AbstractCookieInspector#isJSessionIdExistant()}.
      */
@@ -160,20 +160,20 @@ public class ClientCookieInspectorTest {
     public void testGetCookieHeaderLine() {
         assertEquals(headerLineToSet(HEADER_NO_JSESSIONID),
             headerLineToSet(noJSessionIdInspector.getCookieHeaderLine().toStringContent()));
-        
+
         assertEquals(headerLineToSet(HEADER_JSESSIONID_NO_ROUTE),
             headerLineToSet(noJSessionIdRouteBackendRouteInspector.getCookieHeaderLine().toStringContent()));
-        
+
         assertEquals(headerLineToSet(HEADER_JSESSIONID_WRONG_ROUTE),
             headerLineToSet(wrongJSessionIdRouteBackendRouteInspector.getCookieHeaderLine().toStringContent()));
-        
+
         assertEquals(headerLineToSet(HEADER_JSESSIONID_CORRECT_ROUTE),
             headerLineToSet(correctJSessionIdRouteBackendRouteInspector.getCookieHeaderLine().toStringContent()));
-        
+
         assertEquals(headerLineToSet(HEADER_JSESSIONID_WRONG_ROUTE),
             headerLineToSet(wrongJSessionIdRouteNoBackendRouteInspector.getCookieHeaderLine().toStringContent()));
     }
-    
+
     /**
      * Test method for {@link com.openexchange.http.grizzly.filter.backendroute.AbstractCookieInspector#fixJSessionId()}.
      */
@@ -204,11 +204,11 @@ public class ClientCookieInspectorTest {
         wrongJSessionIdRouteNoBackendRouteInspector.fixJSessionId();
         assertEquals("JSessionIds not fixed", JSESSIONID_VALUE, wrongJSessionIdRouteNoBackendRouteInspector.getJSessionIdValue());
     }
-    
+
     private Set<String> headerLineToSet(String headerLine) {
         return new HashSet<String>(Arrays.asList(headerLine.toString().split("; ")));
     }
-    
+
     private HttpRequestPacket httpRequestPacketFromHeaderLine(String headerLine) {
         HttpRequestPacket packet = HttpRequestPacket.builder().header(Header.Cookie, headerLine).build();
         return packet;

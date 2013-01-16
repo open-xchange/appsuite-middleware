@@ -56,7 +56,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 
 /**
- * 
+ *
  * @author d7,cutmasta
  *
  */
@@ -72,19 +72,19 @@ public class UnregisterDatabase extends DatabaseAbstraction {
             parser.ownparse(args2);
 
             final Database db = new Database();
-            
+
             parseAndSetDatabaseID(parser, db);
             parseAndSetDatabasename(parser, db);
-            
+
             successtext = nameOrIdSet(this.dbid, this.dbname, "database");
-            
+
             final Credentials auth = credentialsparsing(parser);
-            
+
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
 
             oxutil.unregisterDatabase(db, auth);
-            
+
             displayUnregisteredMessage(successtext, parser);
             sysexit(0);
         } catch (final Exception e) {

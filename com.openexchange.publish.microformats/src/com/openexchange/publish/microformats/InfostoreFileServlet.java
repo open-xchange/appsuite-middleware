@@ -97,11 +97,11 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     private static final String SITE = "site";
     private static final String INFOSTORE_ID = "infoId";
     private static final String INFOSTORE_VERSION = "infoVersion";
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreFileServlet.class));
 
     private static OXMFPublicationService infostorePublisher = null;
-    
+
 
     public static void setInfostorePublisher(final OXMFPublicationService service) {
         infostorePublisher = service;
@@ -130,7 +130,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     public static void setFileResponseRenderer(final FileResponseRenderer renderer) {
     	fileResponseRenderer = renderer;
     }
-    
+
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final Map<String, String> args = getPublicationArguments(req);
@@ -192,14 +192,14 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             throw e;
         }
     }
-    
+
     private void writeFile(final Session session, final DocumentMetadata metadata, final InputStream fileData, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
     	final AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, ServerSessionAdapter.valueOf(session), "/publications/infostore");
     	final AJAXRequestResult result = new AJAXRequestResult(new FileHolder(fileData, metadata.getFileSize(), metadata.getFileMIMEType(), metadata.getFileName()), "file");
-    	
+
     	fileResponseRenderer.write(request, result, req, resp);
     }
-    
+
     private static final boolean isIE(final HttpServletRequest req) {
         final String userAgent = req.getHeader("User-Agent");
         return null != userAgent && userAgent.contains("MSIE");

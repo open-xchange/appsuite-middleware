@@ -61,7 +61,7 @@ import com.openexchange.tools.session.ServerSession;
  * conversion service to convert Object "data" from a certain format to a
  * certain format, based on the Converter classes used for converting
  * AJAXRequestResults.
- *   
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -72,7 +72,7 @@ public class AJAXConverterAdapter implements SimpleConverter{
 	public AJAXConverterAdapter(Converter converter) {
 		this.converter = converter;
 	}
-	
+
 	public Object convert(String from, String to, Object data,
 			ServerSession session) throws OXException {
 		AJAXRequestResult result = new AJAXRequestResult(data, from);

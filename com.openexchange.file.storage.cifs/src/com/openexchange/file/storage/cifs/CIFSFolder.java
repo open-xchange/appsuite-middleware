@@ -67,7 +67,7 @@ import com.openexchange.file.storage.TypeAware;
 
 /**
  * {@link CIFSFolder}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSFolder extends DefaultFileStorageFolder implements TypeAware {
@@ -104,7 +104,7 @@ public final class CIFSFolder extends DefaultFileStorageFolder implements TypeAw
 
     /**
      * Sets the type.
-     * 
+     *
      * @param type The type to set
      * @return This folder with type applied
      */
@@ -120,7 +120,7 @@ public final class CIFSFolder extends DefaultFileStorageFolder implements TypeAw
 
     /**
      * Parses specified CIFS/SMB file.
-     * 
+     *
      * @param smbFile The CIFS/SMB file denoting the directory
      * @throws OXException If parsing CIFS/SMB file property set fails
      */

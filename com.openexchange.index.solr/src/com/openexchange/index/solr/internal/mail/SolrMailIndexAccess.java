@@ -77,19 +77,19 @@ import com.openexchange.solr.SolrCoreIdentifier;
 
 /**
  * {@link SolrMailIndexAccess}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     private final SolrQueryBuilder queryBuilder;
-    
-    
+
+
     /**
      * Initializes a new {@link SolrMailIndexAccess}.
-     * 
+     *
      * @param identifier
-     * @param queryBuilder 
+     * @param queryBuilder
      */
     public SolrMailIndexAccess(SolrCoreIdentifier identifier, SolrQueryBuilder queryBuilder) {
         super(identifier);
@@ -217,7 +217,7 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         return set;
     }
 
-    
+
     private SolrInputDocument convertToDocument(IndexDocument<MailMessage> document) throws OXException {
         return SolrMailDocumentConverter.convertStatic(contextId, userId, document);
     }

@@ -400,7 +400,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     /**
      * Converts given FETCH response to an appropriate {@link MailMessage} instance.
-     * 
+     *
      * @param fetchResponse The FETCH response to handle
      * @param fullName The full name of associated folder
      * @param separator The separator character
@@ -451,7 +451,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         return mail;
     }
-    
+
     private static FetchItemHandler getItemHandlerByItem(final Item item) {
         if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
             return HEADER_ITEM_HANDLER;
@@ -994,7 +994,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         /**
          * Initializes a new {@link FetchItem}.
-         * 
+         *
          * @param name The name
          */
         protected FetchItem(String name) {
@@ -1014,7 +1014,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     /**
      * Turns given fetch profile into FETCH items to craft a FETCH command.
-     * 
+     *
      * @param isRev1 Whether IMAP protocol is revision 1 or not
      * @param fp The fetch profile to convert
      * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>

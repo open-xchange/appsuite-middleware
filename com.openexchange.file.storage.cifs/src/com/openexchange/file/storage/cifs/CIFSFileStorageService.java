@@ -74,7 +74,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link CIFSFileStorageService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSFileStorageService implements AccountAware {
@@ -85,7 +85,7 @@ public final class CIFSFileStorageService implements AccountAware {
 
     /**
      * Creates a new CIFS/SMB file storage service.
-     * 
+     *
      * @return A new CIFS/SMB file storage service
      */
     public static CIFSFileStorageService newInstance() {
@@ -94,7 +94,7 @@ public final class CIFSFileStorageService implements AccountAware {
 
     /**
      * Creates a new CIFS/SMB file storage service.
-     * 
+     *
      * @param compositeAccountManager The composite account manager
      * @return A new CIFS/SMB file storage service
      */
@@ -150,7 +150,7 @@ public final class CIFSFileStorageService implements AccountAware {
     private void applyCompositeAccountManager(final CompositeFileStorageAccountManagerProvider compositeAccountManager) {
         this.compositeAccountManager = compositeAccountManager;
     }
-    
+
     /**
      * Gets the composite account manager.
      *

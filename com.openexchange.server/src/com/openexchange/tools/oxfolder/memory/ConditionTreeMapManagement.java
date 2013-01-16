@@ -71,7 +71,7 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
  * {@link ConditionTreeMapManagement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConditionTreeMapManagement {
@@ -105,7 +105,7 @@ public final class ConditionTreeMapManagement {
 
     /**
      * Gets the {@link ConditionTreeMapManagement management} instance.
-     * 
+     *
      * @return The {@link ConditionTreeMapManagement management} instance
      */
     public static ConditionTreeMapManagement getInstance() {
@@ -114,7 +114,7 @@ public final class ConditionTreeMapManagement {
 
     /**
      * Drops the map for given context identifier
-     * 
+     *
      * @param contextId The context identifier
      */
     public static void dropFor(final int contextId) {
@@ -162,7 +162,7 @@ public final class ConditionTreeMapManagement {
 
     /**
      * Gets the tree map for given context identifier.
-     * 
+     *
      * @param contextId The context identifier
      * @return The tree map.
      * @throws OXException If returning tree map fails
@@ -185,7 +185,7 @@ public final class ConditionTreeMapManagement {
 
     /**
      * Gets the tree map for given context identifier if already initialized.
-     * 
+     *
      * @param contextId The context identifier
      * @return The tree map or <code>null</code>
      * @throws OXException If returning tree map fails
@@ -233,7 +233,7 @@ public final class ConditionTreeMapManagement {
 
     /**
      * Drops elapsed maps.
-     * 
+     *
      * @param procedure The shrinker procedure
      */
     protected void shrink(final ShrinkTIntObjectProcedure procedure) {
@@ -289,7 +289,7 @@ public final class ConditionTreeMapManagement {
 
         /**
          * Updates the <code>maxStamp</code> time stamp to check for elapsed entries.
-         * 
+         *
          * @return The prepared procedure
          */
         protected ShrinkTIntObjectProcedure prepareNextRun() {

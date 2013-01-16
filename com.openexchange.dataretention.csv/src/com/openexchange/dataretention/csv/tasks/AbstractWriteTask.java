@@ -60,11 +60,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
 import com.openexchange.dataretention.DataRetentionExceptionMessages;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.dataretention.csv.CSVFile;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link AbstractWriteTask} - Abstract write task containing triggered {@link #run()} method, but delegating concrete CSV line creation to
@@ -272,8 +273,10 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
      * @return The escaped string
      */
     protected static final String escape(final String string) {
-        final StringBuilder sb = new StringBuilder(string.length() + 8);
-        for (final char c : string.toCharArray()) {
+        final int length = string.length();
+        final StringAllocator sb = new StringAllocator(length + 8);
+        for (int i = 0; i < length; i++) {
+            final char c = string.charAt(i);
             if (',' == c || ';' == c || '"' == c || '\\' == c) {
                 sb.append('\\').append(c);
             } else if (c < 0x20) {

@@ -49,7 +49,6 @@
 
 package com.openexchange.html.internal.css;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -170,7 +169,7 @@ public final class CSSMatcher {
         PAT_t = Pattern.compile(strTIME, Pattern.CASE_INSENSITIVE);
 
         PATTERN_IS_PATTERN = Pattern.compile("[unNcd*t]+");
-        
+
         PATTERN_COLOR_RGB = Pattern.compile(strCOLOR_RGB_FUNC, Pattern.CASE_INSENSITIVE);
     }
 
@@ -203,16 +202,15 @@ public final class CSSMatcher {
             final String allowedValue = allowedValues[i];
             if (PATTERN_IS_PATTERN.matcher(allowedValue).matches()) {
                 patIndices.add(Integer.valueOf(i));
-                final char[] chars = allowedValue.toCharArray();
-                Arrays.sort(chars);
-                if (Arrays.binarySearch(chars, 'd') >= 0) {
+                if (allowedValue.indexOf('d') >= 0) {
                     return false;
                 }
-                if (Arrays.binarySearch(chars, '*') >= 0) {
+                if (allowedValue.indexOf('*') >= 0) {
                     return true;
                 }
-                for (int j = 0; j < chars.length; j++) {
-                    if (matchesPattern(chars[j], value)) {
+                final int length = allowedValue.length();
+                for (int j = 0; j < length; j++) {
+                    if (matchesPattern(allowedValue.charAt(j), value)) {
                         return true;
                     }
                 }
@@ -338,17 +336,17 @@ public final class CSSMatcher {
         final StringBuilder helper = new StringBuilder(length << 1);
         /*-
          * SIMPLE SELECTORS
-         * 
+         *
          * #id -> #prefix #prefix-id
          * .class -> #prefix .prefix-class
          * element -> #prefix element
-         * 
+         *
          * GROUPS (set of simple selectors; comma separated)
-         * 
+         *
          * #id, .class -> #prefix #prefix-id, #prefix .prefix-class
          * #id, element -> #prefix #prefix-id, #prefix element
          * .class-A, .class-B -> #prefix .prefix-class-A, #prefix .prefix-class-B
-         * 
+         *
          * Escape every ID, escape every class name, prefix every SIMPLE SELECTOR with #prefix,
          * every time when occurring within a line
          */

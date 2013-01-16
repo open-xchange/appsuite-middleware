@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.openexchange.admin.contextrestore.storage.mysqlStorage;
 
@@ -33,14 +33,14 @@ import com.openexchange.log.LogFactory;
 
 /**
  * This class contains all the mysql database related code
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- * 
+ *
  */
 public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStorage {
 
     private final static Log LOG = LogFactory.getLog(OXContextRestoreMySQLStorage.class);
-    
+
     @Override
     public String restorectx(final Context ctx, final PoolIdSchemaAndVersionInfo poolidandschema) throws SQLException, FileNotFoundException, IOException, OXContextRestoreException, StorageException {
         Connection connection = null;

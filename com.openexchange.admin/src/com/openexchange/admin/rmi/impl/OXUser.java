@@ -447,7 +447,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         basicauth.doAuthentication(auth, ctx);
 
-        
+
         final UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
         if(access==null){
             // no such access combination name defined in configuration
@@ -475,7 +475,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         auth = auth == null ? new Credentials("","") : auth;
 
         try {
-            doNullCheck(usrdata);            
+            doNullCheck(usrdata);
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for create is null", e3);
             throw e3;
@@ -486,11 +486,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         basicauth.doAuthentication(auth, ctx);
-        
+
         /*
          * Resolve admin user of specified context via tools and then get his current module access rights
-         */        
-        
+         */
+
         final int admin_id = tool.getAdminForContext(ctx);
         final UserModuleAccess access = oxu.getModuleAccess(ctx, admin_id);
 
@@ -505,7 +505,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     @Override
     public User getContextAdmin(final Context ctx, Credentials auth) throws InvalidCredentialsException, StorageException, InvalidDataException {
         auth = auth == null ? new Credentials("","") : auth;
-        
+
         basicauth.doAuthentication(auth, ctx);
         return (oxu.getData(ctx, new User[]{ new User(tool.getAdminForContext(ctx))} ))[0];
     }
@@ -514,11 +514,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     public UserModuleAccess getContextAdminUserModuleAccess(final Context ctx, Credentials auth)  throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         auth = auth == null ? new Credentials("","") : auth;
         basicauth.doAuthentication(auth, ctx);
-        
+
         /*
          * Resolve admin user of specified context via tools and then get his current module access rights
-         */     
-        
+         */
+
         final int admin_id = tool.getAdminForContext(ctx);
         final UserModuleAccess access = oxu.getModuleAccess(ctx, admin_id);
         return access;
@@ -528,7 +528,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
      * Main method to create a user. Which all inner create methods MUST use after resolving the access rights!
      */
     private User createUserCommon(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        
+
         try {
             doNullCheck(usr,access);
         } catch (final InvalidDataException e3) {
@@ -567,7 +567,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         // homedirectory
         /*-
-         * 
+         *
         final String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home") + "/" + usr.getName();
         if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) && !tool.isContextAdmin(ctx, usr.getId().intValue())) {
             if (!new File(homedir).mkdir()) {
@@ -769,7 +769,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         /*-
-         * 
+         *
         if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false)) {
             for(final User usr : users) {
                 // homedirectory
@@ -1059,8 +1059,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log.error(e.getMessage(), e);
             throw e;
         }
-        
-        
+
+
     }
 
     @Override
@@ -1246,7 +1246,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
 
-        
+
         // TODO mail checks
     }
 
@@ -1256,7 +1256,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         /*-
          * Check a context existence is considered as a security flaw
-         * 
+         *
         try {
             if (!oxu.doesContextExist(ctx)) {
                 throw new InvalidDataException("Context " + ctx.getId() + " does not exist.");
@@ -1264,7 +1264,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         } catch (StorageException e) {
             throw new InvalidDataException(e);
         }
-         * 
+         *
          */
     }
 
@@ -1327,7 +1327,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log.error(e.getMessage(), e);
             throw e;
         }
-        
+
         int permissionBits = -1;
         if (filter != null) {
             try {
@@ -1340,7 +1340,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 permissionBits = getPermissionBits(namedAccessCombination);
             }
         }
-        
+
         final int addBits = getPermissionBits(addAccess);
         final int removeBits = getPermissionBits(removeAccess);
         if (log.isDebugEnabled()) {
@@ -1393,10 +1393,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e;
         }
     }
-    
+
     public int getPermissionBits(UserModuleAccess namedAccessCombination) {
         int retval = 0;
-        
+
         if (namedAccessCombination.isActiveSync()) {
             retval |= UserConfiguration.ACTIVE_SYNC;
         }
@@ -1481,7 +1481,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         if (namedAccessCombination.getWebmail()) {
             retval |= UserConfiguration.WEBMAIL;
         }
-        
+
         return retval;
     }
 }

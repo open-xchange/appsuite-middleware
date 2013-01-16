@@ -59,7 +59,7 @@ import org.osgi.framework.Constants;
 
 /**
  * {@link ServiceContainer} - Container for a service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ServiceContainer<S> {
@@ -72,7 +72,7 @@ public final class ServiceContainer<S> {
 
     /**
      * Initializes a new {@link ServiceContainer}.
-     * 
+     *
      * @param service The service
      */
     public ServiceContainer(S service) {
@@ -81,7 +81,7 @@ public final class ServiceContainer<S> {
 
     /**
      * Initializes a new {@link ServiceContainer}.
-     * 
+     *
      * @param service The service
      * @param ranking The service ranking
      */
@@ -95,7 +95,7 @@ public final class ServiceContainer<S> {
 
     /**
      * Adds specified properties.
-     * 
+     *
      * @param properties The properties to add
      */
     public void addProperties(final Dictionary<String, Object> properties) {
@@ -117,7 +117,7 @@ public final class ServiceContainer<S> {
 
     /**
      * Adds specified properties.
-     * 
+     *
      * @param properties The properties to add
      */
     public void addProperties(final Map<String, Object> properties) {
@@ -132,7 +132,7 @@ public final class ServiceContainer<S> {
 
     /**
      * Removes specified properties.
-     * 
+     *
      * @param keys The named properties to remove
      */
     public void removeProperties(final Collection<String> keys) {
@@ -150,7 +150,7 @@ public final class ServiceContainer<S> {
 
     /**
      * Gets the <i>unmodifiable</i> properties
-     * 
+     *
      * @return The <i>unmodifiable</i> properties
      */
     public Map<String, Object> getProperties() {
@@ -159,7 +159,7 @@ public final class ServiceContainer<S> {
 
     /**
      * Gets the service
-     * 
+     *
      * @return The service
      */
     public S getService() {
@@ -168,7 +168,7 @@ public final class ServiceContainer<S> {
 
     /**
      * Gets the service ranking
-     * 
+     *
      * @return The service ranking
      */
     public int getRanking() {
@@ -177,7 +177,7 @@ public final class ServiceContainer<S> {
 
     /**
      * Sets the service ranking
-     * 
+     *
      * @param ranking The service ranking to set
      */
     public void setRanking(int ranking) {

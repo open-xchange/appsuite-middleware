@@ -66,7 +66,7 @@ public class CommonsLoggingLogger extends AbstractDelegatingLogger {
 
     /**
      * Initializes a new {@link CommonsLoggingLogger}.
-     * 
+     *
      * @param clazz The class
      */
     public CommonsLoggingLogger(final Class<?> clazz) {
@@ -76,7 +76,7 @@ public class CommonsLoggingLogger extends AbstractDelegatingLogger {
 
     /**
      * Initializes a new {@link CommonsLoggingLogger}.
-     * 
+     *
      * @param name The class name
      * @param resourceBundleName The resource bundle name
      */

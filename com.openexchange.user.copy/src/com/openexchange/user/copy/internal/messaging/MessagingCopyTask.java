@@ -82,13 +82,13 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MessagingCopyTask implements CopyUserTaskService {
-    
+
     private static final String SELECT_MESSAGING_ACCOUNTS =
         "SELECT serviceId, account, confId, displayName FROM messagingAccount WHERE cid = ? AND user = ?";
-    
+
     private static final String INSERT_MESSAGING_ACCOUNTS =
         "INSERT INTO messagingAccount (cid, user, serviceId, account, confId, displayName) VALUES (?, ?, ?, ?, ?, ?)";
-    
+
 
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#getAlreadyCopied()
@@ -121,11 +121,11 @@ public class MessagingCopyTask implements CopyUserTaskService {
         final Integer dstUsrId = copyTools.getDestinationUserId();
         final Connection srcCon = copyTools.getSourceConnection();
         final Connection dstCon = copyTools.getDestinationConnection();
-        
+
         try {
             final boolean hasTable = DBUtils.tableExists(srcCon, "messagingAccount");
             if (hasTable) {
-                final ObjectMapping<Integer> accountMapping = copyTools.checkAndExtractGenericMapping(OAuthAccount.class.getName());        
+                final ObjectMapping<Integer> accountMapping = copyTools.checkAndExtractGenericMapping(OAuthAccount.class.getName());
                 final List<MessagingAccount> accounts = loadMessagingAccountsFromDB(srcCon, i(srcCtxId), i(srcUsrId));
                 fillMessagingAccountsWithConfig(accounts, srcCon, i(srcCtxId));
                 exchangeIds(accounts, dstCon, i(dstCtxId));
@@ -134,11 +134,11 @@ public class MessagingCopyTask implements CopyUserTaskService {
             }
         }  catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
-        }       
-        
+        }
+
         return null;
     }
-    
+
     private void setAccountIdsForMessagingAccounts(final List<MessagingAccount> srcAccounts, final ObjectMapping<Integer> accountMapping) {
         for (final MessagingAccount account : srcAccounts) {
             final List<ConfAttribute> stringAttributes = account.getStringAttributes();
@@ -153,13 +153,13 @@ public class MessagingCopyTask implements CopyUserTaskService {
                     } catch (final NumberFormatException e) {
                         // Skip this one
                     }
-                    
+
                     break;
                 }
             }
         }
     }
-    
+
     void fillMessagingAccountsWithConfig(final List<MessagingAccount> accounts, final Connection con, final int cid) throws OXException {
         for (final MessagingAccount account : accounts) {
             final int confId = account.getConfId();
@@ -167,9 +167,9 @@ public class MessagingCopyTask implements CopyUserTaskService {
             final List<ConfAttribute> stringAttributes = GenconfCopyTool.loadAttributesFromDB(con, confId, cid, ConfAttribute.STRING);
             account.setBoolAttributes(boolAttributes);
             account.setStringAttributes(stringAttributes);
-        }        
+        }
     }
-    
+
     private void exchangeIds(final List<MessagingAccount> accounts, final Connection con, final int cid) throws OXException {
         for (final MessagingAccount account : accounts) {
             try {
@@ -179,9 +179,9 @@ public class MessagingCopyTask implements CopyUserTaskService {
             } catch (final SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             }
-        }        
+        }
     }
-    
+
     List<MessagingAccount> loadMessagingAccountsFromDB(final Connection con, final int cid, final int uid) throws OXException {
         final List<MessagingAccount> accounts = new ArrayList<MessagingAccount>();
         PreparedStatement stmt = null;
@@ -190,7 +190,7 @@ public class MessagingCopyTask implements CopyUserTaskService {
             stmt = con.prepareStatement(SELECT_MESSAGING_ACCOUNTS);
             stmt.setInt(1, cid);
             stmt.setInt(2, uid);
-            
+
             rs = stmt.executeQuery();
             while (rs.next()) {
                 int i = 1;
@@ -199,7 +199,7 @@ public class MessagingCopyTask implements CopyUserTaskService {
                 account.setId(rs.getInt(i++));
                 account.setConfId(rs.getInt(i++));
                 account.setDisplayName(rs.getString(i++));
-                
+
                 accounts.add(account);
             }
         } catch (final SQLException e) {
@@ -207,10 +207,10 @@ public class MessagingCopyTask implements CopyUserTaskService {
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
-        
+
         return accounts;
     }
-    
+
     void writeMessagingAccountsToDB(final List<MessagingAccount> accounts, final Connection con, final int cid, final int uid) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -218,7 +218,7 @@ public class MessagingCopyTask implements CopyUserTaskService {
             for (final MessagingAccount account : accounts) {
                 GenconfCopyTool.writeAttributesToDB(account.getBoolAttributes(), con, account.getConfId(), cid, ConfAttribute.BOOL);
                 GenconfCopyTool.writeAttributesToDB(account.getStringAttributes(), con, account.getConfId(), cid, ConfAttribute.STRING);
-                
+
                 int i = 1;
                 stmt.setInt(i++, cid);
                 stmt.setInt(i++, uid);
@@ -226,10 +226,10 @@ public class MessagingCopyTask implements CopyUserTaskService {
                 stmt.setInt(i++, account.getId());
                 stmt.setInt(i++, account.getConfId());
                 stmt.setString(i++, account.getDisplayName());
-                
+
                 stmt.addBatch();
             }
-            
+
             stmt.executeBatch();
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);

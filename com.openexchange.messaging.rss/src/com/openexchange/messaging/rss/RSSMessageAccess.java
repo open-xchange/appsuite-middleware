@@ -279,7 +279,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
     static {
         final CleanerProperties props = new CleanerProperties();
         /*-
-         * 
+         *
         props.setOmitDoctypeDeclaration(true);
         props.setOmitXmlDeclaration(true);
         props.setTransSpecialEntitiesToNCR(true);
@@ -289,7 +289,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         props.setIgnoreQuestAndExclam(false);
         props.setUseCdataForScriptAndStyle(false);
         props.setIgnoreQuestAndExclam(true);
-         * 
+         *
          */
         HTML_CLEANER = new HtmlCleaner(props);
         SERIALIZER = new SimpleXmlSerializer(props);

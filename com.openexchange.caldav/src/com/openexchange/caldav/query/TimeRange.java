@@ -58,7 +58,7 @@ package com.openexchange.caldav.query;
 public class TimeRange extends Filter {
 
     public static final int NOT_SET = -1;
-    
+
     private long start = NOT_SET;
     private long end = NOT_SET;
 
@@ -73,7 +73,7 @@ public class TimeRange extends Filter {
     public long getEnd() {
         return end;
     }
-    
+
     public void setEnd(long end) {
         this.end = end;
     }

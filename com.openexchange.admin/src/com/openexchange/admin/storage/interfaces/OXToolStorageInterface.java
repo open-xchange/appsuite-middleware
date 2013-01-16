@@ -325,7 +325,7 @@ public abstract class OXToolStorageInterface {
     /**
      * load Database with the given ID
      * only sets id and readid, returns null if not found
-     * 
+     *
      * @param id
      * @return
      * @throws StorageException
@@ -380,7 +380,7 @@ public abstract class OXToolStorageInterface {
     /**
      * This method checks if the display name of the given user object is already used for a system user. This method doesn't check for
      * display names in the contacts of the users.
-     * 
+     *
      * @param ctx
      * @param usr
      * @param userId optional user identifier parameter to exclude the user to change. If not applicable give zero.
@@ -418,10 +418,10 @@ public abstract class OXToolStorageInterface {
     public abstract void validateUserName(String name) throws InvalidDataException;
 
     public abstract void checkValidEmailsInUserObject(User user) throws InvalidDataException;
-    
+
     /**
      * Changes access rights for all users in the Database.
-     * 
+     *
      * @param filter Only users with this access combination are affected. Set to -1 for no filter.
      * @param addAccess
      * @param removeAccess

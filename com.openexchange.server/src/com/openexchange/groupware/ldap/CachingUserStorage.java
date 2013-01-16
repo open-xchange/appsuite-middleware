@@ -175,12 +175,12 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
         final UserFactory factory = new UserFactory(delegate, cacheService, lockFor(ctx), ctx, userId);
         return null == user ? new UserReloader(factory, REGION_NAME) : new UserReloader(factory, user, REGION_NAME);
     }
-    
+
     @Override
     public int createUser(final Connection con, final Context context, final User user) throws OXException {
         return delegate.createUser(con, context, user);
     }
-    
+
     @Override
     public int createUser(final Context context, final User user) throws OXException {
         return delegate.createUser(context, user);
@@ -404,11 +404,7 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
         }
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService != null) {
-            try {
-                cacheService.freeCache(REGION_NAME);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            cacheService.freeCache(REGION_NAME);
         }
     }
 

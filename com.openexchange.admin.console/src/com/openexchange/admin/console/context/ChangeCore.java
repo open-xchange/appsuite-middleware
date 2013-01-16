@@ -65,17 +65,17 @@ public abstract class ChangeCore extends ContextAbstraction {
 
     protected void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-        
+
         setContextOption(parser, NeededQuadState.eitheror);
         setContextNameOption(parser, NeededQuadState.eitheror);
 
         setContextQuotaOption(parser, false);
-        
+
         setFurtherOptions(parser);
-        
+
         parser.allowDynamicOptions();
     }
-    
+
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
         setExtensionOptions(parser, ContextConsoleChangeInterface.class);
@@ -83,21 +83,21 @@ public abstract class ChangeCore extends ContextAbstraction {
         String successtext = null;
         try {
             Context ctx = null;
-            Credentials auth = null; 
+            Credentials auth = null;
             try {
                 parser.ownparse(args);
                 ctx = contextparsing(parser);
-                
+
                 // context name
                 parseAndSetContextName(parser, ctx);
-                
+
                 auth = credentialsparsing(parser);
-                
+
                 successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
-                
+
                 // context filestore quota
                 parseAndSetContextQuota(parser, ctx);
-                
+
                 parseAndSetExtensions(parser, ctx, auth);
 
                 // Dynamic Options
@@ -121,6 +121,6 @@ public abstract class ChangeCore extends ContextAbstraction {
     }
 
     protected abstract void maincall(final AdminParser parser, final Context ctx, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException;
-        
+
     protected abstract void setFurtherOptions(final AdminParser parser);
 }

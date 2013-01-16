@@ -56,7 +56,7 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 
 /**
  * {@link OAuthServiceMetaDataRegisterer}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> {
@@ -67,7 +67,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataRegisterer}.
-     * 
+     *
      * @param context The bundle context
      * @param activator The activator to track/start services
      */

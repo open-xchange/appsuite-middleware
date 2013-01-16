@@ -107,7 +107,7 @@ public final class SessionCache {
 
     /**
      * Gets associated cache.
-     * 
+     *
      * @return The cache
      * @throws OXException If cache is absent
      */

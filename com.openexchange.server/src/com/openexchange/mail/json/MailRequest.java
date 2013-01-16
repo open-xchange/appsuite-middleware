@@ -95,7 +95,7 @@ public final class MailRequest {
 
     /**
      * Gets the <code>max</code> parameter.
-     * 
+     *
      * @return The <code>max</code> parameter
      * @throws OXException If <code>max</code> is not a number
      */

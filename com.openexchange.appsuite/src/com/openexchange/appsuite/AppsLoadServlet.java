@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ui7;
+package com.openexchange.appsuite;
 
 import java.io.File;
 import java.io.IOException;

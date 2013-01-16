@@ -90,7 +90,7 @@ public class ThreadLocalSessionHolder implements SessionHolderExtended {
 
     /**
      * Sets the specified <tt>ServerSession</tt> instance.
-     * 
+     *
      * @param serverSession The <tt>ServerSession</tt> instance
      */
     public void setSession(final ServerSession serverSession) {

@@ -161,7 +161,7 @@ public final class Tools {
         } finally {
             Database.back(contextId, false, rcon);
         }
-        
+
     }
 
     /**
@@ -421,19 +421,15 @@ public final class Tools {
     }
 
     private static String getPrefix(final int accountId, final ServerSession session) throws OXException {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = null;
         try {
-            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = null;
-            try {
-                access = MailAccess.getInstance(session, accountId);
-                access.connect(false);
-                return access.getFolderStorage().getDefaultFolderPrefix();
-            } finally {
-                if (null != access) {
-                    access.close(true);
-                }
+            access = MailAccess.getInstance(session, accountId);
+            access.connect(false);
+            return access.getFolderStorage().getDefaultFolderPrefix();
+        } finally {
+            if (null != access) {
+                access.close(true);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

@@ -76,7 +76,7 @@ import com.openexchange.user.UserService;
 public class ChangeHelper {
 
     private final ChangeDescriber describer;
-    
+
     private final AppointmentDiff diff;
     private final Appointment update;
     private final Appointment original;
@@ -106,15 +106,15 @@ public class ChangeHelper {
         final Details details = new Details();
         final Attachments attachments = new Attachments(attachmentMemory);
         ShownAs shownAs = new ShownAs();
-    	
+
     	describer = new ChangeDescriber(rescheduling, details, participants, shownAs, attachments);
-        
+
     }
-    
+
     public List<String> getChanges() throws OXException {
         return describer.getChanges(ctx, original, update, diff, wrapper, locale, timezone);
     }
-    
-    
+
+
 
 }

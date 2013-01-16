@@ -237,7 +237,7 @@ public final class MailMessageParser {
 
     /**
      * Adds specified MIME filter.
-     * 
+     *
      * @param mimeFilter The MIME filter
      * @return This parser with MIME filter applied
      */
@@ -922,14 +922,16 @@ public final class MailMessageParser {
         return filename;
     }
 
-    private static boolean isEmptyString(final String str) {
-        final char[] chars = str.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            if (!Character.isWhitespace(chars[i])) {
-                return false;
-            }
+    private static boolean isEmptyString(final String string) {
+        if (null == string) {
+            return true;
         }
-        return true;
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     /**

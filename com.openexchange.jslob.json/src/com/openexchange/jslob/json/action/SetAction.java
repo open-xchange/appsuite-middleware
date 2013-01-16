@@ -68,13 +68,13 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link SetAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 @Action(
     name = "set"
-    , description = "Sets the JSlob associated with the current user and context. Performs a delete if the passed JSlob is null." 
+    , description = "Sets the JSlob associated with the current user and context. Performs a delete if the passed JSlob is null."
     , method = RequestMethod.PUT
     , parameters = {
         @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
@@ -89,7 +89,7 @@ public final class SetAction extends JSlobAction {
 
     /**
      * Initializes a new {@link SetAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public SetAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {

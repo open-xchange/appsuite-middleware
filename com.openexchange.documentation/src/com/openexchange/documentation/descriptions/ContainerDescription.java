@@ -52,17 +52,17 @@ package com.openexchange.documentation.descriptions;
 
 /**
  * {@link ContainerDescription} - Description for containers.
- * 
- * @see com.openexchange.documentation.annotations.Container  
+ *
+ * @see com.openexchange.documentation.annotations.Container
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface ContainerDescription extends Description {
-	
+
 	/**
 	 * Specifies the attributes. Required.
-	 * 
+	 *
 	 * @return the attributes
 	 */
-    AttributeDescription[] getAttributes(); 
+    AttributeDescription[] getAttributes();
 
 }

@@ -61,15 +61,15 @@ public class NotificationConfiguration implements Cloneable {
     private boolean interestedInChanges;
     private boolean includeHTML;
 	private boolean forceCancelMails;
-    
+
     public boolean sendITIP() {
         return sendITIP;
     }
-    
+
     public boolean interestedInStateChanges() {
         return interestedInChanges && interestedInStateChanges;
     }
-    
+
     public boolean interestedInChanges() {
         return sendITIP || interestedInChanges;
     }
@@ -77,11 +77,11 @@ public class NotificationConfiguration implements Cloneable {
     public boolean includeHTML() {
         return includeHTML;
     }
-    
+
     public void setSendITIP(boolean sendITIP) {
         this.sendITIP = sendITIP;
     }
-    
+
     public void setInterestedInStateChanges(boolean interestedInStateChanges) {
         this.interestedInStateChanges = interestedInStateChanges;
     }
@@ -89,32 +89,32 @@ public class NotificationConfiguration implements Cloneable {
     public void setInterestedInChanges(boolean interestedInChanges) {
         this.interestedInChanges = interestedInChanges;
     }
-    
+
     public void setIncludeHTML(boolean includeHTML) {
         this.includeHTML = includeHTML;
     }
-    
+
     public boolean forceCancelMails() {
 		return forceCancelMails;
 	}
-	
+
 	public void setForceCancelMails(boolean forceCancelMails) {
 		this.forceCancelMails = forceCancelMails;
 	}
-    
+
     @Override
     public NotificationConfiguration clone() {
         NotificationConfiguration copy = new NotificationConfiguration();
-        
+
         copy.sendITIP = sendITIP;
         copy.interestedInStateChanges = interestedInStateChanges;
         copy.interestedInChanges = interestedInChanges;
         copy.includeHTML = includeHTML;
         copy.forceCancelMails = forceCancelMails;
-        
+
         return copy;
     }
 
-	
-    
+
+
 }

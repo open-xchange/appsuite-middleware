@@ -145,15 +145,15 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     // Pretty generic: Could not one element in an import
 	public static final String COULD_NOT_CREATE_MSG = "Could not create the following element: %s";
-	
+
 	public static final String TEMP_FILE_NOT_FOUND_MSG = "Could not find the temp file needed for the conversion.";
 
 	public static final String NEED_FOLDER_MSG = "Missing parameter for folder";
-	
+
 	public static final String IRREGULAR_COLUMN_ID_MSG ="Columns should be numbers, could not convert %s into number";
-	
+
 	public static final String NO_CONTENT_MSG = "The uploaded file did not contain any content";
-	
+
     private ImportExportExceptionMessages() {
         super();
     }

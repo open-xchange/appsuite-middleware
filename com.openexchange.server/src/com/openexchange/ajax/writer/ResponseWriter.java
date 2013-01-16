@@ -199,7 +199,7 @@ public final class ResponseWriter {
 
     /**
      * Writes given properties to specified JSON object.
-     * 
+     *
      * @param json The JSON object
      * @param properties The properties
      * @throws JSONException If writing JSON fails

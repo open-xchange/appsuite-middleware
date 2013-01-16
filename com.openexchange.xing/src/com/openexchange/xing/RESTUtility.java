@@ -90,7 +90,7 @@ public class RESTUtility {
 
     /**
      * Creates and sends a request to the XING API, parses the response as JSON, and returns the result.
-     * 
+     *
      * @param method GET or POST.
      * @param host the hostname to use. Should be either api server, content server, or web server.
      * @param path the URL path, starting with a '/'.
@@ -112,7 +112,7 @@ public class RESTUtility {
 
     /**
      * Creates and sends a request to the XING API, parses the response as JSON, and returns the result.
-     * 
+     *
      * @param method GET or POST.
      * @param host the hostname to use. Should be either api server, content server, or web server.
      * @param path the URL path, starting with a '/'.
@@ -138,7 +138,7 @@ public class RESTUtility {
     /**
      * Creates and sends a request to the XING API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
      * {@link HttpResponse}.
-     * 
+     *
      * @param method GET or POST.
      * @param host the hostname to use. Should be either api server, content server, or web server.
      * @param path the URL path, starting with a '/'.
@@ -162,7 +162,7 @@ public class RESTUtility {
     /**
      * Creates and sends a request to the XING API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
      * {@link HttpResponse}.
-     * 
+     *
      * @param method GET or POST.
      * @param host the hostname to use. Should be either api server, content server, or web server.
      * @param path the URL path, starting with a '/'.
@@ -218,7 +218,7 @@ public class RESTUtility {
 
     /**
      * Reads in content from an {@link HttpResponse} and parses it as JSON.
-     * 
+     *
      * @param response the {@link HttpResponse}.
      * @return a parsed JSON object, typically a Map or a JSONArray.
      * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
@@ -284,7 +284,7 @@ public class RESTUtility {
 
     /**
      * Reads in content from an {@link HttpResponse} and parses it as a query string.
-     * 
+     *
      * @param response The {@link HttpResponse}.
      * @return A map of parameter names to values from the query string.
      * @throws XingIOException if any network-related error occurs while reading in content from the {@link HttpResponse}.
@@ -319,7 +319,7 @@ public class RESTUtility {
 
     /**
      * Executes an {@link HttpUriRequest} with the given {@link Session} and returns an {@link HttpResponse}.
-     * 
+     *
      * @param session The session to use.
      * @param req The request to execute.
      * @return An {@link HttpResponse}.
@@ -336,7 +336,7 @@ public class RESTUtility {
 
     /**
      * Executes an {@link HttpUriRequest} with the given {@link Session} and returns an {@link HttpResponse}.
-     * 
+     *
      * @param session The session to use.
      * @param req The request to execute.
      * @param socketTimeoutOverrideMs If >= 0, the socket timeout to set on this request. Does nothing if set to a negative number.
@@ -425,7 +425,7 @@ public class RESTUtility {
 
     /**
      * Creates a URL for a request to the XING API.
-     * 
+     *
      * @param host The XING host (i.e., api server, content server, or web server).
      * @param apiVersion The API version to use. You should almost always use {@code XingAPI.VERSION} for this.
      * @param target The target path, staring with a '/'.
@@ -461,7 +461,7 @@ public class RESTUtility {
 
     /**
      * Parses a date/time returned by the XING API. Returns <code>null</code> if it cannot be parsed.
-     * 
+     *
      * @param date A date returned by the API.
      * @return A {@link Date}.
      */

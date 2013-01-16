@@ -91,7 +91,7 @@ public abstract class DefaultMapper<O, E extends Enum<E>> implements Mapper<O, E
 		}
 		for (final Mapping<? extends Object, O> mapping : getMappings().values()) {
 			if (mapping.isSet(update)) {
-				mapping.copy(update, original);	
+				mapping.copy(update, original);
 			}
 		}
 	}
@@ -112,13 +112,13 @@ public abstract class DefaultMapper<O, E extends Enum<E>> implements Mapper<O, E
 		}
 		return delta;
 	}
-	
+
 	@Override
 	public E[] getAssignedFields(final O object) {
 		if (null == object) {
 			throw new IllegalArgumentException("object");
 		}
-		final Set<E> setFields = new HashSet<E>(); 		
+		final Set<E> setFields = new HashSet<E>();
 		for (final Entry<E, ? extends Mapping<? extends Object, O>> entry : getMappings().entrySet()) {
 			if (entry.getValue().isSet(object)) {
 				setFields.add(entry.getKey());
@@ -126,12 +126,12 @@ public abstract class DefaultMapper<O, E extends Enum<E>> implements Mapper<O, E
 		}
 		return setFields.toArray(newArray(setFields.size()));
 	}
-	
+
 	/**
-	 * Gets the mappings for all possible values of the underlying enum. 
-	 * 
+	 * Gets the mappings for all possible values of the underlying enum.
+	 *
 	 * @return the mappings
 	 */
 	protected abstract EnumMap<E, ? extends Mapping<? extends Object, O>> getMappings();
-	
+
 }

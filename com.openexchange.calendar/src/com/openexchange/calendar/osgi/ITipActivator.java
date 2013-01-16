@@ -111,11 +111,11 @@ public class ITipActivator extends HousekeepingActivator {
         final AttachmentBase attachments = getService(AttachmentBase.class);
         final UserConfigurationStorage userConfigs = UserConfigurationStorage.getInstance();
         final TimerService timers = getService(TimerService.class);
-		
+
         int detailInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.detail", 120000);
         int stateChangeInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.states", 600000);
         int priorityInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.priority", 900000);
-        
+
         final AttachmentMemory attachmentMemory = new AttachmentMemory(detailInterval * 3, timers);
         MailSenderService sender = new DefaultMailSenderService(emitter, htmlService, attachments, contexts, users, userConfigs, attachmentMemory);
 
@@ -124,18 +124,18 @@ public class ITipActivator extends HousekeepingActivator {
         final DefaultNotificationParticipantResolver resolver = new DefaultNotificationParticipantResolver(groups, users, resources, config, util );
         final NotificationMailGeneratorFactory mails = new NotificationMailGeneratorFactory(resolver, util, this, attachmentMemory);
 
-        
+
         AppointmentNotificationPool pool = new AppointmentNotificationPool(timers, mails, sender, detailInterval, stateChangeInterval, priorityInterval);
         sender = new PoolingMailSenderService(pool, sender);
-        
-        
+
+
         registerService(ITipAnalyzerService.class, new DefaultITipAnalyzerService(util, this));
         registerService(ITipDingeMacherFactoryService.class, new DefaultITipDingeMacherFactoryService(util, sender, mails));
 
         registerService(ITipMailGeneratorFactory.class, mails);
 
         registerService(MailSenderService.class, sender);
-        
+
         features.add(new NotifyFeature(mails, sender, attachmentMemory, this));
         features.add(new ITipFeature(this));
         setFeatureIfPossible();

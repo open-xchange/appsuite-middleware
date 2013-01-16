@@ -51,7 +51,7 @@ package com.openexchange.secret;
 
 /**
  * {@link SecretEncryptionService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -59,7 +59,7 @@ public interface SecretEncryptionFactoryService {
 
     /**
      * Creates the secret encryption service for specified strategy.
-     * 
+     *
      * @param strategy The strategy
      * @return The created secret encryption service
      */

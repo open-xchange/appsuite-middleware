@@ -96,7 +96,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
             return;
         }
         final VAlarm alarm = new VAlarm();
-        final Dur duration = new Dur(String.format("%sPT%dM", 
+        final Dur duration = new Dur(String.format("%sPT%dM",
             0 == appointmentObject.getAlarm() ? "" : "-", Integer.valueOf(appointmentObject.getAlarm())));
         final Trigger trigger = new Trigger(duration);
         alarm.getProperties().add(trigger);
@@ -152,11 +152,11 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
              * determine related date
              */
             Parameter relatedParameter = trigger.getParameter("RELATED");
-            Date relatedDate = null != relatedParameter && "END".equals(relatedParameter.getValue()) ? 
+            Date relatedDate = null != relatedParameter && "END".equals(relatedParameter.getValue()) ?
                 calendarObject.getEndDate() : calendarObject.getStartDate();
             if (Appointment.class.isAssignableFrom(calendarObject.getClass())) {
                 /*
-                 * set relative alarm timespan 
+                 * set relative alarm timespan
                  */
                 Long duration = parseTriggerDuration(index, trigger, relatedDate, timeZone, warnings);
                 if (null != duration) {
@@ -177,9 +177,9 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
             } else {
                 warnings.add(new ConversionWarning(index, "Can only parse alarms for appointments and tasks"));
             }
-        }        
+        }
     }
-    
+
     private Trigger getTrigger(int index, T component, List<ConversionWarning> warnings) {
         /*
          * check mozilla x-props
@@ -197,7 +197,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
                  */
                 return new Trigger(mozillaSnoozeTime.getParameters(), mozillaSnoozeTime.getValue());
             }
-        } 
+        }
         /*
          * check default vAlarm
          */
@@ -218,13 +218,13 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
                 warnings.add(new ConversionWarning(index, "Can only convert DISPLAY alarms with triggers"));
             }
         }
-                
+
         return null;
     }
-    
+
     /**
      * Parses the alarm trigger as absolute date-time.
-     * 
+     *
      * @param index the current conversion index
      * @param trigger the iCal trigger property
      * @param start the date where the trigger is targeted at
@@ -253,7 +253,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
 
     /**
      * Parses the alarm trigger as relative duration in seconds.
-     * 
+     *
      * @param index the current conversion index
      * @param trigger the iCal trigger property
      * @param start the date where the trigger is targeted at
@@ -268,7 +268,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
                 warnings.add(new ConversionWarning(index, "Ignoring non-negative duration for alarm trigger"));
                 return null;
             } else {
-                return new Long((((duration.getWeeks() * 7 + duration.getDays()) * 24  + duration.getHours() ) * 60 + duration.getMinutes()) * 60 + duration.getSeconds());  
+                return new Long((((duration.getWeeks() * 7 + duration.getDays()) * 24  + duration.getHours() ) * 60 + duration.getMinutes()) * 60 + duration.getSeconds());
             }
         } else if (null != trigger.getDateTime()) {
             java.util.Date date = ParserTools.recalculateAsNeeded(trigger.getDateTime(), trigger, timeZone);

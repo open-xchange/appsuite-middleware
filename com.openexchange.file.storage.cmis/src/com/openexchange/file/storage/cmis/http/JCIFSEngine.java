@@ -73,11 +73,11 @@ public final class JCIFSEngine implements NTLMEngine {
         super();
     }
 
-    private static final int TYPE_1_FLAGS = 
-        NtlmFlags.NTLMSSP_NEGOTIATE_56 | 
-        NtlmFlags.NTLMSSP_NEGOTIATE_128 | 
-        NtlmFlags.NTLMSSP_NEGOTIATE_NTLM2 | 
-        NtlmFlags.NTLMSSP_NEGOTIATE_ALWAYS_SIGN | 
+    private static final int TYPE_1_FLAGS =
+        NtlmFlags.NTLMSSP_NEGOTIATE_56 |
+        NtlmFlags.NTLMSSP_NEGOTIATE_128 |
+        NtlmFlags.NTLMSSP_NEGOTIATE_NTLM2 |
+        NtlmFlags.NTLMSSP_NEGOTIATE_ALWAYS_SIGN |
         NtlmFlags.NTLMSSP_REQUEST_TARGET;
 
     @Override

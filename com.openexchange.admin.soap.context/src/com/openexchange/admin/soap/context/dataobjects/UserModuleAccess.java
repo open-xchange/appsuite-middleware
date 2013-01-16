@@ -9,9 +9,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse f\u00fcr UserModuleAccess complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="UserModuleAccess">
  *   &lt;complexContent>
@@ -53,8 +53,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "UserModuleAccess", propOrder = {
@@ -157,11 +157,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der olox20-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isOLOX20() {
         return olox20;
@@ -169,11 +169,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der olox20-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setOLOX20(Boolean value) {
         this.olox20 = value;
@@ -181,11 +181,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der usm-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isUSM() {
         return usm;
@@ -193,11 +193,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der usm-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setUSM(Boolean value) {
         this.usm = value;
@@ -205,11 +205,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der activeSync-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isActiveSync() {
         return activeSync;
@@ -217,11 +217,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der activeSync-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setActiveSync(Boolean value) {
         this.activeSync = value;
@@ -229,11 +229,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der calendar-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isCalendar() {
         return calendar;
@@ -241,11 +241,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der calendar-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setCalendar(Boolean value) {
         this.calendar = value;
@@ -253,11 +253,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der collectEmailAddresses-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isCollectEmailAddresses() {
         return collectEmailAddresses;
@@ -265,11 +265,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der collectEmailAddresses-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setCollectEmailAddresses(Boolean value) {
         this.collectEmailAddresses = value;
@@ -277,11 +277,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der contacts-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isContacts() {
         return contacts;
@@ -289,11 +289,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der contacts-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setContacts(Boolean value) {
         this.contacts = value;
@@ -301,11 +301,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der delegateTask-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isDelegateTask() {
         return delegateTask;
@@ -313,11 +313,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der delegateTask-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setDelegateTask(Boolean value) {
         this.delegateTask = value;
@@ -325,11 +325,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der deniedPortal-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isDeniedPortal() {
         return deniedPortal;
@@ -337,11 +337,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der deniedPortal-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setDeniedPortal(Boolean value) {
         this.deniedPortal = value;
@@ -349,11 +349,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der editGroup-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isEditGroup() {
         return editGroup;
@@ -361,11 +361,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der editGroup-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setEditGroup(Boolean value) {
         this.editGroup = value;
@@ -373,11 +373,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der editPassword-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isEditPassword() {
         return editPassword;
@@ -385,11 +385,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der editPassword-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setEditPassword(Boolean value) {
         this.editPassword = value;
@@ -397,11 +397,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der editPublicFolders-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isEditPublicFolders() {
         return editPublicFolders;
@@ -409,11 +409,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der editPublicFolders-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setEditPublicFolders(Boolean value) {
         this.editPublicFolders = value;
@@ -421,11 +421,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der editResource-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isEditResource() {
         return editResource;
@@ -433,11 +433,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der editResource-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setEditResource(Boolean value) {
         this.editResource = value;
@@ -445,11 +445,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der forum-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isForum() {
         return forum;
@@ -457,11 +457,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der forum-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setForum(Boolean value) {
         this.forum = value;
@@ -469,11 +469,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der globalAddressBookDisabled-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isGlobalAddressBookDisabled() {
         return globalAddressBookDisabled;
@@ -481,11 +481,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der globalAddressBookDisabled-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setGlobalAddressBookDisabled(Boolean value) {
         this.globalAddressBookDisabled = value;
@@ -493,11 +493,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der ical-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isIcal() {
         return ical;
@@ -505,11 +505,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der ical-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setIcal(Boolean value) {
         this.ical = value;
@@ -517,11 +517,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der infostore-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isInfostore() {
         return infostore;
@@ -529,11 +529,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der infostore-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setInfostore(Boolean value) {
         this.infostore = value;
@@ -541,11 +541,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der multipleMailAccounts-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isMultipleMailAccounts() {
         return multipleMailAccounts;
@@ -553,11 +553,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der multipleMailAccounts-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setMultipleMailAccounts(Boolean value) {
         this.multipleMailAccounts = value;
@@ -565,11 +565,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der pinboardWrite-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isPinboardWrite() {
         return pinboardWrite;
@@ -577,11 +577,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der pinboardWrite-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setPinboardWrite(Boolean value) {
         this.pinboardWrite = value;
@@ -589,11 +589,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der projects-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isProjects() {
         return projects;
@@ -601,11 +601,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der projects-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setProjects(Boolean value) {
         this.projects = value;
@@ -613,11 +613,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der publicFolderEditable-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isPublicFolderEditable() {
         return publicFolderEditable;
@@ -625,11 +625,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der publicFolderEditable-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setPublicFolderEditable(Boolean value) {
         this.publicFolderEditable = value;
@@ -637,11 +637,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der publication-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isPublication() {
         return publication;
@@ -649,11 +649,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der publication-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setPublication(Boolean value) {
         this.publication = value;
@@ -661,11 +661,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der readCreateSharedFolders-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isReadCreateSharedFolders() {
         return readCreateSharedFolders;
@@ -673,11 +673,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der readCreateSharedFolders-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setReadCreateSharedFolders(Boolean value) {
         this.readCreateSharedFolders = value;
@@ -685,11 +685,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der rssBookmarks-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isRssBookmarks() {
         return rssBookmarks;
@@ -697,11 +697,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der rssBookmarks-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setRssBookmarks(Boolean value) {
         this.rssBookmarks = value;
@@ -709,11 +709,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der rssPortal-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isRssPortal() {
         return rssPortal;
@@ -721,11 +721,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der rssPortal-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setRssPortal(Boolean value) {
         this.rssPortal = value;
@@ -733,11 +733,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der subscription-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isSubscription() {
         return subscription;
@@ -745,11 +745,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der subscription-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setSubscription(Boolean value) {
         this.subscription = value;
@@ -757,11 +757,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der syncml-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isSyncml() {
         return syncml;
@@ -769,11 +769,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der syncml-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setSyncml(Boolean value) {
         this.syncml = value;
@@ -781,11 +781,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der tasks-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isTasks() {
         return tasks;
@@ -793,11 +793,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der tasks-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setTasks(Boolean value) {
         this.tasks = value;
@@ -805,11 +805,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der vcard-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isVcard() {
         return vcard;
@@ -817,11 +817,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der vcard-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setVcard(Boolean value) {
         this.vcard = value;
@@ -829,11 +829,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der webdav-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isWebdav() {
         return webdav;
@@ -841,11 +841,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der webdav-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setWebdav(Boolean value) {
         this.webdav = value;
@@ -853,11 +853,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der webdavXml-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isWebdavXml() {
         return webdavXml;
@@ -865,11 +865,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der webdavXml-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setWebdavXml(Boolean value) {
         this.webdavXml = value;
@@ -877,11 +877,11 @@ public class UserModuleAccess {
 
     /**
      * Ruft den Wert der webmail-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isWebmail() {
         return webmail;
@@ -889,11 +889,11 @@ public class UserModuleAccess {
 
     /**
      * Legt den Wert der webmail-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setWebmail(Boolean value) {
         this.webmail = value;

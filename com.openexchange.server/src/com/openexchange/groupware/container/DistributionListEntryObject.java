@@ -197,7 +197,7 @@ public class DistributionListEntryObject implements Serializable {
 
     /**
      * Sets the distribution list entry's email address
-     * 
+     *
      * @param emailaddress The email address to set
      * @param verifyAddress <code>true</code>, if the address should be verified, <code>false</code>, otherwise
      * @throws OXException If specified email address is invalid and verification is enabled

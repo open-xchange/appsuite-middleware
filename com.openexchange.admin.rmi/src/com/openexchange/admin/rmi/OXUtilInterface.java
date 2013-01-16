@@ -63,17 +63,17 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 /**
  * This class defines the Open-Xchange API Version 2 for creating and
  * manipulating needed components of the system.<br><br>
- * 
+ *
  * <b>Example for initializing the system:</b>
  * <pre>
  * <b>// Register database,server and a filestore.</b>
  * final OXUtilInterface iface = (OXUtilInterface)Naming.lookup("rmi:///oxhost/"+OXUtilInterface.RMI_NAME);
- * 
+ *
  * final Credentials auth = new Credentials();
  * auth.setLogin("masteradmin");
  * auth.setPassword("secret");
- * 
- * Database client_db = new Database();        
+ *
+ * Database client_db = new Database();
  * client_db.setName(name);
  * client_db.setDriver("com.mysql.jdbc.Driver");
  * client_db.setLogin("openexchange");
@@ -87,26 +87,26 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&
  * serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
  * client_db.setClusterWeight(100);
- * 
+ *
  * <b>// Register database</b>
  * iface.registerDatabase(client_db,auth);
- * 
+ *
  * <b>// Register server</b>
  * Server srv = new Server();
  * srv.setName("local");
  * iface.registerServer(srv,auth);
- *  
+ *
  * <b>// Register filestore</b>
  * Filestore client_st = new Filestore();
  * client_st.setUrl("file:/var/ox/filestore");
- * client_st.setSize(100L);        
+ * client_st.setSize(100L);
  * client_st.setMaxContexts(100);
  * iface.registerFilestore(srv,auth);
  * </pre>
  * The system is now ready to be filled with 100 contexts.<br>
  * See {@link OXContextInterface} for an example of creating a context.
- * 
- * 
+ *
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
@@ -124,7 +124,7 @@ public interface OXUtilInterface extends Remote {
     public static final long DEFAULT_STORE_SIZE = 1000;
     public final static int DEFAULT_STORE_MAX_CTX = 5000;
 
-    
+
     /**
      * RMI name to be used in the naming lookup.
      */
@@ -132,7 +132,7 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Add new maintenance reason.
-     * 
+     *
      * @param reason
      *            MaintenanceReason.
      * @param auth
@@ -151,9 +151,9 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Deletes maintenance reason text.
-     * 
+     *
      * @param reasons
-     *            Reasons which should be deleted!Currently ID must be set in each object! 
+     *            Reasons which should be deleted!Currently ID must be set in each object!
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
@@ -169,7 +169,7 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Get all maintenance reasons which match the specified search_pattern
-     * 
+     *
      * @return MaintenanceReason[] containing MaintenanceReason objects.
      * @param search_pattern
      *             A search pattern to list only those reason which match that pattern
@@ -181,13 +181,13 @@ public interface OXUtilInterface extends Remote {
      *             When the supplied credentials were not correct or invalid.
      * @throws RemoteException
      *             General RMI Exception
-     * @throws InvalidDataException 
+     * @throws InvalidDataException
      */
     public MaintenanceReason[] listMaintenanceReason(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Get all maintenance reasons. Same as calling listMaintenanceReasons with a search_pattern "*"
-     * 
+     *
      * @return MaintenanceReason[] containing MaintenanceReason objects.
      * @param auth
      *             Credentials for authenticating against server.
@@ -197,13 +197,13 @@ public interface OXUtilInterface extends Remote {
      *             When the supplied credentials were not correct or invalid.
      * @throws RemoteException
      *             General RMI Exception
-     * @throws InvalidDataException 
+     * @throws InvalidDataException
      */
     public MaintenanceReason[] listAllMaintenanceReason(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Register an OX Server in the system.
-     * 
+     *
      * @return Contains the new generated server id.
      * @param srv
      *            Server object containing the server name
@@ -211,7 +211,7 @@ public interface OXUtilInterface extends Remote {
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
      *             When an error in the subsystems occurred.
-     * 
+     *
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -223,7 +223,7 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Delete an OX server from the system.
-     * 
+     *
      * @param auth
      *            Credentials for authenticating against server.
      * @param serv
@@ -242,12 +242,12 @@ public interface OXUtilInterface extends Remote {
     /**
      * Register a new database to the system.
      * HINT: Use unregisterDatabase to remove/unregister.
-     * 
+     *
      * DONT use deleteDatabase, cause this method performs a real "drop" for its specified Database!
-     * 
+     *
      * <p>
      * <blockquote>
-     * 
+     *
      * <pre>
      * Database client_db = new Database();
      * client_db.setDisplayname(&quot;mydb&quot;);
@@ -261,10 +261,10 @@ public interface OXUtilInterface extends Remote {
      * client_db.setPoolMax(100);
      * client_db.setUrl(&quot;jdbc:mysql://localhost/?useUnicode=true&amp;characterEncoding=UTF-8&amp;&quot; + &quot;autoReconnect=true&amp;useUnicode=true&amp;useServerPrepStmts=false&amp;useTimezone=true&amp;&quot; + &quot;serverTimezone=UTC&amp;connectTimeout=15000&amp;socketTimeout=15000&quot;);
      * </pre>
-     * 
+     *
      * </blockquote>
      * </p>
-     * 
+     *
      * @return Contains the new database id.
      * @param db
      *            The database to register
@@ -283,33 +283,33 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Change parameters of a database registered in system
-     * 
+     *
      * <p>
      * <blockquote>
-     * 
+     *
      * <pre>
      *     Database client_db = ...load Database from server via
      * <CODE>
      * searchForDatabase
      * </CODE>
-     *  to make sure that 
+     *  to make sure that
      *     the Object contains the correct Database id.
-     *     
+     *
      *     client_db.setDisplayname(client_db.getDisplayname()+&quot;changed&quot;);
      *     client_db.setDriver(client_db.getDriver()+&quot;changed&quot;);
-     *     client_db.setLogin(client_db.getLogin()+&quot;changed&quot;);        
+     *     client_db.setLogin(client_db.getLogin()+&quot;changed&quot;);
      *     client_db.setMaxUnits(2000);
      *     client_db.setPassword(client_db.getPassword()+&quot;changed&quot;);
      *     client_db.setPoolHardLimit(40);
      *     client_db.setPoolInitial(4);
      *     client_db.setPoolMax(200);
      *     client_db.setUrl(client_db.getUrl()+&quot;changed&quot;);
-     *     ....change Database 
+     *     ....change Database
      * </pre>
-     * 
+     *
      * </blockquote>
      * </p>
-     * 
+     *
      * @param db
      *            Database containing the information of the database to edit.
      * @param auth
@@ -327,14 +327,14 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Unregister database identified by its ID from configdb.
-     * 
+     *
      * @param database
      *            Database with id set.
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
      *             When an error in the subsystems occurred.
-     * 
+     *
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -346,7 +346,7 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Search for databases registered in the system.
-     * 
+     *
      * @return Containing the databases found by the search.
      * @param search_pattern
      *            Search pattern e.g "*" "*my*".
@@ -365,7 +365,7 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Convenience method for listing all databases registered in the system.
-     * 
+     *
      * @return Containing the databases found by the search.
      * @param auth
      *            Credentials for authenticating against server.
@@ -382,7 +382,7 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Search for server
-     * 
+     *
      * @return Containing Server Object found by the search.
      * @param search_pattern
      *            Search pattern e.g "*" "*my*".
@@ -390,7 +390,7 @@ public interface OXUtilInterface extends Remote {
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
      *             When an error in the subsystems occurred.
-     * 
+     *
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -402,13 +402,13 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Convenience method for listing all servers
-     * 
+     *
      * @return Containing Server Object found by the search.
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
      *             When an error in the subsystems occurred.
-     * 
+     *
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -420,7 +420,7 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Register new filestore to the system.
-     * 
+     *
      * @param fstore
      *            Filestore to register with the store data.
      * @param auth
@@ -439,7 +439,7 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Change filestore.
-     * 
+     *
      * @param fstore
      *            Contains store to change.
      * @param auth
@@ -457,7 +457,7 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * List filestores.
-     * 
+     *
      * @return Containing result objects.
      * @param search_pattern
      *            Search pattern e.g "*" "*file://%*"
@@ -476,7 +476,7 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Convenience method for listing all filestores.
-     * 
+     *
      * @return Containing result objects.
      * @param auth
      *            Credentials for authenticating against server.
@@ -493,7 +493,7 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Unregister filestore from system identified by its ID
-     * 
+     *
      * @param store
      *            Filestore to unregister with id set.
      * @param auth

@@ -76,33 +76,33 @@ public class AdminParser extends CLIParser {
     private static final String OPT_CHECK_UNIQUENESS = "check";
 
     private static final String OPT_ENVOPTS_LONG = "environment";
-    
+
     private static final String OPT_EXTENDED_LONG = "extendedoptions";
-    
+
     private static final String OPT_NAME_NONEWLINE_LONG = "nonl";
-    
+
     private static final String OPT_NAME_NONEWLINE_DESCRIPTION = "Remove all newlines (\\n) from output";
-    
+
     private final ArrayList<OptionInfo> optinfolist = new ArrayList<OptionInfo>();
-    
+
     private String appname = null;
-    
+
     private CLIOption csvImportOption = null;
-    
+
     final private CLIOption helpoption;
-    
+
     final private CLIOption envoption;
-    
+
     private final CLIOption checkuniquenessoption;
-    
+
     private CLIOption extendedoption;
-    
+
     private final CLIOption noNewlineOption;
 
     private boolean allowDynamic;
-    
+
     private final Map<String, Map<String, String>> dynamicMaps = new HashMap<String, Map<String, String>>();
-    
+
     private class OptionInfo {
         public NeededQuadState needed = NeededQuadState.notneeded;
 
@@ -196,10 +196,10 @@ public class AdminParser extends CLIParser {
         this.noNewlineOption = this.addOption(OPT_NAME_NONEWLINE_LONG, OPT_NAME_NONEWLINE_DESCRIPTION, false, false, false);
     }
 
-    
+
     /**
      * This method is used to add an option with a mandatory field
-     * 
+     *
      * @param shortForm
      * @param longForm
      * @param description
@@ -216,8 +216,8 @@ public class AdminParser extends CLIParser {
     /**
      * This method is used if you want to add an option with a description for
      * the long parameter
-     * 
-     * 
+     *
+     *
      * @param shortForm
      * @param longForm
      * @param longFormParameterDescription
@@ -252,7 +252,7 @@ public class AdminParser extends CLIParser {
     }
 
     /**
-     * 
+     *
      * @param longForm
      * @param longFormParameterDescription
      * @param description
@@ -284,7 +284,7 @@ public class AdminParser extends CLIParser {
             return retval;
         }
     }
-    
+
     /**
      * @param longForm
      * @param longFormParameterDescription
@@ -326,7 +326,7 @@ public class AdminParser extends CLIParser {
             return retval;
         }
     }
-    
+
     /**
      * @param longForm
      * @param longFormParameterDescription
@@ -341,7 +341,7 @@ public class AdminParser extends CLIParser {
         this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended, hidden));
         return retval;
     }
-    
+
     public final CLIOption addSettableBooleanOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg, final boolean extended) {
         if (hasarg) {
             final CLIOption retval = this.addSettableBooleanOption(longForm);
@@ -399,7 +399,7 @@ public class AdminParser extends CLIParser {
                     }
                 }
             }
-            
+
             // show all missing opts
             if (sb.toString().length() > 0) {
                 sb.deleteCharAt(sb.length() - 1);
@@ -412,7 +412,7 @@ public class AdminParser extends CLIParser {
         List<String> staticArgs = new ArrayList<String>(args.length);
         for(String arg : args) {
             if(isExtendedOption(arg) && isDynamicOption(arg)) {
-                parseDynamicOption(arg); 
+                parseDynamicOption(arg);
             } else {
                 staticArgs.add(arg);
             }
@@ -421,33 +421,33 @@ public class AdminParser extends CLIParser {
     }
 
     private void parseDynamicOption(String arg) {
-        
+
         String namespace = null;
         String name = null;
         String value = null;
-       
+
         int slashPos = arg.indexOf('/');
-        
-        
+
+
         if(arg.startsWith("--remove-")) {
             namespace = arg.substring(9, slashPos);
             name = arg.substring(slashPos+1);
         } else {
             int equalPos = arg.indexOf('=');
-            
+
             if(slashPos == -1) {
                 return;
             }
-            
+
             if(equalPos == -1) {
                 return;
             }
-            
+
             namespace = arg.substring(2,slashPos);
             name = arg.substring(slashPos+1, equalPos);
             value = arg.substring(equalPos+1);
         }
-        
+
         getDynamicMap(namespace).put(name, value);
     }
 
@@ -482,7 +482,7 @@ public class AdminParser extends CLIParser {
     public final void setExtendedOptions() {
         this.extendedoption = addOption(OPT_EXTENDED_LONG, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false,false);
     }
-    
+
     public final void printEnvUsage() {
         System.out.println("\nThe following environment variables and their current value are known\n" +
         		"and can be modified to change behaviour:\n");
@@ -496,7 +496,7 @@ public class AdminParser extends CLIParser {
         System.out.println("For possible date formats, see\n http://java.sun.com/j2se/1.5.0/docs/api/java/text/SimpleDateFormat.html");
         System.out.println("For possible timezones, see\n http://java.sun.com/j2se/1.5.0/docs/api/java/util/TimeZone.html");
     }
-    
+
     public final void printUsage() {
         System.out.println("Usage: " + this.appname);
 
@@ -518,13 +518,13 @@ public class AdminParser extends CLIParser {
 
     public final void printUsageExtended() {
         System.out.println("Usage: " + this.appname);
-        
+
         for (final OptionInfo optInfo : this.optinfolist) {
             basicOutput(optInfo);
         }
         printFinalLines();
     }
-    
+
     public void removeOption(final String shortForm, final String longForm) {
         final ArrayList<OptionInfo> removeList = new ArrayList<OptionInfo>();
         for (final OptionInfo optInfo : this.optinfolist) {
@@ -599,7 +599,7 @@ public class AdminParser extends CLIParser {
         }
         System.exit(0);
     }
-    
+
     private String getrightmarker(final NeededQuadState needed) {
         if (needed == NeededQuadState.needed) {
             return "*";
@@ -616,12 +616,12 @@ public class AdminParser extends CLIParser {
     public void allowDynamicOptions() {
         allowDynamic=true;
     }
-    
+
     public void forbidDynamicOptions() {
         allowDynamic=false;
     }
-    
-    
+
+
     public Map<String, Map<String, String>> getDynamicArguments() {
         return dynamicMaps;
     }

@@ -120,7 +120,7 @@ public class CopyAction extends ContactAction {
         if (hasAttachments) {
             contact.removeNumberOfAttachments();
 	        contactService.createContact(request.getSession(), folderID, contact);
-	        copyAttachments(Integer.parseInt(folderID), request.getSession(), request.getSession().getContext(), 
+	        copyAttachments(Integer.parseInt(folderID), request.getSession(), request.getSession().getContext(),
 	        		contact, originalObjectID, originalFolderID, request.getSession().getUser(), request.getSession().getUserConfiguration());
         } else {
 	        contactService.createContact(request.getSession(), folderID, contact);
@@ -221,7 +221,7 @@ public class CopyAction extends ContactAction {
                 } catch (final OXException e1) {
                     LOG.error("Attachment transaction rollback failed", e);
                 }
-                throw new OXException(e);
+                throw e;
             } catch (final OXException e) {
                 try {
                     attachmentBase.rollback();

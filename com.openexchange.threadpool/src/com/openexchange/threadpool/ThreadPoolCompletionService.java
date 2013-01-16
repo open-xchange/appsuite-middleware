@@ -170,10 +170,10 @@ public class ThreadPoolCompletionService<V> implements CancelableCompletionServi
         this.behavior = behavior;
         submittedFutures = new LinkedList<Future<V>>();
     }
-    
+
     /**
      * Sets whether submitted tasks are trackable.
-     * 
+     *
      * @param trackable <code>true</code> if trackable; otherwise <code>false</code>
      * @return This completion service with new behavior applied
      */
@@ -184,7 +184,7 @@ public class ThreadPoolCompletionService<V> implements CancelableCompletionServi
 
     /**
      * Submits given task.
-     * 
+     *
      * @param task The task
      * @return The associated {@link Future}
      */
@@ -219,7 +219,7 @@ public class ThreadPoolCompletionService<V> implements CancelableCompletionServi
 
     /**
      * Submits specified queueing future task.
-     * 
+     *
      * @param f The queueing future task
      */
     protected void submitFutureTask(final FutureTask<V> f) {

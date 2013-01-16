@@ -68,7 +68,7 @@ import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 
 /**
  * Access Token request handler
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AccessTokenServlet extends HttpServlet {
@@ -86,7 +86,7 @@ public class AccessTokenServlet extends HttpServlet {
         req.getSession(true);
         super.service(req, resp);
     }
-    
+
     @Override
     public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
         processRequest(request, response);

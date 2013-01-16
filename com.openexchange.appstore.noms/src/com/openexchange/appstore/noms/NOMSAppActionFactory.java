@@ -18,16 +18,16 @@ public class NOMSAppActionFactory implements AJAXActionServiceFactory {
 
 	private final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>();
 	private final ServiceLookup services;
-	
+
 	public NOMSAppActionFactory(ServiceLookup services) {
 		this.services = services;
 		ACTIONS.put("list", new ListAction(services));
 		ACTIONS.put("enterShop", new EnterShopAction(services));
 		ACTIONS.put("enterApp", new EnterAppAction(services));
 		ACTIONS.put("markup", new MarkupLinkAction(services));
-			
+
 	}
-	
+
 	@Override
 	public AJAXActionService createActionService(String action)
 			throws OXException {

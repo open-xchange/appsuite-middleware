@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface IndexingJob {
-    
+
     void execute(JobInfo jobInfo) throws OXException;
 
 }

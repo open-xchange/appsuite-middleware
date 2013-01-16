@@ -67,7 +67,7 @@ import com.openexchange.push.mq.mbean.PushMQMBeanImpl;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
-    
+
     private final BundleContext context;
 
     private ObjectName objectName;
@@ -99,7 +99,7 @@ public class ManagementRegisterer implements ServiceTrackerCustomizer<Management
         unregisterPushMQMBean(management);
         context.ungetService(reference);
     }
-    
+
     private void registerPushMQMBean(final ManagementService management) {
         if (objectName == null) {
             final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
@@ -115,7 +115,7 @@ public class ManagementRegisterer implements ServiceTrackerCustomizer<Management
             }
         }
     }
-    
+
     private void unregisterPushMQMBean(final ManagementService management) {
         if (objectName != null) {
             final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
@@ -128,7 +128,7 @@ public class ManagementRegisterer implements ServiceTrackerCustomizer<Management
             }
         }
     }
-    
+
     /**
      * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.
      *

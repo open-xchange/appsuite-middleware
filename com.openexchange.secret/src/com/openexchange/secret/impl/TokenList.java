@@ -58,14 +58,14 @@ import com.openexchange.secret.SecretService;
 
 /**
  * {@link TokenList}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TokenList {
 
     /**
      * Parses specified text to a token list.
-     * 
+     *
      * @param text The text to parse
      * @return The token list
      */
@@ -78,7 +78,7 @@ public final class TokenList {
 
     /**
      * Parses specified patterns to a token list.
-     * 
+     *
      * @param patterns The patterns to parse
      * @return The token list
      */
@@ -122,7 +122,7 @@ public final class TokenList {
 
     /**
      * Creates a new token list from specified collection.
-     * 
+     *
      * @param collection The collection
      * @return The new token list
      */
@@ -154,7 +154,7 @@ public final class TokenList {
 
     /**
      * Checks if last entry uses password secret source.
-     * 
+     *
      * @return <code>true</code> if last entry uses password secret source; otherwise <code>false</code>
      */
     public boolean isUsesPassword() {
@@ -177,7 +177,7 @@ public final class TokenList {
 
     /**
      * Returns <tt>true</tt> if this token list contains no elements.
-     * 
+     *
      * @return <tt>true</tt> if this token list contains no elements
      */
     public boolean isEmpty() {
@@ -186,7 +186,7 @@ public final class TokenList {
 
     /**
      * Retrieves, but does not remove, the first element of this token list, or returns <tt>null</tt> if this token list is empty.
-     * 
+     *
      * @return the head of this token list, or <tt>null</tt> if this token list is empty
      */
     public SecretService peekFirst() {
@@ -195,7 +195,7 @@ public final class TokenList {
 
     /**
      * Retrieves, but does not remove, the last element of this token list, or returns <tt>null</tt> if this token list is empty.
-     * 
+     *
      * @return the tail of this token list, or <tt>null</tt> if this token list is empty
      */
     public SecretService peekLast() {
@@ -204,7 +204,7 @@ public final class TokenList {
 
     /**
      * Returns the number of elements in this token list.
-     * 
+     *
      * @return the number of elements in this token list
      */
     public int size() {
@@ -213,7 +213,7 @@ public final class TokenList {
 
     /**
      * Returns the element at the specified position in this token list.
-     * 
+     *
      * @param index The index of the element to return
      * @return The element at the specified position in this token list
      * @throws IndexOutOfBoundsException If the index is out of range (<tt>index &lt; 0 || index &gt;= size()</tt>)
@@ -225,7 +225,7 @@ public final class TokenList {
     /**
      * Returns an iterator over the elements in this token list in proper sequence. The elements will be returned in order from first (head)
      * to last (tail).
-     * 
+     *
      * @return an iterator over the elements in this token list in proper sequence
      */
     public Iterator<SecretService> iterator() {

@@ -61,7 +61,7 @@ public interface Trackable {
 
     /**
      * Gets the optional log properties.
-     * 
+     *
      * @return The log properties or <code>null</code>
      */
     Map<String, Object> optLogProperties();

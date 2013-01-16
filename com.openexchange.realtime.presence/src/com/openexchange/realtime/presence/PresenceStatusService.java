@@ -58,24 +58,24 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PresenceStatusService} - Service to store and query the PresenceStatus of currently connected clients.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public interface PresenceStatusService {
 
     /**
-     * Register a new PresenceChangeListener 
+     * Register a new PresenceChangeListener
      * @param presenceChangeListener the new PresenceChangeListener
      */
     void registerPresenceChangeListener(PresenceChangeListener presenceChangeListener);
-    
+
     /**
-     * Unregister an already registered PresenceChangeListener 
+     * Unregister an already registered PresenceChangeListener
      * @param presenceChangeListener the already registered PresenceChangeListener
      */
     void unregisterPresenceChangeListener(PresenceChangeListener presenceChangeListener);
-    
+
     /**
      * Change the PresenceStatus of an ID. This involves:
      * <ol>
@@ -85,7 +85,7 @@ public interface PresenceStatusService {
      * <li>Notify users about the status update</li>
      * <li>Stores the last time ID changed its PresenceStaus <delay xmlns="urn:xmpp:dely"></li>
      * </ol>
-     * 
+     *
      * @param client    Client that wants to change its PresenceStatus
      * @param status    The new PresenceData
      * @param session   The associated ServerSession
@@ -95,15 +95,15 @@ public interface PresenceStatusService {
 
     /**
      * Get the current PresenceStatus of only one ID.
-     * 
+     *
      * @param id The ID whose PresenceStatus should be queried
      * @return The current PresenceStatus of ID, Offline if no information can be found for the ID
      */
     public PresenceData getPresenceStatus(ID id);
-    
+
     /**
      * Get the current PresenceStatus of one or more IDs.
-     * 
+     *
      * @param ids The IDs whose PresenceStatus should be queried
      * @return The current PresenceStatus of IDs, Offline if no information can be found for the ID
      */

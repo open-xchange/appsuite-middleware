@@ -64,14 +64,14 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class UserCopyTaskRegisterer implements ServiceTrackerCustomizer<UserService, UserService> {
-    
+
     private final BundleContext context;
-        
+
     private ServiceRegistration<CopyUserTaskService> serviceRegistration;
-    
+
     private UserCopyTask task;
-    
-    
+
+
     public UserCopyTaskRegisterer(final BundleContext context) {
         super();
         this.context = context;
@@ -84,7 +84,7 @@ public class UserCopyTaskRegisterer implements ServiceTrackerCustomizer<UserServ
         final UserService service = context.getService(reference);
         task = new UserCopyTask(service);
         serviceRegistration = context.registerService(CopyUserTaskService.class, task, null);
-        
+
         return service;
     }
 

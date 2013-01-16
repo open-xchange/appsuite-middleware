@@ -61,7 +61,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link AWSLoadBalancingActivator}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AWSLoadBalancingActivator extends HousekeepingActivator {

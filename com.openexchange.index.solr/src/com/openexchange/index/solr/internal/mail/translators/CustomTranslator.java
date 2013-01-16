@@ -79,7 +79,7 @@ import com.openexchange.mail.search.ToTerm;
 
 /**
  * {@link CustomTranslator}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class CustomTranslator implements QueryTranslator {
@@ -87,9 +87,9 @@ public class CustomTranslator implements QueryTranslator {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CustomTranslator.class);
 
     private Configuration config;
-    
+
     private String name;
-    
+
 
     @Override
     public void init(String name, Configuration config) throws TranslationException {

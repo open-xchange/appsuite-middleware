@@ -332,9 +332,8 @@ public final class MessagingDatagramPoster {
         /*
          * Write string content and terminating '0'
          */
-        final char[] chars = string.toCharArray();
         for (int i = 0; i < len; i++) {
-            bytes[pos++] = (byte) chars[i];
+            bytes[pos++] = (byte) string.charAt(i);
         }
         /*
          * Terminating zero

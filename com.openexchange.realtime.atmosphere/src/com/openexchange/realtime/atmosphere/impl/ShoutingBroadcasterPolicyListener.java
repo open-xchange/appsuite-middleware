@@ -63,7 +63,7 @@ public class ShoutingBroadcasterPolicyListener implements BroadcasterLifeCyclePo
 
     private final static Log LOG = com.openexchange.log.Log.loggerFor(ShoutingBroadcasterPolicyListener.class);
     private final Broadcaster broadcaster;
-    
+
     public ShoutingBroadcasterPolicyListener(Broadcaster broadcaster) {
         this.broadcaster = broadcaster;
         LOG.info("\n\nHEY HEY, ADDED SHOUTINGBORADCASTLISTENER TO BROADCASTER: "+broadcaster.getID()+"\n\n");

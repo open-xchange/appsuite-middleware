@@ -53,7 +53,7 @@ import org.json.JSONObject;
 
 /**
  * {@link JSlob} - A JSlob holding a JSON object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JSlob {
@@ -79,7 +79,7 @@ public class JSlob {
 
     private JSONObject jsonObject;
     private JSONObject metaObject;
-    
+
     private JSlobId id;
 
     /**
@@ -105,7 +105,7 @@ public class JSlob {
 
     /**
      * Initializes a new {@link JSlob}.
-     * 
+     *
      * @param jsonObject The JSON object initially applied to this JSlob
      */
     public JSlob(final JSONObject jsonObject) {
@@ -116,7 +116,7 @@ public class JSlob {
 
     /**
      * Gets the identifier
-     * 
+     *
      * @return The identifier
      */
     public JSlobId getId() {
@@ -125,7 +125,7 @@ public class JSlob {
 
     /**
      * Sets the identifier
-     * 
+     *
      * @param id The identifier to set
      * @return This JSlob with new identifier applied
      */
@@ -136,7 +136,7 @@ public class JSlob {
 
     /**
      * Gets the JSON object stored in this JSlob.
-     * 
+     *
      * @return The JSON object
      */
     public JSONObject getJsonObject() {
@@ -145,7 +145,7 @@ public class JSlob {
 
     /**
      * Sets the JSON object stored in this JSlob.
-     * 
+     *
      * @param jsonObject The JSON object
      * @return This JSlob with new JSON object applied
      */
@@ -153,7 +153,7 @@ public class JSlob {
         this.jsonObject = jsonObject;
         return this;
     }
-    
+
     /**
      * Gets the json object with unmodifiable metadata describing the regular payload data
      * @return The metadata object
@@ -161,7 +161,7 @@ public class JSlob {
     public JSONObject getMetaObject() {
 		return metaObject;
 	}
-    
+
     /**
      * Sets the json object with unmodifiable metadata describing the regular payload data
      * @param The metadata object
@@ -171,6 +171,6 @@ public class JSlob {
 		this.metaObject = metaObject;
 		return this;
     }
-    
+
 
 }

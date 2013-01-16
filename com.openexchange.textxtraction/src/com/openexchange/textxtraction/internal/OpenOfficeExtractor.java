@@ -62,7 +62,7 @@ import org.jdom2.input.SAXBuilder;
 
 /**
  * {@link OpenOfficeExtractor}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OpenOfficeExtractor {
@@ -104,7 +104,7 @@ public final class OpenOfficeExtractor {
 
     /**
      * Extracts text from OpenOffice Document's input stream.
-     * 
+     *
      * @param in The input stream
      * @return The extracted text
      * @throws IOException If an I/O error occurs

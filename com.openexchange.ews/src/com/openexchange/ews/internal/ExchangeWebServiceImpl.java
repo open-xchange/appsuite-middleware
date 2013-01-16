@@ -62,11 +62,11 @@ import com.openexchange.ews.Items;
 
 /**
  * {@link ExchangeWebServiceImpl}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ExchangeWebServiceImpl implements ExchangeWebService {
-    
+
     private final ExchangeServicePortType port;
     private final ConfigImpl config;
     private final FoldersImpl folders;
@@ -75,9 +75,9 @@ public class ExchangeWebServiceImpl implements ExchangeWebService {
 
     /**
      * Initializes a new {@link ExchangeWebServiceImpl}.
-     * 
+     *
      * @param url The URL to the service (usually [SERVER]/EWS/Exchange.asmx)
-     * @param userName The exchange username 
+     * @param userName The exchange username
      * @param password The password
      */
     public ExchangeWebServiceImpl(String url, String userName, String password) {
@@ -88,9 +88,9 @@ public class ExchangeWebServiceImpl implements ExchangeWebService {
         config.setUserName(userName);
         config.setPassword(password);
         this.folders = new FoldersImpl(this, port);
-        this.items = new ItemsImpl(this, port); 
+        this.items = new ItemsImpl(this, port);
         this.availibility = new AvailabilityImpl(this, port);
-    }    
+    }
 
     @Override
     public ExchangeServicePortType getServicePort() {
@@ -111,18 +111,18 @@ public class ExchangeWebServiceImpl implements ExchangeWebService {
     public Items getItems() {
         return items;
     }
-    
+
     @Override
     public Availability getAvailability() {
         return availibility;
     }
-    
+
     private static ExchangeServicePortType createService() {
-        ExchangeService service = new ExchangeService(getWsdlLocation(), 
+        ExchangeService service = new ExchangeService(getWsdlLocation(),
                 new QName("http://schemas.microsoft.com/exchange/services/2006/messages", "ExchangeService"));
         return service.getExchangeServicePort();
     }
-    
+
     private static URL getWsdlLocation() {
         return ExchangeWebService.class.getResource("/META-INF/Services.wsdl");
     }

@@ -57,9 +57,9 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 
 /**
- * 
+ *
  * @author d7,cutmasta
- * 
+ *
  */
 public class DeleteReason extends ReasonAbstraction {
 
@@ -70,26 +70,26 @@ public class DeleteReason extends ReasonAbstraction {
     private CLIOption reasonIDOption = null;
 
     public DeleteReason(final String[] args2) {
-    
+
         final AdminParser parser = new AdminParser("deletereason");
-    
+
         setOptions(parser);
-    
+
         String reason_id = null;
         try {
             parser.ownparse(args2);
-    
+
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
-    
+
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
-    
+
             reason_id = (String) parser.getOptionValue(this.reasonIDOption);
             final MaintenanceReason[] mrs = new MaintenanceReason[1];
             mrs[0] = new MaintenanceReason();
             mrs[0].setId(Integer.parseInt(reason_id));
             oxutil.deleteMaintenanceReason(mrs, auth);
-            
+
             displayDeletedMessage(reason_id, null, parser);
             sysexit(0);
         } catch (final Exception e) {

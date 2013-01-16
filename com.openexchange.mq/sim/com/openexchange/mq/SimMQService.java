@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link SimMQService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SimMQService implements MQService {
@@ -196,7 +196,7 @@ public class SimMQService implements MQService {
     @Override
     public void deleteQueue(final String name) throws OXException {
         // Nothing to do
-        
+
     }
 
     /* (non-Javadoc)
@@ -205,7 +205,7 @@ public class SimMQService implements MQService {
     @Override
     public void deleteLocaleQueue(final String name) throws OXException {
         // Nothing to do
-        
+
     }
 
     /* (non-Javadoc)
@@ -214,7 +214,7 @@ public class SimMQService implements MQService {
     @Override
     public void deleteTopic(final String name) throws OXException {
         // Nothing to do
-        
+
     }
 
     /* (non-Javadoc)
@@ -223,7 +223,7 @@ public class SimMQService implements MQService {
     @Override
     public void deleteLocaleTopic(final String name) throws OXException {
         // Nothing to do
-        
+
     }
 
 }

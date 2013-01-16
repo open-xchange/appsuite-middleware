@@ -75,8 +75,8 @@ public final class SolrExceptionMessages implements LocalizableStrings {
     public static final String CORE_STORE_ENTRY_NOT_FOUND_MSG = "Could not find Apache Solr Core store for given attributes. %1$s.";
 
     // All core stores seem to be full.
-    public static final String NO_FREE_CORE_STORE_MSG = "All core stores seem to be full.";   
-    
+    public static final String NO_FREE_CORE_STORE_MSG = "All core stores seem to be full.";
+
     // This Apache Solr Core's instance directory (%1$s) already exists and its structure is inconsistent.
     // Apache Solr Core" is a proper name, no translation applicable
     public static final String INSTANCE_DIR_EXISTS_MSG = "This Apache Solr Core's instance directory (%1$s) already exists and its structure is inconsistent.";
@@ -114,5 +114,5 @@ public final class SolrExceptionMessages implements LocalizableStrings {
 
     // An error occurred: %1$s
     public static final String ERROR_MSG = "An error occurred: %1$s";
-    
+
 }

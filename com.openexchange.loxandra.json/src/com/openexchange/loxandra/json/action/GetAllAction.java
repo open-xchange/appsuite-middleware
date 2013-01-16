@@ -52,8 +52,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -69,10 +67,10 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
  */
-@Action(method = RequestMethod.GET, name = "getall", description = "Get all EAV Contacts residing within a folder.", parameters = { 
+@Action(method = RequestMethod.GET, name = "getall", description = "Get all EAV Contacts residing within a folder.", parameters = {
 		@Parameter(name = "folderUUID")})
 public class GetAllAction extends AbstractAction {
-	
+
 	private static Log log = com.openexchange.log.Log.loggerFor(GetAllAction.class);
 
 	/**
@@ -91,7 +89,7 @@ public class GetAllAction extends AbstractAction {
 		UUID u = UUID.fromString(requestData.getParameter("folderUUID"));
 		int from = Integer.parseInt(requestData.getParameter("from"));
 		int to = Integer.parseInt(requestData.getParameter("to"));
-		
+
 		List<EAVContact> c = getContactService().getEAVContactService().getContactsFromFolder(u, from, to);
 		EAVContactParser parser = new EAVContactParser();
 		return new AJAXRequestResult(parser.parseList(c));

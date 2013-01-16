@@ -79,7 +79,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * {@link ManagedMimeMessage} - A {@link MimeMessage} backed by an array or file dependent on provided byte array's size.
  * <p>
  * Invoke {@link #cleanUp()} to release used resources immediately; otherwise they will be released if a specific idle time has elapsed.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp {
@@ -103,7 +103,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
 
     /**
      * Creates file-backed clones of passed <tt>MailMessage</tt> instances.
-     * 
+     *
      * @param originals The <tt>MailMessage</tt> instances to clone
      * @return The file-backed clones of passed <tt>MailMessage</tt> instances
      * @throws OXException If an error occurs
@@ -128,7 +128,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
 
     /**
      * Creates a file-backed clone of passed <tt>MailMessage</tt> instance.
-     * 
+     *
      * @param original The <tt>MailMessage</tt> instance to clone
      * @return The file-backed clone of passed <tt>MailMessage</tt> instance
      * @throws OXException If an error occurs
@@ -199,7 +199,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
 
     /**
      * Initializes a new {@link ManagedMimeMessage}.
-     * 
+     *
      * @param session The session
      * @param file The RFC822 source file
      * @throws MessagingException If a messaging error occurs
@@ -219,7 +219,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
 
     /**
      * Initializes a new {@link ManagedMimeMessage}.
-     * 
+     *
      * @param session The session
      * @param file The RFC822 source file
      * @throws MessagingException If a messaging error occurs
@@ -239,7 +239,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
 
     /**
      * Gets the associated file
-     * 
+     *
      * @return The file
      */
     public File getFile() {

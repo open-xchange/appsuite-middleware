@@ -53,7 +53,7 @@ final class PWUpdate {
     public String field;
     public int cid = -1;
     public int id = -1;
-    
+
     public PWUpdate(String field, int cid, int id) {
         this.field = field;
         this.cid = cid;

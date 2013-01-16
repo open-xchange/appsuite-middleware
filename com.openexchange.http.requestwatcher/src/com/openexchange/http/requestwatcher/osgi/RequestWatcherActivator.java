@@ -50,9 +50,9 @@ public class RequestWatcherActivator extends HousekeepingActivator {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Starting RequestWatcher.");
             }
-            
+
             RequestWatcherServiceRegistry requestWatcherServiceRegistry = RequestWatcherServiceRegistry.getInstance();
-            
+
             /*
              * initialize the registry, handleUn/Availability keeps track of services.
              * Otherwise use trackService(ConfigurationService.class) and openTrackers() to let the superclass handle the services.
@@ -67,13 +67,13 @@ public class RequestWatcherActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         //Stop the Watcher
         requestWatcher.stopWatching();
-         
+
         /*
          * Clear the registry from the services we are tracking.
          * Otherwise use super.stopBundle(); if we let the superclass handle the services.
          */
         RequestWatcherServiceRegistry.getInstance().clearRegistry();
-        
+
         if (LOG.isInfoEnabled()) {
             LOG.info("Unregistering RequestWatcherService");
         }
@@ -94,6 +94,6 @@ public class RequestWatcherActivator extends HousekeepingActivator {
             }
         }
     }
-    
+
 }
 

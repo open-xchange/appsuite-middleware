@@ -49,15 +49,11 @@
 
 package com.openexchange.service.indexing.impl.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import org.quartz.service.QuartzService;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
@@ -78,8 +74,6 @@ import com.openexchange.service.indexing.IndexingServiceMBean;
 import com.openexchange.service.indexing.impl.internal.IndexingServiceImpl;
 import com.openexchange.service.indexing.impl.internal.IndexingServiceMBeanImpl;
 import com.openexchange.service.indexing.impl.internal.Services;
-import com.openexchange.service.indexing.impl.internal.groupware.SessionEventHandler;
-import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -91,21 +85,21 @@ import com.openexchange.userconf.UserConfigurationService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexingActivator extends HousekeepingActivator {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingActivator.class));
-    
+
     private ObjectName indexingMBeanName;
 
     private IndexingServiceMBeanImpl indexingMBean;
 
     private IndexingServiceImpl serviceImpl;
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, 
-            IndexFacadeService.class, 
-            HazelcastInstance.class, 
-            QuartzService.class, 
+        return new Class<?>[] { ConfigurationService.class,
+            IndexFacadeService.class,
+            HazelcastInstance.class,
+            QuartzService.class,
             MailService.class,
             FolderService.class,
             InfostoreFacade.class,
@@ -116,7 +110,7 @@ public class IndexingActivator extends HousekeepingActivator {
             ConfigViewFactory.class,
             ThreadPoolService.class };
     }
-    
+
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.service.indexing");
@@ -124,30 +118,30 @@ public class IndexingActivator extends HousekeepingActivator {
         serviceImpl = new IndexingServiceImpl();
         addService(IndexingService.class, serviceImpl);
         registerService(IndexingService.class, serviceImpl);
-        
+
 //        Dictionary<String, Object> sessionProperties = new Hashtable<String, Object>(1);
 //        sessionProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
 //        registerService(EventHandler.class, new SessionEventHandler(), sessionProperties);
-        
+
         registerMBean(serviceImpl);
         openTrackers();
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-        
+
         ManagementService managementService = Services.optService(ManagementService.class);
         if (managementService != null && indexingMBeanName != null) {
             managementService.unregisterMBean(indexingMBeanName);
             indexingMBean = null;
-        }        
-        
+        }
+
         if (serviceImpl != null) {
             serviceImpl.shutdown();
         }
     }
-    
+
     private void registerMBean(IndexingServiceImpl indexingService) {
         try {
             indexingMBeanName = new ObjectName(IndexingServiceMBean.DOMAIN, IndexingServiceMBean.KEY, IndexingServiceMBean.VALUE);
@@ -178,5 +172,5 @@ public class IndexingActivator extends HousekeepingActivator {
             LOG.error(e.getMessage(), e);
         }
     }
-    
+
 }

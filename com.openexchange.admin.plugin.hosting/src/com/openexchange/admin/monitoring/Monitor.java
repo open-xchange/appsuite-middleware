@@ -51,7 +51,7 @@ package com.openexchange.admin.monitoring;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 
+ *
  * @author cutmasta
  */
 public final class Monitor implements MonitorMBean {

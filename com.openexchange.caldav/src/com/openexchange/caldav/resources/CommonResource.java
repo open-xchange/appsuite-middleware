@@ -73,14 +73,14 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
  * {@link CommonResource}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class CommonResource<T extends CommonObject> extends AbstractResource {
-    
+
     protected static Log LOG = com.openexchange.log.Log.loggerFor(CommonResource.class);
     private static final int MAX_RETRIES = 3;
-    
+
     private int retryCount = 0;
     protected final WebdavFactory factory;
     protected final WebdavPath url;
@@ -89,15 +89,15 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
     protected T object;
     protected boolean exists;
     protected int parentFolderID;
-    
+
     /**
      * Initializes a new {@link CommonResource}.
-     * 
+     *
      * @param parent the parent folder collection.
-     * @param object an existing groupware object represented by this resource, 
+     * @param object an existing groupware object represented by this resource,
      * or <code>null</code> if a placeholder resource should be created
      * @param url the resource url
-     * @throws OXException 
+     * @throws OXException
      */
     public CommonResource(CommonFolderCollection<T> parent, T object, WebdavPath url) throws OXException {
         super();
@@ -107,7 +107,7 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
         this.object = object;
         this.exists = null != object;
         this.parentFolderID = Tools.parse(parent.getFolder().getID());
-    }    
+    }
 
     protected WebdavProtocolException protocolException(Throwable t) {
         return protocolException(t, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -117,11 +117,11 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
         LOG.error(this.getUrl() + ": " + t.getMessage(), t);
         return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
     }
-    
+
     protected WebdavProtocolException protocolException(int statusCode) {
         return protocolException(new Throwable(), statusCode);
     }
-    
+
     protected boolean handle(OXException e) throws WebdavProtocolException {
         boolean retry = false;
         if (Tools.isDataTruncation(e)) {
@@ -145,54 +145,54 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
         } else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
             /*
              * throw appropriate protocol exception
-             */            
+             */
             throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
         } else if (Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
             /*
              * throw appropriate protocol exception
-             */            
+             */
             throw protocolException(e, HttpServletResponse.SC_CONFLICT);
         } else {
             throw protocolException(e);
         }
-        
+
         if (retry) {
             retryCount++;
-            return retryCount <= MAX_RETRIES; 
+            return retryCount <= MAX_RETRIES;
         } else {
             return false;
         }
     }
-    
+
     protected abstract boolean trimTruncatedAttribute(Truncated truncated);
-    
+
     private boolean trimTruncatedAttributes(OXException e) {
         boolean hasTrimmed = false;
         if (null != e.getProblematics()) {
             for (ProblematicAttribute problematic : e.getProblematics()) {
                 if (Truncated.class.isInstance(problematic)) {
-                    hasTrimmed |= this.trimTruncatedAttribute((Truncated)problematic);                    
-                }                 
-            }            
+                    hasTrimmed |= this.trimTruncatedAttribute((Truncated)problematic);
+                }
+            }
         }
         return hasTrimmed;
     }
-    
+
     protected abstract String getFileExtension();
 
     protected abstract void saveObject() throws OXException;
-    
+
     protected abstract void deleteObject() throws OXException;
-    
+
     protected abstract void createObject() throws OXException;
-    
+
     protected abstract void deserialize(InputStream inputStream) throws OXException, IOException;
-    
+
     @Override
     public void create() throws WebdavProtocolException {
         if (this.exists()) {
             throw protocolException(HttpServletResponse.SC_CONFLICT);
-        } 
+        }
         try {
             this.createObject();
         } catch (OXException e) {
@@ -224,7 +224,7 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
     public void save() throws WebdavProtocolException {
         if (false == this.exists()) {
             throw protocolException(HttpServletResponse.SC_NOT_FOUND);
-        }       
+        }
         try {
             this.saveObject();
         } catch (OXException e) {
@@ -233,9 +233,9 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
             } else {
                 throw protocolException(e);
             }
-        }    
-    }    
-    
+        }
+    }
+
     @Override
     public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
         try {
@@ -248,7 +248,7 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
             throw protocolException(e);
         }
     }
-    
+
     protected String extractResourceName() {
         return Tools.extractResourceName(this.url, getFileExtension());
     }
@@ -275,7 +275,7 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
             return "http://www.open-xchange.com/etags/" + object.getObjectID() + "-" + object.getLastModified().getTime();
         }
     }
-    
+
     @Override
     public boolean exists() throws WebdavProtocolException {
         return this.exists;
@@ -290,7 +290,7 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
     public Date getLastModified() throws WebdavProtocolException {
         return null != object ? object.getLastModified() : null;
     }
-    
+
     @Override
     public boolean hasBody() throws WebdavProtocolException {
         return true;

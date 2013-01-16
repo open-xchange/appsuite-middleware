@@ -54,13 +54,13 @@ import org.json.JSONObject;
 /**
  * {@link Address} - Represents an address.
  * <p>
- * 
+ *
  * <pre>
  *     "private_address": {
  *       "city": "Hamburg",
  *       "country": "DE",
  *       "zip_code": "20357",
- *       "street": "Privatstra§e 1",
+ *       "street": "Privatstra\u00dfe 1",
  *       "phone": "49|40|1234560",
  *       "fax": "||",
  *       "province": "Hamburg",
@@ -68,7 +68,7 @@ import org.json.JSONObject;
  *       "mobile_phone": "49|0155|1234567"
  *     }
  * </pre>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Address {
@@ -101,7 +101,7 @@ public class Address {
 
     /**
      * Gets the city
-     * 
+     *
      * @return The city
      */
     public String getCity() {
@@ -110,7 +110,7 @@ public class Address {
 
     /**
      * Gets the country
-     * 
+     *
      * @return The country
      */
     public String getCountry() {
@@ -119,7 +119,7 @@ public class Address {
 
     /**
      * Gets the ZIP code
-     * 
+     *
      * @return The ZIP code
      */
     public String getZipCode() {
@@ -128,7 +128,7 @@ public class Address {
 
     /**
      * Gets the street
-     * 
+     *
      * @return The street
      */
     public String getStreet() {
@@ -137,7 +137,7 @@ public class Address {
 
     /**
      * Gets the phone
-     * 
+     *
      * @return The phone
      */
     public String getPhone() {
@@ -146,7 +146,7 @@ public class Address {
 
     /**
      * Gets the fax
-     * 
+     *
      * @return The fax
      */
     public String getFax() {
@@ -155,7 +155,7 @@ public class Address {
 
     /**
      * Gets the province
-     * 
+     *
      * @return The province
      */
     public String getProvince() {
@@ -164,7 +164,7 @@ public class Address {
 
     /**
      * Gets the email
-     * 
+     *
      * @return The email
      */
     public String getEmail() {
@@ -173,7 +173,7 @@ public class Address {
 
     /**
      * Gets the mobile phone
-     * 
+     *
      * @return The mobile phone
      */
     public String getMobilePhone() {

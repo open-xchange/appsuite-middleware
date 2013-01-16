@@ -56,25 +56,25 @@ package com.openexchange.file.storage;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class FileStorageEventConstants {
-    
+
     public static final String UPDATE_TOPIC = "com/openexchange/groupware/infostore/update";
 
     public static final String CREATE_TOPIC = "com/openexchange/groupware/infostore/insert";
 
     public static final String DELETE_TOPIC = "com/openexchange/groupware/infostore/delete";
-    
+
     public static final String ALL_TOPICS = "com/openexchange/groupware/infostore/*";
-    
+
     public static final String SESSION = "session";
-    
+
     public static final String SERVICE = "service";
-    
+
     public static final String ACCOUNT_ID = "accountId";
-    
+
     public static final String FOLDER_ID = "folderId";
-    
+
     public static final String OBJECT_ID = "objectId";
-    
+
     public static final String VERSIONS = "versions";
-    
+
 }

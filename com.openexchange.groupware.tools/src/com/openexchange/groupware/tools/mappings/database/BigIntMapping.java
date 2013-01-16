@@ -54,7 +54,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 /**
- * {@link BigIntMapping} - Database mapping for <code>Types.BIGINT</code>. 
+ * {@link BigIntMapping} - Database mapping for <code>Types.BIGINT</code>.
  *
  * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -64,7 +64,7 @@ public abstract class BigIntMapping<O> extends DefaultDbMapping<Long, O> {
 	public BigIntMapping(final String columnName, final String readableName) {
 		super(columnName, readableName, Types.BIGINT);
 	}
-	
+
 	@Override
 	public Long get(final ResultSet resultSet) throws SQLException {
 		return resultSet.getLong(this.getColumnLabel());

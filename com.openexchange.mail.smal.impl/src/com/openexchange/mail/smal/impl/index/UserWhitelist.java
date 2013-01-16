@@ -85,7 +85,7 @@ public class UserWhitelist {
                 allowedUsers = Collections.emptySet();
             } else {
                 allowedUsers = new HashSet<String>();
-                String[] names = whitelist.split(",");                
+                String[] names = whitelist.split(",");
                 for (String name : names) {
                     allowedUsers.add(name.trim());
                 }

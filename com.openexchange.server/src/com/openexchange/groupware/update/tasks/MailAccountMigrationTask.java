@@ -133,12 +133,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
     }
 
     private static Map<Integer, List<Integer>> getAllUsers(final int contextId) throws OXException {
-        final Connection writeCon;
-        try {
-            writeCon = Database.get(contextId, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection writeCon = Database.get(contextId, true);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -170,12 +165,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
     }
 
     private static boolean existsPrimaryMailAccount(final int userId, final int contextId) throws OXException {
-        final Connection writeCon;
-        try {
-            writeCon = Database.get(contextId, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection writeCon = Database.get(contextId, true);
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -198,46 +188,36 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountMigrationTask.class));
         // First check (and possibly insert) a sequence for specified context
         checkAndInsertMailAccountSequence(ctx);
-        // Proceed with user data migration to new mail account tables
-        try {
-            final StringBuilder sb = new StringBuilder(256);
-            for (final Integer userId : users) {
-                // Check for default account
-                if (existsPrimaryMailAccount(userId.intValue(), contextId)) {
-                    if (LOG.isInfoEnabled()) {
-                        sb.setLength(0);
-                        LOG.info(sb.append("Default mail account already exists for user ").append(userId).append(" in context ").append(
-                            ctx.getContextId()));
-                    }
-                    continue;
-                }
-                // Default account does not exist
-                if (LOG.isTraceEnabled()) {
+        final StringBuilder sb = new StringBuilder(256);
+        for (final Integer userId : users) {
+            // Check for default account
+            if (existsPrimaryMailAccount(userId.intValue(), contextId)) {
+                if (LOG.isInfoEnabled()) {
                     sb.setLength(0);
-                    LOG.trace(sb.append("Creating default mail account for user ").append(userId).append(" in context ").append(
+                    LOG.info(sb.append("Default mail account already exists for user ").append(userId).append(" in context ").append(
                         ctx.getContextId()));
                 }
-                // Create default account
-                final User user = loadUser(ctx, userId.intValue());
-                final UserSettingMail usm = loadUserSettingMail(ctx, userId.intValue());
-                try {
-                    handleUser(user, getNameProvderFromUSM(usm), ctx, sb, LOG);
-                } catch (final OXException e) {
-                    LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
-                }
+                continue;
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
+            // Default account does not exist
+            if (LOG.isTraceEnabled()) {
+                sb.setLength(0);
+                LOG.trace(sb.append("Creating default mail account for user ").append(userId).append(" in context ").append(
+                    ctx.getContextId()));
+            }
+            // Create default account
+            final User user = loadUser(ctx, userId.intValue());
+            final UserSettingMail usm = loadUserSettingMail(ctx, userId.intValue());
+            try {
+                handleUser(user, getNameProvderFromUSM(usm), ctx, sb, LOG);
+            } catch (final OXException e) {
+                LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
+            }
         }
     }
 
     private static User loadUser(final Context ctx, final int userId) throws OXException, OXException {
-        final Connection con;
-        try {
-            con = Database.get(ctx, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = Database.get(ctx, true);
         try {
             final UserStorage userStorage = new RdbUserStorage();
             return userStorage.getUser(ctx, userId, con);
@@ -247,12 +227,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
     }
 
     private static UserSettingMail loadUserSettingMail(final Context ctx, final int userId) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(ctx, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = Database.get(ctx, true);
         try {
             return UserSettingMailStorage.getInstance().getUserSettingMail(userId, ctx, con);
         } finally {
@@ -386,12 +361,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
     private static void insertDefaultMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx) throws OXException {
         final int cid = ctx.getContextId();
         final int id = MailAccount.DEFAULT_ID;
-        Connection con = null;
-        try {
-            con = Database.get(cid, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        Connection con = Database.get(cid, true);
         PreparedStatement stmt = null;
         try {
             stmt =
@@ -444,8 +414,6 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeSQLStuff(stmt);
             Database.back(cid, true, con);

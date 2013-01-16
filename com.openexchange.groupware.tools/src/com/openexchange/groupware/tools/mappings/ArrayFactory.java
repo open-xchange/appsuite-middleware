@@ -56,13 +56,13 @@ package com.openexchange.groupware.tools.mappings;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface ArrayFactory<T> {
-	
+
 	/**
 	 * Creates a new typed array with the given size.
-	 * 
+	 *
 	 * @param size the size
 	 * @return the typed array
 	 */
 	T[] newArray(int size);
-	
+
 }

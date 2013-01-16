@@ -55,14 +55,14 @@ import com.openexchange.jslob.JSlobService;
 
 /**
  * {@link JSlobServiceRegistry} - A registry for JSlob services.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface JSlobServiceRegistry {
 
     /**
      * Gets the JSlob service associated with given service identifier.
-     * 
+     *
      * @param serviceId The service identifier or an alias
      * @return The JSlob service associated with given service identifier
      * @throws OXException If returning the service fails or not found
@@ -71,7 +71,7 @@ public interface JSlobServiceRegistry {
 
     /**
      * Gets the JSlob service associated with given service identifier.
-     * 
+     *
      * @param serviceId The service identifier or an alias
      * @return The JSlob service associated with given service identifier or <code>null</code>
      * @throws OXException If returning the service fails
@@ -80,7 +80,7 @@ public interface JSlobServiceRegistry {
 
     /**
      * Gets a collection containing all registered JSlob services
-     * 
+     *
      * @return A collection containing all registered JSlob services
      * @throws OXException If returning the collection fails
      */
@@ -88,7 +88,7 @@ public interface JSlobServiceRegistry {
 
     /**
      * Puts given JSlob service into this registry.
-     * 
+     *
      * @param jslobService The JSlob service to put
      * @return <code>true</code> on success; otherwise <code>false</code> if another service is already bound to the same identifier
      */
@@ -96,7 +96,7 @@ public interface JSlobServiceRegistry {
 
     /**
      * Removes the JSlob service associated with given service identifier.
-     * 
+     *
      * @param jslobService The JSlob service to remove
      * @throws OXException If removing the service fails
      */

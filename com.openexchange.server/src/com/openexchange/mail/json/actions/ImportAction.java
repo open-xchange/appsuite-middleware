@@ -97,7 +97,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ImportAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.POST, name = "import", description = "Import mail as MIME data block (RFC822)", parameters = {
@@ -113,7 +113,7 @@ public final class ImportAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link ImportAction}.
-     * 
+     *
      * @param services
      */
     public ImportAction(final ServiceLookup services) {

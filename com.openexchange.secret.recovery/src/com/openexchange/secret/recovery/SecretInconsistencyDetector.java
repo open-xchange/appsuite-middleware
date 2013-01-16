@@ -62,7 +62,7 @@ public interface SecretInconsistencyDetector {
 
     /**
      * Checks if specified session's current secret is working.
-     * 
+     *
      * @param session The session whose secret shall be checked
      * @return <code>null</code> if secret works; otherwise a non-<code>null</code> diagnosis string
      * @throws OXException If checking secret fails

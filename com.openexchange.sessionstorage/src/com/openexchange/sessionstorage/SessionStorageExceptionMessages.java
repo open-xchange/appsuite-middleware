@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link SessionStorageExceptionMessages} - Error message constants for <b><code>com.openexchange.sessionstorage</code></b>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessionStorageExceptionMessages implements LocalizableStrings {

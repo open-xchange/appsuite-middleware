@@ -72,7 +72,7 @@ import com.openexchange.user.UserService;
 public class EWSFreeBusyPublisherActivator extends HousekeepingActivator {
 
     private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EWSFreeBusyPublisherActivator.class));
-    
+
     private ScheduledTimerTask publishTask = null;
 
     /**
@@ -84,7 +84,7 @@ public class EWSFreeBusyPublisherActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, InternalFreeBusyProvider.class, UserService.class, ContextService.class, 
+        return new Class<?>[] { ConfigurationService.class, InternalFreeBusyProvider.class, UserService.class, ContextService.class,
             EWSFactoryService.class, TimerService.class };
     }
 
@@ -97,7 +97,7 @@ public class EWSFreeBusyPublisherActivator extends HousekeepingActivator {
             int delay = Tools.getConfigPropertyInt("com.openexchange.freebusy.publisher.ews.delay", 15);
             publishTask = EWSFreeBusyPublisherLookup.getService(TimerService.class).scheduleWithFixedDelay(
                 new Publisher(), initialDelay, delay, TimeUnit.MINUTES);
-            LOG.info("Scheduled first publication cycle to run in " + initialDelay + 
+            LOG.info("Scheduled first publication cycle to run in " + initialDelay +
                 " minutes, then repeating with a delay of " + delay + " minutes.");
         } catch (Exception e) {
             LOG.error("error starting com.openexchange.freebusy.publisher.ews", e);

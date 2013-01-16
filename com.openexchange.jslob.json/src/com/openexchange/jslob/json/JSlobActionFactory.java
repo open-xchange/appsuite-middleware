@@ -63,7 +63,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link JSlobActionFactory}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -74,7 +74,7 @@ public class JSlobActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Initializes a new {@link JSlobActionFactory}.
-     * 
+     *
      * @param services The service look-up
      */
     public JSlobActionFactory(final ServiceLookup services) {

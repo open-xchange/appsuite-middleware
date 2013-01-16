@@ -66,57 +66,57 @@ public @interface Action {
 
 	/**
 	 * Specifies the name. Required.
-	 * 
+	 *
 	 * @return The name
 	 */
 	String name();
 
 	/**
 	 * Specifies the description. Defaults to <code>""</code>.
-	 * 
+	 *
 	 * @return the description
 	 */
-	String description() default "";		
+	String description() default "";
 
 	/**
 	 * Specifies the request method. Required.
-	 *  
+	 *
 	 * @return the method
 	 */
 	RequestMethod method();
 
 	/**
 	 * Specifies the parameters. Required.
-	 * 
+	 *
 	 * @return the parameters
 	 */
 	Parameter[] parameters();
-	
+
     /**
      * Specifies the default format. Defaults to <code>"apiResponse"</code>.
      *
      * @return the default format
      */
     String defaultFormat() default "apiResponse";
-    
+
     /**
-	 * Specifies the request body description for {@link Type}<code>.PUT</code> or {@link Type}<code>.POST</code> requests. 
+	 * Specifies the request body description for {@link Type}<code>.PUT</code> or {@link Type}<code>.POST</code> requests.
 	 * Defaults to <code>""</code>.
-     * 
+     *
      * @return the request body description
      */
     String requestBody() default "";
 
     /**
 	 * Specifies the response description. Defaults to <code>""</code>.
-	 * 
+	 *
 	 * @return the response description
 	 */
     String responseDescription() default "";
-    
+
     /**
 	 * Specifies whether the action is deprecated or not. Defaults to <code>false</code>.
-     * 
+     *
      * @return <code>true</code>, if it is deprecated, <code>false</code>, otherwise
      */
     boolean deprecated() default false;

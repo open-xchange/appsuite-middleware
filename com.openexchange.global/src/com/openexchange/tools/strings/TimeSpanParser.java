@@ -87,7 +87,7 @@ public class TimeSpanParser  implements StringParser {
      * </ul>
      *
      * So, for example <tt>&quot;2D 1h 12ms&quot;</tt> would be 2 days and one hour and 12 milliseconds
-     * 
+     *
      * @param span The span string
      * @return The parsed <tt>Long</tt> value
      */
@@ -100,7 +100,9 @@ public class TimeSpanParser  implements StringParser {
         int mode = 0;
         long tally = 0;
 
-        for (final char c : span.toCharArray()) {
+        final int length = span.length();
+        for (int i = 0; i < length; i++) {
+            final char c = span.charAt(i);
             if (Character.isDigit(c)) {
                 if (mode == 0) {
                     numberBuilder.append(c);

@@ -73,15 +73,15 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexMailHandler implements MailMessageHandler {
-    
+
     private final String account;
-    
+
     private final String folder;
-    
+
     private final String mailId;
-    
+
     private final List<IndexDocument<Attachment>> attachments;
-    
+
 
     public IndexMailHandler(String account, String folder, String mailId) {
         super();
@@ -197,10 +197,10 @@ public class IndexMailHandler implements MailMessageHandler {
             attachment.setAttachmentId(id);
             attachment.setFileName(fileName);
             attachment.setMimeType(baseContentType);
-            attachment.setContent(part.getInputStream());            
+            attachment.setContent(part.getInputStream());
             attachments.add(new StandardIndexDocument<Attachment>(attachment));
         }
-        
+
         return true;
     }
 
@@ -231,9 +231,9 @@ public class IndexMailHandler implements MailMessageHandler {
 
     @Override
     public void handleMessageEnd(MailMessage mail) throws OXException {
-        
+
     }
-    
+
     public List<IndexDocument<Attachment>> getAttachments() {
         return attachments;
     }

@@ -66,7 +66,7 @@ public final class JMXAuthenticatorImpl implements JMXAuthenticator {
         this.password = password;
     }
 
-  
+
     public Subject authenticate(final Object credentials) {
         if (!(credentials instanceof String[])) {
             if (credentials == null) {

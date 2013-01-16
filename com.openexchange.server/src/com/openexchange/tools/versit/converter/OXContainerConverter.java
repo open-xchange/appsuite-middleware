@@ -544,15 +544,15 @@ public class OXContainerConverter {
                 	if (null != clipRect) {
                 		/*
                 		 * determine image format
-                		 */                		
+                		 */
         				String formatName = "JPEG";
         				Parameter typeParameter = property.getParameter("TYPE");
         				if (null != typeParameter && 1 == typeParameter.getValueCount()) {
         					String type = typeParameter.getValue(0).getText();
         					if (null != type && 0 < type.length()) {
-        						formatName = type; 
+        						formatName = type;
         					}
-        				}                		
+        				}
         				/*
                 		 * try to crop the image
                 		 */
@@ -789,7 +789,7 @@ public class OXContainerConverter {
                     } catch (UnsupportedEncodingException e) {
                         LOG.debug("Error decoding IMPP value", e);
                     }
-                }                
+                }
                 Parameter type = property.getParameter(P_TYPE);
                 boolean set = false;
                 if (null != type) {
@@ -894,7 +894,7 @@ public class OXContainerConverter {
                                         } else if (false == contactContainer.containsEmail3()) {
                                             contactContainer.setEmail3(contactContainer.getEmail1());
                                         } else {
-                                            LOG.debug("Can only save one 'work' email address, going to overwrite existing value.");                                           
+                                            LOG.debug("Can only save one 'work' email address, going to overwrite existing value.");
                                         }
                                     }
                                     contactContainer.setEmail1(value);
@@ -910,7 +910,7 @@ public class OXContainerConverter {
                                         } else if (false == contactContainer.containsEmail2()) {
                                             contactContainer.setEmail2(contactContainer.getEmail3());
                                         } else {
-                                            LOG.debug("Can only save one 'other' email address, going to overwrite existing value.");                                           
+                                            LOG.debug("Can only save one 'other' email address, going to overwrite existing value.");
                                         }
                                     }
                                     contactContainer.setEmail3(value);
@@ -996,11 +996,11 @@ public class OXContainerConverter {
 
     /**
      * Extracts the clipping information from the supplied 'X-ABCROP-RECTANGLE'
-     * rectangle if defined. The result's 'width' and 'height' properties 
-     * represent the dimensions of the target image. The 'x' property is the 
-     * horizontal offset to draw the source image in the target image from the 
+     * rectangle if defined. The result's 'width' and 'height' properties
+     * represent the dimensions of the target image. The 'x' property is the
+     * horizontal offset to draw the source image in the target image from the
      * left border, the 'y' property is the vertical offset from the bottom.
-     * 
+     *
      * @param cropParameter the 'X-ABCROP-RECTANGLE' parameter
      * @return the clipping rectangle, or <code>null</code>, if not defined
      */
@@ -1012,9 +1012,9 @@ public class OXContainerConverter {
     			Matcher matcher = clipRectPattern.matcher(text);
     			if (matcher.find()) {
     				try {
-        				int offsetLeft = Integer.parseInt(matcher.group(1));                				
-        				int offsetBottom = Integer.parseInt(matcher.group(2));                				
-        				int targetWidth = Integer.parseInt(matcher.group(3));                				
+        				int offsetLeft = Integer.parseInt(matcher.group(1));
+        				int offsetBottom = Integer.parseInt(matcher.group(2));
+        				int targetWidth = Integer.parseInt(matcher.group(3));
         				int targetHeight = Integer.parseInt(matcher.group(4));
         				return new Rectangle(offsetLeft, offsetBottom, targetWidth, targetHeight);
     				} catch (NumberFormatException e) {
@@ -1022,20 +1022,20 @@ public class OXContainerConverter {
     				}
     			}
     		}
-    	}    	
+    	}
 		return null;
     }
-    
+
     /**
-     * Performs a crop operation on the source image as defined by the 
-     * supplied clipping rectangle. 
-     * 
+     * Performs a crop operation on the source image as defined by the
+     * supplied clipping rectangle.
+     *
      * @param source the source image
-     * @param clipRect the clip rectangle from an 'X-ABCROP-RECTANGLE' property 
+     * @param clipRect the clip rectangle from an 'X-ABCROP-RECTANGLE' property
      * @param formatName the target image format
      * @return the cropped image
      * @throws IOException
-     * @throws OXException 
+     * @throws OXException
      */
     private static byte[] doABCrop(byte[] source, Rectangle clipRect, String formatName) throws IOException, OXException {
     	InputStream inputStream = null;
@@ -1049,16 +1049,16 @@ public class OXContainerConverter {
         	 * crop the image
         	 */
         	ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class, true);
-        	return imageService.transfom(sourceImage).crop(clipRect.x * -1, 
+        	return imageService.transfom(sourceImage).crop(clipRect.x * -1,
         			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width, clipRect.height).getBytes(formatName);
     	} finally {
     		Streams.close(inputStream);
     	}
     }
-    
+
     /**
      * Scales an image if needed to fit into the supplied rectangular area.
-     * 
+     *
      * @param source The image data
      * @param maxWidth The maximum target width
      * @param maxHeight The maximum target height
@@ -1074,7 +1074,7 @@ public class OXContainerConverter {
         if ("vnd.microsoft.icon".equalsIgnoreCase(formatName) || "x-icon".equalsIgnoreCase(formatName)) {
             // ImageIO has problems reading icons: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6633448
             return source;
-        }        
+        }
         InputStream inputStream = null;
         try {
             /*
@@ -1099,7 +1099,7 @@ public class OXContainerConverter {
 
     /**
      * Scales a contact image if configured via <code>com.openexchange.contact.scaleVCardImages</code>.
-     * 
+     *
      * @param source The image data
      * @param formatName The image format name
      * @return The scaled image data, or the unchanged <code>source</code> if not configured
@@ -1113,7 +1113,7 @@ public class OXContainerConverter {
             if (null != value && 0 < value.length()) {
                 int idx = value.indexOf('x');
                 if (1 > idx) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(value);    
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(value);
                 }
                 try {
                     int maxWidth = Integer.parseInt(value.substring(0, idx));
@@ -1123,7 +1123,7 @@ public class OXContainerConverter {
                     throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, value);
                 }
             }
-        } 
+        }
         return source;
     }
 
@@ -1856,11 +1856,11 @@ public class OXContainerConverter {
             addProperty(object, P_TEL, P_TYPE, new String[] { "isdn" }, contact.getTelephoneISDN());
             addProperty(object, P_TEL, P_TYPE, new String[] { "pager" }, contact.getTelephonePager());
             // EMAIL
-            addProperty(object, P_EMAIL, P_TYPE, 1 == contact.getDefaultAddress() ? 
+            addProperty(object, P_EMAIL, P_TYPE, 1 == contact.getDefaultAddress() ?
                 new String[] { "INTERNET", PARAM_WORK, "pref" } : new String[] { "INTERNET", PARAM_WORK }, contact.getEmail1());
-            addProperty(object, P_EMAIL, P_TYPE, 2 == contact.getDefaultAddress() ? 
+            addProperty(object, P_EMAIL, P_TYPE, 2 == contact.getDefaultAddress() ?
                 new String[] { "INTERNET", PARAM_HOME, "pref" } : new String[] { "INTERNET", PARAM_HOME }, contact.getEmail2());
-            addProperty(object, P_EMAIL, P_TYPE, 3 == contact.getDefaultAddress() ? 
+            addProperty(object, P_EMAIL, P_TYPE, 3 == contact.getDefaultAddress() ?
                 new String[] { "INTERNET", "pref", "other" } : new String[] { "INTERNET", "other" }, contact.getEmail3());
             // MAILER is ignored
             // TZ is ignored
@@ -1928,7 +1928,7 @@ public class OXContainerConverter {
             if (0 < categories.size()) {
                 addProperty(object, P_CATEGORIES, categories);
             }
-        }       
+        }
         // NOTE
         addProperty(object, "NOTE", contact.getNote());
         // REV

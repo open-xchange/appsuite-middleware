@@ -54,34 +54,33 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 
 import com.openexchange.carddav.resources.CardDAVCollection;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link SyncToken} - Contains the value of the synchronization token as it 
+ * {@link SyncToken} - Contains the value of the synchronization token as it
  * would be returned by a DAV:sync-collection report.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SyncToken extends SingleXMLPropertyMixin {
-	
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SyncToken.class);
 
     private final CardDAVCollection collection;
 	private Date lastModified = null;
-	
+
 	/**
      * Initializes a new {@link SyncToken}.
-	 * 
-	 * @param collection the parent CardDAV collection 
+	 *
+	 * @param collection the parent CardDAV collection
 	 */
     public SyncToken(CardDAVCollection collection) {
     	super(Protocol.DAV_NS.getURI(), "sync-token");
     	this.collection = collection;
-    }	
+    }
 
     @Override
     protected String getValue() {
@@ -91,7 +90,7 @@ public class SyncToken extends SingleXMLPropertyMixin {
 			} catch (WebdavProtocolException e) {
 		        LOG.error(e.getMessage(), e);
 			}
-    	}    	
+    	}
     	return Long.toString(null != lastModified ? lastModified.getTime() : 0);
     }
 

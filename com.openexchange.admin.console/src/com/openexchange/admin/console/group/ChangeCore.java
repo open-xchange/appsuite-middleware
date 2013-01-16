@@ -60,10 +60,10 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 
 public abstract class ChangeCore extends GroupAbstraction {
-    
+
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
-        
+
         setGroupIdOption(parser, NeededQuadState.eitheror);
         setGroupNameOption(parser, NeededQuadState.eitheror);
 
@@ -85,18 +85,18 @@ public abstract class ChangeCore extends GroupAbstraction {
             parser.ownparse(args);
 
             final Group grp = new Group();
-            
+
             parseAndSetGroupId(parser, grp);
             parseAndSetGroupName(parser, grp);
-            
+
             successtext = nameOrIdSet(this.groupid, this.groupName, "group");
-            
+
             final Context ctx = contextparsing(parser);
 
             final Credentials auth = credentialsparsing(parser);
 
             final OXGroupInterface oxgrp = getGroupInterface();
-            
+
             final String addMembers = (String) parser.getOptionValue(this.addMemberOption);
             if (addMembers != null) {
                 final User[] newMemberList = getMembers(parser, addMembers);
@@ -104,7 +104,7 @@ public abstract class ChangeCore extends GroupAbstraction {
                     oxgrp.addMember(ctx, grp, newMemberList, auth);
                 }
             }
-            
+
             final String removeMembers = (String) parser.getOptionValue(this.removeMemberOption);
             if (removeMembers != null) {
                 final User[] removeMemberList = getMembers(parser, removeMembers);

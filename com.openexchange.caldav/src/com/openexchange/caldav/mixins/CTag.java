@@ -52,17 +52,16 @@ package com.openexchange.caldav.mixins;
 import java.util.Date;
 import org.apache.commons.logging.Log;
 import com.openexchange.caldav.resources.CommonFolderCollection;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
 /**
  * {@link CTag}
- * 
+ *
  * getctag xmlns="http://calendarserver.org/ns/"
- * 
- * The "calendar-ctag" is like a resource "etag"; it changes when anything in the calendar has changed. This allows the client to quickly 
+ *
+ * The "calendar-ctag" is like a resource "etag"; it changes when anything in the calendar has changed. This allows the client to quickly
  * determine that it does not need to synchronize any changed events.
  * @see <a href="https://trac.calendarserver.org/browser/CalendarServer/trunk/doc/Extensions/caldav-ctag.txt">caldav-ctag-02</a>
  *
@@ -70,17 +69,17 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CTag extends SingleXMLPropertyMixin {
-	
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CTag.class);
 
 	private final CommonFolderCollection<?> collection;
     private String value = null;
-    
+
     public CTag(CommonFolderCollection<?> collection) {
         super("http://calendarserver.org/ns/", "getctag");
-        this.collection = collection;        
-    }   
-    
+        this.collection = collection;
+    }
+
     @Override
     protected String getValue() {
         if (null == value && null != collection) {

@@ -64,14 +64,14 @@ import com.openexchange.index.solr.internal.SolrField;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class InfostoreFieldMapper implements FieldMapper {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreFieldMapper.class);
-    
+
     private static final InfostoreFieldMapper INSTANCE = new InfostoreFieldMapper();
-    
+
     private final Map<InfostoreIndexField, SolrInfostoreField> fieldMapping;
-    
-    
+
+
     private InfostoreFieldMapper() {
         super();
         fieldMapping = new EnumMap<InfostoreIndexField, SolrInfostoreField>(InfostoreIndexField.class);
@@ -82,22 +82,22 @@ public class InfostoreFieldMapper implements FieldMapper {
             }
         }
     }
-    
+
     public static InfostoreFieldMapper getInstance() {
         return INSTANCE;
     }
-    
+
     @Override
     public SolrField solrFieldFor(IndexField indexField) {
         if (indexField == null) {
             return null;
         }
-        
+
         if (!(indexField instanceof InfostoreIndexField)) {
             LOG.warn("Parameter 'indexField' must be of type " + InfostoreIndexField.class.getName() + "!");
             return null;
         }
-        
+
         return fieldMapping.get(indexField);
     }
 

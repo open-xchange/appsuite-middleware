@@ -139,7 +139,7 @@ public abstract class Scanner implements VersitDefinition.Reader {
             if (peek < '0' || peek > '9') {
                 // Obviously a number with less digits than expected
                 if (strict) {
-                    throw new VersitException(this, digits + "-digit number expected");                    
+                    throw new VersitException(this, digits + "-digit number expected");
                 }
                 break;
             }

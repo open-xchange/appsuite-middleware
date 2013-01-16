@@ -89,12 +89,7 @@ public final class ContactCollectorReEnabler extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
-        final Connection con;
-        try {
-            con = Database.getNoTimeout(contextId, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
             perform(con);

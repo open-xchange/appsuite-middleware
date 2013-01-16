@@ -60,7 +60,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link PostMethodHandler} - Serves the REST-like <code>POST</code> request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PostMethodHandler extends AbstractMethodHandler {
@@ -108,7 +108,7 @@ public final class PostMethodHandler extends AbstractMethodHandler {
                 jObject.put("value", requestData.getData());
                 requestData.setData(jObject, "json");
             } catch (final JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage()); 
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         } else {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);

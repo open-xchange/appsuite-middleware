@@ -125,12 +125,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
 
         final Confirm confirm = parseConfirmation(dataArguments);
 
-        final Context ctx;
-        try {
-            ctx = ContextStorage.getStorageContext(session);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Context ctx = ContextStorage.getStorageContext(session);
         final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
         if (iCalParser == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ICalParser.class.getName());
@@ -173,8 +168,6 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
                 tasks = parseTaskStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings,
                         defaultZone);
             }
-        } catch (final ConversionError e) {
-            throw new OXException(e);
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -190,10 +183,8 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
              */
             try {
                 insertAppointments(session, calendarFolder, ctx, appointments, confirm, folderAndIdArray);
-            } catch (final OXException e) {
-                throw new OXException(e);
             } catch (final JSONException e) {
-                throw new OXException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             }
         }
         if (!tasks.isEmpty()) {
@@ -208,10 +199,8 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
              */
             try {
                 insertTasks(session, taskFolder, tasks, folderAndIdArray);
-            } catch (final OXException e) {
-                throw new OXException(e);
             } catch (final JSONException e) {
-                throw new OXException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             }
         }
         return folderAndIdArray;

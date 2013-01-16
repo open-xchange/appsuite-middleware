@@ -536,8 +536,8 @@ public abstract class MailConfig {
     }
 
     /**
-     * Gets the sane (puny-code) representation of passed login in case it appears to be an Internet address. 
-     * 
+     * Gets the sane (puny-code) representation of passed login in case it appears to be an Internet address.
+     *
      * @param login The login
      * @return The sane login
      */
@@ -619,7 +619,7 @@ public abstract class MailConfig {
 
     /**
      * Gets the standard names.
-     * 
+     *
      * @return The standard names
      */
     public String[] getStandardNames() {
@@ -630,7 +630,7 @@ public abstract class MailConfig {
 
     /**
      * Gets the standard full names.
-     * 
+     *
      * @return The standard full names
      */
     public String[] getStandardFullNames() {
@@ -641,7 +641,7 @@ public abstract class MailConfig {
 
     /**
      * Applies folder name information from given mail account
-     * 
+     *
      * @param mailAccount The mail account
      */
     public void applyStandardNames(final MailAccount mailAccount) {
@@ -853,7 +853,7 @@ public abstract class MailConfig {
      * Performs optional custom parsing.
      * <p>
      * Returns <code>false</code> by default.
-     * 
+     *
      * @param account The associated mail account
      * @param session The user's session
      * @return <code>true</code> if custom parsing has been performed; otherwise <code>false</code>

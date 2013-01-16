@@ -58,7 +58,7 @@ import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link HumanReadableRecurrences}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class HumanReadableRecurrences {

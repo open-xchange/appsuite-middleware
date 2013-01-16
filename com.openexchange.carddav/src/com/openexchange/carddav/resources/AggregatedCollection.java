@@ -57,21 +57,20 @@ import org.apache.commons.logging.Log;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.acl.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
- * {@link AggregatedCollection} - CardDAV collection aggregating the contents 
- * of all visible folders. 
- * 
+ * {@link AggregatedCollection} - CardDAV collection aggregating the contents
+ * of all visible folders.
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class AggregatedCollection extends CardDAVCollection {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AggregatedCollection.class);
-    
+
     private String displayName = null;
 
     public AggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, String displayName) throws WebdavProtocolException {
@@ -99,10 +98,10 @@ public class AggregatedCollection extends CardDAVCollection {
     protected Collection<Contact> getContacts() throws OXException {
     	return factory.getState().getContacts();
     }
-	
+
 	@Override
 	protected String getFolderID() throws OXException {
-		return factory.getState().getDefaultFolder().getID();		
+		return factory.getState().getDefaultFolder().getID();
 	}
 
 	@Override

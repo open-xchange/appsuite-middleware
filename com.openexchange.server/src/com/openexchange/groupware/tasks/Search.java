@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -118,12 +117,7 @@ public class Search {
         if (SearchObject.NO_PATTERN == search.getPattern()) {
             return;
         }
-        final int minimumSearchCharacters;
-        try {
-            minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        } catch (final ConfigurationException e) {
-            throw new OXException(e);
-        }
+        final int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
         if (0 == minimumSearchCharacters) {
             return;
         }

@@ -5,7 +5,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link SpamSettingExceptionMessages} - Exception messages for {@link SpamSettingException} that needs to be translated.
- * 
+ *
  * @author francisco.laguna@open-xchange.com
  */
 public final class SpamSettingExceptionMessages implements LocalizableStrings {

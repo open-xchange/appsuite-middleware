@@ -76,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SubscriptionExecutionServiceImpl}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionService, FolderUpdaterRegistry {
@@ -96,7 +96,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
      * <p>
      * Acquires the lock if it is available and returns immediately with the value {@code true}. If the lock is not available then this
      * method will return immediately with the value {@code false}.
-     * 
+     *
      * @param subscriptionId The subscription identifier
      * @param session The associated session
      * @return {@code true} if the lock was acquired and {@code false} otherwise
@@ -107,7 +107,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
 
     /**
      * Releases the lock.
-     * 
+     *
      * @param subscriptionId The subscription identifier
      * @param session The associated session
      */

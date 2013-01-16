@@ -181,7 +181,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Checks for duplicate folder through a LIST request.
-     * 
+     *
      * @param name The name to check for
      * @param treeId The tree identifier
      * @param parentId The parent identifier
@@ -197,7 +197,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Checks for duplicate folder through a LIST request.
-     * 
+     *
      * @param name The name to check for
      * @param treeId The tree identifier
      * @param parentId The parent identifier
@@ -466,7 +466,7 @@ public abstract class AbstractPerformer {
      * A check-for-duplicate result.
      */
     protected static final class CheckForDuplicateResult {
-        
+
         protected final OXException error;
         protected final String optFolderId;
 

@@ -51,13 +51,10 @@ package com.openexchange.http.grizzly.filter.backendroute;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import org.glassfish.grizzly.http.Cookie;
 import org.glassfish.grizzly.http.Cookies;
 import org.glassfish.grizzly.http.HttpRequestPacket;
-import org.glassfish.grizzly.http.CookiesBuilder.ClientCookiesBuilder;
 import org.glassfish.grizzly.http.util.CookieParserUtils;
 import org.glassfish.grizzly.http.util.CookieSerializerUtils;
 import org.glassfish.grizzly.http.util.Header;
@@ -71,7 +68,7 @@ import org.glassfish.grizzly.memory.ByteBufferWrapper;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class ClientCookieInspector extends AbstractCookieInspector {
- 
+
     /**
      * Initializes a new {@link ClientCookieInspector}.
      * @param httpRequestPacket the incoming request packet, must not be null
@@ -87,7 +84,7 @@ public class ClientCookieInspector extends AbstractCookieInspector {
         this.cookieMap = getCookieMapFromHeaderLine(cookieHeader == null ? "" : cookieHeader);
         this.backendRoute = backendRoute;
     }
-    
+
     /**
      * Convert the client header line into a map<name, cookie> of cookies.
      * @param headerLine the header line from the client http request
@@ -97,10 +94,10 @@ public class ClientCookieInspector extends AbstractCookieInspector {
         if(headerLine == null) {
             throw new IllegalArgumentException();
         }
-        HashMap<String, Cookie> cookieMap = new HashMap<String, Cookie>(); 
+        HashMap<String, Cookie> cookieMap = new HashMap<String, Cookie>();
         Cookies cookies = new Cookies();
         CookieParserUtils.parseClientCookies(cookies, headerLine, true);
-      for (Cookie cookie : cookies.get()) {        
+      for (Cookie cookie : cookies.get()) {
             cookieMap.put(cookie.getName(), cookie);
         }
         return cookieMap;
@@ -108,12 +105,12 @@ public class ClientCookieInspector extends AbstractCookieInspector {
 
     /**
      * Construct a http <code>Cookie:</code> header line from the cookies currently stored in the inspector.
-     * @return a Cookie: header line 
+     * @return a Cookie: header line
      */
     public ByteBufferWrapper getCookieHeaderLine() {
         StringBuilder sb = new StringBuilder();
         CookieSerializerUtils.serializeClientCookies(sb, false, cookieMap.values().toArray(new Cookie[0]));
         return new ByteBufferWrapper(ByteBuffer.wrap(sb.toString().getBytes()));
     }
-    
+
 }

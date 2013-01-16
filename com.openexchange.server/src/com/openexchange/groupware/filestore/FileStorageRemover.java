@@ -84,12 +84,8 @@ public final class FileStorageRemover extends ContextDelete {
     }
 
     private void removeFileStorage(final Context ctx, final DBProvider dbProvider) throws OXException {
-        try {
-            final FileStorage stor = getFileStorage(ctx, dbProvider);
-            stor.remove();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final FileStorage stor = getFileStorage(ctx, dbProvider);
+        stor.remove();
     }
 
     private FileStorage getFileStorage(final Context ctx, final DBProvider dbProvider) throws OXException {

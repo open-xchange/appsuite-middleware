@@ -62,7 +62,7 @@ public interface ManagedFileContent extends SimpleContent<InputStream> {
 
     /**
      * Gets the content type of associated managed file.
-     * 
+     *
      * @return The content type; e.g. <code><i>application/octet-stream</i></code>
      */
     String getContentType();
@@ -76,7 +76,7 @@ public interface ManagedFileContent extends SimpleContent<InputStream> {
 
     /**
      * Gets the managed file's identifier.
-     * 
+     *
      * @return The identifier
      */
     String getId();

@@ -91,6 +91,8 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Construct an empty JSONArray.
+     * 
+     * @throws IllegalArgumentException If the specified initial capacity is negative
      */
     public JSONArray(final int initialCapacity) {
         super();

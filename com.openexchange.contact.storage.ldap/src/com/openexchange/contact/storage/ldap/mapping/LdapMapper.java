@@ -82,11 +82,11 @@ import com.openexchange.search.SingleSearchTerm;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class LdapMapper extends DefaultMapper<Contact, ContactField> {
-    
-    /** 
+
+    /**
      * A generic contact mapper without ldap attribute information
      */
-    public static final LdapMapper GENERIC; 
+    public static final LdapMapper GENERIC;
 
     /**
      * Contains all possible contact mappings
@@ -94,7 +94,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
     protected static final EnumMap<ContactField, LdapMapping<? extends Object>> POSSIBLE_MAPPINGS;
 
     protected final EnumMap<ContactField, LdapMapping<? extends Object>> mappings;
-    
+
 
     public LdapMapper(Properties mappingProps, String propertyPrefix) throws OXException {
         super();
@@ -104,14 +104,14 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
     public LdapMapper(String mappingFile, String propertyPrefix) throws OXException {
         this(Tools.loadProperties(mappingFile), propertyPrefix);
     }
-    
+
     private LdapMapper(EnumMap<ContactField, LdapMapping<? extends Object>> mappings) {
         super();
         this.mappings = mappings;
     }
-    
+
     public Comparator<Contact> getComparator(final SortOptions sortOptions) {
-        if (null == sortOptions || SortOptions.EMPTY.equals(sortOptions) || 
+        if (null == sortOptions || SortOptions.EMPTY.equals(sortOptions) ||
             null == sortOptions.getOrder() || 0 == sortOptions.getOrder().length) {
             return null;
         }
@@ -124,7 +124,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
                     if (null != mapping) {
                         int comparison = mapping.compare(contact1, contact2, locale);
                         if (0 != comparison) {
-                            return Order.DESCENDING.equals(sortOrder.getOrder()) ? -1 * comparison : comparison;                            
+                            return Order.DESCENDING.equals(sortOrder.getOrder()) ? -1 * comparison : comparison;
                         }
                     }
                 }
@@ -132,34 +132,34 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
         };
     }
-    
+
     public LdapMapping<? extends Object> getMapping(SingleSearchTerm term) {
         LdapMapping<? extends Object> mapping = null;
         for (Operand<?> operand : term.getOperands()) {
             if (Operand.Type.COLUMN.equals(operand.getType())) {
                 if (null != mapping) {
-                    throw new IllegalArgumentException("Unable to handle more than one COLUMN-type operand in single-searchterm.");                    
+                    throw new IllegalArgumentException("Unable to handle more than one COLUMN-type operand in single-searchterm.");
                 }
                 mapping = this.opt(getField(operand.getValue()));
             }
         }
         return mapping;
     }
-    
+
     protected EnumMap<ContactField, LdapMapping<? extends Object>> loadMappings(Properties mappingProps, String propertyPrefix) throws OXException {
-        EnumMap<ContactField, LdapMapping<? extends Object>> mappings = 
+        EnumMap<ContactField, LdapMapping<? extends Object>> mappings =
             new EnumMap<ContactField, LdapMapping<? extends Object>>(ContactField.class);
-        int beginIndex = propertyPrefix.length();                
+        int beginIndex = propertyPrefix.length();
         for (Entry<Object, Object> prop : mappingProps.entrySet()) {
             /*
-             * check property 
+             * check property
              */
             String propertyValue = (String)prop.getValue();
             if (null == propertyValue || 0 == propertyValue.length()) {
                 // not mapped
                 continue;
             }
-            String propertyName = prop.getKey().toString(); 
+            String propertyName = prop.getKey().toString();
             if (false == propertyName.startsWith(propertyPrefix) || beginIndex > propertyName.length()) {
                 // wrong prefix
                 continue;
@@ -181,10 +181,10 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
         }
         return mappings;
     }
-    
+
     /**
-     * 
-     * 
+     *
+     *
      * @param result
      * @param idResolver
      * @param fields
@@ -201,7 +201,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
         }
         return contact;
     }
-        
+
     @Override
     public LdapMapping<? extends Object> get(ContactField field) throws OXException {
         LdapMapping<? extends Object> mapping = this.opt(field);
@@ -233,7 +233,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
     protected EnumMap<ContactField, LdapMapping<? extends Object>> getMappings() {
         return this.mappings;
     }
-    
+
     public String[] getLdapAttributes(ContactField... fields) {
         if (null == fields) {
             return new String[0];
@@ -243,18 +243,18 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             LdapMapping<? extends Object> ldapMapping = this.opt(field);
             if (null != ldapMapping) {
                 if (null != ldapMapping.getLdapAttributeName()) {
-                    ldapAttributes.add(ldapMapping.getLdapAttributeName());                    
+                    ldapAttributes.add(ldapMapping.getLdapAttributeName());
                 }
                 if (null != ldapMapping.getAlternativeLdapAttributeName()) {
-                    ldapAttributes.add(ldapMapping.getAlternativeLdapAttributeName());                    
+                    ldapAttributes.add(ldapMapping.getAlternativeLdapAttributeName());
                 }
             }
         }
         return ldapAttributes.toArray(new String[ldapAttributes.size()]);
     }
-    
+
     public SortKey[] getSortKeys(SortOptions sortOptions) throws OXException {
-        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions) 
+        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)
             && null != sortOptions.getOrder() && 0 < sortOptions.getOrder().length) {
             List<SortKey> sortKeys = new ArrayList<SortKey>();
             for (SortOrder sortOrder : sortOptions.getOrder()) {
@@ -272,7 +272,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
     /**
      * Creates a suitable mapping for the supplied contact field and sets the
      * mapping's ldap attribute name.
-     * 
+     *
      * @param field
      * @param ldapAttribute
      * @return
@@ -292,18 +292,18 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             if (1 < attributeNames.length) {
                 ldapMapping.setAlternativeLdapAttributeName(attributeNames[1]);
             }
-            return ldapMapping;  
+            return ldapMapping;
         }
     }
-    
+
     static {
-        EnumMap<ContactField, LdapMapping<? extends Object>> mappings = 
+        EnumMap<ContactField, LdapMapping<? extends Object>> mappings =
             new EnumMap<ContactField, LdapMapping<? extends Object>>(ContactField.class);
-        
+
         mappings.put(ContactField.DISPLAY_NAME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setDisplayName(value);
             }
 
@@ -313,20 +313,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getDisplayName();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeDisplayName();                
+                contact.removeDisplayName();
             }
         });
 
         mappings.put(ContactField.SUR_NAME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setSurName(value);
             }
 
@@ -336,20 +336,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getSurName();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeSurName();                
+                contact.removeSurName();
             }
         });
 
         mappings.put(ContactField.GIVEN_NAME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setGivenName(value);
             }
 
@@ -359,20 +359,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getGivenName();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeGivenName();              
+                contact.removeGivenName();
             }
         });
 
         mappings.put(ContactField.MIDDLE_NAME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setMiddleName(value);
             }
 
@@ -382,20 +382,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getMiddleName();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeMiddleName();             
+                contact.removeMiddleName();
             }
         });
 
         mappings.put(ContactField.SUFFIX, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setSuffix(value);
             }
 
@@ -405,20 +405,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getSuffix();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeSuffix();             
+                contact.removeSuffix();
             }
         });
 
         mappings.put(ContactField.TITLE, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTitle(value);
             }
 
@@ -428,20 +428,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTitle();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTitle();              
+                contact.removeTitle();
             }
         });
 
         mappings.put(ContactField.STREET_HOME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setStreetHome(value);
             }
 
@@ -451,20 +451,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getStreetHome();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeStreetHome();             
+                contact.removeStreetHome();
             }
         });
 
         mappings.put(ContactField.POSTAL_CODE_HOME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setPostalCodeHome(value);
             }
 
@@ -474,20 +474,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getPostalCodeHome();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removePostalCodeHome();             
+                contact.removePostalCodeHome();
             }
         });
 
         mappings.put(ContactField.CITY_HOME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCityHome(value);
             }
 
@@ -497,20 +497,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCityHome();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeCityHome();               
+                contact.removeCityHome();
             }
         });
 
         mappings.put(ContactField.STATE_HOME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setStateHome(value);
             }
 
@@ -520,20 +520,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getStateHome();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeStateHome();              
+                contact.removeStateHome();
             }
         });
 
         mappings.put(ContactField.COUNTRY_HOME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCountryHome(value);
             }
 
@@ -543,20 +543,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCountryHome();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeCountryHome();                
+                contact.removeCountryHome();
             }
         });
 
         mappings.put(ContactField.MARITAL_STATUS, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setMaritalStatus(value);
             }
 
@@ -566,20 +566,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getMaritalStatus();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeMaritalStatus();              
+                contact.removeMaritalStatus();
             }
         });
 
         mappings.put(ContactField.NUMBER_OF_CHILDREN, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setNumberOfChildren(value);
             }
 
@@ -589,20 +589,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getNumberOfChildren();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeNumberOfChildren();               
+                contact.removeNumberOfChildren();
             }
         });
 
         mappings.put(ContactField.PROFESSION, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setProfession(value);
             }
 
@@ -612,20 +612,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getProfession();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeProfession();             
+                contact.removeProfession();
             }
         });
 
         mappings.put(ContactField.NICKNAME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setNickname(value);
             }
 
@@ -635,20 +635,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getNickname();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeNickname();               
+                contact.removeNickname();
             }
         });
 
         mappings.put(ContactField.SPOUSE_NAME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setSpouseName(value);
             }
 
@@ -658,20 +658,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getSpouseName();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeSpouseName();             
+                contact.removeSpouseName();
             }
         });
 
         mappings.put(ContactField.NOTE, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setNote(value);
             }
 
@@ -681,20 +681,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getNote();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeNote();               
+                contact.removeNote();
             }
         });
 
         mappings.put(ContactField.COMPANY, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCompany(value);
             }
 
@@ -704,20 +704,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCompany();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeCompany();                
+                contact.removeCompany();
             }
         });
 
         mappings.put(ContactField.DEPARTMENT, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setDepartment(value);
             }
 
@@ -727,20 +727,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getDepartment();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeDepartment();             
+                contact.removeDepartment();
             }
         });
 
         mappings.put(ContactField.POSITION, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setPosition(value);
             }
 
@@ -750,20 +750,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getPosition();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removePosition();               
+                contact.removePosition();
             }
         });
 
         mappings.put(ContactField.EMPLOYEE_TYPE, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setEmployeeType(value);
             }
 
@@ -773,20 +773,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getEmployeeType();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeEmployeeType();               
+                contact.removeEmployeeType();
             }
         });
 
         mappings.put(ContactField.ROOM_NUMBER, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setRoomNumber(value);
             }
 
@@ -796,20 +796,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getRoomNumber();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeRoomNumber();             
+                contact.removeRoomNumber();
             }
         });
 
         mappings.put(ContactField.STREET_BUSINESS, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setStreetBusiness(value);
             }
 
@@ -819,20 +819,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getStreetBusiness();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeStreetBusiness();             
+                contact.removeStreetBusiness();
             }
         });
 
         mappings.put(ContactField.POSTAL_CODE_BUSINESS, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setPostalCodeBusiness(value);
             }
 
@@ -842,20 +842,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getPostalCodeBusiness();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removePostalCodeBusiness();             
+                contact.removePostalCodeBusiness();
             }
         });
 
         mappings.put(ContactField.CITY_BUSINESS, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCityBusiness(value);
             }
 
@@ -865,20 +865,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCityBusiness();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeCityBusiness();               
+                contact.removeCityBusiness();
             }
         });
 
         mappings.put(ContactField.STATE_BUSINESS, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setStateBusiness(value);
             }
 
@@ -888,20 +888,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getStateBusiness();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeStateBusiness();              
+                contact.removeStateBusiness();
             }
         });
 
         mappings.put(ContactField.COUNTRY_BUSINESS, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCountryBusiness(value);
             }
 
@@ -911,20 +911,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCountryBusiness();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeCountryBusiness();                
+                contact.removeCountryBusiness();
             }
         });
 
         mappings.put(ContactField.NUMBER_OF_EMPLOYEE, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setNumberOfEmployee(value);
             }
 
@@ -934,20 +934,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getNumberOfEmployee();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeNumberOfEmployee();               
+                contact.removeNumberOfEmployee();
             }
         });
 
         mappings.put(ContactField.SALES_VOLUME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setSalesVolume(value);
             }
 
@@ -957,20 +957,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getSalesVolume();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeSalesVolume();                
+                contact.removeSalesVolume();
             }
         });
 
         mappings.put(ContactField.TAX_ID, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTaxID(value);
             }
 
@@ -980,20 +980,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTaxID();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTaxID();              
+                contact.removeTaxID();
             }
         });
 
         mappings.put(ContactField.COMMERCIAL_REGISTER, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCommercialRegister(value);
             }
 
@@ -1003,20 +1003,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCommercialRegister();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeCommercialRegister();             
+                contact.removeCommercialRegister();
             }
         });
 
         mappings.put(ContactField.BRANCHES, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setBranches(value);
             }
 
@@ -1026,20 +1026,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getBranches();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeBranches();               
+                contact.removeBranches();
             }
         });
 
         mappings.put(ContactField.BUSINESS_CATEGORY, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setBusinessCategory(value);
             }
 
@@ -1049,20 +1049,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getBusinessCategory();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeBusinessCategory();               
+                contact.removeBusinessCategory();
             }
         });
 
         mappings.put(ContactField.INFO, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setInfo(value);
             }
 
@@ -1072,20 +1072,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getInfo();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeInfo();               
+                contact.removeInfo();
             }
         });
 
         mappings.put(ContactField.MANAGER_NAME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setManagerName(value);
             }
 
@@ -1095,7 +1095,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getManagerName();
             }
 
@@ -1108,7 +1108,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
         mappings.put(ContactField.ASSISTANT_NAME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setAssistantName(value);
             }
 
@@ -1118,20 +1118,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getAssistantName();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeAssistantName();              
+                contact.removeAssistantName();
             }
         });
 
         mappings.put(ContactField.STREET_OTHER, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setStreetOther(value);
             }
 
@@ -1141,7 +1141,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getStreetOther();
             }
 
@@ -1154,7 +1154,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
         mappings.put(ContactField.POSTAL_CODE_OTHER, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setPostalCodeOther(value);
             }
 
@@ -1164,20 +1164,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getPostalCodeOther();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removePostalCodeHome();             
+                contact.removePostalCodeHome();
             }
         });
 
         mappings.put(ContactField.CITY_OTHER, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCityOther(value);
             }
 
@@ -1187,20 +1187,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCityOther();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeCityOther();              
+                contact.removeCityOther();
             }
         });
 
         mappings.put(ContactField.STATE_OTHER, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setStateOther(value);
             }
 
@@ -1210,20 +1210,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getStateOther();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeStateOther();             
+                contact.removeStateOther();
             }
         });
 
         mappings.put(ContactField.COUNTRY_OTHER, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCountryOther(value);
             }
 
@@ -1233,20 +1233,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCountryOther();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeCountryOther();               
+                contact.removeCountryOther();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_ASSISTANT, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneAssistant(value);
             }
 
@@ -1256,20 +1256,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneAssistant();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephoneAssistant();             
+                contact.removeTelephoneAssistant();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_BUSINESS1, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneBusiness1(value);
             }
 
@@ -1279,20 +1279,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneBusiness1();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephoneBusiness1();             
+                contact.removeTelephoneBusiness1();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_BUSINESS2, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneBusiness2(value);
             }
 
@@ -1302,20 +1302,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneBusiness2();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephoneBusiness2();             
+                contact.removeTelephoneBusiness2();
             }
         });
 
         mappings.put(ContactField.FAX_BUSINESS, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setFaxBusiness(value);
             }
 
@@ -1325,20 +1325,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getFaxBusiness();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeFaxBusiness();                
+                contact.removeFaxBusiness();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_CALLBACK, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneCallback(value);
             }
 
@@ -1348,20 +1348,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneCallback();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephoneCallback();              
+                contact.removeTelephoneCallback();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_CAR, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneCar(value);
             }
 
@@ -1371,20 +1371,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneCar();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephoneCar();               
+                contact.removeTelephoneCar();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_COMPANY, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneCompany(value);
             }
 
@@ -1394,7 +1394,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneCompany();
             }
 
@@ -1407,7 +1407,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
         mappings.put(ContactField.TELEPHONE_HOME1, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneHome1(value);
             }
 
@@ -1417,20 +1417,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneHome1();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephoneHome1();             
+                contact.removeTelephoneHome1();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_HOME2, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneHome2(value);
             }
 
@@ -1440,20 +1440,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneHome2();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephoneHome2();             
+                contact.removeTelephoneHome2();
             }
         });
 
         mappings.put(ContactField.FAX_HOME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setFaxHome(value);
             }
 
@@ -1463,20 +1463,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getFaxHome();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeFaxHome();                
+                contact.removeFaxHome();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_ISDN, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneISDN(value);
             }
 
@@ -1486,20 +1486,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneISDN();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephoneISDN();              
+                contact.removeTelephoneISDN();
             }
         });
 
         mappings.put(ContactField.CELLULAR_TELEPHONE1, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCellularTelephone1(value);
             }
 
@@ -1509,20 +1509,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCellularTelephone1();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeCellularTelephone1();             
+                contact.removeCellularTelephone1();
             }
         });
 
         mappings.put(ContactField.CELLULAR_TELEPHONE2, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCellularTelephone2(value);
             }
 
@@ -1532,20 +1532,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCellularTelephone2();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeCellularTelephone2();             
+                contact.removeCellularTelephone2();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_OTHER, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneOther(value);
             }
 
@@ -1555,20 +1555,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneOther();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephoneOther();             
+                contact.removeTelephoneOther();
             }
         });
 
         mappings.put(ContactField.FAX_OTHER, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setFaxOther(value);
             }
 
@@ -1578,20 +1578,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getFaxOther();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeFaxOther();               
+                contact.removeFaxOther();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_PAGER, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephonePager(value);
             }
 
@@ -1601,20 +1601,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephonePager();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephonePager();             
+                contact.removeTelephonePager();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_PRIMARY, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephonePrimary(value);
             }
 
@@ -1624,20 +1624,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephonePrimary();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephonePrimary();               
+                contact.removeTelephonePrimary();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_RADIO, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneRadio(value);
             }
 
@@ -1647,20 +1647,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneRadio();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephoneRadio();             
+                contact.removeTelephoneRadio();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_TELEX, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneTelex(value);
             }
 
@@ -1670,20 +1670,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneTelex();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephoneTelex();             
+                contact.removeTelephoneTelex();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_TTYTDD, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneTTYTTD(value);
             }
 
@@ -1693,20 +1693,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneTTYTTD();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephoneTTYTTD();                
+                contact.removeTelephoneTTYTTD();
             }
         });
 
         mappings.put(ContactField.INSTANT_MESSENGER1, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setInstantMessenger1(value);
             }
 
@@ -1716,20 +1716,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getInstantMessenger1();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeInstantMessenger1();              
+                contact.removeInstantMessenger1();
             }
         });
 
         mappings.put(ContactField.INSTANT_MESSENGER2, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setInstantMessenger2(value);
             }
 
@@ -1739,20 +1739,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getInstantMessenger2();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeInstantMessenger2();              
+                contact.removeInstantMessenger2();
             }
         });
 
         mappings.put(ContactField.TELEPHONE_IP, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneIP(value);
             }
 
@@ -1762,20 +1762,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneIP();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeTelephoneIP();                
+                contact.removeTelephoneIP();
             }
         });
 
         mappings.put(ContactField.EMAIL1, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setEmail1(value);
             }
 
@@ -1785,20 +1785,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getEmail1();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeEmail1();             
+                contact.removeEmail1();
             }
         });
 
         mappings.put(ContactField.EMAIL2, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setEmail2(value);
             }
 
@@ -1808,20 +1808,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getEmail2();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeEmail2();             
+                contact.removeEmail2();
             }
         });
 
         mappings.put(ContactField.EMAIL3, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setEmail3(value);
             }
 
@@ -1831,20 +1831,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getEmail3();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeEmail3();             
+                contact.removeEmail3();
             }
         });
 
         mappings.put(ContactField.URL, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setURL(value);
             }
 
@@ -1854,20 +1854,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getURL();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeURL();                
+                contact.removeURL();
             }
         });
 
         mappings.put(ContactField.CATEGORIES, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCategories(value);
             }
 
@@ -1877,7 +1877,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCategories();
             }
 
@@ -1890,7 +1890,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
         mappings.put(ContactField.USERFIELD01, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField01(value);
             }
 
@@ -1900,20 +1900,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField01();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField01();                
+                contact.removeUserField01();
             }
         });
 
         mappings.put(ContactField.USERFIELD02, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField02(value);
             }
 
@@ -1923,20 +1923,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField02();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField02();                
+                contact.removeUserField02();
             }
         });
 
         mappings.put(ContactField.USERFIELD03, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField03(value);
             }
 
@@ -1946,20 +1946,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField03();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField03();                
+                contact.removeUserField03();
             }
         });
 
         mappings.put(ContactField.USERFIELD04, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField04(value);
             }
 
@@ -1969,20 +1969,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField04();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField04();                
+                contact.removeUserField04();
             }
         });
 
         mappings.put(ContactField.USERFIELD05, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField05(value);
             }
 
@@ -1992,20 +1992,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField05();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField05();                
+                contact.removeUserField05();
             }
         });
 
         mappings.put(ContactField.USERFIELD06, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField06(value);
             }
 
@@ -2015,20 +2015,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField06();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField06();                
+                contact.removeUserField06();
             }
         });
 
         mappings.put(ContactField.USERFIELD07, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField07(value);
             }
 
@@ -2038,20 +2038,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField07();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField07();                
+                contact.removeUserField07();
             }
         });
 
         mappings.put(ContactField.USERFIELD08, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField08(value);
             }
 
@@ -2061,20 +2061,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField08();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField08();                
+                contact.removeUserField08();
             }
         });
 
         mappings.put(ContactField.USERFIELD09, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField09(value);
             }
 
@@ -2084,20 +2084,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField09();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField09();                
+                contact.removeUserField09();
             }
         });
 
         mappings.put(ContactField.USERFIELD10, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField10(value);
             }
 
@@ -2107,20 +2107,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField10();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField10();                
+                contact.removeUserField10();
             }
         });
 
         mappings.put(ContactField.USERFIELD11, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField11(value);
             }
 
@@ -2130,20 +2130,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField11();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField11();                
+                contact.removeUserField11();
             }
         });
 
         mappings.put(ContactField.USERFIELD12, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField12(value);
             }
 
@@ -2153,20 +2153,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField12();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField12();                
+                contact.removeUserField12();
             }
         });
 
         mappings.put(ContactField.USERFIELD13, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField13(value);
             }
 
@@ -2176,20 +2176,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField13();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField13();                
+                contact.removeUserField13();
             }
         });
 
         mappings.put(ContactField.USERFIELD14, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField14(value);
             }
 
@@ -2199,20 +2199,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField14();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField14();                
+                contact.removeUserField14();
             }
         });
 
         mappings.put(ContactField.USERFIELD15, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField15(value);
             }
 
@@ -2222,20 +2222,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField15();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField15();                
+                contact.removeUserField15();
             }
         });
 
         mappings.put(ContactField.USERFIELD16, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField16(value);
             }
 
@@ -2245,20 +2245,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField16();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField16();                
+                contact.removeUserField16();
             }
         });
 
         mappings.put(ContactField.USERFIELD17, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField17(value);
             }
 
@@ -2268,20 +2268,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField17();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField17();                
+                contact.removeUserField17();
             }
         });
 
         mappings.put(ContactField.USERFIELD18, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField18(value);
             }
 
@@ -2291,20 +2291,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField18();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField18();                
+                contact.removeUserField18();
             }
         });
 
         mappings.put(ContactField.USERFIELD19, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField19(value);
             }
 
@@ -2314,20 +2314,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField19();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField19();                
+                contact.removeUserField19();
             }
         });
 
         mappings.put(ContactField.USERFIELD20, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUserField20(value);
             }
 
@@ -2337,20 +2337,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUserField20();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUserField20();                
+                contact.removeUserField20();
             }
         });
 
         mappings.put(ContactField.OBJECT_ID, new LdapIDMapping() {
 
             @Override
-            public void set(Contact contact, Integer value) { 
+            public void set(Contact contact, Integer value) {
                 contact.setObjectID(value);
             }
 
@@ -2360,20 +2360,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
                 return contact.getObjectID();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeObjectID();               
+                contact.removeObjectID();
             }
         });
 
         mappings.put(ContactField.NUMBER_OF_DISTRIBUTIONLIST, new LdapIntegerMapping() {
 
             @Override
-            public void set(Contact contact, Integer value) { 
+            public void set(Contact contact, Integer value) {
                 contact.setNumberOfDistributionLists(value);
             }
 
@@ -2383,13 +2383,13 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
                 return contact.getNumberOfDistributionLists();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeNumberOfDistributionLists();              
+                contact.removeNumberOfDistributionLists();
             }
         });
 
@@ -2412,14 +2412,14 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void remove(Contact contact) {
-                contact.removeDistributionLists();              
+                contact.removeDistributionLists();
             }
         });
-        
+
         mappings.put(ContactField.NUMBER_OF_LINKS, new LdapIntegerMapping() {
 
             @Override
-            public void set(Contact contact, Integer value) { 
+            public void set(Contact contact, Integer value) {
                 contact.setNumberOfLinks(value);
             }
 
@@ -2429,20 +2429,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
                 return contact.getNumberOfLinks();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeNumberOfLinks();              
+                contact.removeNumberOfLinks();
             }
         });
 
         mappings.put(ContactField.FOLDER_ID, new LdapIntegerMapping() {
 
             @Override
-            public void set(Contact contact, Integer value) { 
+            public void set(Contact contact, Integer value) {
                 contact.setParentFolderID(value);
             }
 
@@ -2452,20 +2452,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
                 return contact.getParentFolderID();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeParentFolderID();             
+                contact.removeParentFolderID();
             }
         });
 
         mappings.put(ContactField.CONTEXTID, new LdapIntegerMapping() {
 
             @Override
-            public void set(Contact contact, Integer value) { 
+            public void set(Contact contact, Integer value) {
                 contact.setContextId(value);
             }
 
@@ -2475,20 +2475,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
                 return contact.getContextId();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeContextID();              
+                contact.removeContextID();
             }
         });
 
         mappings.put(ContactField.PRIVATE_FLAG, new LdapIntegerMapping() {
 
             @Override
-            public void set(Contact contact, Integer value) { 
+            public void set(Contact contact, Integer value) {
                 contact.setPrivateFlag(1 == value.intValue());
             }
 
@@ -2498,20 +2498,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
                 return contact.getPrivateFlag() ? Integer.valueOf(1) : Integer.valueOf(0);
             }
-            
+
             @Override
             public void remove(Contact contact) {
-                contact.removePrivateFlag();                
+                contact.removePrivateFlag();
             }
         });
 
         mappings.put(ContactField.CREATED_BY, new LdapIntegerMapping() {
 
             @Override
-            public void set(Contact contact, Integer value) { 
+            public void set(Contact contact, Integer value) {
                 contact.setCreatedBy(value);
             }
 
@@ -2521,20 +2521,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
                 return contact.getCreatedBy();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeCreatedBy();              
+                contact.removeCreatedBy();
             }
         });
 
         mappings.put(ContactField.MODIFIED_BY, new LdapIntegerMapping() {
 
             @Override
-            public void set(Contact contact, Integer value) { 
+            public void set(Contact contact, Integer value) {
                 contact.setModifiedBy(value);
             }
 
@@ -2544,20 +2544,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
                 return contact.getModifiedBy();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeModifiedBy();             
+                contact.removeModifiedBy();
             }
         });
 
         mappings.put(ContactField.CREATION_DATE, new LdapDateMapping() {
 
             @Override
-            public void set(Contact contact, Date value) { 
+            public void set(Contact contact, Date value) {
                 contact.setCreationDate(value);
             }
 
@@ -2567,20 +2567,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Date get(Contact contact) { 
+            public Date get(Contact contact) {
                 return contact.getCreationDate();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeCreationDate();               
+                contact.removeCreationDate();
             }
         });
 
         mappings.put(ContactField.LAST_MODIFIED, new LdapDateMapping() {
 
             @Override
-            public void set(Contact contact, Date value) { 
+            public void set(Contact contact, Date value) {
                 contact.setLastModified(value);
             }
 
@@ -2590,20 +2590,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Date get(Contact contact) { 
+            public Date get(Contact contact) {
                 return contact.getLastModified();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeLastModified();               
+                contact.removeLastModified();
             }
         });
 
         mappings.put(ContactField.BIRTHDAY, new LdapDateMapping() {
 
             @Override
-            public void set(Contact contact, Date value) { 
+            public void set(Contact contact, Date value) {
                 contact.setBirthday(value);
             }
 
@@ -2613,20 +2613,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Date get(Contact contact) { 
+            public Date get(Contact contact) {
                 return contact.getBirthday();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeBirthday();               
+                contact.removeBirthday();
             }
         });
 
         mappings.put(ContactField.ANNIVERSARY, new LdapDateMapping() {
 
             @Override
-            public void set(Contact contact, Date value) { 
+            public void set(Contact contact, Date value) {
                 contact.setAnniversary(value);
             }
 
@@ -2636,18 +2636,18 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Date get(Contact contact) { 
+            public Date get(Contact contact) {
                 return contact.getAnniversary();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeAnniversary();                
+                contact.removeAnniversary();
             }
         });
 
         mappings.put(ContactField.IMAGE1, new LdapImageMapping() {
-            
+
             @Override
             public void set(Contact contact, byte[] value) {
                 contact.setImage1(value);
@@ -2665,14 +2665,14 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void remove(Contact contact) {
-                contact.removeImage1();             
+                contact.removeImage1();
             }
         });
-        
+
         mappings.put(ContactField.IMAGE1_CONTENT_TYPE, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setImageContentType(value);
             }
 
@@ -2682,15 +2682,15 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getImageContentType();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeImageContentType();               
+                contact.removeImageContentType();
             }
-            
+
             @Override
             public String get(LdapResult result, LdapIDResolver idResolver) throws OXException {
                 /*
@@ -2699,13 +2699,13 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
                 Object value = getValue(result);
                 return null != value && byte[].class.isInstance(value) ? "image/jpeg" : null;
             }
-                        
+
         });
 
         mappings.put(ContactField.IMAGE_LAST_MODIFIED, new LdapDateMapping() {
 
             @Override
-            public void set(Contact contact, Date value) { 
+            public void set(Contact contact, Date value) {
                 contact.setImageLastModified(value);
             }
 
@@ -2715,15 +2715,15 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Date get(Contact contact) { 
+            public Date get(Contact contact) {
                 return contact.getImageLastModified();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeImageLastModified();              
+                contact.removeImageLastModified();
             }
-            
+
             @Override
             public Date get(LdapResult result, LdapIDResolver idResolver) throws OXException {
                 /*
@@ -2738,7 +2738,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
         mappings.put(ContactField.INTERNAL_USERID, new LdapIntegerMapping() {
 
             @Override
-            public void set(Contact contact, Integer value) { 
+            public void set(Contact contact, Integer value) {
                 contact.setInternalUserId(value);
             }
 
@@ -2748,20 +2748,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
                 return contact.getInternalUserId();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeInternalUserId();             
+                contact.removeInternalUserId();
             }
         });
 
         mappings.put(ContactField.COLOR_LABEL, new LdapIntegerMapping() {
 
             @Override
-            public void set(Contact contact, Integer value) { 
+            public void set(Contact contact, Integer value) {
                 contact.setLabel(value);
             }
 
@@ -2771,20 +2771,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
                 return contact.getLabel();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeLabel();              
+                contact.removeLabel();
             }
         });
 
         mappings.put(ContactField.FILE_AS, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setFileAs(value);
             }
 
@@ -2794,20 +2794,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getFileAs();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeFileAs();             
+                contact.removeFileAs();
             }
         });
 
         mappings.put(ContactField.DEFAULT_ADDRESS, new LdapIntegerMapping() {
 
             @Override
-            public void set(Contact contact, Integer value) { 
+            public void set(Contact contact, Integer value) {
                 contact.setDefaultAddress(value);
             }
 
@@ -2817,20 +2817,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
                 return contact.getDefaultAddress();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeDefaultAddress();             
+                contact.removeDefaultAddress();
             }
         });
 
         mappings.put(ContactField.MARK_AS_DISTRIBUTIONLIST, new LdapBooleanMapping() {
-            
+
             @Override
-            public void set(Contact contact, Boolean value) { 
+            public void set(Contact contact, Boolean value) {
                 contact.setMarkAsDistributionlist(value.booleanValue());
             }
 
@@ -2840,13 +2840,13 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Boolean get(Contact contact) { 
+            public Boolean get(Contact contact) {
                 return Boolean.valueOf(contact.getMarkAsDistribtuionlist());
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeMarkAsDistributionlist();             
+                contact.removeMarkAsDistributionlist();
             }
 
 //            @Override
@@ -2884,7 +2884,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
         mappings.put(ContactField.NUMBER_OF_ATTACHMENTS, new LdapIntegerMapping() {
 
             @Override
-            public void set(Contact contact, Integer value) { 
+            public void set(Contact contact, Integer value) {
                 contact.setNumberOfAttachments(value);
             }
 
@@ -2894,20 +2894,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
                 return contact.getNumberOfAttachments();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeNumberOfAttachments();                
+                contact.removeNumberOfAttachments();
             }
         });
 
         mappings.put(ContactField.YOMI_FIRST_NAME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setYomiFirstName(value);
             }
 
@@ -2917,20 +2917,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getYomiFirstName();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeYomiFirstName();              
+                contact.removeYomiFirstName();
             }
         });
 
         mappings.put(ContactField.YOMI_LAST_NAME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setYomiLastName(value);
             }
 
@@ -2940,20 +2940,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getYomiLastName();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeYomiLastName();               
+                contact.removeYomiLastName();
             }
         });
 
         mappings.put(ContactField.YOMI_COMPANY, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setYomiCompany(value);
             }
 
@@ -2963,39 +2963,39 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getYomiCompany();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeYomiCompany();                
+                contact.removeYomiCompany();
             }
         });
 
         mappings.put(ContactField.NUMBER_OF_IMAGES, new LdapIntegerMapping() {
 
             @Override
-            public void set(Contact contact, Integer value) { 
+            public void set(Contact contact, Integer value) {
                 contact.setNumberOfImages(value);
             }
 
             @Override
             public boolean isSet(Contact contact) {
                 //TODO: create Contact.containsNumberOfImages() method
-                return contact.containsImage1(); 
+                return contact.containsImage1();
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
                 return contact.getNumberOfImages();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.setNumberOfImages(0);               
+                contact.setNumberOfImages(0);
             }
-            
+
             @Override
             public Integer get(LdapResult result, LdapIDResolver idResolver) throws OXException {
                 /*
@@ -3009,7 +3009,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
         mappings.put(ContactField.USE_COUNT, new LdapIntegerMapping() {
 
             @Override
-            public void set(Contact contact, Integer value) { 
+            public void set(Contact contact, Integer value) {
                 contact.setUseCount(value);
             }
 
@@ -3019,20 +3019,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public Integer get(Contact contact) { 
+            public Integer get(Contact contact) {
                 return contact.getUseCount();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUseCount();               
+                contact.removeUseCount();
             }
         });
 
         mappings.put(ContactField.HOME_ADDRESS, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setAddressHome(value);
             }
 
@@ -3042,20 +3042,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getAddressHome();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeAddressHome();                
+                contact.removeAddressHome();
             }
         });
 
         mappings.put(ContactField.BUSINESS_ADDRESS, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setAddressBusiness(value);
             }
 
@@ -3065,20 +3065,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getAddressBusiness();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeAddressBusiness();                
+                contact.removeAddressBusiness();
             }
         });
 
         mappings.put(ContactField.OTHER_ADDRESS, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setAddressOther(value);
             }
 
@@ -3089,20 +3089,20 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getAddressOther();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeAddressOther();               
+                contact.removeAddressOther();
             }
         });
 
         mappings.put(ContactField.UID, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setUid(value);
             }
 
@@ -3112,15 +3112,15 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getUid();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeUid();                
+                contact.removeUid();
             }
-            
+
             @Override
             public String get(LdapResult result, LdapIDResolver idResolver) throws OXException {
                 Object value = super.getValue(result);
@@ -3132,14 +3132,14 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
                     }
                 }
                 return null;
-            }            
-            
+            }
+
         });
-        
+
         mappings.put(ContactField.FILENAME, new LdapStringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setFilename(value);
             }
 
@@ -3149,16 +3149,16 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getFilename();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeFilename();               
+                contact.removeFilename();
             }
         });
-        
+
         POSSIBLE_MAPPINGS = mappings;
         GENERIC = new LdapMapper(POSSIBLE_MAPPINGS);
     }
@@ -3168,14 +3168,14 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
         if (ContactField.class.isInstance(value)) {
             field = (ContactField)value;
         } else {
-            field = getField(value.toString());            
+            field = getField(value.toString());
         }
         if (null == field) {
             throw new IllegalArgumentException("unable to determine contact field for value: " + value);
         }
         return field;
     }
-    
+
     private static ContactField getField(String name) {
         try {
             return ContactField.valueOf(name.trim().toUpperCase());
@@ -3189,7 +3189,7 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
         }
     }
-    
+
     private static ContactField getBySimilarity(String name) {
         String normalized = name.replaceAll("[_\\. ]", "").toLowerCase();
         for (ContactField field : ContactField.values()) {

@@ -59,11 +59,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -87,7 +85,7 @@ public class RssAction implements AJAXActionService {
 	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RssAction.class));
 	private final HttpURLFeedFetcher fetcher;
 	private final HashMapFeedInfoCache feedCache;
-	
+
 	public RssAction () {
 		feedCache = new HashMapFeedInfoCache();
 		fetcher = new HttpURLFeedFetcher(feedCache);
@@ -205,10 +203,10 @@ public class RssAction implements AJAXActionService {
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
     private static boolean isAscii(final String s) {
-        final char[] chars = s.toCharArray();
+        final int length = s.length();
         boolean isAscci = true;
-        for (int i = 0; (i < chars.length) && isAscci; i++) {
-            isAscci &= (chars[i] < 128);
+        for (int i = 0; (i < length) && isAscci; i++) {
+            isAscci = (s.charAt(i) < 128);
         }
         return isAscci;
     }

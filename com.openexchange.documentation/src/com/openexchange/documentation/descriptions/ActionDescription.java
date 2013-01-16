@@ -55,21 +55,21 @@ import com.openexchange.documentation.Type;
 /**
  * {@link ActionDescription} - Description for actions.
  *
- * @see com.openexchange.documentation.annotations.Action  
+ * @see com.openexchange.documentation.annotations.Action
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface ActionDescription extends Description {
-	
+
 	/**
 	 * Specifies the request method. Required.
-	 *  
+	 *
 	 * @return the method
 	 */
 	RequestMethod getMethod();
 
 	/**
 	 * Specifies the parameters. Required.
-	 * 
+	 *
 	 * @return the parameters
 	 */
     ParameterDescription[] getParameters();
@@ -83,22 +83,22 @@ public interface ActionDescription extends Description {
 
     /**
 	 * Specifies the response description. Defaults to <code>""</code>.
-	 * 
+	 *
 	 * @return the response description
 	 */
 	String getResponseDescription();
 
     /**
-	 * Specifies the request body description for {@link Type}<code>.PUT</code> or {@link Type}<code>.POST</code> requests. 
+	 * Specifies the request body description for {@link Type}<code>.PUT</code> or {@link Type}<code>.POST</code> requests.
 	 * Defaults to <code>""</code>.
-     * 
+     *
      * @return the request body description
      */
 	String getRequestBody();
 
     /**
 	 * Specifies whether the action is deprecated or not. Defaults to <code>false</code>.
-     * 
+     *
      * @return <code>true</code>, if it is deprecated, <code>false</code>, otherwise
      */
 	boolean isDeprecated();

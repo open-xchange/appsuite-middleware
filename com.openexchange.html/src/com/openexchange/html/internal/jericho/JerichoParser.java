@@ -72,7 +72,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * {@link JerichoParser} - Parses specified real-life HTML document.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JerichoParser {
@@ -144,7 +144,7 @@ public final class JerichoParser {
 
     /**
      * Ensure given HTML content has a <code>&lt;body&gt;</code> tag.
-     * 
+     *
      * @param html The HTML content to check
      * @return The checked HTML content possibly with surrounded with a <code>&lt;body&gt;</code> tag
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
@@ -172,10 +172,10 @@ public final class JerichoParser {
     private static final Pattern NESTED_TAG = Pattern.compile("^(?:\r?\n *)?(<[^>]+>)");
 
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
-    
+
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
-     * 
+     *
      * @param html The real-life HTML document
      * @param handler The HTML handler
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
@@ -263,7 +263,7 @@ public final class JerichoParser {
                 }
             }
             /*-
-             * 
+             *
             if (tagType == StartTagType.NORMAL) {
                 handler.handleStartTag((StartTag) tag);
             } else if (tagType == EndTagType.NORMAL) {
@@ -279,7 +279,7 @@ public final class JerichoParser {
                     handler.handleUnknownTag(tag);
                 }
             }
-             * 
+             *
              */
         } else if (segment instanceof CharacterReference) {
             final CharacterReference characterReference = (CharacterReference) segment;

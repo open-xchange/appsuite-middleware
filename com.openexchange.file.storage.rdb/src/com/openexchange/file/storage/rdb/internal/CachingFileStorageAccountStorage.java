@@ -173,7 +173,7 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
         cacheLock = new ReentrantLock(true);
         serviceRegistry = Services.getServices();
     }
- 
+
     /**
      * Invalidates specified account.
      *
@@ -197,7 +197,7 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
 
     /**
      * Gets the first account matching specified account identifier.
-     * 
+     *
      * @param accountId The account identifier
      * @param session The session
      * @return The matching account or <code>null</code>

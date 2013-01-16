@@ -61,7 +61,7 @@ public interface AJAXResultDecoratorRegistry {
 
     /**
      * Gets the decorator for specified identifier.
-     * 
+     *
      * @param identifier The decorator's identifier
      * @return The identifier or <code>null</code> if there is no such decorator
      */
@@ -69,7 +69,7 @@ public interface AJAXResultDecoratorRegistry {
 
     /**
      * Gets the decorators from this registry.
-     * 
+     *
      * @return The decorators kept in a list
      */
     List<AJAXResultDecorator> getDecorators();

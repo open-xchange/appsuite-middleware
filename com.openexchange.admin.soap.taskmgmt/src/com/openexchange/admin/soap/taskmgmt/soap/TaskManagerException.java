@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -39,11 +39,11 @@ public class TaskManagerException {
 
     /**
      * Ruft den Wert der taskManagerException-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link com.openexchange.admin.soap.taskmgmt.exceptions.TaskManagerException }
-     *     
+     *
      */
     public com.openexchange.admin.soap.taskmgmt.exceptions.TaskManagerException getTaskManagerException() {
         return taskManagerException;
@@ -51,11 +51,11 @@ public class TaskManagerException {
 
     /**
      * Legt den Wert der taskManagerException-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link com.openexchange.admin.soap.taskmgmt.exceptions.TaskManagerException }
-     *     
+     *
      */
     public void setTaskManagerException(com.openexchange.admin.soap.taskmgmt.exceptions.TaskManagerException value) {
         this.taskManagerException = value;

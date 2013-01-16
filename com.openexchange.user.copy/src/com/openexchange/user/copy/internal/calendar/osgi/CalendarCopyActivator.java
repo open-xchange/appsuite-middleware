@@ -62,9 +62,9 @@ import com.openexchange.user.copy.internal.calendar.CalendarCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class CalendarCopyActivator implements BundleActivator {
-    
+
     private ServiceRegistration<CopyUserTaskService> serviceRegistration = null;
-    
+
 
     /**
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)

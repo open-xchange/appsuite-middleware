@@ -60,17 +60,17 @@ import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
  * {@link RotateTransformation}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class RotateTransformation implements ImageTransformation {
-    
+
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RotateTransformation.class));
 
     public RotateTransformation() {
         super();
     }
-    
+
     @Override
     public BufferedImage perform(BufferedImage sourceImage, ImageInformation imageInformation) throws IOException {
         if (null == imageInformation) {
@@ -139,7 +139,7 @@ public class RotateTransformation implements ImageTransformation {
         }
         return t;
     }
-    
+
     @Override
     public boolean needsImageInformation() {
         return true;
@@ -147,7 +147,7 @@ public class RotateTransformation implements ImageTransformation {
 
     @Override
     public boolean supports(String formatName) {
-        return null != formatName && "jpeg".equalsIgnoreCase(formatName) || "jpg".equalsIgnoreCase(formatName) || 
+        return null != formatName && "jpeg".equalsIgnoreCase(formatName) || "jpg".equalsIgnoreCase(formatName) ||
             "tiff".equalsIgnoreCase(formatName) || "psd".equalsIgnoreCase(formatName);
     }
 

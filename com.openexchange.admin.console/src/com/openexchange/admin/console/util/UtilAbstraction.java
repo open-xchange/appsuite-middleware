@@ -54,23 +54,23 @@ import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 
 /**
- * 
+ *
  * @author d7,cutmasta
  *
  */
 public abstract class UtilAbstraction extends ObjectNamingAbstraction {
-    
+
     // for all tools
     protected CLIOption searchOption = null;
 
     //  Setting names for options
     protected final static char OPT_NAME_SEARCH_PATTERN_SHORT = 's';
     protected final static String OPT_NAME_SEARCH_PATTERN_LONG = "searchpattern";
-    
+
     protected void setSearchOption(final AdminParser parser){
         this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCH_PATTERN_SHORT,OPT_NAME_SEARCH_PATTERN_LONG,"Search/List pattern!",true, NeededQuadState.notneeded);
     }
-    
+
     protected void displayRegisteredMessage(final String id, final AdminParser parser) {
         createMessageForStdout(id, null, "registered", parser);
     }

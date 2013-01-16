@@ -66,9 +66,9 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link FreeBusyAttendee}
- * 
- * Emits a {@link FreeBusyInformation}s attendee. 
- * 
+ *
+ * Emits a {@link FreeBusyInformation}s attendee.
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class FreeBusyAttendee extends AbstractVerifyingAttributeConverter<VFreeBusy, FreeBusyInformation> {
@@ -86,7 +86,7 @@ public class FreeBusyAttendee extends AbstractVerifyingAttributeConverter<VFreeB
     }
 
     @Override
-    public void emit(Mode mode, int index, FreeBusyInformation freeBusyInformation, VFreeBusy vFreeBusy, List<ConversionWarning> warnings, 
+    public void emit(Mode mode, int index, FreeBusyInformation freeBusyInformation, VFreeBusy vFreeBusy, List<ConversionWarning> warnings,
         Context ctx, Object... args) throws ConversionError {
         Attendee attendee = new Attendee();
         String address = freeBusyInformation.getAttendee();
@@ -107,9 +107,9 @@ public class FreeBusyAttendee extends AbstractVerifyingAttributeConverter<VFreeB
     }
 
     @Override
-    public void parse(int index, VFreeBusy vFreeBusy, FreeBusyInformation freeBusyInformation, TimeZone timeZone, Context ctx, 
+    public void parse(int index, VFreeBusy vFreeBusy, FreeBusyInformation freeBusyInformation, TimeZone timeZone, Context ctx,
         List<ConversionWarning> warnings) throws ConversionError {
         throw new UnsupportedOperationException("not implemented");
     }
-    
+
 }

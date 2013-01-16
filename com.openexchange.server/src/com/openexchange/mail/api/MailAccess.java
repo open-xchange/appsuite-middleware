@@ -326,8 +326,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Gets a new, un-cached <tt>MailAccess</tt> instance that is initially not connected. 
-     * 
+     * Gets a new, un-cached <tt>MailAccess</tt> instance that is initially not connected.
+     *
      * @param session The associated session
      * @param accountId The account identifier
      * @return The new, un-cached <tt>MailAccess</tt> instance
@@ -354,7 +354,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Re-connects specified <tt>MailAccess</tt> instance.
-     * 
+     *
      * @param mailAccess The <tt>MailAccess</tt> instance to re-connect
      * @return The re-connected <tt>MailAccess</tt> instance.
      * @throws OXException If re-connect attempt fails
@@ -715,7 +715,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Remembers specified {@link MimeCleanUp} instance.
-     * 
+     *
      * @param mimeCleanUp The {@link MimeCleanUp} instance
      */
     public static void rememberMimeCleanUp(final MimeCleanUp mimeCleanUp) {

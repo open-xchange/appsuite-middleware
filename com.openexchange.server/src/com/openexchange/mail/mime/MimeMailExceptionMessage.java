@@ -54,7 +54,7 @@ import com.openexchange.mail.MailExceptionCode;
 
 /**
  * {@link MimeMailExceptionMessage}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class MimeMailExceptionMessage implements LocalizableStrings {

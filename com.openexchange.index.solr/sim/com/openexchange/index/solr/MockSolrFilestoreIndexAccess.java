@@ -64,7 +64,7 @@ import com.openexchange.solr.SolrCoreIdentifier;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MockSolrFilestoreIndexAccess extends SolrInfostoreIndexAccess {
-    
+
     private final InMemoryIndex index;
 
     /**
@@ -74,12 +74,12 @@ public class MockSolrFilestoreIndexAccess extends SolrInfostoreIndexAccess {
         super(new SolrCoreIdentifier(1, 1, 1), null);
         index = new InMemoryIndex();
     }
-    
+
     @Override
     protected QueryResponse query(SolrParams query) throws OXException {
         return index.query(query);
     }
-    
+
     @Override
     protected UpdateResponse addSolrDocument(SolrInputDocument document) throws OXException {
         return index.addDocument(document);

@@ -61,7 +61,7 @@ import com.openexchange.subscribe.yahoo.YahooSubscribeService;
 
 /**
  * {@link Activator}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Activator extends HousekeepingActivator {

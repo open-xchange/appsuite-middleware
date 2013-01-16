@@ -468,13 +468,7 @@ public final class MALPollDBUtility {
      * @throws OXException If database service is not available
      */
     private static DatabaseService getDBService() throws OXException {
-        final DatabaseService databaseService;
-        try {
-            databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
-        return databaseService;
+        return MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
     }
 
     private static Connection getReadWriteConnection(final int cid, final DatabaseService databaseService) throws OXException {

@@ -76,11 +76,7 @@ public final class MailNotifyPushMailAccountDeleteListener implements MailAccoun
     @Override
     public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         if (MailNotifyPushListener.getAccountId() == id) {
-            try {
-                MailNotifyPushListenerRegistry.getInstance().purgeUserPushListener(cid, user);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            MailNotifyPushListenerRegistry.getInstance().purgeUserPushListener(cid, user);
         }
     }
 

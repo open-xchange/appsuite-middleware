@@ -72,17 +72,17 @@ public class DoNothingProcessor extends Processor {
     public DoNothingProcessor(ProcessorStrategy strategy) {
         super(strategy);
     }
-    
+
     @Override
     public void processFolderAsync(MailFolder folder, int accountId, Session session, Map<String, Object> params) throws OXException {
 
     }
-    
+
     @Override
     public void processFolderAsync(MailFolder mailFolder, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> params) throws OXException {
 
     }
-    
+
     @Override
     public void processFolderAsync(MailFolderInfo folderInfo, int accountId, Session session, Map<String, Object> params) throws OXException {
 

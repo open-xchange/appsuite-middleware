@@ -58,26 +58,26 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
  * The {@link Owner}
- * 
- * This property identifies a particular principal as being the "owner" of the 
- * resource. Since the owner of a resource often has special access control 
- * capabilities (e.g., the owner frequently has permanent DAV:write-acl 
- * privilege), clients might display the resource owner in their user 
+ *
+ * This property identifies a particular principal as being the "owner" of the
+ * resource. Since the owner of a resource often has special access control
+ * capabilities (e.g., the owner frequently has permanent DAV:write-acl
+ * privilege), clients might display the resource owner in their user
  * interface.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Owner extends SingleXMLPropertyMixin {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(Owner.class);
     private static final String PROPERTY_NAME = "owner";
-    private final CommonFolderCollection<?> collection;    
+    private final CommonFolderCollection<?> collection;
 
     public Owner(CommonFolderCollection<?> collection) {
         super(Protocol.DAV_NS.getURI(), PROPERTY_NAME);
         this.collection = collection;
     }
-    
+
     @Override
     protected String getValue() {
         User owner = null;

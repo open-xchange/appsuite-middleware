@@ -59,7 +59,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * {@link RedirectServlet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RedirectServlet extends HttpServlet {

@@ -54,22 +54,22 @@ import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link Lookup}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class Lookup {
-    
+
     public Lookup() {
         super();
     }
-    
+
     public abstract String[] getLegacyExchangeDNs(User[] users) throws OXException;
-    
+
     public String getLegacyExchangeDN(User user) throws OXException {
         String[] legacyExchangeDNs = getLegacyExchangeDNs(new User[0]);
         return null != legacyExchangeDNs && 0 < legacyExchangeDNs.length ? legacyExchangeDNs[0] : null;
     }
-    
+
     protected String replaceUserAttributes(String template, User user) {
         String value = new String(template);
         value = value
@@ -86,7 +86,7 @@ public abstract class Lookup {
         ;
         return value;
 
-        
-        
+
+
     }
 }

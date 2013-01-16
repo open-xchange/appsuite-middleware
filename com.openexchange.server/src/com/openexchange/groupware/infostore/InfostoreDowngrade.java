@@ -96,7 +96,7 @@ public class InfostoreDowngrade extends DowngradeListener {
             } catch (final OXException e1) {
                 //IGNORE
             }
-            throw new OXException(e);
+            throw e;
         } finally {
             try {
                 infostore.finish();

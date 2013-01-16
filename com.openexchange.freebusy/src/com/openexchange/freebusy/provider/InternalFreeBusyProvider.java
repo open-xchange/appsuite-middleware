@@ -57,48 +57,48 @@ import com.openexchange.session.Session;
 
 /**
  * {@link InternalFreeBusyProvider}
- * 
+ *
  * Provider for internal free/busy information.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface InternalFreeBusyProvider extends FreeBusyProvider {
-    
+
     /**
      * Gets the available free/busy data for an internal user.
-     * 
+     *
      * @param session The session
      * @param userID The user ID
-     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param from The lower (inclusive) limit of the requested time-range
      * @param until The upper (exclusive) limit of the requested time-range
      * @return The free/busy data
-     * @throws OXException 
+     * @throws OXException
      */
     FreeBusyData getUserFreeBusy(Session session, int userID, Date from, Date until);
 
     /**
      * Gets the available free/busy data for an internal resource.
-     * 
+     *
      * @param session The session
      * @param resourceID The resource ID
-     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param from The lower (inclusive) limit of the requested time-range
      * @param until The upper (exclusive) limit of the requested time-range
      * @return The free/busy data
-     * @throws OXException 
+     * @throws OXException
      */
     FreeBusyData getResourceFreeBusy(Session session, int resourceID, Date from, Date until);
 
     /**
      * Gets the available free/busy data for an internal group.
-     * 
+     *
      * @param session The session
      * @param groupID The group ID
-     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param from The lower (inclusive) limit of the requested time-range
      * @param until The upper (exclusive) limit of the requested time-range
-     * @return A map of free/busy data, with each entry representing the free/busy data of each group participant, along with the 
-     *         aggregated data for the whole group  
-     * @throws OXException 
+     * @return A map of free/busy data, with each entry representing the free/busy data of each group participant, along with the
+     *         aggregated data for the whole group
+     * @throws OXException
      */
     Map<String, FreeBusyData> getGroupFreeBusy(Session session, int groupID, Date from, Date until) throws OXException;
-    
+
 }

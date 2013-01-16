@@ -69,7 +69,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link UserConfigProvider}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -85,7 +85,7 @@ public class UserConfigProvider implements ConfigProviderService {
 
     /**
      * Initializes a new {@link UserConfigProvider}.
-     * 
+     *
      * @param services The service look-up
      */
     public UserConfigProvider(final ServiceLookup services) {
@@ -95,7 +95,7 @@ public class UserConfigProvider implements ConfigProviderService {
 
     /**
      * Gets the associated user.
-     * 
+     *
      * @param userId The user identifier
      * @param ctx The context
      * @return The user
@@ -110,7 +110,7 @@ public class UserConfigProvider implements ConfigProviderService {
     		return sessionHolder.getUser();
     	}
     	*/
-    
+
         final CacheService cacheService = services.getService(CacheService.class);
         if (cacheService == null) {
             return services.getService(UserService.class).getUser(userId, ctx);

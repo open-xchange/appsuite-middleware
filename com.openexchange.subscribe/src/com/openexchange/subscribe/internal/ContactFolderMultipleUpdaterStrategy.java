@@ -228,8 +228,8 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
             }
         }
         ContactService contactService = (ContactService)getFromSession(SQL_INTERFACE, session);
-        TargetFolderSession targetFolderSession = (TargetFolderSession)getFromSession(SESSION, session);        
-        contactService.updateContact(targetFolderSession, String.valueOf(original.getParentFolderID()), 
+        TargetFolderSession targetFolderSession = (TargetFolderSession)getFromSession(SESSION, session);
+        contactService.updateContact(targetFolderSession, String.valueOf(original.getParentFolderID()),
             String.valueOf(original.getObjectID()), original, original.getLastModified());
     }
 }

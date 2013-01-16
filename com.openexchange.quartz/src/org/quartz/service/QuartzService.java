@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link QuartzService} - An OSGi service wrapped around <a href="http://quartz-scheduler.org/">Quartz</a> scheduler.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface QuartzService {
@@ -105,7 +105,7 @@ public interface QuartzService {
      * Specifies the job's start time; the number of milliseconds since January 1, 1970, 00:00:00 GMT.
      * <p>
      * Utility class {@link DateBuilder} provides many useful methods:
-     * 
+     *
      * <pre>
      * get a &quot;nice round&quot; time a few seconds in the future...
      * Date startTime = DateBuilder.nextGivenSecondDate(null, 15);
@@ -130,32 +130,32 @@ public interface QuartzService {
 
     /**
      * Gets the nodes local scheduler started on bundle start-up.
-     * 
+     *
      * @return The local scheduler
-     * @throws OXException 
+     * @throws OXException
      */
     Scheduler getLocalScheduler() throws OXException;
-    
+
     /**
      * Gets the local instance of the clustered scheduler identified by it's name.
      * The name has to be cluster-wide unique. For every name a local scheduler instance
      * is created on the requesting node. All scheduler instances within the cluster that share the same name
      * also share the same job store. A scheduler instance can be used even if it's not started. The instance
      * acts as a job store client then and can be used to submit jobs and triggers. It will just not execute jobs then.
-     * 
+     *
      * @param name The schedulers name.
-     * @param start <code>true</code> if the scheduler should be started before it will be returned. 
+     * @param start <code>true</code> if the scheduler should be started before it will be returned.
      * This does not a affect scheduler instance that was already started.
      * @param threads The number of worker threads to be configured. This takes effect if scheduler is started.
      * @return The clustered scheduler
-     * @throws OXException 
+     * @throws OXException
      */
     Scheduler getClusteredScheduler(String name, boolean start, int threads) throws OXException;
-    
+
     /**
      * Releases the ressources held by this scheduler instance. Does nothing if no scheduler exists for this name or name is <code>null</code>.
      * If the corresponding scheduler was started, it will be stopped. Currently running jobs may finish before the scheduler shuts down.
-     *  
+     *
      * @param name The schedulers name.
      */
     void releaseClusteredScheduler(String name);

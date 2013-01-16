@@ -67,11 +67,11 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
  */
-@Action(method = RequestMethod.PUT, name = "remove", description = "Remove an EAV Contact from a specific folder.", parameters = { 
-		@Parameter(name = "")}) 
+@Action(method = RequestMethod.PUT, name = "remove", description = "Remove an EAV Contact from a specific folder.", parameters = {
+		@Parameter(name = "")})
 public class RemoveAction extends AbstractAction {
 
-	
+
 	/**
 	 * Default Constructor
 	 * @param serviceLookup
@@ -89,7 +89,7 @@ public class RemoveAction extends AbstractAction {
 		JSONObject json = (JSONObject) requestData.getData();
 		EAVContact c = new EAVContact();
 		UUID folderUUID = null;
-		
+
 		try {
 			c.setUUID(UUID.fromString(json.getString("uuid")));
 			c.setTimeUUID(UUID.fromString(json.getString("timeuuid")));
@@ -98,9 +98,9 @@ public class RemoveAction extends AbstractAction {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
+
 		getContactService().getEAVContactService().removeContactFromFolder(c, folderUUID);
-		
+
 		return new AJAXRequestResult(new JSONObject());
 	}
 }

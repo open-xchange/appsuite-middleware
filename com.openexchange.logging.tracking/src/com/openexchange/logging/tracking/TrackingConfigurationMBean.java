@@ -62,7 +62,7 @@ public interface TrackingConfigurationMBean {
 
 	public boolean setLogLevel(String className, int cid,
 			String userName, String logLevel);
-	
+
 	public void clearTracking(int cid, int uid);
 	public void clearTracking(String sessionId);
 	public void clearTracking(int cid);

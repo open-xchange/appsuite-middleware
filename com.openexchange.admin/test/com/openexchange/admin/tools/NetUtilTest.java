@@ -55,7 +55,7 @@ import org.junit.Test;
 
 /**
  * @author choeger
- * 
+ *
  */
 public class NetUtilTest {
 

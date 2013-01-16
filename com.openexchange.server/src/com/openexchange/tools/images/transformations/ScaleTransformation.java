@@ -61,21 +61,21 @@ import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
  * {@link ScaleTransformation}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ScaleTransformation implements ImageTransformation {
-    
+
     private final int maxWidth, maxHeight;
     private final ScaleType scaleType;
-    
+
     public ScaleTransformation(int maxWidth, int maxHeight, ScaleType scaleType) {
         super();
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
         this.scaleType = scaleType;
     }
-    
+
     @Override
     public BufferedImage perform(BufferedImage sourceImage, ImageInformation imageInformation) throws IOException {
         DimensionConstrain constrain;

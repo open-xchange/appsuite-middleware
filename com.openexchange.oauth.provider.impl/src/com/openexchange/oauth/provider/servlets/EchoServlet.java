@@ -65,7 +65,7 @@ import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 
 /**
  * A text servlet to echo incoming "echo" param along with userId
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class EchoServlet extends HttpServlet {

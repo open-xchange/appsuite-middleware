@@ -73,7 +73,7 @@ public final class SerializableHelper {
 
     /**
      * Writes specified {@link Serializable serializable} object to a <code>byte</code> array.
-     * 
+     *
      * @param object The serializable object
      * @return The resulting <code>byte</code> array
      * @throws IOException If writing the object fails
@@ -90,7 +90,7 @@ public final class SerializableHelper {
 
     /**
      * Reads the object from specified <code>byte</code> array.
-     * 
+     *
      * @param bytes The object's byte description
      * @return The read object
      * @throws IOException If reading the object fails

@@ -59,7 +59,7 @@ import java.util.Map;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class VersionContainer {
-    
+
     private final Map<Integer, FileHolder> versions = new HashMap<Integer, FileHolder>();
 
     private int currentVersion;
@@ -73,22 +73,22 @@ public class VersionContainer {
         super();
         currentVersion = -1;
     }
-    
+
     public boolean containsVersion(int version) {
         return versions.containsKey(version);
     }
-    
+
     public FileHolder getVersion(int version) {
         return versions.get(version);
     }
-    
+
     public int addVersion(FileHolder fileHolder) {
-        int version = ++currentVersion;  
+        int version = ++currentVersion;
         versions.put(version, fileHolder);
-        
+
         return version;
     }
-    
+
     public FileHolder removeVersion(int version)  {
         FileHolder removed = versions.remove(version);
         if (version == currentVersion) {
@@ -98,17 +98,17 @@ public class VersionContainer {
                     tmp = v;
                 }
             }
-            
+
             currentVersion = tmp;
         }
-        
+
         return removed;
     }
-    
+
     public FileHolder getCurrentVersion() {
         return versions.get(currentVersion);
     }
-    
+
     public int getCurrentVersionNumber() {
         return currentVersion;
     }

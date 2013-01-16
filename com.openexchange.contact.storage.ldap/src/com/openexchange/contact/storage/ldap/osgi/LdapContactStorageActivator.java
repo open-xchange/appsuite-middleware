@@ -86,7 +86,7 @@ public class LdapContactStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContextService.class, UserService.class, TimerService.class, 
+        return new Class<?>[] { DatabaseService.class, ContextService.class, UserService.class, TimerService.class,
             CacheService.class, ConfigurationService.class };
     }
 
@@ -109,15 +109,15 @@ public class LdapContactStorageActivator extends HousekeepingActivator {
             }
         } catch (Exception e) {
             LOG.error("error starting \"com.openexchange.contact.storage.ldap\"", e);
-            throw e;            
+            throw e;
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.contact.storage.ldap");
-        LdapServiceLookup.set(null);            
+        LdapServiceLookup.set(null);
         super.stopBundle();
     }
-    
+
 }

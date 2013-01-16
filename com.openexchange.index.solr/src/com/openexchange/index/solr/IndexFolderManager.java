@@ -84,7 +84,7 @@ public class IndexFolderManager {
             }
         }
     }
-    
+
     private static boolean isIndexed(Connection con, int contextId, int userId, int module, String account, String folder) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -96,7 +96,7 @@ public class IndexFolderManager {
             stmt.setInt(++i, module);
             stmt.setString(++i, account);
             stmt.setString(++i, folder);
-            
+
             rs = stmt.executeQuery();
             boolean isIndexed;
             if (rs.next()) {
@@ -107,23 +107,23 @@ public class IndexFolderManager {
                     createFolderEntry(con, contextId, userId, module, account, folder);
                 }
             }
-            
+
             return isIndexed;
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);         
+            DBUtils.closeSQLStuff(rs, stmt);
         }
     }
-    
+
     public static void setIndexed(int contextId, int userId, int module, String account, String folder) throws OXException {
         updateIndexed(true, contextId, userId, module, account, folder);
     }
-    
+
     public static void unsetIndexed(int contextId, int userId, int module, String account, String folder) throws OXException {
         updateIndexed(false, contextId, userId, module, account, folder);
     }
-    
+
     private static void updateIndexed(boolean isIndexed, int contextId, int userId, int module, String account, String folder) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getWritable(contextId);
@@ -137,7 +137,7 @@ public class IndexFolderManager {
             stmt.setInt(++i, module);
             stmt.setString(++i, account);
             stmt.setString(++i, folder);
-            
+
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -145,10 +145,10 @@ public class IndexFolderManager {
             DBUtils.closeSQLStuff(stmt);
             if (con != null) {
                 dbService.backWritable(contextId, con);
-            }   
+            }
         }
     }
-    
+
     public static boolean isLocked(int contextId, int userId, int module, String account, String folder) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getWritable(contextId);
@@ -159,9 +159,9 @@ public class IndexFolderManager {
                 dbService.backWritable(contextId, con);
             }
         }
-        
+
     }
-    
+
     private static boolean isLocked(Connection con, int contextId, int userId, int module, String account, String folder) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -173,7 +173,7 @@ public class IndexFolderManager {
             stmt.setInt(++i, module);
             stmt.setString(++i, account);
             stmt.setString(++i, folder);
-            
+
             rs = stmt.executeQuery();
             boolean isLocked;
             if (rs.next()) {
@@ -182,7 +182,7 @@ public class IndexFolderManager {
                 isLocked = false;
                 createFolderEntry(con, contextId, userId, module, account, folder);
             }
-            
+
             return isLocked;
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -190,19 +190,19 @@ public class IndexFolderManager {
             DBUtils.closeSQLStuff(rs, stmt);
         }
     }
-    
+
     public static boolean lock(int contextId, int userId, int module, String account, String folder) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getWritable(contextId);
         try {
-            return lock(con, contextId, userId, module, account, folder);        
+            return lock(con, contextId, userId, module, account, folder);
         } finally {
             if (con != null) {
                 dbService.backWritable(contextId, con);
             }
         }
     }
-    
+
     private static boolean lock(Connection con, int contextId, int userId, int module, String account, String folder) throws OXException {
         PreparedStatement stmt = null;
         PreparedStatement ustmt = null;
@@ -216,7 +216,7 @@ public class IndexFolderManager {
             stmt.setInt(++i, module);
             stmt.setString(++i, account);
             stmt.setString(++i, folder);
-            
+
             rs = stmt.executeQuery();
             if (rs.next()) {
                 boolean locked = rs.getBoolean(1);
@@ -237,7 +237,7 @@ public class IndexFolderManager {
                     con.commit();
                     return rows > 0;
                 }
-            } else {      
+            } else {
                 con.commit();
             }
         } catch (SQLException e) {
@@ -246,13 +246,13 @@ public class IndexFolderManager {
         } finally {
             DBUtils.autocommit(con);
             DBUtils.closeSQLStuff(rs, stmt);
-            DBUtils.closeSQLStuff(ustmt);                    
+            DBUtils.closeSQLStuff(ustmt);
         }
-        
+
         createFolderEntry(con, contextId, userId, module, account, folder);
         return lock(con, contextId, userId, module, account, folder);
     }
-    
+
     public static boolean unlock(int contextId, int userId, int module, String account, String folder) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getWritable(contextId);
@@ -268,7 +268,7 @@ public class IndexFolderManager {
             stmt.setInt(++i, module);
             stmt.setString(++i, account);
             stmt.setString(++i, folder);
-            
+
             rs = stmt.executeQuery();
             if (rs.next()) {
                 boolean locked = rs.getBoolean(1);
@@ -283,7 +283,7 @@ public class IndexFolderManager {
                     ustmt.setString(++i, folder);
                     ustmt.setBoolean(++i, true);
                     int rows = ustmt.executeUpdate();
-                    
+
                     con.commit();
                     return rows > 0;
                 } else {
@@ -305,7 +305,7 @@ public class IndexFolderManager {
             }
         }
     }
-    
+
     public static Map<String, Boolean> getIndexedFolders(int contextId, int userId, int module, String account) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getReadOnly(contextId);
@@ -318,14 +318,14 @@ public class IndexFolderManager {
             stmt.setInt(2, userId);
             stmt.setInt(3, module);
             stmt.setString(4, account);
-            
+
             rs = stmt.executeQuery();
             while (rs.next()) {
                 String folder = rs.getString(1);
                 boolean indexed = rs.getBoolean(2);
                 results.put(folder, indexed);
             }
-            
+
             return results;
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -336,7 +336,7 @@ public class IndexFolderManager {
             }
         }
     }
-    
+
     public static boolean setTimestamp(int contextId, int userId, int module, String account, String folder, long timestamp) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getWritable(contextId);
@@ -349,12 +349,12 @@ public class IndexFolderManager {
             stmt.setInt(++i, userId);
             stmt.setInt(++i, module);
             stmt.setString(++i, account);
-            stmt.setString(++i, folder);            
+            stmt.setString(++i, folder);
             int rows = stmt.executeUpdate();
             if (rows == 1) {
                 return true;
             }
-            
+
             return false;
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -362,10 +362,10 @@ public class IndexFolderManager {
             DBUtils.closeSQLStuff(stmt);
             if (con != null) {
                 dbService.backWritable(contextId, con);
-            }   
+            }
         }
     }
-    
+
     public static long getTimestamp(int contextId, int userId, int module, String account, String folder) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getWritable(contextId);
@@ -377,11 +377,11 @@ public class IndexFolderManager {
             }
         }
     }
-    
+
     private static long getTimestamp(Connection con, int contextId, int userId, int module, String account, String folder) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        try {  
+        try {
             stmt = con.prepareStatement("SELECT timestamp FROM indexedFolders WHERE cid = ? AND uid = ? AND module = ? AND account = ? AND folder = ?");
             int i = 0;
             stmt.setInt(++i, contextId);
@@ -389,7 +389,7 @@ public class IndexFolderManager {
             stmt.setInt(++i, module);
             stmt.setString(++i, account);
             stmt.setString(++i, folder);
-            
+
             rs = stmt.executeQuery();
             long timestamp;
             if (rs.next()) {
@@ -398,15 +398,15 @@ public class IndexFolderManager {
                 createFolderEntry(con, contextId, userId, module, account, folder);
                 return getTimestamp(con, contextId, userId, module, account, folder);
             }
-            
+
             return timestamp;
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);         
+            DBUtils.closeSQLStuff(rs, stmt);
         }
     }
-    
+
     public static boolean deleteFolderEntry(int contextId, int userId, int module, String account, String folder) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getWritable(contextId);
@@ -418,12 +418,12 @@ public class IndexFolderManager {
             stmt.setInt(++i, userId);
             stmt.setInt(++i, module);
             stmt.setString(++i, account);
-            stmt.setString(++i, folder);            
-            int rows = stmt.executeUpdate();     
+            stmt.setString(++i, folder);
+            int rows = stmt.executeUpdate();
             if (rows == 1) {
                 return true;
             }
-            
+
             return false;
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -431,24 +431,24 @@ public class IndexFolderManager {
             DBUtils.closeSQLStuff(stmt);
             if (con != null) {
                 dbService.backWritable(contextId, con);
-            }  
+            }
         }
     }
-    
+
     public static List<String> getElapsedFolders(int contextId, int userId, int module, String account, long timestamp) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getReadOnly(contextId);
         List<String> folders = new ArrayList<String>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        try {  
+        try {
             stmt = con.prepareStatement("SELECT folder, timestamp FROM indexedFolders WHERE cid = ? AND uid = ? AND module = ? AND account = ?");
             int i = 0;
             stmt.setInt(++i, contextId);
             stmt.setInt(++i, userId);
             stmt.setInt(++i, module);
             stmt.setString(++i, account);
-            
+
             rs = stmt.executeQuery();
             while (rs.next()) {
                 String folder = rs.getString(1);
@@ -457,7 +457,7 @@ public class IndexFolderManager {
                     folders.add(folder);
                 }
             }
-            
+
             return folders;
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -465,10 +465,10 @@ public class IndexFolderManager {
             DBUtils.closeSQLStuff(rs, stmt);
             if (con != null) {
                 dbService.backReadOnly(contextId, con);
-            }            
+            }
         }
     }
-    
+
     public static boolean createFolderEntry(int contextId, int userId, int module, String account, String folder) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getWritable(contextId);
@@ -477,10 +477,10 @@ public class IndexFolderManager {
         } finally {
             if (con != null) {
                 dbService.backWritable(contextId, con);
-            }  
+            }
         }
     }
-    
+
     private static boolean createFolderEntry(Connection con, int contextId, int userId, int module, String account, String folder) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -494,17 +494,17 @@ public class IndexFolderManager {
             stmt.setLong(++i, System.currentTimeMillis());
             stmt.setBoolean(++i, false);
             stmt.setBoolean(++i, false);
-            
-            int rows = stmt.executeUpdate();     
+
+            int rows = stmt.executeUpdate();
             if (rows == 1) {
                 return true;
             }
-            
+
             return false;
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);             
+            DBUtils.closeSQLStuff(stmt);
         }
     }
 

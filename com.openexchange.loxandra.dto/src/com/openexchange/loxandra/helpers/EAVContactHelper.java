@@ -61,7 +61,7 @@ import com.openexchange.groupware.container.DataObject;
  */
 public class EAVContactHelper {
 	private static Map<Integer, String> nonStringFields = new HashMap<Integer, String>();
-	
+
 	static {
 		nonStringFields.put(Contact.ANNIVERSARY, "date");
 		nonStringFields.put(Contact.BIRTHDAY, "date");
@@ -70,7 +70,7 @@ public class EAVContactHelper {
 		nonStringFields.put(Contact.IMAGE_LAST_MODIFIED, "date");
 		nonStringFields.put(CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, "date");
 	}
-	
+
 	public static boolean isNonString(final int column) {
 		return nonStringFields.containsKey(column);
 	}

@@ -72,21 +72,21 @@ import com.openexchange.search.internal.operands.ConstantOperand;
 public class SearchAdapter {
 
     private final SearchTerm<?> term;
-    
+
     public SearchAdapter(ContactSearchObject contactSearch) throws OXException {
         this.term = null != contactSearch.getPattern() ? parseSearchTerm(contactSearch) : parseSearchTermAlternative(contactSearch);
     }
-    
+
     /**
      * @return the term
      */
     public SearchTerm<?> getSearchTerm() {
         return term;
     }
-    
+
     /**
      * Parses a search term from JSON.
-     * 
+     *
      * @param json
      * @return
      * @throws JSONException
@@ -110,13 +110,13 @@ public class SearchAdapter {
         SearchTerm<?> foldersTerm = contactSearch.hasFolders() ? parseFoldersTerm(contactSearch.getFolders()) : null;
         if (null != foldersTerm && null != foldersTerm.getOperands() && 0 < foldersTerm.getOperands().length) {
             searchTerm = null == searchTerm ? foldersTerm : getCompositeTerm(foldersTerm, searchTerm);
-        } 
+        }
         return searchTerm;
     }
-    
+
     /**
      * Parses an alternative search term from JSON.
-     * 
+     *
      * @param json
      * @return
      * @throws JSONException
@@ -175,7 +175,7 @@ public class SearchAdapter {
             searchTerm.addSearchTerm(getSearchTerm(ContactField.YOMI_COMPANY, contactSearch.getYomiCompany(), false == orSearch, true));
         }
         /*
-         * combine with email auto complete 
+         * combine with email auto complete
          */
         if (emailAutoComplete) {
             searchTerm = getCompositeTerm(searchTerm, HAS_EMAIL_TERM);
@@ -189,26 +189,26 @@ public class SearchAdapter {
         }
         return searchTerm;
     }
-    
+
     /**
      * Creates a new 'AND' composite search term using the supplied terms as
      * operands.
-     * 
+     *
      * @param term1 the first term
      * @param term2 the second term
      * @return the composite search term
      */
     private static CompositeSearchTerm getCompositeTerm(SearchTerm<?> term1, SearchTerm<?> term2) {
-        CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);            
+        CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
         andTerm.addSearchTerm(term1);
         andTerm.addSearchTerm(term2);
         return andTerm;
     }
 
     /**
-     * Parses the "folder" information from the supplied json object and puts 
-     * the folder IDs into a suitable search term. 
-     * 
+     * Parses the "folder" information from the supplied json object and puts
+     * the folder IDs into a suitable search term.
+     *
      * @param json
      * @return
      * @throws JSONException
@@ -217,16 +217,16 @@ public class SearchAdapter {
     private static SearchTerm<?> parseFoldersTerm(int[] folders) throws OXException {
         return getFoldersTerm(folders);
     }
-    
+
     /**
      * Creates a search term to find contacts based on their parent folder.
-     * 
+     *
      * @param folderIDs the IDs of the folders
      * @return the search term
      */
     private static SearchTerm<?> getFoldersTerm(int[] folderIDs) {
         if (null == folderIDs || 0 == folderIDs.length) {
-            return null;            
+            return null;
         } else if (1 == folderIDs.length) {
             return getFolderTerm(folderIDs[0]);
         } else {
@@ -237,10 +237,10 @@ public class SearchAdapter {
             return orTerm;
         }
     }
-    
+
     /**
      * Creates a search term to find contacts based on their parent folder.
-     * 
+     *
      * @param folderID the ID of the folder
      * @return the search term
      */
@@ -250,15 +250,15 @@ public class SearchAdapter {
         term.addOperand(new ConstantOperand<String>(Integer.toString(folderID)));
         return term;
     }
-    
+
     /**
      * Creates a search term to find contacts based on their start letter.
-     * 
+     *
      * @param pattern the start letter pattern
      * @return the search term
      */
     private static SearchTerm<?> getStartLetterTerm(String pattern) {
-        String field = ContactConfig.getInstance().getString(ContactConfig.Property.LETTER_FIELD);            
+        String field = ContactConfig.getInstance().getString(ContactConfig.Property.LETTER_FIELD);
         if (".".equals(pattern) || "#".equals(pattern)) {
             CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
             CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
@@ -333,7 +333,7 @@ public class SearchAdapter {
             return null;
         }
     }
-   
+
     private static final CompositeSearchTerm HAS_EMAIL_TERM;
     static {
         ContactField[] emailFields = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
@@ -353,8 +353,8 @@ public class SearchAdapter {
         hasEmailTerm.addSearchTerm(distributionListTerm);
         HAS_EMAIL_TERM = hasEmailTerm;
     }
-    
-    private static SingleSearchTerm getSearchTerm(ContactField field, String pattern, boolean prependWildcard, 
+
+    private static SingleSearchTerm getSearchTerm(ContactField field, String pattern, boolean prependWildcard,
             boolean appendWildcard) throws OXException {
         SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
         term.addOperand(new ContactFieldOperand(field));
@@ -362,7 +362,7 @@ public class SearchAdapter {
         term.addOperand(new ConstantOperand<String>(prepareForSearch(pattern, prependWildcard, appendWildcard)));
         return term;
     }
-    
+
     private static String prepareForSearch(String pattern, boolean prependWildcard, boolean appendWildcard) {
         if (prependWildcard && false == pattern.startsWith("*")) {
             pattern = "*" + pattern;

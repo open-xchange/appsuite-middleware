@@ -72,9 +72,7 @@ public interface SessiondService {
     /**
      * Creates a new session object in the SessionD storage with the given session parameters.
      * <p>
-     * If passed <tt>parameterObject</tt> implements {@link Parameterized} interface, then generated {@link Session session} is added to it
-     * with {@link Parameterized#PARAM_SESSION} name.
-     * 
+     *
      * @param parameterObject The parameter object describing the session to create
      * @return The session object interface of the newly created session.
      * @throws OXException If creating the session fails

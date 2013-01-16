@@ -65,7 +65,7 @@ import com.openexchange.mq.MQService;
 
 /**
  * {@link MQJmsQueueExample} - Example class for a simple Point-to-Point example using JMS classes.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MQJmsQueueExample {

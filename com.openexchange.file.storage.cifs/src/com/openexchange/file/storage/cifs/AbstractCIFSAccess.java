@@ -107,7 +107,7 @@ public abstract class AbstractCIFSAccess {
 
     /**
      * Gets the associated SMB file.
-     * 
+     *
      * @param path The path
      * @return The SMB file; either newly created or fetched from cache
      * @throws IOException If an I/O error occurs in case of newly created SMB file
@@ -129,7 +129,7 @@ public abstract class AbstractCIFSAccess {
 
     /**
      * Checks for existence of specified SMB file.
-     * 
+     *
      * @param smbFolder The CIFS/SMB file
      * @return <code>true</code> if existent; otherwise <code>false</code>
      * @throws SmbException If a CIFS/SMB exception occurs
@@ -140,7 +140,7 @@ public abstract class AbstractCIFSAccess {
         } catch (final SmbException e) {
             final String message = e.getMessage();
             if ("The network name cannot be found.".equals(message) || "Access is denied.".equals(message)) {
-                // This means that the named share was not found. 
+                // This means that the named share was not found.
                 return false;
             }
             throw e;
@@ -149,7 +149,7 @@ public abstract class AbstractCIFSAccess {
 
     /**
      * Checks if specified <code>SmbException</code> indicates that associated resource is not readable.
-     * 
+     *
      * @param e The SMB exception to examine
      * @return <code>true</code> if <code>SmbException</code> indicates that associated resource is not readable; otherwise <code>false</code>
      */

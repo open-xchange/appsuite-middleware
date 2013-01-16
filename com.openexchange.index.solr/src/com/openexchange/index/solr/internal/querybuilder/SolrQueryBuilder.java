@@ -60,7 +60,7 @@ import com.openexchange.index.QueryParameters;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface SolrQueryBuilder {
-    
+
     SolrQuery buildQuery(QueryParameters params) throws OXException;
 
 }

@@ -61,28 +61,28 @@ import com.openexchange.groupware.container.Contact;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ContactDatabaseGetter extends AbstractContactSwitcherWithDelegate {
-    
+
     public ContactDatabaseGetter() {
         super();
         final ContactGetter getter = new ContactGetter();
         super.setDelegate(getter);
     }
-    
-    
+
+
     /**
      * @see com.openexchange.groupware.contact.helpers.AbstractContactSwitcherWithDelegate#creationdate(java.lang.Object[])
      */
     @Override
-    public Object creationdate(Object... objects) throws OXException {        
+    public Object creationdate(Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("CreationDate");
         }
         final Contact conObj = (Contact) objects[0];
         final Date value = conObj.getCreationDate();
-        
+
         return value.getTime();
     }
-    
+
     /**
      * @see com.openexchange.groupware.contact.helpers.AbstractContactSwitcherWithDelegate#lastmodified(java.lang.Object[])
      */
@@ -93,7 +93,7 @@ public class ContactDatabaseGetter extends AbstractContactSwitcherWithDelegate {
         }
         final Contact conObj = (Contact) objects[0];
         final Date value = conObj.getLastModified();
-        
+
         return value.getTime();
     }
 

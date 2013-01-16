@@ -59,33 +59,33 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link Folders}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface Folders {
-    
+
     /**
      * Gets a folder.
-     * 
+     *
      * @param folderID The folder ID
      * @param shape The folder shape
      * @return The folder
-     * @throws OXException 
+     * @throws OXException
      */
     BaseFolderType getFolder(BaseFolderIdType folderID, DefaultShapeNamesType shape) throws OXException;
 
     /**
      * Gets a folder based on it's distinguished folder ID name.
-     * 
+     *
      * @param distinguishedFolderIdName The distinguished folder ID name
      * @param shape The folder shape
      * @return The folder
      */
     BaseFolderType getFolder(DistinguishedFolderIdNameType distinguishedFolderIdName, DefaultShapeNamesType shape) throws OXException;
-    
+
     /**
-     * Searches for folders by their display name. 
-     * 
+     * Searches for folders by their display name.
+     *
      * @param parentFolderID The parent folder ID
      * @param name The folder's display name
      * @param traversal The traversal type
@@ -96,8 +96,8 @@ public interface Folders {
     List<BaseFolderType> findFoldersByName(BaseFolderIdType parentFolderID, String name, FolderQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException;
 
     /**
-     * Searches for a folder by it's display name. 
-     * 
+     * Searches for a folder by it's display name.
+     *
      * @param parentFolderID The parent folder ID
      * @param name The folder's display name
      * @param traversal The traversal type
@@ -106,5 +106,5 @@ public interface Folders {
      * @throws OXException
      */
     BaseFolderType findFolderByName(BaseFolderIdType parentFolderID, String name, FolderQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException;
-    
+
 }

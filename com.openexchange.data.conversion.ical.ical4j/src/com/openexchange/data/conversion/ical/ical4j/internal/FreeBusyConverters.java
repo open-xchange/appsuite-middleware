@@ -64,7 +64,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.freebusy.FreeBusySl
 
 /**
  * {@link FreeBusyConverters}
- * 
+ *
  * @author Tobias Friedrich <tobias.friedrich@open-xchange.com>
  */
 public final class FreeBusyConverters {
@@ -80,7 +80,7 @@ public final class FreeBusyConverters {
     private static AttributeConverter<VFreeBusy, FreeBusyInformation> freeBusyAttendees = new FreeBusyAttendees();
     private static AttributeConverter<VFreeBusy, FreeBusyInformation> freeBusySlots = new FreeBusySlots();
     private static AttributeConverter<VFreeBusy, FreeBusyInformation> createdBy = new CreatedBy<VFreeBusy, FreeBusyInformation>();
-    
+
     /**
      * Prevent instantiation.
      */

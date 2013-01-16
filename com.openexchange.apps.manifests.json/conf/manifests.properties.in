@@ -1,2 +1,11 @@
-# Where to look for UI manifest files
-com.openexchange.apps.manifestPath=@prefix@/appsuite/manifests
+# Frontend properties of OX App Suite
+# This file configures the installation-specific settings of the web front-end.
+
+# Path to the installation directory of UI apps.
+com.openexchange.apps.path = @prefix@/appsuite
+
+# Path to the zoneinfo database
+#com.openexchange.apps.tzdata = /usr/share/zoneinfo
+
+# Paths to directories with UI manifest files
+#com.openexchange.apps.manifestPath=@prefix@/appsuite/manifests:<more paths>

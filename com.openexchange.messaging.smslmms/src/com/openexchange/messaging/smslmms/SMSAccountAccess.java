@@ -76,7 +76,7 @@ public class SMSAccountAccess implements MessagingAccountAccess, SMSAccess {
 
     /**
      * Initializes a new {@link SMSAccountAccess}.
-     * 
+     *
      * @param smsAccess The SMS/MMS access
      */
     public SMSAccountAccess(final SMSConfiguration configuration, final SMSAccess smsAccess) {

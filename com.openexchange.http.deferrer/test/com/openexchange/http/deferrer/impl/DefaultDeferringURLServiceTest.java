@@ -67,7 +67,7 @@ public class DefaultDeferringURLServiceTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         DefaultDeferringURLService.PREFIX.set(new DispatcherPrefixService() {
-            
+
             @Override
             public String getPrefix() {
                 return "/ajax/";

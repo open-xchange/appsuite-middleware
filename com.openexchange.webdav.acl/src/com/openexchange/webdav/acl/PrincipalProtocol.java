@@ -59,15 +59,15 @@ import com.openexchange.webdav.protocol.Protocol;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class PrincipalProtocol extends Protocol {
-    
+
     public PrincipalProtocol() {
         super();
     }
-     
+
     @Override
     public WebdavAction getReportAction(String ns, String name) {
         if (PrincipalMatchReport.NAMESPACE.equals(ns) && PrincipalMatchReport.NAME.equals(name)) {
-            return new PrincipalMatchReport(this);                
+            return new PrincipalMatchReport(this);
         }
         return null;
     }

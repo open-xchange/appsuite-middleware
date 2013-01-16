@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link WhiteboardSecretService} - Whiteboard pattern for {@link SecretService}.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WhiteboardSecretService implements RankingAwareSecretService {
@@ -67,7 +67,7 @@ public class WhiteboardSecretService implements RankingAwareSecretService {
 
     /**
      * Initializes a new {@link WhiteboardSecretService}.
-     * 
+     *
      * @param context The bundle context
      */
     public WhiteboardSecretService(final BundleContext context) {
@@ -76,7 +76,7 @@ public class WhiteboardSecretService implements RankingAwareSecretService {
 
     /**
      * Gets the ranking of the currently applicable {@link SecretService} reference.
-     * 
+     *
      * @return The currently applicable service ranking
      */
     @Override

@@ -83,7 +83,7 @@ public class ContactHandler {
         ContactService contactService = SubscriptionServiceRegistry.getInstance().getService(ContactService.class);
 
         for(final Contact updatedContact: updatedContacts){
-            final SearchIterator<Contact> existingContacts = contactService.getAllContacts(session, String.valueOf(folderId)); 
+            final SearchIterator<Contact> existingContacts = contactService.getAllContacts(session, String.valueOf(folderId));
             boolean foundMatch = false;
             while( existingContacts.hasNext() && ! foundMatch ){
                 Contact existingContact = null;
@@ -98,7 +98,7 @@ public class ContactHandler {
                 if( isSame(existingContact, updatedContact)){
                     foundMatch = true;
                     updatedContact.setObjectID( existingContact.getObjectID() );
-                    contactService.updateContact(session, String.valueOf(folderId), 
+                    contactService.updateContact(session, String.valueOf(folderId),
                         String.valueOf(existingContact.getObjectID()), updatedContact, new Date());
                 }
             }

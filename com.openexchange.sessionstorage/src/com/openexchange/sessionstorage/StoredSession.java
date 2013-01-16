@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link StoredSession} - Represents a session held in session storage.
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -97,7 +97,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
     /**
      * Initializes a new {@link StoredSession}.
      */
-    public StoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, 
+    public StoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login,
         String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters) {
         this();
         this.sessionId = sessionId;
@@ -135,7 +135,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
             }
         }
     }
-    
+
     /**
      * Initializes a new {@link StoredSession}.
      */
@@ -176,7 +176,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.userId = session.getUserId();
         this.userLogin = session.getUserlogin();
     }
-    
+
     @Override
     public String getLoginName() {
         return loginName;
@@ -193,7 +193,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
 
     /**
      * Sets the password
-     * 
+     *
      * @param password The password
      */
     public void setPassword(final String password) {
@@ -207,7 +207,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
 
     /**
      * Sets the context identifier
-     * 
+     *
      * @param contextId The context identifier
      */
     public void setContextId(final int contextId) {
@@ -221,7 +221,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
 
     /**
      * Sets the user identifier
-     * 
+     *
      * @param userId The user identifier
      */
     public void setUserId(final int userId) {
@@ -230,7 +230,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
 
     /**
      * Gets the session identifier.
-     * 
+     *
      * @return The session identifier
      */
     public String getSessionId() {
@@ -239,7 +239,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
 
     /**
      * Sets the session identifier.
-     * 
+     *
      * @param sessionId The session identifier to set
      */
     public void setSessionId(final String sessionId) {
@@ -253,7 +253,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
 
     /**
      * Sets the secret identifier.
-     * 
+     *
      * @param secret The secret identifier
      */
     public void setSecret(final String secret) {
@@ -267,7 +267,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
 
     /**
      * Sets the login; e.g <code>test@foo</code>.
-     * 
+     *
      * @param login The login
      */
     public void setLogin(final String login) {
@@ -281,7 +281,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
 
     /**
      * Sets the random token.
-     * 
+     *
      * @param randomToken The random token
      */
     public void setRandomToken(final String randomToken) {
@@ -305,7 +305,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
 
     /**
      * Sets the authentication identifier.
-     * 
+     *
      * @param authId The authentication identifier
      */
     public void setAuthId(final String authId) {
@@ -334,7 +334,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
 
     /**
      * Gets the user login; e.g. <code>test</code>
-     * 
+     *
      * @return The user login
      */
     public String getUserLogin() {

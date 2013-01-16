@@ -52,7 +52,7 @@ package com.openexchange.realtime.util;
 /**
  * {@link ElementPaths} - Identifies elements in a namespace.
  * Structured after Javas Package.Class namespace scheme <code>PathRoot.PathNode1.PathNode2.Element</code>.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class ElementPath {
@@ -76,7 +76,7 @@ public class ElementPath {
      * Valid input is either just an element or a namespace and an Element joined by a dot. Neither namespaces nor elements must start or
      * end with a dot. So valid input looks like <code>Element</code> or <code>Root.Node.Element</code>
      * Initializes a new {@link ElementPath}.
-     * 
+     *
      * @param elementPath the string represntation to parse
      * @throws IllegalArgumentException for malformed elementPaths
      */
@@ -90,7 +90,7 @@ public class ElementPath {
                 throw new IllegalArgumentException("Malformed elementPath");
             }
             this.namespace = namespace;
-            
+
             String element = elementPath.substring(index + 1, elementPath.length());
             if (element.isEmpty()) {
                 throw new IllegalArgumentException("Malformed elementPath");
@@ -114,7 +114,7 @@ public class ElementPath {
     @Override
     public String toString() {
         if("".equals(namespace)) {
-            return "ElementPath [" + element + "]";            
+            return "ElementPath [" + element + "]";
         }
         return "ElementPath [" + namespace + "." + element + "]";
     }
@@ -130,23 +130,30 @@ public class ElementPath {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (!(obj instanceof ElementPath))
+        }
+        if (!(obj instanceof ElementPath)) {
             return false;
+        }
         ElementPath other = (ElementPath) obj;
         if (element == null) {
-            if (other.element != null)
+            if (other.element != null) {
                 return false;
-        } else if (!element.equals(other.element))
+            }
+        } else if (!element.equals(other.element)) {
             return false;
+        }
         if (namespace == null) {
-            if (other.namespace != null)
+            if (other.namespace != null) {
                 return false;
-        } else if (!namespace.equals(other.namespace))
+            }
+        } else if (!namespace.equals(other.namespace)) {
             return false;
+        }
         return true;
     }
 

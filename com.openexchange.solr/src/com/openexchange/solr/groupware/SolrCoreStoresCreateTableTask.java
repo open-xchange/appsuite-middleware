@@ -67,10 +67,10 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrCoreStoresCreateTableTask extends UpdateTaskAdapter {
-    
+
     // FIXME: This has to be rewritten as soon as we have a framework for config DB update tasks
-    
-    private static final String CT_CORE_STORES = 
+
+    private static final String CT_CORE_STORES =
         "CREATE TABLE solrCoreStores (" +
             "id INT4 unsigned NOT NULL," +
             "uri varchar(255) NOT NULL," +
@@ -78,7 +78,7 @@ public class SolrCoreStoresCreateTableTask extends UpdateTaskAdapter {
             "numCores INT4 unsigned NOT NULL," +
             "PRIMARY KEY (id)" +
           ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-        
+
 
     public SolrCoreStoresCreateTableTask() {
         super();
@@ -89,9 +89,9 @@ public class SolrCoreStoresCreateTableTask extends UpdateTaskAdapter {
     	final DatabaseService dbService = Services.getService(DatabaseService.class);
         updateConfigDB(dbService);
     }
-    
+
     private void updateConfigDB(final DatabaseService dbService) throws OXException {
-        final Connection writeCon = dbService.getWritable();        
+        final Connection writeCon = dbService.getWritable();
         PreparedStatement stmt = null;
         /*
          * Create table solrServers in configDb

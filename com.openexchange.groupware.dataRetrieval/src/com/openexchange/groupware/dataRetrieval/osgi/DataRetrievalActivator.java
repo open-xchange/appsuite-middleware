@@ -64,7 +64,7 @@ import com.openexchange.session.SessionSpecificContainerRetrievalService;
 
 /**
  * {@link DataRetrievalActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DataRetrievalActivator extends AbstractSessionServletActivator {

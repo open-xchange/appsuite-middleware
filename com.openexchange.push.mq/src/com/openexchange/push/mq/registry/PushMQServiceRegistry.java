@@ -58,9 +58,9 @@ import com.openexchange.osgi.ServiceRegistry;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public final class PushMQServiceRegistry {
-    
+
     private final static ServiceRegistry registry = new ServiceRegistry();
-    
+
     public static ServiceRegistry getServiceRegistry() {
         return registry;
     }

@@ -136,12 +136,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
     }
 
     private static Map<Integer, List<Integer>> getAllUsers(final int contextId) throws OXException {
-        final Connection readCon;
-        try {
-            readCon = Database.getNoTimeout(contextId, false);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection readCon = Database.getNoTimeout(contextId, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -180,8 +175,6 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
         try {
             writeCon = Database.get(contextId, true);
             writeCon.setAutoCommit(false); // BEGIN
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             // Auto-Commit mode could not be changed
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

@@ -68,17 +68,17 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link ResultIterator} - Search iterator for contacts fetched through the 
- * contact service, performing additional operations on the contacts. 
+ * {@link ResultIterator} - Search iterator for contacts fetched through the
+ * contact service, performing additional operations on the contacts.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ResultIterator implements SearchIterator<Contact> {
-	
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ResultIterator.class));
 
-    private static final ContactField[] DLISTMEMBER_FIELDS = { 
-    	ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.PRIVATE_FLAG, ContactField.LAST_MODIFIED, 
+    private static final ContactField[] DLISTMEMBER_FIELDS = {
+    	ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.PRIVATE_FLAG, ContactField.LAST_MODIFIED,
     	ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, };
 
     private final SearchIterator<Contact> delegate;
@@ -89,10 +89,10 @@ public class ResultIterator implements SearchIterator<Contact> {
 	private final Session session;
 
 	/**
-	 * Initializes a new {@link ResultIterator} where the 'can read all' 
-	 * information is evaluated dynamically based on the contact's parent 
+	 * Initializes a new {@link ResultIterator} where the 'can read all'
+	 * information is evaluated dynamically based on the contact's parent
 	 * folders.
-	 * 
+	 *
 	 * @param delegate
 	 * @param needsAttachmentInfo
 	 * @param contextID
@@ -102,11 +102,11 @@ public class ResultIterator implements SearchIterator<Contact> {
 	public ResultIterator(SearchIterator<Contact> delegate, boolean needsAttachmentInfo, Session session) throws OXException {
 		this(delegate, needsAttachmentInfo, session, null);
 	}
-	
+
 	/**
-	 * Initializes a new {@link ResultIterator} where the supplied 'can read 
-	 * all' information is used statically. 
-	 * 
+	 * Initializes a new {@link ResultIterator} where the supplied 'can read
+	 * all' information is used statically.
+	 *
 	 * @param delegate
 	 * @param needsAttachmentInfo
 	 * @param contextID
@@ -117,17 +117,17 @@ public class ResultIterator implements SearchIterator<Contact> {
 	public ResultIterator(SearchIterator<Contact> delegate, boolean needsAttachmentInfo, Session session, boolean canReadAll) throws OXException {
 		this(delegate, needsAttachmentInfo, session, Boolean.valueOf(canReadAll));
 	}
-	
+
 	private ResultIterator(SearchIterator<Contact> delegate, boolean needsAttachmentInfo, Session session, Boolean canReadAll) throws OXException {
 		super();
 		this.delegate = delegate;
 		this.needsAttachmentInfo = needsAttachmentInfo;
 		this.session = session;
 		this.canReadAll = canReadAll;
-		this.canReadAllMap = new HashMap<String, Boolean>(); 
+		this.canReadAllMap = new HashMap<String, Boolean>();
 		initNext();
 	}
-	
+
 	private void initNext() throws OXException {
         while (delegate.hasNext()) {
             next = delegate.next();
@@ -137,13 +137,13 @@ public class ResultIterator implements SearchIterator<Contact> {
                 return;
             }
         }
-        next = null;	
+        next = null;
 	}
-	
+
 	/**
-	 * Adds the date of the last modification to attachments of the given 
+	 * Adds the date of the last modification to attachments of the given
 	 * contact when needed, i.e. the information is not already present.
-	 * 
+	 *
 	 * @param contact the contact to add the attachment information for
 	 * @throws OXException
 	 */
@@ -153,11 +153,11 @@ public class ResultIterator implements SearchIterator<Contact> {
 					Tools.getContext(session.getContextId()), Types.CONTACT, contact.getObjectID()));
 		}
 	}
-	
+
 	/**
-	 * Adds distribution list member information dynamically by querying the 
-	 * referenced contacts. 
-	 * 
+	 * Adds distribution list member information dynamically by querying the
+	 * referenced contacts.
+	 *
 	 * @param contact
 	 */
 	private void addDistributionListInfo(Contact contact) {
@@ -187,7 +187,7 @@ public class ResultIterator implements SearchIterator<Contact> {
 		member.removeEntryID();
 		member.setEmailfield(DistributionListEntryObject.INDEPENDENT);
 	}
-	
+
 	private void updateMemberInfo(DistributionListEntryObject member, Contact referencedContact) {
 		member.setDisplayname(referencedContact.getDisplayName());
 		member.setFolderID(referencedContact.getParentFolderID());
@@ -208,16 +208,16 @@ public class ResultIterator implements SearchIterator<Contact> {
 			LOG.warn("Error setting e-mail address for updated distribution list member", e);
 		}
 	}
-	
+
 	private Contact[] getReferencedContacts(DistributionListEntryObject[] members) {
 		Contact[] contacts = new Contact[members.length];
 		/*
 		 * determine queried folders
 		 */
-		Map<String, List<String>> folderAndObjectIDs = new HashMap<String, List<String>>();  
+		Map<String, List<String>> folderAndObjectIDs = new HashMap<String, List<String>>();
 		for (DistributionListEntryObject member : members) {
 			if (DistributionListEntryObject.INDEPENDENT != member.getEmailfield()) {
-				String folderID = Integer.toString(member.getFolderID()); 
+				String folderID = Integer.toString(member.getFolderID());
 				if (null == folderAndObjectIDs.get(folderID)) {
 					folderAndObjectIDs.put(folderID, new ArrayList<String>());
 				}
@@ -231,7 +231,7 @@ public class ResultIterator implements SearchIterator<Contact> {
 			SearchIterator<Contact> searchIterator = null;
 			try {
 				ContactStorage storage = Tools.getStorage(session, entry.getKey());
-				searchIterator = storage.list(session, "0".equals(entry.getKey()) ? null : entry.getKey(), 
+				searchIterator = storage.list(session, "0".equals(entry.getKey()) ? null : entry.getKey(),
 						entry.getValue().toArray(new String[entry.getValue().size()]), DLISTMEMBER_FIELDS);
 				while (searchIterator.hasNext()) {
 					Contact contact = searchIterator.next();
@@ -241,7 +241,7 @@ public class ResultIterator implements SearchIterator<Contact> {
 							 * add contact info for matching member in result
 							 */
 							for (int i = 0; i < members.length; i++) {
-								if (members[i].getEntryID() == contact.getObjectID() && (0 == members[i].getFolderID() || 										
+								if (members[i].getEntryID() == contact.getObjectID() && (0 == members[i].getFolderID() ||
 										members[i].getFolderID() == contact.getParentFolderID())) {
 									contacts[i] = contact;
 								}
@@ -265,11 +265,11 @@ public class ResultIterator implements SearchIterator<Contact> {
 		}
 		return contacts;
 	}
-	
+
 	/**
 	 * Gets a value indicating whether the supplied contact should be passed
 	 * through from the delegate or not.
-	 * 
+	 *
 	 * @param contact
 	 * @return
 	 * @throws OXException
@@ -298,7 +298,7 @@ public class ResultIterator implements SearchIterator<Contact> {
 					LOG.debug("Unable to determine effective permissions for folder '" + folderID + "'", e);
 				}
 				canReadAllMap.put(folderID, Boolean.valueOf(canReadAllObjects));
-			}				
+			}
 			return canReadAllMap.get(folderID).booleanValue();
 		}
 	}
@@ -339,5 +339,5 @@ public class ResultIterator implements SearchIterator<Contact> {
 	public OXException[] getWarnings() {
 		return delegate.getWarnings();
 	}
-	
+
 }

@@ -177,38 +177,25 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
     }
 
     protected void insertContactObject(final Contact co, final boolean override) throws OXException {
-        try {
-            Contacts.performContactStorageInsert(co, userId, session, override);
-            final EventClient ec = new EventClient(session);
-            ec.create(co);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        Contacts.performContactStorageInsert(co, userId, session, override);
+        final EventClient ec = new EventClient(session);
+        ec.create(co);
     }
 
     @Override
     public void updateContactObject(final Contact co, final int fid, final java.util.Date d) throws OXException {
-
-        try {
             final Contact storageVersion = Contacts.getContactById(co.getObjectID(), session);
             Contacts.performContactStorageUpdate(co, fid, d, userId, memberInGroups, ctx, userConfiguration);
             final EventClient ec = new EventClient(session);
             ec.modify(storageVersion, co, new OXFolderAccess(ctx).getFolderObject(co.getParentFolderID()));
-        } catch (final OXException e) {
-            throw e;
-        }
     }
 
     @Override
     public void updateUserContact(final Contact contact, final java.util.Date lastModified) throws OXException {
-        try {
             final Contact storageVersion = Contacts.getContactById(contact.getObjectID(), session);
             Contacts.performUserContactStorageUpdate(contact, lastModified, userId, memberInGroups, ctx, userConfiguration);
             final EventClient ec = new EventClient(session);
             ec.modify(storageVersion, contact, new OXFolderAccess(ctx).getFolderObject(contact.getParentFolderID()));
-        } catch (final OXException e) {
-            throw e;
-        }
     }
 
     @Override
@@ -254,8 +241,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 closeSQLStuff(rs, stmt);
             }
             return retval;
-        } catch (final OXException e) {
-            throw e;
         } finally {
             DBPool.closeReaderSilent(ctx, readCon);
         }
@@ -502,11 +487,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             }
             searchobject.setAllFolderSQLINString(cs.buildFolderSearch(userId, memberInGroups, folders, session));
         } else {
-            try {
-                searchobject.setAllFolderSQLINString(cs.buildAllFolderSearchString(userId, memberInGroups, session).toString());
-            } catch (final SearchIteratorException e) {
-                throw new OXException(e);
-            }
+            searchobject.setAllFolderSQLINString(cs.buildAllFolderSearchString(userId, memberInGroups, session).toString());
         }
         Search.checkPatternLength(searchobject);
         final StringBuilder sqlOrder = new StringBuilder();
@@ -686,7 +667,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
         } catch (final SearchIteratorException e) {
             error = true;
-            throw new OXException(e);
+            throw e;
         } catch (final SQLException e) {
             error = true;
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -706,11 +687,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             }
         }
 
-        try {
-            return new PrefetchIterator<Contact>(si);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return new PrefetchIterator<Contact>(si);
     }
 
     @Override
@@ -718,12 +695,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         if (objectId <= 0) {
             throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(objectId), I(ctx.getContextId()));
         }
-        final FolderObject contactFolder;
-        try {
-            contactFolder = new OXFolderAccess(ctx).getFolderObject(fid);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final FolderObject contactFolder = new OXFolderAccess(ctx).getFolderObject(fid);
         if (contactFolder.getModule() != FolderObject.CONTACT) {
             throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(ctx.getContextId()), I(userId));
         }
@@ -741,8 +713,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (null != creationDate) {
                 co.setLastModifiedOfNewestAttachment(creationDate);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             DBPool.closeReaderSilent(ctx, con);
         }
@@ -828,7 +798,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (readCon != null) {
                 DBPool.closeReaderSilent(ctx, readCon);
             }
-            throw new OXException(e);
+            throw e;
         }
         SearchIterator<Contact> si = null;
         Statement stmt = null;
@@ -863,7 +833,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             si = new ContactObjectIterator(rs, stmt, cols, false, readCon);
         } catch (final SearchIteratorException e) {
             error = true;
-            throw new OXException(e);
+            throw e;
         } catch (final SQLException e) {
             error = true;
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -882,11 +852,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 }
             }
         }
-        try {
-            return new PrefetchIterator<Contact>(si);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return new PrefetchIterator<Contact>(si);
     }
 
     @Override
@@ -912,7 +878,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
         } catch (final SearchIteratorException e) {
             error = true;
-            throw new OXException(e);
+            throw e;
         } catch (final SQLException e) {
             error = true;
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -928,11 +894,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 }
             }
         }
-        try {
-            return new PrefetchIterator<Contact>(si);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return new PrefetchIterator<Contact>(si);
     }
 
     @Override
@@ -992,8 +954,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             }
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
-        } catch (final OXException e) {
-            throw e;
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             try {
@@ -1196,8 +1156,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             }
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
 
         return co;
@@ -1403,11 +1361,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
 	private String checkFolderRights(final ContactSearchtermSqlConverter conv, final ContactSql cs) throws OXException {
 
         if(! conv.hasFolders() ){
-        	try {
-                return cs.buildAllFolderSearchString(userId, memberInGroups, session).toString();
-            } catch (final SearchIteratorException e) {
-                throw new OXException(e);
-            }
+        	return cs.buildAllFolderSearchString(userId, memberInGroups, session).toString();
         }
 
         final OXFolderAccess oxfa = new OXFolderAccess(ctx);

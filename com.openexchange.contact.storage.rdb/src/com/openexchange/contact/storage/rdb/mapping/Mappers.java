@@ -60,7 +60,7 @@ public final class Mappers {
 	 * The mappings for contacts.
 	 */
 	public static final ContactMapper CONTACT = new ContactMapper();
-	
+
 	/**
 	 * The mappings for distribution list members.
 	 */

@@ -58,13 +58,13 @@ import org.osgi.service.event.EventHandler;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IndexEventHandler implements EventHandler {
-    
+
     //FIXME:
 
     @Override
     public void handleEvent(Event event) {
         // Nothing to do
-        
+
     }
 
 //    protected static final org.apache.commons.logging.Log LOG =

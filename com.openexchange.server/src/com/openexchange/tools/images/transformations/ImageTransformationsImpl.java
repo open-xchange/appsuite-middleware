@@ -83,47 +83,47 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link ImageTransformationsImpl}
- * 
+ *
  * Default {@link ImageTransformations} implementation.
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ImageTransformationsImpl implements ImageTransformations {
-    
+
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImageTransformationsImpl.class));
-    
+
     private final InputStream sourceImageStream;
     private final List<ImageTransformation> transformations;
     private BufferedImage sourceImage;
     private Metadata metadata;
     private boolean compress;
-    
+
     private ImageTransformationsImpl(BufferedImage sourceImage, InputStream sourceImageStream) {
         super();
         this.sourceImage = sourceImage;
         this.sourceImageStream = sourceImageStream;
         this.transformations = new ArrayList<ImageTransformation>();
     }
-    
+
     /**
      * Initializes a new {@link ImageTransformationsImpl}.
-     * 
+     *
      * @param sourceImage The source image
      */
     public ImageTransformationsImpl(BufferedImage sourceImage) {
         this(sourceImage, null);
-    }    
+    }
 
     /**
      * Initializes a new {@link ImageTransformationsImpl}.
-     * 
+     *
      * @param sourceImage The source image
-     * @throws IOException 
+     * @throws IOException
      */
     public ImageTransformationsImpl(InputStream sourceImageStream) throws IOException {
         this(null, sourceImageStream);
-    }    
+    }
 
     @Override
     public ImageTransformations rotate() {
@@ -173,12 +173,12 @@ public class ImageTransformationsImpl implements ImageTransformations {
         } else {
             byte[] bytes = getBytes(imageFormat);
             return null != bytes ? Streams.newByteArrayInputStream(bytes) : null;
-        }            
+        }
     }
-    
+
     /**
      * Gets a value indicating whether the denoted format name leads to transformations or not.
-     * 
+     *
      * @param formatName The format name
      * @return <code>true</code>, if there are transformations for the targte image format, <code>false</code>, otherwise
      */
@@ -188,15 +188,15 @@ public class ImageTransformationsImpl implements ImageTransformations {
         }
         for (ImageTransformation transformation : transformations) {
             if (transformation.supports(formatName)) {
-                return true;                                        
+                return true;
             }
         }
         return false;
     }
-    
+
     /**
      * Gets the resulting image after applying all transformations.
-     * 
+     *
      * @param formatName the image format to use, or <code>null</code> if not relevant
      * @return The transformed image
      * @throws IOException
@@ -207,30 +207,30 @@ public class ImageTransformationsImpl implements ImageTransformations {
             ImageInformation imageInformation = null != this.metadata ? getImageInformation(this.metadata) : null;
             for (ImageTransformation transformation : transformations) {
                 if (transformation.supports(formatName)) {
-                    image = transformation.perform(image, imageInformation);                                        
+                    image = transformation.perform(image, imageInformation);
                 }
             }
         }
         return image;
     }
-    
+
     /**
      * Gets the source image, either from the supplied buffered image or the supplied stream, extracting image metadata as needed.
-     * 
+     *
      * @param formatName The format to use, e.g. "jpeg" or "tiff"
      * @return The source image
      * @throws IOException
      */
     private BufferedImage getSourceImage(String formatName) throws IOException {
         if (null == this.sourceImage && null != this.sourceImageStream) {
-            this.sourceImage = needsMetadata(formatName) ? readAndExtractMetadata(sourceImageStream) : read(sourceImageStream); 
+            this.sourceImage = needsMetadata(formatName) ? readAndExtractMetadata(sourceImageStream) : read(sourceImageStream);
         }
         return sourceImage;
     }
-    
+
     /**
      * Gets a value indicating whether additional metadata is required for one of the transformations or not.
-     * 
+     *
      * @param formatName The format to use, e.g. "jpeg" or "tiff"
      * @return <code>true</code>, if metadata is needed, <code>false</code>, otherwise
      */
@@ -245,10 +245,10 @@ public class ImageTransformationsImpl implements ImageTransformations {
         }
         return false;
     }
-    
+
     /**
      * Writes out an image into a byte-array.
-     * 
+     *
      * @param image The image to write
      * @param formatName The format to use, e.g. "jpeg" or "tiff"
      * @return The image data
@@ -264,24 +264,24 @@ public class ImageTransformationsImpl implements ImageTransformations {
             if (needsCompression(formatName)) {
                 writeCompressed(image, formatName, outputStream);
             } else {
-                write(image, formatName, outputStream);            
+                write(image, formatName, outputStream);
             }
             return outputStream.toByteArray();
         } finally {
             Streams.close(outputStream);
         }
     }
-    
+
     private boolean needsCompression(String formatName) {
-        return this.compress && null != formatName && "jpeg".equalsIgnoreCase(formatName) || "jpg".equalsIgnoreCase(formatName);        
+        return this.compress && null != formatName && "jpeg".equalsIgnoreCase(formatName) || "jpg".equalsIgnoreCase(formatName);
     }
-    
+
     private static void write(BufferedImage image, String formatName, OutputStream output) throws IOException {
         if (false == ImageIO.write(image, formatName, output)) {
             throw new IOException("no appropriate writer is found");
         }
     }
-    
+
     private static void writeCompressed(BufferedImage image, String formatName, OutputStream output) throws IOException {
         ImageWriter writer = null;
         ImageOutputStream imageOutputStream = null;
@@ -309,11 +309,11 @@ public class ImageTransformationsImpl implements ImageTransformations {
             }
         }
     }
-    
+
     /**
-     * Tries to adjust the default settings on the supplied image write parameters to apply compression, ignoring any 
-     * {@link UnsupportedOperationException}s that may occur. 
-     * 
+     * Tries to adjust the default settings on the supplied image write parameters to apply compression, ignoring any
+     * {@link UnsupportedOperationException}s that may occur.
+     *
      * @param parameters The parameters to adjust for compression
      */
     private static void adjustCompressionParams(ImageWriteParam parameters) {
@@ -333,10 +333,10 @@ public class ImageTransformationsImpl implements ImageTransformations {
             LOG.debug(e.getMessage(), e);
         }
     }
-    
+
     /**
      * Reads a buffered image from the supplied stream and closes the stream afterwards.
-     * 
+     *
      * @param inputStream The stream to read the image from
      * @return The buffered image
      * @throws IOException
@@ -351,10 +351,10 @@ public class ImageTransformationsImpl implements ImageTransformations {
             Streams.close(inputStream);
         }
     }
-    
+
     /**
      * Reads a buffered image from the supplied stream and closes the stream afterwards, trying to extract metadata information.
-     * 
+     *
      * @param inputStream The stream to read the image from
      * @return The buffered image
      * @throws IOException
@@ -381,12 +381,12 @@ public class ImageTransformationsImpl implements ImageTransformations {
             }
         }
     }
-    
+
     /**
      * Extracts image information from the supplied metadata.
-     * 
+     *
      * @param metadata The metadata to extract the image information
-     * @return The image information, or <code>null</code> if none could be extracted 
+     * @return The image information, or <code>null</code> if none could be extracted
      */
     private static ImageInformation getImageInformation(Metadata metadata) {
         if (null != metadata) {
@@ -414,10 +414,10 @@ public class ImageTransformationsImpl implements ImageTransformations {
     }
 
     /**
-     * Strips a leading "image/" as well as trailing additional properties after the first ";" from the supplied value if necessary from 
+     * Strips a leading "image/" as well as trailing additional properties after the first ";" from the supplied value if necessary from
      * image formats passed as content type. Also implicitly converts "pjpeg"- and "x-png"-formats as used by Internet Explorer to their
-     * common format names. 
-     * 
+     * common format names.
+     *
      * @param value The value
      * @return The cleaned image format
      */
@@ -426,7 +426,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             if (value.toLowerCase().startsWith("image/")) {
                 value = value.substring(6);
             }
-            int idx = value.indexOf(';'); 
+            int idx = value.indexOf(';');
             if (0 < idx) {
                 value = value.substring(0, idx);
             }
@@ -446,7 +446,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
     /**
      * Gets a value indicating whether an image format can be read or not.
-     * 
+     *
      * @param formatName The image format name
      * @return <code>true</code> if the image format can be read, <code>false</code>, otherwise
      */

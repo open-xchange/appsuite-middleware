@@ -61,7 +61,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link AJAXRequestResult} - Simple container for a {@link JSONValue result}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXRequestResult {
@@ -202,7 +202,7 @@ public class AJAXRequestResult {
 
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
-     * 
+     *
      * @see #EMPTY_REQUEST_RESULT
      */
     public AJAXRequestResult() {
@@ -211,7 +211,7 @@ public class AJAXRequestResult {
 
     /**
      * Initializes a new {@link AJAXRequestResult} with time stamp set to <code>null</code>.
-     * 
+     *
      * @param resultObject The result object
      */
     public AJAXRequestResult(final Object resultObject) {
@@ -220,7 +220,7 @@ public class AJAXRequestResult {
 
     /**
      * Initializes a new {@link AJAXRequestResult}.
-     * 
+     *
      * @param resultObject The result object
      * @param timestamp The server's last-modified time stamp (corresponding to either a GET, ALL, or LIST request)
      */
@@ -230,7 +230,7 @@ public class AJAXRequestResult {
 
     /**
      * Initializes a new {@link AJAXRequestResult} with time stamp set to <code>null</code>.
-     * 
+     *
      * @param resultObject The result object
      * @param format The format of the result object
      */
@@ -240,7 +240,7 @@ public class AJAXRequestResult {
 
     /**
      * Initializes a new {@link AJAXRequestResult}.
-     * 
+     *
      * @param resultObject The result object
      * @param timestamp The server's last-modified time stamp (corresponding to either a GET, ALL, or LIST request)
      * @param format The format of the result object
@@ -260,7 +260,7 @@ public class AJAXRequestResult {
 
     /**
      * Gets the duration.
-     * 
+     *
      * @return The duration or <code>-1</code> if not set
      */
     public long getDuration() {
@@ -269,7 +269,7 @@ public class AJAXRequestResult {
 
     /**
      * Sets the duration
-     * 
+     *
      * @param duration The duration to set
      * @return This AJAX request result with duration applied
      */
@@ -280,11 +280,11 @@ public class AJAXRequestResult {
 
     /**
      * Sets the duration by given processing start time stamp.
-     * 
+     *
      * <pre>
      * System.currentTimeMillis() - start;
      * </pre>
-     * 
+     *
      * @param start The start time stamp
      * @return This AJAX request result with duration applied
      */
@@ -294,7 +294,7 @@ public class AJAXRequestResult {
 
     /**
      * Adds given duration.
-     * 
+     *
      * @param duration The duration to add
      * @return This AJAX request result with duration applied
      */
@@ -308,11 +308,11 @@ public class AJAXRequestResult {
 
     /**
      * Adds given duration by given start time stamp.
-     * 
+     *
      * <pre>
      * System.currentTimeMillis() - start;
      * </pre>
-     * 
+     *
      * @param start The start time stamp
      * @return This AJAX request result with duration applied
      */
@@ -322,7 +322,7 @@ public class AJAXRequestResult {
 
     /**
      * Gets the result type
-     * 
+     *
      * @return The result type
      */
     public ResultType getType() {
@@ -331,7 +331,7 @@ public class AJAXRequestResult {
 
     /**
      * Sets the result type
-     * 
+     *
      * @param resultType The result type to set
      */
     public void setType(final ResultType resultType) {
@@ -342,7 +342,7 @@ public class AJAXRequestResult {
      * Gets the expiry time.
      * <p>
      * Have a notion of a time-to-live value.
-     * 
+     *
      * @return The expiry time or <code>-1</code> for no expiry
      */
     public long getExpires() {
@@ -351,7 +351,7 @@ public class AJAXRequestResult {
 
     /**
      * Sets the expires time
-     * 
+     *
      * @param expires The expires time or <code>-1</code> for no expiry
      */
     public void setExpires(final long expires) {
@@ -360,7 +360,7 @@ public class AJAXRequestResult {
 
     /**
      * Gets the deferred flag
-     * 
+     *
      * @return The deferred flag
      */
     public boolean isDeferred() {
@@ -369,7 +369,7 @@ public class AJAXRequestResult {
 
     /**
      * Sets the deferred flag
-     * 
+     *
      * @param deferred The deferred flag to set
      */
     public void setDeferred(final boolean deferred) {
@@ -413,7 +413,7 @@ public class AJAXRequestResult {
 
     /**
      * Gets the result object.
-     * 
+     *
      * @return The result object
      */
     public Object getResultObject() {
@@ -422,7 +422,7 @@ public class AJAXRequestResult {
 
     /**
      * Sets the result object
-     * 
+     *
      * @param resultObject The result object to set
      */
     public void setResultObject(final Object resultObject) {
@@ -431,7 +431,7 @@ public class AJAXRequestResult {
 
     /**
      * Gets the result's format.
-     * 
+     *
      * @return The format
      */
     public String getFormat() {
@@ -440,7 +440,7 @@ public class AJAXRequestResult {
 
     /**
      * Sets this result's format.
-     * 
+     *
      * @param format The format
      */
     public void setFormat(final String format) {
@@ -449,7 +449,7 @@ public class AJAXRequestResult {
 
     /**
      * Gets the time stamp.
-     * 
+     *
      * @return The time stamp
      */
     public Date getTimestamp() {
@@ -458,7 +458,7 @@ public class AJAXRequestResult {
 
     /**
      * Sets the time stamp.
-     * 
+     *
      * @param timestamp The time stamp.
      */
     public void setTimestamp(final Date timestamp) {
@@ -467,7 +467,7 @@ public class AJAXRequestResult {
 
     /**
      * Gets the warnings.
-     * 
+     *
      * @return The warnings
      */
     public Collection<OXException> getWarnings() {
@@ -476,7 +476,7 @@ public class AJAXRequestResult {
 
     /**
      * Sets the warnings.
-     * 
+     *
      * @param warnings The warnings to set
      * @return This request result with specified warnings added
      */
@@ -519,7 +519,7 @@ public class AJAXRequestResult {
 
     /**
      * Gets the headers
-     * 
+     *
      * @return The headers
      */
     public Map<String, String> getHeaders() {
@@ -528,7 +528,7 @@ public class AJAXRequestResult {
 
     /**
      * Sets a parameter.
-     * 
+     *
      * @param name The parameter name
      * @param value The value; if <code>null</code> a remove is performed
      */
@@ -542,7 +542,7 @@ public class AJAXRequestResult {
 
     /**
      * Removes a parameter.
-     * 
+     *
      * @param name The parameter name
      */
     public void removeParameter(final String name) {
@@ -551,7 +551,7 @@ public class AJAXRequestResult {
 
     /**
      * Gets the associated parameter value.
-     * 
+     *
      * @param name The parameter name
      * @return The associated value or <code>null</code> if there is no such parameter
      */
@@ -561,7 +561,7 @@ public class AJAXRequestResult {
 
     /**
      * Gets the parameters
-     * 
+     *
      * @return The parameters
      */
     public Map<String, Object> getParameters() {
@@ -570,7 +570,7 @@ public class AJAXRequestResult {
 
     /**
      * Sets a response property.
-     * 
+     *
      * @param name The property name
      * @param value The value; if <code>null</code> a remove is performed
      */
@@ -584,7 +584,7 @@ public class AJAXRequestResult {
 
     /**
      * Removes a response property.
-     * 
+     *
      * @param name The property name
      */
     public void removeResponseProperty(final String name) {
@@ -593,7 +593,7 @@ public class AJAXRequestResult {
 
     /**
      * Gets the associated response property.
-     * 
+     *
      * @param name The parameter name
      * @return The associated response property or <code>null</code> if there is no such parameter
      */
@@ -603,7 +603,7 @@ public class AJAXRequestResult {
 
     /**
      * Gets the response properties.
-     * 
+     *
      * @return The response properties
      */
     public Map<String, Object> getResponseProperties() {
@@ -618,7 +618,7 @@ public class AJAXRequestResult {
 
     /**
      * Sets the result object and its format.
-     * 
+     *
      * @param object The result format
      * @param format The format
      */

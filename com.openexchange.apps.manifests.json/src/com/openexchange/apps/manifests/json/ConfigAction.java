@@ -85,17 +85,17 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(noSession = true)
 public class ConfigAction implements AJAXActionService {
 
-	private ServiceLookup services;
-	private ServerConfigServicesLookup registry;
-	
+	private final ServiceLookup services;
+	private final ServerConfigServicesLookup registry;
+
 	private ComputedServerConfigValueService[] computedValues = new ComputedServerConfigValueService[0];
-		
+
 
 	public ConfigAction(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
 		super();
 		this.services = services;
 		this.registry = registry;
-		
+
 		computedValues = new ComputedServerConfigValueService[]{
 				new Manifests(services, manifests),
 				new Capabilities(services),
@@ -110,9 +110,9 @@ public class ConfigAction implements AJAXActionService {
 			ServerSession session) throws OXException {
 		try {
 			JSONObject serverconfig = getFromConfiguration(requestData, session);
-			
+
 			addComputedValues(serverconfig, requestData, session);
-			
+
 			return new AJAXRequestResult(serverconfig, "json");
 		} catch (JSONException x) {
 			throw AjaxExceptionCodes.JSON_ERROR.create(x.toString());
@@ -122,18 +122,18 @@ public class ConfigAction implements AJAXActionService {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private JSONObject getFromConfiguration(AJAXRequestData requestData,
 			ServerSession session) throws JSONException, OXException {
-		
+
 		Map serverConfigs = (Map) services.getService(ConfigurationService.class).getYaml("as-config.yml");
-		
+
 		Map serverConfig = new HashMap();
-		
+
 		Map defaults = (Map) services.getService(ConfigurationService.class).getYaml("as-config-defaults.yml");
 		if (defaults != null) {
 			serverConfig.putAll((Map) defaults.get("default"));
 		}
-		
-		
-		
+
+
+
 		// Find other applicable configs
 		if (serverConfigs != null) {
 			for(Object value: serverConfigs.values()) {
@@ -142,44 +142,44 @@ public class ConfigAction implements AJAXActionService {
 				}
 			}
 		}
-		
+
 		return (JSONObject) JSONCoercion.coerceToJSON(serverConfig);
 	}
-	
+
 	private boolean looksApplicable(Map value, AJAXRequestData requestData,
 			ServerSession session) throws OXException {
-		
+
 		if (value == null) {
 			return false;
 		}
-		String host = (String) value.get("host");	
+		String host = (String) value.get("host");
 		if (host != null) {
 			if (requestData.getHostname().equals(host) || host.equals("all")) {
 				return true;
 			}
 		}
-		
+
 		String hostRegex = (String) value.get("hostRegex");
-		
+
 		if (hostRegex != null) {
 			Pattern pattern = Pattern.compile(hostRegex);
 			if (pattern.matcher(requestData.getHostname()).find()) {
 				return true;
 			}
 		}
-		
-		
+
+
 		List<ServerConfigMatcherService> matchers = registry.getMatchers();
 		for (ServerConfigMatcherService matcher : matchers) {
 			if (matcher.looksApplicable(value, requestData, session)) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
-	
+
+
 	private void addComputedValues(JSONObject serverconfig,
 			AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
 		for (ComputedServerConfigValueService computed : computedValues) {

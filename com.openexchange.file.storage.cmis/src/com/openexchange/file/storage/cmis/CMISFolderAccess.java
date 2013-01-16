@@ -144,7 +144,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                 throw CMISExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
             if (!root) {
-                return convertFolder(folderObjectId, (Folder) object);                
+                return convertFolder(folderObjectId, (Folder) object);
             }
             final CMISFolder folder = convertFolder(folderObjectId, (Folder) object);
             folder.setRootFolder(true);

@@ -76,13 +76,9 @@ public abstract class AbstractUserFuncs implements IValueHandler {
     @Override
     public void writeValue(final Session session, final Context ctx, final User user,
         final Setting setting) throws OXException {
-        try {
-            final UserImpl newUser = new UserImpl(user);
-            setValue(newUser, setting.getSingleValue().toString(), user);
-            UserStorage.getInstance().updateUser(newUser, ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final UserImpl newUser = new UserImpl(user);
+        setValue(newUser, setting.getSingleValue().toString(), user);
+        UserStorage.getInstance().updateUser(newUser, ctx);
     }
 
     /**

@@ -53,15 +53,15 @@ import java.io.Serializable;
 import org.quartz.Trigger;
 
 /**
- * 
+ *
  * {@link TriggerStateWrapper}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public final class TriggerStateWrapper implements Serializable {
-    
+
     private static final long serialVersionUID = -7286840785328204285L;
-    
+
     public static final int STATE_WAITING = 0;
 
     public static final int STATE_ACQUIRED = 1;
@@ -77,13 +77,13 @@ public final class TriggerStateWrapper implements Serializable {
     public static final int STATE_PAUSED_BLOCKED = 6;
 
     public static final int STATE_ERROR = 7;
-    
+
     final Trigger trigger;
-    
+
     private int state;
-    
+
     private String owner;
-    
+
 
     public TriggerStateWrapper(Trigger trigger) {
         super();
@@ -91,7 +91,7 @@ public final class TriggerStateWrapper implements Serializable {
         this.state = STATE_WAITING;
         this.owner = null;
     }
-    
+
     public TriggerStateWrapper(Trigger trigger, int state) {
         super();
         this.trigger = trigger;
@@ -102,23 +102,23 @@ public final class TriggerStateWrapper implements Serializable {
     public Trigger getTrigger() {
         return trigger;
     }
-    
+
     public void setState(int state) {
         this.state = state;
     }
-    
+
     public int getState() {
         return state;
     }
-    
+
     public void setOwner(String owner) {
         this.owner = owner;
     }
-    
+
     public void resetOwner() {
         this.owner = null;
     }
-    
+
     public String getOwner() {
         return owner;
     }

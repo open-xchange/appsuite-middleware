@@ -85,7 +85,7 @@ public class Activator extends HousekeepingActivator {
         track(UserService.class, new UserServiceTrackerCustomizer(context, userResolver));
         Participants.userResolver = userResolver;
         CreatedBy.userResolver = userResolver;
-        
+
         ConfigurationService configurationService = getService(ConfigurationService.class);
 
         final OXResourceResolver resourceResolver = new OXResourceResolver();
@@ -94,7 +94,7 @@ public class Activator extends HousekeepingActivator {
 
         track(CalendarCollectionService.class, new CalendarServiceTracker(context));
         openTrackers();
-        
+
         ICal4JParser parser = new ICal4JParser();
         parser.setLimit(configurationService.getIntProperty("com.openexchange.import.ical.limit", -1));
 		registerService(ICalParser.class, parser, null);

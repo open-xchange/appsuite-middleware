@@ -54,7 +54,7 @@ import com.mortennobel.imagescaling.DimensionConstrain;
 
 /**
  * {@link CoverDimensionConstrain}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class CoverDimensionConstrain extends DimensionConstrain {
@@ -81,9 +81,13 @@ public class CoverDimensionConstrain extends DimensionConstrain {
 
         int dstWidth = (int) Math.round(dimension.width * scale);
         int dstHeight = (int) Math.round(dimension.height * scale);
-        
-        if (dstWidth < 3) dstWidth = 3;
-        if (dstHeight < 3) dstHeight = 3;
+
+        if (dstWidth < 3) {
+            dstWidth = 3;
+        }
+        if (dstHeight < 3) {
+            dstHeight = 3;
+        }
 
         return new Dimension(dstWidth, dstHeight);
     }

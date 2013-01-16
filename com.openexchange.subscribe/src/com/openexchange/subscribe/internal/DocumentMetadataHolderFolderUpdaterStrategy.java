@@ -74,7 +74,7 @@ import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link DocumentMetadataHolderFolderUpdaterStrategy}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdaterStrategy<DocumentMetadataHolder> {

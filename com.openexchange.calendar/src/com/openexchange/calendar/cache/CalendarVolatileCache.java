@@ -63,17 +63,17 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link CalendarVolatileCache} - The volatile calendar cache.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CalendarVolatileCache {
 
     /**
-     * References the volatily cached query, element, whatever. 
+     * References the volatily cached query, element, whatever.
      */
     public static enum CacheType {
         getAllPrivateAppointmentAndFolderIdsForUser(1),
-        
+
         ;
 
         private final int num;
@@ -93,7 +93,7 @@ public final class CalendarVolatileCache {
 
     /**
      * Initializes cache instance.
-     * 
+     *
      * @param context The bundle context
      */
     public static void initInstance(final BundleContext context) {
@@ -113,7 +113,7 @@ public final class CalendarVolatileCache {
      * Initializes cache instance with given cache.
      * <p>
      * <b>For testing only.</b>
-     * 
+     *
      * @param cache The cache
      */
     public static void initInstance(final Cache cache) {
@@ -146,7 +146,7 @@ public final class CalendarVolatileCache {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static CalendarVolatileCache getInstance() {
@@ -231,7 +231,7 @@ public final class CalendarVolatileCache {
 
     /**
      * Clears this cache.
-     * 
+     *
      * @throws OXException
      */
     public void clear() throws OXException {
@@ -243,7 +243,7 @@ public final class CalendarVolatileCache {
 
     /**
      * Gets the value for specified key.
-     * 
+     *
      * @param key The key
      * @return The value or <code>null</code> if absent
      */
@@ -255,7 +255,7 @@ public final class CalendarVolatileCache {
 
     /**
      * Gets the value for specified key in given group.
-     * 
+     *
      * @param key The key
      * @param group The group identifier
      * @return The value from group or <code>null</code> if absent
@@ -268,7 +268,7 @@ public final class CalendarVolatileCache {
 
     /**
      * Invalidates denoted group.
-     * 
+     *
      * @param group The group identifier
      */
     public void invalidateGroup(final String group) {
@@ -280,7 +280,7 @@ public final class CalendarVolatileCache {
 
     /**
      * Puts specified key-value-pair.
-     * 
+     *
      * @param key The key
      * @param obj The value
      * @throws OXException If put into cache fails
@@ -294,7 +294,7 @@ public final class CalendarVolatileCache {
 
     /**
      * Puts specified key-value-pair.
-     * 
+     *
      * @param key The key
      * @param obj The value
      * @param attributes The optional attributes
@@ -313,7 +313,7 @@ public final class CalendarVolatileCache {
 
     /**
      * Puts specified key-value-pair into give group.
-     * 
+     *
      * @param key The key
      * @param group The group identifier
      * @param value The value
@@ -328,7 +328,7 @@ public final class CalendarVolatileCache {
 
     /**
      * Puts specified key-value-pair into give group.
-     * 
+     *
      * @param key The key
      * @param group The group identifier
      * @param value The value
@@ -348,7 +348,7 @@ public final class CalendarVolatileCache {
 
     /**
      * Removes the value associated with given key.
-     * 
+     *
      * @param key The key
      * @throws OXException If removal fails
      */
@@ -361,7 +361,7 @@ public final class CalendarVolatileCache {
 
     /**
      * Removes the value associated with given key from group.
-     * 
+     *
      * @param key The key
      * @param group The group identifier
      */
@@ -374,7 +374,7 @@ public final class CalendarVolatileCache {
 
     /**
      * New cache key for given <code>int</code> pair.
-     * 
+     *
      * @param cacheType The cache type
      * @param int2 An arbitrary <code>int</code> value
      * @return The cache key or <code>null</code>
@@ -386,7 +386,7 @@ public final class CalendarVolatileCache {
 
     /**
      * New cache key.
-     * 
+     *
      * @param cacheType The cache type
      * @param objs Arbitrary further keys
      * @return The cache key or <code>null</code>

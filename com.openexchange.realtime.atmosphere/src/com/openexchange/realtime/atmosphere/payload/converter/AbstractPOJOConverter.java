@@ -53,7 +53,7 @@ import com.openexchange.realtime.payload.converter.AbstractGoodQualityConverter;
 
 
 /**
- * {@link AbstractPOJOConverter} 
+ * {@link AbstractPOJOConverter}
  *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */

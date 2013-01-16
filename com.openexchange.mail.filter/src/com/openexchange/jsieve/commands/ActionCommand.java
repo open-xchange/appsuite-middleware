@@ -100,20 +100,20 @@ public class ActionCommand extends ControlOrActionCommand {
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
             /*
              * http://tools.ietf.org/html/rfc5435
-             * 
+             *
              *    Usage:  notify [":from" string]
              * [":importance" <"1" / "2" / "3">]
              * [":options" string-list]
              * [":message" string]
              * <method: string>
-             * 
+             *
              * only :message is supported
              *
              */
             retval.put(":message", Integer.valueOf(1));
             return retval;
         }
-        
+
         /**
          * The number of arguments which this command takes at least
          */

@@ -54,10 +54,10 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
  * The {@link DefaultAlarmVtodoDate}
- * 
- * A default alarm applied to "VTODO" components whose "DTSTART" property 
+ *
+ * A default alarm applied to "VTODO" components whose "DTSTART" property
  * value type is "DATE"
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DefaultAlarmVtodoDate extends SingleXMLPropertyMixin {
@@ -65,10 +65,10 @@ public class DefaultAlarmVtodoDate extends SingleXMLPropertyMixin {
     public DefaultAlarmVtodoDate() {
         super(CaldavProtocol.CAL_NS.getURI(), "default-alarm-vtodo-date");
     }
-    
+
     @Override
     protected String getValue() {
     	return "BEGIN:VALARM&#xD;\r\nEND:VALARM&#xD;\r\n";
     }
-    
+
 }

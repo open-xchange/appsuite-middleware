@@ -65,32 +65,30 @@ import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
-import com.openexchange.mail.index.MailUUID;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.session.Session;
 
 /**
  * {@link IndexAccessAdapter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IndexAccessAdapter {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IndexAccessAdapter.class));
 
     private static final IndexAccessAdapter INSTANCE = new IndexAccessAdapter();
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     public static IndexAccessAdapter getInstance() {
@@ -106,19 +104,19 @@ public final class IndexAccessAdapter {
 
     /**
      * Gets the tracked indexing service.
-     * 
+     *
      * @return The indexing service or <code>null</code> if absent
      */
     public IndexingService getIndexingService() {
         return SmalServiceLookup.getServiceStatic(IndexingService.class);
     }
-    
+
     public IndexAccess<MailMessage> getIndexAccess(final Session session) throws OXException {
         final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
         final IndexAccess<MailMessage> indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
         return indexAccess;
     }
-    
+
     public void releaseIndexAccess(IndexAccess<MailMessage> indexAccess) {
         if (indexAccess != null) {
             final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
@@ -138,12 +136,12 @@ public final class IndexAccessAdapter {
                             .setHandler(SearchHandler.ALL_REQUEST)
                             .setAccountFolders(Collections.singleton(accountFolders))
                             .build();
-        
+
         final Set<MailIndexField> fields = new HashSet<MailIndexField>(1);
         fields.add(MailIndexField.ID);
         return indexAccess.query(qp, fields).getNumFound() > 0L;
     }
-    
+
     public List<MailMessage> getMessages(final int accountId, final String folder, final Session session, final MailSortField sortField, final OrderDirection order) throws OXException, InterruptedException {
         final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
         if (null == facade) {
@@ -168,7 +166,7 @@ public final class IndexAccessAdapter {
                 final MailField field = MailField.getField(sortField.getField());
                 indexSortField = MailIndexField.getFor(field);
             }
-            
+
             Order indexOrder = null;
             if (order != null) {
                 indexOrder = OrderDirection.DESC.equals(order) ? Order.DESC : Order.ASC;
@@ -179,10 +177,10 @@ public final class IndexAccessAdapter {
                                             .setAccountFolders(Collections.singleton(accountFolders))
                                             .setSortField(indexSortField)
                                             .setOrder(indexOrder);
-            
-            
-                                            
-                                            
+
+
+
+
             final IndexResult<MailMessage> result = indexAccess.query(builder.build(), null);
             final List<MailMessage> mails = new ArrayList<MailMessage>();
             mails.addAll(IndexDocumentHelper.messagesFrom(result.getResults()));

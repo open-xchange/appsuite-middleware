@@ -329,7 +329,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     // Somewhat brittle test
     @Test
     public void testRemoveDocuments() throws OXException {
-        final FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());  
+        final FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());
         final FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
         fileAccess.expectCall("hashCode").andReturn(1); // Look if it's there
         fileAccess.expectCall("hashCode").andReturn(1); // Store it
@@ -343,7 +343,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
 
-        
+
         fileAccess.expectCall("removeDocument", Arrays.asList(tuple2), 12L).andReturn(Arrays.asList(tuple2));
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
@@ -494,8 +494,8 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         file.setFolderId(folderId.toUniqueID());
 
         fileAccess.expectCall("getFileMetadata", folderId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(file);
-        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);        
-        
+        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+
         saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
 
         verifyAccount();
@@ -512,7 +512,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
         fileAccess.expectCall("getFileMetadata", folderId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(file);
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
-        
+
         saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
 
         verifyAccount();
@@ -995,17 +995,17 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     @Override
     protected EventAdmin getEventAdmin() {
         return new EventAdmin() {
-            
+
             @Override
             public void sendEvent(Event arg0) {
                 // Nothing to do
-                
+
             }
-            
+
             @Override
             public void postEvent(Event arg0) {
                 // Nothing to do
-                
+
             }
         };
     }

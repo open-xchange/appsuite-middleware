@@ -62,7 +62,7 @@ import com.openexchange.xing.exception.XingException;
 
 /**
  * {@link Conversation} - Represents a XING conversation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Conversation {
@@ -78,7 +78,7 @@ public class Conversation {
 
     /**
      * Initializes a new {@link Conversation}.
-     * 
+     *
      * @throws XingException If parsing fails
      */
     public Conversation(final JSONObject conversationInformation) throws XingException {
@@ -130,7 +130,7 @@ public class Conversation {
 
     /**
      * Gets the identifier
-     * 
+     *
      * @return The identifier
      */
     public String getId() {
@@ -139,7 +139,7 @@ public class Conversation {
 
     /**
      * Gets the subject
-     * 
+     *
      * @return The subject
      */
     public String getSubject() {
@@ -148,7 +148,7 @@ public class Conversation {
 
     /**
      * Gets the message count
-     * 
+     *
      * @return The message count
      */
     public int getMessageCount() {
@@ -157,7 +157,7 @@ public class Conversation {
 
     /**
      * Gets the unread message count
-     * 
+     *
      * @return The unread message count
      */
     public int getUnreadMessageCount() {
@@ -166,7 +166,7 @@ public class Conversation {
 
     /**
      * Gets the updated-at time stamp
-     * 
+     *
      * @return The updated-at time stamp
      */
     public Date getUpdatedAt() {
@@ -175,7 +175,7 @@ public class Conversation {
 
     /**
      * Gets the read-only flag
-     * 
+     *
      * @return The read-only flag
      */
     public boolean isReadOnly() {
@@ -184,7 +184,7 @@ public class Conversation {
 
     /**
      * Gets the participants
-     * 
+     *
      * @return The participants
      */
     public List<User> getParticipants() {
@@ -193,7 +193,7 @@ public class Conversation {
 
     /**
      * Gets the latest messages
-     * 
+     *
      * @return The latest messages
      */
     public List<Message> getLatestMessages() {

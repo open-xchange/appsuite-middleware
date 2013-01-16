@@ -65,7 +65,7 @@ public class ContextExceptionMessage implements LocalizableStrings {
     private ContextExceptionMessage() {
         super();
     }
-    
+
     // Mailadmin for a context is missing.
     public final static String NO_MAILADMIN_MSG = "Cannot resolve mailadmin for context %d.";
 

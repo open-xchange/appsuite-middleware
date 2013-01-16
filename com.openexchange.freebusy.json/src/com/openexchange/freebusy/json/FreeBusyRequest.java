@@ -63,11 +63,11 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FreeBusyRequest}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class FreeBusyRequest {
-    
+
     private static final String PARAMETER_FROM = "from";
     private static final String PARAMETER_UNTIL = "until";
     private static final String PARAMETER_PARTICIPANT = "participant";
@@ -79,7 +79,7 @@ public class FreeBusyRequest {
 
     /**
      * Initializes a new {@link FreeBusyRequest}.
-     * 
+     *
      * @param request The AJAX request data
      * @param session The session
      * @throws OXException
@@ -89,27 +89,27 @@ public class FreeBusyRequest {
         this.request = request;
         this.session = session;
     }
-    
+
     /**
      * Gets the 'from' parameter from the request.
-     * 
+     *
      * @return The 'from' date
      * @throws OXException
      */
     public Date getFrom() throws OXException {
         return getDate(PARAMETER_FROM);
     }
-    
+
     /**
      * Gets the 'until' parameter from the request.
-     * 
+     *
      * @return The 'until' date
      * @throws OXException
      */
     public Date getUntil() throws OXException {
         return getDate(PARAMETER_UNTIL);
     }
-    
+
     public String getParticipant() throws OXException {
         String value = request.getParameter(PARAMETER_PARTICIPANT);
         if (null == value) {
@@ -118,12 +118,12 @@ public class FreeBusyRequest {
             return value;
         }
     }
-    
+
     public boolean isMerged() throws OXException {
         String value = request.getParameter(PARAMETER_MERGED);
         return null != value ? Boolean.parseBoolean(value) : false;
     }
-    
+
     public List<String> getParticipants() throws OXException {
         JSONArray jsonArray = (JSONArray)request.getData();
         if (null == jsonArray) {
@@ -144,7 +144,7 @@ public class FreeBusyRequest {
         }
         return participants;
     }
-    
+
     public ServerSession getSession() {
         return session;
     }

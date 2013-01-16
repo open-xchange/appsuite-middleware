@@ -315,7 +315,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 
             cObj.addParticipant(up);
         }
-        
+
         final List<ConfirmableParticipant> confirmableParticipants = new ArrayList<ConfirmableParticipant>();
         for(final String mail : mails.keySet()) {
             final ExternalUserParticipant external = new ExternalUserParticipant(mail);
@@ -368,7 +368,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         }
     }
 
-    
+
     private static Set<String> getPossibleAddresses(User user) {
         Set<String> possibleAddresses = new HashSet<String>();
         if (null != user.getMail()) {

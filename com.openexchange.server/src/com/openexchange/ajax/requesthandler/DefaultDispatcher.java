@@ -330,7 +330,7 @@ public class DefaultDispatcher implements Dispatcher {
         }
 	    return ret.booleanValue();
 	}
-	
+
 	@Override
     public boolean mayOmitSession(final String module, final String action) throws OXException {
 	    final StrPair key = new StrPair(module, action);

@@ -84,7 +84,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
  * {@link ContactServiceImpl}
- * 
+ *
  * Default {@link ContactService} implementation.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -360,7 +360,7 @@ public class ContactServiceImpl extends DefaultContactService {
 	}
 
     @Override
-    protected void doUpdateUser(final Session session, final String folderID, final String objectID, final Contact contact, 
+    protected void doUpdateUser(final Session session, final String folderID, final String objectID, final Contact contact,
         final Date lastRead) throws OXException {
         int userID = session.getUserId();
         int contextID = session.getContextId();
@@ -376,7 +376,7 @@ public class ContactServiceImpl extends DefaultContactService {
          * check folder
          */
         if (FolderObject.SYSTEM_LDAP_FOLDER_ID != parse(folderID) ||
-            contact.containsParentFolderID() && 0 < contact.getParentFolderID() && 
+            contact.containsParentFolderID() && 0 < contact.getParentFolderID() &&
             FolderObject.SYSTEM_LDAP_FOLDER_ID != contact.getParentFolderID()) {
             throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(FolderObject.SYSTEM_LDAP_FOLDER_ID, contextID, userID);
         }
@@ -390,7 +390,7 @@ public class ContactServiceImpl extends DefaultContactService {
                 /*
                  * take over bugfix for https://bugs.open-xchange.com/show_bug.cgi?id=19128#c9:
                  * Accepting context admin as a user's contact creator, too, and executing self-healing mechanism
-                 */                
+                 */
                 contact.setCreatedBy(contact.getInternalUserId());
             } else {
                 throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
@@ -543,7 +543,7 @@ public class ContactServiceImpl extends DefaultContactService {
             if (false == found) {
                 throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
             }
-        }        
+        }
         /*
          * delete contacts from storage
          */
@@ -658,21 +658,21 @@ public class ContactServiceImpl extends DefaultContactService {
         int userID = session.getUserId();
         /*
          * check folders
-         */        
+         */
         if (null != folderIDs) {
             for (String folderID : folderIDs) {
                 FolderObject folder = Tools.getFolder(contextID, folderID);
-                Check.isContactFolder(folder, session);            
+                Check.isContactFolder(folder, session);
                 EffectivePermission permission = Tools.getPermission(session, folder);
                 Check.canReadOwn(permission, session, folderID);
             }
-        }        
+        }
         /*
          * determine queried storages according to queried folders
          */
-        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, 
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
             null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
-        Check.hasStorages(queriedStorages);     
+        Check.hasStorages(queriedStorages);
         /*
          * prepare fields and sort options
          */
@@ -708,7 +708,7 @@ public class ContactServiceImpl extends DefaultContactService {
          */
         return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions);
     }
-    
+
 	@Override
     protected <O> SearchIterator<Contact> doSearchContacts(final Session session, final SearchTerm<O> term, final ContactField[] fields,
 			SortOptions sortOptions) throws OXException {
@@ -723,7 +723,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
 				termAnanlyzer.hasFolderIDs() ? termAnanlyzer.getFolderIDs() : Tools.getSearchFolders(contextID, userID));
-        Check.hasStorages(queriedStorages);     
+        Check.hasStorages(queriedStorages);
         /*
          * prepare fields and sort options
          */
@@ -776,7 +776,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
 				contactSearch.hasFolders() ? Tools.toStringList(contactSearch.getFolders()) : Tools.getSearchFolders(contextID, userID));
-		Check.hasStorages(queriedStorages);		
+		Check.hasStorages(queriedStorages);
         /*
          * prepare fields and sort options
          */
@@ -816,7 +816,7 @@ public class ContactServiceImpl extends DefaultContactService {
         searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, folderID));
         searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.INTERNAL_USERID, SingleOperation.EQUALS, Integer.valueOf(userID)));
         /*
-         * search        
+         * search
          */
         Contact contact = null;
         SearchIterator<Contact> searchIterator = null;
@@ -836,7 +836,7 @@ public class ContactServiceImpl extends DefaultContactService {
 	}
 
 	@Override
-    protected <O> SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, SearchTerm<O> term, ContactField[] fields, 
+    protected <O> SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, SearchTerm<O> term, ContactField[] fields,
         SortOptions sortOptions) throws OXException {
 		int currentUserID = session.getUserId();
 		int contextID = session.getContextId();
@@ -922,9 +922,9 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * determine queried storages according to searched folders
          */
-        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, 
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
             null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
-        Check.hasStorages(queriedStorages);     
+        Check.hasStorages(queriedStorages);
         /*
          * prepare fields and sort options
          */
@@ -959,7 +959,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * determine queried storages according to searched folders
          */
-        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, 
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
             null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
         Check.hasStorages(queriedStorages);
         /*
@@ -992,23 +992,23 @@ public class ContactServiceImpl extends DefaultContactService {
     /**
      * Performs a list of tasks returning a search iterator of contacts and merges the results into a single search iterator, respecting
      * the supplied sort options. Multiple tasks are executed concurrently, while a single task is invoked on the current thread.
-     * 
+     *
      * @param tasks The tasks to execute
      * @param session The session
-     * @param needsAttachmentInfo <code>true</code>, whether the result iterator needs attachment information, <code>false</code>, 
+     * @param needsAttachmentInfo <code>true</code>, whether the result iterator needs attachment information, <code>false</code>,
      *        otherwise
      * @param sortOptions The sort options or use, or <code>null</code> if not needed
      * @return The combined iterator
      * @throws OXException
      */
-    private static SearchIterator<Contact> perform(List<AbstractTask<SearchIterator<Contact>>> tasks, Session session, 
+    private static SearchIterator<Contact> perform(List<AbstractTask<SearchIterator<Contact>>> tasks, Session session,
         boolean needsAttachmentInfo, SortOptions sortOptions) throws OXException {
         try {
             if (null == tasks || 0 == tasks.size()) {
                 /*
                  * no tasks, no results
                  */
-                List<Contact> emptyList = Collections.emptyList(); 
+                List<Contact> emptyList = Collections.emptyList();
                 return new SearchIteratorAdapter<Contact>(emptyList.iterator(), 0);
             } else if (1 == tasks.size()) {
                 /*

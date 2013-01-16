@@ -69,20 +69,20 @@ import com.openexchange.service.indexing.IndexingServiceMBean;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexingServiceMBeanImpl extends StandardMBean implements IndexingServiceMBean {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexingServiceMBeanImpl.class);
-    
+
     private final IndexingServiceImpl indexingService;
-    
+
 
     public IndexingServiceMBeanImpl(IndexingServiceImpl indexingService) throws NotCompliantMBeanException {
         super(IndexingServiceMBean.class);
         this.indexingService = indexingService;
     }
 
-    @Override    
+    @Override
     public List<String> getAllLocalRunningJobs() throws MBeanException {
-        ClassLoader tmp = Thread.currentThread().getContextClassLoader();        
+        ClassLoader tmp = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             List<String> names = new ArrayList<String>();
@@ -92,7 +92,7 @@ public class IndexingServiceMBeanImpl extends StandardMBean implements IndexingS
                 JobKey key = job.getJobDetail().getKey();
                 names.add(key.getName());
             }
-            
+
             return names;
         } catch (Exception e) {
             LOG.info(e.getMessage(), e);
@@ -104,7 +104,7 @@ public class IndexingServiceMBeanImpl extends StandardMBean implements IndexingS
 
     @Override
     public List<String> getLocalRunningJobs(int contextId, int userId) throws MBeanException {
-        ClassLoader tmp = Thread.currentThread().getContextClassLoader();        
+        ClassLoader tmp = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             List<String> names = new ArrayList<String>();
@@ -114,9 +114,9 @@ public class IndexingServiceMBeanImpl extends StandardMBean implements IndexingS
                 JobKey key = job.getJobDetail().getKey();
                 if (key.getGroup().equals(indexingService.generateJobGroup(contextId, userId))) {
                     names.add(key.getName());
-                }                
+                }
             }
-            
+
             return names;
         } catch (Exception e) {
             LOG.info(e.getMessage(), e);
@@ -128,7 +128,7 @@ public class IndexingServiceMBeanImpl extends StandardMBean implements IndexingS
 
     @Override
     public List<String> getAllScheduledJobs() throws MBeanException {
-        ClassLoader tmp = Thread.currentThread().getContextClassLoader();        
+        ClassLoader tmp = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             List<String> names = new ArrayList<String>();
@@ -137,7 +137,7 @@ public class IndexingServiceMBeanImpl extends StandardMBean implements IndexingS
             for (JobKey key : jobKeys) {
                 names.add(key.getName());
             }
-            
+
             return names;
         } catch (Exception e) {
             LOG.info(e.getMessage(), e);
@@ -149,16 +149,16 @@ public class IndexingServiceMBeanImpl extends StandardMBean implements IndexingS
 
     @Override
     public List<String> getScheduledJobs(int contextId, int userId) throws MBeanException {
-        ClassLoader tmp = Thread.currentThread().getContextClassLoader();        
+        ClassLoader tmp = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             List<String> names = new ArrayList<String>();
-            Scheduler scheduler = indexingService.getScheduler();        
+            Scheduler scheduler = indexingService.getScheduler();
             Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(indexingService.generateJobGroup(contextId, userId)));
             for (JobKey key : jobKeys) {
                 names.add(key.getName());
             }
-            
+
             return names;
         } catch (Exception e) {
             LOG.info(e.getMessage(), e);

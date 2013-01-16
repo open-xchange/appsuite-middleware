@@ -85,5 +85,5 @@ public interface ISimplifiedThreadStructure {
      * @throws OXException If messages cannot be returned
      */
     public List<List<MailMessage>> getThreadSortedMessages(String folder, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] fields) throws OXException;
-    
+
 }

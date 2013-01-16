@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,22 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.subscribe.xing.groupware;
 
 
 
 /**
- * {@link SessionRemoverTimerTask} - A one-shot timer task to remove a session after its expiry.
+ * {@link XingCrawlerSubscriptionsRemoverTask}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SessionRemoverTimerTask implements Runnable {
-
-    private final String sessionId;
-    private final SessionData sessionData;
+public class XingCrawlerSubscriptionsRemoverTask extends SubscriptionRemoverTask {
 
     /**
-     * Initializes a new {@link SessionRemoverTimerTask}.
+     * Initializes a new {@link XingCrawlerSubscriptionsRemoverTask}.
      */
-    public SessionRemoverTimerTask(final String sessionId, final SessionData sessionData) {
-        super();
-        this.sessionId = sessionId;
-        this.sessionData = sessionData;
+    public XingCrawlerSubscriptionsRemoverTask() {
+        super("com.openexchange.subscribe.xing");
     }
 
-    @Override
-    public void run() {
-        sessionData.dropVolatileSession(sessionId);
-    }
 }

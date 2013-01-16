@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
 public class AtmospherePayloadTreeTransformer implements PayloadTreeTransformer {
 
     private static ExtensionRegistry transformers = ExtensionRegistry.getInstance();
-    
+
     @Override
     public PayloadTree incoming(PayloadTree payloadTree, ServerSession session) throws OXException {
         if(payloadTree == null || session == null) {
@@ -79,7 +79,7 @@ public class AtmospherePayloadTreeTransformer implements PayloadTreeTransformer 
         PayloadTree transformedTree = new PayloadTree(transformedRoot);
         return transformedTree;
     }
-    
+
     private PayloadTreeNode incoming(PayloadTreeNode node, ServerSession session) throws OXException {
         ElementPath elementPath = node.getElementPath();
         AtmospherePayloadElementTransformer transformer = transformers.getTransformerFor(elementPath);
@@ -88,7 +88,7 @@ public class AtmospherePayloadTreeTransformer implements PayloadTreeTransformer 
         }
         PayloadElement transformedPayload = transformer.incoming(node.getPayloadElement(), session);
         PayloadTreeNode resultNode = new PayloadTreeNode(transformedPayload);
-        
+
         if(node.hasChildren()) {
             for (PayloadTreeNode child : node.getChildren()) {
                 PayloadTreeNode transformedChild = incoming(child, session);
@@ -108,7 +108,7 @@ public class AtmospherePayloadTreeTransformer implements PayloadTreeTransformer 
         PayloadTree transformedTree = new PayloadTree(transformedRoot);
         return transformedTree;
     }
-    
+
     private PayloadTreeNode outgoing(PayloadTreeNode node, ServerSession session) throws OXException {
         ElementPath elementPath = node.getElementPath();
         AtmospherePayloadElementTransformer transformer = transformers.getTransformerFor(elementPath);
@@ -117,7 +117,7 @@ public class AtmospherePayloadTreeTransformer implements PayloadTreeTransformer 
         }
         PayloadElement transformedPayload = transformer.incoming(node.getPayloadElement(), session);
         PayloadTreeNode resultNode = new PayloadTreeNode(transformedPayload);
-        
+
         if(node.hasChildren()) {
             for (PayloadTreeNode child : node.getChildren()) {
                 PayloadTreeNode transformedChild = incoming(child, session);

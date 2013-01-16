@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link OSGiCoverExtractorRegistry} - An OSGi-based {@link CoverExtractorRegistry}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OSGiCoverExtractorRegistry implements CoverExtractorRegistry, ServiceTrackerCustomizer<CoverExtractor, CoverExtractor> {

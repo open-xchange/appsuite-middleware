@@ -61,7 +61,7 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link CustomSslRmiServerSocketFactory}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CustomSslRmiServerSocketFactory extends SslRMIServerSocketFactory {
@@ -70,7 +70,7 @@ public final class CustomSslRmiServerSocketFactory extends SslRMIServerSocketFac
 
     /**
      * Initializes a new {@link CustomSslRmiServerSocketFactory}.
-     * 
+     *
      * @param bindAddr The optional bind address or <code>"*"</code> for unbounded
      * @throws IllegalArgumentException  If bindAddr is unknown
      */
@@ -85,7 +85,7 @@ public final class CustomSslRmiServerSocketFactory extends SslRMIServerSocketFac
 
     /**
      * Initializes a new {@link CustomSslRmiServerSocketFactory}.
-     * 
+     *
      * @param bindAddr The optional bind address or <code>"*"</code> for unbounded
      * @param enabledCipherSuites Names of all the cipher suites to enable on SSL connections accepted by server sockets created by this
      *            factory, or <code>null</code> to use the cipher suites that are enabled by default
@@ -141,7 +141,7 @@ public final class CustomSslRmiServerSocketFactory extends SslRMIServerSocketFac
         // (given "serverSocket" to layer on top of):
 
         /*-
-         * 
+         *
          return new ForwardingServerSocket(serverSocket) {
             public Socket accept() throws IOException {
               Socket socket = serverSocket.accept();
@@ -168,7 +168,7 @@ public final class CustomSslRmiServerSocketFactory extends SslRMIServerSocketFac
               return serverSocket.toString();
             }
          };
-         * 
+         *
          */
     }
 

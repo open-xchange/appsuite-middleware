@@ -108,35 +108,16 @@ public class UpdaterImpl extends Updater {
 
     @Override
     public void startUpdate(final int contextId) throws OXException {
-        final TimerService timerService;
-        try {
-            timerService = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
         timerService.schedule(new UpdateProcess(contextId), 0);
     }
 
     private SchemaUpdateState getSchema(final int contextId) throws OXException {
-        final SchemaUpdateState schema;
-        try {
-            final SchemaStore store = SchemaStore.getInstance();
-            schema = store.getSchema(contextId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
-        return schema;
+        return SchemaStore.getInstance().getSchema(contextId);
     }
 
     private SchemaUpdateState getSchema(final int poolId, final String schemaName) throws OXException {
-        final SchemaUpdateState state;
-        try {
-            final SchemaStore store = SchemaStore.getInstance();
-            state = store.getSchema(poolId, schemaName);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
-        return state;
+        return SchemaStore.getInstance().getSchema(poolId, schemaName);
     }
 
     @Override

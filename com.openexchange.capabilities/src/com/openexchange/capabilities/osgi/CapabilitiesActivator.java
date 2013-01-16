@@ -52,13 +52,12 @@ package com.openexchange.capabilities.osgi;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.internal.CapabilityServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -73,26 +72,25 @@ public class CapabilitiesActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final ServiceTracker<CapabilityChecker, CapabilityChecker> capCheckers = track(CapabilityChecker.class);
-    	
-    	
-    	final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, context) {
-        	
-        	@Override
-        	public List<CapabilityChecker> getCheckers() {
-        		Object[] services = capCheckers.getServices();
-        		if (services == null) {
-        			return Collections.emptyList();
-        		}
-        		List<CapabilityChecker> checkers = new ArrayList<CapabilityChecker>(services.length);
 
-        		for (Object service : services) {
-					checkers.add((CapabilityChecker) service);
-				}
-        		
-        		return checkers;
-        	}
+        final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, context) {
+
+            @Override
+            public List<CapabilityChecker> getCheckers() {
+                Object[] services = capCheckers.getServices();
+                if (services == null) {
+                    return Collections.emptyList();
+                }
+                List<CapabilityChecker> checkers = new ArrayList<CapabilityChecker>(services.length);
+
+                for (Object service : services) {
+                    checkers.add((CapabilityChecker) service);
+                }
+
+                return checkers;
+            }
         };
-        
+
         registerService(CapabilityService.class, capService);
 
         track(Capability.class, new SimpleRegistryListener<Capability>() {

@@ -164,9 +164,9 @@ public final class HtmlProcessing {
             if (DisplayMode.RAW.equals(mode)) {
                 retval = content;
             } else {
-                
+
                 // dumpToFile(content, "~/Desktop/html-original.html");
-                
+
                 retval = htmlService.dropScriptTagsInHeader(content);
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
@@ -211,7 +211,7 @@ public final class HtmlProcessing {
                         retval = replaceBody(retval, cssPrefix);
                     }
                 }
-                
+
                 // dumpToFile(retval, "~/Desktop/html-processed.html");
             }
         } else {
@@ -250,7 +250,7 @@ public final class HtmlProcessing {
 
     /**
      * Calculates the MD5 for given string.
-     * 
+     *
      * @param str The string
      * @return The MD5 hash
      */
@@ -267,7 +267,7 @@ public final class HtmlProcessing {
 
     /**
      * Replaces body tag with an appropriate &lt;div&gt; tag.
-     * 
+     *
      * @param htmlContent The HTML content
      * @param cssPrefix The CSS prefix
      * @return The HTML content with replaced body tag
@@ -358,7 +358,7 @@ public final class HtmlProcessing {
 
     /**
      * Sanitizes possible CSS style sheets contained in provided HTML content.
-     * 
+     *
      * @param htmlContent The HTML content
      * @param optHtmlService The optional HTML service
      * @return The HTML content with sanitized CSS style sheets
@@ -423,10 +423,10 @@ public final class HtmlProcessing {
     private static final Pattern PATTERN_STYLE = Pattern.compile("<style.*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     private static final Pattern PATTERN_STYLE_FILE = Pattern.compile("<link.*?(type=['\"]text/css['\"].*?href=['\"](.*?)['\"]|href=['\"](.*?)['\"].*?type=['\"]text/css['\"]).*?/>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    
+
     /**
      * Drops CSS style sheet information from given HTML content.
-     * 
+     *
      * @param htmlContent The HTML content
      * @return The HTML content cleansed by CSS style sheet information
      */

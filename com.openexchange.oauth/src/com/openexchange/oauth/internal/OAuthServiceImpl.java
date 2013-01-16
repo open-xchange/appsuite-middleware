@@ -135,7 +135,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     private final IDGeneratorService idGenerator;
 
     private final ContextService contexts;
-    
+
     private final CallbackRegistry callbackRegistry;
 
     /**
@@ -274,11 +274,11 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Return interaction
              */
-            
+
             if (metaData.registerTokenBasedDeferrer()) {
             	callbackRegistry.add(callbackUrl, scribeToken.getToken());
             }
-            
+
             return new OAuthInteractionImpl(
                 scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken),
                 authURL,
@@ -595,7 +595,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             provider.releaseReadConnection(context, con);
         }
     }
-    
+
     @Override
     public OAuthAccount getDefaultAccount(final API api, final Session session) throws OXException {
         final int contextId = session.getContextId();
@@ -866,7 +866,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     public void update(final String recrypted, final PWUpdate customizationNote) throws OXException {
         final StringBuilder b = new StringBuilder();
         b.append("UPDATE oauthAccounts SET ").append(customizationNote.field).append("= ? WHERE cid = ? AND id = ?");
-        
+
         final Context context = getContext(customizationNote.cid);
         Connection con = null;
         PreparedStatement stmt = null;

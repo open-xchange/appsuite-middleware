@@ -75,20 +75,20 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
- * {@link UndecidedFolderCollection} 
- * 
+ * {@link UndecidedFolderCollection}
+ *
  * WebDAV task- and calendar-collections that are about to be created
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class UndecidedFolderCollection extends CalDAVFolderCollection<CalendarObject> {
-    
+
     private String displayName;
     private ContentType contentType;
 
     /**
      * Initializes a new {@link UndecidedFolderCollection}.
-     * 
+     *
      * @param factory The underlying CalDAV factory
      * @param url The target WebDAV path
      * @throws OXException
@@ -105,7 +105,7 @@ public class UndecidedFolderCollection extends CalDAVFolderCollection<CalendarOb
             String value = prop.getValue();
             if (prop.isXML()) {
                 // try to extract comp attribute from xml fragment
-                Pattern compNameRegex = Pattern.compile("name=\\\"(.+?)\\\"", 
+                Pattern compNameRegex = Pattern.compile("name=\\\"(.+?)\\\"",
                     Pattern.DOTALL | Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.MULTILINE);
                 Matcher regexMatcher = compNameRegex.matcher(value);
                 if (regexMatcher.find()) {
@@ -125,7 +125,7 @@ public class UndecidedFolderCollection extends CalDAVFolderCollection<CalendarOb
     @Override
     public void create() throws WebdavProtocolException {
         try {
-            UserizedFolder parentFolder = factory.getFolderService().getDefaultFolder(factory.getUser(), factory.getState().getTreeID(), 
+            UserizedFolder parentFolder = factory.getFolderService().getDefaultFolder(factory.getUser(), factory.getState().getTreeID(),
                 this.contentType, factory.getSession(), null);
             FolderObject newFolder = new FolderObject();
             newFolder.setFolderName(displayName);
@@ -138,7 +138,7 @@ public class UndecidedFolderCollection extends CalDAVFolderCollection<CalendarOb
             throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
         }
     }
-    
+
     @Override
     public boolean exists() throws WebdavProtocolException {
         return false;
@@ -198,5 +198,5 @@ public class UndecidedFolderCollection extends CalDAVFolderCollection<CalendarOb
         permission.setGroupPermission(false);
         return permission;
     }
-    
+
 }

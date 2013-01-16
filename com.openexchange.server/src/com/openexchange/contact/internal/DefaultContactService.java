@@ -66,16 +66,16 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link DefaultContactService} 
- * 
+ * {@link DefaultContactService}
+ *
  * Abstract {@link ContactService} implementation.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class DefaultContactService implements ContactService {
-	
+
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DefaultContactService.class));
-   
+
     /**
      * Initializes a new {@link DefaultContactService}.
      */
@@ -86,8 +86,8 @@ public abstract class DefaultContactService implements ContactService {
 
 	/*
 	 * -----------------------------------------------------------------------------------------------------------------------------------
-	 */    
-    
+	 */
+
 	@Override
 	public Contact getContact(Session session, String folderId, String id) throws OXException {
 		return this.getContact(session, folderId, id, null);
@@ -157,7 +157,7 @@ public abstract class DefaultContactService implements ContactService {
 	public <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, ContactField[] fields) throws OXException {
 		return this.searchContacts(session, term, fields, null);
 	}
-	
+
 	@Override
 	public SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch) throws OXException {
 		return this.searchContacts(session, contactSearch, null, null);
@@ -172,17 +172,17 @@ public abstract class DefaultContactService implements ContactService {
 	public SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields) throws OXException {
 		return this.searchContacts(session, contactSearch, fields, null);
 	}
-	
+
 	@Override
 	public Contact getUser(Session session, int userID) throws OXException {
 		return getUser(session, userID, null);
 	}
-	
+
 	@Override
 	public SearchIterator<Contact> getUsers(Session session, int[] userIDs) throws OXException {
 		return getUsers(session, userIDs, null);
 	}
-	
+
     @Override
     public SearchIterator<Contact> searchContactsWithBirthday(Session session, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
         return searchContactsWithBirthday(session, null, from, until, fields, sortOptions);
@@ -246,7 +246,7 @@ public abstract class DefaultContactService implements ContactService {
 		Check.argNotNull(since, "since");
 		return this.doGetContacts(false, session, folderId, null, fields, sortOptions, since);
 	}
-	
+
 	@Override
 	public SearchIterator<Contact> getDeletedContacts(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
 		Check.argNotNull(session, "session");
@@ -273,17 +273,17 @@ public abstract class DefaultContactService implements ContactService {
 		Check.contactNotNull(contact, session.getContextId(), session.getUserId());
 		return contact;
 	}
-	
+
 	@Override
 	public void createContact(Session session, String folderId, Contact contact) throws OXException {
 		Check.argNotNull(session, "session");
 		Check.argNotNull(folderId, "folderId");
-		Check.argNotNull(contact, "contact");		
+		Check.argNotNull(contact, "contact");
 		this.doCreateContact(session, folderId, contact);
 	}
 
     @Override
-    public void updateContact(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead) 
+    public void updateContact(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead)
             throws OXException {
         Check.argNotNull(session, "session");
         Check.argNotNull(folderId, "folderId");
@@ -291,14 +291,14 @@ public abstract class DefaultContactService implements ContactService {
         Check.argNotNull(lastRead, "lastRead");
         Check.argNotNull(contact, "contact");
         if (contact.containsParentFolderID() && contact.getParentFolderID() != parse(folderId)) {
-            this.doUpdateAndMoveContact(session, folderId, Integer.toString(contact.getParentFolderID()), id, contact, lastRead);           
+            this.doUpdateAndMoveContact(session, folderId, Integer.toString(contact.getParentFolderID()), id, contact, lastRead);
         } else {
             this.doUpdateContact(session, folderId, id, contact, lastRead);
         }
     }
 
     @Override
-    public void updateUser(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead) 
+    public void updateUser(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead)
             throws OXException {
         Check.argNotNull(session, "session");
         Check.argNotNull(folderId, "folderId");
@@ -320,7 +320,7 @@ public abstract class DefaultContactService implements ContactService {
         Check.argNotNull(lastRead, "lastRead");
         this.doDeleteContact(session, folderId, id, lastRead);
     }
-    
+
     @Override
     public void deleteContacts(Session session, String folderId, String[] ids, Date lastRead) throws OXException {
         Check.argNotNull(session, "session");
@@ -329,21 +329,21 @@ public abstract class DefaultContactService implements ContactService {
         Check.argNotNull(lastRead, "lastRead");
         this.doDeleteContacts(session, folderId, ids, lastRead);
     }
-    
+
     @Override
     public void deleteContacts(Session session, String folderId) throws OXException {
         Check.argNotNull(session, "session");
         Check.argNotNull(folderId, "folderId");
         this.doDeleteContacts(session, folderId);
     }
-    
+
 	@Override
     public Contact getUser(Session session, int userID, ContactField[] fields) throws OXException {
 		Check.argNotNull(session, "session");
 		Contact contact = null;
 		SearchIterator<Contact> searchIterator = null;
 		try {
-			searchIterator = this.doGetUsers(session, new int[] { userID }, (SearchTerm<?>)null, fields, null); 
+			searchIterator = this.doGetUsers(session, new int[] { userID }, (SearchTerm<?>)null, fields, null);
 			contact = searchIterator.next();
 		} finally {
 			if (null != searchIterator) {
@@ -353,14 +353,14 @@ public abstract class DefaultContactService implements ContactService {
 		Check.contactNotNull(contact, session.getContextId(), userID);
 		return contact;
     }
-    
+
 	@Override
     public SearchIterator<Contact> getUsers(Session session, int[] userIDs, ContactField[] fields) throws OXException {
 		Check.argNotNull(session, "session");
 		Check.argNotNull(userIDs, "userIDs");
 		return this.doGetUsers(session, userIDs, (SearchTerm<?>)null, fields, null);
     }
-    
+
 	@Override
     public SearchIterator<Contact> getAllUsers(Session session, ContactField[] fields, final SortOptions sortOptions) throws OXException {
 		Check.argNotNull(session, "session");
@@ -394,7 +394,7 @@ public abstract class DefaultContactService implements ContactService {
         Check.argNotNull(until, "until");
         return doSearchContactsWithAnniversary(session, from, until, folderIDs, fields, sortOptions);
     }
-    
+
     @Override
     public SearchIterator<Contact> searchContactsWithBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
         Check.argNotNull(session, "session");
@@ -402,55 +402,55 @@ public abstract class DefaultContactService implements ContactService {
         Check.argNotNull(until, "until");
         if (from.after(until)) {
             throw new IllegalArgumentException("'from' must not be after 'until'");
-        }        
+        }
         return doSearchContactsWithBirthday(session, from, until, folderIDs, fields, sortOptions);
     }
 
 	/*
 	 * -----------------------------------------------------------------------------------------------------------------------------------
 	 */
-	
+
 	protected abstract void doCreateContact(Session session, String folderID, Contact contact) throws OXException;
-	
-	protected abstract void doUpdateAndMoveContact(Session session, String sourceFolderId, String targetFolderId, String objectID, 
+
+	protected abstract void doUpdateAndMoveContact(Session session, String sourceFolderId, String targetFolderId, String objectID,
 			Contact contact, Date lastRead) throws OXException;
-	
-    protected abstract void doUpdateContact(Session session, String folderID, String objectID, Contact contact, Date lastRead) 
+
+    protected abstract void doUpdateContact(Session session, String folderID, String objectID, Contact contact, Date lastRead)
         throws OXException;
 
-    protected abstract void doUpdateUser(Session session, String folderID, String objectID, Contact contact, Date lastRead) 
+    protected abstract void doUpdateUser(Session session, String folderID, String objectID, Contact contact, Date lastRead)
         throws OXException;
 
     protected abstract void doDeleteContact(Session session, String folderID, String objectID, Date lastRead) throws OXException;
-    
+
     protected abstract void doDeleteContacts(Session session, String folderID, String[] objectIDs, Date lastRead) throws OXException;
 
     protected abstract void doDeleteContacts(Session session, String folderID) throws OXException;
-    
+
 	protected abstract <O> SearchIterator<Contact> doGetContacts(boolean deleted, Session session, String folderID,
 			String[] ids, ContactField[] fields, SortOptions sortOptions, Date since) throws OXException;
-	
-	protected abstract <O> SearchIterator<Contact> doSearchContacts(Session session, SearchTerm<O> term, ContactField[] fields, 
+
+	protected abstract <O> SearchIterator<Contact> doSearchContacts(Session session, SearchTerm<O> term, ContactField[] fields,
 			SortOptions sortOptions) throws OXException;
-	
-	protected abstract SearchIterator<Contact> doSearchContacts(Session session, ContactSearchObject contactSearch, 
+
+	protected abstract SearchIterator<Contact> doSearchContacts(Session session, ContactSearchObject contactSearch,
 			ContactField[] fields, SortOptions sortOptions) throws OXException;
-	
+
 	protected abstract String doGetOrganization(Session session) throws OXException;
-	
+
 	protected abstract <O> SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, SearchTerm<O> term,
 			ContactField[] fields, SortOptions sortOptions) throws OXException;
-	
+
 	protected abstract SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, ContactSearchObject contactSearch,
 			ContactField[] fields, SortOptions sortOptions) throws OXException;
-	
+
     protected abstract SearchIterator<Contact> doSearchContactsWithBirthday(Session session, Date from, Date until, List<String> folderIDs,
         ContactField[] fields, SortOptions sortOptions) throws OXException;
-    
+
     protected abstract SearchIterator<Contact> doSearchContactsWithAnniversary(Session session, Date from, Date until, List<String> folderIDs,
         ContactField[] fields, SortOptions sortOptions) throws OXException;
-    
-    protected abstract SearchIterator<Contact> doGetContacts(Session session, List<String> folderIDs, ContactField[] fields, 
+
+    protected abstract SearchIterator<Contact> doGetContacts(Session session, List<String> folderIDs, ContactField[] fields,
         SortOptions sortOptions) throws OXException;
 
 }

@@ -66,5 +66,5 @@ public class ContextMapping extends IntegerToObjectMapping<Context> {
     public Context getDestination(final Context source) {
         return getDestinationById(source.getContextId());
     }
-    
+
 }

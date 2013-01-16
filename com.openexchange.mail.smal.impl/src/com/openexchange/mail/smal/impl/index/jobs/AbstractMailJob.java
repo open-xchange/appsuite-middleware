@@ -86,24 +86,24 @@ import com.openexchange.service.indexing.impl.internal.Services;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractMailJob implements IndexingJob { 
-    
+public abstract class AbstractMailJob implements IndexingJob {
+
     public static final String IDS = "ids";
-    
+
     protected static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractMailJob.class);
-    
+
     protected static final int CHUNK_SIZE = 100;
-    
-    
+
+
     protected AbstractMailJob() {
         super();
-    }    
-    
+    }
+
     protected void addMails(final MailJobInfo info, final List<String> idsToAdd, final IMailMessageStorage messageStorage, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
         if (idsToAdd.isEmpty()) {
             return;
         }
-        
+
         final MailMessageParser parser = new MailMessageParser();
         ChunkPerformer.perform(new Performable() {
             @Override
@@ -111,15 +111,15 @@ public abstract class AbstractMailJob implements IndexingJob {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Adding a chunk of mails of folder " + info.folder + ": " + info.toString());
                 }
-                
-                List<String> subList = idsToAdd.subList(off, len);  
+
+                List<String> subList = idsToAdd.subList(off, len);
                 List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();
                 List<IndexDocument<Attachment>> attachments = new ArrayList<IndexDocument<Attachment>>();
                 MailMessage[] messages = messageStorage.getMessages(
-                    info.folder, 
-                    subList.toArray(new String[subList.size()]), 
+                    info.folder,
+                    subList.toArray(new String[subList.size()]),
                     MailField.values());
-                
+
                 /*
                  * Avoid memory leak in java mail implementation
                  */
@@ -127,7 +127,7 @@ public abstract class AbstractMailJob implements IndexingJob {
                     LOG.debug("Cleaning mail cache of com.sun.mail.imap.IMAPFolder...");
                     ((IMailMessageStorageExt) messageStorage).clearCache();
                 }
-                    
+
                 String[] mailIds = new String[messages.length];
                 for (int i = 0; i < messages.length; i++) {
                     MailMessage mailMessage = messages[i];
@@ -135,14 +135,14 @@ public abstract class AbstractMailJob implements IndexingJob {
                         mailIds[i] = (mailMessage.getMailId());
                     }
                 }
-                    
+
                 String[] primaryContents = messageStorage.getPrimaryContents(info.folder, mailIds);
                 for (int i = 0; i < messages.length; i++) {
                     MailMessage message = messages[i];
                     if (message != null) {
                         ContentAwareMailMessage contentAwareMessage = new ContentAwareMailMessage(primaryContents[i], message);
                         documents.add(new StandardIndexDocument<MailMessage>(contentAwareMessage));
-                        
+
                         try {
                             IndexMailHandler handler = new IndexMailHandler(String.valueOf(info.accountId), info.folder, message.getMailId());
                             parser.parseMailMessage(message, handler);
@@ -156,11 +156,11 @@ public abstract class AbstractMailJob implements IndexingJob {
                 if (!documents.isEmpty()) {
                     mailIndex.addDocuments(documents);
                 }
-                
+
                 if (!attachments.isEmpty()) {
                     attachmentIndex.addDocuments(attachments);
                 }
-                
+
                 return subList.size();
             }
 
@@ -177,39 +177,39 @@ public abstract class AbstractMailJob implements IndexingJob {
             @Override
             public int getInitialOffset() {
                 return 0;
-            }         
+            }
         });
     }
-    
+
     protected void deleteMails(final MailJobInfo info, final List<String> idsToDelete, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
         if (idsToDelete.isEmpty()) {
             return;
         }
-        
+
         ChunkPerformer.perform(new Performable() {
             @Override
             public int perform(int off, int len) throws OXException {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Deleting a chunk of mails in folder " + info.folder + ": " + info.toString());
                 }
-                
+
                 List<String> subList = idsToDelete.subList(off, len);
                 SearchTerm<?>[] idTerms = new SearchTerm<?>[subList.size()];
                 Set<String> mailUuids = new HashSet<String>(subList.size());
-                int i = 0;        
+                int i = 0;
                 for (String id : subList) {
                     mailUuids.add(MailUUID.newUUID(info.contextId, info.userId, info.accountId, info.folder, id).toString());
                     idTerms[i] = new ObjectIdTerm(id);
                     ++i;
-                }                    
-                
+                }
+
                 QueryParameters deleteMailsQuery = new QueryParameters.Builder()
                     .setHandler(SearchHandler.GET_REQUEST)
                     .setIndexIds(mailUuids)
                     .build();
                 mailIndex.deleteByQuery(deleteMailsQuery);
-                
-                SearchTerm<?> orTerm = new ORTerm(idTerms);                
+
+                SearchTerm<?> orTerm = new ORTerm(idTerms);
                 AccountFolders accountFolders = new AccountFolders(String.valueOf(info.accountId), Collections.singleton(String.valueOf(info.folder)));
                 QueryParameters deleteAttachmentsQuery = new QueryParameters.Builder()
                     .setHandler(SearchHandler.CUSTOM)
@@ -218,7 +218,7 @@ public abstract class AbstractMailJob implements IndexingJob {
                     .setAccountFolders(Collections.singleton(accountFolders))
                     .build();
                 attachmentIndex.deleteByQuery(deleteAttachmentsQuery);
-                
+
                 return subList.size();
             }
 
@@ -238,26 +238,26 @@ public abstract class AbstractMailJob implements IndexingJob {
             }
         });
     }
-    
+
     protected void changeMails(final MailJobInfo info, final List<String> changedMails, final IMailMessageStorage messageStorage, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
         if (changedMails.isEmpty()) {
             return;
         }
-        
+
         ChunkPerformer.perform(new Performable() {
             @Override
             public int perform(int off, int len) throws OXException {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Adding a chunk of mails of folder " + info.folder + ": " + info.toString());
                 }
-                
+
                 List<String> subList = changedMails.subList(off, len);
-                List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();               
+                List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();
                 MailMessage[]  messages = messageStorage.getMessages(
-                    info.folder, 
-                    subList.toArray(new String[subList.size()]), 
+                    info.folder,
+                    subList.toArray(new String[subList.size()]),
                     MailField.values());
-                    
+
                 String[] mailIds = new String[messages.length];
                 for (int i = 0; i < messages.length; i++) {
                     MailMessage mailMessage = messages[i];
@@ -265,20 +265,20 @@ public abstract class AbstractMailJob implements IndexingJob {
                         mailIds[i] = (mailMessage.getMailId());
                     }
                 }
-                
-                String[] primaryContents = messageStorage.getPrimaryContents(info.folder, mailIds);                               
+
+                String[] primaryContents = messageStorage.getPrimaryContents(info.folder, mailIds);
                 for (int i = 0; i < messages.length; i++) {
                     MailMessage message = messages[i];
                     if (message != null) {
                         ContentAwareMailMessage contentAwareMessage = new ContentAwareMailMessage(primaryContents[i], message);
-                        documents.add(new StandardIndexDocument<MailMessage>(contentAwareMessage));           
+                        documents.add(new StandardIndexDocument<MailMessage>(contentAwareMessage));
                     }
                 }
 
                 if (!documents.isEmpty()) {
                     mailIndex.addDocuments(documents);
                 }
-                
+
                 return subList.size();
             }
 
@@ -298,7 +298,7 @@ public abstract class AbstractMailJob implements IndexingJob {
             }
         });
     }
-    
+
     protected void closeIndexAccess(IndexAccess<?> indexAccess) throws OXException {
         if (indexAccess != null) {
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);

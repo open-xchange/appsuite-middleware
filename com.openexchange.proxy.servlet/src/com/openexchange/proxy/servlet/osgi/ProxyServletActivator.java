@@ -87,9 +87,9 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.proxy.servlet");
             }
-            
+
             registerSessionServlet(Constants.PATH, new ProxyServlet());
-            
+
             trackers = new ArrayList<ServiceTracker<?,?>>(4);
             trackers.add(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerServiceCustomizer(context)));
             trackers.add(new ServiceTracker<SessiondService,SessiondService>(context, SessiondService.class, new RegistryServiceTrackerCustomizer<SessiondService>(context, ServiceRegistry.getInstance(), SessiondService.class)));

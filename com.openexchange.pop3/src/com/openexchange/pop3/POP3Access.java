@@ -387,7 +387,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         /*-
          * Some POP3 accounts specify a connect frequency limitation,
          * therefore skip ping check if:
-         * 
+         *
          * com.openexchange.pop3.allowPing=false
          */
         final ConfigurationService service = POP3ServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);

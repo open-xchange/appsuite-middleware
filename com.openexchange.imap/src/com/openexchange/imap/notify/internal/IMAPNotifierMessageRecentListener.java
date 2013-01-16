@@ -55,9 +55,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.event.MessageRecentEvent;
 import javax.mail.event.MessageRecentListener;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPProperties;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -169,16 +169,16 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
      * @param str The string to check
      * @return <code>true</code> if string is considered empty; otherwise <code>false</code>
      */
-    protected static boolean isEmptyString(final String str) {
-        if (null == str) {
+    protected static boolean isEmptyString(final String string) {
+        if (null == string) {
             return true;
         }
-        final char[] chars = str.toCharArray();
-        boolean empty = true;
-        for (int i = 0; empty && i < chars.length; i++) {
-            empty = Character.isWhitespace(chars[i]);
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
         }
-        return empty;
+        return isWhitespace;
     }
 
     /**

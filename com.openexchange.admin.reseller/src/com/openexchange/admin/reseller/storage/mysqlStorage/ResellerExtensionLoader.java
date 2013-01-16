@@ -84,7 +84,7 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
     private static final Log LOG = LogFactory.getLog(ResellerExtensionLoader.class);
 
     private final AdminCache cache;
-    
+
     public ResellerExtensionLoader(AdminCache cache) {
         super();
         this.cache = cache;
@@ -129,7 +129,7 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
                 stmt.setInt(pos++, cid.intValue());
             }
             rs = stmt.executeQuery();
-            
+
             while (rs.next()) {
                 int cid = rs.getInt(1);
                 Context context = contexts.get(I(cid));

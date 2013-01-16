@@ -55,12 +55,12 @@ import javax.net.ssl.X509TrustManager;
 
 /**
  * The No-Op trust manager.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TrivialTrustManager implements X509TrustManager {
 
-    
+
     /**
      * Initializes a new {@link TrivialTrustManager}.
      */

@@ -67,9 +67,9 @@ import com.openexchange.osgi.SimpleRegistryListener;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Activator extends HousekeepingActivator {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
-    
+
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -79,10 +79,10 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final ObjectName objectName = new ObjectName(
-            IndexManagementMBean.DOMAIN, 
-            IndexManagementMBean.KEY, 
+            IndexManagementMBean.DOMAIN,
+            IndexManagementMBean.KEY,
             IndexManagementMBean.VALUE);
-        
+
         track(IndexManagementService.class, new SimpleRegistryListener<IndexManagementService>() {
             @Override
             public void added(ServiceReference<IndexManagementService> ref, IndexManagementService service) {

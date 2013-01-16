@@ -92,14 +92,14 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class TaskCopyTask implements CopyUserTaskService {
-    
+
     private int srcUserId;
     private int dstUserId;
     private Context srcCtx;
     private Context dstCtx;
     private Connection srcCon;
     private Connection dstCon;
-    
+
     private final UserService service;
 
     /**
@@ -115,7 +115,7 @@ public class TaskCopyTask implements CopyUserTaskService {
      * @see com.openexchange.user.copy.CopyUserTaskService#getAlreadyCopied()
      */
     public String[] getAlreadyCopied() {
-        return new String[] {             
+        return new String[] {
             UserCopyTask.class.getName(),
             ContextLoadTask.class.getName(),
             ConnectionFetcherTask.class.getName(),
@@ -140,7 +140,7 @@ public class TaskCopyTask implements CopyUserTaskService {
 
         srcCtx = copyTools.getSourceContext();
         dstCtx = copyTools.getDestinationContext();
-        
+
         srcUserId = copyTools.getSourceUserId();
         dstUserId = copyTools.getDestinationUserId();
 
@@ -187,7 +187,7 @@ public class TaskCopyTask implements CopyUserTaskService {
         } catch (final OXException e) {
             throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create(e);
         }
-        
+
         return tasks;
     }
 
@@ -206,7 +206,7 @@ public class TaskCopyTask implements CopyUserTaskService {
                 newFolders.clear();
                 final Set<InternalParticipant> internals = new HashSet<InternalParticipant>();
                 final Set<ExternalParticipant> externals = new HashSet<ExternalParticipant>();
-                
+
                 final Participant[] participants = task.getParticipants();
                 if (participants != null) {
                     for (final Participant p : participants) {

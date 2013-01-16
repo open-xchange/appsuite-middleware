@@ -58,13 +58,13 @@ import java.rmi.server.RMISocketFactory;
 
 /**
  * {@link CustomRMIClientSocketFactory}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CustomRMISocketFactory extends RMISocketFactory implements Serializable {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 4536982546713571286L;
 
@@ -72,7 +72,7 @@ public final class CustomRMISocketFactory extends RMISocketFactory implements Se
 
     /**
      * Initializes a new {@link CustomRMIClientSocketFactory}.
-     * 
+     *
      * @param bindAddr The bind address
      * @throws IOException If initialization fails
      */

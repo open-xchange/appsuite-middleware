@@ -56,9 +56,9 @@ package com.openexchange.groupware.attach.index;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
-    
+
     private final SearchTerm<?>[] terms;
-    
+
 
     public ANDTerm(SearchTerm<?>[] terms) {
         super();
@@ -66,7 +66,7 @@ public class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
     }
 
     @Override
-    public SearchTerm<?>[] getPattern() {        
+    public SearchTerm<?>[] getPattern() {
         return terms;
     }
 

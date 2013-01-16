@@ -93,7 +93,7 @@ public interface ServerSession extends Session {
     public UserSettingMail getUserSettingMail();
 
 	/**
-	 * Determines if this session is not authenticated and therefore anonymous. 
+	 * Determines if this session is not authenticated and therefore anonymous.
 	 * @return
 	 */
 	public boolean isAnonymous();

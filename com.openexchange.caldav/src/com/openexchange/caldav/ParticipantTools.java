@@ -61,16 +61,16 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
  * {@link ParticipantTools}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ParticipantTools {
-    
+
     /**
-     * Checks whether two arrays contain different participants or not, 
-     * ignoring ID differences for external participants, optionally also 
+     * Checks whether two arrays contain different participants or not,
+     * ignoring ID differences for external participants, optionally also
      * comparing the confirmation status.
-     *  
+     *
      * @param participants1 the first list of participants
      * @param participants2 the second list of participants
      * @param compareStatus
@@ -87,10 +87,10 @@ public class ParticipantTools {
     }
 
     /**
-     * Checks whether two sets contain different participants or not, 
-     * ignoring ID differences for external participants, optionally also 
+     * Checks whether two sets contain different participants or not,
+     * ignoring ID differences for external participants, optionally also
      * comparing the confirmation status.
-     *  
+     *
      * @param participants1 the first list of participants
      * @param participants2 the second list of participants
      * @param compareStatus
@@ -107,10 +107,10 @@ public class ParticipantTools {
     }
 
     /**
-     * Determines whether a set of participants contains a collection of 
-     * participants, ignoring ID differences for external participants, 
+     * Determines whether a set of participants contains a collection of
+     * participants, ignoring ID differences for external participants,
      * optionally also comparing the confirmation status.
-     * 
+     *
      * @param participants1
      * @param participants2
      * @param compareStatus
@@ -126,10 +126,10 @@ public class ParticipantTools {
     }
 
     /**
-     * Determines whether an array of participants contains a collection of 
-     * participants, ignoring ID differences for external participants, 
+     * Determines whether an array of participants contains a collection of
+     * participants, ignoring ID differences for external participants,
      * optionally also comparing the confirmation status.
-     * 
+     *
      * @param participants1
      * @param participants2
      * @param compareStatus
@@ -146,9 +146,9 @@ public class ParticipantTools {
 
     /**
      * Determines whether a collection of participants contains a participant,
-     * ignoring ID differences for external participants, optionally also 
+     * ignoring ID differences for external participants, optionally also
      * comparing the confirmation status.
-     * 
+     *
      * @param participants
      * @param participant
      * @param compareStatus
@@ -165,8 +165,8 @@ public class ParticipantTools {
             }
             return false; // not found
         }
-//            
-//            
+//
+//
 //            if (Participant.EXTERNAL_USER == participant.getType()) {
 //            for (Participant p : participants) {
 //                if (null != p && equals(p, participant, compareStatus)) {
@@ -177,15 +177,15 @@ public class ParticipantTools {
 //        } else {
 //            return participants.contains(participant);
 //        }
-    }    
+    }
 
     /**
-     * Gets a set of individual participants of an appointment, i.e. unique 
-     * participants that are either internal or external users. Group- and 
-     * resource-participants are excluded from the result.  
-     * 
+     * Gets a set of individual participants of an appointment, i.e. unique
+     * participants that are either internal or external users. Group- and
+     * resource-participants are excluded from the result.
+     *
      * @param appointment the appointment to extract the participants from
-     * @return a set of individual participants, that may be empty, but 
+     * @return a set of individual participants, that may be empty, but
      * never <code>null</code>
      */
     public static Set<Participant> getIndividualParticipants(Appointment appointment) {
@@ -211,15 +211,15 @@ public class ParticipantTools {
                         individualParticipants.add(userParticipant);
                     }
                 }
-            }           
+            }
         }
         return individualParticipants;
     }
-    
+
     /**
-     * Compares on participant with another, ignoring ID differences for 
-     * external participants. 
-     * 
+     * Compares on participant with another, ignoring ID differences for
+     * external participants.
+     *
      * @param participant1
      * @param participant2
      * @return
@@ -227,12 +227,12 @@ public class ParticipantTools {
     public static boolean equals(Participant participant1, Participant participant2) {
         return equals(participant1, participant2, false);
     }
-    
+
     /**
-     * Compares on participant with another, ignoring ID differences for 
-     * external participants, optionally also comparing the confirmation 
-     * status. 
-     * 
+     * Compares on participant with another, ignoring ID differences for
+     * external participants, optionally also comparing the confirmation
+     * status.
+     *
      * @param participant1
      * @param participant2
      * @param compareStatus
@@ -241,7 +241,7 @@ public class ParticipantTools {
     public static boolean equals(Participant participant1, Participant participant2, boolean compareStatus) {
         if (Participant.EXTERNAL_USER == participant1.getType() && null != participant1.getEmailAddress() &&
                 participant1.getEmailAddress().equals(participant2.getEmailAddress()) || participant1.equals(participant2)) {
-            return compareStatus ? getStatus(participant1).equals(getStatus(participant2)) : true;               
+            return compareStatus ? getStatus(participant1).equals(getStatus(participant2)) : true;
         } else {
             return false;
         }
@@ -249,7 +249,7 @@ public class ParticipantTools {
 
     /**
      * Gets the confirmation status for a participant.
-     * 
+     *
      * @param participant
      * @return
      */
@@ -262,9 +262,9 @@ public class ParticipantTools {
             return ConfirmStatus.NONE;
         }
     }
-       
+
     private ParticipantTools() {
         super();
     }
-    
+
 }

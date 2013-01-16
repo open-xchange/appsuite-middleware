@@ -169,7 +169,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
             return false;
         }
     }
-    
+
     private static void enableForeignKeyChecks(final Connection con) throws SQLException {
         if (null == con) {
             return;

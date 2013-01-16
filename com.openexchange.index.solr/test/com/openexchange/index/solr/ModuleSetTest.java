@@ -59,35 +59,35 @@ import org.junit.Test;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ModuleSetTest {
-    
+
     @Test
     public void testWhitespaces() throws Exception {
         ModuleSet modules = new ModuleSet(" 19,137 ");
         assertTrue("Missing module", modules.containsModule(19));
         assertTrue("Missing module", modules.containsModule(137));
         assertTrue("Missing module", modules.containsModule(138));
-        
+
         modules.removeModule(19);
         modules.removeModule(137);
         assertFalse(modules.removeModule(138));
         assertFalse("Module exists", modules.containsModule(19));
         assertFalse("Module exists", modules.containsModule(137));
-        
+
         assertEquals("Wrong result", "", modules.toString());
     }
-    
+
     @Test
     public void testEmptySet() throws Exception {
         ModuleSet modules = new ModuleSet();
         assertEquals("Wrong result", "", modules.toString());
-        
+
         modules = new ModuleSet("");
         assertEquals("Wrong result", "", modules.toString());
-        
+
         modules = new ModuleSet(" , ");
         assertEquals("Wrong result", "", modules.toString());
     }
-    
+
     @Test
     public void testAddToEmptySet() throws Exception {
         ModuleSet modules = new ModuleSet();

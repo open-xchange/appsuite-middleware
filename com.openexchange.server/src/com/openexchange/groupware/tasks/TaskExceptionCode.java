@@ -58,7 +58,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * Error codes for task exceptions.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum TaskExceptionCode implements OXExceptionCode {
@@ -232,7 +232,10 @@ public enum TaskExceptionCode implements OXExceptionCode {
     DELETE_FAILED_RETRY(DELETE_FAILED_MSG, Category.CATEGORY_TRY_AGAIN, 54),
 
     /** Value "%1$s" of attribute "%2$s" contains non digit characters. */
-    CONTAINS_NON_DIGITS(CONTAINS_NON_DIGITS_MSG, Category.CATEGORY_USER_INPUT, 55);
+    CONTAINS_NON_DIGITS(CONTAINS_NON_DIGITS_MSG, Category.CATEGORY_USER_INPUT, 55),
+
+    /** Can not determine delegator of task %1$d. */
+    UNKNOWN_DELEGATOR(UNKNOWN_DELEGATOR_MSG, Category.CATEGORY_ERROR, 56);
 
     private final String message;
 
@@ -300,7 +303,7 @@ public enum TaskExceptionCode implements OXExceptionCode {
 
     private OXException specials(OXException exc) {
         switch(this) {
-        case TASK_NOT_FOUND: 
+        case TASK_NOT_FOUND:
             exc.setGeneric(Generic.NOT_FOUND);
             break;
         case NO_PERMISSION: case NO_WRITE_PERMISSION:

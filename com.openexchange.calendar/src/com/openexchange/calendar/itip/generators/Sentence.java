@@ -68,27 +68,27 @@ public class Sentence {
     private final List<Object> arguments = new ArrayList<Object>();
     private final List<ArgumentType> types = new ArrayList<ArgumentType>();
     private final List<Object[]> extra = new ArrayList<Object[]>();
-    
+
     public Sentence(String message) {
         this.message = message;
     }
-    
+
     public Sentence add(Object argument, ArgumentType type, Object...extra) {
         arguments.add(argument);
         types.add(type);
         this.extra.add(extra);
         return this;
     }
-    
+
     public Sentence add(Object argument) {
         return add(argument, ArgumentType.NONE);
     }
-    
-    
+
+
     public String getMessage(TypeWrapper wrapper, Locale locale) {
         List<String> wrapped = new ArrayList<String>(arguments.size());
         StringHelper sh = StringHelper.valueOf(locale);
-        
+
         for(int i = 0, size = arguments.size(); i < size; i++) {
             Object argument = arguments.get(i);
             ArgumentType type = types.get(i);
@@ -134,9 +134,9 @@ public class Sentence {
         }
         return isWhitespace;
     }
-    
+
     public String getMessage(Locale locale) {
         return getMessage(new PassthroughWrapper(), locale);
     }
-    
+
 }

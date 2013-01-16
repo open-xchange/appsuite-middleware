@@ -99,7 +99,7 @@ public abstract class AbstractCMISAccess {
 
     /**
      * Handles specified CMIS error.
-     * 
+     *
      * @param e The CMIS error
      * @return The appropriate <tt>OXException</tt> instance
      */

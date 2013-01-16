@@ -72,7 +72,7 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
 
 /**
  * A class for sending SMS messages
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public final class SMSMessagingMessage implements MessagingMessage {
@@ -106,7 +106,7 @@ public final class SMSMessagingMessage implements MessagingMessage {
 
     /**
      * Initializes a new {@link SMSMessagingMessage}.
-     * 
+     *
      * @param recipient The recipient of the direct message
      * @param from The sending user
      */
@@ -243,41 +243,41 @@ public final class SMSMessagingMessage implements MessagingMessage {
     public String getUrl() {
         return null;
     }
-    
+
     public static class CaptchaParams {
         private String challenge;
         private String response;
         private String address;
-        
+
         public String getChallenge() {
             return challenge;
         }
-        
+
         public void setChallenge(String challenge) {
             this.challenge = challenge;
         }
-        
+
         public String getResponse() {
             return response;
         }
-        
+
         public void setResponse(String response) {
             this.response = response;
         }
-        
+
         public String getHost() {
             return address;
         }
-        
+
         public void setAddress(String address) {
             this.address = address;
         }
     }
-    
+
     public void setCaptchaParameters(CaptchaParams params) {
         this.params = params;
     }
-    
+
     public CaptchaParams getCaptchaParams() {
         return params;
     }
@@ -290,5 +290,5 @@ public final class SMSMessagingMessage implements MessagingMessage {
             list.add(new StringMessageHeader(MessagingPart.ATTACHMENT, attachmentId));
             headers.put(MessagingPart.ATTACHMENT, list);
         }
-    }    
+    }
 }

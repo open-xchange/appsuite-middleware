@@ -68,7 +68,7 @@ public final class InfostoreFacades {
 
     /**
      * Checks if needed InfoStore bundle(s) is/are available.
-     * 
+     *
      * @return <code>true</code> if available; otherwise <code>false</code>
      */
     public static boolean isInfoStoreAvailable() {

@@ -56,14 +56,14 @@ package com.openexchange.push.mq.mbean;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public interface PushMQMBean {
-    
+
     public static final String PUSH_MQ_DOMAIN = "com.openexchange.push.mq";
-    
+
     /**
      * Start topic subscribers
      */
     public void startListening();
-    
+
     /**
      * Shutdown topic subscribers
      */

@@ -51,14 +51,14 @@ package com.openexchange.tools.hash;
 
 /**
  * {@link HashKey} - Uses a safe hash key computation if a <code>String</code> is intended to be used as hash key.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HashKey {
 
     /**
      * Returns the computation-safe hash key for specified <code>String</code> key.
-     * 
+     *
      * @param key The <code>String</code> key
      * @return The computation-safe hash key
      */
@@ -68,7 +68,7 @@ public final class HashKey {
 
     /**
      * Returns the computation-safe hash key for specified <code>String</code> key.
-     * 
+     *
      * @param key The <code>String</code> key
      * @param hashStart The hash start
      * @return The computation-safe hash key
@@ -79,7 +79,7 @@ public final class HashKey {
 
     /**
      * Returns the computation-safe hash key for specified <code>String</code> key.
-     * 
+     *
      * @param key The <code>String</code> key
      * @param hashStart The hash start
      * @param salt The salt
@@ -91,7 +91,7 @@ public final class HashKey {
 
     /**
      * Returns the computation-safe hash key for specified <code>String</code> key.
-     * 
+     *
      * @param key The <code>String</code> key
      * @param hashStart The hash start
      * @param salt The salt
@@ -107,6 +107,18 @@ public final class HashKey {
     public static final int DEFAULT_HASH = 5381;
 
     private static final int MULTIPLICATION_CONSTANT = 33;
+
+    private static int calcSafeHashCode(final int hashStart, final String val) {
+        int h = hashStart;
+        final int len = val.length();
+        if (len > 0) {
+            final int fac = MULTIPLICATION_CONSTANT;
+            for (int i = 0; i < len; i++) {
+                h = fac * h + val.charAt(i);
+            }
+        }
+        return h;
+    }
 
     private static int calcSafeHashCode(final int hashStart, final char[] val) {
         int h = hashStart;
@@ -133,7 +145,7 @@ public final class HashKey {
         super();
         value = key;
         if (null == salt) {
-            hash = calcSafeHashCode(hashStart, key.toCharArray());
+            hash = calcSafeHashCode(hashStart, key);
         } else {
             final StringBuilder sb = new StringBuilder(key).append('-').append(salt);
             final int count = sb.length();

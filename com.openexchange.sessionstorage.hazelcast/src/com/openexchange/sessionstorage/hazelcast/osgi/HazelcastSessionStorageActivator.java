@@ -69,14 +69,14 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link HazelcastSessionStorageActivator}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
     private static Log LOG = LogFactory.getLog(HazelcastSessionStorageActivator.class);
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ThreadPoolService.class, HazelcastConfigurationService.class };
@@ -99,7 +99,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                 public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
                     final HazelcastInstance hazelcastInstance = context.getService(reference);
                     HazelcastSessionStorageService.setHazelcastInstance(hazelcastInstance);
-                    sessionStorageRegistration = context.registerService(SessionStorageService.class, 
+                    sessionStorageRegistration = context.registerService(SessionStorageService.class,
                         new HazelcastSessionStorageService(discoverMapName(hazelcastInstance.getConfig())), null);
                     return hazelcastInstance;
                 }
@@ -148,7 +148,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
     /**
      * Discovers the sessions map name from the supplied hazelcast configuration.
-     * 
+     *
      * @param config The config object
      * @return The sessions map name
      * @throws IllegalStateException
@@ -166,5 +166,5 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         String msg = "No distributed sessions map found in hazelcast configuration";
         throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
     }
-    
+
 }

@@ -85,7 +85,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailJSONActivator} - The activator for mail module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailJSONActivator extends AJAXModuleActivator {
@@ -129,7 +129,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
     }
 
     private final class DecoratorImpl implements AJAXResultDecorator {
-        
+
         private final MailConverter converter;
 
         private final ContactField[] fields;
@@ -191,7 +191,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                         if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
                             try {
                                 final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
-                                String timestamp = null != contact.getLastModified() ? 
+                                String timestamp = null != contact.getLastModified() ?
                                     String.valueOf(contact.getLastModified().getTime()) : null;
                                 final ImageLocation imageLocation =
                                     new ImageLocation.Builder().folder(Integer.toString(contact.getParentFolderID())).id(

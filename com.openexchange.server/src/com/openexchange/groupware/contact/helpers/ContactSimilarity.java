@@ -210,8 +210,10 @@ public class ContactSimilarity {
     public static String purge(String component) {
         // throw away non characters
 
-        StringBuilder b = new StringBuilder(component.length());
-        for(char c : component.toCharArray()) {
+        int length = component.length();
+        StringBuilder b = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            char c = component.charAt(i);
             if (Character.isLetter(c)) {
                 b.append(c);
             }

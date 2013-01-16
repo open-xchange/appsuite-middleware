@@ -2462,23 +2462,23 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
         @Override
         public Object call() throws OXException {
-            final MailAccess<?, ?> mailAccess;
-            final int accountId = mailAccount.getId();
+            MailAccess<?, ?> mailAccess = null;
             try {
-                mailAccess = MailAccess.getInstance(session, accountId);
-            } catch (final OXException e) {
-                arrays[index] = null;
-                if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getCode()) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug(e.getMessage(), e);
+                final int accountId = mailAccount.getId();
+                try {
+                    mailAccess = MailAccess.getInstance(session, accountId);
+                } catch (final OXException e) {
+                    arrays[index] = null;
+                    if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getCode()) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(e.getMessage(), e);
+                        }
+                        return null;
                     }
-                    return null;
+                    logger.error(e.getMessage(), e);
+                    throw e;
                 }
-                logger.error(e.getMessage(), e);
-                throw e;
-            }
-            final MailFolder rootFolder = mailAccess.getRootFolder();
-            try {
+                final MailFolder rootFolder = mailAccess.getRootFolder();
                 final MailFolderFieldWriter[] mailFolderWriters =
                     com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(columns, mailAccess.getMailConfig(), session);
                 final JSONArray ja = new JSONArray();
@@ -2502,7 +2502,9 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 arrays[index] = null;
                 throw e;
             } finally {
-                mailAccess.close(true);
+                if (null != mailAccess) {
+                    mailAccess.close(true);
+                }
             }
         }
     }

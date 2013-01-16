@@ -50,7 +50,7 @@ package com.openexchange.admin.rmi.dataobjects;
 
 /**
  * Interface for all Objects containing a password mechanism and a password
- * 
+ *
  * @author choeger
  *
  */
@@ -63,20 +63,20 @@ public interface PasswordMechObject {
      * @return the passwordMech
      */
     abstract String getPasswordMech();
-    
+
     /**
      * Represents the password encryption mechanism, value is a password
      * mechanism. Currently supported mechanisms are "{CRYPT}" and "{SHA}",
-     * see {@link User.CRYPT_MECH} and {@link User.SHA_MECH}.  
-     * 
+     * see {@link User.CRYPT_MECH} and {@link User.SHA_MECH}.
+     *
      * @param passwordMech
      *                the passwordMech to set
      */
     abstract void setPasswordMech(final String passwordMech);
-    
+
     /**
      * Return the password of this user object.
-     * 
+     *
      * @return A {@link String} containing the password
      */
     abstract String getPassword();

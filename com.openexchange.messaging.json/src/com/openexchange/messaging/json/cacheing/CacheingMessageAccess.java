@@ -231,12 +231,8 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         final String groupName = getGroupName(message.getFolder());
         final String key = message.getId();
 
-        try {
-            if (key != null) {
-                cache.putInGroup(key, groupName, message);
-            }
-        } catch (final OXException e) {
-            throw new OXException(e);
+        if (key != null) {
+            cache.putInGroup(key, groupName, message);
         }
 
         return message;

@@ -1,18 +1,18 @@
-/* 
- * Copyright 2005 - 2009 Terracotta, Inc. 
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
- * use this file except in compliance with the License. You may obtain a copy 
- * of the License at 
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations 
+/*
+ * Copyright 2005 - 2009 Terracotta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
  * under the License.
- * 
+ *
  */
 
 package org.quartz.examples.example3;
@@ -35,7 +35,7 @@ import org.quartz.impl.StdSchedulerFactory;
 /**
  * This Example will demonstrate all of the basics of scheduling capabilities of
  * Quartz using Cron Triggers.
- * 
+ *
  * @author Bill Kratzer
  */
 public class CronTriggerExample {
@@ -58,7 +58,7 @@ public class CronTriggerExample {
         JobDetail job = newJob(SimpleJob.class)
             .withIdentity("job1", "group1")
             .build();
-        
+
         CronTrigger trigger = newTrigger()
             .withIdentity("trigger1", "group1")
             .withSchedule(cronSchedule("0/20 * * * * ?"))
@@ -73,12 +73,12 @@ public class CronTriggerExample {
         job = newJob(SimpleJob.class)
             .withIdentity("job2", "group1")
             .build();
-        
+
         trigger = newTrigger()
             .withIdentity("trigger2", "group1")
             .withSchedule(cronSchedule("15 0/2 * * * ?"))
             .build();
-        
+
         ft = sched.scheduleJob(job, trigger);
         System.out.println(job.getKey() + " has been scheduled to run at: " + ft
                 + " and repeat based on expression: "
@@ -88,12 +88,12 @@ public class CronTriggerExample {
         job = newJob(SimpleJob.class)
             .withIdentity("job3", "group1")
             .build();
-        
+
         trigger = newTrigger()
             .withIdentity("trigger3", "group1")
             .withSchedule(cronSchedule("0 0/2 8-17 * * ?"))
             .build();
-        
+
         ft = sched.scheduleJob(job, trigger);
         System.out.println(job.getKey() + " has been scheduled to run at: " + ft
                 + " and repeat based on expression: "
@@ -103,12 +103,12 @@ public class CronTriggerExample {
         job = newJob(SimpleJob.class)
             .withIdentity("job4", "group1")
             .build();
-        
+
         trigger = newTrigger()
             .withIdentity("trigger4", "group1")
             .withSchedule(cronSchedule("0 0/3 17-23 * * ?"))
             .build();
-        
+
         ft = sched.scheduleJob(job, trigger);
         System.out.println(job.getKey() + " has been scheduled to run at: " + ft
                 + " and repeat based on expression: "
@@ -118,12 +118,12 @@ public class CronTriggerExample {
         job = newJob(SimpleJob.class)
             .withIdentity("job5", "group1")
             .build();
-        
+
         trigger = newTrigger()
             .withIdentity("trigger5", "group1")
             .withSchedule(cronSchedule("0 0 10am 1,15 * ?"))
             .build();
-        
+
         ft = sched.scheduleJob(job, trigger);
         System.out.println(job.getKey() + " has been scheduled to run at: " + ft
                 + " and repeat based on expression: "
@@ -133,12 +133,12 @@ public class CronTriggerExample {
         job = newJob(SimpleJob.class)
             .withIdentity("job6", "group1")
             .build();
-        
+
         trigger = newTrigger()
             .withIdentity("trigger6", "group1")
             .withSchedule(cronSchedule("0,30 * * ? * MON-FRI"))
             .build();
-        
+
         ft = sched.scheduleJob(job, trigger);
         System.out.println(job.getKey() + " has been scheduled to run at: " + ft
                 + " and repeat based on expression: "
@@ -148,7 +148,7 @@ public class CronTriggerExample {
         job = newJob(SimpleJob.class)
             .withIdentity("job7", "group1")
             .build();
-        
+
         trigger = newTrigger()
             .withIdentity("trigger7", "group1")
             .withSchedule(cronSchedule("0,30 * * ? * SAT,SUN"))

@@ -103,19 +103,19 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
     private final Set<String> servlets = new HashSet<String>();
     private volatile String prefix;
-    
+
     @Override
     protected void startBundle() throws Exception {
 
     	prefix = getService(DispatcherPrefixService.class).getPrefix();
-    	
+
     	final DefaultDispatcher dispatcher = new DefaultDispatcher();
         /*
          * Specify default converters
          */
         final DefaultConverter defaultConverter = new DefaultConverter();
         registerService(Converter.class, defaultConverter);
-        
+
         defaultConverter.addConverter(new DebugConverter());
         /*
          * Add basic converters
@@ -182,7 +182,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         // Keep this order!!!
         dispatcher.addCustomizer(new ConversionCustomizer(defaultConverter));
         dispatcher.addCustomizer(new AJAXActionCustomizerFactory() {
-            
+
             @Override
             public AJAXActionCustomizer createCustomizer(final AJAXRequestData request, final ServerSession session) {
                 return DecoratingAJAXActionCustomizer.getInstance();
@@ -191,7 +191,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         final DispatcherServlet servlet = new DispatcherServlet();
         DispatcherServlet.setDispatcher(dispatcher);
-        
+
         Multiple.setDispatcher(dispatcher);
 
         DispatcherServlet.registerRenderer(new APIResponseRenderer());
@@ -215,7 +215,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         });
 
 //        registerSessionServlet("/ajax", servlet);
-        
+
         track(AJAXActionServiceFactory.class, new SimpleRegistryListener<AJAXActionServiceFactory>() {
 
             @Override
@@ -236,7 +236,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                     servlets.remove(module);
                 }
             }
-            
+
         });
 
         track(ImageTransformationService.class, new SimpleRegistryListener<ImageTransformationService>() {

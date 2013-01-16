@@ -5,7 +5,6 @@ import java.util.List;
 
 import junit.framework.TestSuite;
 
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
@@ -42,8 +41,9 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        for (ServiceRegistration sr: regs)
+        for (ServiceRegistration sr: regs) {
             sr.unregister();
+        }
     }
 
     @Override

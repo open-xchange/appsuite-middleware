@@ -76,22 +76,17 @@ public class CascadingConfigObjectRegistry implements ConfigObjectRegistry{
 
     @Override
     public Object get(String path) throws OXException {
-        try {
-            String configKey = transform(path);
-            String relevantFile = view.get(configKey, String.class);
+        String configKey = transform(path);
+        String relevantFile = view.get(configKey, String.class);
 
-            Object yaml = config.getYaml(relevantFile);
-            if(yaml == null && !relevantFile.endsWith(".yml")) {
-                yaml = config.getYaml(relevantFile+".yml");
-            }
-            if(yaml == null && !relevantFile.endsWith(".yaml")) {
-                yaml = config.getYaml(relevantFile+".yaml");
-            }
-            return yaml;
-        } catch (OXException x) {
-            throw new OXException(x);
+        Object yaml = config.getYaml(relevantFile);
+        if(yaml == null && !relevantFile.endsWith(".yml")) {
+            yaml = config.getYaml(relevantFile+".yml");
         }
-
+        if(yaml == null && !relevantFile.endsWith(".yaml")) {
+            yaml = config.getYaml(relevantFile+".yaml");
+        }
+        return yaml;
     }
 
     protected String transform(String path) {

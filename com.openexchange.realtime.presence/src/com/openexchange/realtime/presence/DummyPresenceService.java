@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DummyPresenceService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DummyPresenceService implements PresenceStatusService {
@@ -130,7 +130,7 @@ public class DummyPresenceService implements PresenceStatusService {
     @Override
     public void registerPresenceChangeListener(PresenceChangeListener presenceChangeListener) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -139,7 +139,7 @@ public class DummyPresenceService implements PresenceStatusService {
     @Override
     public void unregisterPresenceChangeListener(PresenceChangeListener presenceChangeListener) {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

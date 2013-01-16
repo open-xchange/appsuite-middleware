@@ -51,16 +51,16 @@ package com.openexchange.index;
 
 
 /**
- * {@link SearchHandler} - This enum defines possible search handlers. 
+ * {@link SearchHandler} - This enum defines possible search handlers.
  * A search handler takes part in {@link QueryParameters} and is an abstract definition of how
  * a search is being performed, meaning what pattern will be searched within which fields.
- * A search handler may define some additional parameters that have to be set within 
+ * A search handler may define some additional parameters that have to be set within
  * {@link QueryParameters}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public enum SearchHandler {
-    
+
     /**
      * This handler performs a simple search.
      * Mandatory parameters: pattern

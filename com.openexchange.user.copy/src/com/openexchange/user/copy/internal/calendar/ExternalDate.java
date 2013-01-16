@@ -51,7 +51,7 @@ package com.openexchange.user.copy.internal.calendar;
 
 /**
  * {@link ExternalDate}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ExternalDate {
@@ -63,7 +63,7 @@ public class ExternalDate {
     private int confirm;
 
     private String reason;
-    
+
 
     public ExternalDate() {
         super();

@@ -61,7 +61,7 @@ import me.prettyprint.hector.api.beans.Composite;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Operation {
-	
+
 	private final String columnFamilyName;
 	private final OperationAction action;
 	private OperationState state;
@@ -69,13 +69,13 @@ public class Operation {
 	private final String objectRowKey;
 	private final Composite lockedObject;
 	private JSONObject jsonOpData;
-	
+
 	/** Operation data - column name-value pairs */
 	private final Map<String, String> opData;
-	
+
 	/**
 	 * Default constructor
-	 * 
+	 *
 	 * @param cf ColumnFamily Name
 	 * @param t Operation action
 	 * @param seqNum sequence number
@@ -87,30 +87,30 @@ public class Operation {
 		sequenceNumber = seqNum;
 		objectRowKey = rowKey;
 		jsonOpData = new JSONObject();
-		
+
 		opData = new HashMap<String, String>();
 		lockedObject = new Composite(cf, rowKey.toString());
 	}
-	
+
 	/**
 	 * Add operation data
-	 * 
+	 *
 	 * @param column name
 	 * @param data
 	 */
 	public void addOperationData(String columnName, String data) {
 		opData.put(columnName, data);
 	}
-	
+
 	/**
 	 * Returns an iterator for all the keys in the set
-	 * 
+	 *
 	 * @return an iterator
 	 */
 	public Iterator<String> getColumnNamesIterator() {
 		return opData.keySet().iterator();
 	}
-	
+
 	/**
 	 * Get the data of the operation for a specific column
 	 * @param c
@@ -119,16 +119,16 @@ public class Operation {
 	public String getData(String c) {
 		return opData.get(c);
 	}
-	
+
 	/**
 	 * Getter for column family name
-	 * 
+	 *
 	 * @return the column family name
 	 */
 	public String getColumnFamilyName() {
 		return columnFamilyName;
 	}
-	
+
 	/**
 	 * Getter for operation action
 	 * @return the operation action
@@ -136,7 +136,7 @@ public class Operation {
 	public OperationAction getAction() {
 		return action;
 	}
-	
+
 	/**
 	 * Getter for sequence number
 	 * @return the sequence number
@@ -155,10 +155,10 @@ public class Operation {
 	/**
 	 * @return the objectRowKey
 	 */
-	public String getObjectRowKey() {	
+	public String getObjectRowKey() {
 		return objectRowKey;
 	}
-	
+
 	public void compileJSONObject() {
 		jsonOpData = new JSONObject();
 		try {
@@ -166,18 +166,18 @@ public class Operation {
 			jsonOpData.put("rowkey", objectRowKey);
 			jsonOpData.put("action", action.toString());
 			jsonOpData.put("seqNum", sequenceNumber);
-			jsonOpData.put("data", opData);	
+			jsonOpData.put("data", opData);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
+
 		System.out.println(jsonOpData.toString());
 	}
-	
+
 	public JSONObject getJSONData() {
 		return jsonOpData;
 	}
-	
+
 	public void addOperationData(JSONObject data) {
 		Iterator<String> it = data.keys();
 		while (it.hasNext()) {

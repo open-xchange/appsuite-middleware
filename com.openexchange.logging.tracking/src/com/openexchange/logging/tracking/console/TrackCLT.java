@@ -132,9 +132,9 @@ public class TrackCLT {
 	                final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
 
 	                ObjectName OBJECT_NAME = new ObjectName("com.openexchange.logging.tracking", "name", "TrackingConfiguration");
-	                
+
 	                // Let's find out what we're supposed to be doing;
-	                
+
 	                if (cmd.hasOption('v')) {
 	                	setLogLevel(OBJECT_NAME, mbsc, cmd);
 	                	return;
@@ -142,7 +142,7 @@ public class TrackCLT {
 	                	clear(OBJECT_NAME, mbsc, cmd);
 	                	return;
 	                }
-	                
+
 	                System.err.println("Please tell me if you either want to set a certain loglevel (-v or --level) or clear a log level (-x or --clear)");
 	            } finally {
 	                jmxConnector.close();
@@ -192,7 +192,7 @@ public class TrackCLT {
 			String user = cmd.getOptionValue('u');
 			String context = cmd.getOptionValue('c');
 			String className = cmd.getOptionValue('n');
-			
+
 			if (user != null && context != null) {
 				try {
 					mbsc.invoke(OBJECT_NAME, "setLogLevel", new Object[]{className, Integer.valueOf(context), Integer.valueOf(user), loglevel}, null);
@@ -212,7 +212,7 @@ public class TrackCLT {
 			String user = cmd.getOptionValue('u');
 			String context = cmd.getOptionValue('c');
 			String className = cmd.getOptionValue('n');
-			
+
 			if (user != null && context != null) {
 				try {
 					mbsc.invoke(OBJECT_NAME, "clearTracking", new Object[]{className, Integer.valueOf(context), Integer.valueOf(user), loglevel}, null);
@@ -235,13 +235,13 @@ public class TrackCLT {
 	        toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
 	        toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
 	        toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
-	        
+
 	        toolkitOptions.addOption("u", "user", true, "The user name or user id for which to set a log level");
 	        toolkitOptions.addOption("c", "context", true, "The context for which to set a log level");
 	        toolkitOptions.addOption("i", "session", true, "The session id for which to set a log level");
 	        toolkitOptions.addOption("n", "name", true, "The class or package name which to set a log level");
 	        toolkitOptions.addOption("v", "level", true, "The log level (can be: trace, debug, warning, info, error, fatal or all");
-	        
+
 	        toolkitOptions.addOption("x", "clear", false, "Indicates that you want to clear a tracking state");
 	    }
 

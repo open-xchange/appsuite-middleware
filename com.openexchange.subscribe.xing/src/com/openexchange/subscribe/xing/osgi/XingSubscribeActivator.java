@@ -55,6 +55,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -84,7 +87,7 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { OAuthService.class, ContextService.class, SessiondService.class };
+        return new Class[] { OAuthService.class, ContextService.class, SessiondService.class, DatabaseService.class };
     }
 
     @Override
@@ -92,6 +95,11 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
         Services.setServices(this);
         track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this));
         openTrackers();
+        /*
+         * Register update task
+         */
+        final DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new com.openexchange.subscribe.xing.groupware.XingCrawlerSubscriptionsRemoverTask());
+        registerService(UpdateTaskProviderService.class.getName(), providerService);
         /*
          * Register event handler
          */
@@ -131,7 +139,7 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
 
     /**
      * Adds given service.
-     * 
+     *
      * @param authServiceMetaData The service to add
      */
     public void setOAuthServiceMetaData(final OAuthServiceMetaData oAuthServiceMetaData) {

@@ -56,17 +56,17 @@ import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
 
 /**
- * {@link MappedTruncation} - {@link Truncated} implementation providing the 
- * mapping to the truncated attribute. 
+ * {@link MappedTruncation} - {@link Truncated} implementation providing the
+ * mapping to the truncated attribute.
  *
  * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class MappedTruncation<O> implements Truncated {
-	
+
 	/**
 	 * Extracts all mapped truncations from the supplied problematic attributes.
-	 * 
+	 *
 	 * @param e the problematic attributes
 	 * @return the mapped truncations
 	 */
@@ -75,7 +75,7 @@ public class MappedTruncation<O> implements Truncated {
 		if (null != problematics) {
 			for (ProblematicAttribute problematic : problematics) {
 				if (MappedTruncation.class.isInstance(problematic)) {
-					truncations.add((MappedTruncation<O>)problematic);			
+					truncations.add((MappedTruncation<O>)problematic);
 				}
 			}
 		}
@@ -83,13 +83,13 @@ public class MappedTruncation<O> implements Truncated {
 	}
 
 	/**
-	 * Truncates all problematic attributes to the maximum allowed length in 
+	 * Truncates all problematic attributes to the maximum allowed length in
 	 * the supplied object.
-	 * 
+	 *
 	 * @param e the problematic attributes
 	 * @param object the object to truncate the property values for
-	 * @return <code>true</code>, if the value was actually truncated, 
-	 * <code>false</code>, otherwise 
+	 * @return <code>true</code>, if the value was actually truncated,
+	 * <code>false</code>, otherwise
 	 */
 	public static <O> boolean truncate(ProblematicAttribute[] problematics, O object) throws OXException {
 		boolean hasTrimmed = false;
@@ -98,13 +98,13 @@ public class MappedTruncation<O> implements Truncated {
 			for (MappedTruncation<O> truncation : truncations) {
 				hasTrimmed |= truncation.truncate(object);
 			}
-		}		
+		}
 		return hasTrimmed;
 	}
-	
+
 	/**
-	 * Removes problematic attributes from the supplied object. 
-	 * 
+	 * Removes problematic attributes from the supplied object.
+	 *
 	 * @param e the problematic attributes
 	 * @param object the object to remove the property values for
 	 */
@@ -115,7 +115,7 @@ public class MappedTruncation<O> implements Truncated {
 				truncation.remove(object);
 			}
 		}
-	}	
+	}
 
 	private final int maxSize;
 	private final int length;
@@ -124,7 +124,7 @@ public class MappedTruncation<O> implements Truncated {
 
 	/**
 	 * Initializes a new {@link MappedTruncation}.
-	 * 
+	 *
 	 * @param mapping the corresponding mapping
 	 * @param maxSize the maximum allowed size for the property
 	 * @param length the actual length
@@ -134,38 +134,38 @@ public class MappedTruncation<O> implements Truncated {
 		this.maxSize = maxSize;
 		this.length = length;
 		this.readableName = readableName;
-	}	
+	}
 
 	/**
 	 * Gets the backing database mapping for the truncated attribute.
-	 * 
+	 *
 	 * @return the mapping
 	 */
 	public Mapping<?, O> getMapping() {
 		return this.mapping;
 	}
-	
+
 	/**
-	 * Truncates the current property value to the maximum allowed length if it is 
+	 * Truncates the current property value to the maximum allowed length if it is
 	 * longer.
-	 * 
+	 *
 	 * @param object the object to truncate the property's value for
-	 * @return <code>true</code>, if the value was actually truncated, 
-	 * <code>false</code>, otherwise 
+	 * @return <code>true</code>, if the value was actually truncated,
+	 * <code>false</code>, otherwise
 	 */
 	public boolean truncate(O object) throws OXException {
 		return this.mapping.truncate(object, this.maxSize);
 	}
-	
+
 	/**
 	 * Removes the mapped property value from the supplied object.
-	 * 
+	 *
 	 * @param object the object to remove the property's value for
 	 */
 	public void remove(O object) {
 		this.mapping.remove(object);
 	}
-	
+
 	@Override
 	@Deprecated
 	public int getId() {
@@ -181,10 +181,10 @@ public class MappedTruncation<O> implements Truncated {
     @Override
     public int getLength() {
         return this.length;
-    }   
+    }
 
     public String getReadableName() {
         return this.readableName;
-    }   
+    }
 
 }

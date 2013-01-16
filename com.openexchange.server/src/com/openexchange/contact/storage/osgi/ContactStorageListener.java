@@ -58,18 +58,18 @@ import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link ContactStorageListener} - Recognizes {@link ContactStorage} services.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ContactStorageListener implements SimpleRegistryListener<ContactStorage> {
-	
+
     private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactStorageListener.class));
-    
+
     private final DefaultContactStorageRegistry registry;
 
     /**
      * Initializes a new {@link ContactStorageListener}.
-     * 
+     *
      * @param registry the registry to use
      */
     public ContactStorageListener(final DefaultContactStorageRegistry registry) {

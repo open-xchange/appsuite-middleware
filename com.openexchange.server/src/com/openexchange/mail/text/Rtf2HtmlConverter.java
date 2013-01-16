@@ -51,7 +51,6 @@
 package com.openexchange.mail.text;
 
 import java.awt.Color;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.DefaultStyledDocument;

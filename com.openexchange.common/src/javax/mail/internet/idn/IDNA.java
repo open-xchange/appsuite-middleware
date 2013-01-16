@@ -55,7 +55,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * {@link IDNA} - Helper class for internationalized domain names (IDN).
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IDNA {
@@ -77,7 +77,7 @@ public final class IDNA {
      * href="http://blog.http.net/code/gnu-libidn-eszett-hotfix/">http.net</a>!
      * <p>
      * <code>"someone@m&uuml;ller.de"</code> is converted to <code>"someone@xn--mller-kva.de"</code>
-     * 
+     *
      * @param idnAddress The unicode representation of an internet address
      * @return The ASCII-encoded (punycode) of given internet address or <code>null</code> if argument is <code>null</code>
      * @throws AddressException If ASCII representation of given internet address cannot be created
@@ -110,7 +110,7 @@ public final class IDNA {
      * href="http://blog.http.net/code/gnu-libidn-eszett-hotfix/">http.net</a>!
      * <p>
      * <code>"someone@xn--mller-kva.de"</code> is converted to <code>"someone@m&uuml;ller.de"</code>
-     * 
+     *
      * @param aceAddress The ASCII-encoded (punycode) address
      * @return The unicode representation of given internet address or <code>null</code> if argument is <code>null</code>
      */
@@ -133,7 +133,7 @@ public final class IDNA {
     /**
      * Converts a Unicode string to ASCII using the procedure in RFC3490 section 4.1. Unassigned characters are not allowed and STD3 ASCII
      * rules are enforced. The input string may be a domain name containing dots.
-     * 
+     *
      * @param unicodeHostName The host name as Unicode string.
      * @return The encoded host name or <code>null</code> if argument is <code>null</code>
      */
@@ -169,7 +169,7 @@ public final class IDNA {
     /**
      * Converts an ASCII-encoded string to Unicode. Unassigned characters are not allowed and STD3 host names are enforced. Input may be
      * domain name containing dots.
-     * 
+     *
      * @param asciiHostName The host name as ASCII string.
      * @return The Unicode host name or <code>null</code> if argument is <code>null</code>
      */
@@ -199,7 +199,7 @@ public final class IDNA {
 
     /**
      * Checks whether the specified string's characters are ASCII 7 bit
-     * 
+     *
      * @param s The string to check
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */

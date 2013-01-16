@@ -57,7 +57,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * {@link HttpServletRequestRegistryEntry} keeps track of the incoming Request and its associated thread. The Date of instantiation is saved
  * to be able to calculate the age of the entry
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
@@ -72,7 +72,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
 
     /**
      * Initializes a new {@link RequestRegistryEntry}.
-     * 
+     *
      * @param request the incoming request to register
      * @param thread the thread associated with the request
      */
@@ -85,7 +85,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
 
     /**
      * Get the age of this entry.
-     * 
+     *
      * @return the age of the entry in milliseconds
      */
     public long getAge() {
@@ -94,7 +94,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
 
     /**
      * Get the request url.
-     * 
+     *
      * @return the request url as String
      */
     public String getRequestUrl() {
@@ -103,7 +103,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
 
     /**
      * Get the request parameters in the form of name=value&name=value.
-     * 
+     *
      * @return the request parameters as String in the form of name=value&name=value
      */
     public String getRequestParameters() {
@@ -128,7 +128,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
 
     /**
      * Get the StackTrace of the Thread processing this Request.
-     * 
+     *
      * @see java.lang.Thread#getStackTrace()
      */
     public StackTraceElement[] getStackTrace() {
@@ -137,7 +137,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
 
     /**
      * Return thread infos in the form of "id=threadId, name=threadName"
-     * 
+     *
      * @return thread infos in the form of "id=threadId, name=threadName"
      */
     public String getThreadInfo() {
@@ -213,13 +213,13 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
 
     /**
      * Interrupt processing of this thread and send an error to the client if the response wasn't already committed.
-     * 
+     *
      * @throws IOException
      */
     public void sendError() throws IOException {
         /*
          * We have to make the backend completely interrupt aware before we can enable this
-         * thread.interrupt(); 
+         * thread.interrupt();
          */
         if (!response.isCommitted()) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

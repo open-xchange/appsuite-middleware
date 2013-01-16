@@ -57,11 +57,11 @@ import com.openexchange.timer.TimerService;
  * The attachment memory holds information about attachment changes (for a certain timeframe)
  */
 public class AttachmentMemory {
-	
+
 	private final ConcurrentHashMap<TimestampedAttachmentChange, TimestampedAttachmentChange> memory = new ConcurrentHashMap<AttachmentMemory.TimestampedAttachmentChange, AttachmentMemory.TimestampedAttachmentChange>();
-	
+
 	private int purgeInterval;
-	
+
 	public AttachmentMemory(int purgeInterval, TimerService timer) {
 		timer.scheduleAtFixedRate(new Runnable() {
 
@@ -69,10 +69,10 @@ public class AttachmentMemory {
             public void run() {
 				purge();
 			}
-			
+
 		}, purgeInterval, purgeInterval);
 	}
-	
+
 	public void rememberAttachmentChange(int objectId, int ctxId) {
 		TimestampedAttachmentChange tac = new TimestampedAttachmentChange(objectId, ctxId);
 		TimestampedAttachmentChange existing = memory.putIfAbsent(tac, tac);
@@ -80,30 +80,30 @@ public class AttachmentMemory {
 			existing.timestamp = System.currentTimeMillis();
 		}
 	}
-	
+
 	public void forgetAttachmentChange(int objectId, int ctxId) {
 		memory.remove(new TimestampedAttachmentChange(objectId, ctxId));
 	}
-	
+
 	public boolean hasAttachmentChanged(int objectId, int ctxId) {
 		return memory.containsKey(new TimestampedAttachmentChange(objectId, ctxId));
 	}
-	
+
 	private void purge() {
 		long now = System.currentTimeMillis();
-		
+
 		for (TimestampedAttachmentChange change : memory.keySet()) {
 			if (now - change.timestamp > purgeInterval) {
 				memory.remove(change);
 			}
 		}
 	}
-	
+
 	private static class TimestampedAttachmentChange {
 		public int objectId;
 		public int ctxId;
 		public long timestamp = System.currentTimeMillis();
-		
+
 		public TimestampedAttachmentChange(int objectId, int ctxId) {
 			super();
 			this.objectId = objectId;
@@ -142,10 +142,10 @@ public class AttachmentMemory {
 			return "TimestampedAttachmentChange [objectId=" + objectId
 					+ ", ctxId=" + ctxId + ", timestamp=" + timestamp + "]";
 		}
-		
-		
+
+
 	}
-	
-	
-	
+
+
+
 }

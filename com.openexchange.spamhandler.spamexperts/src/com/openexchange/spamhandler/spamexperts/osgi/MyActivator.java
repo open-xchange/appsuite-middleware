@@ -64,15 +64,15 @@ import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 import com.openexchange.user.UserService;
 
 public class MyActivator extends HousekeepingActivator {
-	
+
 	private static final Log LOG = com.openexchange.log.Log.loggerFor(MyActivator.class);
 
 	private HTTPServletRegistration servletRegistration;
 
 	public MyActivator() {
-		super();		
+		super();
 	}
-	
+
 	@Override
 	protected Class<?>[] getNeededServices() {
 		return new Class<?>[] { UserService.class,DatabaseService.class,ContextService.class,ConfigurationService.class,HttpService.class};
@@ -83,7 +83,7 @@ public class MyActivator extends HousekeepingActivator {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
-		
+
 		getServiceRegistry().addService(clazz, getService(clazz));
 	}
 
@@ -93,12 +93,12 @@ public class MyActivator extends HousekeepingActivator {
 			LOG.info("Re-available service: " + clazz.getName());
 		}
 		getServiceRegistry().removeService(clazz);
-		
+
 	}
 
 	@Override
 	protected void startBundle() throws Exception {
-		
+
 		// try to load all the needed services like config service and hostnameservice
 		try {
 			{
@@ -112,19 +112,19 @@ public class MyActivator extends HousekeepingActivator {
 					}
 				}
 			}
-			
-			
+
+
 			// register the http info/sso servlet
 			servletRegistration = new HTTPServletRegistration(context, new com.openexchange.spamhandler.spamexperts.impl.MyServlet(), getFromConfig("com.openexchange.custom.spamexperts.panel_servlet"));
-			
-			
+
+
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
-		
+
 	}
-	
+
 	private String getFromConfig(final String key) throws OXException {
         final ConfigurationService configservice = MyServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
         return configservice.getProperty(key);
@@ -133,7 +133,7 @@ public class MyActivator extends HousekeepingActivator {
 	@Override
 	protected void stopBundle() throws Exception {
 		try {
-			// stop info/sso servlet 
+			// stop info/sso servlet
 			if(servletRegistration != null) {
 			    servletRegistration.unregister();
 			    servletRegistration = null;
@@ -144,5 +144,5 @@ public class MyActivator extends HousekeepingActivator {
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
 	}
-	
+
 }

@@ -371,22 +371,14 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getContext();
         }
-        try {
-            return ContextStorage.getStorageContext(session.getContextId());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return ContextStorage.getStorageContext(session.getContextId());
     }
 
     private User getSessionUser() throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser();
         }
-        try {
-            return UserStorage.getInstance().getUser(session.getUserId(), getContext());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return UserStorage.getInstance().getUser(session.getUserId(), getContext());
     }
 
     private static final Pattern PATTERN_DATE = Pattern.compile(Pattern.quote("#DATE#"));
@@ -592,7 +584,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                         throw x;
                     }
                     if (441 != x.getCode()) {
-                        throw new OXException(x);
+                        throw x;
                     }
                     /*
                      * Duplicate document name, thus retry with a new name

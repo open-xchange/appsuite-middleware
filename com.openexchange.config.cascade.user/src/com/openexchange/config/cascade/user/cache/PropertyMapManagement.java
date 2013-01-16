@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link PropertyMapManagement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PropertyMapManagement {
@@ -68,7 +68,7 @@ public final class PropertyMapManagement {
 
     /**
      * Gets the {@link PropertyMapManagement management} instance.
-     * 
+     *
      * @return The management instance
      */
     public static PropertyMapManagement getInstance() {
@@ -94,7 +94,7 @@ public final class PropertyMapManagement {
 
     /**
      * Drop caches for given context.
-     * 
+     *
      * @param contextId The context identifier
      */
     public void dropFor(final int contextId) {
@@ -106,7 +106,7 @@ public final class PropertyMapManagement {
 
     /**
      * Drop caches for given session's user.
-     * 
+     *
      * @param session The session
      */
     public void dropFor(final Session session) {
@@ -122,7 +122,7 @@ public final class PropertyMapManagement {
 
     /**
      * Drop caches for given session's user.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      */
@@ -139,7 +139,7 @@ public final class PropertyMapManagement {
 
     /**
      * Gets the property map for specified session.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The property map
@@ -168,7 +168,7 @@ public final class PropertyMapManagement {
 
     /**
      * Optionally gets the property map for specified user in given context.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The property map or <code>null</code> if absent

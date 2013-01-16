@@ -64,7 +64,7 @@ public interface ContactStorageRegistry {
 
     /**
      * Gets the {@link ContactStorage} for the supplied folder ID.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the folder to get the storage for
      * @return the storage
@@ -74,7 +74,7 @@ public interface ContactStorageRegistry {
 
     /**
      * Gets a list of all registered {@link ContactStorage}s.
-     * 
+     *
      * @param session the session
      * @return the storages
      * @throws OXException

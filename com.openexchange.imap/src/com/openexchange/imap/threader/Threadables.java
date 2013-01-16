@@ -100,7 +100,7 @@ import com.sun.mail.imap.protocol.UID;
 
 /**
  * {@link Threadables} - Utility class for {@code Threadable}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Threadables {
@@ -119,7 +119,7 @@ public final class Threadables {
 
     /**
      * Whether to use {@code org.apache.commons.net.nntp.Threader} instead of {@code Threader}.
-     * 
+     *
      * @return <code>true</code> to use Commons Net threader; otherwise <code>false</code>
      */
     public static boolean useCommonsNetThreader() {
@@ -139,7 +139,7 @@ public final class Threadables {
 
     /**
      * Performs threading algorithm on specified {@code Threadable} instance.
-     * 
+     *
      * @param threadable
      * @return
      */
@@ -169,7 +169,7 @@ public final class Threadables {
 
     /**
      * Gets the <tt>Threadable</tt> with cache look-up.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param sorted Whether the returned <tt>Threadable</tt> is supposed to be thread-sorted
      * @param cache <code>true</code> to immediately return a possibly cached element; otherwise <code>false</code>
@@ -311,7 +311,7 @@ public final class Threadables {
 
     /**
      * Gets the <tt>MailMessage</tt>s for given IMAP folder.
-     * 
+     *
      * @param imapFolder The IMAP folders
      * @param limit The max. number of messages or <code>-1</code>
      * @param fetchProfile The FETCH profile
@@ -406,13 +406,13 @@ public final class Threadables {
                 }
                 return null;
             }
-            
+
         }));
     }
 
     /**
      * Gets the <tt>Threadable</tt>s for given IMAP folder.
-     * 
+     *
      * @param imapFolder The IMAP folders
      * @param limit The max. number of messages or <code>-1</code>
      * @return The fetched <tt>Threadable</tt>s
@@ -424,7 +424,7 @@ public final class Threadables {
 
     /**
      * Whether to include <tt>"References"</tt> header.
-     * 
+     *
      * @return <code>true</code> to include "References" header; else <code>false</code>
      */
     static boolean includeReferences() {
@@ -433,7 +433,7 @@ public final class Threadables {
 
     /**
      * Gets the <tt>Threadable</tt>s for given IMAP folder.
-     * 
+     *
      * @param imapFolder The IMAP folders
      * @param limit The max. number of messages or <code>-1</code>
      * @param fetchSingleFields <code>true</code> to fetch single fields; otherwise <code>false</code> for complete headers
@@ -665,7 +665,7 @@ public final class Threadables {
 
     /**
      * Gets the item associated with given class in specified <i>FETCH</i> response.
-     * 
+     *
      * @param <I> The returned item's class
      * @param clazz The item class to look for
      * @param fetchResponse The <i>FETCH</i> response
@@ -686,7 +686,7 @@ public final class Threadables {
     /**
      * Converts passed {@link Threadable} to an IMAP-conform THREAD=REFERENCES result string; <br>
      * e.g:&nbsp;<code>"((1)(2)(3)(4)(5)(6)(7)(8)(9)(10)(11)(12)(13))"</code>.
-     * 
+     *
      * @param threadable The instance
      * @param filter The filter
      * @return The resulting THREAD=REFERENCES string
@@ -753,7 +753,7 @@ public final class Threadables {
 
     /**
      * Appends the latter <tt>Threadable</tt> to the first <tt>Threadable</tt> instance.
-     * 
+     *
      * @param threadable The <tt>Threadable</tt> instance
      * @param toAppend The <tt>Threadable</tt> instance to append
      */
@@ -770,7 +770,7 @@ public final class Threadables {
 
     /**
      * Transforms <tt>Threadable</tt> to list of <tt>ThreadSortNode</tt>s.
-     * 
+     *
      * @param t The <tt>Threadable</tt> to transform
      * @return The resulting list of <tt>ThreadSortNode</tt>s
      */
@@ -807,7 +807,7 @@ public final class Threadables {
     /**
      * Filters from <tt>Threadable</tt> those sub-trees which solely consist of specified <tt>Threadable</tt>s associated with given full
      * name
-     * 
+     *
      * @param fullName The full name to filter with
      * @param t The <tt>Threadable</tt> instance
      */
@@ -849,7 +849,7 @@ public final class Threadables {
 
     /**
      * Unfolds specified <tt>Threadable</tt>.
-     * 
+     *
      * @param t The <tt>Threadable</tt> to unfold
      * @return The resulting list
      */
@@ -865,7 +865,7 @@ public final class Threadables {
 
     /**
      * Folds specified list to returned <tt>Threadable</tt>.
-     * 
+     *
      * @param list The list to fold
      * @return The folded <tt>Threadable</tt> instance
      */

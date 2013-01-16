@@ -64,9 +64,9 @@ import com.openexchange.index.IndexResult;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface SolrResultConverter<V> {
-    
+
     IndexDocument<V> convert(SolrDocument document) throws OXException;
-    
+
     IndexResult<V> createIndexResult(List<IndexDocument<V>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException;
 
 }

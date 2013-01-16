@@ -57,7 +57,7 @@ import java.util.Set;
 
 /**
  * {@link HashKeyMap} - The <code>String</code> map backed by a <code>HashKey</code> map.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @see HashKey
  */
@@ -74,7 +74,7 @@ public final class HashKeyMap<V> extends AbstractHashKeyCollection<HashKeyMap<V>
 
     /**
      * Initializes a new {@link HashKeyMap}.
-     * 
+     *
      * @param initialCapacity The initial map's capacity
      */
     public HashKeyMap(final int initialCapacity) {
@@ -83,7 +83,7 @@ public final class HashKeyMap<V> extends AbstractHashKeyCollection<HashKeyMap<V>
 
     /**
      * Initializes a new {@link HashKeyMap} from specified backing map.
-     * 
+     *
      * @param map The backing map
      */
     public HashKeyMap(final Map<HashKey, V> map) {

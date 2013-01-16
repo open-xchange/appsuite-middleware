@@ -99,7 +99,7 @@ public interface FileStorageServiceFactory {
 	 * @return The file storage service
 	 */
 	FileStorageService getFileStorageService();
-	
+
 	/**
 	 * Gets mandatory service.
 	 *

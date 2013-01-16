@@ -60,7 +60,7 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link ConditionTree}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConditionTree {
@@ -103,7 +103,7 @@ public final class ConditionTree {
 
     /**
      * Inserts specified permission.
-     * 
+     *
      * @param p The permission associated with a certain entity
      */
     public void insert(final Permission p) {
@@ -133,7 +133,7 @@ public final class ConditionTree {
 
     /**
      * Gets the identifiers of visible folders.
-     * 
+     *
      * @return The visible folders' identifiers
      */
     public TIntSet getVisibleFolderIds() {
@@ -142,7 +142,7 @@ public final class ConditionTree {
 
     /**
      * Gets the identifiers of visible folders filtered by given condition.
-     * 
+     *
      * @param condition The condition to apply to returned identifiers
      * @return The visible folders' identifiers
      */

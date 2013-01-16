@@ -80,7 +80,7 @@ public class JSONAssertion implements JSONCondition {
 
     /**
      * Checks for equality of specified JSON values.
-     * 
+     *
      * @param jsonValue1 The first JSON value
      * @param jsonValue2 The second JSON value
      * @return <code>true</code> if equal; otherwise <code>false</code>
@@ -115,7 +115,7 @@ public class JSONAssertion implements JSONCondition {
 
     /**
      * Checks for equality of specified JSON datas.
-     * 
+     *
      * @param jsonData1 The first JSON data
      * @param jsonData2 The second JSON data
      * @return <code>true</code> if equal; otherwise <code>false</code>

@@ -215,11 +215,11 @@ public final class TextProcessing {
         if (line.length() == 0) {
             return null;
         }
-        final char[] chars = line.toCharArray();
+        final int length = line.length();
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(8);
         int lastGT = -1;
-        for (int i = 0; i < chars.length; i++) {
-            final char c = chars[i];
+        for (int i = 0; i < length; i++) {
+            final char c = line.charAt(i);
             if (c == '>') {
                 sb.append(c);
                 lastGT = i;

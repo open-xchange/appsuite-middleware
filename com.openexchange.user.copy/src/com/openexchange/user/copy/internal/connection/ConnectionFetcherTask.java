@@ -99,14 +99,14 @@ public class ConnectionFetcherTask implements CopyUserTaskService {
         srcCtx = tools.getSourceContext();
         dstCtxId = i(tools.getDestinationContextId());
         srcCon = service.getReadOnly(srcCtx);
-      
+
         try {
             dstCon = service.getForUpdateTask(dstCtxId);
         } catch (final OXException e) {
             service.backReadOnly(srcCtx, srcCon);
             throw e;
         }
-        
+
         try {
             DBUtils.startTransaction(dstCon);
         } catch (final SQLException e) {

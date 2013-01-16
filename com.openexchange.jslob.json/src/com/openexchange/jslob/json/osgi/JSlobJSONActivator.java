@@ -65,7 +65,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link JSlobJSONActivator} - Activator for the JSlob JSON interface.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JSlobJSONActivator extends AJAXModuleActivator {

@@ -67,7 +67,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link FastSecretInconsistencyDetector}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -83,7 +83,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
     private final CryptoService cryptoService;
     private final UserService userService;
     private final EncryptedItemDetectorService detector;
-    
+
     /**
      * Initializes a new {@link FastSecretInconsistencyDetector}.
      */
@@ -109,7 +109,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
         if (canDecrypt(token.iterator().next(), secret)) {
             return null;
         }
-        
+
         if (detector.hasEncryptedItems(session)) {
             return "Could not decrypt token";
         }

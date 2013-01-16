@@ -98,7 +98,7 @@ import com.openexchange.session.Session;
 /**
  * {@link SmalMessageStorage} - The message storage for SMAL which either delegates calls to delegating message storage or serves them from
  * index storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure {
@@ -107,7 +107,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     /**
      * Initializes a new {@link SmalMessageStorage}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public SmalMessageStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
@@ -180,19 +180,19 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             LOG.warn("Could not schedule indexing job.", e);
         }
     }
-    
+
     @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
         return messageStorage.getMessages(folder, mailIds, fields);
     }
-    
+
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         IndexFacadeService indexFacade = getIndexFacadeService();
         if (searchTerm == null || indexFacade == null || isBlacklisted() || !isIndexingAllowed()) {
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
-        
+
         IndexAccess<MailMessage> indexAccess = null;
         try {
             MailFields mfs = new MailFields(fields);
@@ -203,14 +203,14 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 QueryParameters.Builder builder = new QueryParameters
                     .Builder()
                     .setAccountFolders(Collections.singleton(accountFolders));
-                
+
                 if (sortField != null) {
                     MailField field = MailField.getField(sortField.getField());
                     MailIndexField indexSortField = MailIndexField.getFor(field);
                     if (indexSortField != null) {
                         builder.setSortField(indexSortField);
                     }
-                    
+
                     if (order != null) {
                         builder.setOrder(order == OrderDirection.ASC ? Order.ASC : Order.DESC);
                     }
@@ -223,7 +223,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                     long diff = System.currentTimeMillis() - start;
                     LOG.debug("Index Query lasted " + diff + "ms.");
                 }
-                
+
                 List<IndexDocument<MailMessage>> documents = result.getResults();
                 List<MailMessage> mails;
                 if (indexRange != null) {
@@ -246,7 +246,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                     }
                     documents = documents.subList(fromIndex, toIndex);
                 }
-                
+
                 mails = IndexDocumentHelper.messagesFrom(documents);
                 return mails.toArray(new MailMessage[mails.size()]);
             }
@@ -256,14 +256,14 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             if (indexAccess != null) {
                 indexFacade.releaseIndexAccess(indexAccess);
             }
-            
+
             try {
                 submitFolderJob(folder);
             } catch (OXException e) {
                 LOG.warn("Could not schedule folder job for folder " + folder + '.', e);
             }
         }
-        
+
         /*
          * Fallback to message storage
          */
@@ -279,7 +279,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         try {
             Builder builder = prepareJobBuilder(ChangeByIdsJob.class);
             builder.folder(folder);
-            builder.addProperty(ChangeByIdsJob.IDS, mailIds);        
+            builder.addProperty(ChangeByIdsJob.IDS, mailIds);
             submitJob(builder.build());
         } catch (Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
@@ -302,25 +302,25 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     }
 
     @Override
-    public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {        
+    public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         final MailMessage mail = messageStorage.getMessage(folder, mailId, markSeen);
         if (mail == null)  {
             throw MailExceptionCode.MAIL_NOT_FOUN_BY_MESSAGE_ID.create(folder, mailId);
         }
-        
-        mail.setAccountId(accountId);        
+
+        mail.setAccountId(accountId);
         // TODO: this may be critical to performance.
 //        try {
 //            if (!mail.isPrevSeen()) {
 //                Builder builder = prepareJobBuilder(AddByIdsJob.class);
 //                builder.folder(folder);
-//                builder.addProperty(AddByIdsJob.IDS, new String[] { mail.getMailId() });        
+//                builder.addProperty(AddByIdsJob.IDS, new String[] { mail.getMailId() });
 //                submitJob(builder.build());
-//            }            
+//            }
 //        } catch (Exception e) {
 //            LOG.warn("Could not schedule indexing job.", e);
 //        }
-        
+
         return mail;
     }
 
@@ -332,7 +332,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         } catch (OXException e) {
             LOG.warn("Could not schedule folder job for folder " + folder + '.', e);
         }
-        
+
         return messages;
     }
 
@@ -345,18 +345,18 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         String[] retval = null;
         if (fast) {
-            messageStorage.moveMessages(sourceFolder, destFolder, mailIds, true);            
+            messageStorage.moveMessages(sourceFolder, destFolder, mailIds, true);
             retval = new String[0];
         } else {
             retval = messageStorage.moveMessages(sourceFolder, destFolder, mailIds, false);
-        }        
-        
+        }
+
         try {
             Builder deleteBuilder = prepareJobBuilder(RemoveByIdsJob.class);
             deleteBuilder.folder(sourceFolder);
             deleteBuilder.addProperty(RemoveByIdsJob.IDS, mailIds);
             submitJob(deleteBuilder.build());
-            
+
             Builder createBuilder = prepareJobBuilder(AddByIdsJob.class);
             createBuilder.folder(destFolder);
             createBuilder.addProperty(AddByIdsJob.IDS, mailIds);
@@ -364,7 +364,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         } catch (Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
         }
-        
+
         return retval;
     }
 
@@ -477,7 +477,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     public String[] getPrimaryContents(final String folder, final String[] mailIds) throws OXException {
         return messageStorage.getPrimaryContents(folder, mailIds);
     }
-    
+
     private void submitJob(JobInfo jobInfo) throws OXException {
         if (session instanceof FakeSession) {
             if (LOG.isDebugEnabled()) {
@@ -486,11 +486,11 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             // FIXME: This is done to prevent loops here and needs a much better solution!
             return;
         }
-        
+
         if (!isIndexingAllowed() || isBlacklisted()) {
             return;
         }
-        
+
         IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
         if (indexingService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IndexingService.class);
@@ -498,7 +498,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
         indexingService.scheduleJob(true, jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
     }
-    
+
     private Builder prepareJobBuilder(Class<? extends IndexingJob> clazz) throws OXException {
         MailAccountStorageService storageService = SmalServiceLookup.getServiceStatic(MailAccountStorageService.class);
         if (storageService == null) {
@@ -506,12 +506,12 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         }
 
         MailAccount account = storageService.getMailAccount(accountId, userId, contextId);
-        String decryptedPW = account.getPassword() == null ? session.getPassword() : MailPasswordUtil.decrypt(account.getPassword(), 
-            session, 
-            accountId, 
-            account.getLogin(), 
+        String decryptedPW = account.getPassword() == null ? session.getPassword() : MailPasswordUtil.decrypt(account.getPassword(),
+            session,
+            accountId,
+            account.getLogin(),
             account.getMailServer());
-        
+
         Builder builder = MailJobInfo.newBuilder(clazz)
             .login(account.getLogin())
             .accountId(account.getId())
@@ -519,7 +519,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             .userId(userId)
             .primaryPassword(session.getPassword())
             .password(decryptedPW);
-        
+
         return builder;
     }
 

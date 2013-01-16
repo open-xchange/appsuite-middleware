@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link DefaultProcessorStrategy} - The default processor strategy.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultProcessorStrategy implements ProcessorStrategy {
@@ -85,7 +85,7 @@ public class DefaultProcessorStrategy implements ProcessorStrategy {
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     public static DefaultProcessorStrategy getInstance() {

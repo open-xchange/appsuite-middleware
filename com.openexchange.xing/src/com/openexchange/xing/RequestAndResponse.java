@@ -54,7 +54,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 
 /**
  * {@link RequestAndResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RequestAndResponse {

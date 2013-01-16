@@ -52,23 +52,23 @@ package com.openexchange.user.copy.internal.folder.util;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * A {@link FolderEqualsWrapper} contains a {@link FolderObject} and 
- * adds {@link java.lang.Object#equals(Object)} and {@link java.lang.Object#hashCode()} 
+ * A {@link FolderEqualsWrapper} contains a {@link FolderObject} and
+ * adds {@link java.lang.Object#equals(Object)} and {@link java.lang.Object#hashCode()}
  * to it.
  * <br>
  * <br>
- * Two {@link FolderEqualsWrapper} are <em>equal</em> if {@link FolderEqualsWrapper#getObjectID()} 
+ * Two {@link FolderEqualsWrapper} are <em>equal</em> if {@link FolderEqualsWrapper#getObjectID()}
  * returns the same result for both objects.
- *  
+ *
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class FolderEqualsWrapper implements Cloneable {
-    
+
     private FolderObject folder;
-    
+
     private String key;
-    
+
 
     /**
      * Initializes a new {@link FolderEqualsWrapper}.
@@ -79,35 +79,35 @@ public class FolderEqualsWrapper implements Cloneable {
         this.folder = folder;
         this.key = key;
     }
-    
+
     public FolderObject getFolder() {
         return folder;
     }
-    
+
     public int getParentFolderID() {
         return folder.getParentFolderID();
     }
-    
+
     public int getObjectID() {
         return folder.getObjectID();
     }
-    
+
     public void setObjectID(final int id) {
         folder.setObjectID(id);
     }
-    
+
     public void setParentFolderID(final int id) {
         folder.setParentFolderID(id);
     }
-    
+
     public void setCreator(final int id) {
         folder.setCreator(id);
     }
-    
+
     public void setModifiedBy(final int id) {
         folder.setModifiedBy(id);
     }
-    
+
     public void setKey(final String key) {
         this.key = key;
     }
@@ -151,18 +151,18 @@ public class FolderEqualsWrapper implements Cloneable {
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     @Override
     public FolderEqualsWrapper clone() throws CloneNotSupportedException {
         final FolderEqualsWrapper clone = (FolderEqualsWrapper) super.clone();
         clone.folder = folder.clone();
-        
+
         return clone;
     }
-    
+
     /**
      * @see java.lang.Object#toString()
      */

@@ -231,16 +231,15 @@ public final class ResourceCreate {
         }
     }
 
-    private static boolean isEmpty(final String s) {
-        if (null == s || s.length() == 0) {
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
             return true;
         }
-        final char[] chars = s.toCharArray();
-        for (final char c : chars) {
-            if (!Character.isWhitespace(c)) {
-                return false;
-            }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
         }
-        return true;
+        return isWhitespace;
     }
 }

@@ -52,6 +52,7 @@ package com.openexchange.imap.entity2acl;
 import java.net.InetSocketAddress;
 import java.util.EnumSet;
 import java.util.Set;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link IMAPServer} - Represents an IMAP server with ACL support.
@@ -266,11 +267,12 @@ public enum IMAPServer {
             if (null == str) {
                 return null;
             }
-            final char[] chars = str.toCharArray();
-            for (int i = 0; i < chars.length; i++) {
-                chars[i] = Character.toLowerCase(chars[i]);
+            final int length = str.length();
+            final StringAllocator sb = new StringAllocator(length);
+            for (int i = 0; i < length; i++) {
+                sb.append(Character.toLowerCase(str.charAt(i)));
             }
-            return new String(chars);
+            return sb.toString();
         }
 
         /**

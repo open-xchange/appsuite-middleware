@@ -85,7 +85,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SimpleThreadStructureAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SimpleThreadStructureAction extends AbstractMailAction implements MailRequestSha1Calculator {
@@ -96,7 +96,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
 
     /**
      * Initializes a new {@link SimpleThreadStructureAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public SimpleThreadStructureAction(final ServiceLookup services) {

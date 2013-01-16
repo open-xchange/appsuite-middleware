@@ -91,7 +91,7 @@ public class MailPerformer extends AbstrakterDingeMacher {
             int owner = getOwner(session, analysis, appointment);
             writeMail(action, null, appointment, session, owner);
         }
-        
+
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         for (ITipAnnotation annotation : annotations) {
             Appointment appointment = annotation.getAppointment();

@@ -53,7 +53,6 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -125,7 +124,7 @@ public final class AllAction extends AppointmentAction {
         int orderBy = req.optInt(AJAXServlet.PARAMETER_SORT);
         final boolean showPrivateAppointments = Boolean.parseBoolean(req.getParameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS));
         final boolean listOrder;
-        
+
         if (orderBy == AppointmentAJAXRequest.NOT_FOUND) {
             orderBy = CalendarObject.START_DATE;
         }

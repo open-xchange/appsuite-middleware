@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link SecretEncryptionStrategy}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -61,7 +61,7 @@ public interface SecretEncryptionStrategy<T> {
 
     /**
      * Updates using <code>recrypted</code>.
-     * 
+     *
      * @param recrypted The re-crypted string
      * @param customizationNote The optional customization note
      * @throws OXException If update fails

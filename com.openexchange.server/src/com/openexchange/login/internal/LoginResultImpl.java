@@ -101,7 +101,7 @@ final class LoginResultImpl implements LoginResult {
 
     /**
      * Sets the login request.
-     * 
+     *
      * @param request The login request
      */
     void setRequest(final LoginRequest request) {
@@ -115,7 +115,7 @@ final class LoginResultImpl implements LoginResult {
 
     /**
      * Sets the context.
-     * 
+     *
      * @param context The context
      */
     public void setContext(final Context context) {
@@ -129,7 +129,7 @@ final class LoginResultImpl implements LoginResult {
 
     /**
      * Sets the user
-     * 
+     *
      * @param user The user
      */
     public void setUser(final User user) {
@@ -143,7 +143,7 @@ final class LoginResultImpl implements LoginResult {
 
     /**
      * Sets the session.
-     * 
+     *
      * @param session The session
      */
     public void setSession(final Session session) {
@@ -152,7 +152,7 @@ final class LoginResultImpl implements LoginResult {
 
     /**
      * Sets the cookies.
-     * 
+     *
      * @param cookies The cookies
      */
     void setCookies(Cookie[] cookies) {
@@ -166,7 +166,7 @@ final class LoginResultImpl implements LoginResult {
 
     /**
      * Sets the headers
-     * 
+     *
      * @param headers The headers
      */
     void setHeaders(Header[] headers) {
@@ -190,7 +190,7 @@ final class LoginResultImpl implements LoginResult {
 
     /**
      * Sets the redirect URI.
-     * 
+     *
      * @param redirect The redirect URI
      */
     public void setRedirect(final String redirect) {
@@ -199,7 +199,7 @@ final class LoginResultImpl implements LoginResult {
 
     /**
      * Sets the result code.
-     * 
+     *
      * @param code The result code
      */
     public void setCode(final ResultCode code) {

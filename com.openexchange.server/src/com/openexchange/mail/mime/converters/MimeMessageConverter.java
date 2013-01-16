@@ -517,7 +517,46 @@ public final class MimeMessageConverter {
 
     /**
      * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong Content-Type header.
-     * 
+     * <p>
+     * Aligns <i>Message-Id</i> header to given host name.
+     *
+     * @param mimeMessage The MIME message
+     * @param hostName The host name
+     * @throws OXException If operation fails
+     */
+    public static void saveChanges(final MimeMessage mimeMessage, final String hostName) throws OXException {
+        try {
+            saveChanges(mimeMessage);
+            /*
+             * Change Message-Id header appropriately
+             */
+            if (null != hostName) {
+                final String name = "Message-ID";
+                final String messageId = mimeMessage.getHeader(name, null);
+                if (null != messageId) {
+                    /*
+                     * Somewhat of: <744810669.1.1314981157714.JavaMail.username@host.com>
+                     */
+                    final int pos = messageId.indexOf('@');
+                    if (pos > 0) {
+                        final StringBuilder mid = new StringBuilder(messageId.substring(0, pos + 1)).append(hostName);
+                        if (messageId.charAt(0) == '<') {
+                            mid.append('>');
+                        }
+                        mimeMessage.setHeader(name, mid.toString());
+                    } else {
+                        mimeMessage.setHeader(name, messageId + hostName);
+                    }
+                }
+            }
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong Content-Type header.
+     *
      * @param mimeMessage The message
      * @throws OXException If an error occurs
      */

@@ -69,11 +69,11 @@ import com.openexchange.push.mq.registry.PushMQServiceRegistry;
 
 /**
  * {@link PushMQListener}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class PushMQListener implements MQTopicListener {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMQListener.class));
 
     private EventAdmin eventAdmin;
@@ -143,7 +143,7 @@ public class PushMQListener implements MQTopicListener {
             LOG.error(e.getMessage(), e);
         }
     }
-    
+
     private String getHostname() {
         String hostname = "";
         try {

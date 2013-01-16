@@ -90,34 +90,22 @@ public class InfostoreDocumentLoader implements PublicationDataLoaderService {
     @Override
     public Collection<? extends Object> load(Publication publication) throws OXException {
         ArrayList<InputStream> documents = new ArrayList<InputStream>();
-        try {
-            InputStream document = infostore.getDocument(
-                Integer.parseInt(publication.getEntityId()),
-                InfostoreFacade.CURRENT_VERSION,
-                publication.getContext(),
-                loadUser(publication.getContext(), publication.getUserId()),
-                loadUserConfiguration(publication.getContext(), publication.getUserId()));
-            documents.add(document);
-        } catch (OXException e) {
-            throw new OXException(e);
-        }
+        InputStream document = infostore.getDocument(
+            Integer.parseInt(publication.getEntityId()),
+            InfostoreFacade.CURRENT_VERSION,
+            publication.getContext(),
+            loadUser(publication.getContext(), publication.getUserId()),
+            loadUserConfiguration(publication.getContext(), publication.getUserId()));
+        documents.add(document);
         return documents;
     }
 
     protected User loadUser(Context ctx, int userId) throws OXException {
-        try {
-            return users.getUser(userId, ctx);
-        } catch (OXException e) {
-            throw new OXException(e);
-        }
+        return users.getUser(userId, ctx);
     }
 
     protected UserConfiguration loadUserConfiguration(Context ctx, int userId) throws OXException {
-        try {
-            return userConfigs.getUserConfiguration(userId, ctx);
-        } catch (OXException e) {
-            throw new OXException(e);
-        }
+        return userConfigs.getUserConfiguration(userId, ctx);
     }
 
 }

@@ -75,7 +75,7 @@ public final class MimeHeaderNameChecker {
 
     /**
      * Sanitizes header names of specified RFC822 bytes
-     * 
+     *
      * @param bytes The RFC822 bytes to sanitize
      * @return The sanitized RFC822 bytes
      */

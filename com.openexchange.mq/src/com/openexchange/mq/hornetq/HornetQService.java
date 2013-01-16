@@ -72,7 +72,7 @@ import com.openexchange.mq.MQService;
 
 /**
  * {@link HornetQService} - The HornetQ Message Queue service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HornetQService implements MQService {
@@ -110,7 +110,7 @@ public final class HornetQService implements MQService {
 
     /**
      * Gets the special queue for managing HornetQ.
-     * 
+     *
      * @return The special queue for managing HornetQ.
      */
     @Override
@@ -159,9 +159,9 @@ public final class HornetQService implements MQService {
 
     /*-
      * ----------------------- Methods for JMS-like access to message queue -----------------------
-     * 
+     *
      * Check with http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/prog_model.html
-     * 
+     *
      */
 
     @Override

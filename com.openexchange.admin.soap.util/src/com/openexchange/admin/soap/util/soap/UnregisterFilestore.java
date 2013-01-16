@@ -12,9 +12,9 @@ import com.openexchange.admin.soap.util.dataobjects.Filestore;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -27,8 +27,8 @@ import com.openexchange.admin.soap.util.dataobjects.Filestore;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -45,11 +45,11 @@ public class UnregisterFilestore {
 
     /**
      * Ruft den Wert der store-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Filestore }
-     *     
+     *
      */
     public Filestore getStore() {
         return store;
@@ -57,11 +57,11 @@ public class UnregisterFilestore {
 
     /**
      * Legt den Wert der store-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Filestore }
-     *     
+     *
      */
     public void setStore(Filestore value) {
         this.store = value;
@@ -69,11 +69,11 @@ public class UnregisterFilestore {
 
     /**
      * Ruft den Wert der auth-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Credentials }
-     *     
+     *
      */
     public Credentials getAuth() {
         return auth;
@@ -81,11 +81,11 @@ public class UnregisterFilestore {
 
     /**
      * Legt den Wert der auth-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Credentials }
-     *     
+     *
      */
     public void setAuth(Credentials value) {
         this.auth = value;

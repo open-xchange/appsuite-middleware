@@ -59,7 +59,7 @@ public interface InterruptorAware {
 
     /**
      * Gets the stack trace of the thread that lastly invoked {@link #interrupt()}.
-     * 
+     *
      * @return The stack trace of the interrupting thread or <code>null</code> if this thread is not in interrupted state
      */
     StackTraceElement[] getInterruptorStack();

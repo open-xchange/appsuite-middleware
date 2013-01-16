@@ -68,7 +68,7 @@ final class UserKey {
         result = prime * result + userId;
         hash = result;
     }
-    
+
     /**
      * Gets the user identifier
      *
@@ -77,7 +77,7 @@ final class UserKey {
     public int getUserId() {
         return userId;
     }
-    
+
     /**
      * Gets the context identifier
      *

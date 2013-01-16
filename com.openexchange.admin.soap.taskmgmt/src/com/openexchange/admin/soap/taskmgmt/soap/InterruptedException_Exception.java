@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "InterruptedException", targetNamespace = "http://soap.admin.openexchange.com")
 public class InterruptedException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.taskmgmt.soap.InterruptedException interruptedException;
 
     public InterruptedException_Exception() {
         super();
     }
-    
+
     public InterruptedException_Exception(String message) {
         super(message);
     }
-    
+
     public InterruptedException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

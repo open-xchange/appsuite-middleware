@@ -68,7 +68,7 @@ import com.openexchange.xing.session.Session;
 
 /**
  * {@link XingAPI} - The XING API.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class XingAPI<S extends Session> {
@@ -89,7 +89,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Initializes a new {@link XingAPI}.
-     * 
+     *
      * @param session The associated session
      */
     public XingAPI(final S session) {
@@ -108,7 +108,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Returns the {@link User} associated with the current {@link Session}.
-     * 
+     *
      * @return the current session's {@link User}.
      * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
      * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
@@ -136,7 +136,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Returns the {@link User} associated with given user identifier.
-     * 
+     *
      * @param userId The user identifier
      * @return The specified user.
      * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
@@ -167,7 +167,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Gets the requested user's contacts.
-     * 
+     *
      * @param userId The user identifier
      * @param limit The number of contacts to be returned. Must be zero or a positive number. Default: <code>10</code>, Maximum:
      *            <code>100</code>. If its value is equal to zero, default limit is passed to request
@@ -242,7 +242,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Gets all of the requested user's contacts.
-     * 
+     *
      * @param userId The user identifier
      * @param orderBy Determines the ascending order of the returned list. Currently only supports <code>"last_name"</code>. Defaults to
      *            <code>"id"</code>
@@ -293,7 +293,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Gets the conversations for specified user.
-     * 
+     *
      * @param userId The user identifier
      * @param limit The number of conversations to be returned. Must be zero or a positive number. Default: <code>10</code>, Maximum:
      *            <code>100</code>. If its value is equal to zero, default limit is passed to request
@@ -353,7 +353,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Gets all of the requested user's conversations.
-     * 
+     *
      * @param userId The user identifier
      * @param userFields List of user attributes to return. If this parameter is not used, only the ID will be returned.
      * @param withLatestMessages The number of latest messages to be returned. Must be zero or a positive number. Default: <code>0</code>,
@@ -407,7 +407,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Gets the denoted conversation for specified user.
-     * 
+     *
      * @param id The conversation identifier
      * @param userId The user identifier
      * @param userFields List of user attributes to return. If this parameter is not used, only the ID will be returned.

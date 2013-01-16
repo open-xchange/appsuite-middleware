@@ -88,11 +88,11 @@ import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link AbstractSMALStorage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractSMALStorage {
-    
+
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSMALStorage.class));
     /**
      * The fields containing only the mail identifier.
@@ -169,7 +169,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Checks if denoted account is blacklisted
-     * 
+     *
      * @return <code>true</code> if blacklisted; otherwise <code>false</code>
      * @throws OXException If an error occurs
      */
@@ -225,7 +225,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Gets the <tt>IndexFacadeService</tt> service.
-     * 
+     *
      * @return The <tt>IndexFacadeService</tt> service or <code>null</code> if absent or disabled via configuration
      * @throws OXException If user configuration cannot be read
      */
@@ -236,7 +236,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Gets the {@link ConfigViewFactory} service.
-     * 
+     *
      * @return The service
      */
     protected ConfigViewFactory getConfigViewFactory() {
@@ -245,7 +245,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Initiates processing of given folder.
-     * 
+     *
      * @param fullName The folder full name
      * @return The processing progress
      * @throws OXException If folder retrieval fails
@@ -260,7 +260,7 @@ public abstract class AbstractSMALStorage {
               accountId,
               session,
               Collections.<String, Object> emptyMap());
-            
+
         }
 
         processFolder(folderStorage.getFolder(fullName));
@@ -268,7 +268,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Initiates processing of given folder.
-     * 
+     *
      * @param mailFolder The folder to process
      * @return The processing progress
      * @throws OXException If processing fails
@@ -280,7 +280,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Initiates processing of given folder.
-     * 
+     *
      * @param mailFolderInfo The information of the folder to process
      * @return The processing progress
      * @throws OXException If processing fails
@@ -289,7 +289,7 @@ public abstract class AbstractSMALStorage {
     protected void processFolder(final MailFolderInfo mailFolderInfo) throws OXException, InterruptedException {
         processor.processFolderAsync(mailFolderInfo, accountId, session, Collections.<String, Object> emptyMap());
     }
-    
+
     protected boolean isIndexingAllowed() throws OXException {
         ConfigViewFactory config = SmalServiceLookup.getServiceStatic(ConfigViewFactory.class);
         ConfigView view = config.getView(userId, contextId);
@@ -300,7 +300,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Submits a folder job for the given full name.
-     * 
+     *
      * @param folder The folders full name.
      * @throws OXException
      */
@@ -312,12 +312,12 @@ public abstract class AbstractSMALStorage {
             // FIXME: This is done to prevent loops here and needs a much better solution!
             return;
         }
-        
+
         if (!isIndexingAllowed() || isBlacklisted()) {
             return;
         }
-        
-        MailConfig mailConfig = delegateMailAccess.getMailConfig();                
+
+        MailConfig mailConfig = delegateMailAccess.getMailConfig();
         Builder builder = MailJobInfo.newBuilder(MailFolderJob.class)
             .login(mailConfig.getLogin())
             .accountId(accountId)
@@ -334,7 +334,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Handles specified {@link RuntimeException} instance.
-     * 
+     *
      * @param e The runtime exception to handle
      * @return An appropriate {@link OXException}
      */
@@ -344,7 +344,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Creates a new {@link ThreadPoolCompletionService completion service}.
-     * 
+     *
      * @return A new completion service.
      * @throws OXException If completion service cannot be created due to absent {@link ThreadPoolService service}
      */

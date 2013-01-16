@@ -85,11 +85,7 @@ public class InsertRequest extends AbstractAppointmentRequest<InsertResponse> {
         final Element eProp = new Element("prop", NS_DAV);
 
         final AppointmentWriter appointmentWriter = new AppointmentWriter();
-        try {
-            appointmentWriter.addContent2PropElement(eProp, appointment, false, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        appointmentWriter.addContent2PropElement(eProp, appointment, false, true);
         return eProp;
     }
 

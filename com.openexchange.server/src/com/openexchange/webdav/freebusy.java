@@ -152,7 +152,7 @@ public class freebusy extends HttpServlet {
         }
 
         boolean simple = getSimple(request);
-        
+
         response.setContentType("text/calendar");
         final PrintWriter printWriter = response.getWriter();
         writeVCalendar(context, start, end, mailAddress, participant.getIdentifier(), participant.getType(), printWriter, simple);
@@ -246,7 +246,7 @@ public class freebusy extends HttpServlet {
         return false;
     }
 
-    private void writeVCalendar(final Context context, final Date start, final Date end, final String mailAddress, final int principalId, 
+    private void writeVCalendar(final Context context, final Date start, final Date end, final String mailAddress, final int principalId,
         final int type, final PrintWriter printWriter, boolean simple) {
         printWriter.println("BEGIN:VCALENDAR");
         printWriter.println("PRODID:-//www.open-xchange.org//");
@@ -292,7 +292,7 @@ public class freebusy extends HttpServlet {
         if (simple) {
             if (Appointment.FREE == appointment.getShownAs()) {
                 return;
-            } 
+            }
             pw.print("FREEBUSY:");
         } else {
             pw.print("FREEBUSY;FBTYPE=");
@@ -309,7 +309,7 @@ public class freebusy extends HttpServlet {
             default:
                 pw.print("BUSY:");
             }
-        }        
+        }
         synchronized (format) {
             pw.print(format.format(appointment.getStartDate()));
             pw.print('/');

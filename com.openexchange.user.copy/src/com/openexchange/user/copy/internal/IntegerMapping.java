@@ -51,7 +51,7 @@ package com.openexchange.user.copy.internal;
 
 /**
  * {@link IntegerMapping}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IntegerMapping extends IntegerToObjectMapping<Integer> {
@@ -60,7 +60,7 @@ public class IntegerMapping extends IntegerToObjectMapping<Integer> {
     public Integer getDestination(final Integer source) {
         return getDestinationById(source);
     }
-    
+
     public void addMapping(final Integer source, final Integer destination) {
         addMapping(source, source, destination, destination);
     }

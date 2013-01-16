@@ -60,7 +60,6 @@ import java.util.UUID;
 
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -89,88 +88,88 @@ import com.openexchange.loxandra.impl.cassandra.CassandraEAVContactFactoryServic
  *
  */
 public class TransactionManager {
-	
+
 	private static final Log log = com.openexchange.log.Log.loggerFor(TransactionManager.class);
-	
+
 	private static Map<String, Queue<Transaction>> queue;
-	
+
 	private static String CF_TRANSACTION_LOG = "TransactionLog";
-	
+
 	private static final Keyspace keyspace = CassandraEAVContactFactoryServiceImpl.getKeyspace();
-	
+
 	private static final UUID LOCK_ROW = new UUID(0,0);
 	private static final UUID STATUS_ROW = new UUID(Long.MAX_VALUE, Long.MAX_VALUE);
-	
+
 	private static final UUIDSerializer us = UUIDSerializer.get();
 	private static final CompositeSerializer cs = CompositeSerializer.get();
 	private static final ByteBufferSerializer bbs = ByteBufferSerializer.get();
-	
+
 	/** Locked column's TTL in seconds. A lock shouldn't be acquired more than 10 seconds,
 	 * meaning that an operation at that particular column shouldn't exceed this time limit. */
 	private static final int columnTTL = 10;
-	
+
 	private static TransactionManager instance;
-	
+
 	/**
 	 * Default Constructor
 	 */
 	private TransactionManager() {
 		queue = new HashMap<String, Queue<Transaction>>();
 	}
-	
+
 	/**
 	 * Check if there are uncommited changes into the 'TransactionLog' CF and if true, then replay
 	 */
 	public void checkAndReplay() {
-		
+
 		long timeStart = System.currentTimeMillis();
-		
+
 		try {
-		
+
 			Composite start = new Composite();
 			start.addComponent(0, OperationState.PENDING.toString(), Composite.ComponentEquality.EQUAL);
-			
+
 			Composite end = new Composite();
 			end.addComponent(0, OperationState.PENDING.toString(), Composite.ComponentEquality.GREATER_THAN_EQUAL);
-			
+
 			SliceQuery<UUID, Composite, ByteBuffer> sliceQuery = HFactory.createSliceQuery(keyspace, us, cs, bbs);
 			sliceQuery.setColumnFamily(CF_TRANSACTION_LOG).setKey(STATUS_ROW);
 			ColumnSliceIterator<UUID, Composite, ByteBuffer> itTransactions = new ColumnSliceIterator<UUID, Composite, ByteBuffer>(sliceQuery, start, end, false);
-		 	
+
 		 	while (itTransactions.hasNext()) {
 				HColumn<Composite, ByteBuffer> hColumn = itTransactions.next();
-				
+
 				try {
 					UUID txKey = UUID.fromString(ByteBufferUtil.string((ByteBuffer)hColumn.getName().get(1)));
-					
+
 					/*Composite s = new Composite();
 					start.addComponent(0, ++opsCount, Composite.ComponentEquality.EQUAL);
-					
+
 					Composite e = new Composite();
 					end.addComponent(0, ++opsCount, Composite.ComponentEquality.EQUAL);*/
-					
-					
+
+
 					//SliceQuery<UUID, Composite, ByteBuffer> query = HFactory.createSliceQuery(keyspace, us, cs, bbs);
 					//query.setKey(txKey).setColumnFamily(CF_TRANSACTION_LOG);
 				 	//Iterator<HColumn<Composite, ByteBuffer>> itOps = query.setColumnFamily(CF_TRANSACTION_LOG).execute().get().getColumns().iterator();
-					//ColumnSliceIterator<UUID, Composite, ByteBuffer> itOps = new ColumnSliceIterator<UUID, Composite, ByteBuffer>(query, null, new Composite("\uFFFF"), false); 
+					//ColumnSliceIterator<UUID, Composite, ByteBuffer> itOps = new ColumnSliceIterator<UUID, Composite, ByteBuffer>(query, null, new Composite("\uFFFF"), false);
 					//ColumnSliceIterator<UUID, Composite, ByteBuffer> itOps = new ColumnSliceIterator<UUID, Composite, ByteBuffer>(query, s, e, false);
-				 	
+
 				 	//Iterator<HColumn<Composite, ByteBuffer>> it = sliceQ.getColumns().iterator();
-					
-					
+
+
 					// EVERYTHING IS A FUCKING MESS >:-@
-					
+
 					//System.out.println("KEY[1]: " + ByteBufferUtil.string((ByteBuffer)hColumn.getName().get(1)));
-					
-					
-					
+
+
+
 					/*ArrayList<Operation> ops = new ArrayList<Operation>();
 					Operation o;
 					int pSeqNum = 0;
 					while (itOps.hasNext()) {
 						HColumn<Composite, ByteBuffer> h = (HColumn<Composite, ByteBuffer>) itOps.next();
-						
+
 						int seqNum = ((ByteBuffer)h.getName().get(0)).get(0);
 						String cf = ByteBufferUtil.string((ByteBuffer)h.getName().get(1));
 						OperationAction oa = OperationAction.getByString(ByteBufferUtil.string((ByteBuffer)h.getName().get(2)));
@@ -178,42 +177,42 @@ public class TransactionManager {
 						if (oa == null)
 							c = ByteBufferUtil.string((ByteBuffer)h.getName().get(2));
 						String data = ByteBufferUtil.string(h.getValue());
-						
+
 						/*if (seqNum > pSeqNum && oa != null) {
 							pSeqNum = seqNum;
 							//o = new Operation(cf, oa, pSeqNum, 1);
 						}*/
-						
-						
+
+
 						//System.out.println(Integer.valueOf(ByteBufferUtil.string((ByteBuffer)h.getName().get(0))));
-						
-						/*o = new Operation(ByteBufferUtil.string((ByteBuffer)h.getName().get(1)), 
-											OperationAction.getByString(ByteBufferUtil.string((ByteBuffer)h.getName().get(2))), 
-											ByteBufferUtil.toInt((ByteBuffer)h.getName().get(0)), 
+
+						/*o = new Operation(ByteBufferUtil.string((ByteBuffer)h.getName().get(1)),
+											OperationAction.getByString(ByteBufferUtil.string((ByteBuffer)h.getName().get(2))),
+											ByteBufferUtil.toInt((ByteBuffer)h.getName().get(0)),
 											ByteBufferUtil.string((ByteBuffer)h.getValue()));
 						ops.add(o);*/
-						
+
 						/*byte[] b = ((ByteBuffer)h.getName().get(0)).array();
 						String str = new String(b, "UTF8");
-						
-						System.out.println(/*"TXKEY: " + txKey +  
-											"CF: " + cf + 
-											", ACTION: " + oa + 
+
+						System.out.println(/*"TXKEY: " + txKey +
+											"CF: " + cf +
+											", ACTION: " + oa +
 											", SEQ: " + seqNum +
 											", COLUMN: " + c +
 											", DATA: " + ByteBufferUtil.string(h.getValue()));
-						
+
 					}*/
-					
-					
+
+
 					//WORKS! ^^
 					Transaction t = new Transaction(txKey);
-					
+
 					ColumnFamilyTemplate<UUID, Composite> template = new ThriftColumnFamilyTemplate<UUID, Composite>(keyspace, CF_TRANSACTION_LOG, us, cs);
 					ColumnFamilyResult<UUID, Composite> res = template.queryColumns(txKey);
-					
+
 					Iterator<Composite> it = res.getColumnNames().iterator();
-					
+
 					while(it.hasNext()) {
 						Composite c = it.next();
 						String status = res.getString(c);
@@ -230,13 +229,13 @@ public class TransactionManager {
 							}
 						}
 					}
-					
+
 					try {
 						t.commit();
 					} catch (OXException e) {
 						e.printStackTrace();
 					}
-					
+
 					/*
 					int pSeqNum = 0;
 					int cSeqNum = 0;
@@ -250,33 +249,33 @@ public class TransactionManager {
 							System.out.println(cPending);
 							System.out.println("Data pending: " + res.getString(cPending));
 						}
-						/*	
+						/*
 						cSeqNum = ((ByteBuffer)c.get(0)).get(0);
 						if (pSeqNum < cSeqNum) {
 							pSeqNum = cSeqNum;
-							System.out.println("pSeqNum: " + pSeqNum+ 
-											", cSeqNum: " + cSeqNum + 
+							System.out.println("pSeqNum: " + pSeqNum+
+											", cSeqNum: " + cSeqNum +
 											", data: " + res.getString(c));
 						}
 					}*/
-					
+
 					//new Transaction(txKey, ops);
-					
+
 				} catch (CharacterCodingException e) {
 					e.printStackTrace();
 				}
 			}
-		 	
+
 		 	long timeEnd = System.currentTimeMillis();
 		 	System.out.println("Runtime for checkAndReplay(): " + (timeEnd - timeStart) + " msec.");
 		} catch (HUnavailableException h) {
 			log.error("Cannot replay transaction logs, because there may not be enough replicas present to handle consistency level.");
 		}
 	}
-	
+
 	/**
 	 * Acquire lock
-	 * 
+	 *
 	 * @param tx Transaction to acquire the lock for
 	 * @return true if the lock has been successfully acquired, false otherwise
 	 */
@@ -284,27 +283,27 @@ public class TransactionManager {
 		boolean lockAcquired = false;
 		Mutator<UUID> m = HFactory.createMutator(keyspace, us);
 		Iterator<Operation> iter = tx.getOperations().iterator();
-		
+
 		while (iter.hasNext()) {
 			Operation type = iter.next();
-			
+
 			String rowKey = type.getObjectRowKey().toString();
-			
+
 			Composite start = new Composite();
 		 	start.addComponent(0, type.getColumnFamilyName(), Composite.ComponentEquality.EQUAL);
 		 	start.addComponent(1, rowKey, Composite.ComponentEquality.EQUAL);
-		 	
+
 		 	Composite end = new Composite();
 		 	end.addComponent(0, type.getColumnFamilyName(), Composite.ComponentEquality.EQUAL);
 		 	end.addComponent(1, rowKey, Composite.ComponentEquality.EQUAL);
-		 		
+
 		 	SliceQuery<UUID, Composite, ByteBuffer> sliceQuery = HFactory.createSliceQuery(keyspace, us, cs, bbs);
 		 	ColumnSlice<Composite, ByteBuffer> slice = sliceQuery.setColumnFamily(CF_TRANSACTION_LOG)
 		 														.setKey(LOCK_ROW)
 		 														.setRange(start, end, false, 1).execute().get();
 		 	lockAcquired = slice.getColumns().size() == 0 ? true : false;
-		 	
-		 	//If another transaction already acquired a lock for one of the required objects, then put in queue 
+
+		 	//If another transaction already acquired a lock for one of the required objects, then put in queue
 		 	if (!lockAcquired) {
 		 		String key = type.getColumnFamilyName() + "-" + type.getObjectRowKey();
 		 		Queue<Transaction> q = queue.get(key);
@@ -313,51 +312,52 @@ public class TransactionManager {
 		 		}
 		 		q.add(tx);
 		 		queue.put(key, q);
-		 		
+
 		 		log.info("waiting for lock " + key + " to be released");
-		 		
+
 		 		return lockAcquired;
 		 	}
-		 	
+
 		 	HColumn<Composite, UUID> h = HFactory.createColumn(type.getLockedObject(), tx.getTXKey());
 		 	h.setTtl(columnTTL);
 		 	m.addInsertion(LOCK_ROW, CF_TRANSACTION_LOG, h);
 		}
-		
+
 		try {
 			m.execute();
 		} catch (HectorException h) {
 			h.printStackTrace();
 			throw new OXException(666, "Failed to log the transaction");
 		}
-		
+
 		return lockAcquired;
 	}
-	
+
 	/**
 	 * Release lock
-	 * 
+	 *
 	 * @param tx Transaction to release the lock for
 	 * @return true if the lock has been successfully released, otherwise false
 	 * @throws OXException
 	 */
 	public synchronized void releaseLock(Transaction tx) throws OXException {
-		
+
 		Mutator<UUID> m = HFactory.createMutator(keyspace, us);
 		Iterator<Operation> it = tx.getOperations().iterator();
-		
+
 		List<Queue<Transaction>> lq = new ArrayList<Queue<Transaction>>();
-		
+
 		while (it.hasNext()) {
 			Operation operation = it.next();
 			m.addDeletion(LOCK_ROW, CF_TRANSACTION_LOG, operation.getLockedObject(), cs);
 			Queue<Transaction> q = queue.get(operation.getColumnFamilyName() + "-" + operation.getObjectRowKey());
-			if (q != null)
-				lq.add(q);
+			if (q != null) {
+                lq.add(q);
+            }
 		}
-		
+
 		m.execute();
-		
+
 		Iterator<Queue<Transaction>> itQ = lq.iterator();
 		while (itQ.hasNext()) {
 			Queue<Transaction> queue = itQ.next();
@@ -367,7 +367,7 @@ public class TransactionManager {
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns the instance of the TransactionManager. Optimized with the double locking mechanism.
 	 * @return a TransactionManager instance
@@ -375,11 +375,12 @@ public class TransactionManager {
 	public static TransactionManager getInstance() {
 		if (instance == null) {
 			synchronized(TransactionManager.class) {
-				if (instance == null)
-					instance = new TransactionManager();	
+				if (instance == null) {
+                    instance = new TransactionManager();
+                }
 			}
 		}
-		
+
 		return instance;
 	}
 }

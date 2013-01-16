@@ -18,7 +18,7 @@ import org.apache.commons.cli.UnrecognizedOptionException;
 
 /**
  * {@link CLIParser} - The command-line parser.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CLIParser {
@@ -44,7 +44,7 @@ public class CLIParser {
 
     /**
      * Initializes a new {@link CLIParser}.
-     * 
+     *
      * @param posix <code>true</code> to strictly parse command line in POSIX notation; otherwise <code>false</code>
      */
     public CLIParser(final boolean posix) {
@@ -57,7 +57,7 @@ public class CLIParser {
 
     /**
      * Adds the specified option to the list of options.
-     * 
+     *
      * @param opt The option to add
      * @return The added option
      */
@@ -80,7 +80,7 @@ public class CLIParser {
 
     /**
      * Convenience method for adding a string option.
-     * 
+     *
      * @param shortForm The option's short form
      * @param longForm The option's long form
      * @return The added option
@@ -91,7 +91,7 @@ public class CLIParser {
 
     /**
      * Convenience method for adding a string option.
-     * 
+     *
      * @param longForm The option's long form
      * @return The added option
      */
@@ -101,7 +101,7 @@ public class CLIParser {
 
     /**
      * Convenience method for adding a settable boolean option.
-     * 
+     *
      * @param longForm The option's long form
      * @return The added option
      */
@@ -111,7 +111,7 @@ public class CLIParser {
 
     /**
      * Convenience method for adding an integer option.
-     * 
+     *
      * @param shortForm The option's short form
      * @param longForm The option's long form
      * @return The added option
@@ -122,7 +122,7 @@ public class CLIParser {
 
     /**
      * Convenience method for adding an integer option.
-     * 
+     *
      * @param longForm The option's long form
      * @return The added option
      */
@@ -132,7 +132,7 @@ public class CLIParser {
 
     /**
      * Convenience method for adding a long integer option.
-     * 
+     *
      * @param shortForm The option's short form
      * @param longForm The option's long form
      * @return The added option
@@ -143,7 +143,7 @@ public class CLIParser {
 
     /**
      * Convenience method for adding a long integer option.
-     * 
+     *
      * @param longForm The option's long form
      * @return The added option
      */
@@ -153,7 +153,7 @@ public class CLIParser {
 
     /**
      * Convenience method for adding a double option.
-     * 
+     *
      * @param shortForm The option's short form
      * @param longForm The option's long form
      * @return The added option
@@ -164,7 +164,7 @@ public class CLIParser {
 
     /**
      * Convenience method for adding a double option.
-     * 
+     *
      * @param longForm The option's long form
      * @return The added option
      */
@@ -174,7 +174,7 @@ public class CLIParser {
 
     /**
      * Convenience method for adding a boolean option.
-     * 
+     *
      * @param shortForm The option's short form
      * @param longForm The option's long form
      * @return The added option
@@ -185,7 +185,7 @@ public class CLIParser {
 
     /**
      * Convenience method for adding a boolean option.
-     * 
+     *
      * @param longForm The option's long form
      * @return The added option
      */
@@ -195,7 +195,7 @@ public class CLIParser {
 
     /**
      * Gets given option's value.
-     * 
+     *
      * @param o The option whose value shall be returned
      * @return The option's value or <code>null</code> if not present
      */
@@ -205,7 +205,7 @@ public class CLIParser {
 
     /**
      * Gets given option's value.
-     * 
+     *
      * @param o The option whose value shall be returned
      * @param def The default value to return if option is not present
      * @param remove <code>true</code> to remove option's value from parser's known values; otherwise <code>false</code>
@@ -226,7 +226,7 @@ public class CLIParser {
 
     /**
      * Gets the parsed values of all occurrences of given option, or an empty collection if the option was not set.
-     * 
+     *
      * @param option The option
      * @return The parsed values of all occurrences of given option
      */
@@ -253,7 +253,7 @@ public class CLIParser {
 
     /**
      * Removes given option.
-     * 
+     *
      * @param option The option to remove
      */
     protected final void removeOption(final CLIOption option) {
@@ -268,7 +268,7 @@ public class CLIParser {
 
     /**
      * Parses specified command line.
-     * 
+     *
      * @param argv The command line arguments
      * @throws CLIParseException If parsing fails
      * @throws CLIIllegalOptionValueException If an illegal option occurs
@@ -343,7 +343,7 @@ public class CLIParser {
 
     /**
      * Parses specified command line.
-     * 
+     *
      * @param argv The command line arguments
      * @param locale The locale
      * @throws CLIParseException If parsing fails

@@ -59,17 +59,17 @@ import com.openexchange.mail.smal.impl.SmalServiceLookup;
 
 /**
  * {@link AccountBlacklist}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class AccountBlacklist {
 
     private static boolean allExternalAllowed = false;
-    
+
     private static boolean allExternalForbidden = false;
 
     private static Set<String> blacklistedServers = null;
-    
+
 
     /**
      * Returns if the given mail account server is blacklisted.<br>
@@ -83,7 +83,7 @@ public class AccountBlacklist {
         if (allExternalAllowed) {
             return false;
         }
-        
+
         if (allExternalForbidden) {
             return true;
         }

@@ -262,19 +262,11 @@ public final class Permission {
     }
 
     static OCLPermission getPermission(final Context ctx, final User user, final UserConfiguration userConfig, final FolderObject folder) throws OXException {
-        try {
-            return new OXFolderAccess(ctx).getFolderPermission(folder.getObjectID(), user.getId(), userConfig);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return new OXFolderAccess(ctx).getFolderPermission(folder.getObjectID(), user.getId(), userConfig);
     }
 
     static OCLPermission getPermission(final Context ctx, final Connection con, final User user, final UserConfiguration userConfig, final FolderObject folder) throws OXException {
-        try {
-            return new OXFolderAccess(con, ctx).getFolderPermission(folder.getObjectID(), user.getId(), userConfig);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return new OXFolderAccess(con, ctx).getFolderPermission(folder.getObjectID(), user.getId(), userConfig);
     }
 
     static void checkForTaskFolder(final FolderObject folder) throws OXException {

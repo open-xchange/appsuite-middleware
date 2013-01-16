@@ -232,12 +232,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         PreparedStatement stmt = null;
         PreparedStatement folder_update = null;
-        
+
         PreparedStatement stmtupdateattribute = null;
         PreparedStatement stmtinsertattribute = null;
         PreparedStatement stmtdelattribute = null;
-        
-        
+
+
         final int userId = usrdata.getId().intValue();
         try {
 
@@ -401,21 +401,21 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
             }
-            
+
             if(usrdata.isUserAttributesset()) {
-                
+
                 stmtupdateattribute = con.prepareStatement("UPDATE user_attribute SET value = ? WHERE cid=? AND id=? AND name=?");
                 stmtupdateattribute.setInt(2, contextId);
                 stmtupdateattribute.setInt(3, userId);
-                
+
                 stmtinsertattribute = con.prepareStatement("INSERT INTO user_attribute (value, cid, id, name) VALUES (?, ?, ?, ?)");
                 stmtinsertattribute.setInt(2, contextId);
                 stmtinsertattribute.setInt(3, userId);
-                
+
                 stmtdelattribute = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
                 stmtdelattribute.setInt(1, contextId);
                 stmtdelattribute.setInt(2, userId);
-                
+
                 for(final Map.Entry<String, Map<String, String>> ns : usrdata.getUserAttributes().entrySet()) {
                     final String namespace = ns.getKey();
                     for(final Map.Entry<String, String> pair : ns.getValue().entrySet()) {
@@ -424,7 +424,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         if(value != null) {
                             stmtupdateattribute.setString(1, value);
                             stmtupdateattribute.setString(4, name);
-                            
+
                             final int changedRows = stmtupdateattribute.executeUpdate();
                             if(changedRows == 0) {
                                 stmtinsertattribute.setString(1, value);
@@ -437,9 +437,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         }
                     }
                 }
-                
+
             }
- 
+
             // update prg_contacts ONLY if needed ( see
             // "prg_contacts_update_needed")
             final Class<? extends User> c = usrdata.getClass();
@@ -700,7 +700,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     folder_update.setInt(3, userId);
                     folder_update.executeUpdate();
                     folder_update.close();
-    
+
                     folder_update = con.prepareStatement("UPDATE user_mail_account SET confirmed_spam = ?, confirmed_spam_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
                     folder_update.setString(1, mailfolderconfirmedspam);
                     folder_update.setString(2, "");
@@ -761,7 +761,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 folder_update.executeUpdate();
                 folder_update.close();
             }
-            
+
             if (folder_update != null) {
                 folder_update.close();
             }
@@ -897,7 +897,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             closePreparedStatement(stmtupdateattribute);
             closePreparedStatement(stmtinsertattribute);
             closePreparedStatement(stmtdelattribute);
-            
+
             try {
                 if (con != null) {
                     cache.pushConnectionForContext(contextId, con);
@@ -1250,10 +1250,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         }
                     }
                 }
-                
+
                 // Fill in dynamic attributes
                 insertDynamicAttributes(con, ctx.getId(), userId, usrdata.getUserAttributes());
-                
+
 
                 // add user to login2user table with the internal id
                 stmt = con.prepareStatement("INSERT INTO login2user (cid,id,uid) VALUES (?,?,?)");
@@ -1403,7 +1403,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     private void insertDynamicAttributes(final Connection write_ox_con, final int cid, final int userId, final Map<String, Map<String, String>> dynamicValues) throws SQLException {
         PreparedStatement stmt = null;
-        
+
         try {
             stmt = write_ox_con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value) VALUES (?, ?, ?, ?)");
             stmt.setInt(1, cid);
@@ -1418,7 +1418,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.executeUpdate();
                 }
             }
-            
+
         } finally {
             closePreparedStatement(stmt);
         }
@@ -1724,12 +1724,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     /**
      * read all gui related settings from the configtree
-     * 
+     *
      * @param ctx
      * @param user
      * @param con
      * @return Map containing the GUI configuration, null if no settings found
-     * @throws OXException 
+     * @throws OXException
      * @throws SettingException
      */
     private Map<String,String> readGUISettings(final Context ctx, final User user, final Connection con) throws OXException {
@@ -1744,13 +1744,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if( ret == null ) {
                     ret = new HashMap<String, String>();
                 }
-                final String value = (String)s.getSingleValue(); 
+                final String value = (String)s.getSingleValue();
                 if( value != null ) {
                     ret.put(p,value);
                 }
             }
         }
-        
+
         final Setting[] modules = ConfigTree.getInstance().getSettingByPath("modules").getElements();
         for (int i = 0; i < modules.length; i++) {
             final Setting guiSetting = modules[i].getElement("gui");
@@ -1851,7 +1851,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     }
                     newuser.setGuiPreferences(guiPrefs);
                 }
-                
+
                 if (-1 != user_id) {
                     // TODO: Why do we make this clause?
                     if (null == username) {
@@ -1996,7 +1996,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     /**
      * Parses a dynamic attribute from the user_attribute table
      * Returns a String[] with retval[0] being the namespace and retval[1] being the name
-     * @throws StorageException 
+     * @throws StorageException
      */
     private String[] parseDynamicAttribute(final String name) throws StorageException {
         final int pos = name.indexOf('/');

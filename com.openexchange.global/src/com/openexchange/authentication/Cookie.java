@@ -60,7 +60,7 @@ public interface Cookie {
      * @return the name of the cookie.
      */
     String getName();
-    
+
     /**
      * @return the cookies value.
      */

@@ -70,7 +70,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public abstract class ChangeCore extends UserAbstraction {
 
     protected final void setOptions(final AdminParser parser) {
-        
+
         parser.setExtendedOptions();
         setDefaultCommandLineOptions(parser);
 
@@ -79,12 +79,12 @@ public abstract class ChangeCore extends UserAbstraction {
         setUsernameOption(parser, NeededQuadState.eitheror);
 
         setMandatoryOptionsWithoutUsername(parser, NeededQuadState.notneeded);
-        
+
         // add optional opts
         setOptionalOptions(parser);
-        
+
         setFurtherOptions(parser);
-        
+
         parser.allowDynamicOptions();
     }
 
@@ -104,7 +104,7 @@ public abstract class ChangeCore extends UserAbstraction {
             final User usr = new User();
             parseAndSetUserId(parser, usr);
             parseAndSetUsername(parser, usr);
-            
+
             successtext = nameOrIdSetInt(this.userid, this.username, "user");
 
             final Context ctx = contextparsing(parser);
@@ -125,23 +125,23 @@ public abstract class ChangeCore extends UserAbstraction {
 
             // change module access
             // first load current module access rights from server
-            UserModuleAccess access = oxusr.getModuleAccess(ctx, usr, auth);                    
-            
+            UserModuleAccess access = oxusr.getModuleAccess(ctx, usr, auth);
+
             // apply rights from commandline
             boolean changed = setModuleAccessOptions(parser, access);
-            
+
             if(changed) {
                 // apply changes in module access on server
                 oxusr.changeModuleAccess(ctx, usr, access, auth);
             }
-            
+
             // Dynamic Options
             applyDynamicOptionsToUser(parser, usr);
-            
+
             // finally do change call last (must be done last because else we cannot
             // change admin password
             maincall(parser, oxusr, ctx, usr, access, auth);
-            
+
             displayChangedMessage(successtext, ctx.getId(), parser);
             sysexit(0);
         } catch (final Exception e) {

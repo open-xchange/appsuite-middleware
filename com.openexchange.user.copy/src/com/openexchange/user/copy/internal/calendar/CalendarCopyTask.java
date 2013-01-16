@@ -96,8 +96,8 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class CalendarCopyTask implements CopyUserTaskService {
-    
-    private static final String SELECT_APP_IDS = 
+
+    private static final String SELECT_APP_IDS =
         "SELECT " +
             "m.object_id " +
         "FROM " +
@@ -116,8 +116,8 @@ public class CalendarCopyTask implements CopyUserTaskService {
             "m.cid = ? " +
         "AND " +
             "m.pfid IN (#IDS#)";
-    
-    private static final String SELECT_APPOINTMENTS = 
+
+    private static final String SELECT_APPOINTMENTS =
         "SELECT " +
             "creating_date, changing_date, fid, pflag, timestampfield01, timestampfield02, " +
             "timezone, intfield01, intfield02, intfield03, intfield04, intfield05, intfield06, " +
@@ -129,8 +129,8 @@ public class CalendarCopyTask implements CopyUserTaskService {
             "cid = ? " +
         "AND " +
             "intfield01 IN (#IDS#)";
-    
-    private static final String SELECT_PARTICIPANTS = 
+
+    private static final String SELECT_PARTICIPANTS =
         "SELECT " +
             "r.id, r.type, r.ma, r.dn, m.confirm, m.reason, m.pfid, m.reminder " +
         "FROM " +
@@ -149,8 +149,8 @@ public class CalendarCopyTask implements CopyUserTaskService {
             "r.object_id = ? " +
         "AND " +
             "(r.id = ? OR r.type = 5);";
-    
-    private static final String INSERT_APPOINTMENT = 
+
+    private static final String INSERT_APPOINTMENT =
         "INSERT INTO " +
             "prg_dates " +
             "(creating_date, created_from, changing_date, changed_from, " +
@@ -160,21 +160,21 @@ public class CalendarCopyTask implements CopyUserTaskService {
             "field09, uid, organizer, sequence, organizerId, principal, principalId, filename) " +
         "VALUES " +
             "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
-    private static final String INSERT_MEMBER = 
+
+    private static final String INSERT_MEMBER =
         "INSERT INTO " +
             "prg_dates_members " +
             "(object_id, member_uid, confirm, reason, pfid, reminder, cid) " +
         "VALUES " +
             "(?, ?, ?, ?, ?, ?, ?)";
-    
-    private static final String INSERT_RIGHT = 
+
+    private static final String INSERT_RIGHT =
         "INSERT INTO " +
     		"prg_date_rights " +
     		"(object_id, cid, id, type, ma, dn) " +
     	"VALUES " +
     	    "(?, ?, ?, ?, ?, ?)";
-    
+
     private static final String SELECT_DATE_EXTERNAL =
         "SELECT " +
             "objectId, mailAddress, displayName, confirm, reason " +
@@ -184,14 +184,14 @@ public class CalendarCopyTask implements CopyUserTaskService {
             "cid = ? " +
         "AND " +
             "objectId IN (#IDS#)";
-    
+
     private static final String INSERT_DATE_EXTERNAL =
         "INSERT INTO " +
             "dateExternal " +
             "(cid, objectId, mailAddress, displayName, confirm, reason) " +
         "VALUES " +
             "(?, ?, ?, ?, ?, ?)";
-    
+
 
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#getAlreadyCopied()
@@ -225,27 +225,27 @@ public class CalendarCopyTask implements CopyUserTaskService {
         final Connection dstCon = copyTools.getDestinationConnection();
         final ObjectMapping<FolderObject> folderMapping = copyTools.getFolderMapping();
         final Set<Integer> sourceFolderIds = folderMapping.getSourceKeys();
-        
+
         final List<Integer> appointmentIds = loadAppointmentIdsFromDB(sourceFolderIds, i(srcUsrId), i(srcCtxId), srcCon);
-        final Map<Integer, CalendarDataObject> appointments = loadAppointmentsFromDB(appointmentIds, i(srcCtxId), srcCon);        
+        final Map<Integer, CalendarDataObject> appointments = loadAppointmentsFromDB(appointmentIds, i(srcCtxId), srcCon);
         checkAppointmentsForMissingRecurrenceMasters(appointments);
         addParticipants(appointments, srcCon, i(srcCtxId), i(srcUsrId));
         exchangeIds(appointments, folderMapping, i(dstUsrId), i(dstCtxId), dstCon, i(srcUsrId));
         writeAppointmentsToDB(dstCon, appointments, i(dstUsrId), i(dstCtxId));
         writeParticipantsToDB(dstCon, appointments, i(dstCtxId));
-        
+
         final IntegerMapping mapping = new IntegerMapping();
         for (final Integer appointmentId : appointments.keySet()) {
             final CalendarDataObject appointment = appointments.get(appointmentId);
             mapping.addMapping(appointmentId, I(appointment.getObjectID()));
         }
-        
+
         final Map<Integer, ExternalDate> externalDates = loadExternalDatesFromDB(srcCon, i(srcCtxId), appointmentIds);
-        writeExternalDatesToDB(dstCon, i(dstCtxId), externalDates, mapping);        
-        
+        writeExternalDatesToDB(dstCon, i(dstCtxId), externalDates, mapping);
+
         return mapping;
     }
-    
+
     void writeExternalDatesToDB(final Connection con, final int cid, final Map<Integer, ExternalDate> dates, final IntegerMapping mapping) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -261,11 +261,11 @@ public class CalendarCopyTask implements CopyUserTaskService {
                     setStringOrNull(i++, stmt, date.getDisplayName());
                     stmt.setInt(i++, date.getConfirm());
                     setStringOrNull(i++, stmt, date.getReason());
-                    
+
                     stmt.addBatch();
                 }
-                
-                stmt.executeBatch();                
+
+                stmt.executeBatch();
             }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
@@ -273,7 +273,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(stmt);
         }
     }
-    
+
     Map<Integer, ExternalDate> loadExternalDatesFromDB(final Connection con, final int cid, final Collection<Integer> appointmentIds) throws OXException {
         if (null == appointmentIds || appointmentIds.isEmpty()) {
             return Collections.<Integer, ExternalDate> emptyMap();
@@ -285,7 +285,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
             final String sql = replaceIdsInQuery("#IDS#", SELECT_DATE_EXTERNAL, appointmentIds);
             stmt = con.prepareStatement(sql);
             stmt.setInt(1, cid);
-            
+
             rs = stmt.executeQuery();
             while (rs.next()) {
                 int i = 1;
@@ -295,18 +295,18 @@ public class CalendarCopyTask implements CopyUserTaskService {
                 date.setDisplayName(rs.getString(i++));
                 date.setConfirm(rs.getInt(i++));
                 date.setReason(rs.getString(i++));
-                
+
                 dates.put(dateId, date);
-            }            
+            }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
-        
+
         return dates;
     }
-    
+
     private void writeParticipantsToDB(final Connection dstCon, final Map<Integer, CalendarDataObject> appointments, final int dstCtxId) throws OXException {
         PreparedStatement mstmt = null;
         PreparedStatement rstmt = null;
@@ -344,7 +344,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
                     }
                 }
             }
-            
+
             mstmt.executeBatch();
             rstmt.executeBatch();
         } catch (final SQLException e) {
@@ -354,7 +354,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(rstmt);
         }
     }
-    
+
     private void writeAppointmentsToDB(final Connection dstCon, final Map<Integer, CalendarDataObject> appointments, final int dstUsrId, final int dstCtxId) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -369,8 +369,8 @@ public class CalendarCopyTask implements CopyUserTaskService {
                 stmt.setInt(i++, appointment.getParentFolderID());
                 stmt.setInt(i++, appointment.getPrivateFlag() ? 1 : 0);
                 stmt.setInt(i++, dstCtxId);
-                stmt.setTimestamp(i++, new Timestamp(appointment.getStartDate().getTime()));      
-                stmt.setTimestamp(i++, new Timestamp(appointment.getEndDate().getTime()));   
+                stmt.setTimestamp(i++, new Timestamp(appointment.getStartDate().getTime()));
+                stmt.setTimestamp(i++, new Timestamp(appointment.getEndDate().getTime()));
                 stmt.setString(i++, appointment.getTimezone());
                 stmt.setInt(i++, appointment.getObjectID());
                 setIntOrNull(i++, stmt, appointment.getRecurrenceID());
@@ -387,27 +387,27 @@ public class CalendarCopyTask implements CopyUserTaskService {
                 setStringOrNull(i++, stmt, appointment.getDelExceptions());
                 setStringOrNull(i++, stmt, appointment.getExceptions());
                 setStringOrNull(i++, stmt, appointment.getCategories());
-                // TODO: If the participants of this appointment have been modified because of the context move, 
+                // TODO: If the participants of this appointment have been modified because of the context move,
                 // keeping the appointments uid may cause problems.
-                setStringOrNull(i++, stmt, appointment.getUid()); 
+                setStringOrNull(i++, stmt, appointment.getUid());
                 setStringOrNull(i++, stmt, appointment.getOrganizer());
                 setIntOrNull(i++, stmt, appointment.getSequence());
                 stmt.setInt(i++, appointment.getOrganizerId());
                 setStringOrNull(i++, stmt, appointment.getPrincipal());
                 stmt.setInt(i++, appointment.getPrincipalId());
                 setStringOrNull(i++, stmt, appointment.getFilename());
-                
+
                 stmt.addBatch();
             }
-            
-            stmt.executeBatch();            
+
+            stmt.executeBatch();
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
-    
+
     private void exchangeIds(final Map<Integer, CalendarDataObject> appointments, final ObjectMapping<FolderObject> folderMapping, final int dstUsrId, final int dstCtxId, final Connection dstCon, final int srcUsrId) throws OXException {
         try {
             final Map<Integer, CalendarDataObject> seriesAppointments = new HashMap<Integer, CalendarDataObject>();
@@ -420,7 +420,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
                 if (appointment.getRecurrenceID() != -1) {
                     seriesAppointments.put(appointmentId, appointment);
                 }
-                
+
                 final FolderObject sourceFolder = folderMapping.getSource(appointment.getParentFolderID());
                 int newParentFolderId = appointment.getParentFolderID();
                 if (sourceFolder != null) {
@@ -428,18 +428,18 @@ public class CalendarCopyTask implements CopyUserTaskService {
                     newParentFolderId = destinationFolder.getObjectID();
                 }
                 appointment.setParentFolderID(newParentFolderId);
-                
+
                 if (appointment.getOrganizerId() == srcUsrId) {
                     appointment.setOrganizerId(dstUsrId);
                 } else {
                     appointment.setOrganizerId(0);
-                }                
+                }
                 if (appointment.getPrincipalId() == srcUsrId) {
                     appointment.setPrincipalId(dstUsrId);
                 } else {
                     appointment.setPrincipalId(0);
                 }
-                
+
                 final Participant[] participants = appointment.getParticipants();
                 if (participants != null) {
                     for (final Participant participant : participants) {
@@ -457,7 +457,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
                     }
                 }
             }
-            
+
             for (final Integer appointmentId : seriesAppointments.keySet()) {
                 final CalendarDataObject appointment = appointments.get(appointmentId);
                 final int recurrenceId = appointment.getRecurrenceID();
@@ -468,7 +468,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         }
     }
-    
+
     void addParticipants(final Map<Integer, CalendarDataObject> appointments, final Connection srcCon, final Integer srcCtxId, final Integer srcUsrId) throws OXException {
         for (final Integer appointmentId : appointments.keySet()) {
             final CalendarDataObject appointment = appointments.get(appointmentId);
@@ -476,7 +476,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
             appointment.setParticipants(participants);
         }
     }
-    
+
     private void checkAppointmentsForMissingRecurrenceMasters(final Map<Integer, CalendarDataObject> appointments) {
         final List<Integer> toRemove = new ArrayList<Integer>();
         for (final Integer appointmentId : appointments.keySet()) {
@@ -484,22 +484,22 @@ public class CalendarCopyTask implements CopyUserTaskService {
             final int recurrenceId = appointment.getRecurrenceID();
             if (recurrenceId != -1 && recurrenceId != appointmentId) {
                 /*
-                 * This is a change exception. 
-                 * We have to check if there is an existing master appointment. 
+                 * This is a change exception.
+                 * We have to check if there is an existing master appointment.
                  * Otherwise we remove this one.
                  */
-                final CalendarDataObject master = appointments.get(recurrenceId);    
+                final CalendarDataObject master = appointments.get(recurrenceId);
                 if (master == null) {
                     toRemove.add(appointmentId);
                 }
             }
         }
-        
+
         for (final int id : toRemove) {
             appointments.remove(id);
         }
     }
-    
+
     private List<Participant> fetchMoveableParticipants(final CalendarDataObject appointment, final Connection srcCon, final Integer srcCtxId, final Integer srcUsrId) throws OXException {
         final List<Participant> participants = new ArrayList<Participant>();
         PreparedStatement stmt = null;
@@ -509,7 +509,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
             stmt.setInt(1, srcCtxId);
             stmt.setInt(2, appointment.getObjectID());
             stmt.setInt(3, srcUsrId);
-            
+
             rs = stmt.executeQuery();
             while (rs.next()) {
                 int i = 1;
@@ -524,21 +524,21 @@ public class CalendarCopyTask implements CopyUserTaskService {
                     userParticipant.setConfirmMessage(rs.getString(i++));
                     userParticipant.setPersonalFolderId(getIntOrNegative(i++, rs));
                     userParticipant.setAlarmMinutes(getIntOrNegative(i++, rs));
-                    
+
                     participant = userParticipant;
                 } else if (type == Participant.EXTERNAL_USER) {
                     final ExternalUserParticipant externalParticipant = new ExternalUserParticipant(rs.getString(i++));
                     externalParticipant.setDisplayName(rs.getString(i++));
                     externalParticipant.setIdentifier(id);
-                    
+
                     participant = externalParticipant;
                 } else {
                     continue;
                 }
-                
+
                 participants.add(participant);
             }
-            
+
             return participants;
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
@@ -546,7 +546,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(rs, stmt);
         }
     }
-    
+
     Map<Integer, CalendarDataObject> loadAppointmentsFromDB(final List<Integer> appointmentIds, final Integer srcCtxId, final Connection srcCon) throws OXException {
         final Map<Integer, CalendarDataObject> appointments = new HashMap<Integer, CalendarDataObject>();
         if (!appointmentIds.isEmpty()) {
@@ -624,7 +624,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
             }
         }
         return appointmentIds;
-    }   
+    }
 
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#done(java.util.Map, boolean)

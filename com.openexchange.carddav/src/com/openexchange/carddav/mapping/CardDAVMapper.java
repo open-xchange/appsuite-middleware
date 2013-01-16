@@ -59,7 +59,7 @@ import com.openexchange.groupware.tools.mappings.Mapping;
 
 /**
  * {@link CardDAVMapper}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
@@ -96,7 +96,7 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
 	public EnumMap<ContactField, Mapping<? extends Object, Contact>> getMappings() {
 		return mappings;
 	}
-	
+
 	@Override
 	public Mapping<? extends Object, Contact> get(final ContactField field) throws OXException {
 		if (null == field) {
@@ -112,14 +112,14 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
 	/**
 	 * Holds all known contact mappings.
 	 */
-	private static final EnumMap<ContactField, Mapping<? extends Object, Contact>> mappings;	
+	private static final EnumMap<ContactField, Mapping<? extends Object, Contact>> mappings;
 	static {
 		mappings = new EnumMap<ContactField, Mapping<? extends Object, Contact>>(ContactField.class);
-		
+
         mappings.put(ContactField.DISPLAY_NAME, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setDisplayName(value);
             }
 
@@ -129,20 +129,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getDisplayName();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeDisplayName();				
+				contact.removeDisplayName();
 			}
         });
 
         mappings.put(ContactField.SUR_NAME, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setSurName(value);
             }
 
@@ -152,7 +152,7 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getSurName();
             }
 
@@ -165,7 +165,7 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
         mappings.put(ContactField.GIVEN_NAME, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setGivenName(value);
             }
 
@@ -175,7 +175,7 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getGivenName();
             }
 
@@ -188,7 +188,7 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
         mappings.put(ContactField.COMPANY, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCompany(value);
             }
 
@@ -198,7 +198,7 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCompany();
             }
 
@@ -207,11 +207,11 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
 				contact.removeCompany();
 			}
         });
-        
+
         mappings.put(ContactField.EMAIL1, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setEmail1(value);
             }
 
@@ -221,7 +221,7 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getEmail1();
             }
 
@@ -234,7 +234,7 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
         mappings.put(ContactField.EMAIL2, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setEmail2(value);
             }
 
@@ -244,20 +244,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getEmail2();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeEmail2(); 
+                contact.removeEmail2();
             }
         });
-        
+
         mappings.put(ContactField.EMAIL3, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setEmail3(value);
             }
 
@@ -267,20 +267,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getEmail3();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeEmail3(); 
+                contact.removeEmail3();
             }
         });
-        
+
         mappings.put(ContactField.CELLULAR_TELEPHONE1, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCellularTelephone1(value);
             }
 
@@ -290,20 +290,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCellularTelephone1();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeCellularTelephone1();		
+				contact.removeCellularTelephone1();
 			}
         });
 
         mappings.put(ContactField.CELLULAR_TELEPHONE2, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCellularTelephone2(value);
             }
 
@@ -313,20 +313,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCellularTelephone2();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeCellularTelephone2();		
+				contact.removeCellularTelephone2();
 			}
         });
 
         mappings.put(ContactField.TELEPHONE_HOME1, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneHome1(value);
             }
 
@@ -336,7 +336,7 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneHome1();
             }
 
@@ -345,11 +345,11 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
 				contact.removeTelephoneHome1();
 			}
         });
-        
+
         mappings.put(ContactField.TELEPHONE_BUSINESS1, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneBusiness1(value);
             }
 
@@ -359,20 +359,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneBusiness1();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeTelephoneBusiness1();				
+				contact.removeTelephoneBusiness1();
 			}
         });
 
         mappings.put(ContactField.TELEPHONE_BUSINESS2, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephoneBusiness2(value);
             }
 
@@ -382,20 +382,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephoneBusiness2();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeTelephoneBusiness2();				
+				contact.removeTelephoneBusiness2();
 			}
         });
 
         mappings.put(ContactField.FAX_HOME, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setFaxHome(value);
             }
 
@@ -405,20 +405,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getFaxHome();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeFaxHome();				
+				contact.removeFaxHome();
 			}
         });
 
         mappings.put(ContactField.FAX_BUSINESS, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setFaxBusiness(value);
             }
 
@@ -428,20 +428,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getFaxBusiness();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeFaxBusiness();				
+				contact.removeFaxBusiness();
 			}
         });
 
         mappings.put(ContactField.FAX_OTHER, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setFaxOther(value);
             }
 
@@ -451,20 +451,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getFaxOther();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeFaxOther();				
+				contact.removeFaxOther();
 			}
         });
 
         mappings.put(ContactField.TELEPHONE_PAGER, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setTelephonePager(value);
             }
 
@@ -474,20 +474,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getTelephonePager();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeTelephonePager();				
+				contact.removeTelephonePager();
 			}
         });
 
         mappings.put(ContactField.NOTE, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setNote(value);
             }
 
@@ -497,20 +497,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getNote();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeNote();				
+				contact.removeNote();
 			}
         });
 
         mappings.put(ContactField.URL, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setURL(value);
             }
 
@@ -520,20 +520,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getURL();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeURL();				
+				contact.removeURL();
 			}
         });
 
         mappings.put(ContactField.STREET_HOME, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setStreetHome(value);
             }
 
@@ -543,20 +543,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getStreetHome();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeStreetHome();				
+				contact.removeStreetHome();
 			}
         });
 
         mappings.put(ContactField.POSTAL_CODE_HOME, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setPostalCodeHome(value);
             }
 
@@ -566,20 +566,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getPostalCodeHome();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removePostalCodeHome();				
+				contact.removePostalCodeHome();
 			}
         });
 
         mappings.put(ContactField.CITY_HOME, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCityHome(value);
             }
 
@@ -589,20 +589,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCityHome();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeCityHome();				
+				contact.removeCityHome();
 			}
         });
 
         mappings.put(ContactField.STATE_HOME, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setStateHome(value);
             }
 
@@ -612,20 +612,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getStateHome();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeStateHome();				
+				contact.removeStateHome();
 			}
         });
 
         mappings.put(ContactField.COUNTRY_HOME, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCountryHome(value);
             }
 
@@ -635,20 +635,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCountryHome();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeCountryHome();				
+				contact.removeCountryHome();
 			}
         });
 
         mappings.put(ContactField.STREET_BUSINESS, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setStreetBusiness(value);
             }
 
@@ -658,20 +658,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getStreetBusiness();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeStreetBusiness();				
+				contact.removeStreetBusiness();
 			}
         });
 
         mappings.put(ContactField.POSTAL_CODE_BUSINESS, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setPostalCodeBusiness(value);
             }
 
@@ -681,20 +681,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getPostalCodeBusiness();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removePostalCodeBusiness();				
+				contact.removePostalCodeBusiness();
 			}
         });
 
         mappings.put(ContactField.CITY_BUSINESS, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCityBusiness(value);
             }
 
@@ -704,20 +704,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCityBusiness();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeCityBusiness();				
+				contact.removeCityBusiness();
 			}
         });
 
         mappings.put(ContactField.STATE_BUSINESS, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setStateBusiness(value);
             }
 
@@ -727,20 +727,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getStateBusiness();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeStateBusiness();				
+				contact.removeStateBusiness();
 			}
         });
 
         mappings.put(ContactField.COUNTRY_BUSINESS, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setCountryBusiness(value);
             }
 
@@ -750,20 +750,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getCountryBusiness();
             }
 
 			@Override
 			public void remove(Contact contact) {
-				contact.removeCountryBusiness();				
+				contact.removeCountryBusiness();
 			}
         });
 
         mappings.put(ContactField.PROFESSION, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setProfession(value);
             }
 
@@ -773,20 +773,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getProfession();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeProfession();             
+                contact.removeProfession();
             }
         });
-        
+
         mappings.put(ContactField.INSTANT_MESSENGER1, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setInstantMessenger1(value);
             }
 
@@ -796,20 +796,20 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getInstantMessenger1();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeInstantMessenger1();             
+                contact.removeInstantMessenger1();
             }
         });
-        
+
         mappings.put(ContactField.INSTANT_MESSENGER2, new StringMapping() {
 
             @Override
-            public void set(Contact contact, String value) { 
+            public void set(Contact contact, String value) {
                 contact.setInstantMessenger2(value);
             }
 
@@ -819,16 +819,16 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             @Override
-            public String get(Contact contact) { 
+            public String get(Contact contact) {
                 return contact.getInstantMessenger2();
             }
 
             @Override
             public void remove(Contact contact) {
-                contact.removeInstantMessenger2();             
+                contact.removeInstantMessenger2();
             }
         });
-        
+
         mappings.put(ContactField.IMAGE1, new DefaultMapping<byte[], Contact>() {
 
 			@Override
@@ -857,6 +857,6 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
 			}
 		});
 
-	}	
+	}
 }
- 
+

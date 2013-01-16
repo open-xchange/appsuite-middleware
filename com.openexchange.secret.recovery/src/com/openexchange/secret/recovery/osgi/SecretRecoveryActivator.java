@@ -102,7 +102,7 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
         if ((whiteboardSecretService.getRanking() < 0) && (null != checker) && checker.usesPassword()) {
             /*-
              * Token list in use and main entry uses password for secret retrieval.
-             * 
+             *
              * Initialize whiteboard services
              */
             final WhiteboardSecretMigrator migrator = this.migrator = new WhiteboardSecretMigrator(context);
@@ -143,7 +143,7 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
             {
                 final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(SecretRecoveryActivator.class));
                 final EventHandler eventHandler = new EventHandler() {
-                    
+
                     @Override
                     public void handleEvent(final Event event) {
                         final String oldPassword = (String) event.getProperty("com.openexchange.passwordchange.oldPassword");
@@ -162,14 +162,14 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
             }
         } else {
             registerService(SecretInconsistencyDetector.class, new SecretInconsistencyDetector() {
-                
+
                 @Override
                 public String isSecretWorking(final ServerSession session) throws OXException {
                     return null;
                 }
             });
             registerService(SecretMigrator.class, new SecretMigrator() {
-                
+
                 @Override
                 public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
                     // No nothing
@@ -177,7 +177,7 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
             });
         }
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();

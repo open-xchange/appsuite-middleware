@@ -186,7 +186,7 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
             closeSQLStuff(stmt);
         }
     }
-    
+
     private boolean isContained(final List<OCLPermission> permissions, final int adminId) {
         for (final OCLPermission permission : permissions) {
             if (adminId == permission.getEntity()) {

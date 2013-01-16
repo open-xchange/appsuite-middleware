@@ -107,12 +107,7 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
         state.setTotal(ctxIds.length);
         final StringBuilder sb = new StringBuilder(128);
 
-        final Connection con;
-        try {
-            con = Database.getNoTimeout(triggeringContextId, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = Database.getNoTimeout(triggeringContextId, true);
         try {
             con.setAutoCommit(false);
             for (final int contextId : ctxIds) {

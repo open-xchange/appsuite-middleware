@@ -202,7 +202,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     }
 
     private static final Pattern EXTRACTOR = Pattern.compile("access_token=(.*?)&?");
-    
+
     private OAuthToken parseResponse(final String string) {
         final Matcher matcher = EXTRACTOR.matcher(string);
         String token = null;
@@ -210,10 +210,10 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
             token = matcher.group(1);
             token = checkToken(token);
         }
-        
+
         return new DefaultOAuthToken(token, "");
     }
-    
+
     private static final Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");
 
     private static String checkToken(final String accessToken) {

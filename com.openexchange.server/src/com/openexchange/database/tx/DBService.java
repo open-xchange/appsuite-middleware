@@ -83,7 +83,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         protected final List<Undoable> undoables = new ArrayList<Undoable>();
         protected boolean preferWriteCon;
         protected final Set<Connection> writeCons = new HashSet<Connection>();
-        
+
         protected ThreadState() {
             super();
         }

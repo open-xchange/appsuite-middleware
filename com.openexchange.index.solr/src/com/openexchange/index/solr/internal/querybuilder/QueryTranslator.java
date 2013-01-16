@@ -51,7 +51,7 @@ package com.openexchange.index.solr.internal.querybuilder;
 
 /**
  * {@link QueryTranslator}
- * 
+ *
  * @author Sven Maurmann
  */
 public interface QueryTranslator {

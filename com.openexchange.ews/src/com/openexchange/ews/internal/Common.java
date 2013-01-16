@@ -77,30 +77,30 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link Common}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class Common {
-    
+
     protected final ExchangeWebService service;
     protected final ExchangeServicePortType port;
-    
+
     public Common(ExchangeWebService service, ExchangeServicePortType port) {
         super();
         this.service = service;
         this.port = port;
     }
-            
+
     protected Holder<ServerVersionInfo> getVersionHolder() {
         return new Holder<ServerVersionInfo>();
     }
-    
+
     protected RequestServerVersion getRequestVersion() {
         RequestServerVersion requestServerVersion = new RequestServerVersion();
         requestServerVersion.setVersion(service.getConfig().getExchangeVersion());
         return requestServerVersion;
     }
-    
+
     protected RestrictionType getIsEqualRestriction(UnindexedFieldURIType fieldURI, String equalTo) {
         ConstantValueType constantValue = new ConstantValueType();
         constantValue.setValue(equalTo);
@@ -113,7 +113,7 @@ public abstract class Common {
         restriction.setSearchExpression(getSearchExpression("IsEqualTo", isEqualTo));
         return restriction;
     }
-    
+
     protected RestrictionType getIsEqualRestriction(UnindexedFieldURIType fieldURI, List<String> equalTos) {
         if (0 == equalTos.size()) {
             throw new IllegalArgumentException("equalTos");
@@ -130,7 +130,7 @@ public abstract class Common {
             return restriction;
         }
     }
-    
+
     protected RestrictionType getContainsRestriction(UnindexedFieldURIType fieldURI, String contains) {
         ConstantValueType constantValue = new ConstantValueType();
         constantValue.setValue(contains);
@@ -142,21 +142,21 @@ public abstract class Common {
         restriction.setSearchExpression(getSearchExpression("Contains", containsExpression));
         return restriction;
     }
-    
+
     protected static JAXBElement<PathToUnindexedFieldType> getPathToUnindexedField(UnindexedFieldURIType fieldURI) {
         PathToUnindexedFieldType pathToUnindexedField = new PathToUnindexedFieldType();
         pathToUnindexedField.setFieldURI(fieldURI);
         QName qName = new QName("http://schemas.microsoft.com/exchange/services/2006/types", "FieldURI");
         return new JAXBElement<PathToUnindexedFieldType>(qName, PathToUnindexedFieldType.class, pathToUnindexedField);
     }
-    
+
     protected static IsEqualToType getIsEqualTo(UnindexedFieldURIType fieldURI, String equalTo) {
         IsEqualToType isEqualTo = new IsEqualToType();
         isEqualTo.setPath(getPathToUnindexedField(fieldURI));
         isEqualTo.setFieldURIOrConstant(getConstantType(equalTo));
         return isEqualTo;
     }
-    
+
     protected static FieldURIOrConstantType getConstantType(String value) {
         ConstantValueType constantValue = new ConstantValueType();
         constantValue.setValue(value);
@@ -164,7 +164,7 @@ public abstract class Common {
         constantType.setConstant(constantValue);
         return constantType;
     }
-    
+
     protected static JAXBElement<SearchExpressionType> getSearchExpression(String name, SearchExpressionType value) {
         return new JAXBElement<SearchExpressionType>(
             new QName("http://schemas.microsoft.com/exchange/services/2006/types", name), SearchExpressionType.class, value);
@@ -172,7 +172,7 @@ public abstract class Common {
 
     /**
      * Checks the supplied response message, and throws an appropriate exception if there are errors or warnings.
-     * 
+     *
      * @param responseMessage The response message to check
      * @throws OXException
      */
@@ -184,10 +184,10 @@ public abstract class Common {
             throw EWSExceptionCodes.create(responseMessage);
         }
     }
-    
+
     /**
      * Checks the supplied response messages, throwing an appropriate exception if there are errors or warnings.
-     * 
+     *
      * @param responseMessages The response messages to check
      * @throws OXException
      */
@@ -197,13 +197,13 @@ public abstract class Common {
         }
         for (ResponseMessageType responseMessage : responseMessages) {
             check(responseMessage);
-            
+
         }
     }
-    
+
     /**
      * Extracts the response messages from the supplied response holder.
-     * 
+     *
      * @param responseHolder The response holder
      * @return The response messages
      * @throws OXException If there are no respsonses
@@ -212,7 +212,7 @@ public abstract class Common {
         if (null != responseHolder && null != responseHolder.value) {
             ArrayOfResponseMessagesType responseMessages = responseHolder.value.getResponseMessages();
             if (null != responseMessages) {
-                List<JAXBElement<? extends ResponseMessageType>> elements = 
+                List<JAXBElement<? extends ResponseMessageType>> elements =
                         responseMessages.getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
                 if (null != elements) {
                     List<ResponseMessageType> responses = new ArrayList<ResponseMessageType>();
@@ -225,13 +225,13 @@ public abstract class Common {
         }
         throw EWSExceptionCodes.NO_RESPONSE.create();
     }
-    
+
     /**
-     * Extracts a single response messages from the supplied response holder. 
-     * 
+     * Extracts a single response messages from the supplied response holder.
+     *
      * @param responseHolder The response holder
      * @return The response message
-     * @throws OXException If there are 0 or more than 1 responses 
+     * @throws OXException If there are 0 or more than 1 responses
      */
     protected static ResponseMessageType getResponseMessage(Holder<? extends BaseResponseMessageType> responseHolder) throws OXException {
         List<ResponseMessageType> responseMessages = getResponseMessages(responseHolder);

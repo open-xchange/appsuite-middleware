@@ -55,7 +55,7 @@ import java.util.Set;
 
 /**
  * {@link Configuration}
- * 
+ *
  * @author Sven Maurmann
  */
 public interface Configuration {

@@ -67,7 +67,7 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexedFoldersCreateTableTask extends UpdateTaskAdapter {
-    
+
     private final IndexedFoldersCreateTableService service;
 
     public IndexedFoldersCreateTableTask(IndexedFoldersCreateTableService service) {

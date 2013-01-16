@@ -54,28 +54,28 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AJAXResultDecorator} - Decorates a specified request data and result pair.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface AJAXResultDecorator {
 
     /**
      * Gets this {@link AJAXResultDecorator decorator's} identifier.
-     * 
+     *
      * @return The identifier
      */
     String getIdentifier();
 
     /**
      * Gets the format accepted by this decorator.
-     * 
+     *
      * @return The accepted format
      */
     String getFormat();
 
     /**
      * Decorates passed {@link AJAXRequestResult result}.
-     * 
+     *
      * @param requestData The request data
      * @param result The result of {@link AJAXActionService#perform(AJAXRequestData, ServerSession)} invocation
      * @param session The associated session

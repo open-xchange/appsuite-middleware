@@ -95,7 +95,7 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer{
 
     @Override
     public ITipAnalysis analyze(final ITipMessage message, final Map<String, String> header, final TypeWrapper wrapper, final Locale locale, final User user, final Context ctx, final Session session) throws OXException {
-        
+
         final ITipAnalysis analysis = new ITipAnalysis();
         analysis.setMessage(message);
 
@@ -135,16 +135,16 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer{
         	}
         }
         change.setDeleted(toDelete);
-        
+
         describeDiff(change, wrapper, session);
-        
+
         analysis.addChange(change);
         analysis.recommendAction(ITipAction.DELETE);
-        
+
         return analysis;
     }
 
-	
+
 
 
 }

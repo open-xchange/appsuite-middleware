@@ -1949,18 +1949,14 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         for (final UserParticipant user : cdao.getUsers()) {
             if (user.getIdentifier() == uid) {
                 if (!user.containsConfirm()) {
-                    try {
-                        user.setConfirm(ServerUserSetting.getInstance().getDefaultStatusPublic(ctx.getContextId(), user.getIdentifier()));
-                    } catch (final OXException e) {
-                        throw new OXException(e);
-                    }
+                    user.setConfirm(ServerUserSetting.getInstance().getDefaultStatusPublic(ctx.getContextId(), user.getIdentifier()));
                 }
                 continue;
             }
             if (user.containsConfirm()) {
                 continue;
             }
-            try {
+            {
                 switch (cdao.getFolderType()) {
                 case FolderObject.SHARED:
                     final int folderOwner = new OXFolderAccess(ctx).getFolderOwner(inFolder);
@@ -1979,8 +1975,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                 default:
                     break;
                 }
-            } catch (final OXException e) {
-                throw new OXException(e);
             }
         }
     }
@@ -3080,8 +3074,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             return null;
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             if (closeResources) {
                 closeResultSet(rs);
@@ -3149,8 +3141,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             return null;
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             if (closeResources) {
                 closeResultSet(rs);
@@ -3225,8 +3215,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             return retval.toArray(new CalendarDataObject[retval.size()]);
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             if (closeResources) {
                 closeResultSet(rs);
@@ -3298,8 +3286,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             return retval;
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             if (closeResources) {
                 closeResultSet(rs);

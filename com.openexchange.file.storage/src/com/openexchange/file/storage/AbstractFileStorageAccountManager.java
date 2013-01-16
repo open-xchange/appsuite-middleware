@@ -66,7 +66,7 @@ public abstract class AbstractFileStorageAccountManager implements FileStorageAc
 
     /**
      * Initializes a new {@link AbstractFileStorageAccountManager}.
-     * 
+     *
      * @param factory The factory
      */
     protected AbstractFileStorageAccountManager(final FileStorageServiceFactory factory) {

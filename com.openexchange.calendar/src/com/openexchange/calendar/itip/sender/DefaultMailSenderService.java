@@ -104,7 +104,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link DefaultMailSenderService}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class DefaultMailSenderService implements MailSenderService {
@@ -137,7 +137,7 @@ public class DefaultMailSenderService implements MailSenderService {
         if (!mail.shouldBeSent()) {
             return;
         }
-        
+
         send(mail, session, mail.getStateType());
     }
 
@@ -165,7 +165,7 @@ public class DefaultMailSenderService implements MailSenderService {
         }
 
     }
-    
+
     /**
      * @param message
      * @param sender
@@ -208,20 +208,20 @@ public class DefaultMailSenderService implements MailSenderService {
     private UserSettingMail getUserSettingMail(final int id, final Context context) throws OXException {
         return UserSettingMailStorage.getInstance().loadUserSettingMail(id, context);
     }
-    
+
 
     private void addBody(NotificationMail mail, MailObject message, Session session) throws MessagingException, OXException, UnsupportedEncodingException {
         NotificationConfiguration recipientConfig = mail.getRecipient().getConfiguration();
 
         String charset = MailProperties.getInstance().getDefaultMimeCharset();
-        
+
         if (recipientConfig.sendITIP()) {
         	recipientConfig = recipientConfig.clone();
             recipientConfig.setSendITIP(mail.getMessage() != null);
         }
-        
+
         boolean addAttachments = !mail.getAttachments().isEmpty() && mail.getRecipient().isExternal();
-        
+
         if (!recipientConfig.sendITIP() && !recipientConfig.includeHTML()) { // text only
         	if (!addAttachments) {
             	message.setContentType("text/plain; charset=" + charset);
@@ -264,7 +264,7 @@ public class DefaultMailSenderService implements MailSenderService {
             message.setText(textAndIcalAndHtml);
         }
     }
-    
+
     private BodyPart toPart(Multipart multipart) throws MessagingException {
     	MimeBodyPart part = new MimeBodyPart();
     	part.setContent(multipart);
@@ -277,11 +277,11 @@ public class DefaultMailSenderService implements MailSenderService {
 			Context context = contexts.getContext(session.getContextId());
 			User user = users.getUser(session.getUserId(), context);
 			UserConfiguration config = userConfigurations.getUserConfiguration(session.getUserId(), context);
-			
+
 			Appointment effective = (mail.getAppointment() != null) ? mail.getAppointment() : mail.getOriginal();
 			int folderId = effective.getParentFolderID();
 			int attachedId = effective.getObjectID();
-			
+
 			for (AttachmentMetadata metadata : mail.getAttachments()) {
 				/*
 				 * Create appropriate MIME body part
@@ -336,13 +336,13 @@ public class DefaultMailSenderService implements MailSenderService {
         Multipart textAndHtmlAndIcalMultipart = generateTextAndIcalAndHtmlMultipart(mail, charset, session);
         textAndHtml.setContent(textAndHtmlAndIcalMultipart);
         BodyPart iCalAttachment = generateIcalAttachmentPart(mail, charset, session);
-        
+
         MimeMultipart multipart = new MimeMultipart("mixed");
         multipart.addBodyPart(textAndHtml);
         multipart.addBodyPart(iCalAttachment);
         return multipart;
     }
-    
+
     private Multipart generateTextAndIcalAndHtmlMultipart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException, UnsupportedEncodingException {
         BodyPart textPart = generateTextPart(mail, charset);
         BodyPart htmlPart = generateHtmlPart(mail, charset);

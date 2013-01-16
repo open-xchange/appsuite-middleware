@@ -73,7 +73,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public interface CalendarSqlImp {
-    
+
     PreparedStatement getAllAppointments(Context c, Date d1, Date d2, String select, Connection readcon, int orderBy, Order orderDir) throws OXException, SQLException;
 
     PreparedStatement getAllAppointmentsForUser(Context c, int uid, int groups[], UserConfiguration uc, Date d1, Date d2, String select, Connection readcon, Date since, int orderBy, Order orderDir) throws OXException, SQLException;
@@ -135,7 +135,7 @@ public interface CalendarSqlImp {
     void deleteAppointment(int uid, CalendarDataObject cdao, Connection writecon, Session so, Context ctx, int inFolder, Date clientLastModified) throws SQLException, OXException;
 
     void deleteAppointment(int uid, CalendarDataObject cdao, Connection writecon, Session so, Context ctx, int inFolder, Date clientLastModified, boolean checkPermissions) throws SQLException, OXException;
-    
+
     void deleteAppointmentsInFolder(Session so, Context ctx, ResultSet objects, Connection readcon, Connection writecon, int foldertype, int fid) throws SQLException, OXException;
 
     Date setUserConfirmation(int oid, int folderId, int uid, int confirm, String confirm_message, Session so, Context ctx) throws OXException;
@@ -163,7 +163,7 @@ public interface CalendarSqlImp {
     public int resolveUid(Session session, String uid) throws OXException;
 
     int resolveFilename(Session session, String filename) throws OXException;
-    
+
     int getFolder(Session session, int objectId) throws OXException;
 
     public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message, Session so, Context ctx) throws OXException;

@@ -61,7 +61,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public enum InfostoreIndexField implements IndexField {
-    
+
     UUID(null),
     FOLDER(Metadata.FOLDER_ID_LITERAL),
     ID(Metadata.ID_LITERAL),
@@ -80,29 +80,29 @@ public enum InfostoreIndexField implements IndexField {
     NUMBER_OF_VERSIONS(Metadata.NUMBER_OF_VERSIONS_LITERAL),
     FILESTORE_LOCATION(Metadata.FILESTORE_LOCATION_LITERAL);
 
-    
-    
+
+
     private static final Map<Metadata, InfostoreIndexField> mapping = new HashMap<Metadata, InfostoreIndexField>();
-    
+
     static {
         for (InfostoreIndexField field : values()) {
             Metadata metadataField = field.getMetadataField();
             if (metadataField != null) {
                 mapping.put(metadataField, field);
-            }            
+            }
         }
     }
-    
+
     private final Metadata metadataField;
-    
+
     private InfostoreIndexField(Metadata metadataField) {
         this.metadataField = metadataField;
     }
-    
+
     public Metadata getMetadataField() {
         return metadataField;
     }
-    
+
     public static InfostoreIndexField getByMetadateField(int metadataField) {
         final Metadata key = Metadata.get(metadataField);
         return null == key ? null : mapping.get(key);

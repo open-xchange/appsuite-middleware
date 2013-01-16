@@ -50,11 +50,8 @@
 package com.openexchange.realtime.atmosphere.payload.converter.primitive;
 
 import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter.Quality;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.payload.converter.AbstractJSONConverter;
-import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.tools.session.ServerSession;
 
 

@@ -136,17 +136,11 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RdbFolderSQLInterface.class));
 
     private final int userId;
-
     private final int[] groups;
-
     private final ServerSession session;
-
     private final Context ctx;
-
     private final User user;
-
     private final UserConfiguration userConfiguration;
-
     private final OXFolderAccess oxfolderAccess;
 
     /**
@@ -167,10 +161,6 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         this.oxfolderAccess = oxfolderAccess == null ? new OXFolderAccess(session.getContext()) : oxfolderAccess;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.api2.FolderSQLInterface#getUsersInfostoreFolder()
-     */
     @Override
     public FolderObject getUsersInfostoreFolder() throws OXException {
         if (!userConfiguration.hasInfostore()) {
@@ -182,10 +172,6 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         return oxfolderAccess.getDefaultFolder(userId, FolderObject.INFOSTORE);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.api2.FolderSQLInterface#getFolderById(int)
-     */
     @Override
     public FolderObject getFolderById(final int id) throws OXException {
         final int pos = Arrays.binarySearch(VIRTUAL_IDS, id);
@@ -238,10 +224,6 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.api2.FolderSQLInterface#saveFolderObject(com.openexchange .groupware.container.FolderObject, java.util.Date)
-     */
     @Override
     public FolderObject saveFolderObject(final FolderObject folderobjectArg, final Date clientLastModified) throws OXException {
         if (folderobjectArg.getType() == FolderObject.PUBLIC && !userConfiguration.hasFullPublicFolderAccess() && (!folderobjectArg.containsModule() || folderobjectArg.getModule() != FolderObject.INFOSTORE)) {
@@ -364,10 +346,6 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.api2.FolderSQLInterface#deleteFolderObject(com.openexchange .groupware.container.FolderObject, java.util.Date)
-     */
     @Override
     public int deleteFolderObject(final FolderObject folderobject, final Date clientLastModified) throws OXException {
         try {
@@ -499,113 +477,73 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @seecom.openexchange.api2.FolderSQLInterface# getNonTreeVisiblePublicCalendarFolders()
-     */
     @Override
     public SearchIterator<FolderObject> getNonTreeVisiblePublicCalendarFolders() throws OXException {
-        try {
-            if (!userConfiguration.hasCalendar()) {
-                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
-                    getUserName(session),
-                    folderModule2String(FolderObject.CALENDAR),
-                    Integer.valueOf(ctx.getContextId()));
-            }
-            LinkedList<Integer> result;
-            if ((result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_CALENDAR.queryNum, session)) == null) {
-                loadNonTreeVisibleFoldersIntoQueryCache(session, ctx, userConfiguration);
-                result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_CALENDAR.queryNum, session);
-            }
-            return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
-        } catch (final OXException e) {
-            throw e;
+        if (!userConfiguration.hasCalendar()) {
+            throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
+                getUserName(session),
+                folderModule2String(FolderObject.CALENDAR),
+                Integer.valueOf(ctx.getContextId()));
         }
+        LinkedList<Integer> result;
+        if ((result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_CALENDAR.queryNum, session)) == null) {
+            loadNonTreeVisibleFoldersIntoQueryCache(session, ctx, userConfiguration);
+            result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_CALENDAR.queryNum, session);
+        }
+        return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.api2.FolderSQLInterface#getNonTreeVisiblePublicTaskFolders ()
-     */
     @Override
     public SearchIterator<FolderObject> getNonTreeVisiblePublicTaskFolders() throws OXException {
-        try {
-            if (!userConfiguration.hasTask()) {
-                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
-                    getUserName(session),
-                    folderModule2String(FolderObject.TASK),
-                    Integer.valueOf(ctx.getContextId()));
-            }
-            LinkedList<Integer> result;
-            if ((result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_TASK.queryNum, session)) == null) {
-                loadNonTreeVisibleFoldersIntoQueryCache(session, ctx, userConfiguration);
-                result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_TASK.queryNum, session);
-            }
-            return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
+        if (!userConfiguration.hasTask()) {
+            throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
+                getUserName(session),
+                folderModule2String(FolderObject.TASK),
+                Integer.valueOf(ctx.getContextId()));
         }
+        LinkedList<Integer> result;
+        if ((result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_TASK.queryNum, session)) == null) {
+            loadNonTreeVisibleFoldersIntoQueryCache(session, ctx, userConfiguration);
+            result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_TASK.queryNum, session);
+        }
+        return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
     }
 
-    /*
-     * (non-Javadoc)
-     * @seecom.openexchange.api2.FolderSQLInterface# getNonTreeVisiblePublicContactFolders()
-     */
     @Override
     public SearchIterator<FolderObject> getNonTreeVisiblePublicContactFolders() throws OXException {
-        try {
-            if (!userConfiguration.hasContact()) {
-                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
-                    getUserName(session),
-                    folderModule2String(FolderObject.CONTACT),
-                    Integer.valueOf(ctx.getContextId()));
-            }
-            LinkedList<Integer> result;
-            if ((result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_CONTACT.queryNum, session)) == null) {
-                loadNonTreeVisibleFoldersIntoQueryCache(session, ctx, userConfiguration);
-                result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_CONTACT.queryNum, session);
-            }
-            return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
+        if (!userConfiguration.hasContact()) {
+            throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
+                getUserName(session),
+                folderModule2String(FolderObject.CONTACT),
+                Integer.valueOf(ctx.getContextId()));
         }
+        LinkedList<Integer> result;
+        if ((result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_CONTACT.queryNum, session)) == null) {
+            loadNonTreeVisibleFoldersIntoQueryCache(session, ctx, userConfiguration);
+            result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_CONTACT.queryNum, session);
+        }
+        return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
     }
 
-    /*
-     * (non-Javadoc)
-     * @seecom.openexchange.api2.FolderSQLInterface# getNonTreeVisiblePublicInfostoreFolders()
-     */
     @Override
     public SearchIterator<FolderObject> getNonTreeVisiblePublicInfostoreFolders() throws OXException {
-        try {
-            if (!userConfiguration.hasInfostore()) {
-                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
-                    getUserName(session),
-                    folderModule2String(FolderObject.INFOSTORE),
-                    Integer.valueOf(ctx.getContextId()));
-            }
-            LinkedList<Integer> result;
-            if ((result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_INFOSTORE.queryNum, session)) == null) {
-                loadNonTreeVisibleFoldersIntoQueryCache(session, ctx, userConfiguration);
-                result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_INFOSTORE.queryNum, session);
-            }
-            return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
+        if (!userConfiguration.hasInfostore()) {
+            throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
+                getUserName(session),
+                folderModule2String(FolderObject.INFOSTORE),
+                Integer.valueOf(ctx.getContextId()));
         }
+        LinkedList<Integer> result;
+        if ((result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_INFOSTORE.queryNum, session)) == null) {
+            loadNonTreeVisibleFoldersIntoQueryCache(session, ctx, userConfiguration);
+            result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_INFOSTORE.queryNum, session);
+        }
+        return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.api2.FolderSQLInterface#getRootFolderForUser()
-     */
     @Override
     public SearchIterator<FolderObject> getRootFolderForUser() throws OXException {
-        try {
-            return OXFolderIteratorSQL.getUserRootFoldersIterator(userId, groups, userConfiguration, ctx);
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        }
+        return OXFolderIteratorSQL.getUserRootFoldersIterator(userId, groups, userConfiguration, ctx);
     }
 
     /**
@@ -649,92 +587,50 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                 return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
             }
             return OXFolderIteratorSQL.getVisibleSubfoldersIterator(parentId, userId, groups, ctx, userConfiguration, since);
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.api2.FolderSQLInterface#getSharedFoldersFrom(int, java.sql.Timestamp)
-     */
     @Override
     public SearchIterator<FolderObject> getSharedFoldersFrom(final int owner, final Timestamp since) throws OXException {
-        try {
-            if (!userConfiguration.hasFullSharedFolderAccess()) {
-                throw OXFolderExceptionCode.NO_SHARED_FOLDER_ACCESS.create(getUserName(session), Integer.valueOf(ctx.getContextId()));
-            }
-            return OXFolderIteratorSQL.getVisibleSharedFolders(
-                userId,
-                groups,
-                userConfiguration.getAccessibleModules(),
-                owner,
-                ctx,
-                since,
-                null);
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
+        if (!userConfiguration.hasFullSharedFolderAccess()) {
+            throw OXFolderExceptionCode.NO_SHARED_FOLDER_ACCESS.create(getUserName(session), Integer.valueOf(ctx.getContextId()));
         }
+        return OXFolderIteratorSQL.getVisibleSharedFolders(
+            userId,
+            groups,
+            userConfiguration.getAccessibleModules(),
+            owner,
+            ctx,
+            since,
+            null);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.api2.FolderSQLInterface#getPathToRoot(int)
-     */
     @Override
     public SearchIterator<FolderObject> getPathToRoot(final int folderId) throws OXException {
-        try {
-            return OXFolderIteratorSQL.getFoldersOnPathToRoot(folderId, userId, userConfiguration, user.getLocale(), ctx);
-        } catch (final OXException e) {
-            throw e;
-        }
+        return OXFolderIteratorSQL.getFoldersOnPathToRoot(folderId, userId, userConfiguration, user.getLocale(), ctx);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.api2.FolderSQLInterface#getDeletedFolders(java.util. Date)
-     */
     @Override
     public SearchIterator<FolderObject> getDeletedFolders(final Date since) throws OXException {
-        try {
-            return OXFolderIteratorSQL.getDeletedFoldersSince(since, userId, groups, userConfiguration.getAccessibleModules(), ctx);
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        }
+        return OXFolderIteratorSQL.getDeletedFoldersSince(since, userId, groups, userConfiguration.getAccessibleModules(), ctx);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.api2.FolderSQLInterface#getModifiedUserFolders(java. util.Date)
-     */
     @Override
     public SearchIterator<FolderObject> getModifiedUserFolders(final Date since) throws OXException {
-        try {
-            return OXFolderIteratorSQL.getModifiedFoldersSince(
-                since == null ? new Date(0) : since,
-                userId,
-                groups,
-                userConfiguration.getAccessibleModules(),
-                false,
-                ctx);
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        }
+        return OXFolderIteratorSQL.getModifiedFoldersSince(
+            since == null ? new Date(0) : since,
+            userId,
+            groups,
+            userConfiguration.getAccessibleModules(),
+            false,
+            ctx);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.api2.FolderSQLInterface#getAllModifiedFolders(java.util .Date)
-     */
     @Override
     public SearchIterator<FolderObject> getAllModifiedFolders(final Date since) throws OXException {
-        try {
-            return OXFolderIteratorSQL.getAllModifiedFoldersSince(since == null ? new Date(0) : since, ctx);
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        }
+        return OXFolderIteratorSQL.getAllModifiedFoldersSince(since == null ? new Date(0) : since, ctx);
     }
 
     @Override

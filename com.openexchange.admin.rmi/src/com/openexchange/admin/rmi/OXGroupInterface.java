@@ -65,30 +65,30 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 /**
  * This interface defines the Open-Xchange API Version 2 for creating and
  * manipulating OX groups within an OX context.<br><br>
- * 
+ *
  * <b>Example:</b>
  * <pre>
  * final OXGroupInterface iface = (OXGroupInterface)Naming.lookup("rmi:///oxhost/"+OXGroupInterface.RMI_NAME);
- * 
+ *
  * final Context ctx = new Context(1);
- * 
+ *
  * Group grp = new Group();
  * grp.setDisplayname("display name");
  * grp.setName("name");
- * 
+ *
  * final Credentials auth = new Credentials();
  * auth.setLogin("admin");
  * auth.setPassword("secret");
- * 
+ *
  * Group created = iface.create(ctx,group,auth);
- *  
+ *
  * </pre>
- *  
- * 
+ *
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- * 
+ *
  */
 public interface OXGroupInterface extends Remote {
 
@@ -99,7 +99,7 @@ public interface OXGroupInterface extends Remote {
 
     /**
      * Adds a new member to the group within given context.
-     * 
+     *
      * @param ctx
      *                Context object
      * @param grp_id
@@ -129,7 +129,7 @@ public interface OXGroupInterface extends Remote {
 
     /**
      * Method for changing group data in given context
-     * 
+     *
      * @param ctx
      *                Context object
      * @param grp
@@ -155,7 +155,7 @@ public interface OXGroupInterface extends Remote {
 
     /**
      * Create new group in given context.
-     * 
+     *
      * @param ctx
      *                Context object.
      * @param grp
@@ -181,7 +181,7 @@ public interface OXGroupInterface extends Remote {
 
     /**
      * Method for deleting group within given context.
-     * 
+     *
      * @param ctx
      *                Context object
      * @param grp
@@ -207,7 +207,7 @@ public interface OXGroupInterface extends Remote {
 
     /**
      * Delete group within given context.
-     * 
+     *
      * @param ctx
      *                Context object
      * @param grps
@@ -234,7 +234,7 @@ public interface OXGroupInterface extends Remote {
 
     /**
      * Fetch a group from server.
-     * 
+     *
      * @param ctx
      *                Context object
      * @param grp
@@ -262,7 +262,7 @@ public interface OXGroupInterface extends Remote {
     /**
      * Fetch specified groups from server. Can be used to fetch group data
      * including extensions.
-     * 
+     *
      * @param ctx
      * @param grps
      * @param auth
@@ -280,7 +280,7 @@ public interface OXGroupInterface extends Remote {
     /**
      * Gets the default group of the specified context. This method obsoletes
      * the old variant which returned an int value
-     * 
+     *
      * @param ctx
      * @param auth
      * @return The id of the default group of the context
@@ -296,7 +296,7 @@ public interface OXGroupInterface extends Remote {
     /**
      * Get User IDs of the members of this group. This method obsoletes the old
      * variant which returned an int array.
-     * 
+     *
      * @param ctx
      *                Context object
      * @param grp
@@ -323,7 +323,7 @@ public interface OXGroupInterface extends Remote {
 
     /**
      * List groups within context matching the pattern.
-     * 
+     *
      * @param ctx
      *                Context object.
      * @param pattern
@@ -349,7 +349,7 @@ public interface OXGroupInterface extends Remote {
 
     /**
      * List all groups within context.
-     * 
+     *
      * @param ctx
      *                Context object.
      * @param auth
@@ -372,7 +372,7 @@ public interface OXGroupInterface extends Remote {
     public Group[] listAll(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException;
 
     /**
-     * 
+     *
      * @param ctx
      *                Context object.
      * @param usr
@@ -399,7 +399,7 @@ public interface OXGroupInterface extends Remote {
 
     /**
      * Remove member(s) from group.
-     * 
+     *
      * @param ctx
      *                Context object
      * @param grp

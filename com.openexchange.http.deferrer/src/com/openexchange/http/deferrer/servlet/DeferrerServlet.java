@@ -62,7 +62,7 @@ import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 
 /**
  * {@link DeferrerServlet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DeferrerServlet extends HttpServlet {

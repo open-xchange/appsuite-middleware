@@ -65,12 +65,11 @@ import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
-import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link RequestReportingFilter} - Add incoming requests to the RequestWatcherService so we can track and interrupt long running requests.
  * EAS Requests aren't tracked as they are long running requests simulating server side message pushing.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RequestReportingFilter implements Filter {
@@ -86,7 +85,7 @@ public class RequestReportingFilter implements Filter {
 
     RequestWatcherService requestWatcherService = null;
 
-    private boolean isFilterEnabled;
+    private final boolean isFilterEnabled;
 
     public RequestReportingFilter() throws OXException {
         GrizzlyServiceRegistry serviceRegistry = GrizzlyServiceRegistry.getInstance();
@@ -145,7 +144,7 @@ public class RequestReportingFilter implements Filter {
 
     /**
      * Write a String to the error log.
-     * 
+     *
      * @param logValue the String that should be logged
      */
     private static void writeToErrorLog(String logValue) {
@@ -156,7 +155,7 @@ public class RequestReportingFilter implements Filter {
 
     /**
      * Write a String to the info log.
-     * 
+     *
      * @param logValue the String that should be logged
      */
     private static void writeToInfoLog(String logValue) {
@@ -167,7 +166,7 @@ public class RequestReportingFilter implements Filter {
 
     /**
      * Write a String to the debug log.
-     * 
+     *
      * @param logValue the String that should be logged
      */
     private static void writeToDebugLog(String logValue) {

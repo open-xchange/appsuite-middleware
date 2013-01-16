@@ -57,9 +57,9 @@ package com.openexchange.groupware.attach.index;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ORTerm extends SearchTerm<SearchTerm<?>[]> {
-    
+
     private final SearchTerm<?>[] terms;
-    
+
 
     public ORTerm(SearchTerm<?>[] terms) {
         super();
@@ -67,7 +67,7 @@ public class ORTerm extends SearchTerm<SearchTerm<?>[]> {
     }
 
     @Override
-    public SearchTerm<?>[] getPattern() {        
+    public SearchTerm<?>[] getPattern() {
         return terms;
     }
 

@@ -175,10 +175,9 @@ public final class IPAddressUtil {
         char ch;
         boolean saw_xdigit;
         int val;
-        final char[] srcb = src.toCharArray();
         final byte[] dst = new byte[INADDR16SZ];
 
-        int srcb_length = srcb.length;
+        int srcb_length = src.length();
         final int pc = src.indexOf('%');
         if (pc == srcb_length - 1) {
             return null;
@@ -191,8 +190,8 @@ public final class IPAddressUtil {
         colonp = -1;
         int i = 0, j = 0;
         /* Leading :: requires some special handling. */
-        if (srcb[i] == ':') {
-            if (srcb[++i] != ':') {
+        if (src.charAt(i) == ':') {
+            if (src.charAt(++i) != ':') {
                 return null;
             }
         }
@@ -200,7 +199,7 @@ public final class IPAddressUtil {
         saw_xdigit = false;
         val = 0;
         while (i < srcb_length) {
-            ch = srcb[i++];
+            ch = src.charAt(i++);
             final int chval = Character.digit(ch, 16);
             if (chval != -1) {
                 val <<= 4;

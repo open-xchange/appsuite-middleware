@@ -47,7 +47,7 @@ public enum OXJSONExceptionCodes implements OXExceptionCode {
     MISSING_FIELD(OXJSONExceptionMessage.MISSING_FIELD_MSG, Category.CATEGORY_ERROR, 9);
 
     private static final String PREFIX = "SVL";
-    
+
     private final String message;
     private final Category category;
     private final int number;

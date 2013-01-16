@@ -61,7 +61,7 @@ public interface MailRequestSha1Calculator {
 
     /**
      * Gets the SHA1 sum for given mail request.
-     * 
+     *
      * @param req The mail request
      * @return The SHA1 sum
      * @throws OXException If SHA1 sum cannot be calculated.

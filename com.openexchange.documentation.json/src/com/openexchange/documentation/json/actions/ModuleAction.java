@@ -66,9 +66,9 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Action(method = RequestMethod.GET, name = "module", description = "Get a module's description.", parameters = { 
+@Action(method = RequestMethod.GET, name = "module", description = "Get a module's description.", parameters = {
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-		@Parameter(name = "name", description = "The name of the module.") 
+		@Parameter(name = "name", description = "The name of the module.")
 }, responseDescription = "An object containing the requested module's description.")
 public final class ModuleAction extends DocumentationAction {
 

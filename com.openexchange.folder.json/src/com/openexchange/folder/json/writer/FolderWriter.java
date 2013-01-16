@@ -199,7 +199,7 @@ public final class FolderWriter {
 
         /**
          * Writes associated field's value to given JSON value.
-         * 
+         *
          * @param jsonValue The JSON value
          * @param folder The folder
          * @throws JSONException If a JSON error occurs

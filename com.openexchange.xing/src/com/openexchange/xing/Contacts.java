@@ -58,7 +58,7 @@ import com.openexchange.xing.exception.XingException;
 
 /**
  * {@link Contacts} - Represents a XING account's contacts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Contacts {
@@ -77,7 +77,7 @@ public class Contacts {
 
     /**
      * Initializes a new {@link Contacts}.
-     * 
+     *
      * @throws XingException If initialization fails
      */
     public Contacts(final JSONObject contactsInformation) throws XingException {
@@ -97,7 +97,7 @@ public class Contacts {
 
     /**
      * Gets the total
-     * 
+     *
      * @return The total
      */
     public int getTotal() {
@@ -106,7 +106,7 @@ public class Contacts {
 
     /**
      * Gets the users
-     * 
+     *
      * @return The users
      */
     public List<User> getUsers() {

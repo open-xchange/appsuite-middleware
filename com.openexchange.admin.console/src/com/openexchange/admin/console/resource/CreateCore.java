@@ -59,7 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 
 public abstract class CreateCore extends ResourceAbstraction {
-    
+
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
 
@@ -68,7 +68,7 @@ public abstract class CreateCore extends ResourceAbstraction {
         setAvailableOption(parser, false);
         setDescriptionOption(parser, false);
         setEmailOption(parser, true);
-        
+
         setFurtherOptions(parser);
     }
 
@@ -81,17 +81,17 @@ public abstract class CreateCore extends ResourceAbstraction {
             parser.ownparse(args);
 
             final Resource res = new Resource();
-            
+
             parseAndSetMandatoryFields(parser, res);
 
             final Context ctx = contextparsing(parser);
 
             final Credentials auth = credentialsparsing(parser);
-            
+
             final OXResourceInterface oxres = getResourceInterface();
-            
+
             maincall(parser, oxres, ctx, res, auth);
-            
+
             final Integer id = oxres.create(ctx, res, auth).getId();
 
             displayCreatedMessage(String.valueOf(id), ctxid, parser);

@@ -49,14 +49,14 @@
 package com.openexchange.admin.exceptions;
 
 public class OXMailToolException extends Exception {
-    
+
     /**
      * For serialization
      */
     private static final long serialVersionUID = -5639267927236312830L;
 
     /**
-     * 
+     *
      */
     public OXMailToolException() {
 

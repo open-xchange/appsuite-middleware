@@ -67,7 +67,7 @@ public enum SolrIndexExceptionCodes implements OXExceptionCode {
      * No IndexAccess implementation was found for module %1$s.
      */
     MISSING_ACCESS_FOR_MODULE(SolrIndexExceptionMessages.MISSING_ACCESS_FOR_MODULE_MSG, CATEGORY_ERROR, 1001),
-    
+
     /**
      * An I/O Error occurred: %1$s
      */

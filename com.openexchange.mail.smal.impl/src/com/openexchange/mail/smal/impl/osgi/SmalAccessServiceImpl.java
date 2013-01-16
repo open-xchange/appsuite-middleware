@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SmalAccessServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SmalAccessServiceImpl implements SmalAccessService {

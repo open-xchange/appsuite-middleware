@@ -146,6 +146,7 @@ public class OXHttpServer extends HttpServer {
      * @return the {@link ServerConfiguration} used to configure this
      *  {@link HttpServer} instance
      */
+    @Override
     public final ServerConfiguration getServerConfiguration() {
         return serverConfig;
     }
@@ -164,6 +165,7 @@ public class OXHttpServer extends HttpServer {
      * @param listener the {@link NetworkListener} to associate with this
      *  server instance.
      */
+    @Override
     public void addListener(final NetworkListener listener) {
 
         if (!started) {
@@ -192,6 +194,7 @@ public class OXHttpServer extends HttpServer {
      * @return the {@link NetworkListener}, if any, associated with the
      *  specified <code>name</code>.
      */
+    @Override
     public NetworkListener getListener(final String name) {
 
         return listeners.get(name);
@@ -203,6 +206,7 @@ public class OXHttpServer extends HttpServer {
      * @return a <code>read only</code> {@link Collection} over the listeners
      *  associated with this <code>HttpServer</code> instance.
      */
+    @Override
     public Collection<NetworkListener> getListeners() {
         return Collections.unmodifiableMap(listeners).values();
     }
@@ -221,6 +225,7 @@ public class OXHttpServer extends HttpServer {
      *
      * @param name the name of the {@link NetworkListener} to remove.
      */
+    @Override
     public NetworkListener removeListener(final String name) {
 
         final NetworkListener listener = listeners.remove(name);
@@ -242,6 +247,7 @@ public class OXHttpServer extends HttpServer {
 
     }
 
+    @Override
     DelayedExecutor getDelayedExecutor() {
         return delayedExecutor;
     }
@@ -254,6 +260,7 @@ public class OXHttpServer extends HttpServer {
      * @throws IOException if an error occurs while attempting to start the
      *  server.
      */
+    @Override
     public synchronized void start() throws IOException{
 
         if (started) {
@@ -265,7 +272,7 @@ public class OXHttpServer extends HttpServer {
 
         delayedExecutor = new DelayedExecutor(auxExecutorService);
         delayedExecutor.start();
-        
+
         for (final NetworkListener listener : listeners.values()) {
             configureListener(listener);
             try {
@@ -326,6 +333,7 @@ public class OXHttpServer extends HttpServer {
      * @return the {@link HttpHandler} used by this <code>HttpServer</code>
      *  instance.
      */
+    @Override
     public HttpHandler getHttpHandler() {
         return httpHandlerChain;
     }
@@ -335,11 +343,13 @@ public class OXHttpServer extends HttpServer {
      * @return <code>true</code> if this <code>HttpServer</code> has
      *  been started.
      */
+    @Override
     public boolean isStarted() {
         return started;
     }
 
 
+    @Override
     public JmxObject getManagementObject(boolean clear) {
         if (!clear && managementObject == null) {
             synchronized (serverConfig) {
@@ -363,6 +373,7 @@ public class OXHttpServer extends HttpServer {
      * Stops the <code>HttpServer</code> instance.
      * </p>
      */
+    @Override
     public synchronized void stop() {
 
         if (!started) {
@@ -389,13 +400,13 @@ public class OXHttpServer extends HttpServer {
 
             delayedExecutor.stop();
             delayedExecutor = null;
-            
+
             stopAuxThreadPool();
 
             if (serverConfig.isJmxEnabled()) {
                 disableJMX();
             }
-            
+
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, null, e);
         } finally {
@@ -408,7 +419,7 @@ public class OXHttpServer extends HttpServer {
         }
 
     }
-    
+
 
     /**
      * @return a <code>HttpServer</code> configured to listen to requests
@@ -496,11 +507,11 @@ public class OXHttpServer extends HttpServer {
     public static HttpServer createSimpleServer(final String path,
                                                 final String host,
                                                 final int port) {
-        
+
         return createSimpleServer(path, host, new PortRange(port));
 
     }
-    
+
     /**
      * @param path the document root.
      * @param host the network port to which this listener will bind.
@@ -527,10 +538,11 @@ public class OXHttpServer extends HttpServer {
         return server;
 
     }
-    
+
     // ------------------------------------------------------- Protected Methods
 
 
+    @Override
     protected void enableJMX() {
 
         if (jmxManager == null) {
@@ -546,6 +558,7 @@ public class OXHttpServer extends HttpServer {
     }
 
 
+    @Override
     protected void disableJMX() {
 
         if (jmxManager != null) {
@@ -613,25 +626,25 @@ public class OXHttpServer extends HttpServer {
             fileCache.getMonitoringConfig().addProbes(
                     serverConfig.getMonitoringConfig().getFileCacheConfig().getProbes());
             builder.add(fileCacheFilter);
-            
+
             final ServerFilterConfiguration config = new ServerFilterConfiguration(serverConfig);
 
             final HttpServerFilter webServerFilter = new OXHttpServerFilter(
                     config,
                     delayedExecutor);
-            
+
             if (listener.isSendFileExplicitlyConfigured()) {
                 config.setSendFileEnabled(listener.isSendFileEnabled());
             }
-            
+
             if (listener.getScheme() != null) {
                 config.setScheme(listener.getScheme());
             }
-            
+
             config.setTraceEnabled(config.isTraceEnabled() || listener.isTraceEnabled());
-            
+
             webServerFilter.setHttpHandler(httpHandlerChain);
-            
+
             webServerFilter.getMonitoringConfig().addProbes(
                     serverConfig.getMonitoringConfig().getWebServerConfig().getProbes());
 
@@ -650,6 +663,7 @@ public class OXHttpServer extends HttpServer {
         configureMonitoring(listener);
     }
 
+    @Override
     protected Set<ContentEncoding> configureCompressionEncodings(final NetworkListener listener) {
             final String mode = listener.getCompression();
             int compressionMinSize = listener.getCompressionMinSize();
@@ -756,6 +770,7 @@ public class OXHttpServer extends HttpServer {
     /**
      * Modifies handlers mapping during runtime.
      */
+    @Override
     synchronized void onAddHttpHandler(HttpHandler httpHandler, String[] mapping) {
         if (isStarted()) {
             httpHandlerChain.addHandler(httpHandler, mapping);
@@ -765,6 +780,7 @@ public class OXHttpServer extends HttpServer {
     /**
      * Modifies handlers mapping during runtime.
      */
+    @Override
     synchronized void onRemoveHttpHandler(HttpHandler httpHandler) {
         if (isStarted()) {
             httpHandlerChain.removeHttpHandler(httpHandler);

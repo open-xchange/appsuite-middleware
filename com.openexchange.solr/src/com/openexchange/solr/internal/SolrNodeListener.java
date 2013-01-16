@@ -65,12 +65,12 @@ import com.hazelcast.query.SqlPredicate;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrNodeListener implements MembershipListener {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrNodeListener.class);
-    
+
     private final HazelcastInstance hazelcast;
-    
-    
+
+
     public SolrNodeListener(HazelcastInstance hazelcast) {
         super();
         this.hazelcast = hazelcast;
@@ -87,7 +87,7 @@ public class SolrNodeListener implements MembershipListener {
         String hostAddress = member.getInetSocketAddress().getAddress().getHostAddress();
         IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
         solrNodes.remove(hostAddress);
-        
+
         String host = SolrCoreTools.resolveSocketAddress(member.getInetSocketAddress());
         SqlPredicate predicate = new SqlPredicate("this = " + host);
         IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);

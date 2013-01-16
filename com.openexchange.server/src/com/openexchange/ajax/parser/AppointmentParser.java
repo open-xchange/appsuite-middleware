@@ -131,7 +131,7 @@ public class AppointmentParser extends CalendarParser {
         if (jsonobject.has(AppointmentFields.IGNORE_CONFLICTS)) {
             appointmentobject.setIgnoreConflicts(parseBoolean(jsonobject, AppointmentFields.IGNORE_CONFLICTS));
         }
-        
+
         if (jsonobject.has(AppointmentFields.IGNORE_OUTDATED_SEQUENCE)) {
             appointmentobject.setIgnoreOutdatedSequence(parseBoolean(jsonobject, AppointmentFields.IGNORE_OUTDATED_SEQUENCE));
         }

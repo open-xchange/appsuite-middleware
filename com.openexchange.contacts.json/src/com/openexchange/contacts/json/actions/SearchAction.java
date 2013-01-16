@@ -99,7 +99,7 @@ public class SearchAction extends ContactAction {
     	JSONObject jsonObject = request.getJSONData();
         ContactSearchObject contactSearch = createContactSearchObject(jsonObject);
         List<Contact> contacts = new ArrayList<Contact>();
-        Date lastModified = addContacts(contacts, getContactService().searchContacts(request.getSession(), contactSearch, request.getFields(), 
+        Date lastModified = addContacts(contacts, getContactService().searchContacts(request.getSession(), contactSearch, request.getFields(),
             request.getSortOptions()));
         request.sortInternalIfNeeded(contacts);
         return new AJAXRequestResult(contacts, lastModified, "contact");

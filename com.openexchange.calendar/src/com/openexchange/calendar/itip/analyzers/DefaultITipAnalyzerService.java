@@ -71,11 +71,11 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultITipAnalyzerService implements ITipAnalyzerService {
-    
+
     private final Map<ITipMethod, ITipAnalyzer> analyzers = new EnumMap<ITipMethod, ITipAnalyzer>(ITipMethod.class);
-    
+
     private final ITipAnalyzer internalAnalyzer;
-    
+
     public DefaultITipAnalyzerService(ITipIntegrationUtility util, ServiceLookup services) {
         add(new AddITipAnalyzer(util, services));
         add(new CancelITipAnalyzer(util, services));
@@ -83,10 +83,10 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
         add(new RefreshITipAnalyzer(util, services));
         add(new ReplyITipAnalyzer(util, services));
         add(new UpdateITipAnalyzer(util, services));
-        
+
         internalAnalyzer = new InternalITipAnalyzer(util, services);
     }
-    
+
     private void add(ITipAnalyzer analyzer) {
         List<ITipMethod> methods = analyzer.getMethods();
         for (ITipMethod method : methods) {
@@ -105,21 +105,21 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
             if (method == ITipMethod.COUNTER && message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
                 method = ITipMethod.REPLY;
             }
-            
+
             ITipAnalyzer analyzer;
             if (mailHeader.containsKey("X-Open-Xchange-Object")) {
                 analyzer = internalAnalyzer;
             } else {
                 analyzer = analyzers.get(method);
             }
-            
+
             if (analyzer == null) {
                 // TODO: Error
             } else {
             	result.add(analyzer.analyze(message, mailHeader, format, session));
             }
         }
-        
+
         return result;
     }
 

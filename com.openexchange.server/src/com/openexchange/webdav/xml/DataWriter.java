@@ -211,10 +211,10 @@ public class DataWriter {
         /*
          * Check non-null text
          */
-        final char[] chars = text.toCharArray();
-        final StringBuilder retvalBuilder = new StringBuilder(chars.length);
-        for (int i = 0; i < chars.length; i++) {
-            int ch = chars[i];
+        final int length = text.length();
+        final StringBuilder retvalBuilder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            int ch = text.charAt(i);
             /*
              * Check for high part of a surrogate pair
              */
@@ -222,8 +222,8 @@ public class DataWriter {
                 /*
                  * Check if next char is the low-surrogate
                  */
-                if (++i < chars.length) {
-                    final char low = chars[i];
+                if (++i < length) {
+                    final char low = text.charAt(i);
                     if (low >= 0xDC00 && low <= 0xDFFF) {
                         /*
                          * Good pair, calculate character's true value to check for a valid XML character
@@ -259,7 +259,7 @@ public class DataWriter {
 
     /**
      * Gets the error message for given arguments.
-     * 
+     *
      * @param message The message template in <tt>printf</tt> style
      * @param arg The message argument
      * @return The error message
@@ -270,7 +270,7 @@ public class DataWriter {
 
     /**
      * Gets the error message for given arguments.
-     * 
+     *
      * @param message The message template in <tt>printf</tt> style
      * @param errorCode The error code
      * @return The error message

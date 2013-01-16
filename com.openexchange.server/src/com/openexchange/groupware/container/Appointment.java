@@ -88,7 +88,7 @@ public class Appointment extends CalendarObject implements Cloneable {
         FOLDER_ID,
         // From DataObject
         OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
-    
+
     public static final int[] ALL_COLUMNS_FOR_CLONE = {
         // From AppointmentObject itself
         LOCATION, FULL_TIME, SHOWN_AS,
@@ -512,7 +512,7 @@ public class Appointment extends CalendarObject implements Cloneable {
     }
 
     public static Set<Differ<? super Appointment>> differ = new HashSet<Differ<? super Appointment>>();
-    
+
     static {
         differ.addAll(CalendarObject.differ);
     }

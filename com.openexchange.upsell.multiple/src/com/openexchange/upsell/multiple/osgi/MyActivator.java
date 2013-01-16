@@ -122,7 +122,7 @@ public class MyActivator extends HousekeepingActivator {
 
         // track Remote instances
         final ServiceTrackerCustomizer<Remote, Remote> trackerCustomizer = new ServiceTrackerCustomizer<Remote, Remote>() {
-            
+
             @Override
             public void removedService(final ServiceReference<Remote> reference, final Remote service) {
                 if (null != service) {
@@ -130,12 +130,12 @@ public class MyActivator extends HousekeepingActivator {
                     context.ungetService(reference);
                 }
             }
-            
+
             @Override
             public void modifiedService(final ServiceReference<Remote> reference, final Remote service) {
                 // Ignore
             }
-            
+
             @Override
             public Remote addingService(final ServiceReference<Remote> reference) {
                 final Remote service = context.getService(reference);

@@ -189,7 +189,7 @@ public final class ContactImageDataSource implements ImageDataSource {
         /*
          * Get contact
          */
-        final Contact contact = optContact(session, objectId, folder, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE); 
+        final Contact contact = optContact(session, objectId, folder, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE);
         /*
          * Return contact image
          */
@@ -213,7 +213,7 @@ public final class ContactImageDataSource implements ImageDataSource {
 
     /**
      * Gets a contact with specified fields.
-     * 
+     *
      * @param session The current session
      * @param imageLocation The image location containing the contact information
      * @param fields The contact fields to retrieve
@@ -221,13 +221,13 @@ public final class ContactImageDataSource implements ImageDataSource {
      * @throws OXException
      */
     private static Contact optContact(Session session, ImageLocation imageLocation, ContactField...fields) throws OXException {
-        return optContact(session, ImageUtility.getUnsignedInteger(imageLocation.getId()), 
+        return optContact(session, ImageUtility.getUnsignedInteger(imageLocation.getId()),
             ImageUtility.getUnsignedInteger(imageLocation.getFolder()), fields);
     }
-    
+
     /**
      * Gets a contact with specified fields.
-     * 
+     *
      * @param objectId The object ID of the contact to get
      * @param folder The parent folder ID of the contact to get
      * @param session The current session

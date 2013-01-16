@@ -55,7 +55,7 @@ import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link ParticipantHelper}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

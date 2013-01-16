@@ -82,9 +82,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ShowMailAction implements AJAXActionService{
-    
+
     private final ServiceLookup services;
-    
+
     public ShowMailAction(final ServiceLookup services) {
         this.services = services;
     }
@@ -102,12 +102,12 @@ public class ShowMailAction implements AJAXActionService{
             }
             // Generate Mail
             final NotificationMail mail = generateMail(appointments, request, session);
-            
+
             // Put text and html into the response
             final JSONObject object = new JSONObject();
             object.put("text", mail.getText());
             object.put("html", mail.getHtml());
-     
+
             return new AJAXRequestResult(object);
         } catch (final JSONException x) {
         	throw AjaxExceptionCodes.JSON_ERROR.create(x);
@@ -116,12 +116,12 @@ public class ShowMailAction implements AJAXActionService{
 
     private Appointment[] parse(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
         final AppointmentParser parser = new AppointmentParser(true, TimeZone.getTimeZone(session.getUser().getTimeZone()));
-        
+
         final Object data = request.getData();
         if (data == null) {
             return new Appointment[0];
         }
-        
+
         if (data instanceof JSONObject) {
             final JSONObject appointment = (JSONObject) data;
             final Appointment parsed = new Appointment();
@@ -129,7 +129,7 @@ public class ShowMailAction implements AJAXActionService{
             correctConfirm(parsed, appointment);
             return new Appointment[]{parsed};
         }
-        
+
         if (data instanceof JSONArray) {
             final JSONArray appointments = (JSONArray) data;
             final List<Appointment> list = new ArrayList<Appointment>();
@@ -142,7 +142,7 @@ public class ShowMailAction implements AJAXActionService{
             }
             return list.toArray(new Appointment[list.size()]);
         }
-        
+
         return new Appointment[0];
     }
 
@@ -163,7 +163,7 @@ public class ShowMailAction implements AJAXActionService{
                 }
             }
         }
-        
+
         if (object.has("users")) {
             final JSONArray array = object.getJSONArray("users");
             for(int i = 0, size = array.length(); i < size; i++) {
@@ -196,7 +196,7 @@ public class ShowMailAction implements AJAXActionService{
             }
         }
 
-        
+
         final Participant[] participants = parsed.getParticipants();
         if (participants != null) {
             for (final Participant participant : participants) {
@@ -206,27 +206,27 @@ public class ShowMailAction implements AJAXActionService{
                     if (confirmStatus == null) {
                         confirmStatus = confirmMap.get(up.getEmailAddress().toLowerCase());
                     }
-                    
+
                     if (confirmStatus != null) {
                         up.setConfirm(confirmStatus);
                     }
-                    
-                } 
-                
+
+                }
+
                 if (participant instanceof ExternalUserParticipant) {
                     final ExternalUserParticipant ep = (ExternalUserParticipant) participant;
                     Integer confirmStatus = confirmMap.get(Integer.toString(ep.getIdentifier()));
                     if (confirmStatus == null) {
                         confirmStatus = confirmMap.get(ep.getEmailAddress().toLowerCase());
                     }
-                    
+
                     if (confirmStatus != null) {
                         ep.setConfirm(confirmStatus);
                     }
                 }
             }
         }
-        
+
         final UserParticipant[] users = parsed.getUsers();
         if (users != null) {
             for (final UserParticipant up : users) {
@@ -234,13 +234,13 @@ public class ShowMailAction implements AJAXActionService{
                 if (confirmStatus == null && up.getEmailAddress() != null) {
                     confirmStatus = confirmMap.get(up.getEmailAddress().toLowerCase());
                 }
-                
+
                 if (confirmStatus != null) {
                     up.setConfirm(confirmStatus);
                 }
             }
         }
-        
+
         final ConfirmableParticipant[] confirmations = parsed.getConfirmations();
         if (confirmations != null) {
             for (final ConfirmableParticipant ep : confirmations) {
@@ -248,13 +248,13 @@ public class ShowMailAction implements AJAXActionService{
                 if (confirmStatus == null) {
                     confirmStatus = confirmMap.get(ep.getEmailAddress().toLowerCase());
                 }
-                
+
                 if (confirmStatus != null) {
                     ep.setStatus(ConfirmStatus.byId(confirmStatus));
                 }
             }
         }
-        
+
     }
 
     private NotificationMail generateMail(final Appointment[] appointments, final AJAXRequestData request, final ServerSession session) throws OXException {
@@ -264,7 +264,7 @@ public class ShowMailAction implements AJAXActionService{
         final Appointment appointment = (appointments.length > 1) ? appointments[1] : appointments[0];
 
         final ITipMailGenerator generator = service.create(original, appointment, session, session.getUserId());
-        
+
         final String type = request.getParameter("type");
         if (type.equalsIgnoreCase("create")) {
             return generator.generateCreateMailFor(request.getParameter("mail"));
@@ -275,7 +275,7 @@ public class ShowMailAction implements AJAXActionService{
         } else if (type.equalsIgnoreCase("delete")) {
             return generator.generateDeleteMailFor(request.getParameter("mail"));
         }
-        
+
         return null;
     }
 

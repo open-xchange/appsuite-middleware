@@ -55,13 +55,13 @@ import java.util.Set;
 
 /**
  * {@link Attachment}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Attachment {
 
     private static final Set<String> ALLOWED_TYPES = new HashSet<String>();
-    
+
     static {
         ALLOWED_TYPES.add("application/pdf");
         ALLOWED_TYPES.add("application/x-pdf");
@@ -69,7 +69,7 @@ public class Attachment {
         ALLOWED_TYPES.add("applications/vnd.pdf");
         ALLOWED_TYPES.add("text/pdf");
         ALLOWED_TYPES.add("text/x-pdf");
-        
+
         /*
          * Microsoft Office Mime-Types (see http://filext.com/faq/office_mime_types.php):
          */
@@ -93,7 +93,7 @@ public class Attachment {
         ALLOWED_TYPES.add("application/vnd.ms-powerpoint.presentation.macroEnabled.12");
         ALLOWED_TYPES.add("application/vnd.ms-powerpoint.template.macroEnabled.12");
         ALLOWED_TYPES.add("application/vnd.ms-powerpoint.slideshow.macroEnabled.12");
-        
+
         /*
          * OpenOffice Mime-Types (see http://books.evc-cit.info/odbook/ch01.html#mimetype-table):
          */
@@ -141,7 +141,7 @@ public class Attachment {
 
     /**
      * Gets the module
-     * 
+     *
      * @return The module
      */
     public int getModule() {
@@ -150,7 +150,7 @@ public class Attachment {
 
     /**
      * Sets the module
-     * 
+     *
      * @param module The module to set
      */
     public void setModule(int module) {
@@ -159,7 +159,7 @@ public class Attachment {
 
     /**
      * Gets the account
-     * 
+     *
      * @return The account
      */
     public String getAccount() {
@@ -168,7 +168,7 @@ public class Attachment {
 
     /**
      * Sets the account
-     * 
+     *
      * @param account The account to set
      */
     public void setAccount(String account) {
@@ -177,7 +177,7 @@ public class Attachment {
 
     /**
      * Gets the folder
-     * 
+     *
      * @return The folder
      */
     public String getFolder() {
@@ -186,7 +186,7 @@ public class Attachment {
 
     /**
      * Sets the folder
-     * 
+     *
      * @param folder The folder to set
      */
     public void setFolder(String folder) {
@@ -195,7 +195,7 @@ public class Attachment {
 
     /**
      * Gets the objectId
-     * 
+     *
      * @return The objectId
      */
     public String getObjectId() {
@@ -204,7 +204,7 @@ public class Attachment {
 
     /**
      * Sets the objectId
-     * 
+     *
      * @param objectId The objectId to set
      */
     public void setObjectId(String objectId) {
@@ -213,7 +213,7 @@ public class Attachment {
 
     /**
      * Gets the attachmentId
-     * 
+     *
      * @return The attachmentId
      */
     public String getAttachmentId() {
@@ -222,7 +222,7 @@ public class Attachment {
 
     /**
      * Sets the attachmentId
-     * 
+     *
      * @param attachmentId The attachmentId to set
      */
     public void setAttachmentId(String attachmentId) {
@@ -231,7 +231,7 @@ public class Attachment {
 
     /**
      * Gets the fileName
-     * 
+     *
      * @return The fileName
      */
     public String getFileName() {
@@ -240,7 +240,7 @@ public class Attachment {
 
     /**
      * Sets the fileName
-     * 
+     *
      * @param fileName The fileName to set
      */
     public void setFileName(String fileName) {
@@ -249,7 +249,7 @@ public class Attachment {
 
     /**
      * Gets the fileSize
-     * 
+     *
      * @return The fileSize
      */
     public long getFileSize() {
@@ -258,7 +258,7 @@ public class Attachment {
 
     /**
      * Sets the fileSize
-     * 
+     *
      * @param fileSize The fileSize to set
      */
     public void setFileSize(long fileSize) {
@@ -267,7 +267,7 @@ public class Attachment {
 
     /**
      * Gets the mimeType
-     * 
+     *
      * @return The mimeType
      */
     public String getMimeType() {
@@ -276,7 +276,7 @@ public class Attachment {
 
     /**
      * Sets the mimeType
-     * 
+     *
      * @param mimeType The mimeType to set
      */
     public void setMimeType(String mimeType) {
@@ -285,7 +285,7 @@ public class Attachment {
 
     /**
      * Gets the md5Sum
-     * 
+     *
      * @return The md5Sum
      */
     public String getMd5Sum() {
@@ -294,7 +294,7 @@ public class Attachment {
 
     /**
      * Sets the md5Sum
-     * 
+     *
      * @param md5Sum The md5Sum to set
      */
     public void setMd5Sum(String md5Sum) {
@@ -303,7 +303,7 @@ public class Attachment {
 
     /**
      * Gets the content
-     * 
+     *
      * @return The content
      */
     public InputStream getContent() {
@@ -312,13 +312,13 @@ public class Attachment {
 
     /**
      * Sets the content
-     * 
+     *
      * @param file The content to set
      */
     public void setContent(InputStream file) {
         this.content = file;
     }
-    
+
     public static Set<String> allowedMimeTypes() {
         return ALLOWED_TYPES;
     }

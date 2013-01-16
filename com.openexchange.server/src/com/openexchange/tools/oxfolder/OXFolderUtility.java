@@ -96,7 +96,7 @@ public final class OXFolderUtility {
 
     /**
      * Gets the appropriate accessible module for DB folder queries.
-     * 
+     *
      * @param accessibleModules The accessible modules as indicated by user configuration
      * @return The appropriate accessible module for DB folder queries
      */

@@ -60,9 +60,9 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class LdapConfig {
-    
+
     public static final String CONFIG_PREFIX = "com.openexchange.contact.storage.ldap.";
-    
+
     public enum AuthType {
         ADMINDN,
         ANONYMOUS,
@@ -94,15 +94,15 @@ public class LdapConfig {
         BASE(SearchControls.OBJECT_SCOPE),
         ONE(SearchControls.ONELEVEL_SCOPE),
         SUB(SearchControls.SUBTREE_SCOPE);
-        
+
         public int getValue() {
             return value;
         }
-        
+
         private final int value;
-        
-        private SearchScope(int value) { 
-            this.value = value; 
+
+        private SearchScope(int value) {
+            this.value = value;
         }
     }
 
@@ -115,15 +115,15 @@ public class LdapConfig {
         FOLLOW("follow"),
         IGNORE("ignore"),
         STANDARD(null);
-        
+
         public String getValue() {
             return value;
         }
-        
+
         private final String value;
-        
-        private ReferralTypes(String value) { 
-            this.value = value; 
+
+        private ReferralTypes(String value) {
+            this.value = value;
         }
     }
 
@@ -136,14 +136,14 @@ public class LdapConfig {
         public String getValue() {
             return value;
         }
-        
+
         private final String value;
-        
-        private DerefAliases(String value) { 
-            this.value = value; 
+
+        private DerefAliases(String value) {
+            this.value = value;
         }
     }
-    
+
     private int contextID;
     private String folderID;
     private String folderName;
@@ -151,9 +151,9 @@ public class LdapConfig {
     private IDMapping idMapping;
     private String mappingFile;
     private String cacheConfigFile;
-    private int refreshInterval;    
+    private int refreshInterval;
     private String uri;
-    private String baseDN;    
+    private String baseDN;
     private String adminDN;
     private String adminBindPW;
     private SearchScope searchScope;
@@ -182,14 +182,14 @@ public class LdapConfig {
         super();
         this.init(properties);
     }
-    
+
     private void init(Properties properties) throws OXException {
         folderID = getProperty(properties, "folderID", null);
         if (null == folderID) {
             folderName = getProperty(properties, "foldername");
         }
         storagePriority = Integer.parseInt(getProperty(properties, "storagePriority"));
-        contextID = Integer.parseInt(getProperty(properties, "contextID"));        
+        contextID = Integer.parseInt(getProperty(properties, "contextID"));
         idMapping = IDMapping.valueOf(getProperty(properties, "idMapping").toUpperCase());
         uri = getProperty(properties, "uri");
         baseDN = getProperty(properties, "baseDN", null);
@@ -199,7 +199,7 @@ public class LdapConfig {
         authtype = AuthType.valueOf(getProperty(properties, "authtype", "AdminDN").toUpperCase());
         if (AuthType.ADMINDN.equals(authtype) && (null == adminDN || null == adminBindPW)) {
             throw LdapExceptionCodes.WRONG_OR_MISSING_CONFIG_VALUE.create("authtype/adminDN/adminBindPW");
-        } 
+        }
         if (AuthType.USER.equals(authtype)) {
             userLoginSource = LoginSource.valueOf(getProperty(properties, "userLoginSource").toUpperCase());
             userSearchAttribute = getProperty(properties, "userSearchAttribute");
@@ -239,7 +239,7 @@ public class LdapConfig {
         trustAllCerts = Boolean.parseBoolean(getProperty(properties, "trustAllCerts", "false"));
         excludeEmptyLists = Boolean.parseBoolean(getProperty(properties, "trustAllCerts", "true"));
     }
-    
+
     private static String getProperty(Properties properties, String propertyName, String defaultValue) {
         String value = properties.getProperty(CONFIG_PREFIX + propertyName);
         return null != value && 0 < value.length() ? value : defaultValue;
@@ -285,10 +285,10 @@ public class LdapConfig {
             .append('\t').append("Page results size: ").append(pagesize).append('\n')
             .append('\t').append("Result sorting: ").append(sorting).append('\n')
             .append('\t').append("ADS deletion support: ").append(adsDeletionSupport).append('\n')
-        ;        
+        ;
         return stringBuilder.toString();
     }
-    
+
     /**
      * Gets the uri
      *
@@ -297,7 +297,7 @@ public class LdapConfig {
     public String getUri() {
         return uri;
     }
-    
+
     /**
      * Sets the uri
      *
@@ -306,7 +306,7 @@ public class LdapConfig {
     public void setUri(String uri) {
         this.uri = uri;
     }
-    
+
     /**
      * Gets the baseDN
      *
@@ -315,7 +315,7 @@ public class LdapConfig {
     public String getBaseDN() {
         return baseDN;
     }
-    
+
     /**
      * Sets the baseDNUsers
      *
@@ -324,7 +324,7 @@ public class LdapConfig {
     public void setBaseDN(String baseDN) {
         this.baseDN = baseDN;
     }
-    
+
     /**
      * Gets the adminDN
      *
@@ -333,7 +333,7 @@ public class LdapConfig {
     public String getAdminDN() {
         return adminDN;
     }
-    
+
     /**
      * Sets the adminDN
      *
@@ -342,7 +342,7 @@ public class LdapConfig {
     public void setAdminDN(String adminDN) {
         this.adminDN = adminDN;
     }
-    
+
     /**
      * Gets the adminBindPW
      *
@@ -351,7 +351,7 @@ public class LdapConfig {
     public String getAdminBindPW() {
         return adminBindPW;
     }
-    
+
     /**
      * Sets the adminBindPW
      *
@@ -360,7 +360,7 @@ public class LdapConfig {
     public void setAdminBindPW(String adminBindPW) {
         this.adminBindPW = adminBindPW;
     }
-    
+
     /**
      * Gets the searchScope
      *
@@ -369,7 +369,7 @@ public class LdapConfig {
     public SearchScope getSearchScope() {
         return searchScope;
     }
-    
+
     /**
      * Sets the searchScope
      *
@@ -378,7 +378,7 @@ public class LdapConfig {
     public void setSearchScope(SearchScope searchScope) {
         this.searchScope = searchScope;
     }
-    
+
     /**
      * Gets the authtype
      *
@@ -387,7 +387,7 @@ public class LdapConfig {
     public AuthType getAuthtype() {
         return authtype;
     }
-    
+
     /**
      * Sets the authtype
      *
@@ -396,7 +396,7 @@ public class LdapConfig {
     public void setAuthtype(AuthType authtype) {
         this.authtype = authtype;
     }
-    
+
     /**
      * Gets the sorting
      *
@@ -405,7 +405,7 @@ public class LdapConfig {
     public Sorting getSorting() {
         return sorting;
     }
-    
+
     /**
      * Sets the sorting
      *
@@ -414,7 +414,7 @@ public class LdapConfig {
     public void setSorting(Sorting sorting) {
         this.sorting = sorting;
     }
-    
+
     /**
      * Gets the userLoginSource
      *
@@ -423,7 +423,7 @@ public class LdapConfig {
     public LoginSource getUserLoginSource() {
         return userLoginSource;
     }
-    
+
     /**
      * Sets the userLoginSource
      *
@@ -432,7 +432,7 @@ public class LdapConfig {
     public void setUserLoginSource(LoginSource userLoginSource) {
         this.userLoginSource = userLoginSource;
     }
-    
+
     /**
      * Gets the userSearchFilter
      *
@@ -441,7 +441,7 @@ public class LdapConfig {
     public String getUserSearchFilter() {
         return userSearchFilter;
     }
-    
+
     /**
      * Sets the userSearchFilter
      *
@@ -450,7 +450,7 @@ public class LdapConfig {
     public void setUserSearchFilter(String userSearchFilter) {
         this.userSearchFilter = userSearchFilter;
     }
-    
+
     /**
      * Gets the userSearchScope
      *
@@ -459,7 +459,7 @@ public class LdapConfig {
     public SearchScope getUserSearchScope() {
         return userSearchScope;
     }
-    
+
     /**
      * Sets the userSearchScope
      *
@@ -468,7 +468,7 @@ public class LdapConfig {
     public void setUserSearchScope(SearchScope userSearchScope) {
         this.userSearchScope = userSearchScope;
     }
-    
+
     /**
      * Gets the userSearchAttribute
      *
@@ -477,7 +477,7 @@ public class LdapConfig {
     public String getUserSearchAttribute() {
         return userSearchAttribute;
     }
-    
+
     /**
      * Sets the userSearchAttribute
      *
@@ -486,7 +486,7 @@ public class LdapConfig {
     public void setUserSearchAttribute(String userSearchAttribute) {
         this.userSearchAttribute = userSearchAttribute;
     }
-    
+
     /**
      * Gets the userSearchBaseDN
      *
@@ -495,7 +495,7 @@ public class LdapConfig {
     public String getUserSearchBaseDN() {
         return userSearchBaseDN;
     }
-    
+
     /**
      * Sets the userSearchBaseDN
      *
@@ -504,7 +504,7 @@ public class LdapConfig {
     public void setUserSearchBaseDN(String userSearchBaseDN) {
         this.userSearchBaseDN = userSearchBaseDN;
     }
-    
+
     /**
      * Gets the userAuthType
      *
@@ -513,7 +513,7 @@ public class LdapConfig {
     public AuthType getUserAuthType() {
         return userAuthType;
     }
-    
+
     /**
      * Sets the userAuthType
      *
@@ -522,7 +522,7 @@ public class LdapConfig {
     public void setUserAuthType(AuthType userAuthType) {
         this.userAuthType = userAuthType;
     }
-    
+
     /**
      * Gets the pagesize
      *
@@ -531,7 +531,7 @@ public class LdapConfig {
     public int getPagesize() {
         return pagesize;
     }
-    
+
     /**
      * Sets the pagesize
      *
@@ -549,7 +549,7 @@ public class LdapConfig {
     public String getContactMappingFile() {
         return mappingFile;
     }
-    
+
     /**
      * Sets the mappingfile
      *
@@ -567,7 +567,7 @@ public class LdapConfig {
     public String getFoldername() {
         return folderName;
     }
-    
+
     /**
      * Sets the foldername
      *
@@ -577,7 +577,7 @@ public class LdapConfig {
         this.folderName = foldername;
     }
 
-    
+
     /**
      * Gets the searchfilter
      *
@@ -586,7 +586,7 @@ public class LdapConfig {
     public String getSearchfilter() {
         return searchfilter;
     }
-    
+
     /**
      * Sets the searchfilter
      *
@@ -595,7 +595,7 @@ public class LdapConfig {
     public void setSearchfilter(String searchfilter) {
         this.searchfilter = searchfilter;
     }
-    
+
     /**
      * Gets the adsDeletionSupport
      *
@@ -604,7 +604,7 @@ public class LdapConfig {
     public boolean isAdsDeletionSupport() {
         return adsDeletionSupport;
     }
-    
+
     /**
      * Sets the adsDeletionSupport
      *
@@ -613,7 +613,7 @@ public class LdapConfig {
     public void setAdsDeletionSupport(boolean adsDeletionSupport) {
         this.adsDeletionSupport = adsDeletionSupport;
     }
-    
+
     /**
      * Gets the referrals
      *
@@ -622,7 +622,7 @@ public class LdapConfig {
     public ReferralTypes getReferrals() {
         return referrals;
     }
-    
+
     /**
      * Sets the referrals
      *
@@ -631,7 +631,7 @@ public class LdapConfig {
     public void setReferrals(ReferralTypes referrals) {
         this.referrals = referrals;
     }
-    
+
     /**
      * Gets the refreshinterval
      *
@@ -640,7 +640,7 @@ public class LdapConfig {
     public int getRefreshinterval() {
         return refreshInterval;
     }
-    
+
     /**
      * Sets the refreshinterval
      *
@@ -649,7 +649,7 @@ public class LdapConfig {
     public void setRefreshinterval(int refreshinterval) {
         this.refreshInterval = refreshinterval;
     }
-    
+
     /**
      * Gets the pooltimeout
      *
@@ -658,7 +658,7 @@ public class LdapConfig {
     public int getPooltimeout() {
         return pooltimeout;
     }
-    
+
     /**
      * Sets the pooltimeout
      *
@@ -667,7 +667,7 @@ public class LdapConfig {
     public void setPooltimeout(int pooltimeout) {
         this.pooltimeout = pooltimeout;
     }
-    
+
     /**
      * Gets the derefAliases
      *
@@ -676,7 +676,7 @@ public class LdapConfig {
     public DerefAliases getDerefAliases() {
         return derefAliases;
     }
-    
+
     /**
      * Sets the derefAliases
      *
@@ -685,7 +685,7 @@ public class LdapConfig {
     public void setDerefAliases(DerefAliases derefAliases) {
         this.derefAliases = derefAliases;
     }
-    
+
     /**
      * Gets the storagePriority
      *
@@ -694,7 +694,7 @@ public class LdapConfig {
     public int getStoragePriority() {
         return storagePriority;
     }
-    
+
     /**
      * Sets the storagePriority
      *
@@ -712,7 +712,7 @@ public class LdapConfig {
     public int getContextID() {
         return contextID;
     }
-    
+
     /**
      * Sets the contextID
      *

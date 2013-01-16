@@ -58,9 +58,9 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
- * 
+ *
  * @author d7,cutmasta
- * 
+ *
  */
 public class ListFilestore extends FilestoreAbstraction {
 
@@ -103,7 +103,7 @@ public class ListFilestore extends FilestoreAbstraction {
         for (final Filestore filestore : filestores) {
             data.add(makeCSVData(filestore, false));
         }
-        
+
         //doOutput(new String[] { "3r", "35l", "7r", "8r", "7r", "7r", "7r" },
         doOutput(new String[] { "r", "l", "r", "r", "r", "r", "r" },
                  new String[] { "id", "path", "size", "reserved", "used", "maxctx", "curctx" }, data);
@@ -156,13 +156,13 @@ public class ListFilestore extends FilestoreAbstraction {
         } else {
             rea_data.add(null);
         }
-        
+
         if (fstore.getUsed() != null) {
             rea_data.add(fstore.getUsed().toString());
         } else {
             rea_data.add(null);
         }
-        
+
         if (fstore.getMaxContexts() != null) {
             rea_data.add(fstore.getMaxContexts().toString());
         } else {
@@ -174,10 +174,10 @@ public class ListFilestore extends FilestoreAbstraction {
         } else {
             rea_data.add(null);
         }
-        
+
         return rea_data;
     }
-    
+
     @Override
     protected final String getObjectName() {
         return "filestores";

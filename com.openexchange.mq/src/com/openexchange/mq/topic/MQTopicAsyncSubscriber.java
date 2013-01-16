@@ -62,7 +62,7 @@ import com.openexchange.mq.topic.internal.WrappingMessageListener;
  * listener} to given topic.
  * <p>
  * Invoke {@link #close()} method when done.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MQTopicAsyncSubscriber extends MQTopicResource {
@@ -73,7 +73,7 @@ public final class MQTopicAsyncSubscriber extends MQTopicResource {
 
     /**
      * Initializes a new {@link MQTopicAsyncSubscriber}.
-     * 
+     *
      * @param topicName The name of topic to subscribe from
      * @throws OXException If initialization fails
      */

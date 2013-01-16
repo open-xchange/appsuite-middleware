@@ -455,7 +455,7 @@ public class ReminderHandler implements ReminderService {
             DBPool.closeReaderSilent(context, con);
         }
     }
-    
+
     @Override
     public ReminderObject[] loadReminders(final int[] targetIds, final int userId, final int module, final Connection connection) throws OXException {
         Connection con = null;
@@ -466,7 +466,7 @@ public class ReminderHandler implements ReminderService {
             con = connection;
             externalConnection = true;
         }
-    
+
         try {
             return loadReminder(targetIds, userId, module, con);
         } finally {
@@ -615,7 +615,7 @@ public class ReminderHandler implements ReminderService {
         } catch (final SearchIteratorException e) {
             DBUtils.closeSQLStuff(rs, ps);
             DBPool.closeReaderSilent(context, con);
-            throw new OXException(e);
+            throw e;
         }
     }
 
@@ -643,11 +643,7 @@ public class ReminderHandler implements ReminderService {
         /*
          * Update target
          */
-        try {
-            TargetRegistry.getInstance().getService(reminder.getModule()).updateTargetObject(context, writeCon, reminder.getTargetId());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        TargetRegistry.getInstance().getService(reminder.getModule()).updateTargetObject(context, writeCon, reminder.getTargetId());
     }
 
     @Override
@@ -667,7 +663,7 @@ public class ReminderHandler implements ReminderService {
         } catch (final SearchIteratorException exc) {
             DBUtils.closeSQLStuff(rs, ps);
             DBPool.closeReaderSilent(context, readCon);
-            throw new OXException(exc);
+            throw exc;
         } catch (final SQLException exc) {
             DBUtils.closeSQLStuff(rs, ps);
             DBPool.closeReaderSilent(context, readCon);

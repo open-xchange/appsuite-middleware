@@ -84,7 +84,7 @@ import com.openexchange.threadpool.behavior.AbortBehavior;
 
 /**
  * {@link HazelcastSessionStorageService} - The {@link SessionStorageService} backed by {@link HazelcastInstance}.
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -97,7 +97,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     /**
      * Sets specified {@link HazelcastInstance}.
-     * 
+     *
      * @param hazelcast The {@link HazelcastInstance}
      */
     public static void setHazelcastInstance(final HazelcastInstance hazelcast) {
@@ -143,7 +143,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
-     * 
+     *
      * @param mapName The name of the distributed sessions map
      */
     public HazelcastSessionStorageService(String mapName) {
@@ -152,7 +152,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         abortBehavior = AbortBehavior.<IMap<String, HazelcastStoredSession>> getInstance();
         allowFailIfPaused = false;
     }
-    
+
     /**
      * Sets the fail-if-paused behavior.
      *
@@ -191,7 +191,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     /**
      * Gets the map
-     * 
+     *
      * @return The map
      * @throws OXException If service is unavailable or currently paused
      */
@@ -232,7 +232,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     /**
      * Gets the map
-     * 
+     *
      * @return The map
      * @throws HazelcastException If service is unavailable or currently paused
      */
@@ -401,7 +401,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 }
             }
             /*
-             * also query cluster if not yet found 
+             * also query cluster if not yet found
              */
             for (HazelcastStoredSession session : filter(predicate, true)) {
                 if (null != session && session.getContextId() == contextId) {
@@ -448,7 +448,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 }
             }
             /*
-             * also query cluster if not yet found 
+             * also query cluster if not yet found
              */
             for (HazelcastStoredSession session : filter(predicate, true)) {
                 if (null != session && session.getUserId() == userId && session.getContextId() == contextId) {
@@ -531,13 +531,13 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 throw new NullPointerException("altId is null.");
             }
             Predicate<String, HazelcastStoredSession> altIdPredicate = new Predicate<String, HazelcastStoredSession>() {
-                
+
                 private static final long serialVersionUID = -4810797295980425113L;
 
                 @Override
                 public boolean apply(MapEntry<String, HazelcastStoredSession> mapEntry) {
-                    return null != mapEntry && null != mapEntry.getValue() && 
-                        altId.equals(mapEntry.getValue().getParameter(Session.PARAM_ALTERNATIVE_ID)); 
+                    return null != mapEntry && null != mapEntry.getValue() &&
+                        altId.equals(mapEntry.getValue().getParameter(Session.PARAM_ALTERNATIVE_ID));
                 }
             };
             for (HazelcastStoredSession session : filter(altIdPredicate, true)) {
@@ -610,7 +610,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     /**
      * Filters the stored sessions by a {@link Predicate}.
-     * 
+     *
      * @param predicate The predicate to use for filtering
      * @param failIfPaused <code>true</code> to abort if the hazelcast instance is paused, <code>false</code>, otherwise
      * @return The stored sessions matching the predicate, or an empty collection if none were found
@@ -620,13 +620,13 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         if (null != sessions) {
             return sessions.values(predicate);
         } else {
-            return Collections.emptyList();    
+            return Collections.emptyList();
         }
     }
-    
+
     /**
      * Filters the locally available stored sessions by a {@link Predicate}.
-     * 
+     *
      * @param predicate The predicate to use for filtering
      * @param failIfPaused <code>true</code> to abort if the hazelcast instance is paused, <code>false</code>, otherwise
      * @return The stored sessions matching the predicate, or an empty collection if none were found
@@ -643,10 +643,10 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                         values.add(storedSession);
                     }
                 }
-            }            
+            }
             return values;
         } else {
-            return Collections.emptyList();    
+            return Collections.emptyList();
         }
     }
 

@@ -52,7 +52,6 @@ package com.openexchange.http.grizzly.addon;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.glassfish.grizzly.filterchain.Filter;
 import org.glassfish.grizzly.filterchain.FilterChainBuilder;
 import org.glassfish.grizzly.http.server.AddOn;
@@ -65,7 +64,7 @@ import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 
 /**
  * {@link GrizzlOXAddOn}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class GrizzlOXAddOn implements AddOn {

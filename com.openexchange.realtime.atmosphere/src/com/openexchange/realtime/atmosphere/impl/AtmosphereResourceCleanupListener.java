@@ -58,7 +58,7 @@ import com.openexchange.log.LogFactory;
 
 
 /**
- * {@link AtmosphereResourceCleanupListener} - Properly disposes Broadcasters after the last resource was disconnected. 
+ * {@link AtmosphereResourceCleanupListener} - Properly disposes Broadcasters after the last resource was disconnected.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -94,7 +94,7 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
                     LOG.debug("Destroying broadcaster: " + broadcaster.getID());
                 }
               broadcaster.destroy();
-            } 
+            }
         }
     }
 

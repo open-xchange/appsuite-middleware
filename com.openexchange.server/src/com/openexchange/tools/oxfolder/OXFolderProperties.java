@@ -363,7 +363,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     /**
      * Updates according to given flag.
-     * 
+     *
      * @param enableInternalUsersEdit The flag
      * @param contextId The context identifier
      */

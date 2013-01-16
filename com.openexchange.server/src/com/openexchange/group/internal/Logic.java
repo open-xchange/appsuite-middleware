@@ -202,25 +202,20 @@ public final class Logic {
      * @throws OXException if a member identifier is not found in the
      * database.
      */
-    final static void doMembersExist(final Context ctx, final Group group)
-        throws OXException {
+    final static void doMembersExist(final Context ctx, final Group group) throws OXException {
         if (!group.isMemberSet()) {
             return;
         }
-        try {
-            final UserStorage storage = UserStorage.getInstance();
-            final TIntSet set = new TIntHashSet();
-            for (final int userId : storage.listAllUser(ctx)) {
-                set.add(userId);
+        final UserStorage storage = UserStorage.getInstance();
+        final TIntSet set = new TIntHashSet();
+        for (final int userId : storage.listAllUser(ctx)) {
+            set.add(userId);
+        }
+        for (final int userId : group.getMember()) {
+            if (!set.contains(userId)) {
+                throw GroupExceptionCodes.NOT_EXISTING_MEMBER.create(Integer
+                    .valueOf(userId));
             }
-            for (final int userId : group.getMember()) {
-                if (!set.contains(userId)) {
-                    throw GroupExceptionCodes.NOT_EXISTING_MEMBER.create(Integer
-                        .valueOf(userId));
-                }
-            }
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 }

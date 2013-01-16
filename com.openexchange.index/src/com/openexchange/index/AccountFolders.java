@@ -64,36 +64,36 @@ import java.util.Set;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class AccountFolders implements Serializable {
-    
+
     private static final long serialVersionUID = 5383632935001614920L;
-    
+
     private final String account;
-    
+
     private final Set<String> folders;
-    
-    
+
+
     public AccountFolders(String account) {
         this(account, Collections.EMPTY_SET);
     }
-    
+
     public AccountFolders(String account, Set<String> folders) {
         super();
         this.account = account;
         this.folders = new HashSet<String>(folders);
     }
-    
+
     public void addFolder(String folder) {
         folders.add(folder);
     }
-    
+
     public void removeFolder(String folder) {
         folders.remove(folder);
     }
-    
+
     public String getAccount() {
         return account;
     }
-    
+
     public Set<String> getFolders() {
         return folders;
     }

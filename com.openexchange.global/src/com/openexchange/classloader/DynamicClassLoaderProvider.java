@@ -38,7 +38,7 @@ public interface DynamicClassLoaderProvider {
      * its parent class loaders. This ensures that the returned class loader has access to all dynamically loaded classes that are not part
      * of this class loader. When the class loader is not needed anymore, it is released by calling the {@link #release(ClassLoader)}
      * method.
-     * 
+     *
      * @param parent The parent class loader for this dynamic class loader.
      * @return The class loader.
      * @see #release(ClassLoader)
@@ -48,7 +48,7 @@ public interface DynamicClassLoaderProvider {
     /**
      * Releases the provided class loader. When the class loader is not needed anymore, e.g. when the dynamic class loader is shutdown, it
      * is released with this method. The implementation can use this hook to free any allocated resources etc.
-     * 
+     *
      * @param classLoader The class loader.
      * @see #getClassLoader(ClassLoader)
      */

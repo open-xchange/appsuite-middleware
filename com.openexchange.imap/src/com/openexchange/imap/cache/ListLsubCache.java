@@ -351,7 +351,7 @@ public final class ListLsubCache {
 
     /**
      * Initializes ACL list
-     * 
+     *
      * @param accountId The account identifier
      * @param imapStore The IMAP store
      * @param session The session
@@ -499,7 +499,7 @@ public final class ListLsubCache {
      * Gets the LIST entry marked with "\Drafts" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
-     * 
+     *
      * @param accountId The account identifier
      * @param imapFolder The IMAP folder
      * @param session The session
@@ -527,7 +527,7 @@ public final class ListLsubCache {
      * Gets the LIST entry marked with "\Junk" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
-     * 
+     *
      * @param accountId The account identifier
      * @param imapFolder The IMAP folder
      * @param session The session
@@ -555,7 +555,7 @@ public final class ListLsubCache {
      * Gets the LIST entry marked with "\Sent" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
-     * 
+     *
      * @param accountId The account identifier
      * @param imapFolder The IMAP folder
      * @param session The session
@@ -583,7 +583,7 @@ public final class ListLsubCache {
      * Gets the LIST entry marked with "\Trash" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
-     * 
+     *
      * @param accountId The account identifier
      * @param imapFolder The IMAP folder
      * @param session The session

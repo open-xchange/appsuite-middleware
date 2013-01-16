@@ -56,9 +56,9 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Server;
 
 /**
- * 
+ *
  * @author d7,cutmasta
- * 
+ *
  */
 public class UnregisterServer extends ServerAbstraction {
 
@@ -73,10 +73,10 @@ public class UnregisterServer extends ServerAbstraction {
             parser.ownparse(args2);
 
             final Server sv = new Server();
-            
+
             parseAndSetServerID(parser, sv);
             parseAndSetServername(parser, sv);
-            
+
             successtext = nameOrIdSet(this.serverid, this.servername, "server");
 
             final Credentials auth = credentialsparsing(parser);
@@ -85,7 +85,7 @@ public class UnregisterServer extends ServerAbstraction {
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
             oxutil.unregisterServer(sv, auth);
-            
+
             displayUnregisteredMessage(successtext, parser);
             sysexit(0);
         } catch (final Exception e) {

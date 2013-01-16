@@ -57,8 +57,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link TimeMapping} - JSON specific mapping implementation for Times, 
- * i.e. {@link Date}s in the client timezone. 
+ * {@link TimeMapping} - JSON specific mapping implementation for Times,
+ * i.e. {@link Date}s in the client timezone.
  *
  * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -86,11 +86,11 @@ public abstract class TimeMapping<O> extends DefaultJsonMapping<Date, O> {
 	}
 
     private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
-        return null == timeZone ? date : date + timeZone.getOffset(date); 
+        return null == timeZone ? date : date + timeZone.getOffset(date);
     }
 
     private static long subtractTimeZoneOffset(final long date, final TimeZone timeZone) {
-        return null == timeZone ? date : date - timeZone.getOffset(date); 
+        return null == timeZone ? date : date - timeZone.getOffset(date);
     }
 
 }

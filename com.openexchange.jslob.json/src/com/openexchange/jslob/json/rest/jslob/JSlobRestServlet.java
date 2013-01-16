@@ -58,7 +58,7 @@ import com.openexchange.jslob.json.rest.MethodHandler;
 
 /**
  * {@link JSlobRestServlet} - The REST servlet for JSlob module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSlobRestServlet extends AbstractRestServlet {

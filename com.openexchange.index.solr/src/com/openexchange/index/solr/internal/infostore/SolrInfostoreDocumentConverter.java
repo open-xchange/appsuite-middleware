@@ -76,7 +76,7 @@ import com.openexchange.index.solr.internal.SolrResultConverter;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrInfostoreDocumentConverter implements SolrResultConverter<DocumentMetadata> {
-    
+
     public static SolrInputDocument convertStatic(int contextId, int userId, IndexDocument<DocumentMetadata> indexDocument) throws OXException {
         DocumentMetadata file = indexDocument.getObject();
         SolrInputDocument document = new SolrInputDocument();
@@ -96,7 +96,7 @@ public class SolrInfostoreDocumentConverter implements SolrResultConverter<Docum
             }
         }
 
-        document.setField(SolrInfostoreField.UUID.solrName(), InfostoreUUID.newUUID(contextId, userId, indexDocument.getObject()));        
+        document.setField(SolrInfostoreField.UUID.solrName(), InfostoreUUID.newUUID(contextId, userId, indexDocument.getObject()));
         return document;
     }
 
@@ -104,10 +104,10 @@ public class SolrInfostoreDocumentConverter implements SolrResultConverter<Docum
     public IndexDocument<DocumentMetadata> convert(SolrDocument document) throws OXException {
         DocumentMetadata converted = convertStatic(document);
         IndexDocument<DocumentMetadata> indexDocument = new StandardIndexDocument<DocumentMetadata>(converted);
-        
+
         return indexDocument;
     }
-    
+
     public static DocumentMetadata convertStatic(SolrDocument document) {
         DocumentMetadata file = new SolrDocumentMetadata();
         SetSwitch setter = new SetSwitch(file);
@@ -124,13 +124,13 @@ public class SolrInfostoreDocumentConverter implements SolrResultConverter<Docum
                     } else {
                         setter.setValue(value);
                     }
-                    
+
                     metadataField.doSwitch(setter);
                     setter.setValue(null);
                 }
             }
         }
-        
+
         return file;
     }
 

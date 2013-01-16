@@ -279,7 +279,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
     protected HashMap<String, String[]> setCreds(final AdminParser parser, HashMap<String, String[]> env) throws CLIIllegalOptionValueException {
         final String jmxuser = (String)parser.getOptionValue(this.jmxuser);
         final String jmxpass = (String)parser.getOptionValue(this.jmxpass);
-        
+
         if( jmxuser != null && jmxuser.trim().length() > 0 ) {
             if( jmxpass == null ) {
                 throw new CLIIllegalOptionValueException(this.jmxpass,null);

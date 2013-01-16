@@ -63,7 +63,7 @@ public class FileDiscoverer {
 
     /**
      * Initializes a new {@link FileDiscoverer}.
-     * 
+     *
      * @param dir The directory
      * @throws FileNotFoundException If directory could not be found
      */
@@ -80,7 +80,7 @@ public class FileDiscoverer {
 
     /**
      * Gets the files with given file extension
-     * 
+     *
      * @param extension The file extension; e.g. <code>".po"</code>
      * @return The matching files
      */
@@ -97,7 +97,7 @@ public class FileDiscoverer {
 
     /**
      * Parses the locale from given file name; e.g. <code>"backend.<b>en_US</b>.po"</code>.
-     * 
+     *
      * @param fileName The file name
      * @return The parsed locale or <code>null</code>
      */
@@ -122,7 +122,7 @@ public class FileDiscoverer {
 
     /**
      * Gets the directory.
-     * 
+     *
      * @return The directory
      */
     public File getDirectory() {

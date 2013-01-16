@@ -67,19 +67,19 @@ public class ITipAnalysis {
     private final Set<ITipAction> actions = EnumSet.noneOf(ITipAction.class);
     private ITipMessage message = null;
 	private String uid;
-    
+
     public ITipMessage getMessage() {
         return message;
     }
-    
+
     public void setMessage(ITipMessage message) {
         this.message = message;
     }
-    
+
     public List<ITipChange> getChanges() {
         return changes;
     }
-    
+
     public void addChange(ITipChange change) {
         changes.add(change);
     }
@@ -87,29 +87,29 @@ public class ITipAnalysis {
     public List<ITipAnnotation> getAnnotations() {
         return annotations;
     }
-    
+
     public void addAnnotation(ITipAnnotation annotation) {
-        annotations.add(annotation);  
+        annotations.add(annotation);
     }
 
     public Set<ITipAction> getActions() {
         return actions;
     }
-    
+
     public void recommendAction(ITipAction action) {
         actions.add(action);
     }
-    
+
     public void recommendActions(ITipAction...actions) {
         for (ITipAction action : actions) {
             this.actions.add(action);
         }
     }
-    
+
     public void setUid(String uid) {
 		this.uid = uid;
 	}
-    
+
 	public String getUid() {
 		return uid;
 	}

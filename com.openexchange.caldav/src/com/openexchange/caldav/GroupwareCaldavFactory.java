@@ -89,7 +89,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 /**
  * The {@link GroupwareCaldavFactory} holds access to all external groupware services and acts as the factory for CaldavResources and
  * CaldavCollections
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -109,8 +109,8 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
     private final CalendarCollectionService calendarUtils;
     private final ConfigViewFactory configs;
     private final FreeBusyService freeBusyService;
-    
-    public GroupwareCaldavFactory(SessionHolder sessionHolder, AppointmentSqlFactoryService appointments, FolderService folders, 
+
+    public GroupwareCaldavFactory(SessionHolder sessionHolder, AppointmentSqlFactoryService appointments, FolderService folders,
         ICalEmitter icalEmitter, ICalParser icalParser, UserService users, CalendarCollectionService calendarUtils, ConfigViewFactory configs,
         FreeBusyService freeBusyService) {
         this.sessionHolder = sessionHolder;
@@ -162,7 +162,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
     public TasksSQLInterface getTaskInterface() {
         return new TasksSQLImpl(getSession());
     }
-    
+
     public FolderService getFolderService() {
         return folders;
     }
@@ -236,10 +236,10 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
      * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
      */
     public static final class State {
-        
+
         private final Map<WebdavPath, CommonCollection> knownCollections;
         private final GroupwareCaldavFactory factory;
-        
+
         private Date minDateTime = null;
         private Date maxDateTime = null;
         private String treeID;
@@ -249,10 +249,10 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
             this.factory = factory;
             this.knownCollections = new HashMap<WebdavPath, CommonCollection>();
         }
-        
+
         /**
          * Gets the used folder tree identifier.
-         * 
+         *
          * @return the folder tree ID
          */
         public String getTreeID() {
@@ -266,10 +266,10 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
             }
             return treeID;
         }
-        
+
         /**
-         * Gets the configured minimum date-time for the CalDAV interface 
-         * 
+         * Gets the configured minimum date-time for the CalDAV interface
+         *
          * @return the minimum date
          */
         public Date getMinDateTime() {
@@ -285,7 +285,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
                 calendar.set(Calendar.HOUR_OF_DAY, 0);
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.set(Calendar.SECOND, 0);
-                calendar.set(Calendar.MILLISECOND, 0);                
+                calendar.set(Calendar.MILLISECOND, 0);
                 if ("one_year".equals(value)) {
                     calendar.add(Calendar.YEAR, -1);
                     calendar.set(Calendar.DAY_OF_YEAR, 1);
@@ -295,15 +295,15 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
                 } else {
                     calendar.add(Calendar.MONTH, -1);
                     calendar.set(Calendar.DAY_OF_MONTH, 1);
-                }                
-                this.minDateTime = calendar.getTime();                
+                }
+                this.minDateTime = calendar.getTime();
             }
             return minDateTime;
         }
 
         /**
-         * Gets the configured maximum date-time for the CalDAV interface 
-         * 
+         * Gets the configured maximum date-time for the CalDAV interface
+         *
          * @return the maximum date
          */
         public Date getMaxDateTime() {
@@ -322,7 +322,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.set(Calendar.SECOND, 0);
                 calendar.set(Calendar.MILLISECOND, 0);
-                this.maxDateTime = calendar.getTime();                
+                this.maxDateTime = calendar.getTime();
             }
             return maxDateTime;
         }
@@ -335,7 +335,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
             if (this.knownCollections.containsKey(url)) {
                 return knownCollections.get(url);
             }
-            
+
             CommonCollection collection = null;
             if (isRoot(url)) {
                 collection = new com.openexchange.caldav.resources.CalDAVRootCollection(factory);
@@ -345,18 +345,18 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
                 collection = factory.mixin(new com.openexchange.caldav.resources.ScheduleInboxCollection(factory));
             } else {
                 CommonCollection rootCollection = this.resolveCollection(ROOT_URL);
-                collection = (CommonCollection)rootCollection.getChild(url.name());                
+                collection = (CommonCollection)rootCollection.getChild(url.name());
             }
-            
+
             if (null == collection) {
                 throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
             } else {
                 collection = factory.mixin(collection);
-                this.knownCollections.put(url, collection);                
+                this.knownCollections.put(url, collection);
                 return collection;
             }
         }
-        
+
         public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException {
             url = sanitize(url);
             if (2 == url.size()) {
@@ -373,6 +373,6 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
         private static WebdavPath sanitize(WebdavPath url) {
             return url.startsWith(new WebdavPath("caldav")) ? url.subpath(1) : url;
         }
-        
+
     }
 }

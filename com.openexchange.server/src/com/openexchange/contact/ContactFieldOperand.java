@@ -53,19 +53,19 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.search.Operand;
 
 /**
- * {@link ContactFieldOperand} - 'Column' type search term operand for contact fields. 
+ * {@link ContactFieldOperand} - 'Column' type search term operand for contact fields.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ContactFieldOperand implements Operand<ContactField>{
 
 	private final ContactField value;
-	
+
 	public ContactFieldOperand(final ContactField value) {
 		super();
 		this.value = value;
 	}
-	
+
 	@Override
 	public com.openexchange.search.Operand.Type getType() {
 		return Type.COLUMN;
@@ -75,7 +75,7 @@ public class ContactFieldOperand implements Operand<ContactField>{
 	public ContactField getValue() {
 		return this.value;
 	}
-	
+
     @Override
     public String toString() {
         return new com.openexchange.java.StringAllocator(Type.COLUMN.getType()).append(':').append(value).toString();

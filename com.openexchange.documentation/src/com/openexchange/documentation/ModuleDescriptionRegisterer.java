@@ -58,9 +58,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.documentation.descriptions.ModuleDescription;
 
 /**
- * {@link ModuleDescriptionRegisterer} - Abstract tracker customizer that registers a {@link ModuleDescription} service when the 
+ * {@link ModuleDescriptionRegisterer} - Abstract tracker customizer that registers a {@link ModuleDescription} service when the
  * {@link DescriptionFactory} service is available.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class ModuleDescriptionRegisterer implements ServiceTrackerCustomizer<DescriptionFactory, DescriptionFactory> {
@@ -75,21 +75,21 @@ public abstract class ModuleDescriptionRegisterer implements ServiceTrackerCusto
         super();
 		this.context = context;
     }
-    
+
     /**
-     * Creates a new {@link ServiceTracker} based on this customizer instance that tracks registered services under the name of the 
+     * Creates a new {@link ServiceTracker} based on this customizer instance that tracks registered services under the name of the
      * {@link DescriptionFactory} class.
-     * 
+     *
      * @return the service tracker
      */
     public ServiceTracker<DescriptionFactory, DescriptionFactory> asTracker() {
     	return new ServiceTracker<DescriptionFactory, DescriptionFactory>(this.context, DescriptionFactory.class, this);
     }
-    
+
     /**
      * Gets the module description
-     * 
-     * @param factory a description factory instance to aid with description construction 
+     *
+     * @param factory a description factory instance to aid with description construction
      * @return the module description
      */
     protected abstract ModuleDescription getDescription(final DescriptionFactory factory);
@@ -103,7 +103,7 @@ public abstract class ModuleDescriptionRegisterer implements ServiceTrackerCusto
 
 	@Override
 	public final void modifiedService(final ServiceReference<DescriptionFactory> reference, final DescriptionFactory service) {
-		// nothing to do		
+		// nothing to do
 	}
 
 	@Override

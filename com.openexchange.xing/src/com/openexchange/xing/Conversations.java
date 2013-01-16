@@ -58,7 +58,7 @@ import com.openexchange.xing.exception.XingException;
 
 /**
  * {@link Conversations} - Represents a XING conversations response.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Conversations {
@@ -78,7 +78,7 @@ public class Conversations {
 
     /**
      * Initializes a new {@link Conversations}.
-     * 
+     *
      * @throws XingException If initialization fails
      */
     public Conversations(final JSONObject conversationsInformation) throws XingException {
@@ -99,7 +99,7 @@ public class Conversations {
 
     /**
      * Gets the total
-     * 
+     *
      * @return The total
      */
     public int getTotal() {
@@ -108,7 +108,7 @@ public class Conversations {
 
     /**
      * Gets the unread count
-     * 
+     *
      * @return The unread count
      */
     public int getUnreadCount() {
@@ -117,7 +117,7 @@ public class Conversations {
 
     /**
      * Sets the unread count.
-     * 
+     *
      * @param unreadCount The unread count
      */
     public void setUnreadCount(int unreadCount) {
@@ -126,7 +126,7 @@ public class Conversations {
 
     /**
      * Gets the items
-     * 
+     *
      * @return The items
      */
     public List<Conversation> getItems() {

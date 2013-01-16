@@ -92,16 +92,16 @@ public class CustomFutureTask<V> extends FutureTask<V> {
         number = COUNTER.incrementAndGet();
         trackable = (task instanceof Trackable) ? (Trackable) task : null;
     }
-    
+
     /**
      * Gets the associated trackable instance.
-     * 
+     *
      * @return The associated trackable instance or <code>null</code>
      */
     public Trackable getTrackable() {
         return trackable;
     }
-    
+
     /**
      * Gets the number
      *

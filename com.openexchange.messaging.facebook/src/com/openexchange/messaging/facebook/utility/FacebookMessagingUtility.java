@@ -116,7 +116,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Gets pretty-printed string representation of specified node.
-     * 
+     *
      * @param node The node
      * @return The pretty-printed string representation of specified node
      */
@@ -132,7 +132,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Pretty prints specified node.
-     * 
+     *
      * @param node The node
      * @param writer The writer
      * @throws TransformerException If a transformation error occurs

@@ -103,20 +103,20 @@ public final class UUIDs {
      * @return The UUID
      */
     public static UUID fromUnformattedString(final String unformattedString) {
-        return toUUID(decodeHex(unformattedString.toCharArray()));
+        return toUUID(decodeHex(unformattedString));
     }
 
-    private static byte[] decodeHex(final char[] data) throws IllegalArgumentException {
-        final int len = data.length;
+    private static byte[] decodeHex(final String data) throws IllegalArgumentException {
+        final int len = data.length();
         if ((len & 0x01) != 0) {
             throw new IllegalArgumentException("Odd number of characters.");
         }
         final byte[] out = new byte[len >> 1];
         // two characters form the hex value.
         for (int i = 0, j = 0; j < len; i++) {
-            int f = toDigit(data[j], j) << 4;
+            int f = toDigit(data.charAt(j), j) << 4;
             j++;
-            f = f | toDigit(data[j], j);
+            f = f | toDigit(data.charAt(j), j);
             j++;
             out[i] = (byte) (f & 0xFF);
         }

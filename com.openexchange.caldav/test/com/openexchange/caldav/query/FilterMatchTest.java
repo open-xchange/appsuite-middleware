@@ -61,7 +61,7 @@ import junit.framework.TestCase;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FilterMatchTest extends TestCase {
-    
+
     public void testMatcherForTimeSpanQuery() {
         FilterAnalyzer analyzer = new FilterAnalyzerBuilder()
             .compFilter("VCALENDAR")
@@ -70,7 +70,7 @@ public class FilterMatchTest extends TestCase {
               .end()
             .end()
         .build();
-        
+
         Filter filter = new Filter().addFilter(
             compFilter("VCALENDAR").addFilter(
                 compFilter("VEVENT").addFilter(
@@ -78,14 +78,14 @@ public class FilterMatchTest extends TestCase {
                 )
             )
         );
-        
-        ArrayList<Object> captured = new ArrayList<Object>(); 
+
+        ArrayList<Object> captured = new ArrayList<Object>();
         boolean matches = analyzer.match(filter, captured);
         assertTrue(matches);
         assertEquals(2, captured.size());
         assertEquals(D("08.09.2011 22:00").getTime(), captured.get(0));
         assertEquals(-1L, captured.get(1));
-        
+
         filter = new Filter().addFilter(
             compFilter("VCALENDAR").addFilter(
                 compFilter("VBLUPP").addFilter(
@@ -93,9 +93,9 @@ public class FilterMatchTest extends TestCase {
                 )
             )
         );
-        
+
         assertFalse(analyzer.match(filter, new ArrayList<Object>()));
-        
+
     }
 
     private Filter timeSpan(Date start) {
@@ -109,5 +109,5 @@ public class FilterMatchTest extends TestCase {
         compFilter.setName(string);
         return compFilter;
     }
-    
+
 }

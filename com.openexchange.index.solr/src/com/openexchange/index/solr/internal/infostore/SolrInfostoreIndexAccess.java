@@ -80,13 +80,13 @@ import com.openexchange.solr.SolrCoreIdentifier;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMetadata> {
-    
+
     private final SolrQueryBuilder queryBuilder;
-    
+
 
     /**
      * Initializes a new {@link SolrInfostoreIndexAccess}.
-     * 
+     *
      * @param identifier
      */
     public SolrInfostoreIndexAccess(SolrCoreIdentifier identifier, SolrQueryBuilder queryBuilder) {
@@ -114,12 +114,12 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
         if (documents.isEmpty()) {
             return;
         }
-        
+
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<DocumentMetadata> document : documents) {
             inputDocuments.add(convertToDocument(document));
         }
-        
+
         addSolrDocuments(inputDocuments);
     }
 
@@ -136,13 +136,13 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
         for (IndexDocument<DocumentMetadata> document : documents) {
             uuids.add(InfostoreUUID.newUUID(contextId, userId, document.getObject()).toString());
         }
-        
+
         String deleteQuery = buildQueryStringWithOr(SolrAttachmentField.UUID.solrName(), uuids);
         if (deleteQuery != null) {
             deleteDocumentsByQuery(deleteQuery);
         }
     }
-    
+
     @Override
     public IndexResult<DocumentMetadata> query0(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
         // TODO: implement me
@@ -151,14 +151,14 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
 
     @Override
     public IndexResult<DocumentMetadata> query0(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
-        SolrQuery solrQuery = queryBuilder.buildQuery(parameters);            
+        SolrQuery solrQuery = queryBuilder.buildQuery(parameters);
         Set<SolrInfostoreField> solrFields = convertAndCheckFields(parameters, fields);
         setFieldList(solrQuery, solrFields);
         List<IndexDocument<DocumentMetadata>> results = queryChunkWise(new SolrInfostoreDocumentConverter(), solrQuery, parameters.getOff(), parameters.getLen(), 100);
         if (results.isEmpty()) {
             return Indexes.emptyResult();
         }
-        
+
         return new SolrIndexResult<DocumentMetadata>(results.size(), results, null);
     }
 
@@ -166,7 +166,7 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
         Set<SolrInfostoreField> set;
         if (fields == null) {
             set = EnumSet.allOf(SolrInfostoreField.class);
-        } else {        
+        } else {
             set = EnumSet.noneOf(SolrInfostoreField.class);
             for (IndexField field : fields) {
                 if (field instanceof InfostoreIndexField) {
@@ -177,10 +177,10 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
                 }
             }
         }
-        
+
         return set;
     }
-    
+
     private SolrInputDocument convertToDocument(IndexDocument<DocumentMetadata> document) throws OXException {
         return SolrInfostoreDocumentConverter.convertStatic(contextId, userId, document);
     }

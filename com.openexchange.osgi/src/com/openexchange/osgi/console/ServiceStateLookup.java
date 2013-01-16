@@ -53,14 +53,14 @@ import java.util.List;
 
 /**
  * A {@link ServiceStateLookup} provides access to {@link ServiceState} Objects.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ServiceStateLookup {
 
     /**
      * Retrieves a snapshot of the current service state.
-     * 
+     *
      * @param name The name of the bundle to query the service state for.
      * @return The current service state, or <code>null</code> if the bundle is not known.
      */
@@ -68,7 +68,7 @@ public interface ServiceStateLookup {
 
     /**
      * Retrieves the names this lookup knows about
-     * 
+     *
      * @return
      */
     public List<String> getNames();

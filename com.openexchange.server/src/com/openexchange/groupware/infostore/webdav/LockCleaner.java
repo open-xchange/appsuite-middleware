@@ -115,11 +115,11 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
                 } catch (NumberFormatException e) {
                     LOG.fatal("Couldn't remove locks from infoitem. Run the consistency tool.", e);
                 }
-                
+
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
                 }
             }
-        }            
+        }
     }
 }

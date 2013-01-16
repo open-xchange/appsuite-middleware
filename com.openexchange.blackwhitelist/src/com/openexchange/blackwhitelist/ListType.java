@@ -51,11 +51,11 @@ package com.openexchange.blackwhitelist;
 
 /**
  * {@link ListType}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public enum ListType {
 
     black, white;
-    
+
 }

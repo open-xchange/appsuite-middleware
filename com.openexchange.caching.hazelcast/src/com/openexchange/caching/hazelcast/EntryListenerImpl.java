@@ -83,7 +83,7 @@ public final class EntryListenerImpl implements EntryListener<Serializable, Seri
         public int getElementEvent() {
             return elementEvent;
         }
-        
+
         public void setElementEvent(final int elementEvent) {
             this.elementEvent = elementEvent;
         }

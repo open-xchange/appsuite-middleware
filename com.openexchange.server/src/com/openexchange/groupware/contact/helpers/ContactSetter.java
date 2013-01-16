@@ -1738,7 +1738,7 @@ public class ContactSetter implements ContactSwitcher {
         conObj.setImageContentType(value);
         return conObj;
     }
-    
+
     @Override
     public Object homeaddress(Object[] objects) throws OXException {
         if (objects.length < 2) {

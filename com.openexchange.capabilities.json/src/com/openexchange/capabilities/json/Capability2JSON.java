@@ -50,12 +50,10 @@
 package com.openexchange.capabilities.json;
 
 import java.util.Collection;
-import java.util.Map;
-
+import java.util.Iterator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -67,62 +65,64 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Capability2JSON}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Capability2JSON implements ResultConverter {
 
-	@Override
-	public String getInputFormat() {
-		return "capability";
-	}
+    /**
+     * Initializes a new {@link Capability2JSON}.
+     */
+    public Capability2JSON() {
+        super();
+    }
 
-	@Override
-	public String getOutputFormat() {
-		return "json";
-	}
+    @Override
+    public String getInputFormat() {
+        return "capability";
+    }
 
-	@Override
-	public Quality getQuality() {
-		return Quality.GOOD;
-	}
+    @Override
+    public String getOutputFormat() {
+        return "json";
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public void convert(AJAXRequestData requestData, AJAXRequestResult result,
-			ServerSession session, Converter converter) throws OXException {
-		Object resultObject = result.getResultObject();
-		try {
-			if (Collection.class.isInstance(resultObject)) {
-				result.setResultObject( transform((Collection<Capability>) resultObject), "json");
-			} else {
-				result.setResultObject( transform((Capability) resultObject), "json");
-			}
-		} catch (JSONException x) {
-			throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
-		}
-	}
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
 
-	private JSONObject transform(Capability resultObject) throws JSONException {
-		JSONObject object = new JSONObject();
-		object.put("id", resultObject.getId());
-		object.put("backendSupport", resultObject.isSupportedByBackend());
-		
-		JSONObject attributes = new JSONObject();
-		for(Map.Entry<String, String> entry: resultObject.getAttributes().entrySet()) {
-			attributes.put(entry.getKey(), entry.getValue());
-		}
-		object.put("attributes", attributes);
-		
-		return object;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        Object resultObject = result.getResultObject();
+        try {
+            if (Collection.class.isInstance(resultObject)) {
+                result.setResultObject(transform((Collection<Capability>) resultObject), "json");
+            } else {
+                result.setResultObject(transform((Capability) resultObject), "json");
+            }
+        } catch (JSONException x) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
+        }
+    }
 
-	private JSONArray transform(Collection<Capability> resultObject) throws JSONException {
-		JSONArray array = new JSONArray();
-		for(Capability capability: resultObject) {
-			array.put(transform(capability));
-		}
-		return array;
-	}
+    private JSONObject transform(Capability resultObject) throws JSONException {
+        final JSONObject object = new JSONObject(3);
+        object.put("id", resultObject.getId());
+        object.put("backendSupport", resultObject.isSupportedByBackend());
+        object.put("attributes", new JSONObject(resultObject.getAttributes()));
+        return object;
+    }
+
+    private JSONArray transform(Collection<Capability> resultObjects) throws JSONException {
+        int size = resultObjects.size();
+        JSONArray array = new JSONArray(size);
+        Iterator<Capability> iterator = resultObjects.iterator();
+        for (int i = 0; i < size; i++) {
+            array.put(transform(iterator.next()));
+        }
+        return array;
+    }
 
 }

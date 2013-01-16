@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link EmptySMSFolderAccess} - The empty SMS/MMS {@link MessagingFolderAccess} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EmptySMSFolderAccess implements MessagingFolderAccess {

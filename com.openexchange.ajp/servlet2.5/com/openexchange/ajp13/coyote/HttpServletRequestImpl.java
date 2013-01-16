@@ -183,7 +183,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
 
     private HttpServlet servletInstance;
 
-    private long startTime;
+    private volatile long startTime;
 
     private ActionAwareServletInputStream servletInputStream;
 

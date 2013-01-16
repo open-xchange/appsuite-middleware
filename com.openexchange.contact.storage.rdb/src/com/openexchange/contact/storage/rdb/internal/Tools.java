@@ -79,10 +79,10 @@ import com.openexchange.tools.sql.DBUtils;
 public final class Tools {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Tools.class));
-	
+
     /**
      * Constructs a comma separated string vor the given numeric values.
-     * 
+     *
      * @param values the values
      * @return the csv-string
      */
@@ -100,9 +100,9 @@ public final class Tools {
     /**
      * Gets a string to be used as parameter values in <code>INSERT</code>- or
      * <code>UPDATE</code>-statements.
-     *   
-     * @param count the number of parameters 
-     * @return the parameter string without surrounding parentheses, e.g. 
+     *
+     * @param count the number of parameters
+     * @return the parameter string without surrounding parentheses, e.g.
      * "?,?,?,?"
      */
     public static String getParameters(final int count) {
@@ -110,7 +110,7 @@ public final class Tools {
         if (0 < count) {
             parametersBuilder.append('?');
             for (int i = 1; i < count; i++) {
-                parametersBuilder.append(",?");                
+                parametersBuilder.append(",?");
             }
         }
         return parametersBuilder.toString();
@@ -124,11 +124,11 @@ public final class Tools {
             return 0;
         }
     }
-    
+
     /**
-     * Extracts the relevant information from a {@link DataTruncation} 
+     * Extracts the relevant information from a {@link DataTruncation}
      * exception and puts it into a corresponding {@link OXException}.
-     * 
+     *
      * @param connection
      * @param e
      * @param contact
@@ -136,7 +136,7 @@ public final class Tools {
      * @return
      * @throws OXException
      */
-    public static OXException getTruncationException(final Connection connection, final DataTruncation e, final Contact contact, 
+    public static OXException getTruncationException(final Connection connection, final DataTruncation e, final Contact contact,
     		final Table table) throws OXException {
         final String[] truncatedColumns = DBUtils.parseTruncatedFields(e);
         final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
@@ -150,9 +150,9 @@ public final class Tools {
         	final ContactField field = Mappers.CONTACT.getMappedField(columnLabel);
     		final DbMapping<? extends Object, Contact> mapping = Mappers.CONTACT.get(field);
     		final Object object = mapping.get(contact);
-			final int actualSize = null != object && String.class.isInstance(object) ? 
+			final int actualSize = null != object && String.class.isInstance(object) ?
 					Charsets.getBytes((String) object, Charsets.UTF_8).length : 0;
-			stringBuilder.append(mapping.getReadableName());       		        		
+			stringBuilder.append(mapping.getReadableName());
 			truncatedAttributes[i] = new MappedTruncation<Contact>(mapping, maximumSize, actualSize, mapping.getReadableName());
         	if (i != truncatedColumns.length - 1) {
         		stringBuilder.append(", ");
@@ -164,10 +164,10 @@ public final class Tools {
         final OXException truncationException;
         if (truncatedAttributes.length > 0) {
             final OXException.Truncated truncated = truncatedAttributes[0];
-            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringBuilder.toString(), 
+            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringBuilder.toString(),
             		Integer.valueOf(truncated.getMaxSize()), Integer.valueOf(truncated.getLength()));
         } else {
-            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringBuilder.toString(), Integer.valueOf(-1), 
+            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringBuilder.toString(), Integer.valueOf(-1),
             		Integer.valueOf(-1));
         }
         for (final OXException.Truncated truncated : truncatedAttributes) {
@@ -175,15 +175,15 @@ public final class Tools {
         }
         return truncationException;
     }
-    
+
     private Tools() {
         // prevent instantiation
     }
 
 	/**
-	 * Parses a numerical identifier from a string, wrapping a possible 
+	 * Parses a numerical identifier from a string, wrapping a possible
 	 * NumberFormatException into an OXException.
-	 * 
+	 *
 	 * @param id the id string
 	 * @return the parsed identifier
 	 * @throws OXException
@@ -192,14 +192,14 @@ public final class Tools {
 		try {
 			return Integer.parseInt(id);
 		} catch (final NumberFormatException e) {
-			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id); 
+			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id);
 		}
 	}
 
 	/**
-	 * Parses an array of numerical identifiers from a string, wrapping a 
+	 * Parses an array of numerical identifiers from a string, wrapping a
 	 * possible NumberFormatException into an OXException.
-	 * 
+	 *
 	 * @param id the id string
 	 * @return the parsed identifier
 	 * @throws OXException
@@ -215,14 +215,14 @@ public final class Tools {
             }
             return intIDs;
         } catch (final NumberFormatException e) {
-			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, Arrays.toString(ids)); 
+			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, Arrays.toString(ids));
         }
     }
-	
+
     /**
-     * Updates a distribution list member with properties read out from the 
+     * Updates a distribution list member with properties read out from the
      * referenced contact.
-     * 
+     *
      * @param member the distribution list member
      * @param referencedContact the contact referenced by the member
      * @return <code>true</code>, if the member was actually updated, <code>false</code>, otherwise
@@ -235,42 +235,42 @@ public final class Tools {
     		wasUpdated = true;
     	}
     	if (referencedContact.containsDisplayName()) {
-    		if (null == referencedContact.getDisplayName() && null != member.getDisplayname() || 
+    		if (null == referencedContact.getDisplayName() && null != member.getDisplayname() ||
     				null != referencedContact.getDisplayName() && false == referencedContact.getDisplayName().equals(member.getDisplayname())) {
     			member.setDisplayname(referencedContact.getDisplayName());
     			wasUpdated = true;
     		}
     	}
     	if (referencedContact.containsSurName()) {
-    		if (null == referencedContact.getSurName() && null != member.getLastname() || 
+    		if (null == referencedContact.getSurName() && null != member.getLastname() ||
     				null != referencedContact.getSurName() && false == referencedContact.getSurName().equals(member.getLastname())) {
     			member.setLastname(referencedContact.getSurName());
     			wasUpdated = true;
     		}
     	}
     	if (referencedContact.containsGivenName()) {
-    		if (null == referencedContact.getGivenName() && null != member.getFirstname() || 
+    		if (null == referencedContact.getGivenName() && null != member.getFirstname() ||
     				null != referencedContact.getGivenName() && false == referencedContact.getGivenName().equals(member.getFirstname())) {
     			member.setFirstname(referencedContact.getGivenName());
     			wasUpdated = true;
     		}
     	}
     	if (referencedContact.containsEmail1() && DistributionListEntryObject.EMAILFIELD1 == member.getEmailfield()) {
-    		if (null == referencedContact.getEmail1() && null != member.getEmailaddress() || 
+    		if (null == referencedContact.getEmail1() && null != member.getEmailaddress() ||
     				null != referencedContact.getEmail1() && false == referencedContact.getEmail1().equals(member.getEmailaddress())) {
     			member.setEmailaddress(referencedContact.getEmail1(), false);
     			wasUpdated = true;
     		}
     	}
     	if (referencedContact.containsEmail2() && DistributionListEntryObject.EMAILFIELD2 == member.getEmailfield()) {
-    		if (null == referencedContact.getEmail2() && null != member.getEmailaddress() || 
+    		if (null == referencedContact.getEmail2() && null != member.getEmailaddress() ||
     				null != referencedContact.getEmail2() && false == referencedContact.getEmail2().equals(member.getEmailaddress())) {
     			member.setEmailaddress(referencedContact.getEmail2(), false);
     			wasUpdated = true;
     		}
     	}
     	if (referencedContact.containsEmail3() && DistributionListEntryObject.EMAILFIELD3 == member.getEmailfield()) {
-    		if (null == referencedContact.getEmail3() && null != member.getEmailaddress() || 
+    		if (null == referencedContact.getEmail3() && null != member.getEmailaddress() ||
     				null != referencedContact.getEmail3() && false == referencedContact.getEmail3().equals(member.getEmailaddress())) {
     			member.setEmailaddress(referencedContact.getEmail3(), false);
     			wasUpdated = true;
@@ -278,12 +278,12 @@ public final class Tools {
     	}
     	return wasUpdated;
     }
-    
+
     /**
      * Gets the ORDER BY clause from the sort options.
-     * 
+     *
      * @param sortOptions the sort options
-     * @return the ORDER BY clause, or an empty String if not specified 
+     * @return the ORDER BY clause, or an empty String if not specified
      * @throws OXException
      */
     public static String getOrderClause(final SortOptions sortOptions) throws OXException {
@@ -301,12 +301,12 @@ public final class Tools {
         }
         return stringBuilder.toString();
     }
-    
+
     /**
      * Gets the LIMIT clause from the sort options.
-     * 
+     *
      * @param sortOptions the sort options
-     * @return the LIMIT clause, or an empty String if not specified 
+     * @return the LIMIT clause, or an empty String if not specified
      * @throws OXException
      */
     public static String getLimitClause(final SortOptions sortOptions) throws OXException {
@@ -322,7 +322,7 @@ public final class Tools {
         }
         return stringBuilder.toString();
     }
-    
+
     private static String getOrderClause(final SortOrder order, final SuperCollator collator) throws OXException {
         final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         if (null == collator || SuperCollator.DEFAULT.equals(collator)) {
@@ -338,6 +338,6 @@ public final class Tools {
         }
         return stringBuilder.toString();
     }
-    
+
 
 }

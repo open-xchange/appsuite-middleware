@@ -84,7 +84,7 @@ public final class Tokens implements LoginRequestHandler {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(Tokens.class);
 
-    private LoginConfiguration conf;
+    private final LoginConfiguration conf;
 
     public Tokens(LoginConfiguration conf) {
         super();

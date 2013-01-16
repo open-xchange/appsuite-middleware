@@ -51,7 +51,7 @@ package com.openexchange.groupware.container;
 
 /**
  * {@link ConfirmationChange}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 

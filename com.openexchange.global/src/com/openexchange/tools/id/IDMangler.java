@@ -79,7 +79,7 @@ public class IDMangler {
 
     /**
      * Generates a mangled/composite identifier from specified String components.
-     * 
+     *
      * @param components The String components
      * @return The mangled/composite identifier
      */
@@ -102,23 +102,6 @@ public class IDMangler {
             return null;
         }
         return encodeQP(string);
-        // com.openexchange.java.StringAllocator buffer = new com.openexchange.java.StringAllocator(string.length() * 3);
-        // for (char c : string.toCharArray()) {
-        // switch (c) {
-        // case '/':
-        // buffer.append("[/]");
-        // break;
-        // case '[':
-        // buffer.append("[[]");
-        // break;
-        // case ':':
-        // buffer.append("[:]");
-        // break;
-        // default:
-        // buffer.append(c);
-        // }
-        // }
-        // return buffer.toString();
     }
 
     private static enum ParserState {
@@ -127,7 +110,7 @@ public class IDMangler {
 
     /**
      * Parses specified mangled identifier into its String components.
-     * 
+     *
      * @param mangled The mangled identifier
      * @return The identifier's components
      */
@@ -137,7 +120,7 @@ public class IDMangler {
 
     /**
      * Parses specified mangled identifier into its String components.
-     * 
+     *
      * @param mangled The mangled identifier
      * @param stateMachine <code>true</code> for state machine based parsing; otherwise <code>false</code>
      * @return The identifier's components
@@ -148,8 +131,10 @@ public class IDMangler {
             final com.openexchange.java.StringAllocator buffer = new com.openexchange.java.StringAllocator(50);
             ParserState state = ParserState.APPEND_PREFIX;
             ParserState unescapedState = null;
-    
-            for (final char c : mangled.toCharArray()) {
+
+            final int length = mangled.length();
+            for (int i = 0; i < length; i++) {
+                final char c = mangled.charAt(i);
                 switch (c) {
                 case '[': {
                     if (state == ParserState.ESCAPED) {

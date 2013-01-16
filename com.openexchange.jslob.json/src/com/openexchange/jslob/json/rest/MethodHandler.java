@@ -58,14 +58,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * Handles requests in a REST-like manner for a certain HTTP method; like <code>GET</code>, <code>PUT</code>, ...
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MethodHandler {
 
     /**
      * Parses REST-like HTTP Servlet request to an appropriate {@link AJAXRequestData} instance.
-     * 
+     *
      * @param req The HTTP Servlet request
      * @param session The session
      * @param servlet The dispatcher Servlet

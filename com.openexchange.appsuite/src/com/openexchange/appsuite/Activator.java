@@ -47,38 +47,36 @@
  *
  */
 
-package com.openexchange.ui7.osgi;
+package com.openexchange.appsuite;
 
 import java.io.File;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.ui7.AppsActionFactory;
-import com.openexchange.ui7.FileCache;
+import org.osgi.framework.BundleException;
+import org.osgi.service.http.HttpService;
+import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
 
-/**
- * {@link AppsModuleActivator}
- * 
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
- */
-public class AppsModuleActivator extends AJAXModuleActivator {
+public class Activator extends HousekeepingActivator {
 
-    private final FileCache cache;
-
-    private final File root;
-
-    public AppsModuleActivator(FileCache cache, File root) {
-        super();
-        this.cache = cache;
-        this.root = root;
-    }
+    private static Class<?>[] NEEDED_SERVICES = { HttpService.class, ConfigurationService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
+        return NEEDED_SERVICES;
     }
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new AppsActionFactory(this, cache, root), "apps");
+        String prefix = Dispatcher.PREFIX.get();
+        ConfigurationService config = getService(ConfigurationService.class);
+        String property = config.getProperty("com.openexchange.apps.path");
+        if (property == null) {
+            throw new BundleException("Missing property: com.openexchange.apps.path", BundleException.ACTIVATOR_ERROR);
+        }
+        File path = new File(property);
+        File apps = new File(path, "apps");
+        File zoneinfo = new File(config.getProperty("com.openexchange.apps.zoneinfo", "/usr/share/zoneinfo/"));
+        HttpService service = getService(HttpService.class);
+        service.registerServlet(prefix + "apps/load", new AppsLoadServlet(apps, zoneinfo), null, null);
     }
-
 }

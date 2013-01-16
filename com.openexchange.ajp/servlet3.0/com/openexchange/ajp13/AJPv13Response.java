@@ -751,9 +751,8 @@ public class AJPv13Response {
          * Write string content and terminating '0'
          */
         if (strLength > 0) {
-            final char[] chars = strValue.toCharArray();
             for (int i = 0; i < strLength; i++) {
-                sink.write((byte) chars[i]);
+                sink.write((byte) strValue.charAt(i));
             }
         }
         sink.write(0);
@@ -766,10 +765,9 @@ public class AJPv13Response {
          * Write string content and terminating '0'
          */
         if (strLength > 0) {
-            final char[] chars = strValue.toCharArray();
             final byte[] bytes = new byte[strLength];
             for (int i = 0; i < strLength; i++) {
-                bytes[i] = (byte) chars[i];
+                bytes[i] = (byte) strValue.charAt(i);
             }
             c = writeByteArray(bytes, byteArray, c);
         }

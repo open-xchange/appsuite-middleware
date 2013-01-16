@@ -56,7 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link DeferredActivatorServiceStateLookup}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DeferredActivatorServiceStateLookup implements ServiceStateLookup {
@@ -73,7 +73,7 @@ public class DeferredActivatorServiceStateLookup implements ServiceStateLookup {
 
     /**
      * Applies the given service state information.
-     * 
+     *
      * @param name The bundle's symbolic name
      * @param missing The list of symbolic names of missing services
      * @param present The list of symbolic names of available services

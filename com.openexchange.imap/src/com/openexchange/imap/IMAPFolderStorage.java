@@ -348,7 +348,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 // Supports SPECIAL-USE capability
                 checker = new SpecialUseDefaultFolderChecker(accountId, session, ctx, imapStore, imapConfig);
             } else {
-                checker = new IMAPDefaultFolderChecker(accountId, session, ctx, imapStore, imapConfig);                
+                checker = new IMAPDefaultFolderChecker(accountId, session, ctx, imapStore, imapConfig);
             }
         }
         return checker;
@@ -1178,11 +1178,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (null == mass) {
                     name = MailFolder.DEFAULT_FOLDER_NAME;
                 } else {
-                    try {
-                        name = mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
-                    } catch (final OXException e) {
-                        throw new OXException(e);
-                    }
+                    name = mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
                 }
 
             }
@@ -2859,9 +2855,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     private static String stripPOSTRight(final String rights) {
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(rights.length());
-        final char[] chars = rights.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            final char c = chars[i];
+        final int length = rights.length();
+        for (int i = 0; i < length; i++) {
+            final char c = rights.charAt(i);
             if ('p' != c && 'P' != c) {
                 sb.append(c);
             }
@@ -2955,7 +2951,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      */
     private static boolean checkFolderNameValidity(final String name, final char separator, final boolean mboxEnabled) {
         WILDCARDS.forEach(new TIntProcedure() {
-            
+
             @Override
             public boolean execute(final int value) {
                 return name.indexOf(value) < 0;

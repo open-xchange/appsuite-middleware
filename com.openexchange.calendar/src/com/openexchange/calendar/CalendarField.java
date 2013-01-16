@@ -54,7 +54,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link CalendarField}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public enum CalendarField {
@@ -120,7 +120,7 @@ public enum CalendarField {
                 return field;
             }
         }
-        
+
         return null;
     }
 

@@ -57,7 +57,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 
 public class MoveContextDatabase extends ContextAbstraction {
-    
+
     public MoveContextDatabase(final String[] args2) {
 
         final AdminParser parser = new AdminParser("movecontextdatabase");
@@ -69,9 +69,9 @@ public class MoveContextDatabase extends ContextAbstraction {
             parser.ownparse(args2);
             final Context ctx = contextparsing(parser);
             parseAndSetContextName(parser, ctx);
-            
+
             successcontext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
-            
+
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref

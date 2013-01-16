@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractMethodHandler} - The abstract method handler.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractMethodHandler implements MethodHandler {
@@ -148,7 +148,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
 
     /**
      * Gets the module identifier.
-     * 
+     *
      * @return The module identifier
      */
     protected abstract String getModule();
@@ -156,7 +156,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
     /**
      * Parses by path info (extra path information follows the Servlet path but precedes the query string and will start with a "/"
      * character)
-     * 
+     *
      * @param requestData The AJAX request data
      * @param pathInfo The path info
      * @param req The HTTP request
@@ -165,7 +165,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
 
     /**
      * Whether to apply body data.
-     * 
+     *
      * @return <code>true</code> to apply body data; else <code>false</code>
      */
     protected abstract boolean shouldApplyBody();
@@ -200,7 +200,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
 
     /**
      * Checks if specified string is empty.
-     * 
+     *
      * @param string The string
      * @return <code>true</code> if empty; else <code>false</code>
      */

@@ -55,7 +55,7 @@ import com.openexchange.caching.ElementAttributes;
 
 /**
  * {@link HazelcastCacheElement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HazelcastCacheElement implements CacheElement {
@@ -104,7 +104,7 @@ public final class HazelcastCacheElement implements CacheElement {
 
     /**
      * Sets the cache name
-     * 
+     *
      * @param cacheName The cache name to set
      */
     public void setCacheName(String cacheName) {
@@ -113,7 +113,7 @@ public final class HazelcastCacheElement implements CacheElement {
 
     /**
      * Sets the key
-     * 
+     *
      * @param key The key to set
      */
     public void setKey(Serializable key) {
@@ -122,7 +122,7 @@ public final class HazelcastCacheElement implements CacheElement {
 
     /**
      * Sets the value
-     * 
+     *
      * @param val The value to set
      */
     public void setVal(Serializable val) {

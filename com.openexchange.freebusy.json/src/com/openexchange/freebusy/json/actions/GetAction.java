@@ -63,7 +63,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link GetAction}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.GET, name = "get", description = "Get free/busy information.", parameters = {
@@ -89,7 +89,7 @@ public class GetAction extends FreeBusyAction {
             freeBusyData = getFreeBusyService().getFreeBusy(
                 request.getSession(), request.getParticipant(), request.getFrom(), request.getUntil());
         }
-        return new AJAXRequestResult(null != freeBusyData ? 
+        return new AJAXRequestResult(null != freeBusyData ?
             serialize(freeBusyData.getIntervals(), request.getTimeZone()) : JSONObject.NULL, "json");
     }
 

@@ -85,7 +85,7 @@ public abstract class ContactAction implements AJAXActionService {
 
     /**
      * Initializes a new {@link ContactAction}.
-     * 
+     *
      * @param serviceLookup The service lookup to use
      */
     public ContactAction(ServiceLookup serviceLookup) {
@@ -100,7 +100,7 @@ public abstract class ContactAction implements AJAXActionService {
 
     /**
      * Performs the request.
-     * 
+     *
      * @param request The request
      * @return The AJAX result
      * @throws OXException
@@ -109,8 +109,8 @@ public abstract class ContactAction implements AJAXActionService {
 
     /**
      * Gets the contact service.
-     * 
-     * @return the contact service 
+     *
+     * @return the contact service
      * @throws OXException
      */
     protected ContactService getContactService() throws OXException {
@@ -122,8 +122,8 @@ public abstract class ContactAction implements AJAXActionService {
     }
 
     /**
-     * Gets the latest modification date of the contact compared to another date. 
-     * 
+     * Gets the latest modification date of the contact compared to another date.
+     *
      * @param lastModified the date to compare
      * @param contact the contact
      * @return
@@ -132,12 +132,12 @@ public abstract class ContactAction implements AJAXActionService {
     	final Date contactLastModified = contact.getLastModified();
     	return null == contactLastModified || lastModified.after(contactLastModified) ? lastModified : contactLastModified;
     }
-    
+
     /**
      * Closes a search iterator silently
-     * 
+     *
      * @param searchIterator The search iterator to close
-     * @throws OXException 
+     * @throws OXException
      */
     protected static <T> void close(SearchIterator<T> searchIterator) {
     	if (null != searchIterator) {
@@ -148,14 +148,14 @@ public abstract class ContactAction implements AJAXActionService {
     	    }
     	}
     }
-    
+
     /**
-     * Adds all contacts available from a search iterator into a collection.  
-     * 
+     * Adds all contacts available from a search iterator into a collection.
+     *
      * @param contacts The collection to add the contacts to
      * @param searchIterator The search iterator to get the contacts from
      * @return The latest last-modified timestamp of all added contacts
-     * @throws OXException 
+     * @throws OXException
      */
     protected static Date addContacts(Collection<Contact> contacts, SearchIterator<Contact> searchIterator) throws OXException {
         Date lastModified = new Date(0);
@@ -171,6 +171,6 @@ public abstract class ContactAction implements AJAXActionService {
             }
         }
         return lastModified;
-    }    
+    }
 
 }

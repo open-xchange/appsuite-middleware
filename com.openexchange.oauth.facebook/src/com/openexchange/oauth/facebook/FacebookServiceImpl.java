@@ -133,7 +133,7 @@ public class FacebookServiceImpl implements FacebookService {
         return contacts;
 
     }
-    
+
     private static final Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");
 
     private static String checkToken(final String accessToken) {

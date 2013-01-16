@@ -76,13 +76,13 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
 	private final Object process(final Metadata field, final Object value) {
 		switch(field.getId()) {
 		default : return value;
-		    case Metadata.CREATION_DATE: 
+		    case Metadata.CREATION_DATE:
 		    case Metadata.LOCKED_UNTIL :
 		    case Metadata.LAST_MODIFIED_UTC:
 		    	return Long.valueOf(((Date)value).getTime());
 		    case Metadata.LAST_MODIFIED:
 		    	return (value != null) ?  Long.valueOf(((Date)value).getTime()) : Long.valueOf(System.currentTimeMillis());
-		        
+
 		}
 	}
 

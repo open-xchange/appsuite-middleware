@@ -51,7 +51,7 @@ package com.openexchange.user.copy.internal.uwa;
 
 /**
  * {@link Widget}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Widget {
@@ -73,7 +73,7 @@ public class Widget {
     private String parameters;
 
     private String adj;
-    
+
 
     public Widget() {
         super();

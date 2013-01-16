@@ -70,55 +70,55 @@ import com.openexchange.index.solr.internal.querybuilder.Configuration;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrAttachmentSearchTermVisitorTest {
-    
+
     @Test
     public void testVisitor() {
         ObjectIdTerm t1 = new ObjectIdTerm("1");
         ObjectIdTerm t2 = new ObjectIdTerm("2");
         ObjectIdTerm t3 = new ObjectIdTerm("3");
         ObjectIdTerm t4 = new ObjectIdTerm("4");
-        
+
         ORTerm orTerm1 = new ORTerm(new SearchTerm<?>[] { t1, t2 });
         ORTerm orTerm2 = new ORTerm(new SearchTerm<?>[] { t3, t4 });
         ANDTerm andTerm = new ANDTerm(new SearchTerm<?>[] { orTerm1, orTerm2 });
-        
+
         Configuration config = new Configuration() {
-            
+
             @Override
             public boolean haveTranslatorForHandler(String handler) {
                 // Nothing to do
                 return false;
             }
-            
+
             @Override
             public Map<String, String> getTranslatorMap() {
                 // Nothing to do
                 return null;
             }
-            
+
             @Override
             public String getTranslatorForHandler(String handler) {
                 // Nothing to do
                 return null;
             }
-            
+
             @Override
             public Map<String, String> getRawMapping() {
                 // Nothing to do
                 return null;
             }
-            
+
             @Override
             public Set<String> getKeys(String handlerName) {
                 return Collections.singleton(handlerName + '.' + SolrAttachmentField.OBJECT_ID.parameterName());
             }
-            
+
             @Override
             public Set<String> getKeys() {
                 // Nothing to do
                 return null;
             }
-            
+
             @Override
             public List<String> getIndexFields(String key) {
                 if (key.equals("test." + SolrAttachmentField.OBJECT_ID.parameterName())) {
@@ -126,7 +126,7 @@ public class SolrAttachmentSearchTermVisitorTest {
                 }
                 return null;
             }
-            
+
             @Override
             public Set<String> getHandlers() {
                 // Nothing to do

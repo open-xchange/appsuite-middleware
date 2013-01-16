@@ -54,7 +54,7 @@ import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link FolderID} - The folder identifier consisting of service identifier, account identifier and folder identifier.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -68,7 +68,7 @@ public class FolderID {
 
     /**
      * Initializes a new {@link FolderID}.
-     * 
+     *
      * @param service The service identifier
      * @param accountId The account identifier
      * @param folderId The folder identifier
@@ -82,7 +82,7 @@ public class FolderID {
 
     /**
      * Initializes a new {@link FolderID}.
-     * 
+     *
      * @param uniqueID The composite identifier; e.g. <code>"com.openexchange.file.storage.custom://1234/MyFolder"</code>
      */
     public FolderID(String uniqueID) {

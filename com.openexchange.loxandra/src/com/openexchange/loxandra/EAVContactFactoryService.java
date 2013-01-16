@@ -55,10 +55,10 @@ import com.openexchange.exception.OXException;
  *
  */
 public interface EAVContactFactoryService {
-	
+
 	/**
 	 * Get the contact DAO
-	 * 
+	 *
 	 * @return the contact DAO
 	 */
 	public EAVContactService getEAVContactService() throws OXException;

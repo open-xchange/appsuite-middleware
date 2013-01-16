@@ -62,7 +62,7 @@ import com.openexchange.mail.index.MailIndexField;
 
 /**
  * {@link SolrMailField}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public enum SolrMailField implements SolrField {
@@ -96,13 +96,13 @@ public enum SolrMailField implements SolrField {
     CONTENT_FLAG("content_flag", MailIndexField.CONTENT_FLAG, "param27"),
     CONTENT("content", MailIndexField.CONTENT, "param28");
 
-    
+
     private static final Set<MailIndexField> indexedFields;
 
     private final String solrName;
 
     private final MailIndexField indexField;
-    
+
     private final String customParameter;
 
     static {
@@ -125,26 +125,26 @@ public enum SolrMailField implements SolrField {
     public String solrName() {
         return solrName;
     }
-    
+
     @Override
     public String parameterName() {
         return customParameter;
     }
-    
+
     @Override
     public MailIndexField indexField() {
         return indexField;
     }
-    
+
     public boolean isIndexed() {
         return !StringUtils.isEmpty(solrName);
     }
 
     /**
      * Gets the appropriate index field for specified Solr name.
-     * 
+     *
      * @param solrName The Solr name
-     * @return The index field or <code>null</code> 
+     * @return The index field or <code>null</code>
      */
     public static MailIndexField fieldFor(final String solrName) {
         if (null == solrName) {
@@ -157,7 +157,7 @@ public enum SolrMailField implements SolrField {
         }
         return null;
     }
-    
+
 
     public static Set<MailIndexField> getIndexedFields() {
         return indexedFields;

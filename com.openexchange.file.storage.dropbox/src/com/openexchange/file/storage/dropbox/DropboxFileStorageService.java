@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link DropboxFileStorageService} - The Dropbox file storage service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DropboxFileStorageService implements AccountAware {
@@ -82,7 +82,7 @@ public final class DropboxFileStorageService implements AccountAware {
 
     /**
      * Creates a new Dropbox file storage service.
-     * 
+     *
      * @return A new Dropbox file storage service
      */
     public static DropboxFileStorageService newInstance() {
@@ -91,7 +91,7 @@ public final class DropboxFileStorageService implements AccountAware {
 
     /**
      * Creates a new Dropbox file storage service.
-     * 
+     *
      * @param compositeAccountManager The composite account manager
      * @return A new Dropbox file storage service
      */
@@ -143,7 +143,7 @@ public final class DropboxFileStorageService implements AccountAware {
     private void applyCompositeAccountManager(final CompositeFileStorageAccountManagerProvider compositeAccountManager) {
         this.compositeAccountManager = compositeAccountManager;
     }
-    
+
     /**
      * Gets the composite account manager.
      *

@@ -10,8 +10,8 @@ import java.util.regex.Pattern;
  * context name and an optional resource.
  * Resources are arbitrary Strings that allow the user to specify how he is
  * currently connected to the service (e.g. one resource per client) and by
- * that enable multiple logins from different machines and locations.   
- * 
+ * that enable multiple logins from different machines and locations.
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -60,7 +60,7 @@ public class ID implements Serializable {
 
     /*
      * Check optional id components for emtpy strings and sanitize by setting
-     * to null or default values. 
+     * to null or default values.
      */
     private void sanitize() {
         if (protocol != null && isEmpty(protocol)) {
@@ -70,9 +70,9 @@ public class ID implements Serializable {
         if (resource != null && isEmpty(resource)) {
             resource = null;
         }
-        
+
     }
-        
+
 
     private static boolean isEmpty(final String string) {
         if (null == string) {

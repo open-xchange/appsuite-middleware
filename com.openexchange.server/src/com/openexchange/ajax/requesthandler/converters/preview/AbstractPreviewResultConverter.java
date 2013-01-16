@@ -129,7 +129,7 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
                 dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
                 dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
                 dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
-                
+
                 int pages = -1;
                 if (requestData.containsParameter("pages")) {
                     pages = requestData.getIntParameter("pages");
@@ -164,7 +164,7 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
     /**
      * Parses specified value to a <code>boolean</code>:<br>
      * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or "1".
-     * 
+     *
      * @param value The value to parse
      * @return The parsed <code>boolean</code> value
      */
@@ -187,7 +187,7 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
 
     /**
      * Detects display mode dependent on passed arguments.
-     * 
+     *
      * @param modifyable Whether content is intended being modified by client
      * @param view The view parameter
      * @param usm The user settings

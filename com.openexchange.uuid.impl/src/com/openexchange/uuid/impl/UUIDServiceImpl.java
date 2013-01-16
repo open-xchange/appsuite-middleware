@@ -54,15 +54,15 @@ import com.openexchange.eav.UUIDService;
 
 /**
  * Implementation of {@link UUIDService}
- * 
+ *
  * The structure of the generated UUID is as follows:
  * 12 bytes for contextID, 4 bytes for moduleID, 12 bytes for objectID<br/>
  * eg.: 00000000-0002-0007-0000-00000000000a refers to contextID:2, moduleID: 7, objectID: 10<br/><br/>
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class UUIDServiceImpl implements UUIDService {
-	
+
 	private static final int contextShift = 16;
 
 	/* (non-Javadoc)
@@ -74,7 +74,7 @@ public class UUIDServiceImpl implements UUIDService {
 		long cid = contextID & 0xffffffffL;;
 		long msb = cid << contextShift;
 		msb += moduleID;
-		
+
 		return new UUID(msb, lsb);
 	}
 

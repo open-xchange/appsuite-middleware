@@ -61,11 +61,11 @@ import com.hazelcast.core.Member;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrCoreTools {
-    
+
     public static final String SOLR_NODE_MAP = "solrNodeMap";
-    
+
     public static final String SOLR_CORE_MAP = "solrCoreMap";
-    
+
     public static void incrementCoreCount(HazelcastInstance hazelcast, Member member) {
         IMap<String, Integer> solrNodes = hazelcast.getMap(SOLR_NODE_MAP);
         String localAddress = member.getInetSocketAddress().getAddress().getHostAddress();

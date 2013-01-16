@@ -83,7 +83,7 @@ import com.openexchange.solr.SolrCoreIdentifier;
 
 /**
  * {@link AbstractSolrIndexAccess}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
@@ -108,7 +108,7 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
 
     /**
      * Initializes a new {@link AbstractSolrIndexAccess}.
-     * 
+     *
      * @param identifier The Solr index identifier
      */
     protected AbstractSolrIndexAccess(final SolrCoreIdentifier identifier) {

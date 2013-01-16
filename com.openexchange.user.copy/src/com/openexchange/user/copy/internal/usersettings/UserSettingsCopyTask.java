@@ -82,16 +82,16 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class UserSettingsCopyTask implements CopyUserTaskService {
-    
+
     private static final String SELECT_SQL = "SELECT path_id, value FROM user_setting WHERE cid = ? AND user_id = ?";
-    
+
     private static final String INSERT_SQL = "INSERT INTO user_setting (cid, user_id, path_id, value) VALUES (?, ?, ?, ?)";
-    
+
     private static final String SELECT_SERVER_SQL = "SELECT contact_collect_folder, contact_collect_enabled, defaultStatusPrivate, defaultStatusPublic, contactCollectOnMailTransport, contactCollectOnMailAccess, folderTree FROM user_setting_server WHERE cid = ? AND user = ?";
-    
+
     private static final String INSERT_SERVER_SQL = "INSERT INTO user_setting_server (cid, user, contact_collect_folder, contact_collect_enabled, defaultStatusPrivate, defaultStatusPublic, contactCollectOnMailTransport, contactCollectOnMailAccess, folderTree) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
-    
+
+
     /**
      * Initializes a new {@link UserSettingsCopyTask}.
      */
@@ -124,21 +124,21 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
     public ObjectMapping<?> copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {
         final CopyTools copyTools = new CopyTools(copied);
         final Integer srcCtxId = copyTools.getSourceContextId();
-        final Integer dstCtxId = copyTools.getDestinationContextId();        
+        final Integer dstCtxId = copyTools.getDestinationContextId();
         final Integer srcUsrId = copyTools.getSourceUserId();
-        final Integer dstUsrId = copyTools.getDestinationUserId();        
+        final Integer dstUsrId = copyTools.getDestinationUserId();
         final Connection srcCon = copyTools.getSourceConnection();
         final Connection dstCon = copyTools.getDestinationConnection();
         final Context srcCtx = copyTools.getSourceContext();
         final Context dstCtx = copyTools.getDestinationContext();
         final ObjectMapping<FolderObject> folderMapping = copyTools.getFolderMapping();
-        
+
         /*
          * user_setting
          */
         final List<UserSettingEntry> settings = loadSettingsFromDB(srcCon, i(srcCtxId), i(srcUsrId));
         writeSettingsToDB(dstCon, settings, i(dstCtxId), i(dstUsrId));
-        
+
         /*
          * user_setting_mail
          */
@@ -149,7 +149,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
         } catch (final OXException e) {
             throw UserCopyExceptionCodes.SAVE_MAIL_SETTINGS_PROBLEM.create(e);
         }
-        
+
         /*
          * user_setting_server
          */
@@ -164,14 +164,14 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
                     dstCollectionFolderId = dstCollectionFolder.getObjectID();
                 }
             }
-            
+
             serverSetting.setFolder(dstCollectionFolderId);
             writeServerSettingToDB(dstCon, i(dstCtxId), i(dstUsrId), serverSetting);
         }
-        
+
         return null;
     }
-    
+
     private ServerSetting loadServerSettingFromDB(final Connection con, final int cid, final int uid) throws OXException {
         ServerSetting setting = null;
         PreparedStatement stmt = null;
@@ -180,7 +180,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
             stmt = con.prepareStatement(SELECT_SERVER_SQL);
             stmt.setInt(1, cid);
             stmt.setInt(2, uid);
-            
+
             rs = stmt.executeQuery();
             if (rs.next()) {
                 int i = 1;
@@ -198,10 +198,10 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
-        
+
         return setting;
     }
-    
+
     private void writeServerSettingToDB(final Connection con, final int cid, final int uid, final ServerSetting setting) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -216,7 +216,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
             stmt.setInt(i++, setting.isContactCollectOnMailTransport() ? 1 : 0);
             stmt.setInt(i++, setting.isContactCollectOnMailAccess() ? 1 : 0);
             setIntOrNull(i++, stmt, setting.getFolderTree());
-            
+
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
@@ -224,7 +224,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(stmt);
         }
     }
-    
+
     private List<UserSettingEntry> loadSettingsFromDB(final Connection con, final int cid, final int uid) throws OXException {
         final List<UserSettingEntry> settings = new ArrayList<UserSettingEntry>();
         PreparedStatement stmt = null;
@@ -233,40 +233,40 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
             stmt = con.prepareStatement(SELECT_SQL);
             stmt.setInt(1, cid);
             stmt.setInt(2, uid);
-            
+
             rs = stmt.executeQuery();
             while (rs.next()) {
                 final UserSettingEntry setting = new UserSettingEntry();
                 setting.setPathId(rs.getInt(1));
                 setting.setValue(rs.getString(2));
-                
+
                 settings.add(setting);
-            }            
+            }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
-        
+
         return settings;
     }
-    
+
     private void writeSettingsToDB(final Connection con, final List<UserSettingEntry> settings, final int cid, final int uid) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT_SQL);
-            for (final UserSettingEntry setting : settings) {                
+            for (final UserSettingEntry setting : settings) {
                 stmt.setInt(1, cid);
                 stmt.setInt(2, uid);
                 stmt.setInt(3, setting.getPathId());
-                
+
                 final String value = setting.getValue();
                 if (value == null) {
                     stmt.setNull(4, java.sql.Types.VARCHAR);
                 } else {
                     stmt.setString(4, value);
                 }
-                
+
                 stmt.addBatch();
             }
             stmt.executeBatch();
