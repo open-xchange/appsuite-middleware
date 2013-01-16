@@ -337,39 +337,33 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         synchronized (mutex) {
             final Parameters parameters = request.getParameters();
             final Credentials credentials = request.getCredentials();
-            final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
             final SieveHandler sieveHandler = connectRight(credentials);
             try {
                 handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
-                final String script;
-                if (null != activeScript) {
-                    script = sieveHandler.getScript(activeScript);
-                } else {
-                    script = "";
-                }
+                final String script = null == activeScript ? "" : sieveHandler.getScript(activeScript);
                 if (log.isDebugEnabled()) {
-                    log.debug("The following sieve script will be parsed:\n"
-                        + script);
+                    log.debug("The following sieve script will be parsed:\n" + script);
                 }
-                final RuleListAndNextUid readScriptFromString = sieveTextFilter
-                    .readScriptFromString(script);
-                final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter
-                    .splitClientRulesAndRequire(
+                final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
+                final RuleListAndNextUid readScriptFromString = sieveTextFilter.readScriptFromString(script);
+                final ClientRulesAndRequire clientrulesandrequire =
+                    sieveTextFilter.splitClientRulesAndRequire(
                         readScriptFromString.getRulelist(),
                         parameters.getParameter(Parameter.FLAG),
                         readScriptFromString.isError());
-                final ArrayList<Rule> clientrules = clientrulesandrequire
-                    .getRules();
+                final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
                 changeOutgoingVacationRule(clientrules);
-                return CONVERTER.write(clientrules
-                    .toArray(new Rule[clientrules.size()]));
+                return CONVERTER.write(clientrules.toArray(new Rule[0]));
             } catch (final UnsupportedEncodingException e) {
                 throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
             } catch (final IOException e) {
-                throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
+                throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(
+                    e,
+                    sieveHandler.getSieveHost(),
+                    Integer.valueOf(sieveHandler.getSievePort()));
             } catch (final OXSieveHandlerException e) {
-            	throw handleParsingException(e, credentials);
+                throw handleParsingException(e, credentials);
             } catch (final OXSieveHandlerInvalidCredentialsException e) {
                 throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create(e, EMPTY_ARGS);
             } catch (final ParseException e) {
