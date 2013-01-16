@@ -69,6 +69,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
@@ -724,14 +725,28 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return encodeUrl(s, false);
     }
 
+    private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|(?:%0[aA])?%0[dD]");
+
     /**
      * URL encodes given string.
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      */
     public static String encodeUrl(final String s, final boolean forAnchor) {
+        if (isEmpty(s)) {
+            return s;
+        }
         try {
-            return isEmpty(s) ? s : Charsets.toAsciiString(URLCodec.encodeUrl(forAnchor ? WWW_FORM_URL_ANCHOR : WWW_FORM_URL, s.getBytes(Charsets.ISO_8859_1)));
+            if (!forAnchor) {
+                return Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL, s.getBytes(Charsets.ISO_8859_1)));
+            }
+            // Prepare for being used as anchor/link
+            final String ascii = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL_ANCHOR, s.getBytes(Charsets.ISO_8859_1)));
+            // Strip possible "\r?\n" and/or "%0A?%0D"
+            if (ascii.indexOf('\n') < 0 && ascii.indexOf("%0") < 0) {
+                return ascii;
+            }
+            return PATTERN_CRLF.matcher(ascii).replaceAll("");
         } catch (final RuntimeException e) {
             LOG.error("A runtime error occurred.", e);
             return s;
