@@ -365,8 +365,8 @@ public class Login extends AJAXServlet {
                 writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
 
                 resp.sendRedirect(LoginTools.generateRedirectURL(
-                    req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
-                    req.getParameter("store"),
+                    LoginTools.encodeUrl(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), true),
+                    LoginTools.encodeUrl(req.getParameter("store"), true),
                     session.getSessionID(), conf.getUiWebPath()));
             }
         });

@@ -367,7 +367,7 @@ public class MobileConfigServlet extends HttpServlet {
     }
 
     private void printError(final HttpServletRequest req, final HttpServletResponse resp, final ErrorMessage string) throws IOException {
-        resp.sendRedirect(Activator.ALIAS + "?error=" + URLEncoder.encode(String.valueOf(string.ordinal()), "UTF-8"));
+        resp.sendRedirect(Activator.ALIAS + "?error=" + Integer.toString(string.ordinal()));
     }
 
     private void writeMobileConfig(final PrintWriter printWriter, final OutputStream outStream, final String email, final String host, final String username, final String domain) throws IOException, OXException {
