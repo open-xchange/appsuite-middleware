@@ -51,34 +51,42 @@ package com.openexchange.capabilities.json;
 
 import java.util.Arrays;
 import java.util.Collection;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link CapabilityActionFactory}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CapabilityActionFactory implements AJAXActionServiceFactory {
 
-	private final CapabilityAllAction allAction;
+    private final CapabilityAllAction allAction;
 
-	public CapabilityActionFactory(ServiceLookup services) {
-		this.allAction = new CapabilityAllAction(services);
-	}
+    /**
+     * Initializes a new {@link CapabilityActionFactory}.
+     * 
+     * @param services The service look-up
+     */
+    public CapabilityActionFactory(ServiceLookup services) {
+        super();
+        this.allAction = new CapabilityAllAction(services);
+    }
 
-	@Override
-	public AJAXActionService createActionService(String action)
-			throws OXException {
-		return allAction;
-	}
+    @Override
+    public AJAXActionService createActionService(String action) throws OXException {
+        if ("all".equals(action)) {
+            return allAction;
+        }
+        throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(action, "capabilities");
+    }
 
-	@Override
-	public Collection<?> getSupportedServices() {
-		return Arrays.asList("all");
-	}
+    @Override
+    public Collection<?> getSupportedServices() {
+        return Arrays.asList("all");
+    }
 
 }

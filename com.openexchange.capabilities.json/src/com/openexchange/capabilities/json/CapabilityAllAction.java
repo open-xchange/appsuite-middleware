@@ -50,7 +50,6 @@
 package com.openexchange.capabilities.json;
 
 import java.util.Set;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -63,28 +62,28 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CapabilityAllAction}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 @DispatcherNotes(noSession = true)
 public class CapabilityAllAction implements AJAXActionService {
 
-	private final ServiceLookup services;
+    private final ServiceLookup services;
 
-	public CapabilityAllAction(ServiceLookup services) {
-		super();
-		this.services = services;
-	}
+    /**
+     * Initializes a new {@link CapabilityAllAction}.
+     * 
+     * @param services The service look-up
+     */
+    public CapabilityAllAction(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
-	@Override
-	public AJAXRequestResult perform(AJAXRequestData requestData,
-			ServerSession session) throws OXException {
-
-		CapabilityService capabilityService = services.getService(CapabilityService.class);
-
-		Set<Capability> capabilities = capabilityService.getCapabilities(session);
-
-		return new AJAXRequestResult(capabilities, "capability");
-	}
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        Set<Capability> capabilities = services.getService(CapabilityService.class).getCapabilities(session);
+        return new AJAXRequestResult(capabilities, "capability");
+    }
 
 }

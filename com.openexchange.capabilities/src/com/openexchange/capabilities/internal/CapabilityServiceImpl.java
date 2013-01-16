@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.capabilities.osgi;
+package com.openexchange.capabilities.internal;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -55,9 +55,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import org.osgi.framework.BundleContext;
-
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
@@ -68,89 +66,90 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CapabilityServiceImpl}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CapabilityServiceImpl implements CapabilityService {
 
-	private final ConcurrentMap<String, Capability> capabilities = new ConcurrentHashMap<String, Capability>();
-	private final Set<String> declaredCapabilities = new HashSet<String>();
+    private static final Object PRESENT = new Object();
 
-	private final ServiceLookup services;
+    private final ConcurrentMap<String, Capability> capabilities = new ConcurrentHashMap<String, Capability>();
+    private final ConcurrentMap<String, Object> declaredCapabilities = new ConcurrentHashMap<String, Object>();
 
-	/**
-	 * Initializes a new {@link CapabilityServiceImpl}.
-	 * @param capabilitiesActivator
-	 * @param context
-	 */
-	public CapabilityServiceImpl(ServiceLookup services,
-			BundleContext context) {
-		super();
-		this.services = services;
-	}
+    private final ServiceLookup services;
 
-	@Override
-	public Set<Capability> getCapabilities(ServerSession session)
-			throws OXException {
+    /**
+     * Initializes a new {@link CapabilityServiceImpl}.
+     * 
+     * @param capabilitiesActivator
+     * @param context
+     */
+    public CapabilityServiceImpl(ServiceLookup services, BundleContext context) {
+        super();
+        this.services = services;
+    }
 
-		Set<Capability> capabilities = new HashSet<Capability>();
-		if (!session.isAnonymous()) {
-			for(String type: session.getUserConfiguration().getExtendedPermissions()) {
-				if (check(type, session)) {
-					capabilities.add(getCapability(type));
-				}
-			}
-		}
+    @Override
+    public Set<Capability> getCapabilities(ServerSession session) throws OXException {
 
-		// What about autologin?
+        Set<Capability> capabilities = new HashSet<Capability>();
+        if (!session.isAnonymous()) {
+            for (String type : session.getUserConfiguration().getExtendedPermissions()) {
+                if (check(type, session)) {
+                    capabilities.add(getCapability(type));
+                }
+            }
+        }
 
-		boolean autologin = services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.ajax.login.http-auth.autologin", false);
+        // What about autologin?
 
-		if (autologin) {
-			capabilities.add(new Capability("autologin", true));
-		}
+        boolean autologin =
+            services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.ajax.login.http-auth.autologin", false);
 
-		for(String cap: declaredCapabilities) {
-			if (check(cap, session)) {
-				capabilities.add(getCapability(cap));
-			}
-		}
+        if (autologin) {
+            capabilities.add(new Capability("autologin", true));
+        }
 
-		return capabilities;
-	}
+        for (String cap : declaredCapabilities.keySet()) {
+            if (check(cap, session)) {
+                capabilities.add(getCapability(cap));
+            }
+        }
 
-	private boolean check(String cap, ServerSession session) throws OXException {
-		for(CapabilityChecker checker: getCheckers()) {
-			if (!checker.isEnabled(cap, session)) {
-				return false;
-			}
-		}
-		return true;
-	}
+        return capabilities;
+    }
 
-	public Set<Capability> getAllKnownCapabilities() throws OXException {
-		return new HashSet<Capability>(capabilities.values());
-	}
+    private boolean check(String cap, ServerSession session) throws OXException {
+        for (CapabilityChecker checker : getCheckers()) {
+            if (!checker.isEnabled(cap, session)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-	public Capability getCapability(String id) {
-		Capability capability = capabilities.get(id);
+    public Set<Capability> getAllKnownCapabilities() throws OXException {
+        return new HashSet<Capability>(capabilities.values());
+    }
 
-		if (capability == null) {
-			Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id, false));
-			return existingCapability != null ? existingCapability : capability;
-		}
+    public Capability getCapability(String id) {
+        Capability capability = capabilities.get(id);
 
-		return capability;
-	}
+        if (capability == null) {
+            Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id, false));
+            return existingCapability != null ? existingCapability : capability;
+        }
 
-	@Override
-	public void declareCapability(String capability) {
-		declaredCapabilities.add(capability);
-	}
+        return capability;
+    }
 
-	public List<CapabilityChecker> getCheckers() {
-		return Collections.emptyList();
-	}
+    @Override
+    public void declareCapability(String capability) {
+        declaredCapabilities.put(capability, PRESENT);
+    }
 
+    public List<CapabilityChecker> getCheckers() {
+        return Collections.emptyList();
+    }
 
 }
