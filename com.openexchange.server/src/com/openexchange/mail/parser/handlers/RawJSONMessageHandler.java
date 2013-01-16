@@ -863,7 +863,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
 
     private void asRawContent(final String id, final String baseContentType, final String content, final String filename) throws OXException {
         try {
-            final JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject(8);
             jsonObject.put(MailListField.ID.getKey(), id);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
@@ -878,7 +878,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
 
     private void asAttachment(final String id, final String baseContentType, final long size, final String fileName, final String optContent) throws OXException {
         try {
-            final JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject(8);
             /*
              * Sequence ID
              */
