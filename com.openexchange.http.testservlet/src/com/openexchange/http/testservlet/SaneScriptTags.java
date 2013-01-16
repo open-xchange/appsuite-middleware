@@ -50,8 +50,13 @@
 package com.openexchange.http.testservlet;
 
 import java.net.URLDecoder;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link SaneScriptTags}
@@ -85,13 +90,29 @@ public final class SaneScriptTags {
     }
 
     private static final Pattern PAT_URLDECODE_ENTITIES = Pattern.compile("%([0-9a-fA-F]{2})");
+    private static final Pattern PAT_URLDECODE_PERCENT = Pattern.compile("%25");
+    private static final Set<String> REPLACEES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("3c", "3e", "2b", "22")));
 
     private static String decode(final String html) {
-        String ret = html;
-        while (PAT_URLDECODE_ENTITIES.matcher(ret).find()) {
-            ret = urlDecode(ret);
+        if (html.indexOf('%') < 0) {
+            return html;
         }
-        return ret;
+        String ret = PAT_URLDECODE_PERCENT.matcher(html).replaceAll("%");
+        final Matcher m = PAT_URLDECODE_ENTITIES.matcher(ret);
+        if (!m.find()) {
+            return ret;
+        }
+        final StringBuffer sb = new StringBuffer(ret.length());
+        do {
+            final String entity = toLowerCase(m.group(1));
+            if (REPLACEES.contains(entity)) {
+                m.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
+            } else {
+                m.appendReplacement(sb, "$0");
+            }
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     private static String urlDecode(final String html) {
@@ -153,6 +174,16 @@ public final class SaneScriptTags {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }
