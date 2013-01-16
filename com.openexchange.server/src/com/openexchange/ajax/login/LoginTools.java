@@ -62,6 +62,7 @@ import java.util.Map;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
@@ -81,6 +82,15 @@ public final class LoginTools {
 
     private LoginTools() {
         super();
+    }
+
+    /**
+     * URL encodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     */
+    public static String encodeUrl(final String s, final boolean forAnchor) {
+        return AJAXServlet.encodeUrl(s, forAnchor);
     }
 
     public static String generateRedirectURL(String uiWebPathParam, String shouldStore, String sessionId, String uiWebPath) {

@@ -115,8 +115,8 @@ public final class TokenLogin implements LoginRequestHandler {
 
         Tools.disableCaching(resp);
         resp.sendRedirect(generateRedirectURL(
-            req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
-            req.getParameter(LoginFields.AUTOLOGIN_PARAM),
+            LoginTools.encodeUrl(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), true),
+            LoginTools.encodeUrl(req.getParameter(LoginFields.AUTOLOGIN_PARAM), true),
             session,
             user.getPreferredLanguage(),
             conf.getUiWebPath(),
@@ -144,4 +144,5 @@ public final class TokenLogin implements LoginRequestHandler {
         // client side token should be added to the end by the client
         return retval;
     }
+
 }
