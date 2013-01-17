@@ -131,7 +131,8 @@ public final class TokenLogin implements LoginRequestHandler {
         }
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");
-        retval = retval + ";jsessionid=" + httpSessionId;
+//        FIXME korrekt the jessionid in URL.
+//        retval = retval + ";jsessionid=" + httpSessionId;
         retval = LoginTools.addFragmentParameter(retval, LoginFields.SERVER_TOKEN, serverToken);
         // App Suite UI requires some additional values.
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER, session.getLogin());
@@ -144,5 +145,4 @@ public final class TokenLogin implements LoginRequestHandler {
         // client side token should be added to the end by the client
         return retval;
     }
-
 }
