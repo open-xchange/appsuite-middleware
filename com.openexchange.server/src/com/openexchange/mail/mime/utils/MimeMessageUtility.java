@@ -371,11 +371,12 @@ public final class MimeMessageUtility {
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public static boolean containsContentId(final String contentId, final Collection<String> contentIds) {
-        boolean contains = false;
-        for (Iterator<String> iterator = contentIds.iterator(); !contains && iterator.hasNext();) {
-            contains = equalsCID(contentId, iterator.next());
+        for (final String current : contentIds) {
+            if (equalsCID(contentId, current)) {
+                return true;
+            }
         }
-        return contains;
+        return false;
     }
 
     /**
