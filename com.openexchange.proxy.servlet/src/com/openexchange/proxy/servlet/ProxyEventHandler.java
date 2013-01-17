@@ -52,9 +52,9 @@ package com.openexchange.proxy.servlet;
 import java.text.MessageFormat;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
@@ -88,9 +88,6 @@ public final class ProxyEventHandler implements EventHandler {
                 for (final Session session : sessionContainer.values()) {
                     registryImpl.dropRegistrationsFor(session.getSessionID());
                 }
-            } else if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
-                // final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                // Nothing to do for an added session
             }
         } catch (final Exception e) {
             LOG.error(MessageFormat.format("Error while handling SessionD event \"{0}\": {1}", topic, e.getMessage()), e);
