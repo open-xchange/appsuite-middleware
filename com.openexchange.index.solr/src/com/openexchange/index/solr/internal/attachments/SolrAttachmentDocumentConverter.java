@@ -57,14 +57,16 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.index.Attachment;
+import com.openexchange.groupware.attach.index.AttachmentIndexField;
 import com.openexchange.groupware.attach.index.AttachmentUUID;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.StandardIndexDocument;
+import com.openexchange.index.solr.internal.AbstractDocumentConverter;
+import com.openexchange.index.solr.internal.FieldConfiguration;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
-import com.openexchange.index.solr.internal.SolrResultConverter;
 import com.openexchange.textxtraction.TextXtractService;
 
 /**
@@ -72,54 +74,79 @@ import com.openexchange.textxtraction.TextXtractService;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrAttachmentDocumentConverter implements SolrResultConverter<Attachment> {
+public class SolrAttachmentDocumentConverter extends AbstractDocumentConverter<Attachment> {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrAttachmentDocumentConverter.class);
 
+    
+    /**
+     * Initializes a new {@link SolrAttachmentDocumentConverter}.
+     */
+    public SolrAttachmentDocumentConverter(FieldConfiguration fieldConfig) {
+        super(fieldConfig);
+    }
+    
     @Override
     public IndexDocument<Attachment> convert(SolrDocument document) throws OXException {
-        return convertStatic(document);
+        return convertInternal(document);
+    }
+    
+    @Override
+    public IndexDocument<Attachment> convert(SolrDocument document, Map<String, List<String>> highlightedFields) throws OXException {
+        StandardIndexDocument<Attachment> indexDocument = convertInternal(document);
+        addHighlighting(indexDocument, highlightedFields);
+        
+        return indexDocument;
     }
 
     @Override
     public IndexResult<Attachment> createIndexResult(List<IndexDocument<Attachment>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
         return new SolrIndexResult<Attachment>(documents.size(), documents, null);
     }
-
-    public static IndexDocument<Attachment> convertStatic(SolrDocument document) {
+    
+    private StandardIndexDocument<Attachment> convertInternal(SolrDocument document) throws OXException {
         Attachment attachment = new Attachment();
-        if (document.containsKey(SolrAttachmentField.MODULE.solrName())) {
-            attachment.setModule(((Integer) document.get(SolrAttachmentField.MODULE.solrName())).intValue());
+        Integer module = getFieldValue(AttachmentIndexField.MODULE, document);
+        if (module != null) {
+            attachment.setModule(module.intValue());
         }
-        if (document.containsKey(SolrAttachmentField.ACCOUNT.solrName())) {
-            attachment.setAccount((String) document.get(SolrAttachmentField.ACCOUNT.solrName()));
+        String account = getFieldValue(AttachmentIndexField.ACCOUNT, document);
+        if (account != null) {
+            attachment.setAccount(account);
         }
-        if (document.containsKey(SolrAttachmentField.FOLDER.solrName())) {
-            attachment.setFolder((String) document.get(SolrAttachmentField.FOLDER.solrName()));
+        String folder = getFieldValue(AttachmentIndexField.FOLDER, document);
+        if (folder != null) {
+            attachment.setFolder(folder);
         }
-        if (document.containsKey(SolrAttachmentField.OBJECT_ID.solrName())) {
-            attachment.setObjectId((String) document.get(SolrAttachmentField.OBJECT_ID.solrName()));
+        String objectId = getFieldValue(AttachmentIndexField.OBJECT_ID, document);
+        if (objectId != null) {
+            attachment.setObjectId(objectId);
         }
-        if (document.containsKey(SolrAttachmentField.FILE_NAME.solrName())) {
-            attachment.setFileName((String) document.get(SolrAttachmentField.FILE_NAME.solrName()));
+        String fileName = getFieldValue(AttachmentIndexField.FILE_NAME, document);
+        if (fileName != null) {
+            attachment.setFileName(fileName);
         }
-        if (document.containsKey(SolrAttachmentField.FILE_SIZE.solrName())) {
-            attachment.setFileSize(((Long) document.get(SolrAttachmentField.FILE_SIZE.solrName())).longValue());
+        Long fileSize = getFieldValue(AttachmentIndexField.FILE_SIZE, document);
+        if (fileSize != null) {
+            attachment.setFileSize(fileSize.longValue());
         }
-        if (document.containsKey(SolrAttachmentField.MIME_TYPE.solrName())) {
-            attachment.setMimeType((String) document.get(SolrAttachmentField.MIME_TYPE.solrName()));
+        String mimeType = getFieldValue(AttachmentIndexField.MIME_TYPE, document);
+        if (mimeType != null) {
+            attachment.setMimeType(mimeType);
         }
-        if (document.containsKey(SolrAttachmentField.MD5_SUM.solrName())) {
-            attachment.setMd5Sum((String) document.get(SolrAttachmentField.MD5_SUM.solrName()));
+        String md5Sum = getFieldValue(AttachmentIndexField.MD5_SUM, document);
+        if (md5Sum != null) {
+            attachment.setMd5Sum(md5Sum);
         }
-        if (document.containsKey(SolrAttachmentField.ATTACHMENT_ID.solrName())) {
-            attachment.setAttachmentId((String) document.get(SolrAttachmentField.ATTACHMENT_ID.solrName()));
+        String attachmentId = getFieldValue(AttachmentIndexField.ATTACHMENT_ID, document);
+        if (attachmentId != null) {
+            attachment.setAttachmentId(attachmentId);
         }
 
         return new StandardIndexDocument<Attachment>(attachment);
     }
 
-    public static SolrInputDocument convertStatic(int contextId, int userId, IndexDocument<Attachment> document) throws OXException {
+    public SolrInputDocument convert(int contextId, int userId, IndexDocument<Attachment> document) throws OXException {
         Attachment attachment = document.getObject();
         SolrInputDocument inputDocument = new SolrInputDocument();
         int module = attachment.getModule();
@@ -143,21 +170,21 @@ public class SolrAttachmentDocumentConverter implements SolrResultConverter<Atta
             throw new IllegalArgumentException("File must not be null!");
         }
 
-        inputDocument.setField(SolrAttachmentField.UUID.solrName(), uuid);
-        inputDocument.setField(SolrAttachmentField.MODULE.solrName(), new Integer(module));
-        inputDocument.setField(SolrAttachmentField.FOLDER.solrName(), folder);
-        inputDocument.setField(SolrAttachmentField.OBJECT_ID.solrName(), objectId);
-        inputDocument.setField(SolrAttachmentField.FILE_SIZE.solrName(), new Long(fileSize));
-        inputDocument.setField(SolrAttachmentField.ATTACHMENT_ID.solrName(), attachmentId);
+        setFieldInDocument(inputDocument, AttachmentIndexField.UUID, uuid);
+        setFieldInDocument(inputDocument, AttachmentIndexField.MODULE, new Integer(module));
+        setFieldInDocument(inputDocument, AttachmentIndexField.FOLDER, folder);
+        setFieldInDocument(inputDocument, AttachmentIndexField.OBJECT_ID, objectId);
+        setFieldInDocument(inputDocument, AttachmentIndexField.FILE_SIZE, new Long(fileSize));
+        setFieldInDocument(inputDocument, AttachmentIndexField.ATTACHMENT_ID, attachmentId);
 
-        setFieldIfNotNull(inputDocument, SolrAttachmentField.ACCOUNT.solrName(), account);
-        setFieldIfNotNull(inputDocument, SolrAttachmentField.FILE_NAME.solrName(), fileName);
-        setFieldIfNotNull(inputDocument, SolrAttachmentField.MIME_TYPE.solrName(), mimeType);
-        setFieldIfNotNull(inputDocument, SolrAttachmentField.MD5_SUM.solrName(), md5Sum);
+        setFieldInDocument(inputDocument, AttachmentIndexField.ACCOUNT, account);
+        setFieldInDocument(inputDocument, AttachmentIndexField.FILE_NAME, fileName);
+        setFieldInDocument(inputDocument, AttachmentIndexField.MIME_TYPE, mimeType);
+        setFieldInDocument(inputDocument, AttachmentIndexField.MD5_SUM, md5Sum);
         TextXtractService xtractService = Services.getService(TextXtractService.class);
         try {
             String extractedText = xtractService.extractFrom(file, mimeType);
-            inputDocument.setField(SolrAttachmentField.CONTENT.solrName(), extractedText);
+            setFieldInDocument(inputDocument, AttachmentIndexField.CONTENT, extractedText);
         } catch (Throwable t) {
             LOG.warn("Error during text extraction. Skipping attachments content...", t);
         }
@@ -165,9 +192,4 @@ public class SolrAttachmentDocumentConverter implements SolrResultConverter<Atta
         return inputDocument;
     }
 
-    private static void setFieldIfNotNull(SolrInputDocument inputDocument, String solrName, String value) {
-        if (value != null) {
-            inputDocument.setField(solrName, value);
-        }
-    }
 }

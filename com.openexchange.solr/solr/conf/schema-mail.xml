@@ -130,46 +130,46 @@
     <fields>
         <!-- Common Fields -->
         <field name="uuid" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.UUID" />
-        <field name="timestamp" type="long" stored="true" indexed="true" />
-        <field name="account" type="string" stored="true" indexed="true" />
-        <field name="full_name" type="string" stored="true" indexed="true" />
-        <field name="id" type="string" stored="true" indexed="true" />
-        <field name="color_label" type="int" stored="true" indexed="true" />
-        <field name="attachment" type="boolean" stored="true" indexed="true" />
+        <field name="timestamp" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.TIMESTAMP" />
+        <field name="account" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.ACCOUNT" />
+        <field name="full_name" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.FULL_NAME" />
+        <field name="id" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.ID" />
+        <field name="color_label" type="int" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.COLOR_LABEL" />
+        <field name="attachment" type="boolean" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.ATTACHMENT" />
 
         <!-- Long fields -->
-        <field name="received_date" type="long" stored="true" indexed="true" />
-        <field name="sent_date" type="long" stored="true" indexed="true" />
-        <field name="size" type="long" stored="true" indexed="true" />
+        <field name="received_date" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.RECEIVED_DATE" />
+        <field name="sent_date" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.SENT_DATE" />
+        <field name="size" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.SIZE" />
 
         <!-- Flag fields -->
-        <field name="flag_answered" type="boolean" stored="true" indexed="true" />
-        <field name="flag_deleted" type="boolean" stored="true" indexed="true" />
-        <field name="flag_draft" type="boolean" stored="true" indexed="true" />
-        <field name="flag_flagged" type="boolean" stored="true" indexed="true" />
-        <field name="flag_recent" type="boolean" stored="true" indexed="true" />
-        <field name="flag_seen" type="boolean" stored="true" indexed="true" />
-        <field name="flag_user" type="boolean" stored="true" indexed="true" />
-        <field name="flag_spam" type="boolean" stored="true" indexed="true" />
-        <field name="flag_forwarded" type="boolean" stored="true" indexed="true" />
-        <field name="flag_read_ack" type="boolean" stored="true" indexed="true" />
-        <field name="user_flags" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="flag_answered" type="boolean" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.FLAG_ANSWERED" />
+        <field name="flag_deleted" type="boolean" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.FLAG_DELETED" />
+        <field name="flag_draft" type="boolean" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.FLAG_DRAFT" />
+        <field name="flag_flagged" type="boolean" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.FLAG_FLAGGED" />
+        <field name="flag_recent" type="boolean" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.FLAG_RECENT" />
+        <field name="flag_seen" type="boolean" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.FLAG_SEEN" />
+        <field name="flag_user" type="boolean" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.FLAG_USER" />
+        <field name="flag_spam" type="boolean" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.FLAG_SPAM" />
+        <field name="flag_forwarded" type="boolean" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.FLAG_FORWARDED" />
+        <field name="flag_read_ack" type="boolean" stored="true" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.FLAG_READ_ACK" />
+        <field name="user_flags" type="string" stored="true" indexed="true" multiValued="true" oxIndexField="com.openexchange.mail.index.MailIndexField.USER_FLAGS" />
         
-        <field name="content_flag" type="boolean" stored="false" indexed="true" />
+        <field name="content_flag" type="boolean" stored="false" indexed="true" oxIndexField="com.openexchange.mail.index.MailIndexField.CONTENT_FLAG" />
 
-        <field name="from" type="addr" stored="true" indexed="true" multiValued="true" />
-        <field name="to" type="addr" stored="true" indexed="true" multiValued="true" />
-        <field name="cc" type="addr" stored="true" indexed="true" multiValued="true" />
-        <field name="bcc" type="addr" stored="true" indexed="true" multiValued="true" />
+        <field name="from" type="addr" stored="true" indexed="true" multiValued="true" oxIndexField="com.openexchange.mail.index.MailIndexField.FROM" />
+        <field name="to" type="addr" stored="true" indexed="true" multiValued="true" oxIndexField="com.openexchange.mail.index.MailIndexField.TO" />
+        <field name="cc" type="addr" stored="true" indexed="true" multiValued="true" oxIndexField="com.openexchange.mail.index.MailIndexField.CC" />
+        <field name="bcc" type="addr" stored="true" indexed="true" multiValued="true" oxIndexField="com.openexchange.mail.index.MailIndexField.BCC" />
 
-        <field name="subject" type="text" stored="false" indexed="false" />
+        <field name="subject" type="text" stored="false" indexed="false" oxIndexField="com.openexchange.mail.index.MailIndexField.SUBJECT" />
         <field name="subject_gen" type="text" stored="true" indexed="true" />
         <field name="subject_de" type="text_de" stored="true" indexed="true" />
         <field name="subject_en" type="text_en" stored="true" indexed="true" />
         <field name="subject_fr" type="text_fr" stored="true" indexed="true" />
         <field name="subject_it" type="text_it" stored="true" indexed="true" />
         
-        <field name="content" type="text" stored="false" indexed="false" />  
+        <field name="content" type="text" stored="false" indexed="false" oxIndexField="com.openexchange.mail.index.MailIndexField.CONTENT" />
         <field name="content_gen" type="text" stored="false" indexed="true" />
         <field name="content_de" type="text_de" stored="false" indexed="true" />
         <field name="content_en" type="text_en" stored="false" indexed="true" />

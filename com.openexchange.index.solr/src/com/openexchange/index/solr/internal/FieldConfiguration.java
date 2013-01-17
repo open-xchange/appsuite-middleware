@@ -61,6 +61,8 @@ import com.openexchange.index.IndexField;
  */
 public interface FieldConfiguration {
     
+    boolean isLocalized(IndexField indexField);
+    
     Set<String> getSolrFields(IndexField indexField);
     
     Set<? extends IndexField> getIndexedFields();

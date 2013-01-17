@@ -49,15 +49,16 @@
 
 package com.openexchange.index.solr.internal.attachments.translators;
 
-import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.groupware.attach.index.ANDTerm;
+import com.openexchange.groupware.attach.index.AttachmentIndexField;
 import com.openexchange.groupware.attach.index.ORTerm;
 import com.openexchange.groupware.attach.index.ObjectIdTerm;
 import com.openexchange.groupware.attach.index.SearchTerm;
 import com.openexchange.groupware.attach.index.SearchTermVisitor;
-import com.openexchange.index.solr.internal.attachments.SolrAttachmentField;
+import com.openexchange.index.solr.internal.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
 
 
@@ -75,12 +76,15 @@ public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
     private final Configuration configuration;
 
     private final StringBuilder queryBuilder;
+    
+    private final FieldConfiguration fieldConfig;
 
 
-    public SolrAttachmentSearchTermVisitor(String translatorName, Configuration configuration) {
+    public SolrAttachmentSearchTermVisitor(String translatorName, Configuration configuration, FieldConfiguration fieldConfig) {
         super();
         this.translatorName = translatorName;
         this.configuration = configuration;
+        this.fieldConfig = fieldConfig;
         queryBuilder = new StringBuilder();
     }
 
@@ -93,15 +97,15 @@ public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
 
         SearchTerm<?> firstTerm = searchTerms[0];
         if (searchTerms.length == 1) {
-            queryBuilder.append(toQuery(translatorName, configuration, firstTerm));
+            queryBuilder.append(toQuery(translatorName, configuration, firstTerm, fieldConfig));
             return;
         }
 
         queryBuilder.append(" (");
-        queryBuilder.append(toQuery(translatorName, configuration, firstTerm));
+        queryBuilder.append(toQuery(translatorName, configuration, firstTerm, fieldConfig));
         for (int i = 1; i < searchTerms.length; i++) {
             queryBuilder.append(" OR ");
-            queryBuilder.append(toQuery(translatorName, configuration, searchTerms[i]));
+            queryBuilder.append(toQuery(translatorName, configuration, searchTerms[i], fieldConfig));
         }
         queryBuilder.append(")");
     }
@@ -115,42 +119,37 @@ public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
 
         SearchTerm<?> firstTerm = searchTerms[0];
         if (searchTerms.length == 1) {
-            queryBuilder.append(toQuery(translatorName, configuration, firstTerm));
+            queryBuilder.append(toQuery(translatorName, configuration, firstTerm, fieldConfig));
             return;
         }
 
         queryBuilder.append(" (");
-        queryBuilder.append(toQuery(translatorName, configuration, firstTerm));
+        queryBuilder.append(toQuery(translatorName, configuration, firstTerm, fieldConfig));
         for (int i = 1; i < searchTerms.length; i++) {
             queryBuilder.append(" AND ");
-            queryBuilder.append(toQuery(translatorName, configuration, searchTerms[i]));
+            queryBuilder.append(toQuery(translatorName, configuration, searchTerms[i], fieldConfig));
         }
         queryBuilder.append(")");
     }
 
     @Override
     public void visit(ObjectIdTerm term) {
-        String parameterName = SolrAttachmentField.OBJECT_ID.parameterName();
-        appendStringTerm(parameterName, term);
+        appendStringTerm(AttachmentIndexField.OBJECT_ID, term);
     }
 
-    private void appendStringTerm(String parameterName, SearchTerm<String> term) {
-        Set<String> keys = configuration.getKeys(Configuration.FIELD);
-        if (!keys.contains(Configuration.FIELD + '.' + parameterName)) {
-            LOG.warn("Did not find key '" + Configuration.FIELD + '.' + parameterName + "'. Skipping this field in search query...");
-            return;
-        }
-        List<String> indexFields = configuration.getIndexFields(Configuration.FIELD + '.' + parameterName);
-        if (indexFields == null || indexFields.isEmpty()) {
-            LOG.warn("Did not find index fields for parameter " + parameterName + ". Skipping this field in search query...");
+    private void appendStringTerm(AttachmentIndexField field, SearchTerm<String> term) {
+        Set<String> solrFields = fieldConfig.getSolrFields(field);
+        if (solrFields == null || solrFields.isEmpty()) {
+            LOG.warn("Did not find index fields for parameter " + field.toString() + ". Skipping this field in search query...");
             return;
         }
 
         String pattern = term.getPattern();
+        Iterator<String> it = solrFields.iterator();
         queryBuilder.append('(');
-        queryBuilder.append(indexFields.get(0)).append(':').append('"').append(pattern).append('"');
-        for (int i = 1; i < indexFields.size(); i++) {
-            String indexField = indexFields.get(i);
+        queryBuilder.append(it.next()).append(':').append('"').append(pattern).append('"');
+        while (it.hasNext()) {
+            String indexField = it.next();
             queryBuilder.append(" OR ");
             queryBuilder.append(indexField).append(':').append('"').append(pattern).append('"');
         }
@@ -162,8 +161,8 @@ public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
         return queryBuilder.toString().trim();
     }
 
-    public static String toQuery(String translatorName, Configuration configuration, SearchTerm<?> searchTerm) {
-        SolrAttachmentSearchTermVisitor visitor = new SolrAttachmentSearchTermVisitor(translatorName, configuration);
+    public static String toQuery(String translatorName, Configuration configuration, SearchTerm<?> searchTerm, FieldConfiguration fieldConfig) {
+        SolrAttachmentSearchTermVisitor visitor = new SolrAttachmentSearchTermVisitor(translatorName, configuration, fieldConfig);
         searchTerm.accept(visitor);
 
         return visitor.toString();

@@ -71,7 +71,7 @@ public class MockSolrFilestoreIndexAccess extends SolrInfostoreIndexAccess {
      * Initializes a new {@link MockSolrFilestoreIndexAccess}.
      */
     public MockSolrFilestoreIndexAccess() {
-        super(new SolrCoreIdentifier(1, 1, 1), null);
+        super(new SolrCoreIdentifier(1, 1, 1), null, null);
         index = new InMemoryIndex();
     }
 

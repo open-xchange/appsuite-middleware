@@ -126,18 +126,18 @@
     </types>
 
     <fields>
-        <field name="uuid" type="string" stored="true" indexed="true" />
-        <field name="module" type="int" stored="true" indexed="true" />
-        <field name="account" type="string" stored="true" indexed="true" />
-        <field name="folder" type="string" stored="true" indexed="true" />
-        <field name="id" type="string" stored="true" indexed="true" />
-        <field name="attachment_id" type="string" stored="true" indexed="true" />        
-        <field name="file_name" type="file_name" stored="true" indexed="true" />
-        <field name="file_size" type="long" stored="true" indexed="true" />
-        <field name="mime_type" type="string" stored="true" indexed="true" />
-        <field name="md5_sum" type="string" stored="true" indexed="false" />
+        <field name="uuid" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.UUID" />
+        <field name="module" type="int" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.MODULE" />
+        <field name="account" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.ACCOUNT" />
+        <field name="folder" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.FOLDER" />
+        <field name="id" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.ID" />
+        <field name="attachment_id" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.ATTACHMENT_ID" />
+        <field name="file_name" type="file_name" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.FILE_NAME" />
+        <field name="file_size" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.FILE_SIZE" />
+        <field name="mime_type" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.MIME_TYPE" />
+        <field name="md5_sum" type="string" stored="true" indexed="false" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.MD5_SUM" />
 
-        <field name="content" type="text" stored="false" indexed="false" />
+        <field name="content" type="text" stored="false" indexed="false" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.CONTENT" />
         <field name="content_gen" type="text" stored="false" indexed="true" />
         <field name="content_de" type="text_de" stored="false" indexed="true" />
         <field name="content_en" type="text_en" stored="false" indexed="true" />

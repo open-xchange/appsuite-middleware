@@ -91,9 +91,6 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     /**
      * Initializes a new {@link SolrMailIndexAccess}.
-     *
-     * @param identifier
-     * @param queryBuilder
      */
     public SolrMailIndexAccess(SolrCoreIdentifier identifier, SolrQueryBuilder queryBuilder, FieldConfiguration fieldConfig) {
         super(identifier, fieldConfig);

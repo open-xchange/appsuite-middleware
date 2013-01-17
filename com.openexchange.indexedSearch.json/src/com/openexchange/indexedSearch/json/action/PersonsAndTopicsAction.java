@@ -63,12 +63,14 @@ import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.indexedSearch.json.IndexAJAXRequest;
 import com.openexchange.indexedSearch.json.ResultConverters;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -108,32 +110,24 @@ public class PersonsAndTopicsAction extends AbstractIndexAction {
         Set<String> topics = new LinkedHashSet<String>();
         for (IndexDocument<MailMessage> document : documents) {
             MailMessage mailMessage = document.getObject();
-            Map<String, Object> attributes = document.getExtendedAttributes();
-            if (attributes != null) {
-                String foundIn = tryCast(attributes.get("foundIn"));
-                if (foundIn != null) {
-                    if (foundIn.equals("persons")) {
-                        addInternetAddresses(mailMessage.getFrom(), persons);
-                        addInternetAddresses(mailMessage.getTo(), persons);
-                        addInternetAddresses(mailMessage.getCc(), persons);
-                        addInternetAddresses(mailMessage.getBcc(), persons);
-                    } else if (foundIn.equals("topics")) {
-                        String subject = mailMessage.getSubject();
-                        if (subject != null) {
-                            topics.add(subject);
-                        }
-                    } else if (foundIn.equals("both")) {
-                        addInternetAddresses(mailMessage.getFrom(), persons);
-                        addInternetAddresses(mailMessage.getTo(), persons);
-                        addInternetAddresses(mailMessage.getCc(), persons);
-                        addInternetAddresses(mailMessage.getBcc(), persons);
-                        
-                        String subject = mailMessage.getSubject();
-                        if (subject != null) {
-                            topics.add(subject);
-                        }
-                    }
+            Map<IndexField, List<String>> highlighting = document.getHighlighting();
+            if (highlighting.containsKey(MailIndexField.FROM)) {
+                addInternetAddresses(mailMessage.getFrom(), persons);
+            }
+            if (highlighting.containsKey(MailIndexField.TO)) {
+                addInternetAddresses(mailMessage.getTo(), persons);
+            }
+            if (highlighting.containsKey(MailIndexField.SUBJECT)) {
+                String subject = mailMessage.getSubject();
+                if (subject != null) {
+                    topics.add(subject);
                 }
+            }
+            if (highlighting.containsKey(MailIndexField.CC)) {
+                addInternetAddresses(mailMessage.getCc(), persons);
+            }
+            if (highlighting.containsKey(MailIndexField.BCC)) {
+                addInternetAddresses(mailMessage.getBcc(), persons);
             }
         }
         

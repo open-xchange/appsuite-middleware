@@ -49,18 +49,26 @@
 
 package com.openexchange.index.solr.internal;
 
+import java.util.List;
+import java.util.Map;
+import org.apache.solr.common.SolrDocument;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
+import com.openexchange.index.IndexResult;
+
 
 /**
- * {@link SolrField}
+ * {@link SolrDocumentConverter}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface SolrField {
+public interface SolrDocumentConverter<V> {
 
-    String solrName();
+    IndexDocument<V> convert(SolrDocument document) throws OXException;
+    
+    IndexDocument<V> convert(SolrDocument document, Map<String, List<String>> highlightedFields) throws OXException;
 
-    String parameterName();
+    IndexResult<V> createIndexResult(List<IndexDocument<V>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException;
 
-    IndexField indexField();
 }

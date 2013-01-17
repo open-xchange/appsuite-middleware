@@ -49,6 +49,7 @@
 
 package com.openexchange.index;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -67,8 +68,9 @@ public interface IndexDocument<V> {
     public V getObject();
     
     /**
-     * @return An optional {@link Map<String, Object>} with extended Attributes for this document.
-     * May be <code>null</code>.
+     * @return Optionally highlighted search results. If highlighting is supported depends on the 
+     * search handler configuration of the underlying index implementation. May be <code>null</code>
      */
-    public Map<String, Object> getExtendedAttributes();
+    public Map<IndexField, List<String>> getHighlighting();
+    
 }

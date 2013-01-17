@@ -59,7 +59,8 @@ import com.openexchange.groupware.attach.index.ANDTerm;
 import com.openexchange.groupware.attach.index.ORTerm;
 import com.openexchange.groupware.attach.index.ObjectIdTerm;
 import com.openexchange.groupware.attach.index.SearchTerm;
-import com.openexchange.index.solr.internal.attachments.SolrAttachmentField;
+import com.openexchange.index.IndexField;
+import com.openexchange.index.solr.internal.FieldConfiguration;
 import com.openexchange.index.solr.internal.attachments.translators.SolrAttachmentSearchTermVisitor;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
 
@@ -70,6 +71,8 @@ import com.openexchange.index.solr.internal.querybuilder.Configuration;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrAttachmentSearchTermVisitorTest {
+    
+    private static final String FIELD_NAME = "objectId";
 
     @Test
     public void testVisitor() {
@@ -81,6 +84,44 @@ public class SolrAttachmentSearchTermVisitorTest {
         ORTerm orTerm1 = new ORTerm(new SearchTerm<?>[] { t1, t2 });
         ORTerm orTerm2 = new ORTerm(new SearchTerm<?>[] { t3, t4 });
         ANDTerm andTerm = new ANDTerm(new SearchTerm<?>[] { orTerm1, orTerm2 });
+        
+        FieldConfiguration fieldConfig = new FieldConfiguration() {
+            
+            @Override
+            public boolean isLocalized(IndexField indexField) {
+                // TODO Auto-generated method stub
+                return false;
+            }
+            
+            @Override
+            public String getUUIDField() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public Set<String> getSolrFields(IndexField indexField) {
+                return Collections.singleton(FIELD_NAME);
+            }
+            
+            @Override
+            public String getRawField(IndexField indexField) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public Set<? extends IndexField> getIndexedFields() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public IndexField getIndexField(String solrField) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        };
 
         Configuration config = new Configuration() {
 
@@ -110,7 +151,7 @@ public class SolrAttachmentSearchTermVisitorTest {
 
             @Override
             public Set<String> getKeys(String handlerName) {
-                return Collections.singleton(handlerName + '.' + SolrAttachmentField.OBJECT_ID.parameterName());
+                return Collections.singleton(handlerName + '.' + FIELD_NAME);
             }
 
             @Override
@@ -121,9 +162,6 @@ public class SolrAttachmentSearchTermVisitorTest {
 
             @Override
             public List<String> getIndexFields(String key) {
-                if (key.equals("test." + SolrAttachmentField.OBJECT_ID.parameterName())) {
-                    return Collections.singletonList(SolrAttachmentField.OBJECT_ID.solrName());
-                }
                 return null;
             }
 
@@ -133,9 +171,8 @@ public class SolrAttachmentSearchTermVisitorTest {
                 return null;
             }
         };
-        String query = SolrAttachmentSearchTermVisitor.toQuery("test", config, andTerm);
-        String field = SolrAttachmentField.OBJECT_ID.solrName();
-        String expected = "(((" + field + ":1) OR (" + field + ":2)) AND ((" + field + ":3) OR (" + field + ":4)))";
+        String query = SolrAttachmentSearchTermVisitor.toQuery("test", config, andTerm, fieldConfig);
+        String expected = "(((" + FIELD_NAME + ":\"1\") OR (" + FIELD_NAME + ":\"2\")) AND ((" + FIELD_NAME + ":\"3\") OR (" + FIELD_NAME + ":\"4\")))";
         assertEquals(expected, query);
     }
 

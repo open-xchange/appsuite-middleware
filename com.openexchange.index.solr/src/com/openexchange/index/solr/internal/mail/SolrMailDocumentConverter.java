@@ -51,26 +51,22 @@ package com.openexchange.index.solr.internal.mail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-
 import org.apache.commons.logging.Log;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.StandardIndexDocument;
+import com.openexchange.index.solr.internal.AbstractDocumentConverter;
 import com.openexchange.index.solr.internal.FieldConfiguration;
 import com.openexchange.index.solr.internal.SolrIndexResult;
-import com.openexchange.index.solr.internal.SolrResultConverter;
 import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -86,20 +82,121 @@ import com.openexchange.mail.text.TextFinder;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrMailDocumentConverter implements SolrResultConverter<MailMessage> {
+public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMessage> {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrMailDocumentConverter.class);
     
-    private final FieldConfiguration fieldConfig;
-    
     
     public SolrMailDocumentConverter(FieldConfiguration fieldConfig) {
-        super();
-        this.fieldConfig = fieldConfig;
+        super(fieldConfig);
     }
 
     @Override
     public IndexDocument<MailMessage> convert(SolrDocument document) throws OXException {
+        return convertInternal(document);
+    }
+    
+    @Override
+    public IndexDocument<MailMessage> convert(SolrDocument document, Map<String, List<String>> highlightedFields) throws OXException {
+        StandardIndexDocument<MailMessage> indexDocument = convertInternal(document);
+        addHighlighting(indexDocument, highlightedFields);
+        
+        return indexDocument;
+    }
+
+    @Override
+    public IndexResult<MailMessage> createIndexResult(List<IndexDocument<MailMessage>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
+        return new SolrIndexResult<MailMessage>(documents.size(), documents, facetCounts);
+    }
+
+    public SolrInputDocument convert(int contextId, int userId, IndexDocument<MailMessage> document) throws OXException {
+        MailMessage mail = document.getObject();
+        int accountId = mail.getAccountId();
+        MailUUID uuid = MailUUID.newUUID(contextId, userId, accountId, mail.getFolder(), mail.getMailId());
+        SolrInputDocument inputDocument = new SolrInputDocument();
+        /*
+         * Environmental fields
+         */
+        setFieldInDocument(inputDocument, MailIndexField.TIMESTAMP, System.currentTimeMillis());
+        setFieldInDocument(inputDocument, MailIndexField.UUID, uuid.toString());
+        setFieldInDocument(inputDocument, MailIndexField.ACCOUNT, String.valueOf(accountId));
+    
+        /*
+         * Envelope data
+         */
+        setFieldInDocument(inputDocument, MailIndexField.FULL_NAME, mail.getFolder());
+        setFieldInDocument(inputDocument, MailIndexField.ID, mail.getMailId());
+        addFieldInDocument(inputDocument, MailIndexField.FROM, createAddressHeader(mail.getFrom()));
+        addFieldInDocument(inputDocument, MailIndexField.TO, createAddressHeader(mail.getTo()));
+        addFieldInDocument(inputDocument, MailIndexField.CC, createAddressHeader(mail.getCc()));
+        addFieldInDocument(inputDocument, MailIndexField.BCC, createAddressHeader(mail.getBcc()));
+        setFieldInDocument(inputDocument, MailIndexField.ATTACHMENT, mail.hasAttachment());
+        setFieldInDocument(inputDocument, MailIndexField.COLOR_LABEL, mail.getColorLabel());
+        setFieldInDocument(inputDocument, MailIndexField.SIZE, mail.getSize());
+        setFieldInDocument(inputDocument, MailIndexField.RECEIVED_DATE, mail.getReceivedDate() == null ? null : mail.getReceivedDate().getTime());
+        setFieldInDocument(inputDocument, MailIndexField.SENT_DATE, mail.getSentDate() == null ? null : mail.getSentDate().getTime());
+    
+        /*
+         * Flags
+         */
+        final int flags = mail.getFlags();
+        setFieldInDocument(inputDocument, MailIndexField.FLAG_ANSWERED, Boolean.valueOf((flags & MailMessage.FLAG_ANSWERED) > 0));
+        setFieldInDocument(inputDocument, MailIndexField.FLAG_DELETED, Boolean.valueOf((flags & MailMessage.FLAG_DELETED) > 0));
+        setFieldInDocument(inputDocument, MailIndexField.FLAG_DRAFT, Boolean.valueOf((flags & MailMessage.FLAG_DRAFT) > 0));
+        setFieldInDocument(inputDocument, MailIndexField.FLAG_FLAGGED, Boolean.valueOf((flags & MailMessage.FLAG_FLAGGED) > 0));
+        setFieldInDocument(inputDocument, MailIndexField.FLAG_RECENT, Boolean.valueOf((flags & MailMessage.FLAG_RECENT) > 0));
+        setFieldInDocument(inputDocument, MailIndexField.FLAG_SEEN, Boolean.valueOf((flags & MailMessage.FLAG_SEEN) > 0));
+        setFieldInDocument(inputDocument, MailIndexField.FLAG_USER, Boolean.valueOf((flags & MailMessage.FLAG_USER) > 0));
+        setFieldInDocument(inputDocument, MailIndexField.FLAG_SPAM, Boolean.valueOf((flags & MailMessage.FLAG_SPAM) > 0));
+        setFieldInDocument(inputDocument, MailIndexField.FLAG_FORWARDED, Boolean.valueOf((flags & MailMessage.FLAG_FORWARDED) > 0));
+        setFieldInDocument(inputDocument, MailIndexField.FLAG_READ_ACK, Boolean.valueOf((flags & MailMessage.FLAG_READ_ACK) > 0));
+    
+        /*
+         * User flags
+         */
+        final String[] userFlags = mail.getUserFlags();
+        if (null != userFlags && userFlags.length > 0) {
+            setFieldInDocument(inputDocument, MailIndexField.USER_FLAGS, Arrays.asList(userFlags));
+        }
+    
+        /*
+         * Subject
+         */
+        setFieldInDocument(inputDocument, MailIndexField.SUBJECT, mail.getSubject());
+    
+        String text = null;
+        try {
+            if (mail instanceof ContentAwareMailMessage) {
+                ContentAwareMailMessage contentAwareMessage = (ContentAwareMailMessage) mail;
+                text = contentAwareMessage.getPrimaryContent();
+                if (text == null) {
+                    TextFinder textFinder = new TextFinder();
+                    text = textFinder.getText(mail);
+                }
+            } else {
+                TextFinder textFinder = new TextFinder();
+                text = textFinder.getText(mail);
+            }
+        } catch (Throwable t) {
+            LOG.warn("Error during text extraction. Setting content to null.", t);
+        }
+    
+        if (null != text) {
+            String contentField = fieldConfig.getRawField(MailIndexField.CONTENT);
+            if (contentField != null) {
+                inputDocument.setField(contentField, text);
+            }
+        }
+    
+        String contentFlagField = fieldConfig.getRawField(MailIndexField.CONTENT_FLAG);
+        if (contentFlagField != null) {
+            inputDocument.setField(contentFlagField, Boolean.TRUE);
+        }
+    
+        return inputDocument;
+    }
+
+    private StandardIndexDocument<MailMessage> convertInternal(SolrDocument document) throws OXException {
         MailMessage mail = new IDMailMessage();
         String idField = fieldConfig.getRawField(MailIndexField.ID);
         final String fullNameField = fieldConfig.getRawField(MailIndexField.FULL_NAME);
@@ -126,205 +223,110 @@ public class SolrMailDocumentConverter implements SolrResultConverter<MailMessag
         setAddressField(MailIndexField.CC, document, mail);
         setAddressField(MailIndexField.BCC, document, mail);
 
-        Boolean hasAttachment = getFirstMatchingValue(MailIndexField.ATTACHMENT, document);
+        Boolean hasAttachment = getFieldValue(MailIndexField.ATTACHMENT, document);
         if (hasAttachment != null) {
             mail.setHasAttachment(hasAttachment.booleanValue());
+        }
+        
+        Integer colorLabel = getFieldValue(MailIndexField.COLOR_LABEL, document);
+        if (colorLabel != null) {
+            mail.setColorLabel(colorLabel.intValue());
+        }
+        
+        Long size = getFieldValue(MailIndexField.SIZE, document);
+        if (size != null) {
+            mail.setSize(size.longValue());
+        }
+        
+        Long sentDate = getFieldValue(MailIndexField.SENT_DATE, document);
+        if (sentDate != null) {
+            mail.setSentDate(new Date(sentDate.longValue()));
+        }
+        
+        Long receivedDate = getFieldValue(MailIndexField.RECEIVED_DATE, document);
+        if (receivedDate != null) {
+            mail.setReceivedDate(new Date(receivedDate.longValue()));
+        }
+        
+        setFlags(mail, document);
+        
+        String subject = getFieldValue(MailIndexField.SUBJECT, document);
+        if (subject != null) {
+            mail.setSubject(subject);
         }
 
         return new StandardIndexDocument<MailMessage>(mail);
     }
     
-    private void setAddressField(MailIndexField indexField, SolrDocument document, MailMessage mail) throws OXException {
-        Set<String> fields = fieldConfig.getSolrFields(indexField);
-        if (fields != null && !fields.isEmpty()) {
-            String fieldName = fields.iterator().next();
-            List<String> addressList = getFieldValue(fieldName, document);
-            if (addressList != null && !addressList.isEmpty()) {
-                for (String addr : addressList) {
-                    try {
-                        mail.addFrom(QuotedInternetAddress.parse(addr, false));
-                    } catch (AddressException e) {
-                        mail.addFrom(new PlainTextAddress(addr));
-                    }
-                }
-            }
+    private void setFlags(MailMessage mail, SolrDocument document) throws OXException {
+        int flags = 0;
+        Boolean b = getFieldValue(MailIndexField.FLAG_ANSWERED, document);
+        if (b != null && b.booleanValue()) {
+            flags |= MailMessage.FLAG_ANSWERED;
         }
-    }
-    
-    @SuppressWarnings("unchecked")
-    private <V> V getFirstMatchingValue(MailIndexField indexField, SolrDocument document) throws OXException {
-        Set<String> solrFields = fieldConfig.getSolrFields(indexField);
-        if (solrFields == null || solrFields.isEmpty()) {
-            return null;
+        b = getFieldValue(MailIndexField.FLAG_DELETED, document);
+        if (b != null && b.booleanValue()) {
+            flags |= MailMessage.FLAG_DELETED;
         }
-
-        for (String field : solrFields) {
-            if (document.containsKey(field)) {
-                return (V) document.get(field);
-            }
+        b = getFieldValue(MailIndexField.FLAG_DRAFT, document);
+        if (b != null && b.booleanValue()) {
+            flags |= MailMessage.FLAG_DRAFT;
         }
+        b = getFieldValue(MailIndexField.FLAG_FLAGGED, document);
+        if (b != null && b.booleanValue()) {
+            flags |= MailMessage.FLAG_FLAGGED;
+        }
+        b = getFieldValue(MailIndexField.FLAG_FORWARDED, document);
+        if (b != null && b.booleanValue()) {
+            flags |= MailMessage.FLAG_FORWARDED;
+        }
+        b = getFieldValue(MailIndexField.FLAG_READ_ACK, document);
+        if (b != null && b.booleanValue()) {
+            flags |= MailMessage.FLAG_READ_ACK;
+        }
+        b = getFieldValue(MailIndexField.FLAG_RECENT, document);
+        if (b != null && b.booleanValue()) {
+            flags |= MailMessage.FLAG_RECENT;
+        }
+        b = getFieldValue(MailIndexField.FLAG_SEEN, document);
+        if (b != null && b.booleanValue()) {
+            flags |= MailMessage.FLAG_SEEN;
+        }
+        b = getFieldValue(MailIndexField.FLAG_SPAM, document);
+        if (b != null && b.booleanValue()) {
+            flags |= MailMessage.FLAG_SPAM;
+        }
+        b = getFieldValue(MailIndexField.FLAG_USER, document);
+        if (b != null && b.booleanValue()) {
+            flags |= MailMessage.FLAG_USER;
+        }
+        mail.setFlags(flags);
         
-        return null;
-    }
-
-    @SuppressWarnings("unchecked")
-    private <V> V getFieldValue(String name, SolrDocument document) throws OXException {
-        if (name == null) {
-            return null;
-        }
-
-        Object value = document.getFieldValue(name);
-        if (null == value) {
-            return null;
-        }
-        try {
-            return (V) value;
-        } catch (final ClassCastException e) {
-            throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e, "Unexpected type: " + e.getMessage());
-        }
-    }
-    
-    @Override
-    public IndexDocument<MailMessage> convert(SolrDocument document, Map<String, List<String>> highlightFields) throws OXException {
-        IndexDocument<MailMessage> indexDocument = convert(document);
-        
-        // FIXME: Now it gets ugly. This MUST be changed before deployment...
-        // Return highlight fields within IndexDoxument as Map<IndexField, String>
-//        if (!highlightFields.isEmpty()) {
-//            boolean inPersons = false;
-//            boolean inSubject = false;
-//            for (String field : highlightFields.keySet()) {
-//                if (!inPersons && (field.equals(SolrMailField.FROM.solrName())
-//                    || field.equals(SolrMailField.TO.solrName())
-//                    || field.equals(SolrMailField.CC.solrName())
-//                    || field.equals(SolrMailField.BCC.solrName()))) {
-//                    
-//                    inPersons = true;
-//                }
-//                
-//                if (!inSubject && field.startsWith(SolrMailField.SUBJECT.solrName())) {
-//                    inSubject = true;
-//                }
-//            }
-//            
-//            if (inPersons || inSubject) {
-//                if (inPersons && inSubject) {
-//                    indexDocument.addExtendedAttribute("foundIn", "both");
-//                } else if (inPersons) {
-//                    indexDocument.addExtendedAttribute("foundIn", "persons");
-//                } else {
-//                    indexDocument.addExtendedAttribute("foundIn", "topics");
-//                }
-//            }
-//        }
-        
-        return indexDocument;
-    }
-
-    @Override
-    public IndexResult<MailMessage> createIndexResult(List<IndexDocument<MailMessage>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
-        return new SolrIndexResult<MailMessage>(documents.size(), documents, facetCounts);
-    }
-
-    public SolrInputDocument convert(int contextId, int userId, IndexDocument<MailMessage> document) throws OXException {
-        MailMessage mail = document.getObject();
-        int accountId = mail.getAccountId();
-        MailUUID uuid = MailUUID.newUUID(contextId, userId, accountId, mail.getFolder(), mail.getMailId());
-        SolrInputDocument inputDocument = new SolrInputDocument();
-        /*
-         * Environmental fields
-         */
-        setFieldInDocument(inputDocument, MailIndexField.TIMESTAMP, System.currentTimeMillis());
-        setFieldInDocument(inputDocument, MailIndexField.UUID, uuid.toString());
-        setFieldInDocument(inputDocument, MailIndexField.ACCOUNT, String.valueOf(accountId));
-
-        /*
-         * Envelope data
-         */
-        setFieldInDocument(inputDocument, MailIndexField.FULL_NAME, mail.getFolder());
-        setFieldInDocument(inputDocument, MailIndexField.ID, mail.getMailId());
-        addFieldInDocument(inputDocument, MailIndexField.FROM, createAddressHeader(mail.getFrom()));
-        addFieldInDocument(inputDocument, MailIndexField.TO, createAddressHeader(mail.getTo()));
-        addFieldInDocument(inputDocument, MailIndexField.CC, createAddressHeader(mail.getCc()));
-        addFieldInDocument(inputDocument, MailIndexField.BCC, createAddressHeader(mail.getBcc()));
-        setFieldInDocument(inputDocument, MailIndexField.ATTACHMENT, mail.hasAttachment());
-        setFieldInDocument(inputDocument, MailIndexField.COLOR_LABEL, mail.getColorLabel());
-        setFieldInDocument(inputDocument, MailIndexField.SIZE, mail.getSize());
-        setFieldInDocument(inputDocument, MailIndexField.RECEIVED_DATE, mail.getReceivedDate() == null ? null : mail.getReceivedDate().getTime());
-        setFieldInDocument(inputDocument, MailIndexField.SENT_DATE, mail.getSentDate() == null ? null : mail.getSentDate().getTime());
-
-        /*
-         * Flags
-         */
-        final int flags = mail.getFlags();
-        setFieldInDocument(inputDocument, MailIndexField.FLAG_ANSWERED, Boolean.valueOf((flags & MailMessage.FLAG_ANSWERED) > 0));
-        setFieldInDocument(inputDocument, MailIndexField.FLAG_DELETED, Boolean.valueOf((flags & MailMessage.FLAG_DELETED) > 0));
-        setFieldInDocument(inputDocument, MailIndexField.FLAG_DRAFT, Boolean.valueOf((flags & MailMessage.FLAG_DRAFT) > 0));
-        setFieldInDocument(inputDocument, MailIndexField.FLAG_FLAGGED, Boolean.valueOf((flags & MailMessage.FLAG_FLAGGED) > 0));
-        setFieldInDocument(inputDocument, MailIndexField.FLAG_RECENT, Boolean.valueOf((flags & MailMessage.FLAG_RECENT) > 0));
-        setFieldInDocument(inputDocument, MailIndexField.FLAG_SEEN, Boolean.valueOf((flags & MailMessage.FLAG_SEEN) > 0));
-        setFieldInDocument(inputDocument, MailIndexField.FLAG_USER, Boolean.valueOf((flags & MailMessage.FLAG_USER) > 0));
-        setFieldInDocument(inputDocument, MailIndexField.FLAG_SPAM, Boolean.valueOf((flags & MailMessage.FLAG_SPAM) > 0));
-        setFieldInDocument(inputDocument, MailIndexField.FLAG_FORWARDED, Boolean.valueOf((flags & MailMessage.FLAG_FORWARDED) > 0));
-        setFieldInDocument(inputDocument, MailIndexField.FLAG_READ_ACK, Boolean.valueOf((flags & MailMessage.FLAG_READ_ACK) > 0));
-
-        /*
-         * User flags
-         */
-        final String[] userFlags = mail.getUserFlags();
-        if (null != userFlags && userFlags.length > 0) {
-            setFieldInDocument(inputDocument, MailIndexField.USER_FLAGS, Arrays.asList(userFlags));
-        }
-
-        /*
-         * Subject
-         */
-        setFieldInDocument(inputDocument, MailIndexField.SUBJECT, mail.getSubject());
-
-        String text = null;
-        try {
-            if (mail instanceof ContentAwareMailMessage) {
-                ContentAwareMailMessage contentAwareMessage = (ContentAwareMailMessage) mail;
-                text = contentAwareMessage.getPrimaryContent();
-                if (text == null) {
-                    TextFinder textFinder = new TextFinder();
-                    text = textFinder.getText(mail);
-                }
+        Object userFlagsObject = getFieldValue(MailIndexField.USER_FLAGS, document);
+        if (userFlagsObject != null) {
+            if (userFlagsObject instanceof String) {
+                mail.addUserFlag((String) userFlagsObject);
             } else {
-                TextFinder textFinder = new TextFinder();
-                text = textFinder.getText(mail);
-            }
-        } catch (Throwable t) {
-            LOG.warn("Error during text extraction. Setting content to null.", t);
-        }
-
-        if (null != text) {
-            String contentField = fieldConfig.getRawField(MailIndexField.CONTENT);
-            if (contentField != null) {
-                inputDocument.setField(contentField, text);
+                try {
+                    List<String> flagList = (List<String>) userFlagsObject;
+                    mail.addUserFlags(flagList.toArray(new String[flagList.size()]));
+                } catch (ClassCastException e) {
+                    // ignore
+                }
             }
         }
-
-        String contentFlagField = fieldConfig.getRawField(MailIndexField.CONTENT_FLAG);
-        if (contentFlagField != null) {
-            inputDocument.setField(contentFlagField, Boolean.TRUE);
-        }
-
-        return inputDocument;
     }
     
-    private void setFieldInDocument(SolrInputDocument inputDocument, MailIndexField field, Object value) {
-        String fieldName = fieldConfig.getRawField(field);
-        if (fieldName != null && value != null) {
-            inputDocument.remove(fieldName);
-            inputDocument.addField(fieldName, value);
-        }
-    }
-
-    private void addFieldInDocument(SolrInputDocument inputDocument, MailIndexField field, List<Object> values) {
-        String fieldName = fieldConfig.getRawField(field);
-        if (fieldName != null && values != null && !values.isEmpty()) {
-            inputDocument.addField(fieldName, values);
+    private void setAddressField(MailIndexField indexField, SolrDocument document, MailMessage mail) throws OXException {
+        List<String> addressList = getFieldValue(indexField, document);
+        if (addressList != null && !addressList.isEmpty()) {
+            for (String addr : addressList) {
+                try {
+                    mail.addFrom(QuotedInternetAddress.parse(addr, false));
+                } catch (AddressException e) {
+                    mail.addFrom(new PlainTextAddress(addr));
+                }
+            }
         }
     }
     
