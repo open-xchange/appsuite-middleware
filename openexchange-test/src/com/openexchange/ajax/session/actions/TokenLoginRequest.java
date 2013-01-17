@@ -75,9 +75,9 @@ public final class TokenLoginRequest extends AbstractRequest<TokenLoginResponse>
     public TokenLoginRequest(String login, String password, String authId, String client, String version, boolean autologin, String clientToken) {
         super(new Parameter[] {
             new URLParameter(PARAMETER_ACTION, ACTION_TOKENLOGIN),
+            new URLParameter(AUTHID_PARAM, authId),
             new FieldParameter(LOGIN_PARAM, login),
             new FieldParameter(PASSWORD_PARAM, password),
-            new FieldParameter(AUTHID_PARAM, authId),
             new FieldParameter(CLIENT_PARAM, client),
             new FieldParameter(VERSION_PARAM, version),
             new FieldParameter(AUTOLOGIN_PARAM, Boolean.toString(autologin)),

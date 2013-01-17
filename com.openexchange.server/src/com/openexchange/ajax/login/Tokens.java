@@ -63,6 +63,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.context.ContextService;
@@ -104,7 +105,7 @@ public final class Tokens implements LoginRequestHandler {
         String clientToken = LoginTools.parseParameter(req, CLIENT_TOKEN);
         String serverToken = LoginTools.parseParameter(req, SERVER_TOKEN);
         String client = LoginTools.parseParameter(req, CLIENT_PARAM);
-        String userAgent = LoginTools.parseUserAgent(req);
+        String userAgent = req.getHeader(Header.USER_AGENT);
 
         // TODO Register this login action dynamically if LoginPerformer and UserService gets available.
         ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, false);
@@ -129,10 +130,17 @@ public final class Tokens implements LoginRequestHandler {
         String hash = HashCalculator.getInstance().getHash(req, userAgent, client);
         session.setHash(hash);
 
+        final Locale locale;
+        if (null != contextService && null != userService) {
+            Context context = contextService.getContext(session.getContextId());
+            locale = userService.getUser(session.getUserId(), context).getLocale();
+        } else {
+            locale = Locale.US;
+        }
         final Response response = new Response();
         try {
             JSONObject json = new JSONObject();
-            LoginWriter.write(session, json);
+            LoginWriter.write(session, json, locale);
             response.setData(json);
         } catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
@@ -144,13 +152,6 @@ public final class Tokens implements LoginRequestHandler {
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         Login.writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
         try {
-            final Locale locale;
-            if (null != contextService && null != userService) {
-                Context context = contextService.getContext(session.getContextId());
-                locale = userService.getUser(session.getUserId(), context).getLocale();
-            } else {
-                locale = Locale.US;
-            }
             ResponseWriter.write(response, resp.getWriter(), locale);
         } catch (JSONException e) {
             LOG.error(e.getMessage(), e);
