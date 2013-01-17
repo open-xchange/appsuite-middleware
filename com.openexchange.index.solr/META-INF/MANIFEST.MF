@@ -70,6 +70,7 @@ Import-Package: com.openexchange.config,
  javax.management.timer,
  javax.net,
  javax.net.ssl,
+ javax.xml,
  org.apache.commons.httpclient,
  org.apache.commons.httpclient.auth,
  org.apache.commons.httpclient.cookie,
@@ -100,6 +101,9 @@ Import-Package: com.openexchange.config,
  org.w3c.dom.stylesheets,
  org.w3c.dom.traversal,
  org.w3c.dom.views,
- org.w3c.dom.xpath
+ org.w3c.dom.xpath,
+ org.xml.sax,
+ org.xml.sax.ext,
+ org.xml.sax.helpers
 Export-Package: com.openexchange.index.solr
 

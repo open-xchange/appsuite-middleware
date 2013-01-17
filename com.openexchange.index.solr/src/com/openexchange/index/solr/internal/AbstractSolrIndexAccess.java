@@ -359,16 +359,26 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     }
     
     protected Set<String> collectFields(Set<? extends IndexField> fields) {
+        if (fields == null) {
+            return null;
+        }
+        
         Set<String> allFields = new HashSet<String>();
         for (IndexField indexField : fields) {
             Set<String> solrFields = fieldConfig.getSolrFields(indexField);
-            allFields.addAll(solrFields);
+            if (solrFields != null) {
+                allFields.addAll(solrFields);
+            }
         }
         
         return allFields;
     }
     
     protected void setFieldList(SolrQuery solrQuery, Set<? extends IndexField> fields) {
+        if (fields == null) {
+            return;
+        }
+        
         Set<String> allFields = collectFields(fields);
         for (String field : allFields) {
             solrQuery.addField(field);

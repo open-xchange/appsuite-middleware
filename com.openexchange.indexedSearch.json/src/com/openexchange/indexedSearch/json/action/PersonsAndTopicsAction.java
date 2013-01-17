@@ -111,23 +111,25 @@ public class PersonsAndTopicsAction extends AbstractIndexAction {
         for (IndexDocument<MailMessage> document : documents) {
             MailMessage mailMessage = document.getObject();
             Map<IndexField, List<String>> highlighting = document.getHighlighting();
-            if (highlighting.containsKey(MailIndexField.FROM)) {
-                addInternetAddresses(mailMessage.getFrom(), persons);
-            }
-            if (highlighting.containsKey(MailIndexField.TO)) {
-                addInternetAddresses(mailMessage.getTo(), persons);
-            }
-            if (highlighting.containsKey(MailIndexField.SUBJECT)) {
-                String subject = mailMessage.getSubject();
-                if (subject != null) {
-                    topics.add(subject);
+            if (highlighting != null) {
+                if (highlighting.containsKey(MailIndexField.FROM)) {
+                    addInternetAddresses(mailMessage.getFrom(), persons);
                 }
-            }
-            if (highlighting.containsKey(MailIndexField.CC)) {
-                addInternetAddresses(mailMessage.getCc(), persons);
-            }
-            if (highlighting.containsKey(MailIndexField.BCC)) {
-                addInternetAddresses(mailMessage.getBcc(), persons);
+                if (highlighting.containsKey(MailIndexField.TO)) {
+                    addInternetAddresses(mailMessage.getTo(), persons);
+                }
+                if (highlighting.containsKey(MailIndexField.SUBJECT)) {
+                    String subject = mailMessage.getSubject();
+                    if (subject != null) {
+                        topics.add(subject);
+                    }
+                }
+                if (highlighting.containsKey(MailIndexField.CC)) {
+                    addInternetAddresses(mailMessage.getCc(), persons);
+                }
+                if (highlighting.containsKey(MailIndexField.BCC)) {
+                    addInternetAddresses(mailMessage.getBcc(), persons);
+                }
             }
         }
         
@@ -168,7 +170,13 @@ public class PersonsAndTopicsAction extends AbstractIndexAction {
         }
         
         for (InternetAddress addr : addrs) {
-            resultSet.add(addr.toUnicodeString());
+            String personal = addr.getPersonal();
+            String address = addr.getAddress();
+            if (personal == null) {
+                resultSet.add(address);
+            } else {
+                resultSet.add(personal + " <" + address + ">");
+            }
         }
     }
 

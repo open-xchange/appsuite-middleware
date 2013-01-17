@@ -91,15 +91,14 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
     public SimpleQueryBuilder(String configPath, String moduleField, String accountField, String folderField, FieldConfiguration fieldConfig) throws BuilderException {
         config = new SimpleConfiguration(configPath);
         translators = new HashMap<String, QueryTranslator>();
-
-        for (String handler : config.getHandlers()) {
-            translators.put(handler.trim(), this.initTranslatorForHandler(handler, config));
-        }
-
         this.moduleField = moduleField;
         this.accountField = accountField;
         this.folderField = folderField;
         this.fieldConfig = fieldConfig;
+
+        for (String handler : config.getHandlers()) {
+            translators.put(handler.trim(), this.initTranslatorForHandler(handler));
+        }
     }
 
     /*
@@ -202,11 +201,11 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
 
     // -------------------------- private methods below ----------------------------------- //
 
-    private QueryTranslator initTranslatorForHandler(String handler, Configuration conf) throws BuilderException {
+    private QueryTranslator initTranslatorForHandler(String handler) throws BuilderException {
         try {
-            Class<?> cls = Class.forName(conf.getTranslatorForHandler(handler).trim());
+            Class<?> cls = Class.forName(config.getTranslatorForHandler(handler).trim());
             QueryTranslator qt = (QueryTranslator) cls.newInstance();
-            qt.init(handler, conf, fieldConfig);
+            qt.init(handler, config, fieldConfig);
             return qt;
         } catch (ClassNotFoundException e) {
             log.warn("[SimpleQueryBuilder]: Could not find class for handler \'" + handler + "\': " + e.getMessage());

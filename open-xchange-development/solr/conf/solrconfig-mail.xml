@@ -127,7 +127,7 @@
             <str name="hl.requireFieldMatch">true</str>
         </lst>
         <lst name="defaults">
-            <str name="fl">from to cc bcc subject_gen subject_en subject_de subject_fr subject_it</str>
+            <str name="fl">uuid from to cc bcc subject_gen subject_en subject_de subject_fr subject_it</str>
         </lst>
 
         <arr name="components">

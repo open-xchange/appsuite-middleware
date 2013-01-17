@@ -130,7 +130,7 @@
         <field name="module" type="int" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.MODULE" />
         <field name="account" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.ACCOUNT" />
         <field name="folder" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.FOLDER" />
-        <field name="id" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.ID" />
+        <field name="id" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.OBJECT_ID" />
         <field name="attachment_id" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.ATTACHMENT_ID" />
         <field name="file_name" type="file_name" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.FILE_NAME" />
         <field name="file_size" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.attach.index.AttachmentIndexField.FILE_SIZE" />

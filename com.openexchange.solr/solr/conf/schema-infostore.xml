@@ -130,11 +130,11 @@
 
     <fields>
         <field name="uuid" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.UUID" />
-        <field name="folder_id" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.FOLDER_ID" />
+        <field name="folder_id" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.FOLDER" />
         <field name="id" type="int" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.ID" />
         <field name="created_by" type="int" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.CREATED_BY" />
         <field name="modified_by" type="int" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.MODIFIED_BY" />
-        <field name="creation_date" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.CREATION_DATE" />
+        <field name="creation_date" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.CREATED" />
         <field name="last_modified" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.LAST_MODIFIED" />
         <field name="version" type="int" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.VERSION" />
         <field name="url" type="url" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.URL" />

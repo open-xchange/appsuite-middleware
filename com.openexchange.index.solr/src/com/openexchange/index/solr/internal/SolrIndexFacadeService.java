@@ -312,13 +312,13 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                 if (infostoreBuilder == null) {
                     throw new IllegalStateException("QueryBuilder for module infostore is not initialized.");
                 }
-                return new SolrInfostoreIndexAccess(identifier, infostoreBuilder, mailFieldConfig);
+                return new SolrInfostoreIndexAccess(identifier, infostoreBuilder, infostoreFieldConfig);
 
             case Types.ATTACHMENT:
                 if (attachmentBuilder == null) {
                     throw new IllegalStateException("QueryBuilder for module attachments is not initialized.");
                 }
-                return new SolrAttachmentIndexAccess(identifier, attachmentBuilder, mailFieldConfig);
+                return new SolrAttachmentIndexAccess(identifier, attachmentBuilder, attachmentFieldConfig);
 
             default:
                 throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);
