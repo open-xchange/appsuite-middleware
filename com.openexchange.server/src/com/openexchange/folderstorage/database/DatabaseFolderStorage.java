@@ -822,7 +822,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         /*
                          * A virtual database folder
                          */
-                        retval = VirtualListFolder.getVirtualListFolder(folderId);
+                        final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+                        retval = VirtualListFolder.getVirtualListFolder(folderId, altNames);
                     } else {
                         /*
                          * A non-virtual database folder
@@ -901,6 +902,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                 }
             }
+            final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
             /*
              * Either from working or from backup storage type
              */
@@ -923,7 +925,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
                             ret[index] = SystemRootFolder.getSystemRootFolder();
                         } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
-                            ret[index] = VirtualListFolder.getVirtualListFolder(folderId);
+                            ret[index] = VirtualListFolder.getVirtualListFolder(folderId, altNames);
                         } else {
                             map.put(folderId, index);
                         }
@@ -934,7 +936,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 if (!map.isEmpty()) {
                     final Session session = storageParameters.getSession();
-                    final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
                     for (final FolderObject folderObject : getFolderObjects(map.keys(), ctx, con)) {
                         if (null != folderObject) {
                             final int index = map.get(folderObject.getObjectID());

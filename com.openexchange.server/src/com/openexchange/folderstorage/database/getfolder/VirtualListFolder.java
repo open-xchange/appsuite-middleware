@@ -114,9 +114,10 @@ public final class VirtualListFolder {
      * Gets the database folder representing given virtual folder.
      *
      * @param folderId The virtual folder identifier
+     * @param altNames <code>true</code> to use alternative names for former InfoStore folders; otherwise <code>false</code>
      * @return The database folder representing given virtual folder
      */
-    public static DatabaseFolder getVirtualListFolder(final int folderId) {
+    public static DatabaseFolder getVirtualListFolder(final int folderId, boolean altNames) {
         /*
          * A virtual database folder
          */
@@ -156,7 +157,7 @@ public final class VirtualListFolder {
             fo =
                 FolderObject.createVirtualFolderObject(
                     folderId,
-                    FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME,
+                    altNames ? FolderStrings.VIRTUAL_LIST_FILES_FOLDER_NAME : FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME,
                     FolderObject.INFOSTORE,
                     true,
                     FolderObject.SYSTEM_TYPE);
