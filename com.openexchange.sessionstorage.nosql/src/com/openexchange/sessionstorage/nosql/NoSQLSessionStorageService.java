@@ -626,6 +626,13 @@ public class NoSQLSessionStorageService implements SessionStorageService {
         mutator.execute();
     }
 
+    @Override
+    public int getUserSessionCount(int userId, int contextId) throws OXException {
+        //TODO: most likely, this could be optimized
+        Session[] sessions = getUserSessions(userId, contextId);
+        return null != sessions ? sessions.length : 0;
+    }
+    
     public static NoSQLSessionStorageService getStorageService() {
         return instance;
     }
