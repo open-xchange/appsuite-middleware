@@ -51,6 +51,9 @@ package com.openexchange.oauth.json.oauthaccount.actions;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.DefaultOAuthToken;
@@ -85,6 +88,9 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         if (oauthToken == null) {
             oauthToken = request.getParameter("access_token");
         }
+        if (oauthToken != null) {
+        	oauthToken = stripExpireParam(oauthToken);
+        }
         final String uuid = request.getParameter(OAuthConstants.SESSION_PARAM_UUID);
         if (uuid == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(OAuthConstants.SESSION_PARAM_UUID);
@@ -94,7 +100,8 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
          */
         @SuppressWarnings("unchecked")
         final Map<String, Object> state = (Map<String, Object>) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
-        final String oauthTokenSecret = (String) state.get(OAuthConstants.ARGUMENT_SECRET);
+        String oauthTokenSecret = (String) state.get(OAuthConstants.ARGUMENT_SECRET);
+        oauthTokenSecret = stripExpireParam(oauthTokenSecret);
         session.setParameter(uuid, null);
         /*
          * The OAuth verifier (PIN)
@@ -124,7 +131,25 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         return arguments;
     }
 
-    private static boolean isEmpty(final String string) {
+    /*
+     * Fixes bug 24332
+     */
+    private String stripExpireParam(final String token) {
+    	Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");
+    	
+        if (token.indexOf("&expires") < 0) {
+            return token;
+        }
+        final Matcher m = P_EXPIRES.matcher(token);
+        final StringBuffer sb = new StringBuffer(token.length());
+        if (m.find()) {
+            m.appendReplacement(sb, "");
+        }
+        m.appendTail(sb);
+        return sb.toString();		
+	}
+
+	private static boolean isEmpty(final String string) {
         if (null == string) {
             return true;
         }
