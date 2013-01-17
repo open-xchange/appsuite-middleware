@@ -236,4 +236,13 @@ public interface SessionStorageService {
      */
     public void cleanUp() throws OXException;
 
+    /**
+     * Gets the number of currently stored sessions of a user.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The number of sessions
+     * @throws OXException 
+     */
+    int getUserSessionCount(int userId, int contextId) throws OXException;
 }

@@ -1,3 +1,11 @@
+* 2013-01-17 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24502: Remove whole appointment if deleted via shared folder.
+
+* 2013-01-17 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24347: Replaced indices by adjacent sessions-per-user mapping  
+ 
 * 2013-01-17 - choeger@open-xchange.com
 
  - Fix for bug 24494: own settings in ModuleAccessDefinitions.properties lost after update
