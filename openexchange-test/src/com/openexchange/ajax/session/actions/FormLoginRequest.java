@@ -70,9 +70,9 @@ public class FormLoginRequest extends AbstractRequest<FormLoginResponse> {
     public FormLoginRequest(String login, String password, String authId, String client, String version, boolean autologin) {
         super(new Parameter[] {
             new URLParameter(PARAMETER_ACTION, ACTION_FORMLOGIN),
+            new URLParameter(AUTHID_PARAM, authId),
             new FieldParameter(LOGIN_PARAM, login),
             new FieldParameter(PASSWORD_PARAM, password),
-            new FieldParameter(AUTHID_PARAM, authId),
             new FieldParameter(CLIENT_PARAM, client),
             new FieldParameter(VERSION_PARAM, version),
             new FieldParameter(AUTOLOGIN_PARAM, Boolean.toString(autologin))
