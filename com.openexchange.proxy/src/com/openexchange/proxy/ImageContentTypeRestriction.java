@@ -49,7 +49,6 @@
 
 package com.openexchange.proxy;
 
-import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
@@ -96,7 +95,7 @@ public final class ImageContentTypeRestriction extends ContentTypeRestriction {
                  */
                 return false;
             }
-            lcValue = value.toLowerCase(Locale.ENGLISH).trim();
+            lcValue = toLowerCase(value).trim();
         }
         if (pattern.matcher(lcValue).matches()) {
             return true;
@@ -110,6 +109,16 @@ public final class ImageContentTypeRestriction extends ContentTypeRestriction {
     @Override
     public String getDescription() {
         return "Content-Type header must match: image/*";
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }
