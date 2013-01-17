@@ -51,6 +51,7 @@ package com.openexchange.ajax.index;
 
 import org.json.JSONObject;
 import org.junit.Test;
+
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.index.actions.GeneralIndexResponse;
 import com.openexchange.ajax.index.actions.PersonsAndTopicsRequest;
@@ -74,9 +75,12 @@ public class PersonsAndTopicsTest extends AbstractAJAXSession {
     @Test
     public void testPersonsAndTopics() throws Exception {
         PersonsAndTopicsRequest req = new PersonsAndTopicsRequest("ubun*", 10, 10);
+        long start = System.currentTimeMillis();
         GeneralIndexResponse resp = getClient().execute(req);
+        long diff = System.currentTimeMillis() - start;
         JSONObject json = resp.getJSON();
         System.out.println(json.toString(2));
+        System.out.println("Duration: " + diff);
     }
 
 }

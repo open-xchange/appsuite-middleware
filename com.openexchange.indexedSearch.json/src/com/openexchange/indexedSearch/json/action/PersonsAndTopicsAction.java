@@ -53,13 +53,21 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import javax.mail.internet.InternetAddress;
+
+import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.index.Attachment;
+import com.openexchange.groupware.attach.index.AttachmentIndexField;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
@@ -72,6 +80,10 @@ import com.openexchange.indexedSearch.json.ResultConverters;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -80,6 +92,8 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class PersonsAndTopicsAction extends AbstractIndexAction {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(PersonsAndTopicsAction.class);
 
     /**
      * Initializes a new {@link PersonsAndTopicsAction}.
@@ -92,12 +106,61 @@ public class PersonsAndTopicsAction extends AbstractIndexAction {
 
     @Override
     protected AJAXRequestResult perform(IndexAJAXRequest req) throws OXException, JSONException {
-        String searchTerm = req.checkParameter("searchTerm");
-        int maxPersons = req.optInt("maxPersons") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxPersons");
-        int maxTopics = req.optInt("maxTopics") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxTopics");
+        long start = System.currentTimeMillis();
+        final ServerSession session = req.getSession();
+        final String searchTerm = req.checkParameter("searchTerm");
+        final int maxPersons = req.optInt("maxPersons") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxPersons");
+        final int maxTopics = req.optInt("maxTopics") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxTopics");
+        final IndexFacadeService indexFacade = getService(IndexFacadeService.class);
         
-        IndexFacadeService indexFacade = getService(IndexFacadeService.class);
-        IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, req.getSession());
+        ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
+        Future<JSONArray> attachmentFuture = threadPoolService.submit(new Task<JSONArray>() {
+            @Override
+            public void setThreadName(ThreadRenamer threadRenamer) {}
+
+            @Override
+            public void beforeExecute(Thread t) {}
+
+            @Override
+            public void afterExecute(Throwable t) {}
+
+            @Override
+            public JSONArray call() throws Exception {
+                IndexAccess<Attachment> indexAccess = indexFacade.acquireIndexAccess(Types.ATTACHMENT, session);
+                QueryParameters params = new QueryParameters.Builder()
+                    .setHandler(SearchHandler.PERSONS_AND_TOPICS)
+                    .setSearchTerm("osgi")
+                    .setLength(10)
+                    .build();
+                
+                IndexResult<Attachment> result = indexAccess.query(params, null);
+                List<IndexDocument<Attachment>> documents = result.getResults();
+                Set<String> attachments = new LinkedHashSet<String>();
+                for (IndexDocument<Attachment> document : documents) {
+                    Attachment attachment = document.getObject();
+                    Map<IndexField, List<String>> highlighting = document.getHighlighting();
+                    if (highlighting != null) {
+                        if (highlighting.containsKey(AttachmentIndexField.FILE_NAME) || highlighting.containsKey(AttachmentIndexField.CONTENT)) {
+                            String fileName = attachment.getFileName();
+                            if (fileName != null) {
+                                attachments.add(fileName);
+                            }
+                        }
+                    }
+                }
+                
+                JSONArray array = new JSONArray();
+                for (String attachment : attachments) {
+                    JSONObject json = new JSONObject();
+                    json.put("value", attachment);
+                    array.put(json);
+                }
+                
+                return array;
+            }
+        });
+        
+        IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
         QueryParameters params = new QueryParameters.Builder()
             .setHandler(SearchHandler.PERSONS_AND_TOPICS)
             .setSearchTerm(searchTerm)
@@ -161,6 +224,18 @@ public class PersonsAndTopicsAction extends AbstractIndexAction {
         resultObject.put("persons", personsArray);
         resultObject.put("topics", topicsArray);
         
+        JSONArray attachmentsArray;
+        try {
+            attachmentsArray = attachmentFuture.get();
+            resultObject.put("attachments", attachmentsArray);
+        } catch (InterruptedException e) {
+            LOG.warn("Could not search for attachments", e);
+        } catch (ExecutionException e) {
+            LOG.warn("Could not search for attachments", e);
+        }
+        
+        long diff = System.currentTimeMillis() - start;
+        LOG.warn("Duration: " + diff + "ms.");
         return new AJAXRequestResult(resultObject, "json");
     }
     
