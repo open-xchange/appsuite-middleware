@@ -51,19 +51,20 @@ package com.openexchange.index.solr.internal.querybuilder;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.index.solr.internal.FieldMapper;
+import com.openexchange.index.solr.internal.FieldConfiguration;
 
 /**
  * {@link SimpleQueryBuilder}
@@ -83,11 +84,11 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
 
     private String folderField;
 
-    private FieldMapper fieldMapper;
+    private FieldConfiguration fieldConfig;
 
     private static Log log = com.openexchange.log.Log.loggerFor(SimpleQueryBuilder.class);
 
-    public SimpleQueryBuilder(String configPath, String moduleField, String accountField, String folderField, FieldMapper fieldMapper) throws BuilderException {
+    public SimpleQueryBuilder(String configPath, String moduleField, String accountField, String folderField, FieldConfiguration fieldConfig) throws BuilderException {
         config = new SimpleConfiguration(configPath);
         translators = new HashMap<String, QueryTranslator>();
 
@@ -98,7 +99,7 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
         this.moduleField = moduleField;
         this.accountField = accountField;
         this.folderField = folderField;
-        this.fieldMapper = fieldMapper;
+        this.fieldConfig = fieldConfig;
     }
 
     /*
@@ -205,7 +206,7 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
         try {
             Class<?> cls = Class.forName(conf.getTranslatorForHandler(handler).trim());
             QueryTranslator qt = (QueryTranslator) cls.newInstance();
-            qt.init(handler, conf);
+            qt.init(handler, conf, fieldConfig);
             return qt;
         } catch (ClassNotFoundException e) {
             log.warn("[SimpleQueryBuilder]: Could not find class for handler \'" + handler + "\': " + e.getMessage());
@@ -228,23 +229,12 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
             return;
         }
 
-        SolrField solrSortField = fieldMapper.solrFieldFor(sortField);
-        if (solrSortField != null) {
-            String parameterName = solrSortField.parameterName();
-            Set<String> keys = config.getKeys(Configuration.FIELD);
-            if (!keys.contains(Configuration.FIELD + '.' + parameterName)) {
-                return;
-            }
-
-            List<String> indexFields = config.getIndexFields(Configuration.FIELD + '.' + parameterName);
-            if (indexFields == null || indexFields.isEmpty()) {
-                return;
-            }
-
+        Set<String> sortFields = fieldConfig.getSolrFields(sortField);
+        if (sortFields != null && !sortFields.isEmpty()) {
             Order orderParam = parameters.getOrder();
             ORDER order = orderParam == null ? ORDER.desc : orderParam.equals(Order.DESC) ? ORDER.desc : ORDER.asc;
-            for (String indexField : indexFields) {
-                query.addSortField(indexField, order);
+            for (String field : sortFields) {
+                query.addSortField(field, order);
             }
         }
     }

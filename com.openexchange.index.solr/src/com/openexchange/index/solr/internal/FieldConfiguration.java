@@ -50,6 +50,7 @@
 package com.openexchange.index.solr.internal;
 
 import java.util.Set;
+
 import com.openexchange.index.IndexField;
 
 
@@ -60,10 +61,14 @@ import com.openexchange.index.IndexField;
  */
 public interface FieldConfiguration {
     
-    Set<String> solrFieldsFor(IndexField indexField);
+    Set<String> getSolrFields(IndexField indexField);
     
-    String solrFieldFor();
+    Set<? extends IndexField> getIndexedFields();
     
-    boolean isLocalized(IndexField indexField);
+    String getUUIDField();
+    
+    IndexField getIndexField(String solrField);
+    
+    String getRawField(IndexField indexField);
 
 }

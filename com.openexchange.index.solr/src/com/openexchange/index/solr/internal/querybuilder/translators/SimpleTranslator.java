@@ -52,7 +52,10 @@ package com.openexchange.index.solr.internal.querybuilder.translators;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
+
+import com.openexchange.index.solr.internal.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
 import com.openexchange.index.solr.internal.querybuilder.QueryTranslator;
 import com.openexchange.index.solr.internal.querybuilder.TranslationException;
@@ -74,7 +77,7 @@ public class SimpleTranslator implements QueryTranslator {
     private static Log log = com.openexchange.log.Log.loggerFor(SimpleTranslator.class);
 
     @Override
-    public void init(String name, Configuration config) throws TranslationException {
+    public void init(String name, Configuration config, FieldConfiguration fieldConfig) throws TranslationException {
         handlerName = name.trim();
         translationDict = new HashMap<String, List<String>>();
 

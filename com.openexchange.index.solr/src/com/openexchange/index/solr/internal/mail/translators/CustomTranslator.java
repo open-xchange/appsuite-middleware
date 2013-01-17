@@ -50,14 +50,18 @@
 package com.openexchange.index.solr.internal.mail.translators;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
-import com.openexchange.index.solr.internal.mail.SolrMailField;
+
+import com.openexchange.index.IndexField;
+import com.openexchange.index.solr.internal.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
 import com.openexchange.index.solr.internal.querybuilder.QueryTranslator;
 import com.openexchange.index.solr.internal.querybuilder.TranslationException;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.BccTerm;
 import com.openexchange.mail.search.BodyTerm;
@@ -90,17 +94,20 @@ public class CustomTranslator implements QueryTranslator {
 
     private String name;
 
+    private FieldConfiguration fieldConfig;
+
 
     @Override
-    public void init(String name, Configuration config) throws TranslationException {
+    public void init(String name, Configuration config, FieldConfiguration fieldConfig) throws TranslationException {
         this.name = name;
         this.config = config;
+        this.fieldConfig = fieldConfig;
     }
 
     @Override
     public String translate(Object o) throws TranslationException {
         if (o instanceof SearchTerm<?>) {
-            TranslatorVisitor visitor = new TranslatorVisitor(name, config);
+            TranslatorVisitor visitor = new TranslatorVisitor(name, config, fieldConfig);
             ((SearchTerm<?>) o).accept(visitor);
             return visitor.queryBuilder.toString();
         }
@@ -117,11 +124,14 @@ public class CustomTranslator implements QueryTranslator {
 
         private final String name;
 
+        private final FieldConfiguration fieldConfig;
 
-        public TranslatorVisitor(String name, Configuration config) {
+
+        public TranslatorVisitor(String name, Configuration config, FieldConfiguration fieldConfig) {
             super();
             this.name = name;
             this.config = config;
+            this.fieldConfig = fieldConfig;
             queryBuilder = new StringBuilder(48);
         }
 
@@ -134,13 +144,13 @@ public class CustomTranslator implements QueryTranslator {
             }
 
             queryBuilder.append('(');
-            TranslatorVisitor visitor = new TranslatorVisitor(name, config);
+            TranslatorVisitor visitor = new TranslatorVisitor(name, config, fieldConfig);
             terms[0].accept(visitor);
             queryBuilder.append(visitor.queryBuilder);
             for (int i = 1; i < terms.length; i++) {
                 queryBuilder.append(" AND ");
                 SearchTerm<?> searchTerm = terms[i];
-                visitor = new TranslatorVisitor(name, config);
+                visitor = new TranslatorVisitor(name, config, fieldConfig);
                 searchTerm.accept(visitor);
                 queryBuilder.append(visitor.queryBuilder);
             }
@@ -156,13 +166,13 @@ public class CustomTranslator implements QueryTranslator {
             }
 
             queryBuilder.append('(');
-            TranslatorVisitor visitor = new TranslatorVisitor(name, config);
+            TranslatorVisitor visitor = new TranslatorVisitor(name, config, fieldConfig);
             terms[0].accept(visitor);
             queryBuilder.append(visitor.queryBuilder);
             for (int i = 1; i < terms.length; i++) {
                 queryBuilder.append(" OR ");
                 SearchTerm<?> searchTerm = terms[i];
-                visitor = new TranslatorVisitor(name, config);
+                visitor = new TranslatorVisitor(name, config, fieldConfig);
                 searchTerm.accept(visitor);
                 queryBuilder.append(visitor.queryBuilder);
             }
@@ -172,7 +182,7 @@ public class CustomTranslator implements QueryTranslator {
         @Override
         public void visit(NOTTerm term) {
             queryBuilder.append("NOT (");
-            TranslatorVisitor visitor = new TranslatorVisitor(name, config);
+            TranslatorVisitor visitor = new TranslatorVisitor(name, config, fieldConfig);
             term.getPattern().accept(visitor);
             queryBuilder.append(visitor.queryBuilder);
             queryBuilder.append(')');
@@ -180,38 +190,32 @@ public class CustomTranslator implements QueryTranslator {
 
         @Override
         public void visit(FromTerm term) {
-            String parameterName = SolrMailField.FROM.parameterName();
-            appendStringTerm(parameterName, term);
+            appendStringTerm(MailIndexField.FROM, term);
         }
 
         @Override
         public void visit(ToTerm term) {
-            String parameterName = SolrMailField.TO.parameterName();
-            appendStringTerm(parameterName, term);
+            appendStringTerm(MailIndexField.TO, term);
         }
 
         @Override
         public void visit(CcTerm term) {
-            String parameterName = SolrMailField.CC.parameterName();
-            appendStringTerm(parameterName, term);
+            appendStringTerm(MailIndexField.CC, term);
         }
 
         @Override
         public void visit(BccTerm term) {
-            String parameterName = SolrMailField.BCC.parameterName();
-            appendStringTerm(parameterName, term);
+            appendStringTerm(MailIndexField.BCC, term);
         }
 
         @Override
         public void visit(SubjectTerm term) {
-            String parameterName = SolrMailField.SUBJECT.parameterName();
-            appendStringTerm(parameterName, term);
+            appendStringTerm(MailIndexField.SUBJECT, term);
         }
 
         @Override
         public void visit(BodyTerm term) {
-            String parameterName = SolrMailField.CONTENT.parameterName();
-            appendStringTerm(parameterName, term);
+            appendStringTerm(MailIndexField.CONTENT, term);
         }
 
         @Override
@@ -225,62 +229,60 @@ public class CustomTranslator implements QueryTranslator {
             queryBuilder.append('(');
             int off = queryBuilder.length();
             if ((flags & MailMessage.FLAG_ANSWERED) > 0) {
-                appendFlag(SolrMailField.FLAG_ANSWERED, set);
+                appendFlag(MailIndexField.FLAG_ANSWERED, set);
             }
             if ((flags & MailMessage.FLAG_DELETED) > 0) {
-                appendFlag(SolrMailField.FLAG_DELETED, set);
+                appendFlag(MailIndexField.FLAG_DELETED, set);
             }
             if ((flags & MailMessage.FLAG_DRAFT) > 0) {
-                appendFlag(SolrMailField.FLAG_DRAFT, set);
+                appendFlag(MailIndexField.FLAG_DRAFT, set);
             }
             if ((flags & MailMessage.FLAG_FLAGGED) > 0) {
-                appendFlag(SolrMailField.FLAG_FLAGGED, set);
+                appendFlag(MailIndexField.FLAG_FLAGGED, set);
             }
             if ((flags & MailMessage.FLAG_RECENT) > 0) {
-                appendFlag(SolrMailField.FLAG_RECENT, set);
+                appendFlag(MailIndexField.FLAG_RECENT, set);
             }
             if ((flags & MailMessage.FLAG_SEEN) > 0) {
-                appendFlag(SolrMailField.FLAG_SEEN, set);
+                appendFlag(MailIndexField.FLAG_SEEN, set);
             }
             if ((flags & MailMessage.FLAG_USER) > 0) {
-                appendFlag(SolrMailField.FLAG_USER, set);
+                appendFlag(MailIndexField.FLAG_USER, set);
             }
             if ((flags & MailMessage.FLAG_SPAM) > 0) {
-                appendFlag(SolrMailField.FLAG_SPAM, set);
+                appendFlag(MailIndexField.FLAG_SPAM, set);
             }
             if ((flags & MailMessage.FLAG_FORWARDED) > 0) {
-                appendFlag(SolrMailField.FLAG_FORWARDED, set);
+                appendFlag(MailIndexField.FLAG_FORWARDED, set);
             }
             if ((flags & MailMessage.FLAG_READ_ACK) > 0) {
-                appendFlag(SolrMailField.FLAG_READ_ACK, set);
+                appendFlag(MailIndexField.FLAG_READ_ACK, set);
             }
             queryBuilder.delete(off, off + andConcat.length()); // Delete first >>" AND "<< prefix
             queryBuilder.append(')');
         }
 
-        private void appendFlag(SolrMailField mailField, boolean value) {
-            String parameterName = mailField.parameterName();
-            List<String> indexFields = config.getIndexFields(parameterName);
-            if (indexFields == null || indexFields.isEmpty()) {
-                LOG.warn("Did not find index fields for parameter " + parameterName + ". Skipping this field in search query...");
+        private void appendFlag(MailIndexField mailField, boolean value) {
+            Set<String> solrFields = fieldConfig.getSolrFields(mailField);
+            if (solrFields == null || solrFields.isEmpty()) {
+                LOG.warn("Did not find index fields for parameter " + mailField.toString() + ". Skipping this field in search query...");
                 return;
             }
 
             String andConcat = " AND ";
-            queryBuilder.append(andConcat).append(indexFields.get(0)).append(':').append(value);
+            queryBuilder.append(andConcat).append(solrFields.iterator().next()).append(':').append(value);
         }
 
         @Override
         public void visit(SizeTerm term) {
-            String parameterName = SolrMailField.SIZE.parameterName();
-            List<String> indexFields = config.getIndexFields(parameterName);
-            if (indexFields == null || indexFields.isEmpty()) {
-                LOG.warn("Did not find index fields for parameter " + parameterName + ". Skipping this field in search query...");
+            Set<String> solrFields = fieldConfig.getSolrFields(MailIndexField.SIZE);
+            if (solrFields == null || solrFields.isEmpty()) {
+                LOG.warn("Did not find index fields for parameter " + MailIndexField.SIZE.toString() + ". Skipping this field in search query...");
                 return;
             }
 
             ComparablePattern<Integer> comparablePattern = term.getPattern();
-            String name = indexFields.get(0);
+            String name = solrFields.iterator().next();
             switch (comparablePattern.getComparisonType()) {
                 case EQUALS:
                     queryBuilder.append('(').append(name).append(':').append(comparablePattern.getPattern().intValue()).append(')');
@@ -300,16 +302,15 @@ public class CustomTranslator implements QueryTranslator {
 
         @Override
         public void visit(SentDateTerm term) {
-            String parameterName = SolrMailField.SENT_DATE.parameterName();
-            List<String> indexFields = config.getIndexFields(parameterName);
-            if (indexFields == null || indexFields.isEmpty()) {
-                LOG.warn("Did not find index fields for parameter " + parameterName + ". Skipping this field in search query...");
+            Set<String> solrFields = fieldConfig.getSolrFields(MailIndexField.SENT_DATE);
+            if (solrFields == null || solrFields.isEmpty()) {
+                LOG.warn("Did not find index fields for parameter " + MailIndexField.SENT_DATE.toString() + ". Skipping this field in search query...");
                 return;
             }
 
             ComparablePattern<Date> comparablePattern = term.getPattern();
+            String name = solrFields.iterator().next();
             long time = comparablePattern.getPattern().getTime();
-            String name = indexFields.get(0);
             switch (comparablePattern.getComparisonType()) {
                 case EQUALS:
                     queryBuilder.append('(').append(name).append(':').append(time).append(')');
@@ -329,16 +330,15 @@ public class CustomTranslator implements QueryTranslator {
 
         @Override
         public void visit(ReceivedDateTerm term) {
-            String parameterName = SolrMailField.RECEIVED_DATE.parameterName();
-            List<String> indexFields = config.getIndexFields(parameterName);
-            if (indexFields == null || indexFields.isEmpty()) {
-                LOG.warn("Did not find index fields for parameter " + parameterName + ". Skipping this field in search query...");
+            Set<String> solrFields = fieldConfig.getSolrFields(MailIndexField.RECEIVED_DATE);
+            if (solrFields == null || solrFields.isEmpty()) {
+                LOG.warn("Did not find index fields for parameter " + MailIndexField.RECEIVED_DATE.toString() + ". Skipping this field in search query...");
                 return;
             }
 
             ComparablePattern<Date> comparablePattern = term.getPattern();
+            String name = solrFields.iterator().next();
             long time = comparablePattern.getPattern().getTime();
-            String name = indexFields.get(0);
             switch (comparablePattern.getComparisonType()) {
                 case EQUALS:
                     queryBuilder.append('(').append(name).append(':').append(time).append(')');
@@ -365,30 +365,25 @@ public class CustomTranslator implements QueryTranslator {
         public void visit(HeaderTerm term) {
             throw new IllegalStateException("Unsupported search term: " + HeaderTerm.class.getName());
         }
-
-        private void appendStringTerm(String parameterName, SearchTerm<String> term) {
-            Set<String> keys = config.getKeys(Configuration.FIELD);
-            if (!keys.contains(Configuration.FIELD + '.' + parameterName)) {
-                LOG.warn("Did not find key '" + Configuration.FIELD + '.' + parameterName + "'. Skipping this field in search query...");
+        
+        private void appendStringTerm(IndexField indexField, SearchTerm<String> term) {
+            Set<String> solrFields = fieldConfig.getSolrFields(indexField);
+            if (solrFields == null || solrFields.isEmpty()) {
+                LOG.warn("Did not find index fields for field " + indexField.toString() + ". Skipping this field in search query...");
                 return;
             }
-            List<String> indexFields = config.getIndexFields(Configuration.FIELD + '.' + parameterName);
-            if (indexFields == null || indexFields.isEmpty()) {
-                LOG.warn("Did not find index fields for parameter " + parameterName + ". Skipping this field in search query...");
-                return;
-            }
-
+            
             String pattern = term.getPattern();
+            Iterator<String> it = solrFields.iterator();
             queryBuilder.append('(');
-            queryBuilder.append(indexFields.get(0)).append(':').append('"').append(pattern).append('"');
-            for (int i = 1; i < indexFields.size(); i++) {
-                String indexField = indexFields.get(i);
+            queryBuilder.append(it.next()).append(':').append('"').append(pattern).append('"');
+            while (it.hasNext()) {
+                String solrField = it.next();
                 queryBuilder.append(" OR ");
-                queryBuilder.append(indexField).append(':').append('"').append(pattern).append('"');
+                queryBuilder.append(solrField).append(':').append('"').append(pattern).append('"');
             }
             queryBuilder.append(')');
         }
-
     }
 
 }

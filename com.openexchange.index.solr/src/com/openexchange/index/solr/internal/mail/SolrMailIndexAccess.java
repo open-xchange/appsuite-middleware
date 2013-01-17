@@ -56,8 +56,10 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.FacetParameters;
@@ -68,6 +70,7 @@ import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
+import com.openexchange.index.solr.internal.FieldConfiguration;
 import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -83,7 +86,8 @@ import com.openexchange.solr.SolrCoreIdentifier;
 public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     private final SolrQueryBuilder queryBuilder;
-
+    
+    private final SolrMailDocumentConverter converter;
 
     /**
      * Initializes a new {@link SolrMailIndexAccess}.
@@ -91,9 +95,10 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
      * @param identifier
      * @param queryBuilder
      */
-    public SolrMailIndexAccess(SolrCoreIdentifier identifier, SolrQueryBuilder queryBuilder) {
-        super(identifier);
+    public SolrMailIndexAccess(SolrCoreIdentifier identifier, SolrQueryBuilder queryBuilder, FieldConfiguration fieldConfig) {
+        super(identifier, fieldConfig);
         this.queryBuilder = queryBuilder;
+        converter = new SolrMailDocumentConverter(fieldConfig);
     }
 
     @Override
@@ -103,7 +108,7 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     @Override
     public Set<? extends IndexField> getIndexedFields() {
-        return SolrMailField.getIndexedFields();
+        return fieldConfig.getIndexedFields();
     }
 
     @Override
@@ -144,7 +149,7 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             uuids.add(MailUUID.newUUID(contextId, userId, document.getObject()).toString());
         }
 
-        String deleteQuery = buildQueryStringWithOr(SolrMailField.UUID.solrName(), uuids);
+        String deleteQuery = buildQueryStringWithOr(fieldConfig.getUUIDField(), uuids);
         if (deleteQuery != null) {
             deleteDocumentsByQuery(deleteQuery);
         }
@@ -154,12 +159,11 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     public IndexResult<MailMessage> query0(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
         IndexField sortField = parameters.getSortField();
         Order order = parameters.getOrder();
-        SolrMailField solrSortField = (SolrMailField) MailFieldMapper.getInstance().solrFieldFor(sortField);
         boolean sortManually = false;
         QueryParameters newParameters = parameters;
-        if (solrSortField != null) {
-            if (solrSortField.equals(SolrMailField.FROM) || solrSortField.equals(SolrMailField.TO)
-               || solrSortField.equals(SolrMailField.CC) || solrSortField.equals(SolrMailField.BCC)) {
+        if (sortField != null && (sortField instanceof MailIndexField)) {
+            if (sortField.equals(MailIndexField.FROM) || sortField.equals(MailIndexField.TO)
+               || sortField.equals(MailIndexField.CC) || sortField.equals(MailIndexField.BCC)) {
                 sortManually = true;
                 newParameters = new QueryParameters.Builder()
                                                     .setSearchTerm(parameters.getSearchTerm())
@@ -174,11 +178,10 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         }
 
         SolrQuery solrQuery = queryBuilder.buildQuery(newParameters);
-        Set<SolrMailField> solrFields = checkAndConvert(fields);
-        setFieldList(solrQuery, solrFields);
+        setFieldList(solrQuery, fields);
         List<IndexDocument<MailMessage>> results = queryChunkWise(
-            SolrMailField.UUID,
-            new SolrMailDocumentConverter(),
+            fieldConfig.getUUIDField(),
+            converter,
             solrQuery,
             newParameters.getOff(),
             newParameters.getLen(),
@@ -188,7 +191,7 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         }
 
         if (sortManually) {
-            Collections.sort(results, new AddressComparator(solrSortField, order));
+            Collections.sort(results, new AddressComparator((MailIndexField) sortField, order));
         }
         return new SolrIndexResult<MailMessage>(results.size(), results, null);
     }
@@ -199,28 +202,8 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         return null;
     }
 
-    private Set<SolrMailField> checkAndConvert(Set<? extends IndexField> fields) {
-        Set<SolrMailField> set;
-        if (fields == null) {
-            set = EnumSet.allOf(SolrMailField.class);
-        } else {
-            set = EnumSet.noneOf(SolrMailField.class);
-            for (IndexField indexField : fields) {
-                if (indexField instanceof MailIndexField) {
-                    SolrMailField solrField = (SolrMailField) MailFieldMapper.getInstance().solrFieldFor(indexField);
-                    if (solrField != null) {
-                        set.add(solrField);
-                    }
-                }
-            }
-        }
-
-        return set;
-    }
-
-
     private SolrInputDocument convertToDocument(IndexDocument<MailMessage> document) throws OXException {
-        return SolrMailDocumentConverter.convertStatic(contextId, userId, document);
+        return converter.convert(contextId, userId, document);
     }
 
 }

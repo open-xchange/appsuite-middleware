@@ -51,17 +51,20 @@ package com.openexchange.index.solr.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.joox.Context;
 import org.joox.Filter;
 import org.joox.JOOX;
 import org.joox.Match;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+
 import com.openexchange.index.IndexField;
 
 /**
@@ -71,11 +74,15 @@ import com.openexchange.index.IndexField;
  */
 public class XMLBasedFieldConfiguration implements FieldConfiguration {
     
-    private final Map<IndexField, Set<String>> indexFields = new HashMap<IndexField, Set<String>>();
-
-    private final Map<String, SchemaField> schemaFields = new HashMap<String, SchemaField>();
+    private final Set<IndexField> indexedFields = new HashSet<IndexField>();
     
-    private final Map<String, Set<String>> localizedFields = new HashMap<String, Set<String>>();
+    private final Map<IndexField, Set<String>> indexFields = new HashMap<IndexField, Set<String>>();
+    
+    private final Map<String, IndexField> reverseIndexFields = new HashMap<String, IndexField>();
+    
+    private final Map<IndexField, SchemaField> schemaFields = new HashMap<IndexField, SchemaField>();
+    
+    private String defaultSearchField = null;
     
 
     public XMLBasedFieldConfiguration(String configPath, String schemaPath) throws SAXException, IOException {
@@ -135,6 +142,11 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
     
     private void initSchema(SolrConfig solrConfig, String schemaPath) throws SAXException, IOException {
         Match schema = JOOX.$(new File(schemaPath));
+        Match dsfMatch = schema.find("defaultSearchField");
+        if (dsfMatch.isNotEmpty()) {
+            defaultSearchField = dsfMatch.first().content();
+        }
+        
         Match fieldsMatch = schema.find("fields");
         if (fieldsMatch.isNotEmpty()) {
             Match fieldMatch = fieldsMatch.first().find("field");
@@ -163,21 +175,56 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
                 }
                 
                 if (indexField != null) {
-                    indexFields.put(indexField, solrConfig.localizeField(name));
-                }
-                
-                SchemaField schemaField = new SchemaField(name, type, indexed, stored, multiValued, isLocalized, indexField);
-                schemaFields.put(name, schemaField);
-                if (isLocalized) {
-                    localizedFields.put(name, solrConfig.localizeField(name));
+                    SchemaField schemaField = new SchemaField(name, type, indexed, stored, multiValued, isLocalized, indexField);
+                    schemaFields.put(indexField, schemaField);
+                    
+                    if (isLocalized) {
+                        Set<String> localizedFields = solrConfig.localizeField(name);
+                        indexFields.put(indexField, localizedFields);
+                        for (String localizedField : localizedFields) {
+                            reverseIndexFields.put(localizedField, indexField);
+                        }
+                    } else {
+                        indexFields.put(indexField, Collections.singleton(name));
+                        reverseIndexFields.put(name, indexField);
+                    }
+                    
+                    if (indexed) {
+                        indexedFields.add(indexField);
+                    }
                 }
             }
         }
     }
     
     @Override
-    public Set<String> solrFieldsFor(IndexField indexField) {
+    public Set<String> getSolrFields(IndexField indexField) {
         return indexFields.get(indexField);
+    }
+    
+    @Override
+    public Set<? extends IndexField> getIndexedFields() {
+        return new HashSet<IndexField>(indexedFields);
+    }
+    
+    @Override
+    public String getUUIDField() {
+        return defaultSearchField;
+    }
+    
+    @Override
+    public IndexField getIndexField(String solrField) {
+        return reverseIndexFields.get(solrField);
+    }
+    
+    @Override
+    public String getRawField(IndexField indexField) {
+        SchemaField schemaField = schemaFields.get(indexField);
+        if (schemaField == null) {
+            return null;
+        }
+        
+        return schemaField.getName();
     }
     
     private static final class NameFilter implements Filter {

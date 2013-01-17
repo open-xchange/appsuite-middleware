@@ -52,13 +52,19 @@ package com.openexchange.index.solr.internal.mail;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+
 import javax.mail.internet.AddressException;
+
 import org.apache.solr.common.SolrDocument;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexExceptionCodes;
+import com.openexchange.index.solr.internal.FieldConfiguration;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 
@@ -407,6 +413,22 @@ public final class MailFillers {
             }
         }
     };
+    
+    @SuppressWarnings("unchecked")
+    protected static <V> V getFirstMatchingValue(MailIndexField indexField, SolrDocument document, FieldConfiguration fieldConfig) throws OXException {
+        Set<String> solrFields = fieldConfig.solrFieldsFor(indexField);
+        if (solrFields == null || solrFields.isEmpty()) {
+            return null;
+        }
+
+        for (String field : solrFields) {
+            if (document.containsKey(field)) {
+                return (V) document.get(field);
+            }
+        }
+        
+        return null;
+    }
 
     @SuppressWarnings("unchecked")
     protected static <V> V getFieldValue(final String name, final SolrDocument document) throws OXException {

@@ -59,6 +59,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrResponse;
@@ -68,6 +69,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.index.FacetParameters;
 import com.openexchange.index.IndexAccess;
@@ -91,6 +93,8 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractSolrIndexAccess.class);
 
     private final Lock folderCacheLock = new ReentrantLock();
+    
+    protected final FieldConfiguration fieldConfig;
 
     protected final int contextId;
 
@@ -111,12 +115,13 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
      *
      * @param identifier The Solr index identifier
      */
-    protected AbstractSolrIndexAccess(final SolrCoreIdentifier identifier) {
+    protected AbstractSolrIndexAccess(final SolrCoreIdentifier identifier, final FieldConfiguration fieldConfig) {
         super();
         this.identifier = identifier;
         this.contextId = identifier.getContextId();
         this.userId = identifier.getUserId();
         this.module = identifier.getModule();
+        this.fieldConfig = fieldConfig;
         lastAccess = System.currentTimeMillis();
         retainCount = new AtomicInteger(0);
         indexedFolders = new HashMap<Integer, Map<String, Set<String>>>();
@@ -310,7 +315,7 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         }
     }
 
-    protected List<IndexDocument<V>> queryChunkWise(SolrField uuidField, SolrResultConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize) throws OXException {
+    protected List<IndexDocument<V>> queryChunkWise(String uuidField, SolrResultConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize) throws OXException {
         List<IndexDocument<V>> indexDocuments = new ArrayList<IndexDocument<V>>();
         int fetched = 0;
         int maxRows = len;
@@ -330,8 +335,8 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
             
             SolrDocumentList results = queryResponse.getResults();
             for (SolrDocument document : results) {
-                if (highlighting != null && document.containsKey(uuidField.solrName())) {
-                    String uuid = (String) document.getFieldValue(uuidField.solrName());
+                if (highlighting != null && document.containsKey(uuidField)) {
+                    String uuid = (String) document.getFieldValue(uuidField);
                     if (uuid != null) {
                         Map<String, List<String>> highlightFields = highlighting.get(uuid);
                         if (highlightFields != null) {
@@ -353,6 +358,23 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         } while (fetched < len);
 
         return indexDocuments;
+    }
+    
+    protected Set<String> collectFields(Set<? extends IndexField> fields) {
+        Set<String> allFields = new HashSet<String>();
+        for (IndexField indexField : fields) {
+            Set<String> solrFields = fieldConfig.getSolrFields(indexField);
+            allFields.addAll(solrFields);
+        }
+        
+        return allFields;
+    }
+    
+    protected void setFieldList(SolrQuery solrQuery, Set<? extends IndexField> fields) {
+        Set<String> allFields = collectFields(fields);
+        for (String field : allFields) {
+            solrQuery.addField(field);
+        }
     }
 
     // protected IndexResult<V> queryChunkWise1(SolrResultConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize)
@@ -446,14 +468,5 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
 
         sb.append(')');
         return sb.toString();
-    }
-
-    protected void setFieldList(SolrQuery solrQuery, Set<? extends SolrField> solrFields) {
-        for (SolrField field : solrFields) {
-            String solrName = field.solrName();
-            if (solrName != null) {
-                solrQuery.addField(solrName);
-            }
-        }
     }
 }
