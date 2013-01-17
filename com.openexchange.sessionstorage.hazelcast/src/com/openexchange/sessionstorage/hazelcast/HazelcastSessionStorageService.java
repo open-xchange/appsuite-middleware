@@ -637,7 +637,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
      * @return A long created from the context- and user-ID
      */
     private static Long getKey(int contextID, int userID) {
-        return new Long((long)contextID << 32) | (userID & 0xFFFFFFFL);
+        return Long.valueOf(((long) contextID << 32) | (userID & 0xFFFFFFFL));
     }
     
 }
