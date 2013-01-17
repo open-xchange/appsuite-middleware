@@ -71,9 +71,30 @@ public abstract class AbstractTask<V> implements Task<V> {
      *         invoked with a non-<code>null</code> {@code Throwable} reference)
      */
     public V execute() {
+        final Thread currentThread = Thread.currentThread();
+        if (!(currentThread instanceof ThreadRenamer)) {
+            return innerExecute(currentThread);
+        }
+        // Current thread supports ThreadRenamer
+        final String name = currentThread.getName();
+        setThreadName((ThreadRenamer) currentThread);
+        try {
+            return innerExecute(currentThread);
+        } finally {
+            currentThread.setName(name);
+        }
+    }
+
+    /**
+     * Execute with respect to <code>beforeExecute()</code> and <code>afterExecute()</code> methods
+     * 
+     * @param currentThread The current thread
+     * @return The return value or <code>null</code>
+     */
+    protected V innerExecute(final Thread currentThread) {
         V retval = null;
         boolean ran = false;
-        beforeExecute(Thread.currentThread());
+        beforeExecute(currentThread);
         try {
             retval = call();
             ran = true;
