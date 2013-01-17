@@ -141,6 +141,7 @@ public final class CacheActivator extends HousekeepingActivator {
             registerService(CacheService.class, jcsCacheService, dictionary);
             cacheService = jcsCacheService;
         } else {
+            LOG.info("\n\n\tDefault cache service implementation has been disabled.\n\n");
             track(CacheService.class, new SimpleRegistryListener<CacheService>() {
 
                 @Override
