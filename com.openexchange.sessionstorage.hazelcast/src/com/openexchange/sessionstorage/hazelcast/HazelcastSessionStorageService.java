@@ -502,6 +502,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                     if (null != session && randomToken.equals(session.getRandomToken())) {
                         if (false == session.getLocalIp().equals(newIP)) {
                             session.setLocalIp(newIP);
+                            // TODO: Re-Put
+                            
                         }
                         return session;
                     }
@@ -581,6 +583,24 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
             }
             storedSession.setPassword(newPassword);
+            sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
+        } catch (HazelcastException e) {
+            if (DEBUG) {
+                LOG.debug(e.getMessage(), e);
+            }
+            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public void setLocalIp(String sessionId, String localIp) throws OXException {
+        try {
+            IMap<String, HazelcastStoredSession> sessions = sessions(true);
+            HazelcastStoredSession storedSession = sessions.get(sessionId);
+            if (null == storedSession) {
+                throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
+            }
+            storedSession.setLocalIp(localIp);
             sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
         } catch (HazelcastException e) {
             if (DEBUG) {

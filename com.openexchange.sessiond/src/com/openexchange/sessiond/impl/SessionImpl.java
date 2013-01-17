@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
+import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -65,6 +66,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
+import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
  * {@link SessionImpl} - Implements interface {@link Session}
@@ -402,7 +404,7 @@ public final class SessionImpl implements PutIfAbsent {
     }
 
     @Override
-    public Object setParameterIfAbsent(String name, Object value) {
+    public Object setParameterIfAbsent(final String name, final Object value) {
         if (PARAM_LOCK.equals(name)) {
             return parameters.get(PARAM_LOCK);
         }
@@ -419,10 +421,30 @@ public final class SessionImpl implements PutIfAbsent {
         return localIp;
     }
 
-
     @Override
     public void setLocalIp(final String localIp) {
+        try {
+            setLocalIp(localIp, true);
+        } catch (final OXException e) {
+            LOG.error("Failed to propagate change of IP address.", e);
+        }
+    }
+
+    /**
+     * Sets the local IP address
+     *
+     * @param localIp The local IP address
+     * @param propagate Whether to propagate that IP change through {@code SessiondService}
+     * @throws OXException If propagating change fails
+     */
+    public void setLocalIp(final String localIp, final boolean propagate) throws OXException {
         this.localIp = localIp;
+        if (propagate) {
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (sessionStorageService != null) {
+                sessionStorageService.setLocalIp(sessionId, localIp);
+            }
+        }
     }
 
     @Override

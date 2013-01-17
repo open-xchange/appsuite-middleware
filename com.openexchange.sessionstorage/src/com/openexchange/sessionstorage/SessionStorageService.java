@@ -212,6 +212,15 @@ public interface SessionStorageService {
     public void changePassword(String sessionId, String newPassword) throws OXException;
 
     /**
+     * Sets the local IP address for denoted session.
+     *
+     * @param sessionId The session Id
+     * @param localIp The new local IP address
+     * @throws OXException If changing local IP address failed
+     */
+    public void setLocalIp(String sessionId, String localIp) throws OXException;
+
+    /**
      * Check authId for duplicates
      *
      * @param login Login name to check

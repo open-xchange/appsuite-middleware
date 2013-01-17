@@ -551,6 +551,40 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
+    public void setLocalIp(String sessionId, String localIP) throws OXException {
+        SliceQuery<String, String, String> query = HFactory.createSliceQuery(keyspace, serializer, serializer, serializer);
+        query.setColumnFamily(CF_NAME).setKey(sessionId).setColumnNames(COLUMN_NAMES);
+        QueryResult<ColumnSlice<String, String>> result = query.execute();
+        ColumnSlice<String, String> slice = result.get();
+        String loginName = slice.getColumnByName("loginName").getValue();
+        int contextId = Integer.parseInt(slice.getColumnByName("contextId").getValue());
+        int userId = Integer.parseInt(slice.getColumnByName("userId").getValue());
+        String secret = slice.getColumnByName("secret").getValue();
+        String login = slice.getColumnByName("login").getValue();
+        String randomToken = slice.getColumnByName("randomToken").getValue();
+        String password = slice.getColumnByName("password").getValue();
+        String authId = slice.getColumnByName("authId").getValue();
+        String hash = slice.getColumnByName("hash").getValue();
+        String client = slice.getColumnByName("client").getValue();
+        Session session = new StoredSession(
+            sessionId,
+            loginName,
+            password,
+            contextId,
+            userId,
+            secret,
+            login,
+            randomToken,
+            localIP,
+            authId,
+            hash,
+            client,
+            null);
+        removeSession(sessionId);
+        addSession(session);
+    }
+
+    @Override
     public void checkAuthId(String login, String authId) throws OXException {
         if (null != authId) {
             for (final Session session : getSessions()) {

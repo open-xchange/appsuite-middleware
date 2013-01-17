@@ -239,8 +239,9 @@ public final class LoginTools {
      *
      * @param newIP The possibly new IP address
      * @param session The session to update if IP addresses differ
+     * @throws OXException If operation fails
      */
-    public static void updateIPAddress(LoginConfiguration conf, String newIP, Session session) {
+    public static void updateIPAddress(LoginConfiguration conf, String newIP, Session session) throws OXException {
         if (conf.isInsecure()) {
             String oldIP = session.getLocalIp();
             if (null != newIP && !newIP.equals(oldIP)) {
