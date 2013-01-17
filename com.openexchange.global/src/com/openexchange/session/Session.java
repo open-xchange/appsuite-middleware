@@ -81,6 +81,9 @@ public interface Session {
             return true;
         }
 
+        /**
+         * Empty lock provides no condition. Therefore a <code>UnsupportedOperationException</code> is thrown on invocation attempt.
+         */
         @Override
         public Condition newCondition() {
             throw new UnsupportedOperationException("Empty lock provides no condition.");
