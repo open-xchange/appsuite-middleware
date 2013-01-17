@@ -493,7 +493,28 @@ public final class SessionImpl implements PutIfAbsent {
 
     @Override
     public void setHash(final String hash) {
+        try {
+            setHash(hash, true);
+        } catch (final OXException e) {
+            LOG.error("Failed to propagate change of hash identifier.", e);
+        }
+    }
+
+    /**
+     * Sets the hash identifier
+     *
+     * @param hash The hash identifier
+     * @param propagate Whether to propagate that change through {@code SessiondService}
+     * @throws OXException If propagating change fails
+     */
+    public void setHash(final String hash, final boolean propagate) throws OXException {
         this.hash = hash;
+        if (propagate) {
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (sessionStorageService != null) {
+                sessionStorageService.setHash(sessionId, hash);
+            }
+        }
     }
 
     @Override
@@ -503,6 +524,28 @@ public final class SessionImpl implements PutIfAbsent {
 
     @Override
     public void setClient(final String client) {
-        this.client = client;
+        try {
+            setClient(client, true);
+        } catch (final OXException e) {
+            LOG.error("Failed to propagate change of client identifier.", e);
+        }
     }
+
+    /**
+     * Sets the client identifier
+     *
+     * @param client The client identifier
+     * @param propagate Whether to propagate that change through {@code SessiondService}
+     * @throws OXException If propagating change fails
+     */
+    public void setClient(final String client, final boolean propagate) throws OXException {
+        this.client = client;
+        if (propagate) {
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (sessionStorageService != null) {
+                sessionStorageService.setClient(sessionId, client);
+            }
+        }
+    }
+
 }

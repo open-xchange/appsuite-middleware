@@ -117,6 +117,21 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
+    public void setClient(final String sessionId, final String client) throws OXException {
+        SessionHandler.setClient(getSession(sessionId), client);
+    }
+
+    @Override
+    public void setHash(final String sessionId, final String hash) throws OXException {
+        SessionHandler.setHash(getSession(sessionId), hash);
+    }
+
+    @Override
+    public void setLocalIp(final String sessionId, final String localIp) throws OXException {
+        SessionHandler.setLocalIp(getSession(sessionId), localIp);
+    }
+
+    @Override
     public boolean removeSession(final String sessionId) {
         return SessionHandler.clearSession(sessionId);
     }
@@ -151,7 +166,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
-    public Session getSession(final String sessionId) {
+    public SessionImpl getSession(final String sessionId) {
         SessionControl sessionControl = SessionHandler.getSession(sessionId);
         if (null == sessionControl) {
             // No local session found. Maybe it should be migrated.
@@ -197,7 +212,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
-    public Session getSessionWithTokens(String clientToken, String serverToken) throws OXException {
+    public Session getSessionWithTokens(final String clientToken, final String serverToken) throws OXException {
         return SessionHandler.getSessionWithTokens(clientToken, serverToken);
     }
 

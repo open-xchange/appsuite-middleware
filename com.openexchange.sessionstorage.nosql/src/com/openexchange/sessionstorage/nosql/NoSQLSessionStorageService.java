@@ -551,22 +551,56 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public void setLocalIp(String sessionId, String localIP) throws OXException {
-        SliceQuery<String, String, String> query = HFactory.createSliceQuery(keyspace, serializer, serializer, serializer);
+    public void setLocalIp(final String sessionId, final String newLocalIP) throws OXException {
+        final SliceQuery<String, String, String> query = HFactory.createSliceQuery(keyspace, serializer, serializer, serializer);
         query.setColumnFamily(CF_NAME).setKey(sessionId).setColumnNames(COLUMN_NAMES);
-        QueryResult<ColumnSlice<String, String>> result = query.execute();
-        ColumnSlice<String, String> slice = result.get();
-        String loginName = slice.getColumnByName("loginName").getValue();
-        int contextId = Integer.parseInt(slice.getColumnByName("contextId").getValue());
-        int userId = Integer.parseInt(slice.getColumnByName("userId").getValue());
-        String secret = slice.getColumnByName("secret").getValue();
-        String login = slice.getColumnByName("login").getValue();
-        String randomToken = slice.getColumnByName("randomToken").getValue();
-        String password = slice.getColumnByName("password").getValue();
-        String authId = slice.getColumnByName("authId").getValue();
-        String hash = slice.getColumnByName("hash").getValue();
-        String client = slice.getColumnByName("client").getValue();
-        Session session = new StoredSession(
+        final QueryResult<ColumnSlice<String, String>> result = query.execute();
+        final ColumnSlice<String, String> slice = result.get();
+        final String loginName = slice.getColumnByName("loginName").getValue();
+        final int contextId = Integer.parseInt(slice.getColumnByName("contextId").getValue());
+        final int userId = Integer.parseInt(slice.getColumnByName("userId").getValue());
+        final String secret = slice.getColumnByName("secret").getValue();
+        final String login = slice.getColumnByName("login").getValue();
+        final String randomToken = slice.getColumnByName("randomToken").getValue();
+        final String password = slice.getColumnByName("password").getValue();
+        final String authId = slice.getColumnByName("authId").getValue();
+        final String hash = slice.getColumnByName("hash").getValue();
+        final String client = slice.getColumnByName("client").getValue();
+        final Session session = new StoredSession(
+            sessionId,
+            loginName,
+            password,
+            contextId,
+            userId,
+            secret,
+            login,
+            randomToken,
+            newLocalIP,
+            authId,
+            hash,
+            client,
+            null);
+        removeSession(sessionId);
+        addSession(session);
+    }
+
+    @Override
+    public void setClient(final String sessionId, final String newClient) throws OXException {
+        final SliceQuery<String, String, String> query = HFactory.createSliceQuery(keyspace, serializer, serializer, serializer);
+        query.setColumnFamily(CF_NAME).setKey(sessionId).setColumnNames(COLUMN_NAMES);
+        final QueryResult<ColumnSlice<String, String>> result = query.execute();
+        final ColumnSlice<String, String> slice = result.get();
+        final String loginName = slice.getColumnByName("loginName").getValue();
+        final int contextId = Integer.parseInt(slice.getColumnByName("contextId").getValue());
+        final int userId = Integer.parseInt(slice.getColumnByName("userId").getValue());
+        final String secret = slice.getColumnByName("secret").getValue();
+        final String login = slice.getColumnByName("login").getValue();
+        final String randomToken = slice.getColumnByName("randomToken").getValue();
+        final String password = slice.getColumnByName("password").getValue();
+        final String authId = slice.getColumnByName("authId").getValue();
+        final String hash = slice.getColumnByName("hash").getValue();
+        final String localIP = slice.getColumnByName("localIP").getValue();
+        final Session session = new StoredSession(
             sessionId,
             loginName,
             password,
@@ -578,6 +612,40 @@ public class NoSQLSessionStorageService implements SessionStorageService {
             localIP,
             authId,
             hash,
+            newClient,
+            null);
+        removeSession(sessionId);
+        addSession(session);
+    }
+
+    @Override
+    public void setHash(final String sessionId, final String newHash) throws OXException {
+        final SliceQuery<String, String, String> query = HFactory.createSliceQuery(keyspace, serializer, serializer, serializer);
+        query.setColumnFamily(CF_NAME).setKey(sessionId).setColumnNames(COLUMN_NAMES);
+        final QueryResult<ColumnSlice<String, String>> result = query.execute();
+        final ColumnSlice<String, String> slice = result.get();
+        final String loginName = slice.getColumnByName("loginName").getValue();
+        final int contextId = Integer.parseInt(slice.getColumnByName("contextId").getValue());
+        final int userId = Integer.parseInt(slice.getColumnByName("userId").getValue());
+        final String secret = slice.getColumnByName("secret").getValue();
+        final String login = slice.getColumnByName("login").getValue();
+        final String randomToken = slice.getColumnByName("randomToken").getValue();
+        final String password = slice.getColumnByName("password").getValue();
+        final String authId = slice.getColumnByName("authId").getValue();
+        final String client = slice.getColumnByName("client").getValue();
+        final String localIP = slice.getColumnByName("localIP").getValue();
+        final Session session = new StoredSession(
+            sessionId,
+            loginName,
+            password,
+            contextId,
+            userId,
+            secret,
+            login,
+            randomToken,
+            localIP,
+            authId,
+            newHash,
             client,
             null);
         removeSession(sessionId);

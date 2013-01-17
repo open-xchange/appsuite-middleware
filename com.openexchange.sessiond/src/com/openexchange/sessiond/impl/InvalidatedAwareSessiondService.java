@@ -125,6 +125,24 @@ public final class InvalidatedAwareSessiondService implements SessiondServiceExt
     }
 
     @Override
+    public void setClient(final String sessionId, final String client) throws OXException {
+        impl.getSession(sessionId); // Invoked to implicitly check for invalidated-marker
+        impl.setClient(sessionId, client);
+    }
+
+    @Override
+    public void setHash(final String sessionId, final String hash) throws OXException {
+        impl.getSession(sessionId); // Invoked to implicitly check for invalidated-marker
+        impl.setHash(sessionId, hash);
+    }
+
+    @Override
+    public void setLocalIp(final String sessionId, final String localIp) throws OXException {
+        impl.getSession(sessionId); // Invoked to implicitly check for invalidated-marker
+        impl.setHash(sessionId, localIp);
+    }
+
+    @Override
     public boolean removeSession(final String sessionId) {
         impl.getSession(sessionId); // Invoked to implicitly check for invalidated-marker
         return impl.removeSession(sessionId);
@@ -221,7 +239,7 @@ public final class InvalidatedAwareSessiondService implements SessiondServiceExt
     }
 
     @Override
-    public Session getSessionWithTokens(String clientToken, String serverToken) throws OXException {
+    public Session getSessionWithTokens(final String clientToken, final String serverToken) throws OXException {
         return impl.getSessionWithTokens(clientToken, serverToken);
     }
 

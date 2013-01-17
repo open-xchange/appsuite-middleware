@@ -72,6 +72,21 @@ public class AbstractSimSessiondService implements SessiondService {
     }
 
     @Override
+    public void setClient(String sessionId, String client) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
+    public void setHash(String sessionId, String hash) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
+    public void setLocalIp(String sessionId, String localIp) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
     public int getNumberOfActiveSessions() {
         return 0;
     }

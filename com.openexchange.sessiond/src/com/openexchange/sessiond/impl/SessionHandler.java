@@ -408,7 +408,7 @@ public final class SessionHandler {
      * @return The created session
      * @throws OXException If creating a new session fails
      */
-    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, String clientToken) throws OXException {
+    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, final String clientToken) throws OXException {
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
@@ -432,10 +432,10 @@ public final class SessionHandler {
             // Post event for created session
             postSessionCreation(addedSession);
         } else {
-            String serverToken = sessionIdGenerator.createRandomId();
+            final String serverToken = sessionIdGenerator.createRandomId();
             // TODO change return type and return an interface that allows to dynamically add additional return values.
             session.setParameter("serverToken", serverToken);
-            TokenSessionControl control = TokenSessionContainer.getInstance().addSession(session, clientToken, serverToken);
+            final TokenSessionControl control = TokenSessionContainer.getInstance().addSession(session, clientToken, serverToken);
             addedSession = control.getSession();
         }
         // Return session ID
@@ -621,6 +621,93 @@ public final class SessionHandler {
         }
     }
 
+    /**
+     * Sets the local IP address for given session.
+     *
+     * @param session The session
+     * @param localIp The new local IP address
+     * @throws OXException If changing local IP address fails or any reason
+     */
+    protected static void setLocalIp(final SessionImpl session, final String localIp) throws OXException {
+        if (null != session) {
+            try {
+                session.setLocalIp(localIp, false);
+                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+                if (sessionStorageService != null) {
+                    final Task<Void> c = new AbstractTask<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            sessionStorageService.setLocalIp(session.getSessionID(), localIp);
+                            return null;
+                        }
+                    };
+                    submit(c);
+                }
+            } catch (final RuntimeException e) {
+                throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Sets the client identifier for given session.
+     *
+     * @param session The session
+     * @param client The new client identifier
+     * @throws OXException If changing client identifier fails or any reason
+     */
+    protected static void setClient(final SessionImpl session, final String client) throws OXException {
+        if (null != session) {
+            try {
+                session.setClient(client, false);
+                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+                if (sessionStorageService != null) {
+                    final Task<Void> c = new AbstractTask<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            sessionStorageService.setClient(session.getSessionID(), client);
+                            return null;
+                        }
+                    };
+                    submit(c);
+                }
+            } catch (final RuntimeException e) {
+                throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Sets the hash identifier for given session.
+     *
+     * @param session The session
+     * @param client The new hash identifier
+     * @throws OXException If changing hash identifier fails or any reason
+     */
+    protected static void setHash(final SessionImpl session, final String hash) throws OXException {
+        if (null != session) {
+            try {
+                session.setHash(hash, false);
+                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+                if (sessionStorageService != null) {
+                    final Task<Void> c = new AbstractTask<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            sessionStorageService.setHash(session.getSessionID(), hash);
+                            return null;
+                        }
+                    };
+                    submit(c);
+                }
+            } catch (final RuntimeException e) {
+                throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
+            }
+        }
+    }
+
     protected static Session getSessionByRandomToken(final String randomToken, final String newIP) {
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
@@ -666,18 +753,18 @@ public final class SessionHandler {
         return sessionControl.getSession();
     }
 
-    static Session getSessionWithTokens(String clientToken, String serverToken) throws OXException {
+    static Session getSessionWithTokens(final String clientToken, final String serverToken) throws OXException {
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
         }
         // find session matching to tokens
-        TokenSessionControl tokenControl = TokenSessionContainer.getInstance().getSession(clientToken, serverToken);
-        SessionImpl activatedSession = tokenControl.getSession();
+        final TokenSessionControl tokenControl = TokenSessionContainer.getInstance().getSession(clientToken, serverToken);
+        final SessionImpl activatedSession = tokenControl.getSession();
 
         // Put this session into the normal session container
-        SessionControl sessionControl = sessionData.addSession(activatedSession, noLimit);
-        SessionImpl addedSession = sessionControl.getSession();
+        final SessionControl sessionControl = sessionData.addSession(activatedSession, noLimit);
+        final SessionImpl addedSession = sessionControl.getSession();
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
             storeSession(addedSession, sessionStorageService, false);
@@ -1264,7 +1351,7 @@ public final class SessionHandler {
         private final boolean addIfAbsent;
         private final SessionImpl session;
 
-        protected StoreSessionTask(SessionImpl session, SessionStorageService sessionStorageService, boolean addIfAbsent) {
+        protected StoreSessionTask(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
             super();
             this.sessionStorageService = sessionStorageService;
             this.addIfAbsent = addIfAbsent;
@@ -1327,7 +1414,7 @@ public final class SessionHandler {
             synchronized (SessionHandler.class) {
                 tmp = timeout;
                 if (null == tmp) {
-                    ConfigurationService service = SessiondServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+                    final ConfigurationService service = SessiondServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
                     tmp = Integer.valueOf(null == service ? 250 : service.getIntProperty("com.openexchange.sessiond.sessionstorage.timeout", 250));
                     timeout = tmp;
                 }
@@ -1363,6 +1450,27 @@ public final class SessionHandler {
             return null;
         } catch (final CancellationException e) {
             return null;
+        }
+    }
+
+    private static <V> void submit(final Task<V> c) {
+        try {
+            ThreadPools.getThreadPool().submit(c);
+        } catch (final RejectedExecutionException e) {
+            boolean ran = false;
+            c.beforeExecute(Thread.currentThread());
+            try {
+                c.call();
+                ran = true;
+                c.afterExecute(null);
+            } catch (final Exception ex) {
+                if (!ran) {
+                    c.afterExecute(ex);
+                }
+                // Else the exception occurred within
+                // afterExecute itself in which case we don't
+                // want to call it again.
+            }
         }
     }
 

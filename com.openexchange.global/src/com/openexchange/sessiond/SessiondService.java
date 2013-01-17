@@ -193,4 +193,31 @@ public interface SessiondService {
      */
     public Session getAnyActiveSessionForUser(int userId, int contextId);
 
+    /**
+     * Sets the local IP address for denoted session.
+     *
+     * @param sessionId The session Id
+     * @param localIp The new local IP address
+     * @throws OXException If changing local IP address fails or any reason
+     */
+    public void setLocalIp(String sessionId, String localIp) throws OXException;
+
+    /**
+     * Sets the client identifier for denoted session.
+     *
+     * @param sessionId The session Id
+     * @param client The new client identifier
+     * @throws OXException If changing client identifier fails or any reason
+     */
+    public void setClient(String sessionId, String client) throws OXException;
+
+    /**
+     * Sets the hash identifier for denoted session.
+     *
+     * @param sessionId The session Id
+     * @param client The new hash identifier
+     * @throws OXException If changing hash identifier fails or any reason
+     */
+    public void setHash(String sessionId, String hash) throws OXException;
+
 }

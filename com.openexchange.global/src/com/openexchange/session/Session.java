@@ -52,9 +52,10 @@ package com.openexchange.session;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link Session}
+ * {@link Session} - Represents an Open-Xchange session.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -156,8 +157,10 @@ public interface Session {
     /**
      * Updates the local IP address.
      *
-     * @param ip the new IP address associated with this session
+     * @param ip The new IP address associated with this session
+     * @deprecated Use {@link SessiondService#setLocalIp(String, String)} instead
      */
+    @Deprecated
     public void setLocalIp(String ip);
 
     /**
@@ -264,20 +267,25 @@ public interface Session {
      * Updates the hash value of this session.
      *
      * @param hash The new hash value
+     * @deprecated Use {@link SessiondService#setHash(String, String)} instead
      */
+    @Deprecated
     void setHash(String hash);
 
     /**
-     * The client is remembered through the whole session. It should identify what client uses the backend. Normally this is the web
-     * frontend but there may be other clients especially those that synchronize their data with OX. The client is a parameter passed to the
-     * backend during the login request.
-     * @return the client identifier of the client using the backend.
+     * The client is remembered through the whole session. It should identify what client uses the back-end. Normally this is the web
+     * front-end but there may be other clients especially those that synchronize their data with OX. The client is a parameter passed to the
+     * back-end during the login request.
+     * @return the client identifier of the client using the back-end.
      */
     String getClient();
 
     /**
      * Should only be used to update the client on a redirect request.
-     * @param client new client identifier.
+     * 
+     * @param client The new client identifier.
+     * @deprecated Use {@link SessiondService#setClient(String, String)} instead
      */
+    @Deprecated
     void setClient(String client);
 }
