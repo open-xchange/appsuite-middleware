@@ -491,7 +491,7 @@ public final class SessionHandler {
 
                     @Override
                     public Integer call() throws Exception {
-                        return Integer.valueOf(storageService.getUserSessions(userId, contextId).length);
+                        return Integer.valueOf(storageService.getUserSessionCount(userId, contextId));
                     }
                 };
                 final int count = getFrom(c, Integer.valueOf(0)).intValue();

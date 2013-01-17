@@ -76,6 +76,11 @@ import com.openexchange.threadpool.ThreadPoolService;
 public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
     private static Log LOG = LogFactory.getLog(HazelcastSessionStorageActivator.class);
+    
+    /**
+     * Name for the userSessions multi-map - no further configuration via config file needed
+     */
+    private static final String USER_SESSIONS_NAME = "userSessions-0";
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -100,7 +105,8 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                     final HazelcastInstance hazelcastInstance = context.getService(reference);
                     HazelcastSessionStorageService.setHazelcastInstance(hazelcastInstance);
                     sessionStorageRegistration = context.registerService(SessionStorageService.class,
-                        new HazelcastSessionStorageService(discoverMapName(hazelcastInstance.getConfig())), null);
+                        new HazelcastSessionStorageService(
+                            discoverSessionsMapName(hazelcastInstance.getConfig()), USER_SESSIONS_NAME), null);
                     return hazelcastInstance;
                 }
 
@@ -153,7 +159,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
      * @return The sessions map name
      * @throws IllegalStateException
      */
-    private static String discoverMapName(Config config) throws IllegalStateException {
+    private static String discoverSessionsMapName(Config config) throws IllegalStateException {
         Map<String, MapConfig> mapConfigs = config.getMapConfigs();
         if (null != mapConfigs && 0 < mapConfigs.size()) {
             for (String mapName : mapConfigs.keySet()) {
