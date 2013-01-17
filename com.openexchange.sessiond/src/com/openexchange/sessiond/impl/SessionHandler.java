@@ -249,7 +249,7 @@ public final class SessionHandler {
                         return null;
                     }
                 };
-                submitSafe(c);
+                submitAndIgnoreRejection(c);
             } catch (final RuntimeException e) {
                 LOG.error(e.getMessage(), e);
             }
@@ -617,7 +617,7 @@ public final class SessionHandler {
                     return null;
                 }
             };
-            submitSafe(c);
+            submitAndIgnoreRejection(c);
         }
     }
 
@@ -634,7 +634,7 @@ public final class SessionHandler {
                 session.setLocalIp(localIp, false);
                 final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
                 if (sessionStorageService != null) {
-                    final Task<Void> c = new AbstractTask<Void>() {
+                    final AbstractTask<Void> c = new AbstractTask<Void>() {
 
                         @Override
                         public Void call() throws Exception {
@@ -663,7 +663,7 @@ public final class SessionHandler {
                 session.setClient(client, false);
                 final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
                 if (sessionStorageService != null) {
-                    final Task<Void> c = new AbstractTask<Void>() {
+                    final AbstractTask<Void> c = new AbstractTask<Void>() {
 
                         @Override
                         public Void call() throws Exception {
@@ -692,7 +692,7 @@ public final class SessionHandler {
                 session.setHash(hash, false);
                 final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
                 if (sessionStorageService != null) {
-                    final Task<Void> c = new AbstractTask<Void>() {
+                    final AbstractTask<Void> c = new AbstractTask<Void>() {
 
                         @Override
                         public Void call() throws Exception {
@@ -1453,28 +1453,15 @@ public final class SessionHandler {
         }
     }
 
-    private static <V> void submit(final Task<V> c) {
+    private static <V> void submit(final AbstractTask<V> c) {
         try {
             ThreadPools.getThreadPool().submit(c);
         } catch (final RejectedExecutionException e) {
-            boolean ran = false;
-            c.beforeExecute(Thread.currentThread());
-            try {
-                c.call();
-                ran = true;
-                c.afterExecute(null);
-            } catch (final Exception ex) {
-                if (!ran) {
-                    c.afterExecute(ex);
-                }
-                // Else the exception occurred within
-                // afterExecute itself in which case we don't
-                // want to call it again.
-            }
+            c.execute();
         }
     }
 
-    private static <V> void submitSafe(final Task<V> c) {
+    private static <V> void submitAndIgnoreRejection(final Task<V> c) {
         try {
             ThreadPools.getThreadPool().submit(c);
         } catch (final RejectedExecutionException e) {
