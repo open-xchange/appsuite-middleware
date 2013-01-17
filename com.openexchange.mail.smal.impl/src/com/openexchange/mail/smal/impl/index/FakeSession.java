@@ -157,11 +157,6 @@ public final class FakeSession implements Session, Serializable {
     }
 
     @Override
-    public void removeRandomToken() {
-        // Nope
-    }
-
-    @Override
     public String getAuthId() {
         return null;
     }

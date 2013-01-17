@@ -383,11 +383,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
     }
 
     @Override
-    public void removeRandomToken() {
-        randomToken = null;
-    }
-
-    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(512);
         final String delim = ", ";

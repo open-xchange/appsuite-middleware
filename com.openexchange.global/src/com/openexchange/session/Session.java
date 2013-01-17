@@ -249,11 +249,6 @@ public interface Session {
     public void setParameter(String name, Object value);
 
     /**
-     * Removes the random token
-     */
-    public void removeRandomToken();
-
-    /**
      * @return the authentication identifier that is used to trace the login request across different systems.
      */
     String getAuthId();

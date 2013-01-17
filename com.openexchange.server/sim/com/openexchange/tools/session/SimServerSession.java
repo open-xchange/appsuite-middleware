@@ -162,11 +162,6 @@ public class SimServerSession implements ServerSession {
     }
 
     @Override
-    public void removeRandomToken() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void setParameter(final String name, final Object value) {
         throw new UnsupportedOperationException();
     }

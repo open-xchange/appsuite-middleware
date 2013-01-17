@@ -307,11 +307,6 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     }
 
     @Override
-    public void removeRandomToken() {
-        session().removeRandomToken();
-    }
-
-    @Override
     public String getAuthId() {
         return session().getAuthId();
     }

@@ -137,11 +137,6 @@ public class PublicationSession implements Session {
     }
 
     @Override
-    public void removeRandomToken() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void setParameter(final String name, final Object value) {
         // Nothing to remember.
     }

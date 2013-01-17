@@ -411,7 +411,9 @@ public final class SessionImpl implements PutIfAbsent {
         return parameters.putIfAbsent(name, value);
     }
 
-    @Override
+    /**
+     * Removes the random token
+     */
     public void removeRandomToken() {
         randomToken = null;
     }

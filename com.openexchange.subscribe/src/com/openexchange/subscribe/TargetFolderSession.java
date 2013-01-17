@@ -196,14 +196,6 @@ public class TargetFolderSession implements Session {
     }
 
     @Override
-    public void removeRandomToken() {
-        if (null == session) {
-            throw new UnsupportedOperationException("TargetFolderSession.removeRandomToken()");
-        }
-        session.removeRandomToken();
-    }
-
-    @Override
     public String getAuthId() {
         if (null == session) {
             throw new UnsupportedOperationException("TargetFolderSession.getAuthId()");

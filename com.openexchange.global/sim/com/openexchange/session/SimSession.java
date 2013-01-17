@@ -133,7 +133,6 @@ public class SimSession implements Session {
         this.randomToken = randomToken;
     }
 
-    @Override
     public void removeRandomToken() {
         randomToken = null;
     }

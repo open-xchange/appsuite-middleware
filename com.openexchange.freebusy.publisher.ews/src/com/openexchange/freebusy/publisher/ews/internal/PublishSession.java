@@ -154,13 +154,6 @@ public class PublishSession implements Session {
     @Override
     public void setParameter(String name, Object value) {
         // Nothing to do
-
-    }
-
-    @Override
-    public void removeRandomToken() {
-        // Nothing to do
-
     }
 
     @Override
@@ -178,7 +171,6 @@ public class PublishSession implements Session {
     @Override
     public void setHash(String hash) {
         // Nothing to do
-
     }
 
     @Override
@@ -190,7 +182,6 @@ public class PublishSession implements Session {
     @Override
     public void setClient(String client) {
         // Nothing to do
-
     }
 
 }
