@@ -136,6 +136,10 @@ public final class LoginWriter {
         write(session, json, Collections.<OXException> emptyList(), locale);
     }
 
+    public static void write(Session session, JSONObject json, Locale locale) throws JSONException {
+        write(session, json, Collections.<OXException> emptyList(), locale);
+    }
+
     private static final String PARAMETER_USER_ID = AJAXServlet.PARAMETER_USER_ID;
     private static final String PARAMETER_USER = AJAXServlet.PARAMETER_USER;
     private static final String RANDOM_PARAM = LoginFields.RANDOM_PARAM;
