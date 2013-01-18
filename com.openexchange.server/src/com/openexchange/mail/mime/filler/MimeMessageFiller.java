@@ -191,17 +191,13 @@ public class MimeMessageFiller {
      * Fields
      */
     protected final Session session;
-
     protected final Context ctx;
-
     protected final UserSettingMail usm;
-
     protected int accountId;
 
     private Set<String> uploadFileIDs;
-
     private Set<String> contentIds;
-
+    private boolean discardReferencedInlinedImages;
     private final HtmlService htmlService;
 
     /**
@@ -223,6 +219,7 @@ public class MimeMessageFiller {
      */
     public MimeMessageFiller(final Session session, final Context ctx, final UserSettingMail usm) {
         super();
+        discardReferencedInlinedImages = true;
         htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
         this.session = session;
         this.ctx = ctx;
@@ -230,9 +227,21 @@ public class MimeMessageFiller {
     }
 
     /**
+     * Sets whether to discard referenced inlined images.
+     *
+     * @param discardReferencedInlinedImages The flag to set
+     * @return This filler with new behavior applied
+     */
+    public MimeMessageFiller setDiscardReferencedInlinedImages(boolean discardReferencedInlinedImages) {
+        this.discardReferencedInlinedImages = discardReferencedInlinedImages;
+        return this;
+    }
+
+    /**
      * Sets the account identifier
      *
      * @param accountId The account identifier to set
+     * @return This filler with account identifier set
      */
     public MimeMessageFiller setAccountId(final int accountId) {
         this.accountId = accountId;
@@ -896,25 +905,30 @@ public class MimeMessageFiller {
                     List<String> cidList = null;
                     for (int i = 0; i < size; i++) {
                         if (null == contentIds) {
-                            final MailPart mailPart = mail.getEnclosedMailPart(i);
-                            boolean add = false;
-                            if (embeddedImages && mailPart.getContentType().startsWith("image/")) {
-                                final String contentId = mailPart.getContentId();
-                                if (null != contentId) {
-                                    // Check if image is already inlined inside HTML content
-                                    if (null == cidList) {
-                                        cidList = MimeMessageUtility.getContentIDs(content);
+                            if (discardReferencedInlinedImages) {
+                                final MailPart mailPart = mail.getEnclosedMailPart(i);
+                                boolean add = false;
+                                if (embeddedImages && mailPart.getContentType().startsWith("image/")) {
+                                    final String contentId = mailPart.getContentId();
+                                    if (null != contentId) {
+                                        // Check if image is already inlined inside HTML content
+                                        if (null == cidList) {
+                                            cidList = MimeMessageUtility.getContentIDs(content);
+                                        }
+                                        add = !MimeMessageUtility.containsContentId(contentId, cidList);
+                                    } else {
+                                        // A regular file-attachment image
+                                        add = true;
                                     }
-                                    add = !MimeMessageUtility.containsContentId(contentId, cidList);
                                 } else {
-                                    // A regular file-attachment image
                                     add = true;
                                 }
+                                if (add) {
+                                    addMessageBodyPart(primaryMultipart, mailPart, false);
+                                }
                             } else {
-                                add = true;
-                            }
-                            if (add) {
-                                addMessageBodyPart(primaryMultipart, mailPart, false);
+                                // A regular file-attachment image
+                                addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
                             }
                         } else {
                             final MailPart mailPart = mail.getEnclosedMailPart(i);
