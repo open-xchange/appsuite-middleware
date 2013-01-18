@@ -50,10 +50,8 @@
 package com.openexchange.templating.impl;
 
 import java.io.StringWriter;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
-import com.openexchange.templating.TemplateServiceImpl;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplatingHelper;
 

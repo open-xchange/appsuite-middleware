@@ -49,10 +49,13 @@
 
 package com.openexchange.java;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * {@link Strings} - A library for performing operations that create Strings
@@ -60,6 +63,82 @@ import java.util.List;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Strings {
+
+    /**
+     * Gets specified string's ASCII bytes
+     * 
+     * @param str The string
+     * @return The ASCII bytes
+     */
+    public static byte[] toAsciiBytes(final CharSequence cs) {
+        return Charsets.toAsciiBytes(cs);
+    }
+
+    /**
+     * Gets specified string's ASCII bytes
+     * 
+     * @param str The string
+     * @return The ASCII bytes
+     */
+    public static byte[] toAsciiBytes(final String str) {
+        return Charsets.toAsciiBytes(str);
+    }
+
+    /**
+     * Writes specified string's ASCII bytes to given stream.
+     * 
+     * @param str The string
+     * @param out The stream to write to
+     * @throws IOException If an I/O error occurs
+     */
+    public static void writeAsciiBytes(final String str, final OutputStream out) throws IOException {
+        Charsets.writeAsciiBytes(str, out);
+    }
+
+    private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
+
+    /**
+     * Splits given string by comma separator.
+     * 
+     * @param s The string to split
+     * @return The splitted string
+     */
+    public static String[] splitByComma(final String s) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_COMMA.split(s, 0);
+    }
+
+    private static final Pattern P_SPLIT_CRLF = Pattern.compile("\r?\n");
+
+    /**
+     * Splits given string by CR?LF; yields line-wise output.
+     * 
+     * @param s The string to split
+     * @return The splitted string
+     */
+    public static String[] splitByCRLF(final String s) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_CRLF.split(s, 0);
+    }
+
+    private static final Pattern P_SPLIT_WHITESPACE = Pattern.compile("\\s+");
+
+    /**
+     * Splits given string by whitespaces.
+     * 
+     * @param s The string to split
+     * @return The splitted string
+     */
+    public static String[] splitByWhitespaces(final String s) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_WHITESPACE.split(s, 0);
+    }
 
     /**
      * Joins a collection of objects by connecting the results of their #toString() method with a connector

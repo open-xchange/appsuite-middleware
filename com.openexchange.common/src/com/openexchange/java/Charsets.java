@@ -49,6 +49,8 @@
 
 package com.openexchange.java;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -159,6 +161,34 @@ public final class Charsets {
         final byte[] ret = new byte[length];
         str.getBytes(0, length, ret, 0);
         return ret;
+    }
+
+    private static final int _64K = 65536;
+
+    /**
+     * Writes specified string's ASCII bytes to given stream.
+     *
+     * @param str The string
+     * @param out The stream to write to
+     * @throws IOException If an I/O error occurs
+     */
+    public static void writeAsciiBytes(final String str, final OutputStream out) throws IOException {
+        if (null == str) {
+            return;
+        }
+        final int length = str.length();
+        if (0 == length) {
+            return;
+        }
+        if (length <= _64K) {
+            for (int i = 0; i < length; i++) {
+                out.write((byte) str.charAt(i++));
+            }
+        } else {
+            final byte[] ret = new byte[length];
+            str.getBytes(0, length, ret, 0);
+            out.write(ret, 0, length);
+        }
     }
 
     /**
