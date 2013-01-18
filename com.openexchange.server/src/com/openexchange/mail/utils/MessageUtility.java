@@ -53,7 +53,6 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -63,6 +62,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -405,7 +405,7 @@ public final class MessageUtility {
             return new String(bytes, detectedCharset);
         }
         final String retval = readStream0(streamProvider.getInputStream(), charset);
-        if (retval.indexOf(UNKNOWN) < 0) {
+        if (true || retval.indexOf(UNKNOWN) < 0) {
             return retval;
         }
         final byte[] bytes = getBytesFrom(streamProvider.getInputStream());
@@ -528,20 +528,8 @@ public final class MessageUtility {
             for (int read; (read = inStream.read(buf, 0, BUFSIZE)) > 0;) {
                 tmp.write(buf, 0, read);
             }
-            if (null == charset) {
-                final byte[] bytes = tmp.toByteArray();
-                final Charset detectedCharset = Charsets.forName(detectCharset(bytes));
-                if ("US-ASCII".equals(detectedCharset.name())) {
-                    return Charsets.toAsciiString(tmp.toByteArray());
-                }
-                return new String(bytes, detectedCharset);
-            }
             try {
-                final Charset cs = Charsets.forName(charset);
-                if ("US-ASCII".equals(cs.name())) {
-                    return Charsets.toAsciiString(tmp.toByteArray());
-                }
-                return new String(tmp.toByteArray(), cs);
+                return tmp.toString(charset);
             } catch (final UnsupportedCharsetException e) {
                 LOG.error("Unsupported encoding in a message detected and monitored: \"" + charset + '"', e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(charset);

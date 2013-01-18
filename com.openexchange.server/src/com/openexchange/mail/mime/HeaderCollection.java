@@ -72,7 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 

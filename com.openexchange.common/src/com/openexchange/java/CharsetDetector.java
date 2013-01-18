@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.utils;
+package com.openexchange.java;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -58,6 +58,8 @@ import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mozilla.intl.chardet.nsDetector;
 import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.mozilla.intl.chardet.nsPSMDetector;
@@ -69,7 +71,7 @@ import org.mozilla.intl.chardet.nsPSMDetector;
  */
 public final class CharsetDetector {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CharsetDetector.class));
+    private static final Log LOG = LogFactory.getLog(CharsetDetector.class);
 
     private static final String STR_US_ASCII = "US-ASCII";
 
@@ -206,6 +208,79 @@ public final class CharsetDetector {
             }
             return detectCharset(rawIn);
         }
+    }
+
+    /**
+     * Detects the charset of specified byte array.
+     *
+     * @param in The byte array to examine
+     * @throws NullPointerException If byte array is <code>null</code>
+     * @return The detected charset or <i>US-ASCII</i> if no matching/supported charset could be found
+     */
+    public static String detectCharset(final byte[] in) {
+        return detectCharset(in, in.length);
+    }
+
+    /**
+     * Detects the charset of specified byte array.
+     *
+     * @param in The byte array to examine
+     * @param len The bytes length
+     * @throws NullPointerException If byte array is <code>null</code>
+     * @return The detected charset or <i>US-ASCII</i> if no matching/supported charset could be found
+     */
+    public static String detectCharset(final byte[] in, final int len) {
+        if (null == in) {
+            throw new NullPointerException("byte array input stream is null");
+        }
+        final nsDetector det = new nsDetector(nsPSMDetector.ALL);
+        /*
+         * Set an observer: The Notify() will be called when a matching charset is found.
+         */
+        final CharsetDetectionObserver observer = new CharsetDetectionObserver();
+        det.Init(observer);
+
+        final boolean isAscii = det.isAscii(in, len);
+        if (!isAscii) {
+            det.DoIt(in, len, false);
+        }
+
+        det.DataEnd();
+        /*
+         * Check if content is ascii
+         */
+        if (isAscii) {
+            return STR_US_ASCII;
+        }
+        {
+            /*
+             * Check observer
+             */
+            final String charset = observer.getCharset();
+            if (null != charset && Charset.isSupported(charset)) {
+                return charset;
+            }
+        }
+        /*-
+         * Choose first possible charset but prefer:
+         * 1. UTF-8
+         * 2. WINDOWS-1252
+         */
+        final String prob[] = det.getProbableCharsets();
+        String firstPossibleCharset = null;
+        for (int i = 0; i < prob.length; i++) {
+            if (Charset.isSupported(prob[i])) {
+                if ("utf-8".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
+                    return prob[i];
+                } else if ("windows-1252".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
+                    return prob[i];
+                }
+                if (null == firstPossibleCharset) {
+                    firstPossibleCharset = prob[i];
+                }
+            }
+        }
+        return null == firstPossibleCharset ? FALLBACK : firstPossibleCharset;
     }
 
     /**
@@ -414,10 +489,6 @@ public final class CharsetDetector {
             super();
         }
 
-        /*
-         * (non-Javadoc)
-         * @see org.mozilla.intl.chardet.nsICharsetDetectionObserver#Notify(java. lang.String)
-         */
         @Override
         public void Notify(final String charset) {
             this.charset = charset;

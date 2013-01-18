@@ -56,7 +56,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -255,8 +254,8 @@ public final class TikaDocumentHandler {
             if (HTML_ALIKE.contains(output)) {
                 return serviceLookup.getService(HtmlService.class).getConformHTML(new String(bout.toByteArray(), Charsets.forName(encoding)), encoding);
             }
-            return new String(bout.toByteArray(), Charsets.forName(encoding));
-        } catch (final UnsupportedCharsetException e) {
+            return bout.toString(encoding);
+        } catch (final UnsupportedEncodingException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(stream);

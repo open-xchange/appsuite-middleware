@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 /**
  * <p>
@@ -85,6 +86,37 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
      */
     public UnsynchronizedByteArrayOutputStream(final int size) {
         super(size);
+    }
+
+    /**
+     * Gets the string value for valid bytes.
+     *
+     * @param charset The charset
+     * @return The string value
+     */
+    public String toString(final Charset charset) {
+        final Charset cs = null == charset ? detectCharset() : charset;
+        if ("US-ASCII".equals(cs.name())) {
+            return Charsets.toAsciiString(buf, 0, count);
+        }
+        return new String(buf, 0, count, cs);
+    }
+
+    private Charset detectCharset() {
+        String charset = CharsetDetector.detectCharset(buf, count);
+        if ("US-ASCII".equalsIgnoreCase(charset)) {
+            return Charsets.ISO_8859_1;
+        }
+        return Charsets.forName(charset);
+    }
+
+    /**
+     * Gets the number of valid bytes in the buffer.
+     *
+     * @return The number of valid bytes
+     */
+    public int getCount() {
+        return count;
     }
 
     /**
@@ -241,7 +273,7 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
      */
     @Override
     public String toString(final String enc) throws UnsupportedEncodingException {
-        return new String(buf, 0, count, enc);
+        return toString(null == enc ? null : Charsets.forName(enc));
     }
 
     /**

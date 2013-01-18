@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.mime.dataobjects;
 
-import static com.openexchange.mail.utils.CharsetDetector.detectCharset;
+import static com.openexchange.java.CharsetDetector.detectCharset;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.UnsupportedCharsetException;

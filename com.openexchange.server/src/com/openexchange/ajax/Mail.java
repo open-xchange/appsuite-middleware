@@ -170,7 +170,7 @@ import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.structure.parser.MIMEStructureParser;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;

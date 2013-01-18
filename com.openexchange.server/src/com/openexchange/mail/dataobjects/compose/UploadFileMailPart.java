@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.dataobjects.compose;
 
-import static com.openexchange.mail.utils.CharsetDetector.detectCharset;
+import static com.openexchange.java.CharsetDetector.detectCharset;
 import static com.openexchange.mail.utils.MessageUtility.readStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -70,7 +70,7 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.java.CharsetDetector;
 
 /**
  * {@link UploadFileMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary uploaded file that shall be added as

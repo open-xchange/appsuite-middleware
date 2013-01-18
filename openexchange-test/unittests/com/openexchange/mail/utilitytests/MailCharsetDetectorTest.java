@@ -50,7 +50,7 @@
 package com.openexchange.mail.utilitytests;
 
 import com.openexchange.mail.AbstractMailTest;
-import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
