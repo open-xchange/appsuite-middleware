@@ -76,6 +76,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
@@ -150,7 +151,9 @@ public class TemplateServiceImpl implements TemplateService {
                 return;
             }
             // A file is accessed in a foreign directory
-            throw TemplateErrorMessage.AccessDenied.create();
+            final OXException e = TemplateErrorMessage.AccessDenied.create();
+            LOG.error(new StringAllocator(64).append(e.getErrorCode()).append(": Acces to file denied: \"").append(templatePath).append("\" exceptionID=").append(e.getExceptionId()).toString());
+            throw e;
         } catch (final IOException e) {
             throw TemplateErrorMessage.IOException.create(e, e.getMessage());
         }
@@ -311,6 +314,7 @@ public class TemplateServiceImpl implements TemplateService {
         if (!templateFile.exists() || !templateFile.exists() || !templateFile.canRead()) {
             throw TemplateErrorMessage.TemplateNotFound.create(defaultTemplateName);
         }
+        checkTemplatePath(templateFile.getPath());
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader(templateFile), 2048);
