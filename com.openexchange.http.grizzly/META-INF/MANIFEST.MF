@@ -63,7 +63,9 @@ Bundle-ClassPath: .,
  lib/grizzly-rcm-2.2.20-SNAPSHOT-sources.jar,
  lib/grizzly-rcm-2.2.20-SNAPSHOT.jar,
  lib/grizzly-websockets-2.2.20-SNAPSHOT-sources.jar,
- lib/grizzly-websockets-2.2.20-SNAPSHOT.jar
+ lib/grizzly-websockets-2.2.20-SNAPSHOT.jar,
+ lib/grizzly-http-ajp-2.2.20-SNAPSHOT-sources.jar,
+ lib/grizzly-http-ajp-2.2.20-SNAPSHOT.jar
 Export-Package: com.openexchange.http.grizzly.service.atmosphere,
  org.atmosphere.cache,
  org.atmosphere.client,
