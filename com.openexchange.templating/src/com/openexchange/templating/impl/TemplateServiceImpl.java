@@ -95,9 +95,10 @@ import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 
 /**
- * This class is not thread-safe at all.
+ * {@link TemplateServiceImpl} - The default implementation of {@link TemplateService}.
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TemplateServiceImpl implements TemplateService {
 
@@ -112,6 +113,7 @@ public class TemplateServiceImpl implements TemplateService {
     /** The map for cached tags */
     private static final Map<String, Map<String, Set<String>>> CACHED_TAGS = new ConcurrentHashMap<String, Map<String, Set<String>>>();
 
+    private final Object lock;
     private final ConfigurationService config;
     private OXFolderHelper folders;
     private OXInfostoreHelper infostore;
@@ -124,6 +126,8 @@ public class TemplateServiceImpl implements TemplateService {
      * @param config The configuration service
      */
     public TemplateServiceImpl(final ConfigurationService config) {
+        super();
+        lock = new Object();
         this.config = config;
         exceptionHandler = null;
         defaultTemplatePath = config.getProperty(PATH_PROPERTY);
@@ -195,25 +199,27 @@ public class TemplateServiceImpl implements TemplateService {
         }
         checkTemplatePath(templatePath);
 
-        Template retval = null;
-        try {
-            final TemplateLoader templateLoader = new FileTemplateLoader(path);
-            final String userDir = System.getProperty("user.dir");
-            System.setProperty("user.dir", templatePath);
-            final Configuration config = new Configuration();
-            System.setProperty("user.dir", userDir);
-            config.setTemplateLoader(templateLoader);
-            if (exceptionHandler != null) {
-                config.setTemplateExceptionHandler(exceptionHandler);
+        synchronized (lock) {
+            Template retval = null;
+            try {
+                final TemplateLoader templateLoader = new FileTemplateLoader(path);
+                final String userDir = System.getProperty("user.dir");
+                System.setProperty("user.dir", templatePath);
+                final Configuration config = new Configuration();
+                System.setProperty("user.dir", userDir);
+                config.setTemplateLoader(templateLoader);
+                if (exceptionHandler != null) {
+                    config.setTemplateExceptionHandler(exceptionHandler);
+                }
+                retval = config.getTemplate(templateName);
+            } catch (final IOException e) {
+                throw IOException.create(e);
             }
-            retval = config.getTemplate(templateName);
-        } catch (final IOException e) {
-            throw IOException.create(e);
+            if (retval == null) {
+                throw TemplateNotFound.create(templateName);
+            }
+            return retval;
         }
-        if (retval == null) {
-            throw TemplateNotFound.create(templateName);
-        }
-        return retval;
     }
 
     @Override
@@ -227,62 +233,64 @@ public class TemplateServiceImpl implements TemplateService {
         if (isEmpty(templateName) || !isUserTemplatingEnabled(session)) {
             return loadTemplate(defaultTemplateName);
         }
-        try {
-            FolderObject folder = folders.getPrivateTemplateFolder(session);
-            FolderObject privateFolder = folder;
-            boolean global = false;
+        synchronized (lock) {
+            try {
+                FolderObject folder = folders.getPrivateTemplateFolder(session);
+                FolderObject privateFolder = folder;
+                boolean global = false;
 
-            if (null == folder) {
-                folder = folders.getGlobalTemplateFolder(session);
-                global = true;
-            }
-            String templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
+                if (null == folder) {
+                    folder = folders.getGlobalTemplateFolder(session);
+                    global = true;
+                }
+                String templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
 
-            final String userDir = System.getProperty("user.dir");
-            final String templatePath = config.getProperty(PATH_PROPERTY);
-            System.setProperty("user.dir", templatePath);
-            final Configuration config = new Configuration();
-            System.setProperty("user.dir", userDir);
-            if (exceptionHandler != null) {
-                config.setTemplateExceptionHandler(exceptionHandler);
-            }
-            if (templateText != null) {
+                final String userDir = System.getProperty("user.dir");
+                final String templatePath = config.getProperty(PATH_PROPERTY);
+                System.setProperty("user.dir", templatePath);
+                final Configuration config = new Configuration();
+                System.setProperty("user.dir", userDir);
+                if (exceptionHandler != null) {
+                    config.setTemplateExceptionHandler(exceptionHandler);
+                }
+                if (templateText != null) {
+                    final OXTemplateImpl template = new OXTemplateImpl();
+                    template.setTemplate(new Template(templateName, new StringReader(templateText), config));
+                    template.setLevel(TemplateLevel.USER);
+                    return template;
+                }
+
+                if (!global) {
+                    folder = folders.getGlobalTemplateFolder(session);
+                    global = true;
+
+                    templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
+                }
+
+                if (templateText == null) {
+
+                    if (existsInFilesystem(templateName)) {
+                        templateText = loadFromFileSystem(templateName);
+                        final OXTemplateImpl template = new OXTemplateImpl();
+                        template.setTemplate(new Template(templateName, new StringReader(templateText), config));
+                        template.setLevel(TemplateLevel.SERVER);
+                        return template;
+                    }
+
+                    templateText = loadFromFileSystem(defaultTemplateName);
+                    if (privateFolder == null) {
+                        folder = folders.createPrivateTemplateFolder(session);
+                        privateFolder = folder;
+                    }
+                    infostore.storeTemplateInFolder(session, privateFolder, templateName, templateText);
+                }
                 final OXTemplateImpl template = new OXTemplateImpl();
                 template.setTemplate(new Template(templateName, new StringReader(templateText), config));
                 template.setLevel(TemplateLevel.USER);
                 return template;
+            } catch (final IOException e) {
+                throw IOException.create(e);
             }
-
-            if (!global) {
-                folder = folders.getGlobalTemplateFolder(session);
-                global = true;
-
-                templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
-            }
-
-            if (templateText == null) {
-
-                if (existsInFilesystem(templateName)) {
-                    templateText = loadFromFileSystem(templateName);
-                    final OXTemplateImpl template = new OXTemplateImpl();
-                    template.setTemplate(new Template(templateName, new StringReader(templateText), config));
-                    template.setLevel(TemplateLevel.SERVER);
-                    return template;
-                }
-
-                templateText = loadFromFileSystem(defaultTemplateName);
-                if (privateFolder == null) {
-                    folder = folders.createPrivateTemplateFolder(session);
-                    privateFolder = folder;
-                }
-                infostore.storeTemplateInFolder(session, privateFolder, templateName, templateText);
-            }
-            final OXTemplateImpl template = new OXTemplateImpl();
-            template.setTemplate(new Template(templateName, new StringReader(templateText), config));
-            template.setLevel(TemplateLevel.USER);
-            return template;
-        } catch (final IOException e) {
-            throw IOException.create(e);
         }
     }
 
@@ -305,9 +313,9 @@ public class TemplateServiceImpl implements TemplateService {
         }
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new FileReader(templateFile));
-            final StringBuilder builder = new StringBuilder();
-            String line = null;
+            reader = new BufferedReader(new FileReader(templateFile), 2048);
+            final StringBuilder builder = new StringBuilder(2048);
+            String line;
             while ((line = reader.readLine()) != null) {
                 builder.append(line).append('\n');
             }
@@ -315,13 +323,7 @@ public class TemplateServiceImpl implements TemplateService {
         } catch (final IOException e) {
             throw IOException.create(e);
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    // IGNORE
-                }
-            }
+            Streams.close(reader);
         }
     }
 
@@ -381,8 +383,11 @@ public class TemplateServiceImpl implements TemplateService {
     private Map<String, Set<String>> getTagMap(final File templateDir) {
         final String absolutePath = templateDir.getAbsolutePath();
 
-        if (CACHED_TAGS.containsKey(absolutePath)) {
-            return CACHED_TAGS.get(absolutePath);
+        {
+            final Map<String, Set<String>> map = CACHED_TAGS.get(absolutePath);
+            if (null != map) {
+                return map;
+            }
         }
 
         final File[] files = templateDir.listFiles(new FileFilter() {
@@ -402,7 +407,7 @@ public class TemplateServiceImpl implements TemplateService {
         for (final File file : files) {
             InputStream inStream = null;
             try {
-                inStream = new BufferedInputStream(new FileInputStream(file));
+                inStream = new BufferedInputStream(new FileInputStream(file), 2048);
                 final Properties index = new Properties();
                 index.load(inStream);
                 for (final Entry<Object, Object> entry : index.entrySet()) {
@@ -461,8 +466,10 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final Session session, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
-        setExceptionHandler(exceptionHandler);
-        return loadTemplate(templateName, defaultTemplateName, session);
+        synchronized (lock) {
+            setExceptionHandler(exceptionHandler);
+            return loadTemplate(templateName, defaultTemplateName, session);
+        }
     }
 
     @Override
