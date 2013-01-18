@@ -65,6 +65,8 @@ done
 %config(noreplace) /opt/open-xchange/etc/mysql/*
 
 %changelog
+* Thu Jan 03 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for public patch 2013-01-15
 * Fri Dec 28 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for public patch 2012-12-31
 * Wed Dec 12 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>

@@ -89,6 +89,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Jan 03 2013 Marc Arens <marc.arens@open-xchange.com>
+Build for public patch 2013-01-15
 * Thu Jan 10 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-01-10
 * Fri Dec 28 2012 Marc Arens <marc.arens@open-xchange.com>

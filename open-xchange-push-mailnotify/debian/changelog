@@ -70,6 +70,12 @@ open-xchange-push-mailnotify (6.23.0-0) unstable; urgency=low
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 03 Sep 2012 13:46:51 +0200
 
+open-xchange-push-mailnotify (6.22.0-6) unstable; urgency=low
+
+  * Build for public patch 2013-01-15
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 03 Jan 2013 16:58:54 +0100
+
 open-xchange-push-mailnotify (6.22.0-5) unstable; urgency=low
 
   * Fifth release candidate for 6.22.0
