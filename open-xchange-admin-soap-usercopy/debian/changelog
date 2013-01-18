@@ -118,6 +118,12 @@ open-xchange-admin-soap-usercopy (6.22.1-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 10:03:53 +0200
 
+open-xchange-admin-soap-usercopy (6.22.0-6) unstable; urgency=low
+
+  * Build for public patch 2013-01-15
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 03 Jan 2013 16:58:39 +0100
+
 open-xchange-admin-soap-usercopy (6.22.0-5) unstable; urgency=low
 
   * Fifth release candidate for 6.22.0
