@@ -331,11 +331,21 @@ public class TemplateServiceImpl implements TemplateService {
         return new File(defaultTemplatePath, defaultTemplateName);
     }
 
-    public void setOXFolderHelper(final OXFolderHelper helper) {
+    /**
+     * Sets the folder helper
+     *
+     * @param helper The helper
+     */
+    public synchronized void setOXFolderHelper(final OXFolderHelper helper) {
         this.folders = helper;
     }
 
-    public void setInfostoreHelper(final OXInfostoreHelper helper) {
+    /**
+     * Sets the InfoStore helper
+     *
+     * @param helper The helper
+     */
+    public synchronized void setInfostoreHelper(final OXInfostoreHelper helper) {
         this.infostore = helper;
     }
 
@@ -438,20 +448,16 @@ public class TemplateServiceImpl implements TemplateService {
             return getBasicTemplateNames(filter);
         }
 
-        try {
-            final FolderObject globalTemplateFolder = folders.getGlobalTemplateFolder(session);
-            final FolderObject privateTemplateFolder = folders.getPrivateTemplateFolder(session);
+        final FolderObject globalTemplateFolder = folders.getGlobalTemplateFolder(session);
+        final FolderObject privateTemplateFolder = folders.getPrivateTemplateFolder(session);
 
-            if (globalTemplateFolder != null) {
-                names.addAll(infostore.getNames(session, globalTemplateFolder, filter));
-            }
-            if (privateTemplateFolder != null) {
-                names.addAll(infostore.getNames(session, privateTemplateFolder, filter));
-            }
-
-        } catch (final OXException e) {
-            throw e;
+        if (globalTemplateFolder != null) {
+            names.addAll(infostore.getNames(session, globalTemplateFolder, filter));
         }
+        if (privateTemplateFolder != null) {
+            names.addAll(infostore.getNames(session, privateTemplateFolder, filter));
+        }
+
         final List<String> basicTemplateNames = getBasicTemplateNames(filter);
         final ArrayList<String> userTemplates = new ArrayList<String>(names);
         Collections.sort(userTemplates);
