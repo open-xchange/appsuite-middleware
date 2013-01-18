@@ -89,30 +89,30 @@ public class HazelcastStoredSession extends StoredSession implements DataSeriali
         /*
          * basic properties
          */
-        writeString(out, loginName);
-        writeString(out, password);
+        out.writeUTF(loginName);
+        out.writeUTF(password);
         out.writeInt(contextId);
         out.writeInt(userId);
-        writeString(out, sessionId);
-        writeString(out, secret);
-        writeString(out, login);
-        writeString(out, randomToken);
-        writeString(out, localIp);
-        writeString(out, authId);
-        writeString(out, hash);
-        writeString(out, client);
-        writeString(out, userLogin);
+        out.writeUTF(sessionId);
+        out.writeUTF(secret);
+        out.writeUTF(login);
+        out.writeUTF(randomToken);
+        out.writeUTF(localIp);
+        out.writeUTF(authId);
+        out.writeUTF(hash);
+        out.writeUTF(client);
+        out.writeUTF(userLogin);
         /*
          * special handling for parameters map
          */
         Object alternativeID = parameters.get(PARAM_ALTERNATIVE_ID);
-        writeString(out, null != alternativeID && String.class.isInstance(alternativeID) ? (String)alternativeID : null);
+        out.writeUTF(null != alternativeID && String.class.isInstance(alternativeID) ? (String)alternativeID : null);
         Object capabilitiesValue = parameters.get(PARAM_CAPABILITIES);
         if (null != capabilitiesValue && java.util.Collection.class.isInstance(capabilitiesValue)) {
             Collection<?> capabilities = (Collection<?>)capabilitiesValue;
             out.writeInt(capabilities.size());
             for (Object capability : capabilities) {
-                writeString(out, null != capability && String.class.isInstance(capability) ? (String)capability : null);
+                out.writeUTF(null != capability && String.class.isInstance(capability) ? (String)capability : null);
             }
         } else {
             out.writeInt(0);
@@ -124,23 +124,23 @@ public class HazelcastStoredSession extends StoredSession implements DataSeriali
         /*
          * basic properties
          */
-        loginName = readString(in);
-        password = readString(in);
+        loginName = in.readUTF();
+        password = in.readUTF();
         contextId = in.readInt();
         userId = in.readInt();
-        sessionId = readString(in);
-        secret = readString(in);
-        login = readString(in);
-        randomToken = readString(in);
-        localIp = readString(in);
-        authId = readString(in);
-        hash = readString(in);
-        client = readString(in);
-        userLogin = readString(in);
+        sessionId = in.readUTF();
+        secret = in.readUTF();
+        login = in.readUTF();
+        randomToken = in.readUTF();
+        localIp = in.readUTF();
+        authId = in.readUTF();
+        hash = in.readUTF();
+        client = in.readUTF();
+        userLogin = in.readUTF();
         /*
          * special handling for parameters map
          */
-        String alternativeID = readString(in);
+        String alternativeID = in.readUTF();
         if (null != alternativeID) {
             parameters.put(PARAM_ALTERNATIVE_ID, alternativeID);
         }
@@ -148,23 +148,10 @@ public class HazelcastStoredSession extends StoredSession implements DataSeriali
         if (0 < capabilitiesSize) {
             List<String> capabilities = new ArrayList<String>();
             for (int i = 0; i < capabilitiesSize; i++) {
-                capabilities.add(readString(in));
+                capabilities.add(in.readUTF());
             }
             parameters.put(PARAM_CAPABILITIES, capabilities);
         }
-    }
-
-    private static void writeString(final DataOutput out, final String str) throws IOException {
-        if (null == str) {
-            out.writeBoolean(true);
-        } else {
-            out.writeBoolean(false);
-            out.writeUTF(str);
-        }
-    }
-
-    private static String readString(final DataInput in) throws IOException {
-        return in.readBoolean() ? null : in.readUTF();
     }
 
 }
