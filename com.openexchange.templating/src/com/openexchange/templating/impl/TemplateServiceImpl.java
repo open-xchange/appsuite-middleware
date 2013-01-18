@@ -95,6 +95,8 @@ import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 
 /**
+ * This class is not thread-safe at all.
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class TemplateServiceImpl implements TemplateService {
