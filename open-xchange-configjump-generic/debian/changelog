@@ -130,6 +130,12 @@ open-xchange-configjump-generic (6.22.1-0) unstable; urgency=low
 
  -- Carsten Hoeger <choegeropen-xchange.com>  Fri, 26 Oct 2012 10:04:23 +0200
 
+open-xchange-configjump-generic (6.22.0-6) unstable; urgency=low
+
+  * Build for public patch 2013-01-15
+
+ -- Carsten Hoeger <choegeropen-xchange.com>  Thu, 03 Jan 2013 16:58:59 +0100
+
 open-xchange-configjump-generic (6.22.0-5) unstable; urgency=low
 
   * Fifth release candidate for 6.22.0
