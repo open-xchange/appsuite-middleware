@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,62 @@
  *
  */
 
-package com.openexchange.config.cascade.context.matching;
+package com.openexchange.groupware.userconfiguration.osgi;
 
-import java.util.HashSet;
-import java.util.Set;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfiguration.Permission;
-
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.groupware.userconfiguration.UserConfiguration.AvailabilityChecker;
+import com.openexchange.server.osgi.ServerActivator;
 
 /**
- * {@link UserConfigurationAnalyzer}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link TrackerAvailabilityChecker} - The {@link AvailabilityChecker} backed by a {@link ServiceTracker}.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UserConfigurationAnalyzer {
+public class TrackerAvailabilityChecker<S> extends ServiceTracker<S, S> implements AvailabilityChecker {
 
-	public Set<String> getTags(UserConfiguration configuration) {
-        Set<String> retval = new HashSet<String>(64);
+    private final AtomicBoolean available;
 
-        int permissionBits = configuration.getPermissionBits();
+    /**
+     * Initializes a new {@link TrackerAvailabilityChecker}.
+     * 
+     * @param clazz The service's class to track
+     */
+    public TrackerAvailabilityChecker(final Class<S> clazz) {
+        super(ServerActivator.getContext(), clazz, null);
+        available = new AtomicBoolean();
+    }
 
-        for (final Permission p : Permission.values()) {
-        	final int bit = p.getBit();
-            if (((permissionBits & bit) == bit) && p.isAvailable()) {
-        		retval.add("uc" + p.getTagName());
-        	}
+    @Override
+    public void start() {
+        open();
+    }
+
+    @Override
+    public void stop() {
+        close();
+    }
+
+    @Override
+    public S addingService(final ServiceReference<S> reference) {
+        if (available.compareAndSet(false, true)) {
+            return super.addingService(reference);
         }
+        return null;
+    }
 
-        return retval;
+    @Override
+    public void removedService(final ServiceReference<S> reference, final S service) {
+        if (null != service) {
+            available.compareAndSet(true, false);
+            context.ungetService(reference);
+        }
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return available.get();
     }
 
 }
