@@ -64,6 +64,7 @@ import org.json.JSONTokener;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.log.LogFactory;
@@ -110,6 +111,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             return;
         }
         final ServerSession session = getSessionObject(req);
+        final User user = session.getUser();
         try {
             final String action = req.getParameter(PARAMETER_ACTION);
             final JSONObject request = toJSON(req, action);
@@ -120,11 +122,11 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             }
             final Object response = handler.performRequest(action, request, session, Tools.considerSecure(req));
             final Date timestamp = handler.getTimestamp();
-            writeResponseSafely(response, session.getUser().getLocale(), timestamp, handler.getWarnings(), resp, session);
+            writeResponseSafely(response, null == user ? localeFrom(session) : user.getLocale(), timestamp, handler.getWarnings(), resp, session);
         } catch (final OXException x) {
-            writeException(x, session.getUser().getLocale(), resp, session);
+            writeException(x, null == user ? localeFrom(session) : user.getLocale(), resp, session);
         } catch (final Throwable t) {
-            writeException(wrap(t), session.getUser().getLocale(), resp, session);
+            writeException(wrap(t), null == user ? localeFrom(session) : user.getLocale(), resp, session);
         }
     }
 

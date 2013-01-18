@@ -95,6 +95,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
@@ -453,7 +454,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         if (null == session) {
             return Locale.US;
         }
-        return session.getUser().getLocale();
+        final User user = session.getUser();
+        if (null != user) {
+            return user.getLocale();
+        }
+        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
     }
 
     /**
