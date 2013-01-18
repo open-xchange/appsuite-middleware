@@ -70,6 +70,7 @@ import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.log.LogFactory;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -102,7 +103,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
     }
 
 
-    protected void handle(final HttpServletRequest req, final HttpServletResponse resp) {
+    protected void handle(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         Tools.disableCaching(resp);
@@ -111,6 +112,11 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             return;
         }
         final ServerSession session = getSessionObject(req);
+        if (null == session) {
+            final OXException e = SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+            return;
+        }
         final User user = session.getUser();
         try {
             final String action = req.getParameter(PARAMETER_ACTION);
