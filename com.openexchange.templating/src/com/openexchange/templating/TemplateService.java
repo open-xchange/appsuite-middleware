@@ -53,7 +53,6 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
-
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
@@ -69,7 +68,7 @@ public interface TemplateService {
 
     public OXTemplate loadTemplate(String templateName, String defaultTemplateName, Session session, boolean createCopy) throws OXException;
 
-    public List<String> getBasicTemplateNames(String...filter) throws OXException;
+    public List<String> getBasicTemplateNames(String... filter) throws OXException;
 
     public List<String> getTemplateNames(Session session, String... filter) throws OXException;
     

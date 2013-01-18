@@ -81,4 +81,8 @@ public class TemplateExceptionMessage implements LocalizableStrings {
 
     public final static String SQLException_MSG = "Please try again later.";
 
+    public static final String AccessDenied_HELP = "File access is denied due to operating system's permissions.";
+
+    public static final String AccessDenied_MSG = "File access denied.";
+
 }
