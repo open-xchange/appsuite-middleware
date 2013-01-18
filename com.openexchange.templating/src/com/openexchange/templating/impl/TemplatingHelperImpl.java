@@ -53,7 +53,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
-import com.openexchange.templating.TemplateServiceImpl;
 import com.openexchange.templating.TemplatingHelper;
 
 

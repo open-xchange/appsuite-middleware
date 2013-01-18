@@ -116,6 +116,11 @@ public class PublicationServicesActivator extends HousekeepingActivator {
         unregisterServices();
     }
 
+    /**
+     * Applies given template service.
+     *
+     * @param templateService The template service
+     */
     public void setTemplateService(final TemplateService templateService) {
         infostorePublisher.setTemplateService(templateService);
         contactPublisher.setTemplateService(templateService);
