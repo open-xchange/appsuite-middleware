@@ -11054,6 +11054,14 @@ msgstr ""
 msgid "An underlying system threw an SQL exception"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:84
+msgid "File access is denied due to operating system's permissions."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:86
+msgid "File access denied."
+msgstr ""
+
 #. The consumer key/consumer secret pair is missing in configuration.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:72
 msgid "The consumer key/consumer secret pair is missing in configuration."
