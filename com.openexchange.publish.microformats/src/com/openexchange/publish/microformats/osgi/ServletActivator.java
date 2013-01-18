@@ -89,13 +89,11 @@ public class ServletActivator extends HousekeepingActivator {
 
     private I18nServiceTrackerCustomizer customizer;
 
-    private static final Class<?>[] NEEDED_SERVICES = {
-        HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class, ContactService.class,
-        UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HtmlService.class, ImageTransformationService.class};
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] {
+            HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class, ContactService.class,
+            UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HtmlService.class, ImageTransformationService.class};
     }
 
     @Override
