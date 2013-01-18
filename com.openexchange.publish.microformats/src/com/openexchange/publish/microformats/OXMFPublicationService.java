@@ -179,16 +179,11 @@ public class OXMFPublicationService extends AbstractPublicationService {
             return templateService.loadTemplate(defaultTemplateName);
         }
         final String templateName = object.toString();
-        try {
-            if (templateName == null || "".equals(templateName)) {
-                return templateService.loadTemplate(defaultTemplateName);
-            }
-            final ServerSession serverSession = ServerSessionAdapter.valueOf(new PublicationSession(publication));
-            return templateService.loadTemplate(templateName, defaultTemplateName, serverSession);
-        } catch (final OXException e) {
-            throw e;
+        if (templateName == null || "".equals(templateName)) {
+            return templateService.loadTemplate(defaultTemplateName);
         }
-
+        final ServerSession serverSession = ServerSessionAdapter.valueOf(new PublicationSession(publication));
+        return templateService.loadTemplate(templateName, defaultTemplateName, serverSession);
     }
 
     @Override

@@ -190,39 +190,39 @@ public abstract class AbstractPublicationService implements PublicationService {
     public abstract PublicationTarget getTarget() throws OXException;
 
     public void modifyIncoming(final Publication publication) throws OXException {
-
+        // Empty method
     }
 
     public void modifyOutgoing(final Publication publication) throws OXException {
-
+        // Empty method
     }
 
     public void beforeCreate(final Publication publication) throws OXException {
-
+        // Empty method
     }
 
     public void afterCreate(final Publication publication) throws OXException {
-
+        // Empty method
     }
 
     public void beforeUpdate(final Publication publication) throws OXException {
-
+        // Empty method
     }
 
     public void afterUpdate(final Publication publication) throws OXException {
-
+        // Empty method
     }
 
     public void beforeDelete(final Publication publication) throws OXException {
-
+        // Empty method
     }
 
     public void afterDelete(final Publication publication) throws OXException {
-
+        // Empty method
     }
 
     public void afterLoad(final Collection<Publication> publications) throws OXException {
-
+        // Empty method
     }
 
     public OXException uniquenessConstraintViolation(final String key, final String value) {
