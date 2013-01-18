@@ -73,10 +73,11 @@ public class CapabilityServiceImpl implements CapabilityService {
 
     private static final Object PRESENT = new Object();
 
-    private final ConcurrentMap<String, Capability> capabilities = new ConcurrentHashMap<String, Capability>();
-    private final ConcurrentMap<String, Object> declaredCapabilities = new ConcurrentHashMap<String, Object>();
+    private final ConcurrentMap<String, Capability> capabilities;
+    private final ConcurrentMap<String, Object> declaredCapabilities;
 
     private final ServiceLookup services;
+    private volatile Boolean autologin;
 
     /**
      * Initializes a new {@link CapabilityServiceImpl}.
@@ -87,12 +88,27 @@ public class CapabilityServiceImpl implements CapabilityService {
     public CapabilityServiceImpl(ServiceLookup services, BundleContext context) {
         super();
         this.services = services;
+        capabilities = new ConcurrentHashMap<String, Capability>();
+        declaredCapabilities = new ConcurrentHashMap<String, Object>();
+    }
+
+    private boolean autologin() {
+        Boolean tmp = autologin;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = autologin;
+                if (null == tmp) {
+                    tmp = Boolean.valueOf(services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.ajax.login.http-auth.autologin", false));
+                    autologin = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
     }
 
     @Override
     public Set<Capability> getCapabilities(ServerSession session) throws OXException {
-
-        Set<Capability> capabilities = new HashSet<Capability>();
+        Set<Capability> capabilities = new HashSet<Capability>(64);
         if (!session.isAnonymous()) {
             for (String type : session.getUserConfiguration().getExtendedPermissions()) {
                 if (check(type, session)) {
@@ -103,9 +119,7 @@ public class CapabilityServiceImpl implements CapabilityService {
 
         // What about autologin?
 
-        boolean autologin =
-            services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.ajax.login.http-auth.autologin", false);
-
+        boolean autologin = autologin();
         if (autologin) {
             capabilities.add(new Capability("autologin", true));
         }
