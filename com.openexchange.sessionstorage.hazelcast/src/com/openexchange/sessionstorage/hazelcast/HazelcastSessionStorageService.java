@@ -572,21 +572,20 @@ public class HazelcastSessionStorageService implements SessionStorageService {
      */
     private Collection<HazelcastStoredSession> filterLocal(Predicate<?, ?> predicate) throws OXException {
         IMap<String, HazelcastStoredSession> sessions = sessions();
-        if (null != sessions) {
-            Collection<HazelcastStoredSession> values = new ArrayList<HazelcastStoredSession>();
-            Set<String> localKeySet = sessions.localKeySet(predicate);
-            if (null != localKeySet && 0 < localKeySet.size()) {
-                for (String key : localKeySet) {
-                    HazelcastStoredSession storedSession = sessions.get(key);
-                    if (null != storedSession) {
-                        values.add(storedSession);
-                    }
-                }
-            }
-            return values;
-        } else {
+        if (null == sessions) {
             return Collections.emptyList();
         }
+        Collection<HazelcastStoredSession> values = new ArrayList<HazelcastStoredSession>();
+        Set<String> localKeySet = sessions.localKeySet(predicate);
+        if (null != localKeySet && 0 < localKeySet.size()) {
+            for (String key : localKeySet) {
+                HazelcastStoredSession storedSession = sessions.get(key);
+                if (null != storedSession) {
+                    values.add(storedSession);
+                }
+            }
+        }
+        return values;
     }
 
     /**
