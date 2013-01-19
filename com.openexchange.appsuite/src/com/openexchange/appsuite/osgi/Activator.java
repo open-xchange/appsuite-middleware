@@ -47,27 +47,33 @@
  *
  */
 
-package com.openexchange.appsuite;
+package com.openexchange.appsuite.osgi;
 
 import java.io.File;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.appsuite.AppsLoadServlet;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.HousekeepingActivator;
 
+/**
+ * {@link Activator} - The activator for <code>"com.openexchange.appsuite"</code> bundle.
+ */
 public class Activator extends HousekeepingActivator {
-
-    private static Class<?>[] NEEDED_SERVICES = { HttpService.class, ConfigurationService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { HttpService.class, ConfigurationService.class, DispatcherPrefixService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        String prefix = Dispatcher.PREFIX.get();
+        String prefix = getService(DispatcherPrefixService.class).getPrefix();
+        if (null == prefix) {
+            prefix = Dispatcher.PREFIX.get();
+        }
         ConfigurationService config = getService(ConfigurationService.class);
         String property = config.getProperty("com.openexchange.apps.path");
         if (property == null) {
