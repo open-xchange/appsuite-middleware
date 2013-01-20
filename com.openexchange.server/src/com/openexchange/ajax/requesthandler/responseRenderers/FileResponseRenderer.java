@@ -172,14 +172,14 @@ public class FileResponseRenderer implements ResponseRenderer {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     } else {
                         if (contentDisposition.indexOf(';') >= 0) {
-                            resp.setHeader("Content-Disposition", checkedContentDisposition(contentDisposition.trim(), file));
+                            resp.setHeader("Content-Disposition", contentDisposition.trim());
                         } else {
                             final String disposition = checkedDownload.getContentDisposition();
                             final int pos = disposition.indexOf(';');
                             if (pos >= 0) {
-                                resp.setHeader("Content-Disposition", checkedContentDisposition(contentDisposition.trim(), file) + disposition.substring(pos));
+                                resp.setHeader("Content-Disposition", contentDisposition.trim() + disposition.substring(pos));
                             } else {
-                                resp.setHeader("Content-Disposition", checkedContentDisposition(contentDisposition.trim(), file));
+                                resp.setHeader("Content-Disposition", contentDisposition.trim());
                             }
                         }
                     }
