@@ -147,7 +147,7 @@ public class DefaultMailSenderService implements MailSenderService {
         {
             final int appointmentId = app.getObjectID();
             final int folderId = mail.getRecipient().getFolderId();
-            final String sType = type.toString();
+            final String sType = type != null ? type.toString() : null;
             message = new MailObject(session, appointmentId, folderId, Types.APPOINTMENT, sType);
         }
         message.setInternalRecipient(!mail.getRecipient().isExternal() && !mail.getRecipient().isResource());
