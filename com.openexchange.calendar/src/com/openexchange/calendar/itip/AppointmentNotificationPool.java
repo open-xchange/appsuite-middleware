@@ -102,6 +102,8 @@ public class AppointmentNotificationPool implements
 	private final ReentrantLock lock = new ReentrantLock();
 
 	private final Map<Integer, Map<Integer, QueueItem>> items = new HashMap<Integer, Map<Integer, QueueItem>>();
+	
+	private final Map<Integer, Map<NotificationParticipant, List<Appointment>>> sent = new HashMap<Integer, Map<NotificationParticipant, List<Appointment>>>();
 
 	public AppointmentNotificationPool(TimerService timer,
 			NotificationMailGeneratorFactory generatorFactory,
@@ -166,6 +168,65 @@ public class AppointmentNotificationPool implements
 		}
 	}
 
+    @Override
+    public void aware(Appointment appointment, NotificationParticipant recipient, Session session) {
+        Map<NotificationParticipant, List<Appointment>> participants = sent.get(session.getContextId());
+        if (participants == null) {
+            participants = new HashMap<NotificationParticipant, List<Appointment>>();
+            sent.put(session.getContextId(), participants);
+        }
+        
+        List<Appointment> appointments = participants.get(recipient);
+        if (appointments == null) {
+            appointments = new ArrayList<Appointment>();
+            participants.put(recipient, appointments);
+        }
+        
+        appointments.remove(appointment); // Stops working, if equals() depends on more than the objectId
+        appointments.add(appointment);
+    }
+    
+    /**
+     * Searches for an Appointment about a recipient was already informed. Removes this appointments from memory.
+     * 
+     * @param participant
+     * @param appointment
+     * @param contextId
+     * @return The appointment, null if not found.
+     */
+    private Appointment removeFromSent(NotificationParticipant participant, Appointment appointment, int contextId) {
+        Map<NotificationParticipant, List<Appointment>> participants = sent.get(contextId);
+        if (participants == null) {
+            return null;
+        }
+        
+        List<Appointment> appointments = participants.get(participant);
+        if (appointments == null) {
+            return null;
+        }
+
+        Appointment retval = null;
+        for (Appointment app : appointments) {
+            if (app.getObjectID() == appointment.getObjectID()) {
+                retval = app;
+            }
+        }
+        appointments.remove(retval);
+        
+        if (appointments.isEmpty()) {
+            participants.remove(participant);
+        }
+        if (participants.isEmpty()) {
+            sent.remove(contextId);
+        }
+        
+        return retval;
+    }
+    
+    private void clearSentItems(int contextId) {
+        sent.remove(contextId);
+    }
+
 	private void tick(int contextId, int objectID, boolean force) {
 		try {
 			HandlingSuggestion handlingSuggestion = item(contextId, objectID).tick(force);
@@ -212,11 +273,13 @@ public class AppointmentNotificationPool implements
 	private void drop(int contextId, int objectID) {
 		Map<Integer, QueueItem> contextMap = items.get(contextId);
 		if (contextMap == null) {
+		    clearSentItems(contextId);
 			return;
 		}
 		contextMap.remove(objectID);
 		if (contextMap.isEmpty()) {
 			items.remove(contextId);
+            clearSentItems(contextId);
 		}
 	}
 
@@ -349,9 +412,12 @@ public class AppointmentNotificationPool implements
 			if (moreThanOneUserActed()) {
 				generator.noActor();
 			}
-			List<NotificationParticipant> recipients = generator
-					.getRecipients();
+			List<NotificationParticipant> recipients = generator.getRecipients();
 			for (NotificationParticipant participant : recipients) {
+                if (isAlreadyInformed(participant, mostRecent, session.getContextId())) {
+                    continue; // Skip this participant. He was already informed about the exact same Appointment.
+                }
+
 				NotificationMail mail = generator.generateUpdateMailFor(participant);
 				if (mail != null) {
 					notificationMailer.sendMail(mail, session);
@@ -368,12 +434,25 @@ public class AppointmentNotificationPool implements
             List<NotificationParticipant> recipients = generator.getRecipients();
             for (NotificationParticipant participant : recipients) {
                 if (!(participant.isExternal() || participant.isResource())) {
+                    if (isAlreadyInformed(participant, mostRecent, session.getContextId())) {
+                        continue; // Skip this participant. He was already informed about the exact same Appointment.
+                    }
+
                     NotificationMail mail = generator.generateUpdateMailFor(participant);
                     if (mail != null) {
                         notificationMailer.sendMail(mail, session);
                     }
                 }
             }
+        }
+        
+        private boolean isAlreadyInformed(NotificationParticipant participant, Appointment mostRecent, int contextId) {
+            Appointment alreadySent = removeFromSent(participant, mostRecent, contextId);
+            if (alreadySent != null) {
+                AppointmentDiff diff = AppointmentDiff.compare(alreadySent, mostRecent);
+                return diff.getDifferingFieldNames().isEmpty();
+            }
+            return false;
         }
 
 

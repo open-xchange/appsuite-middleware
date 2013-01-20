@@ -54,12 +54,22 @@ public class PoolingMailSenderService implements MailSenderService {
 				delegate.sendMail(mail, session);
 				return;
 			}
-
-			delegate.sendMail(mail, session);
+			poolAwareDirectSend(mail, session);
+			//delegate.sendMail(mail, session);
 
 		} catch (OXException x) {
 			LOG.error(x.getMessage(), x);
 		}
+	}
+	
+	/**
+	 * Sends the mail directly, but makes the aware of this to avoid duplicate Mails.
+	 * @param mail
+	 * @param session
+	 */
+	private void poolAwareDirectSend(NotificationMail mail, Session session) {
+	    pool.aware(mail.getAppointment(), mail.getRecipient(), session);
+	    delegate.sendMail(mail, session);
 	}
 
 

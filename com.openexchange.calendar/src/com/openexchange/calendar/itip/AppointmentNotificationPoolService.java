@@ -50,6 +50,7 @@
 package com.openexchange.calendar.itip;
 
 
+import com.openexchange.calendar.itip.generators.NotificationParticipant;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.session.Session;
@@ -66,4 +67,6 @@ public interface AppointmentNotificationPoolService {
     public void fasttrack(Appointment appointment, Session session) throws OXException;
 
     public void drop(Appointment appointment, Session session) throws OXException;
+
+    public void aware(Appointment appointment, NotificationParticipant recipient, Session session);
 }

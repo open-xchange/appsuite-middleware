@@ -8,6 +8,7 @@
 * 2013-01-20 - martin.herfurth@open-xchange.com
 
  - Fix for bug 24512: Fixed NPE.
+ - Fix for bug 21822: Duplicate invitation mails.
 
 * 2013-01-18 - thorben.betten@open-xchange.com
 
