@@ -159,9 +159,9 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             documentData = new BufferedInputStream(stream);
             final String userAgent = req.getHeader("user-agent");
-            if (SAVE_AS_TYPE.equals(contentType) || (delivery != null && delivery.equalsIgnoreCase(DOWNLOAD))) {
+            if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
                 final StringBuilder sb = new StringBuilder(32);
-                sb.append(isEmpty(contentDisposition) ? "attachment" : contentDisposition.trim());
+                sb.append(isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
                 DownloadUtility.appendFilenameParameter(file.getName(), null, userAgent, sb);
                 resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(contentType);
@@ -172,14 +172,14 @@ public class FileResponseRenderer implements ResponseRenderer {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     } else {
                         if (contentDisposition.indexOf(';') >= 0) {
-                            resp.setHeader("Content-Disposition", contentDisposition);
+                            resp.setHeader("Content-Disposition", checkedContentDisposition(contentDisposition.trim(), file));
                         } else {
                             final String disposition = checkedDownload.getContentDisposition();
                             final int pos = disposition.indexOf(';');
                             if (pos >= 0) {
-                                resp.setHeader("Content-Disposition", contentDisposition + disposition.substring(pos));
+                                resp.setHeader("Content-Disposition", checkedContentDisposition(contentDisposition.trim(), file) + disposition.substring(pos));
                             } else {
-                                resp.setHeader("Content-Disposition", contentDisposition);
+                                resp.setHeader("Content-Disposition", checkedContentDisposition(contentDisposition.trim(), file));
                             }
                         }
                     }
@@ -316,6 +316,24 @@ public class FileResponseRenderer implements ResponseRenderer {
         }    
     }
 
+    /**
+     * Checks specified <i>Content-Disposition</i> value against passed {@link IFileHolder file}.
+     * <p>
+     * E.g. <code>"inline"</code> is not allowed for <code>"text/html"</code> MIME type.
+     * 
+     * @param contentDisposition The <i>Content-Disposition</i> value to cehck
+     * @param file The file
+     * @return The checked <i>Content-Disposition</i> value
+     */
+    private String checkedContentDisposition(final String contentDisposition, final IFileHolder file) {
+        final String ct = toLowerCase(file.getContentType()); // null-safe
+        if (null == ct || ct.startsWith("text/htm")) {
+            final int pos = contentDisposition.indexOf(';');
+            return pos > 0 ? "attachment" + contentDisposition.substring(pos) : "attachment";
+        }
+        return contentDisposition;
+    }
+
     private boolean isImage(final IFileHolder file) {
         String contentType = file.getContentType();
         if (null == contentType || !contentType.startsWith("image/")) {
@@ -325,6 +343,19 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
         }
         return true;
+    }
+
+    private String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
     private boolean isEmpty(final String string) {
