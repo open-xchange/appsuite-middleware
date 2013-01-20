@@ -68,6 +68,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.Utils;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformations;
@@ -168,14 +169,14 @@ public class FileResponseRenderer implements ResponseRenderer {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     } else {
                         if (contentDisposition.indexOf(';') >= 0) {
-                            resp.setHeader("Content-Disposition", checkedContentDisposition(contentDisposition.trim(), file));
+                            resp.setHeader("Content-Disposition", contentDisposition.trim());
                         } else {
                             final String disposition = checkedDownload.getContentDisposition();
                             final int pos = disposition.indexOf(';');
                             if (pos >= 0) {
-                                resp.setHeader("Content-Disposition", checkedContentDisposition(contentDisposition.trim(), file) + disposition.substring(pos));
+                                resp.setHeader("Content-Disposition", contentDisposition.trim() + disposition.substring(pos));
                             } else {
-                                resp.setHeader("Content-Disposition", checkedContentDisposition(contentDisposition.trim(), file));
+                                resp.setHeader("Content-Disposition", contentDisposition.trim());
                             }
                         }
                     }
@@ -308,7 +309,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             return null;
         }
         final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
+        final StringAllocator builder = new StringAllocator(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

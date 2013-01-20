@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.helper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -57,9 +58,13 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlService;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.encoding.URLCoder;
@@ -205,21 +210,20 @@ public final class DownloadUtility {
             in = new CombinedInputStream(sequence, in);
         }
 
-//        if (contentType.startsWith("text/htm")) {
-//            try {
-//                // Sanitizing needed
-//                final ByteArrayOutputStream bytes = Streams.stream2ByteArrayOutputStream(in);
-//                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-//                final String cs = contentType.getCharsetParameter();
-//                String htmlContent = bytes.toString(CharsetDetector.isValid(cs) ? cs : null);
-//                htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
-//                
-//                
-//                
-//            } catch (IOException e) {
-//                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-//            }
-//        }
+        if (contentType.startsWith("text/htm")) {
+            try {
+                // Sanitizing of HTML content needed
+                final ByteArrayOutputStream bytes = Streams.stream2ByteArrayOutputStream(in);
+                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                final String cs = contentType.getCharsetParameter();
+                final boolean valid = CharsetDetector.isValid(cs);
+                String htmlContent = bytes.toString(valid ? cs : null);
+                htmlContent = htmlService.sanitize(htmlContent, null, true, new boolean[1], null);
+                in = Streams.newByteArrayInputStream(htmlContent.getBytes(valid ? Charsets.forName(cs) : Charsets.ISO_8859_1));
+            } catch (IOException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
+        }
 
         if (overridingDisposition == null) {
             final String baseType = contentType.getBaseType();
