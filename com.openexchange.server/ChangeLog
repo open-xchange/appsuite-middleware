@@ -1,6 +1,7 @@
 * 2013-01-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 24538: Added folder and account information to error messages where possible
+ - Fix for bug 24537: Changed category to let error message be displayed instead of default one
 
 * 2013-01-20 - martin.herfurth@open-xchange.com
 
