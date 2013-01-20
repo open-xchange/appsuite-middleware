@@ -1724,14 +1724,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     return result;
                 }
                 // Zero as comparison result AND primarily sorted by received-date
-                final String inReplyTo1 = o1.get(0).getInReplyTo();
-                final String inReplyTo2 = o2.get(0).getInReplyTo();
+                final MailMessage msg1 = o1.get(0);
+                final MailMessage msg2 = o2.get(0);
+                final String inReplyTo1 = msg1.getInReplyTo();
+                final String inReplyTo2 = msg2.getInReplyTo();
                 if (null == inReplyTo1) {
                     result = null == inReplyTo2 ? 0 : -1;
                 } else {
                     result = null == inReplyTo2 ? 1 : 0;
                 }
-                return 0 == result ? new MailMessageComparator(MailSortField.SENT_DATE, OrderDirection.DESC.equals(order), null).compare(o1.get(0), o2.get(0)) : result;
+                return 0 == result ? new MailMessageComparator(MailSortField.SENT_DATE, OrderDirection.DESC.equals(order), null).compare(msg1, msg2) : result;
             }
         };
         return listComparator;
