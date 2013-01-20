@@ -234,6 +234,7 @@ public final class Conversation {
     /**
      * Gets the messages.
      *
+     * @param comparator The comparator used for sorting listed messages
      * @return The messages with given sorting
      */
     public List<MailMessage> getMessages(final Comparator<MailMessage> comparator) {
