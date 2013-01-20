@@ -2,6 +2,7 @@
 
  - Fix for bug 24538: Added folder and account information to error messages where possible
  - Fix for bug 24537: Changed category to let error message be displayed instead of default one
+ - Fix for bug 24536: Transform "com.sun.mail.util.MessageRemovedIOException" orderly to a "Mail could not be found (MSG-0032)" message
 
 * 2013-01-20 - martin.herfurth@open-xchange.com
 
