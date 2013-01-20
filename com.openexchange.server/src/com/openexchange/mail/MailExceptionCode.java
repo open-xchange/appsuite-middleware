@@ -154,6 +154,10 @@ public enum MailExceptionCode implements OXExceptionCode {
      */
     MAIL_NOT_FOUND(MailExceptionStrings.MAIL_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 32),
     /**
+     * Mail could not be found
+     */
+    MAIL_NOT_FOUND_SIMPLE(MailExceptionStrings.MAIL_NOT_FOUND_SIMPLE_MSG, CATEGORY_USER_INPUT, 32),
+    /**
      * Action %1$s is not supported by %2$s
      */
     UNSUPPORTED_ACTION(MailExceptionStrings.UNSUPPORTED_ACTION_MSG, CATEGORY_ERROR, 33),

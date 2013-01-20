@@ -392,6 +392,9 @@ public final class MimeMessageConverter {
                             fos = null;
                             file = newTempFile;
                         } catch (final IOException e) {
+                            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                            }
                             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                         } finally {
                             Streams.close(fos);
@@ -401,6 +404,9 @@ public final class MimeMessageConverter {
                         mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file);
                         mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
                     } catch (final IOException e) {
+                        if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                        }
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     }
                 }
@@ -474,6 +480,9 @@ public final class MimeMessageConverter {
         } catch (final MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -511,6 +520,9 @@ public final class MimeMessageConverter {
         } catch (final MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -634,6 +646,9 @@ public final class MimeMessageConverter {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -1454,6 +1469,9 @@ public final class MimeMessageConverter {
                             ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                         mailMessage.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                     } catch (final IOException e) {
+                        if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                        }
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     }
                 }
@@ -1903,6 +1921,9 @@ public final class MimeMessageConverter {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }

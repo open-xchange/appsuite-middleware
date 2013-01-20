@@ -203,16 +203,13 @@ public final class MailMessageParser {
      */
 
     private boolean stop;
-
     private boolean multipartDetected;
-
     private InlineDetector inlineDetector;
-
     private String subject;
-
     private MimeFilter mimeFilter;
-
     private final List<OXException> warnings;
+    private String mailId;
+    private String folder;
 
     /**
      * Constructor
@@ -315,6 +312,8 @@ public final class MailMessageParser {
              * Parse mail's envelope
              */
             parseEnvelope(mail, handler);
+            mailId = mail.getMailId();
+            folder = mail.getFolder();
             /*
              * Parse content
              */
@@ -414,7 +413,7 @@ public final class MailMessageParser {
             }
         } else if (isText(lcct)) {
             if (isInline) {
-                final String content = readContent(mailPart, contentType);
+                final String content = readContent(mailPart, contentType, mailId, folder);
                 final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
                 if (uuencodedMP.isUUEncoded()) {
                     /*
@@ -478,7 +477,7 @@ public final class MailMessageParser {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
             if (isInline) {
-                if (!handler.handleInlineHtml(readContent(mailPart, contentType), contentType, size, fileName, mailPart.getSequenceId())) {
+                if (!handler.handleInlineHtml(readContent(mailPart, contentType, mailId, folder), contentType, size, fileName, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
@@ -959,7 +958,7 @@ public final class MailMessageParser {
         return getFileName(null, sequenceId, baseMimeType);
     }
 
-    private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
+    private static String readContent(final MailPart mailPart, final ContentType contentType, final String mailId, final String folder) throws OXException, IOException {
         if (false && is7BitTransferEncoding(mailPart) && (mailPart instanceof MimeRawSource)) {
             try {
                 final byte[] bytes = MessageUtility.getBytesFrom(((MimeRawSource) mailPart).getRawInputStream());
@@ -1027,6 +1026,11 @@ public final class MailMessageParser {
                     e);
             }
             return MessageUtility.readMailPart(mailPart, fallback);
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(e, mailId, folder);                
+            }
+            throw e;
         }
     }
 

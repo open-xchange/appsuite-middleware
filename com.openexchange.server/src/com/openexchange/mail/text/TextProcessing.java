@@ -271,6 +271,9 @@ public final class TextProcessing {
             final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
             return htmlService.html2text(html, true);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }

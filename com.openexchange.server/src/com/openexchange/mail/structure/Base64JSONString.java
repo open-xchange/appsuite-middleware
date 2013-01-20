@@ -94,6 +94,9 @@ public final class Base64JSONString implements JSONString {
                 out.write(buf, 0, read);
             }
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
             try {

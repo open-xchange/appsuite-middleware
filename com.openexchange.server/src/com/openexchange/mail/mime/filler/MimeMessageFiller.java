@@ -1137,6 +1137,9 @@ public class MimeMessageFiller {
         } catch (final ConverterException e) {
             throw MailExceptionCode.VERSIT_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -1965,6 +1968,9 @@ public class MimeMessageFiller {
             try {
                 return new MessageDataSource(data.getData(), contentType);
             } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         }

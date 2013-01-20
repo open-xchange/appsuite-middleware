@@ -447,6 +447,9 @@ public final class CompositeMailMessage extends MailMessage {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
