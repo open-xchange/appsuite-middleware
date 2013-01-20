@@ -205,6 +205,22 @@ public final class DownloadUtility {
             in = new CombinedInputStream(sequence, in);
         }
 
+//        if (contentType.startsWith("text/htm")) {
+//            try {
+//                // Sanitizing needed
+//                final ByteArrayOutputStream bytes = Streams.stream2ByteArrayOutputStream(in);
+//                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+//                final String cs = contentType.getCharsetParameter();
+//                String htmlContent = bytes.toString(CharsetDetector.isValid(cs) ? cs : null);
+//                htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
+//                
+//                
+//                
+//            } catch (IOException e) {
+//                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+//            }
+//        }
+
         if (overridingDisposition == null) {
             final String baseType = contentType.getBaseType();
             final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append("attachment");
