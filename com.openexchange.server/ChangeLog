@@ -1,3 +1,7 @@
+* 2013-01-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24538: Added folder and account information to error messages where possible
+
 * 2013-01-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 24531: Fixed UTF-8 encoding
