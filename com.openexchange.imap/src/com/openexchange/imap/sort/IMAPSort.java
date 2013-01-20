@@ -66,6 +66,7 @@ import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.command.MessageFetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
@@ -320,19 +321,17 @@ public final class IMAPSort {
         /*
          * Cast & return
          */
-        return ((long[]) imapFolder.doCommand(descending ? PROTCMD_SORT_DESC : PROTCMD_SORT_ASC));
+        return ((long[]) imapFolder.doCommand(new SORTProtocolCommand(descending, imapFolder)));
     }
-
-    private static final IMAPFolder.ProtocolCommand PROTCMD_SORT_ASC = new SORTProtocolCommand(false);
-
-    private static final IMAPFolder.ProtocolCommand PROTCMD_SORT_DESC = new SORTProtocolCommand(true);
 
     private static final class SORTProtocolCommand implements IMAPFolder.ProtocolCommand {
 
         private final boolean descending;
+        private final IMAPFolder imapFolder;
 
-        public SORTProtocolCommand(final boolean descending) {
+        public SORTProtocolCommand(final boolean descending, IMAPFolder imapFolder) {
             this.descending = descending;
+            this.imapFolder = imapFolder;
         }
 
         @Override
@@ -366,12 +365,12 @@ public final class IMAPSort {
                 throw new BadCommandException(IMAPException.getFormattedMessage(
                     IMAPException.Code.PROTOCOL_ERROR,
                     command,
-                    response.toString()));
+                    ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
             } else if (response.isNO()) {
                 throw new CommandFailedException(IMAPException.getFormattedMessage(
                     IMAPException.Code.PROTOCOL_ERROR,
                     command,
-                    response.toString()));
+                    ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
             } else {
                 p.handleResult(response);
             }
