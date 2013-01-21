@@ -111,54 +111,59 @@ public class PersonsAndTopicsAction extends AbstractIndexAction {
         final String searchTerm = req.checkParameter("searchTerm");
         final int maxPersons = req.optInt("maxPersons") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxPersons");
         final int maxTopics = req.optInt("maxTopics") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxTopics");
+        final boolean searchAttachments = req.optBoolean("searchAttachments", false);
+        final int maxAttachments = req.optInt("maxAttachments") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxAttachments");
         final IndexFacadeService indexFacade = getService(IndexFacadeService.class);
         
-        ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
-        Future<JSONArray> attachmentFuture = threadPoolService.submit(new Task<JSONArray>() {
-            @Override
-            public void setThreadName(ThreadRenamer threadRenamer) {}
+        Future<JSONArray> attachmentFuture = null;
+        if (searchAttachments) {
+            ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
+            attachmentFuture = threadPoolService.submit(new Task<JSONArray>() {
+                @Override
+                public void setThreadName(ThreadRenamer threadRenamer) {}
 
-            @Override
-            public void beforeExecute(Thread t) {}
+                @Override
+                public void beforeExecute(Thread t) {}
 
-            @Override
-            public void afterExecute(Throwable t) {}
+                @Override
+                public void afterExecute(Throwable t) {}
 
-            @Override
-            public JSONArray call() throws Exception {
-                IndexAccess<Attachment> indexAccess = indexFacade.acquireIndexAccess(Types.ATTACHMENT, session);
-                QueryParameters params = new QueryParameters.Builder()
-                    .setHandler(SearchHandler.PERSONS_AND_TOPICS)
-                    .setSearchTerm("osgi")
-                    .setLength(10)
-                    .build();
-                
-                IndexResult<Attachment> result = indexAccess.query(params, null);
-                List<IndexDocument<Attachment>> documents = result.getResults();
-                Set<String> attachments = new LinkedHashSet<String>();
-                for (IndexDocument<Attachment> document : documents) {
-                    Attachment attachment = document.getObject();
-                    Map<IndexField, List<String>> highlighting = document.getHighlighting();
-                    if (highlighting != null) {
-                        if (highlighting.containsKey(AttachmentIndexField.FILE_NAME) || highlighting.containsKey(AttachmentIndexField.CONTENT)) {
-                            String fileName = attachment.getFileName();
-                            if (fileName != null) {
-                                attachments.add(fileName);
+                @Override
+                public JSONArray call() throws Exception {
+                    IndexAccess<Attachment> indexAccess = indexFacade.acquireIndexAccess(Types.ATTACHMENT, session);
+                    QueryParameters params = new QueryParameters.Builder()
+                        .setHandler(SearchHandler.PERSONS_AND_TOPICS)
+                        .setSearchTerm(searchTerm)
+                        .setLength(maxAttachments)
+                        .build();
+                    
+                    IndexResult<Attachment> result = indexAccess.query(params, null);
+                    List<IndexDocument<Attachment>> documents = result.getResults();
+                    Set<String> attachments = new LinkedHashSet<String>();
+                    for (IndexDocument<Attachment> document : documents) {
+                        Attachment attachment = document.getObject();
+                        Map<IndexField, List<String>> highlighting = document.getHighlighting();
+                        if (highlighting != null) {
+                            if (highlighting.containsKey(AttachmentIndexField.FILE_NAME) || highlighting.containsKey(AttachmentIndexField.CONTENT)) {
+                                String fileName = attachment.getFileName();
+                                if (fileName != null) {
+                                    attachments.add(fileName);
+                                }
                             }
                         }
                     }
+                    
+                    JSONArray array = new JSONArray();
+                    for (String attachment : attachments) {
+                        JSONObject json = new JSONObject();
+                        json.put("value", attachment);
+                        array.put(json);
+                    }
+                    
+                    return array;
                 }
-                
-                JSONArray array = new JSONArray();
-                for (String attachment : attachments) {
-                    JSONObject json = new JSONObject();
-                    json.put("value", attachment);
-                    array.put(json);
-                }
-                
-                return array;
-            }
-        });
+            });
+        }
         
         IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
         QueryParameters params = new QueryParameters.Builder()
@@ -223,15 +228,16 @@ public class PersonsAndTopicsAction extends AbstractIndexAction {
         JSONObject resultObject = new JSONObject();
         resultObject.put("persons", personsArray);
         resultObject.put("topics", topicsArray);
-        
-        JSONArray attachmentsArray;
-        try {
-            attachmentsArray = attachmentFuture.get();
-            resultObject.put("attachments", attachmentsArray);
-        } catch (InterruptedException e) {
-            LOG.warn("Could not search for attachments", e);
-        } catch (ExecutionException e) {
-            LOG.warn("Could not search for attachments", e);
+
+        if (searchAttachments && attachmentFuture != null) {
+            try {
+                JSONArray attachmentsArray = attachmentFuture.get();
+                resultObject.put("attachments", attachmentsArray);
+            } catch (InterruptedException e) {
+                LOG.warn("Could not search for attachments", e);
+            } catch (ExecutionException e) {
+                LOG.warn("Could not search for attachments", e);
+            }
         }
         
         long diff = System.currentTimeMillis() - start;
