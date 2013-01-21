@@ -73,6 +73,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.osgi.StringTranslator;
@@ -229,6 +230,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             resp.getWriter().println("Publishing failed. Please try again later. Exception ID: " + x.getExceptionId());
 
         } catch (final Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             LOG.error(t.getMessage(), t);
             resp.getWriter().println("Publishing failed. Please try again later.");
         }
