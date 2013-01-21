@@ -50,6 +50,7 @@
 package com.openexchange.publish.microformats;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -223,8 +224,9 @@ public class MicroformatServlet extends OnlinePublicationServlet {
                 //html = htmlService.getConformHTML(html, Charset.defaultCharset().toString());
                 html = htmlService.sanitize(html, "microformatWhitelist", false, null, null);
             }
-            resp.getWriter().write(html);
-
+            final PrintWriter writer = resp.getWriter();
+            writer.write(html);
+            writer.flush();
         } catch (final OXException x) {
             LOG.error(x.getMessage(), x);
             resp.getWriter().println("Publishing failed. Please try again later. Exception ID: " + x.getExceptionId());
