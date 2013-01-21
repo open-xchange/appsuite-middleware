@@ -62,7 +62,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -70,6 +69,8 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.templating.TemplateErrorMessage;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -185,13 +186,8 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
             LOG.error(e.getMessage(), e);
             throw TemplateErrorMessage.IOException.create(e);
         } finally {
-            if(reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                }
-            }
-            if(iterator != null){
+            Streams.close(reader);
+            if (iterator != null){
                 iterator.close();
             }
         }

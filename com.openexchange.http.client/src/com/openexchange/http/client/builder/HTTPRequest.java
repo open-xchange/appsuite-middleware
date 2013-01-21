@@ -6,8 +6,8 @@ import com.openexchange.exception.OXException;
 
 public interface HTTPRequest {
 	public HTTPResponse execute() throws OXException;
-	
+
 	public Map<String, String> getHeaders();
 	public Map<String, String> getParameters();
-	
+
 }

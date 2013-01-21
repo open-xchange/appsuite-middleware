@@ -67,8 +67,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Properties;
-import com.mysql.jdbc.MySQLConnection;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -76,6 +74,8 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import com.mysql.jdbc.MySQLConnection;
+import com.openexchange.java.Streams;
 
 /**
  * This is a simple Tool to get an idea how a specific installation of Open-Xchange is used. Operating on the MySQL-database exclusively it
@@ -417,12 +417,13 @@ public class Datamining {
     }
 
     private static void printReport() {
+        FileOutputStream fos = null;
+        OutputStreamWriter out = null;
         try {
-            FileOutputStream fos = new FileOutputStream(reportfilePath + filename);
-            OutputStreamWriter out = new OutputStreamWriter(fos, "UTF-8");
+            fos = new FileOutputStream(reportfilePath + filename);
+            out = new OutputStreamWriter(fos, "UTF-8");
             out.write(reportStringBuilder.toString());
-            out.close();
-            fos.close();
+            out.flush();
             System.out.println("report written to this file : " + reportfilePath + filename);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -430,6 +431,8 @@ public class Datamining {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            Streams.close(out, fos);
         }
     }
 

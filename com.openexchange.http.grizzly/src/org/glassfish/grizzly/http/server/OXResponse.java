@@ -65,7 +65,7 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
 /**
  * {@link OXResponse} OX specific additions to the Grizzly Response like altered cookie handling and absolute/relative redirects respecting
  * forced https.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class OXResponse extends Response {
@@ -74,7 +74,7 @@ public class OXResponse extends Response {
 
     /**
      * Do OX specific cookie handling before adding the cookie via {@link Response#addCookie(Cookie)}.
-     * 
+     *
      * @param cookie The cookie to configure and add to the Response
      */
     @Override
@@ -87,7 +87,7 @@ public class OXResponse extends Response {
 
     /**
      * Send a temporary redirect to the specified redirect location URL.
-     * 
+     *
      * @param location Location URL to redirect to
      * @exception IllegalStateException if this response has already been committed
      * @exception java.io.IOException if an input/output error occurs
@@ -95,8 +95,9 @@ public class OXResponse extends Response {
     @Override
     public void sendRedirect(String location) throws IOException {
 
-        if (isCommitted())
+        if (isCommitted()) {
             throw new IllegalStateException("Illegal attempt to redirect the response as the response has been committed.");
+        }
 
         // Clear any data content that has been buffered
         resetBuffer();
@@ -153,7 +154,7 @@ public class OXResponse extends Response {
     /**
      * Convert (if necessary) and return the absolute URL that represents the resource referenced by this possibly relative URL. If this URL
      * is already absolute, return it unchanged.
-     * 
+     *
      * @param location URL to be (possibly) converted and then returned
      * @exception IllegalArgumentException if a MalformedURLException is thrown when converting the relative URL to an absolute one
      */
@@ -161,8 +162,9 @@ public class OXResponse extends Response {
     @Override
     protected String toAbsolute(String location, boolean normalize) {
 
-        if (location == null)
+        if (location == null) {
             return (location);
+        }
 
         boolean leadingSlash = location.startsWith("/");
 

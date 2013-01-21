@@ -158,7 +158,7 @@ public final class DownloadUtility {
                 if (msieOnWindows && 8F > browserDetector.getBrowserVersion()) {
                     /*-
                      * Image content requested by Internet Explorer < v8
-                     * 
+                     *
                      * Get first 256 bytes
                      */
                     byte[] sequence = new byte[256];

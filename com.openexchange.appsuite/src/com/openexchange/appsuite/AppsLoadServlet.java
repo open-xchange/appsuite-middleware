@@ -71,7 +71,7 @@ import com.openexchange.java.Strings;
 
 /**
  * {@link AppsLoadServlet} - Provides App Suite data for loading applciations.
- * 
+ *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class AppsLoadServlet extends HttpServlet {
@@ -257,7 +257,7 @@ public class AppsLoadServlet extends HttpServlet {
 
     /**
      * Checks, whether the child directory is a sub-directory of the base directory.
-     * 
+     *
      * @param base The base directory.
      * @param child The suspected child directory.
      * @return <code>true</code> if the child is a sub-directory of the base directory.

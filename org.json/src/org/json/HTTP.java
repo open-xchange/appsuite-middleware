@@ -35,15 +35,15 @@ public class HTTP {
 
     /** Carriage return/line feed. */
     public static final String CRLF = "\r\n";
-    
+
     private static final String HEADER_HTTP_VERSION = "HTTP-Version";
-    
+
     private static final String HEADER_STATUS_CODE = "Status-Code";
-    
+
     private static final String HEADER_REASON_PHRASE = "Reason-Phrase";
-    
+
     private static final String HEADER_METHOD = "Method";
-    
+
     private static final String HEADER_REQ_URI = "Request-URI";
 
     /**

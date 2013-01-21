@@ -55,7 +55,7 @@ import com.openexchange.publish.Publication;
 
 /**
  * {@link Hostname} - Provides the host name for a given publication.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Hostname {
@@ -64,7 +64,7 @@ public class Hostname {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static Hostname getInstance() {
@@ -85,7 +85,7 @@ public class Hostname {
 
     /**
      * Gets the host name for given publication.
-     * 
+     *
      * @param pub The publication
      * @return The associated host name
      */
@@ -102,7 +102,7 @@ public class Hostname {
 
     /**
      * Sets the host name service.
-     * 
+     *
      * @param hostnameService The service
      */
     public void setHostnameService(final HostnameService hostnameService) {

@@ -82,6 +82,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -238,10 +239,7 @@ public final class AJAXFile extends PermissionServlet {
                 }
                 out.flush();
             } finally {
-                if (contentInputStream != null) {
-                    contentInputStream.close();
-                    contentInputStream = null;
-                }
+                Streams.close(contentInputStream);
             }
         } catch (final UploadException e) {
             LOG.error(e.getMessage(), e);

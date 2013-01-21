@@ -86,6 +86,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.java.Streams;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -235,11 +236,7 @@ public abstract class ICalDataHandler implements DataHandler {
         try {
             return iCalParser.parseAppointments(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings);
         } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                LOG.error("Error closing input stream", e);
-            }
+            Streams.close(inputStream);
         }
     }
 
@@ -248,11 +245,7 @@ public abstract class ICalDataHandler implements DataHandler {
         try {
             return iCalParser.parseTasks(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings);
         } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                LOG.error("Error closing input stream", e);
-            }
+            Streams.close(inputStream);
         }
     }
 
@@ -335,13 +328,7 @@ public abstract class ICalDataHandler implements DataHandler {
                     }
                     out.flush();
                 } finally {
-                    if (out != null) {
-                        try {
-                            out.close();
-                        } catch (final IOException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
+                    Streams.close(out);
                 }
                 file = tmpFile;
             }

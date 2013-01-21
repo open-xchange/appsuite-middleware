@@ -26,9 +26,9 @@ package org.xerial.snappy;
 
 /**
  * Error codes of snappy-java
- * 
+ *
  * @author leo
- * 
+ *
  */
 public enum SnappyErrorCode {
 

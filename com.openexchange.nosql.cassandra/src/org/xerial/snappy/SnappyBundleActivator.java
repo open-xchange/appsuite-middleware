@@ -54,25 +54,25 @@ import org.osgi.framework.BundleContext;
 
 /**
  * OSGi bundle entry point
- * 
+ *
  * @author Ioannis Chouklis
  * @deprecated For OX use {@link com.openexchange.nosql.cassandra.osgi.CassandraActivator}
  */
 @Deprecated
 public class SnappyBundleActivator implements BundleActivator {
-	
+
 	private static Log log = com.openexchange.log.Log.loggerFor(SnappyBundleActivator.class);
 
 	@Override
     public void start(BundleContext context) throws Exception {
     	log.info("starting snappy bundle");
     	//System.loadLibrary("libsnappyjava");
-    	
+
     	String osName = System.getProperty("os.name");
     	String osArch = System.getProperty("os.arch");
     	String fileSeparator = System.getProperty("file.separator");
     	log.info(osName + " " + osArch);
-    	
+
     	/*if (osName.equals("Linux")) {
     		if (osArch.equals("amd64")) {
     			System.load("Linux/amd64/libsnappyjava.so");
@@ -82,16 +82,16 @@ public class SnappyBundleActivator implements BundleActivator {
     			log.error("Unsupported system");
     		}
     	}*/
-    	
+
     	//System.load(osName + "/" + osArch + "/libsnappyjava.so");
-    	
+
     	//System.load("/home/isole/Downloads/snappy-java-1.0.4.1/target/snappy-1.0.4-Linux-amd64/libsnappyjava.so");
     	System.load(fileSeparator + "tmp" + fileSeparator + "SNAPPY" + fileSeparator + "native"  + fileSeparator + osName + fileSeparator + osArch + fileSeparator + "libsnappyjava.so");
     }
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		// Nothing to do
-		
+
 	}
 
 

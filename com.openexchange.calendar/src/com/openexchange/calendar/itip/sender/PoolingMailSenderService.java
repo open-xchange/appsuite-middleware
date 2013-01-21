@@ -61,7 +61,7 @@ public class PoolingMailSenderService implements MailSenderService {
 			LOG.error(x.getMessage(), x);
 		}
 	}
-	
+
 	/**
 	 * Sends the mail directly, but makes the aware of this to avoid duplicate Mails.
 	 * @param mail

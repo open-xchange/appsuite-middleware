@@ -71,7 +71,7 @@ import com.openexchange.solr.SolrMBean;
 
 /**
  * {@link SolrMonitoringCLT}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrMonitoringCLT {
@@ -81,7 +81,7 @@ public class SolrMonitoringCLT {
     public static void main(String[] args) {
         System.exit(listCores(args));
     }
-    
+
     private static int listCores(String[] args) {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
@@ -89,26 +89,26 @@ public class SolrMonitoringCLT {
         CommandLineParser parser = new PosixParser();
         JMXConnector jmxConnector = null;
         try {
-            CommandLine cmd = parser.parse(options, args, true);            
+            CommandLine cmd = parser.parse(options, args, true);
             if (cmd.hasOption('h')) {
                 printHelp(options);
                 return 0;
             }
-            
+
             JMXServiceURL url = new JMXServiceURL(JMX_URL);
             jmxConnector = JMXConnectorFactory.connect(url, null);
             MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
             SolrMBean solrMBean = solrMBeanProxy(mbsc);
             List<String> activeCores = solrMBean.getActiveCores();
             System.out.println("Number of active Solr Cores: " + activeCores.size());
-            
+
             if (cmd.hasOption('d')) {
                 System.out.println();
                 for (String core : activeCores) {
                     System.out.println("    " + core);
                 }
             }
-            
+
             return 0;
         } catch (MBeanException e) {
             System.out.println(e.getMessage());
@@ -135,7 +135,7 @@ public class SolrMonitoringCLT {
             }
         }
     }
-    
+
     private static void printHelp(Options options) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("listactivesolrcores", "Lists the number of Solr Cores that are active on this node.", options, null, false);

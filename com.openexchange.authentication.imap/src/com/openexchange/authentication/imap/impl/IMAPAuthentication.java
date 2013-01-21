@@ -74,6 +74,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
@@ -386,13 +387,7 @@ public class IMAPAuthentication implements AuthenticationService {
                 } catch (final IOException e) {
                     throw com.openexchange.configuration.ConfigurationExceptionCodes.NOT_READABLE.create(file.getAbsolutePath());
                 } finally {
-                    if (null != fis) {
-                        try {
-                            fis.close();
-                        } catch (final IOException e) {
-                            LOG.error("Error closing file inputstream for file " + IMAP_AUTH_PROPERTY_FILE + " ", e);
-                        }
-                    }
+                    Streams.close(fis);
                 }
             }
         }

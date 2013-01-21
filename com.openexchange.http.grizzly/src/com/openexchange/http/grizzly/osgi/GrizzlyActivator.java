@@ -163,7 +163,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 }
                 networkListener.registerAddOn(new AjpAddOn());
             }
-            
+
             TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport();
             networkListener.setTransport(configuredTcpNioTransport);
 

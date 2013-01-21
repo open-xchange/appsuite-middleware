@@ -18,5 +18,5 @@ public class ApacheDeleteRequestBuilder extends CommonApacheHTTPRequest<HTTPDele
 		return new DeleteMethod(encodedSite);
 	}
 
-	
+
 }

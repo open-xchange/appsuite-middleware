@@ -60,7 +60,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.dataRetrieval.Constants;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
@@ -68,6 +67,8 @@ import com.openexchange.groupware.dataRetrieval.FileMetadata;
 import com.openexchange.groupware.dataRetrieval.config.Configuration;
 import com.openexchange.groupware.dataRetrieval.registry.DataProviderRegistry;
 import com.openexchange.groupware.dataRetrieval.services.Services;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
@@ -150,9 +151,7 @@ public class FileDeliveryServlet extends HttpServlet {
                 count++;
             }
         } finally {
-            in.close();
-            out.close();
-
+            Streams.close(in, out);
         }
 
         resp.setContentLength(count);

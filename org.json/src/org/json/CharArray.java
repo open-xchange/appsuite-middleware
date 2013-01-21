@@ -53,7 +53,7 @@ import java.util.Arrays;
 
 /**
  * {@link CharArray} - Represents a character array.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CharArray implements ICharArray {
@@ -97,22 +97,27 @@ public class CharArray implements ICharArray {
         }
     }
 
+    @Override
     public void reset() {
         pos = 0;
     }
 
+    @Override
     public int capacity() {
         return chars.length;
     }
 
+    @Override
     public int remainingCapacity() {
         return chars.length - pos;
     }
 
+    @Override
     public int length() {
         return pos;
     }
 
+    @Override
     public char charAt(final int index) {
         if (index < 0 || index >= pos) {
             throw new IndexOutOfBoundsException(Integer.toString(index));
@@ -120,6 +125,7 @@ public class CharArray implements ICharArray {
         return chars[index];
     }
 
+    @Override
     public CharSequence subSequence(final int start, final int end) {
         if (start < 0) {
             throw new StringIndexOutOfBoundsException(start);
@@ -135,11 +141,13 @@ public class CharArray implements ICharArray {
         return new CharArray(chars);
     }
 
+    @Override
     public void copyTo(final CharArray other) {
         other.reset();
         System.arraycopy(this.chars, 0, other.chars, 0, pos);
     }
 
+    @Override
     public void copyFrom(final CharArray other) {
         reset();
         final int otherLen = other.pos;
@@ -179,6 +187,6 @@ public class CharArray implements ICharArray {
         }
         return true;
     }
-    
+
 
 }

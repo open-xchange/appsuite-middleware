@@ -57,7 +57,7 @@ import com.openexchange.capabilities.json.CapabilityActionFactory;
 
 /**
  * {@link CapabilitiesJSONActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CapabilitiesJSONActivator extends AJAXModuleActivator {

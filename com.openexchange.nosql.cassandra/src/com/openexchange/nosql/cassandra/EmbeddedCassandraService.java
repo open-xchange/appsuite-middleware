@@ -54,15 +54,15 @@ import org.apache.commons.logging.Log;
 
 /**
  * An embedded Cassandra instance for OX.
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class EmbeddedCassandraService {
-	
+
 	private static Log log = com.openexchange.log.Log.loggerFor(EmbeddedCassandraService.class);
 
 	private CassandraDaemon cassandraDaemon;
-	
+
 	public void init() {
 		cassandraDaemon = new CassandraDaemon();
 		try {
@@ -74,14 +74,14 @@ public class EmbeddedCassandraService {
 			t.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * start the daemon
 	 */
 	public void start() {
 		cassandraDaemon.start();
 	}
-	
+
 	/**
 	 * stop the daemon
 	 */

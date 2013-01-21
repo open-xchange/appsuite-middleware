@@ -310,7 +310,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
@@ -366,7 +366,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 return part.getInputStream();
             } catch (final IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(
@@ -488,7 +488,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
@@ -572,7 +572,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -861,7 +861,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
             } catch (final IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }

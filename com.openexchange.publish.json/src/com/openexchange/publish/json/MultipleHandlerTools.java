@@ -55,7 +55,7 @@ import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * {@link MultipleHandlerTools}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MultipleHandlerTools {

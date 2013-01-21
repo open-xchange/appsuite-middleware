@@ -183,7 +183,7 @@ public final class GetAttachmentAction extends SnippetAction implements ETagAwar
                 }
                 out.flush();
             } finally {
-                attachmentInputStream.close();
+                Streams.close(attachmentInputStream);
             }
             /*
              * Create file holder

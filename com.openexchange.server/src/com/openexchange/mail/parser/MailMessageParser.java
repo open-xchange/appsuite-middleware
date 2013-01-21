@@ -1028,7 +1028,7 @@ public final class MailMessageParser {
             return MessageUtility.readMailPart(mailPart, fallback);
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND.create(e, mailId, folder);                
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(e, mailId, folder);
             }
             throw e;
         }
