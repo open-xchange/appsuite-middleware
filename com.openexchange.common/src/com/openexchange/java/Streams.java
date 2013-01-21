@@ -97,7 +97,7 @@ public class Streams {
     }
 
     /**
-     * Converts specified input stream to a <code>ByteArrayOutputStream</code> array.
+     * Writes specified input stream's content to a <code>ByteArrayOutputStream</code> array.
      *
      * @param is The input stream to read from
      * @return A newly created <code>byte</code> array carrying input stream's bytes.
