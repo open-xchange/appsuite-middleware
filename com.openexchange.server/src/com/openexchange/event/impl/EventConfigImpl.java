@@ -55,8 +55,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link EventConfigImpl}
@@ -102,11 +103,7 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
             try {
                 prop.load(in);
             } finally {
-                try {
-                    in.close();
-                } catch (final IOException e) {
-                    LOG.error("Cannot close input stream.", e);
-                }
+                Streams.close(in);
             }
         } catch (final FileNotFoundException exc) {
             LOG.error("Cannot find propfile: " + propfile, exc);

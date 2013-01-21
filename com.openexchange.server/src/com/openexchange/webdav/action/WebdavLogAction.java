@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -148,14 +149,8 @@ public class WebdavLogAction extends AbstractAction {
 				}
 			} catch (final IOException x) {
 				LOG.debug("",x);
-			}finally {
-				if(reader != null) {
-					try {
-						reader.close();
-					} catch (final IOException x2) {
-						LOG.debug("",x2);
-					}
-				}
+			} finally {
+			    Streams.close(reader);
 			}
 		}
 	}

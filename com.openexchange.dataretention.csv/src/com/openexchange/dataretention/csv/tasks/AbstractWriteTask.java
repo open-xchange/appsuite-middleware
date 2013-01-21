@@ -65,6 +65,7 @@ import com.openexchange.dataretention.RetentionData;
 import com.openexchange.dataretention.csv.CSVFile;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 
 /**
@@ -257,11 +258,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
             fos.write(Charsets.toAsciiBytes(csvLine));
             fos.flush();
         } finally {
-            try {
-                fos.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(fos);
         }
     }
 
