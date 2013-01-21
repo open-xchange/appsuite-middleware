@@ -51,16 +51,23 @@ package com.openexchange.publish.json;
 
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.THROWABLE;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * {@link MultipleHandlerTools}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class MultipleHandlerTools {
+
+    /**
+     * Wraps given {@code Throwable} to an appropriate {@code OXException}.
+     *
+     * @param t The {@code Throwable}
+     * @return The {@code OXException} wrapper
+     */
     public static OXException wrapThrowable(Throwable t) {
+        ExceptionUtils.handleThrowable(t);
         return THROWABLE.create(t, t.getMessage());
     }
 }
