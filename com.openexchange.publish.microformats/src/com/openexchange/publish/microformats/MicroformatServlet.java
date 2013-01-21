@@ -173,15 +173,18 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
             final OXMFPublicationService publisher = publishers.get(module);
             if (publisher == null) {
-                resp.getWriter().println("Don't know how to handle module " + module);
+                final PrintWriter writer = resp.getWriter();
+                writer.println("Don't know how to handle module " + module);
+                writer.flush();
                 return;
             }
             final Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
             final Publication publication = publisher.getPublication(ctx, args.get(SITE));
             if (publication == null || !publication.isEnabled()) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                resp.getWriter().println("Don't know site " + args.get(SITE));
-
+                final PrintWriter writer = resp.getWriter();
+                writer.println("Don't know site " + args.get(SITE));
+                writer.flush();
                 return;
             }
             if (!checkProtected(publication, args, resp)) {
@@ -229,12 +232,15 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             writer.flush();
         } catch (final OXException x) {
             LOG.error(x.getMessage(), x);
-            resp.getWriter().println("Publishing failed. Please try again later. Exception ID: " + x.getExceptionId());
-
+            final PrintWriter writer = resp.getWriter();
+            writer.println("Publishing failed. Please try again later. Exception ID: " + x.getExceptionId());
+            writer.flush();
         } catch (final Throwable t) {
             ExceptionUtils.handleThrowable(t);
             LOG.error(t.getMessage(), t);
-            resp.getWriter().println("Publishing failed. Please try again later.");
+            final PrintWriter writer = resp.getWriter();
+            writer.println("Publishing failed. Please try again later.");
+            writer.flush();
         }
     }
 
