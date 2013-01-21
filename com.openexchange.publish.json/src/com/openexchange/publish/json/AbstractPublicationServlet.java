@@ -60,14 +60,19 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link AbstractPublicationServlet}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public abstract class AbstractPublicationServlet extends PermissionServlet{
+public abstract class AbstractPublicationServlet extends PermissionServlet {
+
+    /**
+     * Initializes a new {@link AbstractPublicationServlet}.
+     */
+    protected AbstractPublicationServlet() {
+        super();
+    }
 
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
