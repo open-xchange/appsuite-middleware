@@ -49,68 +49,22 @@
 
 package com.openexchange.index.solr;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import junit.framework.TestCase;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.index.AccountFolders;
-import com.openexchange.index.IndexResult;
+import org.apache.solr.client.solrj.SolrQuery;
+import com.openexchange.exception.OXException;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
-import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.solr.internal.infostore.SolrDocumentMetadata;
-import com.openexchange.index.solr.internal.infostore.SolrInfostoreIndexAccess;
+import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
 
 
 /**
- * {@link SolrFilestoreIndexAccessTest}
+ * {@link MockQueryBuilder}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrFilestoreIndexAccessTest extends TestCase {
-
-    private SolrInfostoreIndexAccess indexAccess;
-
+public class MockQueryBuilder implements SolrQueryBuilder {
 
     @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        indexAccess = new MockSolrFilestoreIndexAccess();
-    }
-
-    public void testAddDocument() throws Exception {
-        DocumentMetadata file = new SolrDocumentMetadata();
-        file.setCategories("Ene mene muh");
-        file.setColorLabel(3);
-        file.setCreationDate(new GregorianCalendar(2005, 3, 12, 17, 24, 43).getTime());
-        file.setCreatedBy(5);
-        file.setDescription("This is the description");
-        file.setFileMD5Sum("234345645mlml4k5");
-        file.setFileMIMEType("text/html");
-        file.setFileName("A_file_name.html");
-        file.setFileSize(33456L);
-        file.setFolderId(1234L);
-        file.setId(4352);
-        file.setLastModified(new Date());
-        file.setModifiedBy(16);
-        file.setTitle("I am the title, man...");
-        file.setURL("http://some.where");
-        file.setVersion(26);
-        file.setVersionComment("Version comment...");
-
-        StandardIndexDocument<DocumentMetadata> document = new StandardIndexDocument<DocumentMetadata>(file);
-//        document.setProperties(parameters);
-        indexAccess.addDocument(document);
-
-        QueryParameters query = new QueryParameters.Builder().setHandler(SearchHandler.ALL_REQUEST).setAccountFolders(Collections.singleton(new AccountFolders("sada689"))).build();
-        IndexResult<DocumentMetadata> result = indexAccess.query(query, null);
-        assertTrue("Wrong result size", result.getNumFound() == 1);
-        DocumentMetadata reloaded = result.getResults().get(0).getObject();
-        // FIXME: calc differences
-//        Set<DocumentMetadata> differences = file.differences(reloaded);
-//        assertTrue("There were differences.", differences.size() == 0);
-        fail("FIXME!");
+    public SolrQuery buildQuery(QueryParameters params) throws OXException {
+        return new SolrQuery();
     }
 
 }

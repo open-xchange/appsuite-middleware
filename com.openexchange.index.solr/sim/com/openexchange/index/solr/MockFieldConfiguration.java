@@ -49,28 +49,52 @@
 
 package com.openexchange.index.solr;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import java.util.Set;
+import com.openexchange.index.IndexField;
+import com.openexchange.index.solr.internal.FieldConfiguration;
 
 
 /**
- * {@link UnitTests}
+ * {@link MockFieldConfiguration}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    ModuleSetTest.class,
-    SimpleConfigurationTest.class,
-    SolrAttachmentSearchTermVisitorTest.class,
-    SolrIndexFacadeTest.class,
-    SimpleQueryBuilderTest.class,
-    MailSolrIndexAccessTest.class,
-    AddressComparatorTest.class,
-    XMLBasedFieldConfigurationTest.class
-})
+public class MockFieldConfiguration implements FieldConfiguration {
 
-public class UnitTests {
+    @Override
+    public boolean isLocalized(IndexField indexField) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Set<String> getSolrFields(IndexField indexField) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Set<? extends IndexField> getIndexedFields() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getUUIDField() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public IndexField getIndexField(String solrField) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getRawField(IndexField indexField) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }
