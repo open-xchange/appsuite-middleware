@@ -75,6 +75,8 @@ import com.openexchange.index.IndexProperties;
 import com.openexchange.index.solr.ModuleSet;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentIndexAccess;
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
+import com.openexchange.index.solr.internal.config.XMLBasedFieldConfiguration;
 import com.openexchange.index.solr.internal.infostore.SolrInfostoreIndexAccess;
 import com.openexchange.index.solr.internal.mail.SolrMailIndexAccess;
 import com.openexchange.index.solr.internal.querybuilder.BuilderException;

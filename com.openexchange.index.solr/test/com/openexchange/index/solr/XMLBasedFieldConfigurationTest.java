@@ -51,8 +51,15 @@ package com.openexchange.index.solr;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Set;
+import junit.framework.Assert;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import com.openexchange.index.solr.internal.XMLBasedFieldConfiguration;
+import com.openexchange.index.IndexField;
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
+import com.openexchange.index.solr.internal.config.XMLBasedFieldConfiguration;
+import com.openexchange.mail.index.MailIndexField;
 
 
 /**
@@ -146,19 +153,14 @@ public class XMLBasedFieldConfigurationTest {
     		"        <!-- Common Fields -->\n" + 
     		"        <field name=\"uuid\" type=\"string\" stored=\"true\" indexed=\"true\" oxIndexField=\"com.openexchange.mail.index.MailIndexField.UUID\" />\n" + 
     		"\n" + 
-    		"        <field name=\"subject\" type=\"text\" stored=\"false\" indexed=\"false\" oxIndexField=\"com.openexchange.index.solr.NoEnum.VALUE\" />\n" + 
-    		"        <field name=\"subject_gen\" type=\"text\" stored=\"true\" indexed=\"true\" oxIndexField=\"com.openexchange.index.solr.NoEnumAtAll\" />\n" + 
+    		"        <field name=\"subject\" type=\"text\" stored=\"false\" indexed=\"false\" oxIndexField=\"com.openexchange.mail.index.MailIndexField.SUBJECT\" />\n" + 
+    		"        <field name=\"subject_gen\" type=\"text\" stored=\"true\" indexed=\"true\" />\n" + 
     		"        <field name=\"subject_de\" type=\"text_de\" stored=\"true\" indexed=\"true\" />\n" + 
     		"        <field name=\"subject_en\" type=\"text_en\" stored=\"true\" indexed=\"true\" />\n" + 
     		"        <field name=\"subject_fr\" type=\"text_fr\" stored=\"true\" indexed=\"true\" />\n" + 
     		"        <field name=\"subject_it\" type=\"text_it\" stored=\"true\" indexed=\"true\" />\n" + 
     		"        \n" + 
-    		"        <field name=\"content\" type=\"text\" stored=\"false\" indexed=\"false\" />  \n" + 
-    		"        <field name=\"content_gen\" type=\"text\" stored=\"false\" indexed=\"true\" />\n" + 
-    		"        <field name=\"content_de\" type=\"text_de\" stored=\"false\" indexed=\"true\" />\n" + 
-    		"        <field name=\"content_en\" type=\"text_en\" stored=\"false\" indexed=\"true\" />\n" + 
-    		"        <field name=\"content_fr\" type=\"text_fr\" stored=\"false\" indexed=\"true\" />\n" + 
-    		"        <field name=\"content_it\" type=\"text_it\" stored=\"false\" indexed=\"true\" /> \n" + 
+    		"        <field name=\"no_enum\" type=\"text\" stored=\"false\" indexed=\"true\" oxIndexField=\"com.openexchange.index.solr.NoEnum.VALUE\" /> \n" + 
     		"        \n" + 
     		"        <field name=\"locale\" type=\"string\" stored=\"true\" indexed=\"false\" />\n" + 
     		"    </fields>\n" + 
@@ -169,10 +171,16 @@ public class XMLBasedFieldConfigurationTest {
     		"</schema>\n" + 
     		"";
     
-    @Test
-    public void testConfiguration() throws Exception {
-        File configFile = File.createTempFile("solrTestConfig", "xml");
-        File schemaFile = File.createTempFile("solrTestSchema", "xml");
+    private static FieldConfiguration config;
+
+    private static File configFile;
+
+    private static File schemaFile;
+    
+    @BeforeClass
+    public static void setUp() throws Exception {
+        configFile = File.createTempFile("solrTestConfig", "xml");
+        schemaFile = File.createTempFile("solrTestSchema", "xml");
         
         FileWriter fw = new FileWriter(configFile);
         fw.write(SOLR_CONFIG);
@@ -184,7 +192,69 @@ public class XMLBasedFieldConfigurationTest {
         fw.flush();
         fw.close();
         
-        XMLBasedFieldConfiguration config = new XMLBasedFieldConfiguration(configFile.getAbsolutePath(), schemaFile.getAbsolutePath());
+        config = new XMLBasedFieldConfiguration(configFile.getAbsolutePath(), schemaFile.getAbsolutePath());
+    }
+    
+    @AfterClass
+    public static void tearDown() throws Exception {
+        if (configFile != null) {
+            configFile.delete();
+        }
+        
+        if (schemaFile != null) {
+            schemaFile.delete();
+        }
+    }
+    
+    @Test
+    public void testGetIndexedFields() throws Exception {
+        Set<? extends IndexField> indexedFields = config.getIndexedFields();
+        Assert.assertEquals("Wrong number of indexed fields", 2, indexedFields.size());
+        Assert.assertTrue("Missing field uuid", indexedFields.contains(MailIndexField.UUID));
+        Assert.assertTrue("Missing field subject", indexedFields.contains(MailIndexField.SUBJECT));
+    }
+    
+    @Test
+    public void testIsLocalized() throws Exception {
+        Assert.assertTrue(config.isLocalized(MailIndexField.SUBJECT));
+        Assert.assertFalse(config.isLocalized(MailIndexField.UUID));
+    }
+    
+    @Test
+    public void testGetSolrFields() throws Exception {
+        Set<String> solrFields = config.getSolrFields(MailIndexField.UUID);
+        Assert.assertTrue(solrFields.size() == 1);
+        Assert.assertEquals("uuid", solrFields.iterator().next());
+        
+        solrFields = config.getSolrFields(MailIndexField.SUBJECT);
+        Assert.assertTrue(solrFields.size() == 5);
+        Assert.assertTrue(solrFields.contains("subject_gen"));
+        Assert.assertTrue(solrFields.contains("subject_en"));
+        Assert.assertTrue(solrFields.contains("subject_de"));
+        Assert.assertTrue(solrFields.contains("subject_it"));
+        Assert.assertTrue(solrFields.contains("subject_fr"));
+    }
+    
+    @Test
+    public void testGetUUIDField() throws Exception {
+        Assert.assertEquals("uuid", config.getUUIDField());
+    }
+    
+    @Test
+    public void testGetIndexField() throws Exception {
+        Assert.assertEquals(MailIndexField.SUBJECT, config.getIndexField("subject_gen"));
+        Assert.assertEquals(MailIndexField.SUBJECT, config.getIndexField("subject_en"));
+        Assert.assertEquals(MailIndexField.SUBJECT, config.getIndexField("subject_de"));
+        Assert.assertEquals(MailIndexField.SUBJECT, config.getIndexField("subject_it"));
+        Assert.assertEquals(MailIndexField.SUBJECT, config.getIndexField("subject_fr"));
+        
+        Assert.assertEquals(MailIndexField.UUID, config.getIndexField("uuid"));
+    }
+    
+    @Test
+    public void testGetRawField() throws Exception {
+        Assert.assertEquals("uuid", config.getRawField(MailIndexField.UUID));
+        Assert.assertEquals("subject", config.getRawField(MailIndexField.SUBJECT));
     }
 
 }

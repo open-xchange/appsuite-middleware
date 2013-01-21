@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
+package com.openexchange.index.solr.internal.converter;
 
 import java.util.List;
 import java.util.Map;
@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.mail.index.MailIndexField;
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
 
 
 /**

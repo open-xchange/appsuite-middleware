@@ -80,6 +80,8 @@ import com.openexchange.index.IndexManagementService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.solr.IndexFolderManager;
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
+import com.openexchange.index.solr.internal.converter.SolrDocumentConverter;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
 

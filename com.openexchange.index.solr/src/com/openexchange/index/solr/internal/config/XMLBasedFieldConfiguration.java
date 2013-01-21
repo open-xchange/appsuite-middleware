@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
+package com.openexchange.index.solr.internal.config;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,7 +85,7 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
     
     private final Map<IndexField, SchemaField> schemaFields = new HashMap<IndexField, SchemaField>();
     
-    private String defaultSearchField = null;
+    private String uniqueKey = null;
     
 
     public XMLBasedFieldConfiguration(String configPath, String schemaPath) throws SAXException, IOException {
@@ -145,9 +145,9 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
     
     private void initSchema(SolrConfig solrConfig, String schemaPath) throws SAXException, IOException {
         Match schema = JOOX.$(new File(schemaPath));
-        Match dsfMatch = schema.find("defaultSearchField");
-        if (dsfMatch.isNotEmpty()) {
-            defaultSearchField = dsfMatch.first().content();
+        Match uniqueKeyMatch = schema.find("uniqueKey");
+        if (uniqueKeyMatch.isNotEmpty()) {
+            uniqueKey = uniqueKeyMatch.first().content();
         }
         
         Match fieldsMatch = schema.find("fields");
@@ -178,7 +178,7 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
                 }
                 
                 if (indexField != null) {
-                    SchemaField schemaField = new SchemaField(name, type, indexed, stored, multiValued, isLocalized, indexField);
+                    SchemaField schemaField = new SchemaField(name, type, isLocalized ? true : indexed, stored, multiValued, isLocalized, indexField);
                     schemaFields.put(indexField, schemaField);
                     
                     if (isLocalized) {
@@ -192,7 +192,7 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
                         reverseIndexFields.put(name, indexField);
                     }
                     
-                    if (indexed) {
+                    if (schemaField.isIndexed()) {
                         indexedFields.add(indexField);
                     }
                 }
@@ -212,7 +212,7 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
     
     @Override
     public String getUUIDField() {
-        return defaultSearchField;
+        return uniqueKey;
     }
     
     @Override
@@ -297,62 +297,6 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
             }
             
             return fields;
-        }
-    }
-
-    private static final class SchemaField {
-
-        private final String name;
-
-        private final String type;
-
-        private final boolean indexed;
-
-        private final boolean stored;
-
-        private final boolean multiValued;
-        
-        private final boolean isLocalized;
-        
-        private final IndexField indexField;
-
-        public SchemaField(String name, String type, boolean indexed, boolean stored, boolean multiValued, boolean isLocalized, IndexField indexField) {
-            super();
-            this.name = name;
-            this.type = type;
-            this.indexed = indexed;
-            this.stored = stored;
-            this.multiValued = multiValued;
-            this.isLocalized = isLocalized;
-            this.indexField = indexField;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public boolean isIndexed() {
-            return indexed;
-        }
-
-        public boolean isStored() {
-            return stored;
-        }
-
-        public boolean isMultiValued() {
-            return multiValued;
-        }
-        
-        public boolean isLocalized() {
-            return isLocalized;
-        }
-        
-        public IndexField getIndexField() {
-            return indexField;
         }
     }
 

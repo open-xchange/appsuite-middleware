@@ -49,7 +49,7 @@
 
 package com.openexchange.index.solr.internal.querybuilder.translators;
 
-import com.openexchange.index.solr.internal.FieldConfiguration;
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
 import com.openexchange.index.solr.internal.querybuilder.QueryTranslator;
 import com.openexchange.index.solr.internal.querybuilder.TranslationException;

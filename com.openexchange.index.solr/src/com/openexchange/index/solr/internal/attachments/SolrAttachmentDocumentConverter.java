@@ -63,10 +63,10 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.solr.internal.AbstractDocumentConverter;
-import com.openexchange.index.solr.internal.FieldConfiguration;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
+import com.openexchange.index.solr.internal.converter.AbstractDocumentConverter;
 import com.openexchange.textxtraction.TextXtractService;
 
 /**

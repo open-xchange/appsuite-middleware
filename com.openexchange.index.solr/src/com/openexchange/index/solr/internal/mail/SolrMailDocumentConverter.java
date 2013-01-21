@@ -64,9 +64,9 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.solr.internal.AbstractDocumentConverter;
-import com.openexchange.index.solr.internal.FieldConfiguration;
 import com.openexchange.index.solr.internal.SolrIndexResult;
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
+import com.openexchange.index.solr.internal.converter.AbstractDocumentConverter;
 import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -218,10 +218,10 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
             }
         }
         
-        setAddressField(MailIndexField.FROM, document, mail);
-        setAddressField(MailIndexField.TO, document, mail);
-        setAddressField(MailIndexField.CC, document, mail);
-        setAddressField(MailIndexField.BCC, document, mail);
+        mail.addFrom(calculateAddressField(MailIndexField.FROM, document));
+        mail.addTo(calculateAddressField(MailIndexField.TO, document));
+        mail.addCc(calculateAddressField(MailIndexField.CC, document));
+        mail.addBcc(calculateAddressField(MailIndexField.BCC, document));
 
         Boolean hasAttachment = getFieldValue(MailIndexField.ATTACHMENT, document);
         if (hasAttachment != null) {
@@ -317,17 +317,25 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
         }
     }
     
-    private void setAddressField(MailIndexField indexField, SolrDocument document, MailMessage mail) throws OXException {
+    private InternetAddress[] calculateAddressField(MailIndexField indexField, SolrDocument document) throws OXException {
         List<String> addressList = getFieldValue(indexField, document);
+        if (addressList == null || addressList.isEmpty()) {
+            return new InternetAddress[0];
+        }
+        
+        InternetAddress[] addrs = new InternetAddress[addressList.size()];
         if (addressList != null && !addressList.isEmpty()) {
-            for (String addr : addressList) {
+            for (int i = 0; i < addrs.length; i++) {
+                String addr = addressList.get(i);
                 try {
-                    mail.addFrom(QuotedInternetAddress.parse(addr, false));
+                    addrs[i] = new QuotedInternetAddress(addr, false);
                 } catch (AddressException e) {
-                    mail.addFrom(new PlainTextAddress(addr));
+                    addrs[i] = new PlainTextAddress(addr);
                 }
             }
         }
+        
+        return addrs;
     }
     
     private static List<Object> createAddressHeader(final InternetAddress[] addrs) {

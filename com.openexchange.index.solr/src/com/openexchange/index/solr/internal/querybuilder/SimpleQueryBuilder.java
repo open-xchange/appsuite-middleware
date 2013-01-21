@@ -64,7 +64,7 @@ import com.openexchange.index.IndexField;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.index.solr.internal.FieldConfiguration;
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
 
 /**
  * {@link SimpleQueryBuilder}

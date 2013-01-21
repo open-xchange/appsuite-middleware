@@ -47,69 +47,62 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
-
-import java.util.Set;
+package com.openexchange.index.solr.internal.config;
 
 import com.openexchange.index.IndexField;
 
+public class SchemaField {
 
-/**
- * {@link FieldConfiguration} - A configuration object that should be used to map between
- * the fields of OX objects and there counterparts within the solr schema. Especially it takes
- * care about fields that are localized (i.e. a language detection is performed at index-time).
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- */
-public interface FieldConfiguration {
-    
-    /**
-     * @param indexField The index field.
-     * @return <code>True</code>, if this field is localized in Solr.
-     */
-    boolean isLocalized(IndexField indexField);
-    
-    /**
-     * Returns a set of field names that belong to this index field in the solr schema.
-     * If the field is localized, all language fields are contained as well as the fallback field.
-     * If the field is not localized, the set contains the solr field name according to this
-     * index field. May return <code>null</code> if the field is not defined in the solr schema.
-     * 
-     * @param indexField The index field.
-     * @return The set of solr field names.
-     */
-    Set<String> getSolrFields(IndexField indexField);
-    
-    /**
-     * Returns a set of fields that are indexed (i.e. you can search within these fields).
-     * @return The set of indexed fields.
-     */
-    Set<? extends IndexField> getIndexedFields();
-    
-    /**
-     * Returns the solr fields name that identifies a document within the index.
-     * @return The field name.
-     */
-    String getUUIDField();
-    
-    /**
-     * Gets the index field according to a given solr field name.
-     * May return <code>null</code> if the field is not part of the solr schema
-     * or if there is no according index field.
-     * 
-     * @param solrField The solr field name.
-     * @return The index field.
-     */
-    IndexField getIndexField(String solrField);
-    
-    /**
-     * Gets the solr field name for a given index field.
-     * If the field is localized in solr, the generic field name will be returned.
-     * This is especially needed for input documents.
-     * 
-     * @param indexField The index field.
-     * @return The solr field name.
-     */
-    String getRawField(IndexField indexField);
+    private final String name;
 
+    private final String type;
+
+    private final boolean indexed;
+
+    private final boolean stored;
+
+    private final boolean multiValued;
+    
+    private final boolean isLocalized;
+    
+    private final IndexField indexField;
+
+    public SchemaField(String name, String type, boolean indexed, boolean stored, boolean multiValued, boolean isLocalized, IndexField indexField) {
+        super();
+        this.name = name;
+        this.type = type;
+        this.indexed = indexed;
+        this.stored = stored;
+        this.multiValued = multiValued;
+        this.isLocalized = isLocalized;
+        this.indexField = indexField;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public boolean isIndexed() {
+        return indexed;
+    }
+
+    public boolean isStored() {
+        return stored;
+    }
+
+    public boolean isMultiValued() {
+        return multiValued;
+    }
+    
+    public boolean isLocalized() {
+        return isLocalized;
+    }
+    
+    public IndexField getIndexField() {
+        return indexField;
+    }
 }

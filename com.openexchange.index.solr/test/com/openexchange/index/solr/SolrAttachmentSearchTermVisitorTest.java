@@ -60,8 +60,8 @@ import com.openexchange.groupware.attach.index.ORTerm;
 import com.openexchange.groupware.attach.index.ObjectIdTerm;
 import com.openexchange.groupware.attach.index.SearchTerm;
 import com.openexchange.index.IndexField;
-import com.openexchange.index.solr.internal.FieldConfiguration;
 import com.openexchange.index.solr.internal.attachments.translators.SolrAttachmentSearchTermVisitor;
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
 
 
