@@ -112,107 +112,31 @@ public final class DownloadUtility {
      * @throws OXException If checking download fails
      */
     public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, final String overridingDisposition, final String userAgent) throws OXException {
-        final BrowserDetector browserDetector = new BrowserDetector(userAgent);
-        final boolean msieOnWindows = (browserDetector.isMSIE() && browserDetector.isWindows());
-        /*
-         * We are supposed to let the client display the attachment. Therefore set attachment's Content-Type and inline disposition to let
-         * the client decide if it's able to display.
-         */
-        final ContentType contentType = new ContentType(contentTypeStr);
-        if (contentType.startsWith("application/octet-stream")) {
+        try {
+            final BrowserDetector browserDetector = new BrowserDetector(userAgent);
+            final boolean msieOnWindows = (browserDetector.isMSIE() && browserDetector.isWindows());
             /*
-             * Try to determine MIME type
+             * We are supposed to let the client display the attachment. Therefore set attachment's Content-Type and inline disposition to let
+             * the client decide if it's able to display.
              */
-            final String ct = MimeType2ExtMap.getContentType(fileName);
-            final int pos = ct.indexOf('/');
-            contentType.setPrimaryType(ct.substring(0, pos));
-            contentType.setSubType(ct.substring(pos + 1));
-        }
-        InputStream in = inputStream;
-        String fn = fileName;
-        String preparedFileName = getSaveAsFileName(fileName, msieOnWindows, contentTypeStr);
-        /*
-         * Check if it's image content requested by Internet Explorer < v8
-         */
-        if (contentType.startsWith("image/") && msieOnWindows && 8F > browserDetector.getBrowserVersion()) {
-            /*
-             * Get first 256 bytes
-             */
-            byte[] sequence = new byte[256];
-            {
-                final int nRead;
-                try {
-                    nRead = in.read(sequence, 0, sequence.length);
-                } catch (final IOException e) {
-                    throw AjaxExceptionCodes.IO_ERROR.create( e, e.getMessage());
-                }
-                if (nRead < sequence.length) {
-                    final byte[] tmp = sequence;
-                    sequence = new byte[nRead];
-                    System.arraycopy(tmp, 0, sequence, 0, nRead);
-                }
-            }
-            /*
-             * Check consistency of content-type, file extension and magic bytes
-             */
-            final String fileExtension = getFileExtension(fn);
-            if (null == fileExtension) {
+            final ContentType contentType = new ContentType(contentTypeStr);
+            if (contentType.startsWith("application/octet-stream")) {
                 /*
-                 * Check for HTML since no corresponding file extension is known
+                 * Try to determine MIME type
                  */
-                if (HTMLDetector.containsHTMLTags(sequence)) {
-                    return asAttachment(inputStream, preparedFileName);
-                }
-            } else {
-                final Set<String> extensions = new HashSet<String>(MimeType2ExtMap.getFileExtensions(contentType.getBaseType()));
-                if (extensions.isEmpty() || (extensions.size() == 1 && extensions.contains("dat"))) {
-                    /*
-                     * Content type determined by file name extension is unknown
-                     */
-                    final String ct = MimeType2ExtMap.getContentType(fn);
-                    if ("application/octet-stream".equals(ct)) {
-                        /*
-                         * No content type known
-                         */
-                        if (HTMLDetector.containsHTMLTags(sequence)) {
-                            return asAttachment(inputStream, preparedFileName);
-                        }
-                    } else {
-                        final int pos = ct.indexOf('/');
-                        contentType.setPrimaryType(ct.substring(0, pos));
-                        contentType.setSubType(ct.substring(pos + 1));
-                    }
-                } else if (!extensions.contains(fileExtension)) {
-                    /*
-                     * File extension does not fit to MIME type. Reset file name.
-                     */
-                    fn = addFileExtension(fileExtension, extensions.iterator().next());
-                    preparedFileName = getSaveAsFileName(fn, msieOnWindows, contentType.getBaseType());
-                }
-                final String detectedCT = ImageTypeDetector.getMimeType(sequence);
-                if ("application/octet-stream".equals(detectedCT)) {
-                    /*
-                     * Unknown magic bytes. Check for HTML.
-                     */
-                    if (HTMLDetector.containsHTMLTags(sequence)) {
-                        return asAttachment(inputStream, preparedFileName);
-                    }
-                } else if (!contentType.isMimeType(detectedCT)) {
-                    /*
-                     * Image's magic bytes indicate another content type
-                     */
-                    contentType.setBaseType(detectedCT);
-                }
+                final String ct = MimeType2ExtMap.getContentType(fileName);
+                final int pos = ct.indexOf('/');
+                contentType.setPrimaryType(ct.substring(0, pos));
+                contentType.setSubType(ct.substring(pos + 1));
             }
-            /*
-             * New combined input stream
-             */
-            in = new CombinedInputStream(sequence, in);
-        }
-
-        if (contentType.startsWith("text/htm")) {
-            try {
-                // Sanitizing of HTML content needed
+            InputStream in = inputStream;
+            String fn = fileName;
+            if (contentType.startsWith("text/htm")) {
+                /*-
+                 * HTML content requested for download...
+                 * 
+                 * Sanitizing of HTML content needed
+                 */
                 final ByteArrayOutputStream bytes = Streams.stream2ByteArrayOutputStream(in);
                 final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                 final String cs = contentType.getCharsetParameter();
@@ -220,25 +144,104 @@ public final class DownloadUtility {
                 String htmlContent = bytes.toString(valid ? cs : null);
                 htmlContent = htmlService.sanitize(htmlContent, null, true, new boolean[1], null);
                 in = Streams.newByteArrayInputStream(htmlContent.getBytes(valid ? Charsets.forName(cs) : Charsets.ISO_8859_1));
-            } catch (IOException e) {
-                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } else if (contentType.startsWith("image/")) {
+                /*
+                 * Image content requested for download...
+                 */
+                if (msieOnWindows && 8F > browserDetector.getBrowserVersion()) {
+                    /*-
+                     * Image content requested by Internet Explorer < v8
+                     * 
+                     * Get first 256 bytes
+                     */
+                    byte[] sequence = new byte[256];
+                    {
+                        final int nRead = in.read(sequence, 0, sequence.length);
+                        if (nRead < sequence.length) {
+                            final byte[] tmp = sequence;
+                            sequence = new byte[nRead];
+                            System.arraycopy(tmp, 0, sequence, 0, nRead);
+                        }
+                    }
+                    /*
+                     * Check consistency of content-type, file extension and magic bytes
+                     */
+                    String preparedFileName = getSaveAsFileName(fileName, msieOnWindows, contentTypeStr);
+                    final String fileExtension = getFileExtension(fn);
+                    if (null == fileExtension) {
+                        /*
+                         * Check for HTML since no corresponding file extension is known
+                         */
+                        if (HTMLDetector.containsHTMLTags(sequence)) {
+                            return asAttachment(inputStream, preparedFileName);
+                        }
+                    } else {
+                        final Set<String> extensions = new HashSet<String>(MimeType2ExtMap.getFileExtensions(contentType.getBaseType()));
+                        if (extensions.isEmpty() || (extensions.size() == 1 && extensions.contains("dat"))) {
+                            /*
+                             * Content type determined by file name extension is unknown
+                             */
+                            final String ct = MimeType2ExtMap.getContentType(fn);
+                            if ("application/octet-stream".equals(ct)) {
+                                /*
+                                 * No content type known
+                                 */
+                                if (HTMLDetector.containsHTMLTags(sequence)) {
+                                    return asAttachment(inputStream, preparedFileName);
+                                }
+                            } else {
+                                final int pos = ct.indexOf('/');
+                                contentType.setPrimaryType(ct.substring(0, pos));
+                                contentType.setSubType(ct.substring(pos + 1));
+                            }
+                        } else if (!extensions.contains(fileExtension)) {
+                            /*
+                             * File extension does not fit to MIME type. Reset file name.
+                             */
+                            fn = addFileExtension(fileExtension, extensions.iterator().next());
+                            preparedFileName = getSaveAsFileName(fn, msieOnWindows, contentType.getBaseType());
+                        }
+                        final String detectedCT = ImageTypeDetector.getMimeType(sequence);
+                        if ("application/octet-stream".equals(detectedCT)) {
+                            /*
+                             * Unknown magic bytes. Check for HTML.
+                             */
+                            if (HTMLDetector.containsHTMLTags(sequence)) {
+                                return asAttachment(inputStream, preparedFileName);
+                            }
+                        } else if (!contentType.isMimeType(detectedCT)) {
+                            /*
+                             * Image's magic bytes indicate another content type
+                             */
+                            contentType.setBaseType(detectedCT);
+                        }
+                    }
+                    /*
+                     * New combined input stream
+                     */
+                    in = new CombinedInputStream(sequence, in);
+                }
             }
+            final CheckedDownload retval;
+            if (overridingDisposition == null) {
+                final String baseType = contentType.getBaseType();
+                final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append("attachment");
+                appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : baseType, userAgent, builder);
+                retval = new CheckedDownload(baseType, builder.toString(), in);
+            } else if (overridingDisposition.indexOf(';') < 0) {
+                final String baseType = contentType.getBaseType();
+                final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append(overridingDisposition);
+                appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : baseType, userAgent, builder);
+                retval = new CheckedDownload(baseType, builder.toString(), in);
+            } else {
+                retval =  new CheckedDownload(contentType.getBaseType(), overridingDisposition, in);
+            }
+            return retval;
+        } catch (final UnsupportedEncodingException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
-
-        if (overridingDisposition == null) {
-            final String baseType = contentType.getBaseType();
-            final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append("attachment");
-            appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : baseType, userAgent, builder);
-            return new CheckedDownload(baseType, builder.toString(), in);
-        }
-        if (overridingDisposition.indexOf(';') < 0) {
-            final String baseType = contentType.getBaseType();
-            final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append(overridingDisposition);
-            appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : baseType, userAgent, builder);
-            return new CheckedDownload(baseType, builder.toString(), in);
-        }
-
-        return new CheckedDownload(contentType.getBaseType(), overridingDisposition, in);
     }
 
     /**
