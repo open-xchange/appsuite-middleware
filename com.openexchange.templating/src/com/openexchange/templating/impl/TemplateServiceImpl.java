@@ -318,7 +318,7 @@ public class TemplateServiceImpl implements TemplateService {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader(templateFile), 2048);
-            final StringBuilder builder = new StringBuilder(2048);
+            final StringAllocator builder = new StringAllocator(2048);
             String line;
             while ((line = reader.readLine()) != null) {
                 builder.append(line).append('\n');
