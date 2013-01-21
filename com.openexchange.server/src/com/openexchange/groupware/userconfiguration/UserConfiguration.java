@@ -140,7 +140,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
         DELEGATE_TASKS(UserConfiguration.DELEGATE_TASKS, "DelegateTasks"),
         EDIT_GROUP(UserConfiguration.EDIT_GROUP, "EditGroup"),
         EDIT_RESOURCE(UserConfiguration.EDIT_RESOURCE, "EditResource"),
-        EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD, "EditPassword", TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class)),
+        EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD, "EditPassword", TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, true)),
         COLLECT_EMAIL_ADDRESSES(UserConfiguration.COLLECT_EMAIL_ADDRESSES, "CollectEMailAddresses"),
         MULTIPLE_MAIL_ACCOUNTS(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS, "MultipleMailAccounts"),
         SUBSCRIPTION(UserConfiguration.SUBSCRIPTION, "Subscription"),
