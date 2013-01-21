@@ -1,0 +1,33 @@
+* 2011-09-20 - holger.achtziger@open-xchange.com
+
+ - Fixed cache statistics
+
+* 2011-05-24 - steffen.templin@open-xchange.com
+
+ - Repaired autoconf function of most scripts.
+ - Corrected wrong parameter for showruntimestats call in java heap scripts 
+
+* 2011-04-29 - wolfgang.rosenauer@open-xchange.com
+
+ - RPM %post script calls munin-node-configure with explicit libdir path
+ - Improved RPM requirements
+
+* 2011-01-19 - steffen.templin@open-xchange.com
+
+ - Added munin plugin for all other threadpool stats.
+ 
+* 2011-01-17 - steffen.templin@open-xchange.com
+
+ - Added munin plugin for threadpool task stats.
+
+* 2010-11-23 - marcus.klein@open-xchange.com
+
+ - Bugfix #17525: Total number of database connections is monitored successfully again.
+
+* 2010-11-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #17548: AJP requests are monitored successfully again.
+
+* 2010-10-08 - holger.achtziger@open-xchange.com
+
+ - initial version
