@@ -54,6 +54,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import org.apache.commons.logging.Log;
+import com.openexchange.java.Streams;
 
 /**
  * CommandExecutor - executes given command in a separate process and supports possibility to additionally send data to running process and
@@ -63,7 +65,8 @@ import java.io.OutputStream;
  */
 public final class CommandExecutor {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CommandExecutor.class));
+    /** The logger */
+    static final Log LOG = com.openexchange.log.Log.loggerFor(CommandExecutor.class);
 
     private final Process process;
 
@@ -164,10 +167,6 @@ public final class CommandExecutor {
             buf = new StringBuilder();
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.lang.Runnable#run()
-         */
         @Override
         public void run() {
             InputStreamReader isr = null;
@@ -182,22 +181,8 @@ public final class CommandExecutor {
             } catch (final IOException ioe) {
                 LOG.error(ioe.getMessage(), ioe);
             } finally {
-                if (br != null) {
-                    try {
-                        br.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                    br = null;
-                }
-                if (isr != null) {
-                    try {
-                        isr.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                    isr = null;
-                }
+                Streams.close(br);
+                Streams.close(isr);
             }
         }
 

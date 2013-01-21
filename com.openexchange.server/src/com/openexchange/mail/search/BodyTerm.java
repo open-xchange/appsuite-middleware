@@ -191,7 +191,7 @@ public final class BodyTerm extends SearchTerm<String> {
             return getPartTextContent(part);
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
@@ -241,7 +241,7 @@ public final class BodyTerm extends SearchTerm<String> {
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -274,7 +274,7 @@ public final class BodyTerm extends SearchTerm<String> {
             return MessageUtility.readMimePart(part, charset);
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {

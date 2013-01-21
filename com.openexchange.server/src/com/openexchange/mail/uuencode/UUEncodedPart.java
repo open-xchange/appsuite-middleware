@@ -60,6 +60,7 @@ import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
@@ -192,9 +193,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
                     encodedPart.append(line).append('\n');
                 }
             } finally {
-                if (br != null) {
-                    br.close();
-                }
+                Streams.close(br);
             }
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UUEncodedPart.class)).error(e.getMessage(), e);
@@ -221,10 +220,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UUEncodedPart.class)).error(ioe.getMessage(), ioe);
             throw ioe;
         } finally {
-            if (null != bos) {
-                bos.flush();
-                bos.close();
-            }
+            Streams.close(bos);
         }
     }
 }

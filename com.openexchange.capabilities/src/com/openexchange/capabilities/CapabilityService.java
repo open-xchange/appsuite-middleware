@@ -55,14 +55,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CapabilityService} - A capability service.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface CapabilityService {
 
     /**
      * Gets the capabilities associated with given session.
-     * 
+     *
      * @param session The session
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined

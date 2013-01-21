@@ -1,6 +1,3 @@
-mox/config/animations:
-    protected: false
-
 mox/config/appointmentDays:
     protected: false
 
@@ -18,3 +15,6 @@ mox/subscribedFolders/contacts:
 
 mox/subscribedFolders/mail:
     protected: false
+
+mox/defaultContactStoreFolder:
+    protected: true

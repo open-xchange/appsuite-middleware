@@ -68,6 +68,7 @@ import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.servlet.OXServletException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.server.Initialization;
 
 /**
@@ -198,11 +199,7 @@ public final class HttpManagersInit implements Initialization {
             properties.load(fis);
             return properties;
         } finally {
-            try {
-                fis.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(fis);
         }
     }
 

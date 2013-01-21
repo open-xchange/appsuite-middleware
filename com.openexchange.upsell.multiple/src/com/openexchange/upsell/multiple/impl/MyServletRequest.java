@@ -85,6 +85,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
@@ -570,24 +571,21 @@ public final class MyServletRequest  {
 
     static public String getFileContents(final File file) {
         final StringBuilder stringBuilder = new StringBuilder();
+        BufferedReader input = null;
         try {
-            final BufferedReader input = new BufferedReader(new FileReader(file));
-            try {
-                String line = null;
-                while ((line = input.readLine()) != null) {
-                    stringBuilder.append(line);
-                    stringBuilder.append(System.getProperty("line.separator"));
-                }
-            } finally {
-                input.close();
+            input = new BufferedReader(new FileReader(file));
+            String line = null;
+            while ((line = input.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append(System.getProperty("line.separator"));
             }
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
+        } finally {
+            Streams.close(input);
         }
         return stringBuilder.toString();
     }
-
-
 
     /**
      *

@@ -123,8 +123,9 @@ public final class CassandraActivator extends HousekeepingActivator {
     		postfix = ".so";
     	} else if (osName.equals("Windows")) {
     		postfix = ".dll";
-    	} else if (osName.equals("Mac")) {
+    	} else if (osName.subSequence(0, 3).equals("Mac")) {
     		postfix = ".jnilib";
+    		osName = osName.subSequence(0, 3).toString();
     	} else {
     		log.error("Unsupported system");
     	}

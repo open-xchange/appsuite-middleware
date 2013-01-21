@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link TemplatingHelper}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface TemplatingHelper {

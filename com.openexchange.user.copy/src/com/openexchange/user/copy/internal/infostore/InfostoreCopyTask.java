@@ -52,7 +52,6 @@ package com.openexchange.user.copy.internal.infostore;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.user.copy.internal.CopyTools.replaceIdsInQuery;
 import static com.openexchange.user.copy.internal.CopyTools.setStringOrNull;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.sql.Connection;
@@ -65,7 +64,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.Types;
@@ -75,6 +73,8 @@ import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.QuotaFileStorage;
 import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 import com.openexchange.tools.sql.DBUtils;
@@ -265,8 +265,9 @@ public class InfostoreCopyTask implements CopyUserTaskService {
             for (final DocumentMetadata version : versions) {
                 final String location = version.getFilestoreLocation();
                 if (location != null) {
+                    InputStream is = null;
                     try {
-                        final InputStream is = srcFileStorage.getFile(location);
+                        is = srcFileStorage.getFile(location);
                         if (is == null) {
                             LOG.warn("Did not find file for infostore document " + master.getId() + " (" + master.getFileName() + ").");
                             continue;
@@ -274,10 +275,8 @@ public class InfostoreCopyTask implements CopyUserTaskService {
 
                         final String newId = dstFileStorage.saveNewFile(is);
                         version.setFilestoreLocation(newId);
-
-                        is.close();
-                    } catch (final IOException e) {
-                        LOG.warn("Could not close input stream.", e);
+                    } finally {
+                        Streams.close(is);
                     }
                 }
             }

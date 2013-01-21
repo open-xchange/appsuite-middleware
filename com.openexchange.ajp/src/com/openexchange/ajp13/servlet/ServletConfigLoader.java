@@ -66,6 +66,7 @@ import javax.servlet.ServletContext;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.java.Streams;
 
 /**
  * The ServletConfigLoader is used to discover init parameters for servlets. Some 3rd party servlets prefer to be configured via init
@@ -203,13 +204,7 @@ public final class ServletConfigLoader {
         } catch (final IOException x) {
             return null;
         } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
+            Streams.close(in);
         }
         final Map<String, String> m = new HashMap<String, String>();
         addProps(m, props);

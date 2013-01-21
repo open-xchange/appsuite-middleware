@@ -21,39 +21,40 @@ public class Test {
         JSONObject j;
         JSONStringer jj;
         String s;
-        
-// Obj is a typical class that implements JSONString.        
+
+// Obj is a typical class that implements JSONString.
 
         class Obj implements JSONString {
         	public String aString;
         	public double aNumber;
         	public boolean aBoolean;
-        	
+
             public Obj(String string, double n, boolean b) {
                 this.aString = string;
                 this.aNumber = n;
                 this.aBoolean = b;
             }
-            
+
+            @Override
             public String toJSONString() {
-            	return "{" + JSONObject.quote(this.aString) + ":" + 
+            	return "{" + JSONObject.quote(this.aString) + ":" +
             	JSONObject.doubleToString(this.aNumber) + "}";
-            }  
-            
+            }
+
             @Override
 			public String toString() {
             	return this.aString + " " + this.aNumber + " " + this.aBoolean;
             }
-        }      
-        
-        
-        try {     	
+        }
+
+
+        try {
         	final String sa[] = {"aString", "aNumber", "aBoolean"};
         	final Obj obj = new Obj("A string, a number, and a boolean", 42, true);
-            
+
             j = XML.toJSONObject("<![CDATA[This is a collection of test patterns and examples for org.json.]]>  Ignore the stuff past the end.  ");
             System.out.println(j.toString());
-            
+
             jj = new JSONStringer();
             s = jj.object()
                 .key("foo")
@@ -121,8 +122,8 @@ public class Test {
             j = new JSONObject(obj, sa);
             j.put("test", obj);
             j.put("comment", "This object contains a test object that implements JSONString");
-            System.out.println(j.toString(4));          
-            
+            System.out.println(j.toString(4));
+
             j = new JSONObject("{slashes: '///', closetag: '</script>', backslash:'\\\\', ei: {quotes: '\"\\''},eo: {a: '\"quoted\"', b:\"don't\"}, quotes: [\"'\", '\"']}");
             System.out.println(j.toString(2));
             System.out.println(XML.toString(j));
@@ -353,15 +354,15 @@ public class Test {
             j = XML.toJSONObject(s);
             System.out.println(j.toString(4));
             System.out.println(XML.toString(j));
-            
+
             s = "<book><chapter>Content of the first chapter</chapter><chapter>Content of the second chapter      <chapter>Content of the first subchapter</chapter>      <chapter>Content of the second subchapter</chapter></chapter><chapter>Third Chapter</chapter></book>";
             j = XML.toJSONObject(s);
             System.out.println(j.toString(4));
             System.out.println(XML.toString(j));
-            
+
             final Collection<Object> c = null;
             final Map<String, Object> m = null;
-            
+
             j = new JSONObject(m);
             a = new JSONArray(c);
             j.append("stooge", "Joe DeRita");
@@ -376,7 +377,7 @@ public class Test {
             a.put(m);
             a.put(c);
             System.out.println(j.toString(4));
-            
+
             System.out.println("\nTesting Exceptions: ");
 
             System.out.print("Exception: ");
@@ -420,13 +421,13 @@ public class Test {
             	j = XML.toJSONObject("<a><b>    ");
             } catch (Exception e) {
             	System.out.println(e);
-            }            
+            }
             System.out.print("Exception: ");
             try {
             	j = XML.toJSONObject("<a></b>    ");
             } catch (Exception e) {
             	System.out.println(e);
-            }            
+            }
             System.out.print("Exception: ");
             try {
             	j = XML.toJSONObject("<a></a    ");

@@ -63,7 +63,9 @@ import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -71,7 +73,6 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.java.CharsetDetector;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -129,7 +130,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                 setContentType(extractHeader(STR_CONTENT_TYPE, dataSource.getInputStream(), true));
             } catch (final IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
@@ -163,7 +164,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                 setContentType(extractHeader(STR_CONTENT_TYPE, new UnsynchronizedByteArrayInputStream(inputData), false));
             } catch (final IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
@@ -194,7 +195,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             dataBytes = dataAccess.full();
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -386,7 +387,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             }
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -429,7 +430,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             dataAccess.load();
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -446,7 +447,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             dataAccess.writeTo(out);
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -525,11 +526,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             }
             return baos.toByteArray();
         } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(inputStream);
         }
     }
 

@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CapabilityAllAction}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 @DispatcherNotes(noSession = true)
@@ -72,7 +72,7 @@ public class CapabilityAllAction implements AJAXActionService {
 
     /**
      * Initializes a new {@link CapabilityAllAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public CapabilityAllAction(ServiceLookup services) {

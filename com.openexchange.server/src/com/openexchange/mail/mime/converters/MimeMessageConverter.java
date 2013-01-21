@@ -393,7 +393,7 @@ public final class MimeMessageConverter {
                             file = newTempFile;
                         } catch (final IOException e) {
                             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                             }
                             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                         } finally {
@@ -405,7 +405,7 @@ public final class MimeMessageConverter {
                         mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
                     } catch (final IOException e) {
                         if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                         }
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     }
@@ -481,7 +481,7 @@ public final class MimeMessageConverter {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -521,7 +521,7 @@ public final class MimeMessageConverter {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -647,7 +647,7 @@ public final class MimeMessageConverter {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -1470,7 +1470,7 @@ public final class MimeMessageConverter {
                         mailMessage.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                     } catch (final IOException e) {
                         if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                         }
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     }
@@ -1922,7 +1922,7 @@ public final class MimeMessageConverter {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -2143,11 +2143,7 @@ public final class MimeMessageConverter {
             }
             return in.available();
         } finally {
-            try {
-                in.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(in);
         }
     }
 

@@ -71,7 +71,7 @@ import com.openexchange.java.Strings;
 
 /**
  * {@link AppsLoadServlet} - Provides App Suite data for loading applciations.
- * 
+ *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class AppsLoadServlet extends HttpServlet {
@@ -200,18 +200,8 @@ public class AppsLoadServlet extends HttpServlet {
         // Map module name to file name
         if (name.startsWith(ZONEINFO)) {
             filename = new File(zoneinfo, name.substring(ZONEINFO.length()));
-            if (!isSubDirectory(zoneinfo, filename)) {
-                // Illegal access; potential Directory Traversal attack
-                // See http://en.wikipedia.org/wiki/Directory_traversal
-                throw new IllegalStateException("Not allowed to access file: " + filename.getCanonicalPath());
-            }
         } else {
             filename = new File(root, name);
-            if (!isSubDirectory(root, filename)) {
-                // Illegal access; potential Directory Traversal attack
-                // See http://en.wikipedia.org/wiki/Directory_traversal
-                throw new IllegalStateException("Not allowed to access file: " + filename.getCanonicalPath());
-            }
         }
         LOG.debug("Reading " + filename);
 
@@ -253,28 +243,6 @@ public class AppsLoadServlet extends HttpServlet {
         }
 
         return baos.toByteArray();
-    }
-
-    /**
-     * Checks, whether the child directory is a sub-directory of the base directory.
-     * 
-     * @param base The base directory.
-     * @param child The suspected child directory.
-     * @return <code>true</code> if the child is a sub-directory of the base directory.
-     * @throws IOException If an I/O error occurs
-     */
-    private boolean isSubDirectory(final File base, final File child) throws IOException {
-        final File b = base.getCanonicalFile();
-        final File c = child.getCanonicalFile();
-
-        File parentFile = c;
-        while (parentFile != null) {
-            if (b.equals(parentFile)) {
-                return true;
-            }
-            parentFile = parentFile.getParentFile();
-        }
-        return false;
     }
 
 }

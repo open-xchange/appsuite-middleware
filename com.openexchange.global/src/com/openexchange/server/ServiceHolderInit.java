@@ -57,6 +57,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 
 /**
  * {@link ServiceHolderInit} - Initialization for service holder
@@ -145,11 +146,7 @@ public final class ServiceHolderInit implements Initialization {
                 throw ServiceExceptionCode.IO_ERROR.create();
             }
         } finally {
-            try {
-                in.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(in);
         }
     }
 

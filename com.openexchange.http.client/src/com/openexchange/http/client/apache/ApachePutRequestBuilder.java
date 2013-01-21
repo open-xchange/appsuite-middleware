@@ -1,6 +1,5 @@
 package com.openexchange.http.client.apache;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import org.apache.commons.httpclient.HttpMethodBase;
@@ -9,6 +8,7 @@ import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import com.openexchange.http.client.builder.HTTPPutRequestBuilder;
+import com.openexchange.java.Streams;
 
 public class ApachePutRequestBuilder extends CommonApacheHTTPRequest<HTTPPutRequestBuilder> implements HTTPPutRequestBuilder {
 
@@ -53,14 +53,7 @@ public class ApachePutRequestBuilder extends CommonApacheHTTPRequest<HTTPPutRequ
 
 	private void clearBody() {
 		stringBody = null;
-
-		if (isBody != null) {
-			try {
-				isBody.close();
-			} catch (final IOException x) {
-			}
-			isBody = null;
-		}
+		Streams.close(isBody);
 	}
 
 	public HTTPPutRequestBuilder contentType(final String ctype) {

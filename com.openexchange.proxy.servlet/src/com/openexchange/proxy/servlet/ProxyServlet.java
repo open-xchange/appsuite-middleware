@@ -69,6 +69,7 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
+import com.openexchange.java.Streams;
 import com.openexchange.log.Log;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.Response;
@@ -212,11 +213,7 @@ public class ProxyServlet extends SessionServlet {
                 }
                 outputStream.flush();
             } finally {
-                try {
-                    responseStream.close();
-                } catch (final Exception e) {
-                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ProxyServlet.class)).error(e.getMessage(), e);
-                }
+                Streams.close(responseStream);
             }
         } finally {
             closeHttpMethod(httpMethod);
@@ -281,10 +278,7 @@ public class ProxyServlet extends SessionServlet {
              * Ensure closing response
              */
             try {
-                final InputStream stream = httpMethod.getResponseBodyAsStream();
-                if (null != stream) {
-                    stream.close();
-                }
+                Streams.close(httpMethod.getResponseBodyAsStream());
             } catch (final IOException e) {
                 com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ProxyServlet.class)).error(e.getMessage(), e);
             } finally {

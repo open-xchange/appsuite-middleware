@@ -64,11 +64,11 @@ import com.fasterxml.jackson.core.JsonToken;
  * typed <code>get</code> and <code>opt</code> methods that do type checking and type coersion for you.
  * <p>
  * The <code>put</code> methods adds values to an object. For example,
- * 
+ *
  * <pre>
  * myString = new JSONObject().put(&quot;JSON&quot;, &quot;Hello, World!&quot;).toString();
  * </pre>
- * 
+ *
  * produces the string <code>{"JSON": "Hello, World"}</code>.
  * <p>
  * The texts produced by the <code>toString</code> methods strictly conform to the JSON sysntax rules. The constructors are more forgiving
@@ -84,7 +84,7 @@ import com.fasterxml.jackson.core.JsonToken;
  * <li>Numbers may have the <code>0-</code> <small>(octal)</small> or <code>0x-</code> <small>(hex)</small> prefix.</li>
  * <li>Comments written in the slashshlash, slashstar, and hash conventions will be ignored.</li>
  * </ul>
- * 
+ *
  * @author JSON.org
  * @version 2
  */
@@ -97,7 +97,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Sets the logger.
-     * 
+     *
      * @param logger The logger
      */
     public static void setLogger(final Logger logger) {
@@ -108,7 +108,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Sets the max. allowed size of a JSON object.
-     * 
+     *
      * @param maxSize The max. allowed size or a value less than/equal to zero if unlimited
      */
     public static void setMaxSize(final int maxSize) {
@@ -122,7 +122,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Sets whether to use character array pool.
-     * 
+     *
      * @param useCharPool <code>true</code> to use character array pool; otherwise <code>false</code>
      */
     public static void setUseCharPool(final boolean useCharPool) {
@@ -131,7 +131,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Initializes character array pool.
-     * 
+     *
      * @see #setUseCharPool(boolean)
      */
     public static void initCharPool() {
@@ -155,7 +155,7 @@ public class JSONObject extends AbstractJSONValue {
 
         /**
          * There is only intended to be a single instance of the NULL object, so the clone method returns itself.
-         * 
+         *
          * @return NULL.
          */
         @Override
@@ -165,7 +165,7 @@ public class JSONObject extends AbstractJSONValue {
 
         /**
          * A Null object is equal to the null value and to itself.
-         * 
+         *
          * @param object An object to test for nullness.
          * @return true if the object parameter is the JSONObject.NULL object or null.
          */
@@ -176,7 +176,7 @@ public class JSONObject extends AbstractJSONValue {
 
         /**
          * Get the "null" string value.
-         * 
+         *
          * @return The string "null".
          */
         @Override
@@ -216,7 +216,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * Construct a JSONObject from a subset of another JSONObject. An array of strings is used to identify the keys that should be copied.
      * Missing keys are ignored.
-     * 
+     *
      * @param jo A JSONObject.
      * @param sa An array of strings.
      * @exception JSONException If a value is a non-finite number.
@@ -230,7 +230,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Construct a JSONObject from a JSONTokener.
-     * 
+     *
      * @param x A JSONTokener object containing the source string.
      * @throws JSONException If there is a syntax error in the source string.
      */
@@ -241,7 +241,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Parses a JSONTokener and fills its values into this JSONObject
-     * 
+     *
      * @param tokener A JSONTokener object containing the source string
      * @throws JSONException
      */
@@ -295,7 +295,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Construct a JSONObject from a JSONObject.
-     * 
+     *
      * @param other A JSONObject to initialize the contents of the JSONObject.
      */
     public JSONObject(final JSONObject other) {
@@ -304,7 +304,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Construct a JSONObject from a Map.
-     * 
+     *
      * @param map A map object that can be used to initialize the contents of the JSONObject.
      */
     public JSONObject(final Map<String, ? extends Object> map) {
@@ -338,7 +338,7 @@ public class JSONObject extends AbstractJSONValue {
      * Construct a JSONObject from an Object, using reflection to find the public members. The resulting JSONObject's keys will be the
      * strings from the names array, and the values will be the field values associated with those keys in the object. If a key is not found
      * or not visible, then it will not be copied into the new JSONObject.
-     * 
+     *
      * @param object An object that has fields that should be used to make a JSONObject.
      * @param names An array of strings, the names of the fields to be used from the object.
      */
@@ -359,7 +359,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Construct a JSONObject from a reader.
-     * 
+     *
      * @param reader A reader beginning with <code>{</code>&nbsp;<small>(left brace)</small> and ending with <code>}</code>
      *            &nbsp;<small>(right brace)</small>.
      * @exception JSONException If there is a syntax error in reader's content.
@@ -371,7 +371,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Construct a JSONObject from a string. This is the most commonly used JSONObject constructor.
-     * 
+     *
      * @param string A string beginning with <code>{</code>&nbsp;<small>(left brace)</small> and ending with <code>}</code>
      *            &nbsp;<small>(right brace)</small>.
      * @exception JSONException If there is a syntax error in the source string.
@@ -385,7 +385,7 @@ public class JSONObject extends AbstractJSONValue {
      * Fills JSONObject with the given source string. This method is dedicated for <b>re-using</b> a JSONObject in combination with the
      * <code>reset()</code> method, since it gives the same possibility as the common-used <code>JSONObject(String string)</code> constructor
      * to create a JSONObject from a string.
-     * 
+     *
      * @param string A string beginning with <code>{</code>&nbsp;<small>(left brace)</small> and ending with <code>}</code>
      *            &nbsp;<small>(right brace)</small>.
      * @return this.
@@ -401,7 +401,7 @@ public class JSONObject extends AbstractJSONValue {
      * Accumulate values under a key. It is similar to the put method except that if there is already an object stored under the key then a
      * JSONArray is stored under the key to hold all of the accumulated values. If there is already a JSONArray, then the new value is
      * appended to it. In contrast, the put method replaces the previous value.
-     * 
+     *
      * @param key A key string.
      * @param value An object to be accumulated under the key.
      * @return this.
@@ -423,7 +423,7 @@ public class JSONObject extends AbstractJSONValue {
      * Append values to the array under a key. If the key does not exist in the JSONObject, then the key is put in the JSONObject with its
      * value being a JSONArray containing the value parameter. If the key was already associated with a JSONArray, then the value parameter
      * is appended to it.
-     * 
+     *
      * @param key A key string.
      * @param value An object to be accumulated under the key.
      * @return this.
@@ -451,7 +451,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Produce a string from a double. The string "null" will be returned if the number is not finite.
-     * 
+     *
      * @param d A double.
      * @return A String.
      */
@@ -476,7 +476,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get the value object associated with a key.
-     * 
+     *
      * @param key A key string.
      * @return The object associated with the key.
      * @throws JSONException if the key is not found.
@@ -491,7 +491,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get the boolean value associated with a key.
-     * 
+     *
      * @param key A key string.
      * @return The truth.
      * @throws JSONException if the value is not a Boolean or the String "true" or "false".
@@ -508,7 +508,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get the double value associated with a key.
-     * 
+     *
      * @param key A key string.
      * @return The numeric value.
      * @throws JSONException if the key is not found or if the value is not a Number object and cannot be converted to a number.
@@ -524,7 +524,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get the int value associated with a key. If the number value is too large for an int, it will be clipped.
-     * 
+     *
      * @param key A key string.
      * @return The integer value.
      * @throws JSONException if the key is not found or if the value cannot be converted to an integer.
@@ -536,7 +536,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get the JSONArray value associated with a key.
-     * 
+     *
      * @param key A key string.
      * @return A JSONArray which is the value.
      * @throws JSONException if the key is not found or if the value is not a JSONArray.
@@ -551,7 +551,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get the JSONObject value associated with a key.
-     * 
+     *
      * @param key A key string.
      * @return A JSONObject which is the value.
      * @throws JSONException if the key is not found or if the value is not a JSONObject.
@@ -566,7 +566,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get the long value associated with a key. If the number value is too long for a long, it will be clipped.
-     * 
+     *
      * @param key A key string.
      * @return The long value.
      * @throws JSONException if the key is not found or if the value cannot be converted to a long.
@@ -578,7 +578,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get the string associated with a key.
-     * 
+     *
      * @param key A key string.
      * @return A string which is the value.
      * @throws JSONException if the key is not found.
@@ -589,7 +589,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Determine if the JSONObject contains a specific key.
-     * 
+     *
      * @param key A key string.
      * @return true if the key exists in the JSONObject.
      */
@@ -599,7 +599,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Determine if the JSONObject contains a specific key AND if the value associated with the key is not null.
-     * 
+     *
      * @param key A key string.
      * @return true if the JSONObject contains a specific key AND if the value associated with the key is not null.
      */
@@ -609,7 +609,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Determine if the value associated with the key is null or if there is no value.
-     * 
+     *
      * @param key A key string.
      * @return true if there is no value associated with the key or if the value is the JSONObject.NULL object.
      */
@@ -619,7 +619,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get an enumeration of the keys of the JSONObject.
-     * 
+     *
      * @return An iterator of the keys.
      */
     public Iterator<String> keys() {
@@ -628,7 +628,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get the key set of the JSONObject.
-     * 
+     *
      * @return A key set
      */
     public Set<String> keySet() {
@@ -637,7 +637,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get the entry set of the JSONObject
-     * 
+     *
      * @return A entry set
      */
     public Set<Map.Entry<String, Object>> entrySet() {
@@ -646,7 +646,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get the number of keys stored in the JSONObject.
-     * 
+     *
      * @return The number of keys in the JSONObject.
      */
     @Override
@@ -656,7 +656,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Produce a JSONArray containing the names of the elements of this JSONObject.
-     * 
+     *
      * @return A JSONArray containing the key strings, or null if the JSONObject is empty.
      */
     public JSONArray names() {
@@ -670,7 +670,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Produce a string from a Number.
-     * 
+     *
      * @param n A Number
      * @return A String.
      * @throws JSONException If n is a non-finite number.
@@ -696,7 +696,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get an optional value associated with a key.
-     * 
+     *
      * @param key A key string.
      * @return An object which is the value, or null if there is no value.
      */
@@ -707,7 +707,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * Get an optional boolean associated with a key. It returns false if there is no such key, or if the value is not Boolean.TRUE or the
      * String "true".
-     * 
+     *
      * @param key A key string.
      * @return The truth.
      */
@@ -718,7 +718,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * Get an optional boolean associated with a key. It returns the defaultValue if there is no such key, or if it is not a Boolean or the
      * String "true" or "false" (case insensitive).
-     * 
+     *
      * @param key A key string.
      * @param defaultValue The default.
      * @return The truth.
@@ -733,7 +733,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Put a key/value pair in the JSONObject, where the value will be a JSONArray which is produced from a Collection.
-     * 
+     *
      * @param key A key string.
      * @param value A Collection value.
      * @return this.
@@ -747,7 +747,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * Get an optional double associated with a key, or NaN if there is no such key or if its value is not a number. If the value is a
      * string, an attempt will be made to evaluate it as a number.
-     * 
+     *
      * @param key A string which is the key.
      * @return An object which is the value.
      */
@@ -758,7 +758,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * Get an optional double associated with a key, or the defaultValue if there is no such key or if its value is not a number. If the
      * value is a string, an attempt will be made to evaluate it as a number.
-     * 
+     *
      * @param key A key string.
      * @param defaultValue The default.
      * @return An object which is the value.
@@ -775,7 +775,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * Get an optional int value associated with a key, or zero if there is no such key or if the value is not a number. If the value is a
      * string, an attempt will be made to evaluate it as a number.
-     * 
+     *
      * @param key A key string.
      * @return An object which is the value.
      */
@@ -786,7 +786,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * Get an optional int value associated with a key, or the default if there is no such key or if the value is not a number. If the value
      * is a string, an attempt will be made to evaluate it as a number.
-     * 
+     *
      * @param key A key string.
      * @param defaultValue The default.
      * @return An object which is the value.
@@ -801,7 +801,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get an optional JSONArray associated with a key. It returns null if there is no such key, or if its value is not a JSONArray.
-     * 
+     *
      * @param key A key string.
      * @return A JSONArray which is the value.
      */
@@ -812,7 +812,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get an optional JSONObject associated with a key. It returns null if there is no such key, or if its value is not a JSONObject.
-     * 
+     *
      * @param key A key string.
      * @return A JSONObject which is the value.
      */
@@ -824,7 +824,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * Get an optional long value associated with a key, or zero if there is no such key or if the value is not a number. If the value is a
      * string, an attempt will be made to evaluate it as a number.
-     * 
+     *
      * @param key A key string.
      * @return An object which is the value.
      */
@@ -835,7 +835,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * Get an optional long value associated with a key, or the default if there is no such key or if the value is not a number. If the
      * value is a string, an attempt will be made to evaluate it as a number.
-     * 
+     *
      * @param key A key string.
      * @param defaultValue The default.
      * @return An object which is the value.
@@ -851,7 +851,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * Get an optional string associated with a key. It returns an empty string if there is no such key. If the value is not a string and is
      * not null, then it is coverted to a string.
-     * 
+     *
      * @param key A key string.
      * @return A string which is the value.
      */
@@ -861,7 +861,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get an optional string associated with a key. It returns the defaultValue if there is no such key.
-     * 
+     *
      * @param key A key string.
      * @param defaultValue The default.
      * @return A string which is the value.
@@ -873,7 +873,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Put a key/boolean pair in the JSONObject.
-     * 
+     *
      * @param key A key string.
      * @param value A boolean which is the value.
      * @return this.
@@ -886,7 +886,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Put a key/double pair in the JSONObject.
-     * 
+     *
      * @param key A key string.
      * @param value A double which is the value.
      * @return this.
@@ -899,7 +899,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Put a key/int pair in the JSONObject.
-     * 
+     *
      * @param key A key string.
      * @param value An int which is the value.
      * @return this.
@@ -912,7 +912,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Put a key/long pair in the JSONObject.
-     * 
+     *
      * @param key A key string.
      * @param value A long which is the value.
      * @return this.
@@ -925,7 +925,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Put a key/value pair in the JSONObject, where the value will be a JSONObject which is produced from a Map.
-     * 
+     *
      * @param key A key string.
      * @param value A Map value.
      * @return this.
@@ -938,7 +938,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Put a key/value pair in the JSONObject. If the value is null, then the key will be removed from the JSONObject if it is present.
-     * 
+     *
      * @param key A key string.
      * @param value An object which is the value. It should be of one of these types: Boolean, Double, Integer, JSONArray, JSONObject, Long,
      *            String, or the JSONObject.NULL object.
@@ -963,7 +963,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Put a key/value pair in the JSONObject, but only if the key and the value are both non-null.
-     * 
+     *
      * @param key A key string.
      * @param value An object which is the value. It should be of one of these types: Boolean, Double, Integer, JSONArray, JSONObject, Long,
      *            String, or the JSONObject.NULL object.
@@ -980,7 +980,7 @@ public class JSONObject extends AbstractJSONValue {
     /**
      * Produce a string in double quotes with backslash sequences in all the right places. A backslash will be inserted within </, allowing
      * JSON text to be delivered in HTML. In JSON text, a string cannot contain a control character or an unescaped quote or backslash.
-     * 
+     *
      * @param string A String
      * @return A String correctly formatted for insertion in a JSON text.
      */
@@ -1095,7 +1095,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Remove a name and its value, if present.
-     * 
+     *
      * @param key The name to be removed.
      * @return The value that was associated with the name, or null if there was no value.
      */
@@ -1105,7 +1105,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Produce a JSONArray containing the values of the members of this JSONObject.
-     * 
+     *
      * @param names A JSONArray containing a list of key strings. This determines the sequence of the values in the result.
      * @return A JSONArray of values.
      * @throws JSONException If any of the values are non-finite numbers.
@@ -1128,7 +1128,7 @@ public class JSONObject extends AbstractJSONValue {
      * JSON text, then null will be returned instead.
      * <p>
      * Warning: This method assumes that the data structure is acyclical.
-     * 
+     *
      * @return a printable, displayable, portable, transmittable representation of the object, beginning with <code>{</code>
      *         &nbsp;<small>(left brace)</small> and ending with <code>}</code>&nbsp;<small>(right brace)</small>.
      */
@@ -1142,7 +1142,7 @@ public class JSONObject extends AbstractJSONValue {
      * JSON text, then null will be returned instead.
      * <p>
      * Warning: This method assumes that the data structure is acyclical.
-     * 
+     *
      * @param asciiOnly Whether to write only ASCII characters
      * @return a printable, displayable, portable, transmittable representation of the object, beginning with <code>{</code>
      *         &nbsp;<small>(left brace)</small> and ending with <code>}</code>&nbsp;<small>(right brace)</small>.
@@ -1182,7 +1182,7 @@ public class JSONObject extends AbstractJSONValue {
      * Make a pretty-printed JSON text of this JSONObject.
      * <p>
      * Warning: This method assumes that the data structure is acyclical.
-     * 
+     *
      * @param indentFactor The number of spaces to add to each level of indentation.
      * @return a printable, displayable, portable, transmittable representation of the object, beginning with <code>{</code>
      *         &nbsp;<small>(left brace)</small> and ending with <code>}</code>&nbsp;<small>(right brace)</small>.
@@ -1196,7 +1196,7 @@ public class JSONObject extends AbstractJSONValue {
      * Make a pretty-printed JSON text of this JSONObject.
      * <p>
      * Warning: This method assumes that the data structure is acyclical.
-     * 
+     *
      * @param indentFactor The number of spaces to add to each level of indentation.
      * @param indent The indentation of the top level.
      * @return a printable, displayable, transmittable representation of the object, beginning with <code>{</code>&nbsp;<small>(left
@@ -1247,7 +1247,7 @@ public class JSONObject extends AbstractJSONValue {
      * is the most common case), then a text will be produced by the rules.
      * <p>
      * Warning: This method assumes that the data structure is acyclical.
-     * 
+     *
      * @param value The value to be serialized.
      * @return a printable, displayable, transmittable representation of the object, beginning with <code>{</code>&nbsp;<small>(left
      *         brace)</small> and ending with <code>}</code>&nbsp;<small>(right brace)</small>.
@@ -1282,7 +1282,7 @@ public class JSONObject extends AbstractJSONValue {
      * Make a prettyprinted JSON text of an object value.
      * <p>
      * Warning: This method assumes that the data structure is acyclical.
-     * 
+     *
      * @param value The value to be serialized.
      * @param indentFactor The number of spaces to add to each level of indentation.
      * @param indent The indentation of the top level.
@@ -1349,7 +1349,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Writes specified JSON object to given generator.
-     * 
+     *
      * @param jo The JSON object
      * @param asciiOnly Whether to write only ASCII characters
      * @param jGenerator The generator
@@ -1376,7 +1376,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Parses readers' content to a JSON value.
-     * 
+     *
      * @param reader The reader
      * @return The parsed JSON value
      * @throws JSONException If parsing fails
@@ -1402,7 +1402,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Parses specified reader's content to a JSON object.
-     * 
+     *
      * @param reader The reader to read from
      * @return The parsed JSON object
      * @throws JSONException If an error occurs
@@ -1424,7 +1424,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Parses specified JSON object from given parser.
-     * 
+     *
      * @param jParser The JSON parser with {@link JsonToken#START_OBJECT} already consumed
      * @return The JSON object
      * @throws JSONException If an error occurs

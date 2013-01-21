@@ -19,16 +19,16 @@
 // OSInfo.java
 // Since: May 20, 2008
 //
-// $URL$ 
+// $URL$
 // $Author$
 //--------------------------------------
 package org.xerial.snappy;
 
 /**
  * Provides OS name and architecture name.
- * 
+ *
  * @author leo
- * 
+ *
  */
 public class OSInfo
 {

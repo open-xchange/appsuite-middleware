@@ -56,7 +56,7 @@ import java.util.Arrays;
 
 /**
  * {@link UnsynchronizedByteArrayOutputStream} - An implementation of {@link ByteArrayOutputStream} that does not use synchronized methods
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
@@ -80,7 +80,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 
     /**
      * Creates a new byte array output stream, with a buffer capacity of the specified size, in bytes.
-     * 
+     *
      * @param size the initial size.
      * @exception IllegalArgumentException if size is negative.
      */
@@ -93,26 +93,26 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 
     /**
      * Initializes a new {@link UnsynchronizedByteArrayOutputStream}.
-     * 
+     *
      * @param buf The shared buffer
      */
     public UnsynchronizedByteArrayOutputStream(byte[] buf) {
         super();
         this.buf = buf;
     }
-    
+
     /**
      * Gets the underlying byte array buffer.
-     * 
+     *
      * @return The byte array buffer
      */
     public byte[] getBuf() {
         return buf;
     }
-    
+
     /**
      * Gets the number of valid bytes in the buffer.
-     * 
+     *
      * @return The number of valid bytes in the buffer
      */
     public int getCount() {
@@ -121,7 +121,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 
     /**
      * Writes the specified byte to this byte array output stream.
-     * 
+     *
      * @param b the byte to be written.
      */
     @Override
@@ -136,7 +136,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 
     /**
      * Writes <code>len</code> bytes from the specified byte array starting at offset <code>off</code> to this byte array output stream.
-     * 
+     *
      * @param b the data.
      * @param off the start offset in the data.
      * @param len the number of bytes to write.
@@ -159,7 +159,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
     /**
      * Writes the complete contents of this byte array output stream to the specified output stream argument, as if by calling the output
      * stream's write method using <code>out.write(buf, 0, count)</code>.
-     * 
+     *
      * @param out the output stream to which to write the data.
      * @exception IOException if an I/O error occurs.
      */
@@ -170,7 +170,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
     /**
      * Resets the <code>count</code> field of this byte array output stream to zero, so that all currently accumulated output in the output
      * stream is discarded. The output stream can be used again, reusing the already allocated buffer space.
-     * 
+     *
      * @see java.io.ByteArrayInputStream#count
      */
     public void reset() {
@@ -180,7 +180,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
     /**
      * Creates a newly allocated byte array. Its size is the current size of this output stream and the valid contents of the buffer have
      * been copied into it.
-     * 
+     *
      * @return the current contents of this output stream, as a byte array.
      * @see java.io.ByteArrayOutputStream#size()
      */
@@ -190,7 +190,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 
     /**
      * Returns the current size of the buffer.
-     * 
+     *
      * @return the value of the <code>count</code> field, which is the number of valid bytes in this output stream.
      * @see java.io.ByteArrayOutputStream#count
      */
@@ -205,7 +205,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
      * This method always replaces malformed-input and unmappable-character sequences with the default replacement string for the platform's
      * default character set. The {@linkplain java.nio.charset.CharsetDecoder} class should be used when more control over the decoding
      * process is required.
-     * 
+     *
      * @return String decoded from the buffer's contents.
      */
     @Override

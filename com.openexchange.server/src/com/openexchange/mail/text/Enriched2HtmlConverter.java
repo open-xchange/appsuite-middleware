@@ -52,6 +52,8 @@ package com.openexchange.mail.text;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 
 /**
  * Enriched2HtmlConverter - converts text content of MIME type 'text/enriched' to regular html content
@@ -190,7 +192,7 @@ public class Enriched2HtmlConverter {
                  */
                 doReset = true;
             }
-            final StringBuilder sb = new StringBuilder(enrichedText.length());
+            final StringAllocator sb = new StringAllocator(enrichedText.length());
             StringReader input = null;
             try {
                 input = new StringReader(enrichedText.replaceAll("\r\n", "\n"));
@@ -275,9 +277,7 @@ public class Enriched2HtmlConverter {
                 }
                 sb.append(CHAR_LF);
             } finally {
-                if (input != null) {
-                    input.close();
-                }
+                Streams.close(input);
             }
             return sb.toString();
         } catch (final IOException e) {
@@ -322,7 +322,7 @@ public class Enriched2HtmlConverter {
 
     private static final String ENRICHED_PREFIX = "x-tad-";
 
-    private final void handleEnrichedTag(final String tagArg, final StringBuilder sb) {
+    private final void handleEnrichedTag(final String tagArg, final StringAllocator sb) {
         String tag;
         final boolean isEndTag = tagArg.charAt(0) == CHAR_SLASH;
         if (isEndTag) {
@@ -418,7 +418,7 @@ public class Enriched2HtmlConverter {
         }
     }
 
-    private static final void mapSimpleTag(final String rpl, final boolean isEndTag, final StringBuilder sb) {
+    private static final void mapSimpleTag(final String rpl, final boolean isEndTag, final StringAllocator sb) {
         sb.append(CHAR_LT);
         if (isEndTag) {
             sb.append(CHAR_SLASH);
@@ -436,7 +436,7 @@ public class Enriched2HtmlConverter {
 
     private static final String FONT_FACE = " face=\"";
 
-    private static final void openFont(final int size, final String font, final String color, final StringBuilder sb) {
+    private static final void openFont(final int size, final String font, final String color, final StringAllocator sb) {
         sb.append(FONT_PREFIX);
         if (size > 0) {
             sb.append(FONT_SIZE_PLUS).append(size);
@@ -454,7 +454,7 @@ public class Enriched2HtmlConverter {
 
     private static final String FONT_CLOSE_TAG = "</font>";
 
-    private static final void closeFont(final StringBuilder sb) {
+    private static final void closeFont(final StringAllocator sb) {
         sb.append(FONT_CLOSE_TAG);
     }
 

@@ -69,6 +69,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.tools.Constants;
+import com.openexchange.java.Streams;
 import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
@@ -179,7 +180,7 @@ public final class UpdateTaskRunUpdateCLT {
                 final String param = (null == schemaName ? String.valueOf(contextId) : schemaName);
                 mbsc.invoke(Constants.OBJECT_NAME, "runUpdate", new Object[] { param }, null);
             } finally {
-                jmxConnector.close();
+                Streams.close(jmxConnector);
             }
         } catch (final ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());

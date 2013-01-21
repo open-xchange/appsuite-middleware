@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CapabilityServiceImpl}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CapabilityServiceImpl implements CapabilityService {
@@ -81,7 +81,7 @@ public class CapabilityServiceImpl implements CapabilityService {
 
     /**
      * Initializes a new {@link CapabilityServiceImpl}.
-     * 
+     *
      * @param capabilitiesActivator
      * @param context
      */

@@ -70,6 +70,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.management.console.JMXAuthenticatorImpl;
 
@@ -161,7 +162,7 @@ public class CrawlerUpdateCLT {
             } catch (final MalformedObjectNameException e) {
                 System.err.println(e.getMessage());
             } finally {
-                jmxConnector.close();
+                Streams.close(jmxConnector);
             }
 
         } catch (final ParseException e) {

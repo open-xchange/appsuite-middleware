@@ -450,7 +450,7 @@ public class MimeMailException extends OXException {
 
     /**
      * Appends command information to given information string.
-     * 
+     *
      * @param info The information
      * @param folder The optional folder
      * @return The command with optional information appended

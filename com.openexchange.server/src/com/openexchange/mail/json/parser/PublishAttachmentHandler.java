@@ -53,7 +53,6 @@ import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 import static com.openexchange.mail.mime.converters.MimeMessageConverter.convertPart;
 import static com.openexchange.mail.text.HtmlProcessing.getConformHTML;
 import static com.openexchange.mail.text.HtmlProcessing.htmlFormat;
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -85,6 +84,7 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -607,11 +607,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     fileAccess.finish();
                 }
             } finally {
-                try {
-                    in.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
+                Streams.close(in);
             }
         }
         /*

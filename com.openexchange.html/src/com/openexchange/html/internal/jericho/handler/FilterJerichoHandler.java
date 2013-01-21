@@ -83,6 +83,7 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -1074,13 +1075,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                             }
                             mapStr = new String(DEFAULT_WHITELIST);
                         } finally {
-                            if (null != reader) {
-                                try {
-                                    reader.close();
-                                } catch (final Exception e) {
-                                    LOG.error(e.getMessage(), e);
-                                }
-                            }
+                            Streams.close(reader);
                         }
                     }
                 }

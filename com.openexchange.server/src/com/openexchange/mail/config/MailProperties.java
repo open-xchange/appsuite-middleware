@@ -658,11 +658,7 @@ public final class MailProperties implements IMailProperties {
                     e.getMessage()).toString(),
                 e);
         } finally {
-            try {
-                fis.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(fis);
         }
     }
 
