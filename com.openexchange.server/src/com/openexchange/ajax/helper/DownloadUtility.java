@@ -143,7 +143,7 @@ public final class DownloadUtility {
                 final String cs = contentType.getCharsetParameter();
                 final boolean valid = CharsetDetector.isValid(cs);
                 String htmlContent = bytes.toString(valid ? cs : null);
-                htmlContent = htmlService.sanitize(htmlContent, null, true, new boolean[1], null);
+                htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
                 in = Streams.newByteArrayInputStream(htmlContent.getBytes(valid ? Charsets.forName(cs) : Charsets.ISO_8859_1));
             } else if (contentType.startsWith("image/")) {
                 /*
