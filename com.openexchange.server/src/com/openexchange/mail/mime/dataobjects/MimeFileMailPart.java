@@ -60,6 +60,7 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Part;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -202,13 +203,7 @@ public abstract class MimeFileMailPart extends MailPart {
                 }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } finally {
-                if (fis != null) {
-                    try {
-                        fis.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                }
+                Streams.close(fis);
             }
             return cachedContent;
         }

@@ -69,6 +69,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.oxfolder.GABRestorerMBean;
 import com.openexchange.tools.oxfolder.GABRestorerMBeanImpl;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
@@ -177,7 +178,7 @@ public class GABRestorerCLT {
                 // Cannot occur
                 com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(GABRestorerCLT.class)).error(e.getMessage(), e);
             } finally {
-                jmxConnector.close();
+                Streams.close(jmxConnector);
             }
 
         } catch (final ParseException e) {

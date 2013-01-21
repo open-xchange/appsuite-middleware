@@ -107,6 +107,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.image.ImageActionFactory;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
@@ -124,7 +125,6 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
-import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -1557,11 +1557,7 @@ public final class MimeMessageUtility {
             throw e;
         } finally {
             if (close) {
-                try {
-                    inputStream.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
+                Streams.close(inputStream);
             }
         }
     }

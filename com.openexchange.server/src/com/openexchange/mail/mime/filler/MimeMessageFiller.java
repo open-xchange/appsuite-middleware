@@ -106,6 +106,7 @@ import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -1412,7 +1413,7 @@ public class MimeMessageFiller {
                     out.write(bbuf, 0, len);
                 }
             } finally {
-                in.close();
+                Streams.close(in);
             }
             rfcBytes = out.toByteArray();
         }

@@ -77,6 +77,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
@@ -214,7 +215,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 }
                 out.flush();
             } finally {
-                attachmentInputStream.close();
+                Streams.close(attachmentInputStream);
             }
             /*
              * Create file holder

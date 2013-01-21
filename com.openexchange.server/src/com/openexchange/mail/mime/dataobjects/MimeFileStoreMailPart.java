@@ -66,6 +66,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -183,11 +184,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
                         fileAccess.finish();
                     }
                 } finally {
-                    try {
-                        in.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
+                    Streams.close(in);
                 }
             }
             id = String.valueOf(file.getId());

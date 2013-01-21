@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
@@ -155,13 +156,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
+            Streams.close(fis);
         }
     }
 

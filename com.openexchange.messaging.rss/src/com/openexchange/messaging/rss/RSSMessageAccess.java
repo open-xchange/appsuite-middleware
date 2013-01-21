@@ -65,6 +65,7 @@ import org.htmlcleaner.TagNode;
 import org.xml.sax.InputSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingAccountManager;
@@ -329,13 +330,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
                  */
                 return input.build(new InputSource(new UnsynchronizedStringReader(builder.toString())));
             } finally {
-                if (null != in) {
-                    try {
-                        in.close();
-                    } catch (final Exception ignore) {
-                        // Ignore
-                    }
-                }
+                Streams.close(in);
             }
         }
     }

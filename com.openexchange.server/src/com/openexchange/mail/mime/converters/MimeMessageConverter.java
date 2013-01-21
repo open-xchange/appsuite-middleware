@@ -2143,11 +2143,7 @@ public final class MimeMessageConverter {
             }
             return in.available();
         } finally {
-            try {
-                in.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(in);
         }
     }
 

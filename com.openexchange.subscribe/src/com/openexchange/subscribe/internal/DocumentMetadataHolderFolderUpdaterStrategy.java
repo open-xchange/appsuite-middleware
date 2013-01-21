@@ -62,6 +62,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
@@ -159,11 +160,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
             try {
                 infostore.saveDocument(newElement.documentMetadata, file, InfostoreFacade.NEW, sess.serverSession);
             } finally {
-                try {
-                    file.close();
-                } catch (final IOException e) {
-                    LOG.debug(e.getMessage(), e);
-                }
+                Streams.close(file);
             }
         }
     }
