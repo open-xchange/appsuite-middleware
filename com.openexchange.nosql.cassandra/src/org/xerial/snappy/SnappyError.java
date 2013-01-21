@@ -26,14 +26,14 @@ package org.xerial.snappy;
 
 /**
  * Used when serious errors (unchecked exception) are observed.
- * 
+ *
  * @author leo
- * 
+ *
  */
 public class SnappyError extends Error
 {
     /**
-     * 
+     *
      */
     private static final long    serialVersionUID = 1L;
 

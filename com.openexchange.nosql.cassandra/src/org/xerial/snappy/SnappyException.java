@@ -28,10 +28,10 @@ import java.io.IOException;
 
 /**
  * Exception in snappy-java
- * 
+ *
  * @deprecated Snappy-java now uses {@link IOException}
  * @author leo
- * 
+ *
  */
 @Deprecated
 public class SnappyException extends Exception

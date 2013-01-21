@@ -87,7 +87,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /** Checks if associated {@link Permission permission}'s service is available. */
     public static interface AvailabilityChecker extends Initialization {
-        
+
         /**
          * Indicates if associated {@link Permission permission}'s service is available.
          *
@@ -208,7 +208,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
         public void stop() throws OXException {
             checker.stop();
         }
-        
+
         /**
          * Indicates if associated {@link Permission permission}'s service is available.
          *

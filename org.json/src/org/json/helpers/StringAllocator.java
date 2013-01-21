@@ -56,7 +56,7 @@ import java.lang.reflect.Constructor;
  * with no guarantee of synchronization.
  * <p>
  * &nbsp;&nbsp;&nbsp;<b>NOTE: The {@link #toString()} method shares underlying character array!</b>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class StringAllocator extends AbstractStringAllocator implements java.io.Serializable {
@@ -86,7 +86,7 @@ public final class StringAllocator extends AbstractStringAllocator implements ja
 
     /**
      * Constructs a string allocator with no characters in it and an initial capacity specified by the <code>capacity</code> argument.
-     * 
+     *
      * @param capacity the initial capacity.
      * @throws NegativeArraySizeException if the <code>capacity</code> argument is less than <code>0</code>.
      */
@@ -97,7 +97,7 @@ public final class StringAllocator extends AbstractStringAllocator implements ja
     /**
      * Constructs a string allocator initialized to the contents of the specified string. The initial capacity of the string allocator is
      * <code>16</code> plus the length of the string argument.
-     * 
+     *
      * @param str the initial contents of the buffer.
      * @throws NullPointerException if <code>str</code> is <code>null</code>
      */
@@ -109,7 +109,7 @@ public final class StringAllocator extends AbstractStringAllocator implements ja
     /**
      * Constructs a string allocator that contains the same characters as the specified <code>CharSequence</code>. The initial capacity of
      * the string allocator is <code>16</code> plus the length of the <code>CharSequence</code> argument.
-     * 
+     *
      * @param seq the sequence to copy.
      * @throws NullPointerException if <code>seq</code> is <code>null</code>
      */
@@ -158,7 +158,7 @@ public final class StringAllocator extends AbstractStringAllocator implements ja
      * Let <i>n</i> be the length of this character sequence just prior to execution of the <tt>append</tt> method. Then the character at
      * index <i>k</i> in the new character sequence is equal to the character at index <i>k</i> in the old character sequence, if <i>k</i>
      * is less than <i>n</i>; otherwise, it is equal to the character at index <i>k-n</i> in the argument <code>sb</code>.
-     * 
+     *
      * @param sb the <tt>StringBuffer</tt> to append.
      * @return a reference to this object.
      */
@@ -484,7 +484,7 @@ public final class StringAllocator extends AbstractStringAllocator implements ja
 
     /**
      * Save the state of the <tt>StringAllocator</tt> instance to a stream (that is, serialize it).
-     * 
+     *
      * @serialData the number of characters currently stored in the string builder (<tt>int</tt>), followed by the characters in the string
      *             allocator (<tt>char[]</tt>). The length of the <tt>char</tt> array may be greater than the number of characters currently
      *             stored in the string allocator, in which case extra characters are ignored.

@@ -433,7 +433,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
                     properties.load(in);
                     useDefaultConfig = false;
                 } finally {
-                    in.close();
+                    Streams.close(in);
                 }
             } catch (final FileNotFoundException e) {
                 LOG.warn("Missing JTidy configuration file \"" + tidyConfigFilename + "\"");

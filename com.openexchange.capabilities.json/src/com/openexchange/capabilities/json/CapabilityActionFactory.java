@@ -59,7 +59,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link CapabilityActionFactory}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CapabilityActionFactory implements AJAXActionServiceFactory {
@@ -68,7 +68,7 @@ public class CapabilityActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Initializes a new {@link CapabilityActionFactory}.
-     * 
+     *
      * @param services The service look-up
      */
     public CapabilityActionFactory(ServiceLookup services) {

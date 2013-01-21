@@ -597,7 +597,7 @@ public class ContentType extends ParameterizedHeader {
      *
      * @param primaryType The primary type; e.g. <code>"text"</code>
      * @param subType The secondary type; e.g. <code>"plain"</code>
-     * @return <code>true</code> if matches given base type; otherwise <code>false</code>
+     * @return <code>true</code> if equals given base type; otherwise <code>false</code>
      */
     public boolean isBaseType(final String primaryType, final String subType) {
         if (null == this.primaryType) {
@@ -612,6 +612,29 @@ public class ContentType extends ParameterizedHeader {
                 return false;
             }
         } else if (!this.subType.equalsIgnoreCase(subType)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks if this Content-Type has specified base type.
+     *
+     * @param primaryType The primary type; e.g. <code>"text"</code>
+     * @param subTypeExpression The expression for secondary type; e.g. <code>"*"</code>
+     * @return <code>true</code> if matches given base type; otherwise <code>false</code>
+     */
+    public boolean matchesBaseType(final String primaryType, final String subTypeExpression) {
+        if (null == this.primaryType) {
+            if (null != primaryType) {
+                return false;
+            }
+        } else if (!this.primaryType.equalsIgnoreCase(primaryType)) {
+            return false;
+        }
+        if (null == this.subType) {
+            return "*".equals(subTypeExpression);
+        } else if (!Pattern.matches(wildcardToRegex(subTypeExpression), this.subType)) {
             return false;
         }
         return true;
@@ -810,12 +833,21 @@ public class ContentType extends ParameterizedHeader {
     }
 
     /**
-     * Converts specified wildcard string to a regular expression
+     * Converts specified wild-card string to a regular expression
      *
-     * @param wildcard The wildcard string to convert
-     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
+     * @param wildcard The wild-card string to convert
+     * @return An appropriate regular expression ready for being used in a {@link Pattern#compile(String) pattern}
      */
     private static String wildcardToRegex(final String wildcard) {
+        if (null == wildcard) {
+            // Accept all if null
+            return "^.*$";
+        }
+        if (wildcard.indexOf('*') < 0 && wildcard.indexOf('?') < 0) {
+            // Literal pattern
+            return Pattern.quote(wildcard);
+        }
+        // Generate appropriate regex
         final com.openexchange.java.StringAllocator s = new com.openexchange.java.StringAllocator(wildcard.length());
         s.append('^');
         final int len = wildcard.length();

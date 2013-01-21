@@ -444,7 +444,7 @@ public class JSONTokener {
          */
         final String s;
         final char b = c;
-        
+
         if (JSONObject.USE_CHAR_POOL.get()) {
             final DynamicCharArray sb = new DynamicCharArray();
             try {
@@ -565,7 +565,7 @@ public class JSONTokener {
         if (this.myIndex < 0) {
             this.myIndex = this.mySource.length();
             return false;
-        } 
+        }
         this.myIndex += to.length();
         return true;
 

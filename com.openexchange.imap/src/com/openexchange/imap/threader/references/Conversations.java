@@ -324,12 +324,12 @@ public final class Conversations {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
-                        response.toString() + " (" + imapFolder.getStore().toString() + ")"));
+                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else if (response.isNO()) {
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
-                        response.toString() + " (" + imapFolder.getStore().toString() + ")"));
+                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else {
                     protocol.handleResult(response);
                 }

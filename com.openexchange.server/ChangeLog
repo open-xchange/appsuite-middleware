@@ -1,3 +1,15 @@
+* 2013-01-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24538: Added folder and account information to error messages where possible
+ - Fix for bug 24537: Changed category to let error message be displayed instead of default one
+ - Fix for bug 24536: Transform "com.sun.mail.util.MessageRemovedIOException" orderly to a "Mail could not be found (MSG-0032)" message
+ - Fix for bug 24182: Signal permissions with respect to available service; e.g "edit-password" permission
+
+* 2013-01-20 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24512: Fixed NPE.
+ - Fix for bug 21822: Duplicate invitation mails.
+
 * 2013-01-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 24531: Fixed UTF-8 encoding

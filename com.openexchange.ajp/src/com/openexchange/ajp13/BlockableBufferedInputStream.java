@@ -57,6 +57,7 @@ import com.openexchange.concurrent.Blockable;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
 import com.openexchange.concurrent.NonBlockingBlocker;
+import com.openexchange.java.Streams;
 
 /**
  * {@link BlockableBufferedInputStream} - A blockable version of {@link BufferedInputStream}.
@@ -449,9 +450,7 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
                 if (bufUpdater.compareAndSet(this, buffer, null)) {
                     final InputStream input = in;
                     in = null;
-                    if (input != null) {
-                        input.close();
-                    }
+                    Streams.close(input);
                     return;
                 }
                 // Else retry in case a new buf was CASed in fill()

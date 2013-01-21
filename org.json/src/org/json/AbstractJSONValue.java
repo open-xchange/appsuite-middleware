@@ -64,7 +64,7 @@ import com.fasterxml.jackson.core.util.MinimalPrettyPrinter;
 
 /**
  * {@link AbstractJSONValue} - The abstract {@link JSONValue} providing some general-purpose methods.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 abstract class AbstractJSONValue implements JSONValue {
@@ -94,7 +94,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Reads the content from given reader.
-     * 
+     *
      * @param reader The reader
      * @return The reader's content
      * @throws IOException If an I/O error occurs
@@ -157,7 +157,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Creates a new JSON generator.
-     * 
+     *
      * @param writer The writer to write to
      * @return The created generator
      * @throws IOException If an I/O error occurs
@@ -174,7 +174,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Writes end character and flushes generator.
-     * 
+     *
      * @param jGenerator The generator to write to and to flush
      * @param isJsonObject Whether generating a JSON object or a JSON array
      */
@@ -199,7 +199,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Generates String directly from given character array.
-     * 
+     *
      * @param off The offset
      * @param len The length
      * @param chars The character array
@@ -237,7 +237,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Closes given <code>java.io.Closeable</code> instance (if non-<code>null</code>).
-     * 
+     *
      * @param closeable The <code>java.io.Closeable</code> instance
      */
     protected static void close(final java.io.Closeable closeable) {
@@ -252,7 +252,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Writes to given generator.
-     * 
+     *
      * @param asciiOnly Whether to write only ASCII characters
      * @param jGenerator The generator
      * @throws IOException If an I/O error occurs
@@ -262,7 +262,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Writes specified object to given generator.
-     * 
+     *
      * @param v The object
      * @param asciiOnly Whether to allow only ASCII characters
      * @param jGenerator The generator

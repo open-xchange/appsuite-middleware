@@ -236,6 +236,9 @@ public final class MailExceptionStrings implements LocalizableStrings {
      */
     public final static String MAIL_NOT_FOUND_MSG = "Mail(s) %1$s could not be found in folder %2$s";
 
+    // Mail could not be found
+    public final static String MAIL_NOT_FOUND_SIMPLE_MSG = "Mail could not be found";
+
     /**
      * Action %1$s is not supported by %2$s
      */

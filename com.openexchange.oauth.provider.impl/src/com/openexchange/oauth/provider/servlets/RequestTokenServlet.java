@@ -61,6 +61,7 @@ import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthMessage;
 import net.oauth.server.OAuthServlet;
+import com.openexchange.java.Streams;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
@@ -97,6 +98,7 @@ public class RequestTokenServlet extends HttpServlet {
     }
 
     public void processRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+        OutputStream out = null;
         try {
             /*
              * Parse OAuth message from HTTP request
@@ -129,11 +131,12 @@ public class RequestTokenServlet extends HttpServlet {
              * Write-back
              */
             response.setContentType("text/plain");
-            final OutputStream out = response.getOutputStream();
+            out = response.getOutputStream();
             OAuth.formEncode(OAuth.newList("oauth_token", accessor.requestToken, "oauth_token_secret", accessor.tokenSecret), out);
-            out.close();
         } catch (final Exception e) {
             DatabaseOAuthProviderService.handleException(e, request, response, true);
+        } finally {
+            Streams.close(out);
         }
     }
 

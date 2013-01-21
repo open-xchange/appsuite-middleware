@@ -280,7 +280,7 @@ public interface Session {
 
     /**
      * Should only be used to update the client on a redirect request.
-     * 
+     *
      * @param client The new client identifier.
      * @deprecated Use {@link SessiondService#setClient(String, String)} instead
      */

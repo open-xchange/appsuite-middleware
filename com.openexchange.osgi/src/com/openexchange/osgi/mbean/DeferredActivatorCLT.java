@@ -72,6 +72,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.osgi.console.JMXAuthenticatorImpl;
 
 /**
@@ -198,7 +199,7 @@ public class DeferredActivatorCLT {
                     }
                 }
             } finally {
-                jmxConnector.close();
+                Streams.close(jmxConnector);
             }
         } catch (final MalformedObjectNameException e) {
             // Cannot occur

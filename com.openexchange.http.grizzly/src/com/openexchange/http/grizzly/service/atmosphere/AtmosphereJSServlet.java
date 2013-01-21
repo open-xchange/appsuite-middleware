@@ -59,6 +59,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.osgi.framework.Bundle;
+import com.openexchange.java.Streams;
 
 
 /**
@@ -67,9 +68,11 @@ import org.osgi.framework.Bundle;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AtmosphereJSServlet extends HttpServlet {
+
     private final Bundle bundle;
 
     public AtmosphereJSServlet(Bundle bundle) {
+        super();
         this.bundle = bundle;
     }
 
@@ -78,23 +81,25 @@ public class AtmosphereJSServlet extends HttpServlet {
         response.reset();
         response.setContentType("application/javascript");
 
-        InputStream fileStream = bundle.getEntry("lib/jquery.atmosphere.js").openStream();
-        ReadableByteChannel fileChannel = Channels.newChannel(fileStream);
-        WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream());
-
-        final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
-
-        while(fileChannel.read(buffer) != -1) {
+        ReadableByteChannel fileChannel = null;
+        WritableByteChannel outputChannel = null;
+        try {
+            InputStream fileStream = bundle.getEntry("lib/jquery.atmosphere.js").openStream();
+            fileChannel = Channels.newChannel(fileStream);
+            outputChannel = Channels.newChannel(response.getOutputStream());
+            final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
+            while (fileChannel.read(buffer) != -1) {
+                buffer.flip();
+                outputChannel.write(buffer);
+                buffer.compact();
+            }
             buffer.flip();
-            outputChannel.write(buffer);
-            buffer.compact();
+            while (buffer.hasRemaining()) {
+                outputChannel.write(buffer);
+            }
+        } finally {
+            Streams.close(fileChannel);
+            Streams.close(outputChannel);
         }
-        buffer.flip();
-        while(buffer.hasRemaining()) {
-            outputChannel.write(buffer);
-        }
-
-        fileChannel.close();
-        outputChannel.close();
     }
 }

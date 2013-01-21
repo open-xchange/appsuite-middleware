@@ -22,7 +22,7 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
 
     public final static String HTTP_SCHEME="http";
     public final static String HTTPS_SCHEME="https";
-    
+
     private final HttpServletRequest delegate;
     private final String requestScheme;
     private final int serverPort;
@@ -31,10 +31,10 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
 
     /**
      * Initializes a new {@link HttpServletRequestWrapper}.
-     * 
+     *
      * @param httpServletRequest The incoming request
      * @param requestScheme The scheme of the incoming request: http or https
-     * @param serverPort The serverPort of the incoming request 
+     * @param serverPort The serverPort of the incoming request
      * @throws IllegalArgumentException If the port is smaller than 1
      */
     public HttpServletRequestWrapper(HttpServletRequest httpServletRequest, String requestScheme, int serverPort) {
@@ -50,7 +50,7 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
             this.isSecure=false;
         }
         this.serverPort=serverPort;
-        
+
         OXRequest internalRequest = (OXRequest)ServletUtils.getInternalRequest(delegate);
         internalRequest.setXForwardPort(serverPort);
         internalRequest.setxForwardProto(requestScheme);

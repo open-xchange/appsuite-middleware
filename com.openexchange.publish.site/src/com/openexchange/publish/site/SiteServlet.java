@@ -77,6 +77,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.Streams;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -234,7 +235,6 @@ public class SiteServlet extends HttpServlet {
         resp.setContentLength((int) file.getFileSize());
 
         InputStream document = null;
-
         try {
             document = new BufferedInputStream(files.getDocument(file.getId(), file.getVersion()));
             final ServletOutputStream outputStream = resp.getOutputStream();
@@ -243,9 +243,7 @@ public class SiteServlet extends HttpServlet {
                 outputStream.write(d);
             }
         } finally {
-            if (document != null) {
-                document.close();
-            }
+            Streams.close(document);
         }
     }
 

@@ -218,6 +218,9 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
             } catch (final FileNotFoundException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } finally {
                 if (fis != null) {

@@ -113,9 +113,10 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
 
     /**
      * Returns the length (character count).
-     * 
+     *
      * @return the length of the sequence of characters currently represented by this object
      */
+    @Override
     public int length() {
         return count;
     }
@@ -123,7 +124,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
     /**
      * Returns the current capacity. The capacity is the amount of storage available for newly inserted characters, beyond which an
      * allocation will occur.
-     * 
+     *
      * @return the current capacity
      */
     public int capacity() {
@@ -138,7 +139,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <li>Twice the old capacity, plus <code>2</code>.
      * </ul>
      * If the <code>minimumCapacity</code> argument is nonpositive, this method takes no action and simply returns.
-     * 
+     *
      * @param minimumCapacity the minimum desired capacity.
      */
     public void ensureCapacity(final int minimumCapacity) {
@@ -179,11 +180,12 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <p>
      * If the <code>char</code> value specified by the index is a <a href="Character.html#unicode">surrogate</a>, the surrogate value is
      * returned.
-     * 
+     *
      * @param index the index of the desired <code>char</code> value.
      * @return the <code>char</code> value at the specified index.
      * @throws IndexOutOfBoundsException if <code>index</code> is negative or greater than or equal to <code>length()</code>.
      */
+    @Override
     public char charAt(final int index) {
         if ((index < 0) || (index >= count)) {
             throw new StringIndexOutOfBoundsException(index);
@@ -198,7 +200,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * If the <code>char</code> value specified at the given index is in the high-surrogate range, the following index is less than the
      * length of this sequence, and the <code>char</code> value at the following index is in the low-surrogate range, then the supplementary
      * code point corresponding to this surrogate pair is returned. Otherwise, the <code>char</code> value at the given index is returned.
-     * 
+     *
      * @param index the index to the <code>char</code> values
      * @return the code point value of the character at the <code>index</code>
      * @exception IndexOutOfBoundsException if the <code>index</code> argument is negative or not less than the length of this sequence.
@@ -219,7 +221,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * 2)</code> is in the high-surrogate range, then the supplementary code point value of the surrogate pair is returned. If the
      * <code>char</code> value at <code>index -
      * 1</code> is an unpaired low-surrogate or a high-surrogate, the surrogate value is returned.
-     * 
+     *
      * @param index the index following the code point that should be returned
      * @return the Unicode code point value before the given index.
      * @exception IndexOutOfBoundsException if the <code>index</code> argument is less than 1 or greater than the length of this sequence.
@@ -237,7 +239,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <code>beginIndex</code> and extends to the <code>char</code> at index <code>endIndex - 1</code>. Thus the length (in
      * <code>char</code>s) of the text range is <code>endIndex-beginIndex</code>. Unpaired surrogates within this sequence count as one code
      * point each.
-     * 
+     *
      * @param beginIndex the index to the first <code>char</code> of the text range.
      * @param endIndex the index after the last <code>char</code> of the text range.
      * @return the number of Unicode code points in the specified text range
@@ -268,7 +270,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
     /**
      * Returns the index within this sequence that is offset from the given <code>index</code> by <code>codePointOffset</code> code points.
      * Unpaired surrogates within the text range given by <code>index</code> and <code>codePointOffset</code> count as one code point each.
-     * 
+     *
      * @param index the index to be offset
      * @param codePointOffset the offset in code points
      * @return the index within this sequence
@@ -322,13 +324,13 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <code>dstBegin</code> and ending at index:
      * <p>
      * <blockquote>
-     * 
+     *
      * <pre>
      * dstbegin + (srcEnd - srcBegin) - 1
      * </pre>
-     * 
+     *
      * </blockquote>
-     * 
+     *
      * @param srcBegin start copying at this offset.
      * @param srcEnd stop copying at this offset.
      * @param dst the array to copy the data into.
@@ -359,7 +361,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * is identical to the old character sequence, except that it contains the character <code>ch</code> at position <code>index</code>.
      * <p>
      * The index argument must be greater than or equal to <code>0</code>, and less than the length of this sequence.
-     * 
+     *
      * @param index the index of the character to modify.
      * @param ch the new character.
      * @throws IndexOutOfBoundsException if <code>index</code> is negative or greater than or equal to <code>length()</code>.
@@ -376,7 +378,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <p>
      * The argument is converted to a string as if by the method <code>String.valueOf</code>, and the characters of that string are then
      * appended to this sequence.
-     * 
+     *
      * @param obj an <code>Object</code>.
      * @return a reference to this object.
      */
@@ -393,7 +395,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * Let <i>n</i> be the length of this character sequence just prior to execution of the <code>append</code> method. Then the character
      * at index <i>k</i> in the new character sequence is equal to the character at index <i>k</i> in the old character sequence, if
      * <i>k</i> is less than <i>n</i>; otherwise, it is equal to the character at index <i>k-n</i> in the argument <code>str</code>.
-     * 
+     *
      * @param str a string.
      * @return a reference to this object.
      */
@@ -430,6 +432,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
     }
 
     // Documentation in subclasses because of synchro difference
+    @Override
     public AbstractStringAllocator append(CharSequence s) {
         if (s == null) {
             s = "null";
@@ -456,7 +459,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <p>
      * If <code>s</code> is <code>null</code>, then this method appends characters as if the s parameter was a sequence containing the four
      * characters <code>"null"</code>.
-     * 
+     *
      * @param s the sequence to append.
      * @param start the starting index of the subsequence to be appended.
      * @param end the end index of the subsequence to be appended.
@@ -464,6 +467,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @throws IndexOutOfBoundsException if <code>start</code> or <code>end</code> are negative, or <code>start</code> is greater than
      *             <code>end</code> or <code>end</code> is greater than <code>s.length()</code>
      */
+    @Override
     public AbstractStringAllocator append(CharSequence s, final int start, final int end) {
         if (s == null) {
             s = "null";
@@ -494,7 +498,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <p>
      * The overall effect is exactly as if the argument were converted to a string by the method {@link String#valueOf(char[])} and the
      * characters of that string were then {@link #append(String) appended} to this character sequence.
-     * 
+     *
      * @param str the characters to be appended.
      * @return a reference to this object.
      */
@@ -516,7 +520,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <p>
      * The overall effect is exactly as if the arguments were converted to a string by the method {@link String#valueOf(char[],int,int)} and
      * the characters of that string were then {@link #append(String) appended} to this character sequence.
-     * 
+     *
      * @param str the characters to be appended.
      * @param offset the index of the first <code>char</code> to append.
      * @param len the number of <code>char</code>s to append.
@@ -537,7 +541,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <p>
      * The argument is converted to a string as if by the method <code>String.valueOf</code>, and the characters of that string are then
      * appended to this sequence.
-     * 
+     *
      * @param b a <code>boolean</code>.
      * @return a reference to this object.
      */
@@ -572,10 +576,11 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <p>
      * The overall effect is exactly as if the argument were converted to a string by the method {@link String#valueOf(char)} and the
      * character in that string were then {@link #append(String) appended} to this character sequence.
-     * 
+     *
      * @param c a <code>char</code>.
      * @return a reference to this object.
      */
+    @Override
     public AbstractStringAllocator append(final char c) {
         final int newCount = count + 1;
         if (newCount > value.length) {
@@ -590,7 +595,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <p>
      * The argument is converted to a string as if by the method <code>String.valueOf</code>, and the characters of that string are then
      * appended to this sequence.
-     * 
+     *
      * @param i an <code>int</code>.
      * @return a reference to this object.
      */
@@ -634,7 +639,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
         '9', '9', '9', '9', '9', '9', '9', '9', '9', '9',
         };
 
-    final static char [] DigitOnes = { 
+    final static char [] DigitOnes = {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -705,7 +710,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <p>
      * The argument is converted to a string as if by the method <code>String.valueOf</code>, and the characters of that string are then
      * appended to this sequence.
-     * 
+     *
      * @param l a <code>long</code>.
      * @return a reference to this object.
      */
@@ -795,7 +800,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <p>
      * The argument is converted to a string as if by the method <code>String.valueOf</code>, and the characters of that string are then
      * appended to this string sequence.
-     * 
+     *
      * @param f a <code>float</code>.
      * @return a reference to this object.
      */
@@ -809,7 +814,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <p>
      * The argument is converted to a string as if by the method <code>String.valueOf</code>, and the characters of that string are then
      * appended to this sequence.
-     * 
+     *
      * @param d a <code>double</code>.
      * @return a reference to this object.
      */
@@ -822,7 +827,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * Removes the characters in a substring of this sequence. The substring begins at the specified <code>start</code> and extends to the
      * character at index <code>end - 1</code> or to the end of the sequence if no such character exists. If <code>start</code> is equal to
      * <code>end</code>, no changes are made.
-     * 
+     *
      * @param start The beginning index, inclusive.
      * @param end The ending index, exclusive.
      * @return This object.
@@ -855,7 +860,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <p>
      * The overall effect is exactly as if the argument were converted to a <code>char</code> array by the method
      * {@link Character#toChars(int)} and the character in that array were then {@link #append(char[]) appended} to this character sequence.
-     * 
+     *
      * @param codePoint a Unicode code point
      * @return a reference to this object.
      * @exception IllegalArgumentException if the specified <code>codePoint</code> isn't a valid Unicode code point
@@ -893,7 +898,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * Note: If the character at the given index is a supplementary character, this method does not remove the entire character. If correct
      * handling of supplementary characters is required, determine the number of <code>char</code>s to remove by calling
      * <code>Character.charCount(thisSequence.codePointAt(index))</code>, where <code>thisSequence</code> is this sequence.
-     * 
+     *
      * @param index Index of <code>char</code> to remove
      * @return This object.
      * @throws StringIndexOutOfBoundsException if the <code>index</code> is negative or greater than or equal to <code>length()</code>.
@@ -912,7 +917,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * the specified <code>start</code> and extends to the character at index <code>end - 1</code> or to the end of the sequence if no such
      * character exists. First the characters in the substring are removed and then the specified <code>String</code> is inserted at
      * <code>start</code>. (This sequence will be lengthened to accommodate the specified String if necessary.)
-     * 
+     *
      * @param start The beginning index, inclusive.
      * @param end The ending index, exclusive.
      * @param str String that will replace previous contents.
@@ -958,7 +963,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
     /**
      * Returns a new <code>String</code> that contains a subsequence of characters currently contained in this character sequence. The
      * substring begins at the specified index and extends to the end of this sequence.
-     * 
+     *
      * @param start The beginning index, inclusive.
      * @return The new string.
      * @throws StringIndexOutOfBoundsException if <code>start</code> is less than zero, or greater than the length of this object.
@@ -971,20 +976,20 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * Returns a new character sequence that is a subsequence of this sequence.
      * <p>
      * An invocation of this method of the form <blockquote>
-     * 
+     *
      * <pre>
      * sb.subSequence(begin, end)
      * </pre>
-     * 
+     *
      * </blockquote> behaves in exactly the same way as the invocation <blockquote>
-     * 
+     *
      * <pre>
      * sb.substring(begin, end)
      * </pre>
-     * 
+     *
      * </blockquote> This method is provided so that this class can implement the {@link CharSequence} interface.
      * </p>
-     * 
+     *
      * @param start the start index, inclusive.
      * @param end the end index, exclusive.
      * @return the specified subsequence.
@@ -992,6 +997,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      *             or if <tt>start</tt> is greater than <tt>end</tt>
      * @spec JSR-51
      */
+    @Override
     public CharSequence subSequence(final int start, final int end) {
         return substring(start, end);
     }
@@ -999,7 +1005,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
     /**
      * Returns a new <code>String</code> that contains a subsequence of characters currently contained in this sequence. The substring
      * begins at the specified <code>start</code> and extends to the character at index <code>end - 1</code>.
-     * 
+     *
      * @param start The beginning index, inclusive.
      * @param end The ending index, exclusive.
      * @return The new string.
@@ -1024,7 +1030,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * specified <code>offset</code> and extends <code>len</code> <code>char</code>s. The characters of the subarray are inserted into this
      * sequence at the position indicated by <code>index</code>. The length of this sequence increases by <code>len</code> <code>char</code>
      * s.
-     * 
+     *
      * @param index position at which to insert subarray.
      * @param str A <code>char</code> array.
      * @param offset the index of the first <code>char</code> in subarray to be inserted.
@@ -1058,7 +1064,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * then inserted into this sequence at the indicated offset.
      * <p>
      * The offset argument must be greater than or equal to <code>0</code>, and less than or equal to the length of this sequence.
-     * 
+     *
      * @param offset the offset.
      * @param obj an <code>Object</code>.
      * @return a reference to this object.
@@ -1085,7 +1091,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * </ul>
      * <p>
      * The offset argument must be greater than or equal to <code>0</code>, and less than or equal to the length of this sequence.
-     * 
+     *
      * @param offset the offset.
      * @param str a string.
      * @return a reference to this object.
@@ -1118,7 +1124,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * The overall effect is exactly as if the argument were converted to a string by the method {@link String#valueOf(char[])} and the
      * characters of that string were then {@link #insert(int,String) inserted} into this character sequence at the position indicated by
      * <code>offset</code>.
-     * 
+     *
      * @param offset the offset.
      * @param str a character array.
      * @return a reference to this object.
@@ -1149,7 +1155,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * method.
      * <p>
      * If <code>s</code> is <code>null</code>, then the four characters <code>"null"</code> are inserted into this sequence.
-     * 
+     *
      * @param dstOffset the offset.
      * @param s the sequence to be inserted
      * @return a reference to this object.
@@ -1189,7 +1195,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <p>
      * If <code>s</code> is <code>null</code>, then this method inserts characters as if the s parameter was a sequence containing the four
      * characters <code>"null"</code>.
-     * 
+     *
      * @param dstOffset the offset in this sequence.
      * @param s the sequence to be inserted.
      * @param start the starting index of the subsequence to be inserted.
@@ -1232,7 +1238,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * then inserted into this sequence at the indicated offset.
      * <p>
      * The offset argument must be greater than or equal to <code>0</code>, and less than or equal to the length of this sequence.
-     * 
+     *
      * @param offset the offset.
      * @param b a <code>boolean</code>.
      * @return a reference to this object.
@@ -1253,7 +1259,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <code>offset</code>.
      * <p>
      * The offset argument must be greater than or equal to <code>0</code>, and less than or equal to the length of this sequence.
-     * 
+     *
      * @param offset the offset.
      * @param c a <code>char</code>.
      * @return a reference to this object.
@@ -1277,7 +1283,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * then inserted into this sequence at the indicated offset.
      * <p>
      * The offset argument must be greater than or equal to <code>0</code>, and less than or equal to the length of this sequence.
-     * 
+     *
      * @param offset the offset.
      * @param i an <code>int</code>.
      * @return a reference to this object.
@@ -1294,7 +1300,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * then inserted into this sequence at the position indicated by <code>offset</code>.
      * <p>
      * The offset argument must be greater than or equal to <code>0</code>, and less than or equal to the length of this sequence.
-     * 
+     *
      * @param offset the offset.
      * @param l a <code>long</code>.
      * @return a reference to this object.
@@ -1311,7 +1317,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * then inserted into this sequence at the indicated offset.
      * <p>
      * The offset argument must be greater than or equal to <code>0</code>, and less than or equal to the length of this sequence.
-     * 
+     *
      * @param offset the offset.
      * @param f a <code>float</code>.
      * @return a reference to this object.
@@ -1328,7 +1334,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * then inserted into this sequence at the indicated offset.
      * <p>
      * The offset argument must be greater than or equal to <code>0</code>, and less than or equal to the length of this sequence.
-     * 
+     *
      * @param offset the offset.
      * @param d a <code>double</code>.
      * @return a reference to this object.
@@ -1341,13 +1347,13 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
     /**
      * Returns the index within this string of the first occurrence of the specified substring. The integer returned is the smallest value
      * <i>k</i> such that: <blockquote>
-     * 
+     *
      * <pre>
      * this.toString().startsWith(str, <i>k</i>)
      * </pre>
-     * 
+     *
      * </blockquote> is <code>true</code>.
-     * 
+     *
      * @param str any string.
      * @return if the string argument occurs as a substring within this object, then the index of the first character of the first such
      *         substring is returned; if it does not occur as a substring, <code>-1</code> is returned.
@@ -1360,13 +1366,13 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
     /**
      * Returns the index within this string of the first occurrence of the specified substring, starting at the specified index. The integer
      * returned is the smallest value <tt>k</tt> for which: <blockquote>
-     * 
+     *
      * <pre>
      * k &gt;= Math.min(fromIndex, str.length()) &amp;&amp; this.toString().startsWith(str, k)
      * </pre>
-     * 
+     *
      * </blockquote> If no such value of <i>k</i> exists, then -1 is returned.
-     * 
+     *
      * @param str the substring for which to search.
      * @param fromIndex the index from which to start the search.
      * @return the index within this string of the first occurrence of the specified substring, starting at the specified index.
@@ -1379,7 +1385,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
     /**
      * Code shared by String and StringBuffer to do searches. The source is the character array being searched, and the target is the string
      * being searched for.
-     * 
+     *
      * @param source the characters being searched.
      * @param sourceOffset offset of the source string.
      * @param sourceCount count of the source string.
@@ -1431,13 +1437,13 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * Returns the index within this string of the rightmost occurrence of the specified substring. The rightmost empty string "" is
      * considered to occur at the index value <code>this.length()</code>. The returned index is the largest value <i>k</i> such that
      * <blockquote>
-     * 
+     *
      * <pre>
      * this.toString().startsWith(str, k)
      * </pre>
-     * 
+     *
      * </blockquote> is true.
-     * 
+     *
      * @param str the substring to search for.
      * @return if the string argument occurs one or more times as a substring within this object, then the index of the first character of
      *         the last such substring is returned. If it does not occur as a substring, <code>-1</code> is returned.
@@ -1450,13 +1456,13 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
     /**
      * Returns the index within this string of the last occurrence of the specified substring. The integer returned is the largest value
      * <i>k</i> such that: <blockquote>
-     * 
+     *
      * <pre>
      * k &lt;= Math.min(fromIndex, str.length()) &amp;&amp; this.toString().startsWith(str, k)
      * </pre>
-     * 
+     *
      * </blockquote> If no such value of <i>k</i> exists, then -1 is returned.
-     * 
+     *
      * @param str the substring to search for.
      * @param fromIndex the index to start the search from.
      * @return the index within this sequence of the last occurrence of the specified substring.
@@ -1469,7 +1475,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
     /**
      * Code shared by String and StringBuffer to do searches. The source is the character array being searched, and the target is the string
      * being searched for.
-     * 
+     *
      * @param source the characters being searched.
      * @param sourceOffset offset of the source string.
      * @param sourceCount count of the source string.
@@ -1529,7 +1535,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * <p>
      * Note that the reverse operation may result in producing surrogate pairs that were unpaired low-surrogates and high-surrogates before
      * the operation. For example, reversing "&#92;uDC00&#92;uD800" produces "&#92;uD800&#92;uDC00" which is a valid surrogate pair.
-     * 
+     *
      * @return a reference to this object.
      */
     public AbstractStringAllocator reverse() {
@@ -1565,7 +1571,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * Returns a string representing the data in this sequence. A new <code>String</code> object is allocated and initialized to contain the
      * character sequence currently represented by this object. This <code>String</code> is then returned. Subsequent changes to this
      * sequence do not affect the contents of the <code>String</code>.
-     * 
+     *
      * @return a string representation of this sequence of characters.
      */
     @Override

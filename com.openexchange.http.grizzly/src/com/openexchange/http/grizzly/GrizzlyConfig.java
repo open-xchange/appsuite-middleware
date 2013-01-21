@@ -96,10 +96,10 @@ public class GrizzlyConfig implements Initialization {
 
     /** Unique backend route for every single backend behind the load balancer */
     private String backendRoute = "OX0";
-    
+
     /** Do we want to send absolute or relative redirects */
     private boolean isAbsoluteRedirect = false;
-    
+
     /** Do we want to enable the AJP Filter for incoming requests */
     private boolean isAJPEnabled = false;
 
@@ -293,7 +293,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the isForceHttps
-     * 
+     *
      * @return The isForceHttps
      */
     public boolean isForceHttps() {
@@ -368,7 +368,7 @@ public class GrizzlyConfig implements Initialization {
         return httpsProtoPort;
     }
 
-    
+
     /**
      * Gets the isAbsoluteRedirect
      *

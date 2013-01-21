@@ -55,15 +55,12 @@ import java.nio.charset.Charset;
 import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.Buffer;
 import org.glassfish.grizzly.ThreadCache;
-import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.http.Cookie;
-import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.Method;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.server.Session;
 import org.glassfish.grizzly.http.server.util.Globals;
-import org.glassfish.grizzly.http.util.DataChunk;
 import org.glassfish.grizzly.utils.Charsets;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.log.LogProperties;
@@ -110,7 +107,7 @@ public class OXRequest extends Request {
 
     /**
      * Gets the XForwardProto e.g. http/s
-     * 
+     *
      * @return The XForwardProto
      */
     public String getXForwardProto() {
@@ -119,7 +116,7 @@ public class OXRequest extends Request {
 
     /**
      * Sets the xForwardProto e.g. http/s
-     * 
+     *
      * @param XForwardProto The XForwardProto to set
      */
     public void setxForwardProto(String XForwardProto) {
@@ -128,7 +125,7 @@ public class OXRequest extends Request {
 
     /**
      * Gets the XForwardPort
-     * 
+     *
      * @return The XForwardPort
      */
     public int getXForwardPort() {
@@ -137,7 +134,7 @@ public class OXRequest extends Request {
 
     /**
      * Sets the XForwardPort
-     * 
+     *
      * @param XForwardPort The XForwardPort to set
      */
     public void setXForwardPort(int XForwardPort) {

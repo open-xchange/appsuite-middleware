@@ -76,13 +76,13 @@ import com.openexchange.service.indexing.IndexingServiceMBean;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexingServiceMonitoringCLT {
-    
+
     private static final String JMX_URL = "service:jmx:rmi:///jndi/rmi://localhost:9999/server";
 
     public static void main(String[] args) {
         System.exit(listJobs(args));
     }
-    
+
     private static int listJobs(String[] args) {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
@@ -91,12 +91,12 @@ public class IndexingServiceMonitoringCLT {
         CommandLineParser parser = new PosixParser();
         JMXConnector jmxConnector = null;
         try {
-            CommandLine cmd = parser.parse(options, args, true);            
+            CommandLine cmd = parser.parse(options, args, true);
             if (cmd.hasOption('h')) {
                 printHelp(options);
                 return 0;
             }
-            
+
             JMXServiceURL url = new JMXServiceURL(JMX_URL);
             jmxConnector = JMXConnectorFactory.connect(url, null);
             MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
@@ -109,13 +109,13 @@ public class IndexingServiceMonitoringCLT {
                 jobs = proxy.getAllScheduledJobs();
                 System.out.println("All scheduled jobs: " + jobs.size());
             }
-            
+
             if (!cmd.hasOption('c')) {
                 for (String job : jobs) {
                     System.out.println("    " + job);
                 }
             }
-            
+
             return 0;
         } catch (ParseException e) {
             printHelp(options);
@@ -142,16 +142,16 @@ public class IndexingServiceMonitoringCLT {
             }
         }
     }
-    
+
     private static IndexingServiceMBean indexingServiceMBeanProxy(MBeanServerConnection mbsc) throws MalformedObjectNameException {
         IndexingServiceMBean mBean = MBeanServerInvocationHandler.newProxyInstance(mbsc, new ObjectName(
             IndexingServiceMBean.DOMAIN,
             IndexingServiceMBean.KEY,
             IndexingServiceMBean.VALUE), IndexingServiceMBean.class, false);
-        
+
         return mBean;
     }
-    
+
     private static void printHelp(Options options) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("listindexingjobs", "Lists all indexing jobs that are scheduled (cluster-wide).", options, null, false);

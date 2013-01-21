@@ -54,13 +54,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.UnsupportedCharsetException;
-
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Verb;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPPutRequestBuilder;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
+import com.openexchange.java.Streams;
 import com.openexchange.oauth.httpclient.OAuthHTTPRequestBuilder;
 
 public class ScribeHTTPPutRequestBuilder extends
@@ -102,10 +101,7 @@ public class ScribeHTTPPutRequestBuilder extends
 		} catch (IOException e) {
 			throw OxHttpClientExceptionCodes.IO_ERROR.create(e.getMessage());
 		} finally {
-			try {
-				isr.close();
-			} catch (IOException e) {
-			}
+		    Streams.close(isr);
 		}
 		return this;
 	}

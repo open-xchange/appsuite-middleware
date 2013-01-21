@@ -56,8 +56,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 
 /**
  * ReminderConfigImpl
@@ -97,13 +98,7 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 			    fis = new FileInputStream(propfile);
 			    prop.load(fis);
 			} finally {
-			    if (null != fis) {
-			        try {
-                        fis.close();
-                    } catch (final IOException e) {
-                        LOG.error("Cannot close stream.", e);
-                    }
-			    }
+			    Streams.close(fis);
 			}
 		} catch (final FileNotFoundException exc) {
 			LOG.error("Cannot find propfile: " + propfile, exc);

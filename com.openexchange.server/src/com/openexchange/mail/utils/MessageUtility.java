@@ -168,13 +168,7 @@ public final class MessageUtility {
         } catch (final MessagingException e) {
             return getPartRawInputStream(p);
         } finally {
-            if (null != tmp) {
-                try {
-                    tmp.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
+            Streams.close(tmp);
         }
     }
 
@@ -553,11 +547,7 @@ public final class MessageUtility {
             }
             throw e;
         } finally {
-            try {
-                inStream.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(inStream);
         }
     }
 
@@ -640,11 +630,7 @@ public final class MessageUtility {
             }
             throw e;
         } finally {
-            try {
-                in.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(in);
         }
     }
 

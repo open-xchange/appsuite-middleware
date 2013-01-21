@@ -105,6 +105,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -1265,6 +1266,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 return mfm.createManagedFile(tempFile);
             } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         } catch (final OXException e) {
@@ -1411,27 +1415,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                  */
                                 zipOutput.closeArchiveEntry();
                             } finally {
-                                try {
-                                    in.close();
-                                } catch (final IOException e) {
-                                    LOG.error(e.getMessage(), e);
-                                }
+                                Streams.close(in);
                             }
                         }
                     }
                 } finally {
                     // Complete the ZIP file
-                    try {
-                        zipOutput.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
+                    Streams.close(zipOutput);
                 }
                 /*
                  * Return managed file
                  */
                 return mfm.createManagedFile(tempFile);
             } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         } finally {

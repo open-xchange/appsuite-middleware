@@ -57,7 +57,7 @@ import com.openexchange.server.osgi.ServerActivator;
 
 /**
  * {@link TrackerAvailabilityChecker} - The {@link AvailabilityChecker} backed by a {@link ServiceTracker}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TrackerAvailabilityChecker<S> extends ServiceTracker<S, S> implements AvailabilityChecker {
@@ -66,7 +66,7 @@ public class TrackerAvailabilityChecker<S> extends ServiceTracker<S, S> implemen
 
     /**
      * Initializes a new {@link TrackerAvailabilityChecker}.
-     * 
+     *
      * @param clazz The service's class to track
      */
     public TrackerAvailabilityChecker(final Class<S> clazz) {

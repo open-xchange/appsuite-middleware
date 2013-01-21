@@ -97,7 +97,7 @@ import freemarker.template.TemplateExceptionHandler;
 
 /**
  * {@link TemplateServiceImpl} - The default implementation of {@link TemplateService}.
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -123,7 +123,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     /**
      * Initializes a new {@link TemplateServiceImpl}.
-     * 
+     *
      * @param config The configuration service
      */
     public TemplateServiceImpl(final ConfigurationService config) {
@@ -161,7 +161,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     /**
      * Checks, whether the child directory is a sub-directory of the base directory.
-     * 
+     *
      * @param base The base directory.
      * @param child The suspected child directory.
      * @return <code>true</code> if the child is a sub-directory of the base directory.
@@ -318,7 +318,7 @@ public class TemplateServiceImpl implements TemplateService {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader(templateFile), 2048);
-            final StringBuilder builder = new StringBuilder(2048);
+            final StringAllocator builder = new StringAllocator(2048);
             String line;
             while ((line = reader.readLine()) != null) {
                 builder.append(line).append('\n');

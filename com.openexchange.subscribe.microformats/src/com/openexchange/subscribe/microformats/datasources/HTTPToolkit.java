@@ -65,8 +65,8 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.util.URIUtil;
-
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Streams;
 import com.openexchange.subscribe.microformats.OXMFServiceRegistry;
 
 /**
@@ -187,7 +187,7 @@ public class HTTPToolkit {
                 /*
                  * The inconvenient way to close an URL connection: Obtain input stream to close it
                  */
-                urlCon.getInputStream().close();
+                Streams.close(urlCon.getInputStream());
             }
         }
         /*

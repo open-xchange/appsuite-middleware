@@ -65,15 +65,15 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class CassandraActivator extends HousekeepingActivator {
-	
+
 	private static Log log = com.openexchange.log.Log.loggerFor(CassandraActivator.class);
-	
+
 	private static String snappyPathProp = "com.openexchange.nosql.cassandra.snappyjava.nativelibs";
-	
+
 	private EmbeddedCassandraService cassandra;
 
 	/**
-	 * Default Constructor 
+	 * Default Constructor
 	 */
 	public CassandraActivator() {
 		super();
@@ -85,7 +85,7 @@ public final class CassandraActivator extends HousekeepingActivator {
 	 */
 	@Override
 	protected Class<?>[] getNeededServices() {
-		
+
 		return new Class[]{ConfigurationService.class};
 	}
 
@@ -96,28 +96,28 @@ public final class CassandraActivator extends HousekeepingActivator {
 	@Override
 	protected void startBundle() throws Exception {
 		log.info("starting bundle: com.openexchange.nosql.cassandra");
-		
+
 		//-------------- INIT SNAPPYJAVA ----------------//
-		
+
 		SnappyServiceLookUp.set(this);
-		
+
 		ConfigurationService configSnappy = SnappyServiceLookUp.getService(ConfigurationService.class);
 		final File snappyFile = configSnappy.getFileByName("snappy.properties");
 		if (null != snappyFile) {
             System.setProperty("snappy.config", snappyFile.getAbsolutePath().toString());
         }
-		
+
 		Properties prop = new Properties();
 		String configUrl = System.getProperty("snappy.config");
 		prop.load(new FileInputStream(configUrl));
-		
+
 		String snappyNativePath = prop.getProperty(snappyPathProp);
-		
+
     	String osName = System.getProperty("os.name");
     	String osArch = System.getProperty("os.arch");
     	//String fileSeparator = System.getProperty("file.separator");
     	log.info(osName + " " + osArch);
-    	
+
     	String postfix = null;
     	if (osName.equals("Linux")) {
     		postfix = ".so";
@@ -131,29 +131,29 @@ public final class CassandraActivator extends HousekeepingActivator {
 
 		String path = snappyNativePath + "/native/" + osName + "/" + osArch + "/libsnappyjava" + postfix;
     	System.load(path);
-		
+
 		//----------------- INIT CASSANDRA -------------//
-		
+
 		CassandraServiceLookUp.set(this);
-		
+
 		ConfigurationService config = CassandraServiceLookUp.getService(ConfigurationService.class);
 
 		final File file = config.getFileByName("cassandra.yaml");
 		if (null != file) {
             System.setProperty("cassandra.config", file.toURI().toString());
         }
-		
+
 		//start embedded cassandra node
 		cassandra = new EmbeddedCassandraService();
 		cassandra.init();
 		cassandra.start();
-		
+
 		registerService(EmbeddedCassandraService.class, cassandra);
         openTrackers();
-        
+
         log.info("Cassandra Service started successfully.");
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
@@ -163,10 +163,10 @@ public final class CassandraActivator extends HousekeepingActivator {
 		log.info("stopping bundle: com.openexchange.nosql.cassandra");
 		cassandra.stop();
 		cassandra = null;
-		
+
 		CassandraServiceLookUp.set(null);
 		cleanUp();
-		
+
 		log.info("stopped bundle: com.openexchange.nosql.cassandra");
 	}
 }

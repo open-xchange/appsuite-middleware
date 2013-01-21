@@ -57,7 +57,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * {@link CharArrayPool} - A character array pool.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CharArrayPool {
@@ -88,7 +88,7 @@ public final class CharArrayPool {
 
     /**
      * Sets the numbers.
-     * 
+     *
      * @param numberOfSmall The capacity for collection of small-sized character arrays
      * @param numberOfMedium The capacity for collection of medium-sized character arrays
      * @param numberOfLarge The capacity for collection of large-sized character arrays
@@ -110,7 +110,7 @@ public final class CharArrayPool {
 
     /**
      * Sets the lengths.
-     * 
+     *
      * @param lengthOfSmall The length for small-sized character arrays
      * @param lengthOfMedium The length for medium-sized character arrays
      * @param lengthOfLarge The length for large-sized character arrays
@@ -137,7 +137,7 @@ public final class CharArrayPool {
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     protected static CharArrayPool getInstance() {
@@ -158,7 +158,7 @@ public final class CharArrayPool {
 
     /**
      * Gets the number of misses for pooled character arrays.
-     * 
+     *
      * @return The number of misses
      */
     public static long getMisses() {
@@ -167,7 +167,7 @@ public final class CharArrayPool {
 
     /**
      * Gets the number of total pooled character arrays for specified pool part.
-     * 
+     *
      * @param part The pool part
      * @return The number of total pooled character arrays
      */
@@ -186,7 +186,7 @@ public final class CharArrayPool {
 
     /**
      * Gets the number of in-use pooled character arrays for specified pool part.
-     * 
+     *
      * @param part The pool part
      * @return The number of in-use pooled character arrays
      */
@@ -206,7 +206,7 @@ public final class CharArrayPool {
 
     /**
      * Gets the number of currently pooled character arrays for specified pool part.
-     * 
+     *
      * @param part The pool part
      * @return The number of currently pooled character arrays
      */
@@ -265,7 +265,7 @@ public final class CharArrayPool {
 
     /**
      * Gets the length for a character array appropriate for given length.
-     * 
+     *
      * @param capacity The desired length
      * @return The pool-chosen length
      */
@@ -284,7 +284,7 @@ public final class CharArrayPool {
 
     /**
      * Gets the small length
-     * 
+     *
      * @return The small length
      */
     protected int getSmallLength() {
@@ -293,7 +293,7 @@ public final class CharArrayPool {
 
     /**
      * Gets the medium length
-     * 
+     *
      * @return The medium length
      */
     protected int getMediumLength() {
@@ -302,7 +302,7 @@ public final class CharArrayPool {
 
     /**
      * Gets the large length
-     * 
+     *
      * @return The large length
      */
     protected int getLargeLength() {
@@ -311,7 +311,7 @@ public final class CharArrayPool {
 
     /**
      * Gets a pooled character array appropriate for small capacity.
-     * 
+     *
      * @return An appropriate character array or <code>null</code>
      */
     protected ICharArray getSmallCharArray() {
@@ -320,7 +320,7 @@ public final class CharArrayPool {
 
     /**
      * Gets a pooled character array appropriate for medium capacity.
-     * 
+     *
      * @return An appropriate character array or <code>null</code>
      */
     protected ICharArray getMediumCharArray() {
@@ -329,7 +329,7 @@ public final class CharArrayPool {
 
     /**
      * Gets a pooled character array appropriate for large capacity.
-     * 
+     *
      * @return An appropriate character array or <code>null</code>
      */
     protected ICharArray getLargeCharArray() {
@@ -338,7 +338,7 @@ public final class CharArrayPool {
 
     /**
      * Gets a pooled character array appropriate for given pool part.
-     * 
+     *
      * @param capacity The desired pool part
      * @return An appropriate character array or <code>null</code>
      */
@@ -372,7 +372,7 @@ public final class CharArrayPool {
 
     /**
      * Gets a pooled character array appropriate for given capacity.
-     * 
+     *
      * @param capacity The desired capacity
      * @return An appropriate character array or <code>null</code>
      */
@@ -402,7 +402,7 @@ public final class CharArrayPool {
 
     /**
      * Offers specified character array to pool.
-     * 
+     *
      * @param charArray The character array to offer
      * @return <code>true</code> if character array was added to pool; otherwise <code>false</code>
      */

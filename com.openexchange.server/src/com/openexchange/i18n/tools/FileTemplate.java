@@ -56,6 +56,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -100,13 +101,7 @@ public class FileTemplate extends CompiledLineParserTemplate {
             LOG.error(e.getMessage(), e);
             return e.toString();
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    LOG.error(e);
-                }
-            }
+            Streams.close(reader);
         }
     }
 }

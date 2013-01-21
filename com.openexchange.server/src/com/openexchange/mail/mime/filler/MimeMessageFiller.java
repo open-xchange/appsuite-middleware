@@ -106,6 +106,7 @@ import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -1137,6 +1138,9 @@ public class MimeMessageFiller {
         } catch (final ConverterException e) {
             throw MailExceptionCode.VERSIT_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -1409,7 +1413,7 @@ public class MimeMessageFiller {
                     out.write(bbuf, 0, len);
                 }
             } finally {
-                in.close();
+                Streams.close(in);
             }
             rfcBytes = out.toByteArray();
         }
@@ -1965,6 +1969,9 @@ public class MimeMessageFiller {
             try {
                 return new MessageDataSource(data.getData(), contentType);
             } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         }

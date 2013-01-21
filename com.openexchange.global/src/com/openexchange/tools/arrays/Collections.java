@@ -59,6 +59,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -371,15 +372,17 @@ public final class Collections {
      * Returns a copy of the object, or <tt>null</tt> if the object cannot be serialized.
      */
     public static Object copy(final Serializable orig) {
+        ObjectOutputStream out = null;
         try {
             /*
              * Write the object out to a byte array
              */
             final FastByteArrayOutputStream fbos = new FastByteArrayOutputStream();
-            final ObjectOutputStream out = new ObjectOutputStream(fbos);
+            out = new ObjectOutputStream(fbos);
             out.writeObject(orig);
             out.flush();
             out.close();
+            out = null;
             /*
              * Retrieve an input stream from the byte array and read a copy of the object back in
              */
@@ -391,6 +394,8 @@ public final class Collections {
         } catch (final ClassNotFoundException cnfe) {
             LOG.error(cnfe.getMessage(), cnfe);
             return null;
+        } finally {
+            Streams.close(out);
         }
     }
 

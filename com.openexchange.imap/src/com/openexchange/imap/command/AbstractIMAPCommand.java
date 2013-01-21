@@ -84,7 +84,7 @@ public abstract class AbstractIMAPCommand<T> {
      */
     protected boolean returnDefaultValue;
 
-    private final AbstractIMAPProtocolCommand protocolCommand;
+    private final CallbackIMAPProtocolCommand protocolCommand;
 
     /**
      * Initializes a new {@link AbstractIMAPCommand}.
@@ -94,19 +94,22 @@ public abstract class AbstractIMAPCommand<T> {
     protected AbstractIMAPCommand(final IMAPFolder imapFolder) {
         super();
         this.imapFolder = imapFolder;
-        this.protocolCommand = new AbstractIMAPProtocolCommand(this);
+        this.protocolCommand = new CallbackIMAPProtocolCommand(this, imapFolder);
     }
 
-    private static final class AbstractIMAPProtocolCommand implements IMAPFolder.ProtocolCommand {
+    private static final class CallbackIMAPProtocolCommand implements IMAPFolder.ProtocolCommand {
 
-        private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractIMAPProtocolCommand.class));
+        private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CallbackIMAPProtocolCommand.class));
 
         private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
         private final AbstractIMAPCommand<?> abstractIMAPCommand;
+        private final IMAPFolder imapFolder;
 
-        public AbstractIMAPProtocolCommand(final AbstractIMAPCommand<?> abstractIMAPCommand) {
+        protected CallbackIMAPProtocolCommand(final AbstractIMAPCommand<?> abstractIMAPCommand, final IMAPFolder imapFolder) {
+            super();
             this.abstractIMAPCommand = abstractIMAPCommand;
+            this.imapFolder = imapFolder;
         }
 
         @Override
@@ -155,7 +158,7 @@ public abstract class AbstractIMAPCommand<T> {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         imapCmd,
-                        response.toString()));
+                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else if (response.isNO()) {
                     final String error = response.toString();
                     if (error.toLowerCase(Locale.ENGLISH).indexOf("quota") >= 0) {
@@ -167,7 +170,7 @@ public abstract class AbstractIMAPCommand<T> {
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         imapCmd,
-                        error));
+                        ImapUtility.appendCommandInfo(error, imapFolder)));
                 } else {
                     protocol.handleResult(response);
                 }
