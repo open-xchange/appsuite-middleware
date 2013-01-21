@@ -90,6 +90,9 @@ public class Hostname {
      * @return The associated host name
      */
     public String getHostname(final Publication pub) {
+        if (null == pub) {
+            return null;
+        }
         final HostnameService hostnameService = this.hostnameService.get();
         if (hostnameService == null) {
             return null;
