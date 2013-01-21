@@ -105,6 +105,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -1414,21 +1415,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                  */
                                 zipOutput.closeArchiveEntry();
                             } finally {
-                                try {
-                                    in.close();
-                                } catch (final IOException e) {
-                                    LOG.error(e.getMessage(), e);
-                                }
+                                Streams.close(in);
                             }
                         }
                     }
                 } finally {
                     // Complete the ZIP file
-                    try {
-                        zipOutput.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
+                    Streams.close(zipOutput);
                 }
                 /*
                  * Return managed file
