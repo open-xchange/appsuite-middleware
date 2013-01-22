@@ -62,7 +62,7 @@ package com.openexchange.ms;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Topic<E> extends Dispatcher<E> {
+public interface Topic<E> extends MessageDispatcher<E> {
 
     /**
      * Publishes specified message to this topic.

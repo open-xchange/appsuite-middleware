@@ -49,9 +49,11 @@
 
 package com.openexchange.ms.internal;
 
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.hazelcast.core.ITopic;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.Topic;
@@ -64,6 +66,7 @@ import com.openexchange.ms.Topic;
 public final class HzTopic<E> implements Topic<E> {
 
     private final ITopic<E> hzTopic;
+    private final String senderId;
     private final ConcurrentMap<MessageListener<E>, com.hazelcast.core.MessageListener<E>> registeredListeners;
 
     /**
@@ -71,8 +74,14 @@ public final class HzTopic<E> implements Topic<E> {
      */
     public HzTopic(final ITopic<E> hzTopic) {
         super();
+        senderId = UUIDs.getUnformattedString(UUID.randomUUID());
         this.hzTopic = hzTopic;
         registeredListeners = new ConcurrentHashMap<MessageListener<E>, com.hazelcast.core.MessageListener<E>>(8);
+    }
+
+    @Override
+    public String getSenderId() {
+        return senderId;
     }
 
     @Override
@@ -121,7 +130,7 @@ public final class HzTopic<E> implements Topic<E> {
 
         @Override
         public void onMessage(final com.hazelcast.core.Message<E> message) {
-            listener.onMessage(new Message<E>(getName(), message.getMessageObject()));
+            listener.onMessage(new Message<E>(getName(), getSenderId(), message.getMessageObject()));
         }
     }
 }

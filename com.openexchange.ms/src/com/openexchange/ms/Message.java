@@ -63,19 +63,32 @@ public class Message<E> extends EventObject {
     /** The message object */
     protected final E messageObject;
 
+    /** The sender identifier */
+    protected final String senderId;
+
     /**
      * Initializes a new {@link Message}.
      * 
      * @param topicName The name of associated topic
      * @param messageObject The message's object
      */
-    public Message(final String topicName, final E messageObject) {
+    public Message(final String topicName, final String senderId, final E messageObject) {
         super(topicName);
         this.messageObject = messageObject;
+        this.senderId = senderId;
     }
 
     /**
-     * Gets the message's object
+     * Gets the sender identifier,
+     * 
+     * @return The sender identifier
+     */
+    public String getSenderId() {
+        return senderId;
+    }
+
+    /**
+     * Gets the message's object.
      * 
      * @return The message's object
      */

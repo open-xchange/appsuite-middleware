@@ -51,11 +51,13 @@ package com.openexchange.ms.internal;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import com.hazelcast.core.IQueue;
 import com.hazelcast.core.ItemEvent;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.Queue;
@@ -68,6 +70,7 @@ import com.openexchange.ms.Queue;
 public final class HzQueue<E> implements Queue<E> {
 
     private final IQueue<E> hzQueue;
+    private final String senderId;
     private final ConcurrentMap<MessageListener<E>, com.hazelcast.core.ItemListener<E>> registeredListeners;
 
     /**
@@ -75,8 +78,14 @@ public final class HzQueue<E> implements Queue<E> {
      */
     public HzQueue(final IQueue<E> hzQueue) {
         super();
+        senderId = UUIDs.getUnformattedString(UUID.randomUUID());
         this.hzQueue = hzQueue;
         registeredListeners = new ConcurrentHashMap<MessageListener<E>, com.hazelcast.core.ItemListener<E>>(8);
+    }
+
+    @Override
+    public String getSenderId() {
+        return senderId;
     }
 
     @Override
@@ -92,7 +101,7 @@ public final class HzQueue<E> implements Queue<E> {
     }
 
     @Override
-    public void removeMessageListener(MessageListener<E> listener) {
+    public void removeMessageListener(final MessageListener<E> listener) {
         final com.hazelcast.core.ItemListener<E> hzListener = registeredListeners.remove(listener);
         if (null != hzListener) {
             hzQueue.removeItemListener(hzListener);
@@ -115,7 +124,7 @@ public final class HzQueue<E> implements Queue<E> {
     }
 
     @Override
-    public boolean add(E e) {
+    public boolean add(final E e) {
         return hzQueue.add(e);
     }
 
@@ -130,7 +139,7 @@ public final class HzQueue<E> implements Queue<E> {
     }
 
     @Override
-    public boolean offer(E e) {
+    public boolean offer(final E e) {
         return hzQueue.offer(e);
     }
 
@@ -155,17 +164,17 @@ public final class HzQueue<E> implements Queue<E> {
     }
 
     @Override
-    public <T> T[] toArray(T[] a) {
+    public <T> T[] toArray(final T[] a) {
         return hzQueue.toArray(a);
     }
 
     @Override
-    public void put(E e) throws InterruptedException {
+    public void put(final E e) throws InterruptedException {
         hzQueue.put(e);
     }
 
     @Override
-    public boolean offer(E e, long timeout, TimeUnit unit) throws InterruptedException {
+    public boolean offer(final E e, final long timeout, final TimeUnit unit) throws InterruptedException {
         return hzQueue.offer(e, timeout, unit);
     }
 
@@ -175,7 +184,7 @@ public final class HzQueue<E> implements Queue<E> {
     }
 
     @Override
-    public E poll(long timeout, TimeUnit unit) throws InterruptedException {
+    public E poll(final long timeout, final TimeUnit unit) throws InterruptedException {
         return hzQueue.poll(timeout, unit);
     }
 
@@ -185,42 +194,42 @@ public final class HzQueue<E> implements Queue<E> {
     }
 
     @Override
-    public boolean remove(Object o) {
+    public boolean remove(final Object o) {
         return hzQueue.remove(o);
     }
 
     @Override
-    public boolean contains(Object o) {
+    public boolean contains(final Object o) {
         return hzQueue.contains(o);
     }
 
     @Override
-    public int drainTo(Collection<? super E> c) {
+    public int drainTo(final Collection<? super E> c) {
         return hzQueue.drainTo(c);
     }
 
     @Override
-    public boolean containsAll(Collection<?> c) {
+    public boolean containsAll(final Collection<?> c) {
         return hzQueue.containsAll(c);
     }
 
     @Override
-    public int drainTo(Collection<? super E> c, int maxElements) {
+    public int drainTo(final Collection<? super E> c, final int maxElements) {
         return hzQueue.drainTo(c, maxElements);
     }
 
     @Override
-    public boolean addAll(Collection<? extends E> c) {
+    public boolean addAll(final Collection<? extends E> c) {
         return hzQueue.addAll(c);
     }
 
     @Override
-    public boolean removeAll(Collection<?> c) {
+    public boolean removeAll(final Collection<?> c) {
         return hzQueue.removeAll(c);
     }
 
     @Override
-    public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(final Collection<?> c) {
         return hzQueue.retainAll(c);
     }
 
@@ -244,12 +253,12 @@ public final class HzQueue<E> implements Queue<E> {
         }
 
         @Override
-        public void itemAdded(ItemEvent<E> item) {
-            listener.onMessage(new Message<E>(getName(), item.getItem()));
+        public void itemAdded(final ItemEvent<E> item) {
+            listener.onMessage(new Message<E>(getName(), getSenderId(), item.getItem()));
         }
 
         @Override
-        public void itemRemoved(ItemEvent<E> item) {
+        public void itemRemoved(final ItemEvent<E> item) {
             // Ignore
         }
 

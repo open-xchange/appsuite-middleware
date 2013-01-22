@@ -50,11 +50,13 @@
 package com.openexchange.ms;
 
 /**
- * {@link Dispatcher} - The super type for message dispatching.
+ * {@link MessageDispatcher} - The super type for message dispatching.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @see Topic
+ * @see Queue
  */
-public interface Dispatcher<E> {
+public interface MessageDispatcher<E> {
 
     /**
      * Gets the topic's name
@@ -76,6 +78,13 @@ public interface Dispatcher<E> {
      * @param listener The listener
      */
     void removeMessageListener(MessageListener<E> listener);
+
+    /**
+     * Gets the sender identifier,
+     * 
+     * @return The sender identifier
+     */
+    String getSenderId();
 
     /**
      * Destroys this instance cluster-wide.

@@ -46,6 +46,7 @@ Import-Package: com.hazelcast.config,
  javax.xml.transform.stream,
  javax.xml.validation,
  org.apache.commons.logging,
+ org.cliffc.high_scale_lib,
  org.eclipse.osgi.framework.console,
  org.osgi.framework,
  org.osgi.util.tracker,
@@ -56,5 +57,6 @@ Import-Package: com.hazelcast.config,
  org.w3c.dom.traversal,
  org.xml.sax,
  org.xml.sax.ext,
- org.xml.sax.helpers
+ org.xml.sax.helpers,
+ sun.misc
 Export-Package: com.openexchange.ms

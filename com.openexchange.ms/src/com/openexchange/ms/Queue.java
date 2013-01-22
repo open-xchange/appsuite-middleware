@@ -65,7 +65,7 @@ import java.util.concurrent.BlockingQueue;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Queue<E> extends Dispatcher<E>, BlockingQueue<E> {
+public interface Queue<E> extends MessageDispatcher<E>, BlockingQueue<E> {
 
     // Nothing more to add
 }

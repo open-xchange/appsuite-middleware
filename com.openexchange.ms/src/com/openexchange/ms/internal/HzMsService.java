@@ -49,6 +49,8 @@
 
 package com.openexchange.ms.internal;
 
+import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.ms.MsService;
 import com.openexchange.ms.Queue;
@@ -62,6 +64,8 @@ import com.openexchange.ms.Topic;
 public final class HzMsService implements MsService {
 
     private final HazelcastInstance hz;
+    private final ConcurrentMap<String, Queue<?>> queues;
+    private final ConcurrentMap<String, Topic<?>> topics;
 
     /**
      * Initializes a new {@link HzMsService}.
@@ -69,16 +73,36 @@ public final class HzMsService implements MsService {
     public HzMsService(final HazelcastInstance hz) {
         super();
         this.hz = hz;
+        queues = new NonBlockingHashMap<String, Queue<?>>(16);
+        topics = new NonBlockingHashMap<String, Topic<?>>(8);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <E> Queue<E> getQueue(final String name) {
-        return new HzQueue<E>(hz.<E> getQueue(name));
+        Queue<E> queue = (Queue<E>) queues.get(name);
+        if (null == queue) {
+            final HzQueue<E> hzQueue = new HzQueue<E>(hz.<E> getQueue(name));
+            queue = (Queue<E>) queues.putIfAbsent(name, hzQueue);
+            if (null == queue) {
+                queue = hzQueue;
+            }
+        }
+        return queue;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <E> Topic<E> getTopic(final String name) {
-        return new HzTopic<E>(hz.<E> getTopic(name));
+        Topic<E> topic = (Topic<E>) topics.get(name);
+        if (null == topic) {
+            final HzTopic<E> hzTopic = new HzTopic<E>(hz.<E> getTopic(name));
+            topic = (Topic<E>) topics.putIfAbsent(name, hzTopic);
+            if (null == topic) {
+                topic = hzTopic;
+            }
+        }
+        return topic;
     }
 
 }
