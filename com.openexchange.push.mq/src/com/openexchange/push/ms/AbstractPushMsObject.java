@@ -47,87 +47,75 @@
  *
  */
 
-package com.openexchange.push.mq;
+package com.openexchange.push.ms;
 
-import javax.jms.JMSException;
-import javax.jms.Topic;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.mq.MQService;
-import com.openexchange.mq.topic.MQTopicAsyncSubscriber;
-import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.push.mq.registry.PushMQServiceRegistry;
+import java.io.Serializable;
 
 /**
- * {@link PushMQInit}
+ * {@link AbstractPushMsObject} - Abstract push object.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PushMQInit {
+public abstract class AbstractPushMsObject implements Serializable {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMQInit.class));
+    private static final long serialVersionUID = -5653705789077693945L;
 
-    private Topic topic;
-
-    private PushMQPublisher publisher;
-
-    private MQTopicAsyncSubscriber subscriber;
-
-    private final MQService mqService;
-
-    private static volatile PushMQInit init;
+    private final int contextId;
+    private final boolean remote;
 
     /**
-     * Initializes a new {@link PushMQInit}.
+     * Initializes a new {@link AbstractPushMsObject}.
      */
-    public PushMQInit() {
-        ServiceRegistry registry = PushMQServiceRegistry.getServiceRegistry();
-        mqService = registry.getService(MQService.class);
-        init = this;
+    protected AbstractPushMsObject(final int contextId, final boolean remote) {
+        super();
+        this.contextId = contextId;
+        this.remote = remote;
     }
 
-    public PushMQPublisher getPublisher() {
-        return publisher;
+    /**
+     * Gets the context ID.
+     *
+     * @return The context ID
+     */
+    public int getContextId() {
+        return contextId;
     }
 
-    public MQTopicAsyncSubscriber getSubscriber() {
-        return subscriber;
+    /**
+     * Checks if this push object was remotely received.
+     * <p>
+     * If remotely received this push object must not be further distributed among linked hosts.
+     *
+     * @return <code>true</code> if this push object was remotely received; otherwise <code>false</code>
+     */
+    public boolean isRemote() {
+        return remote;
     }
 
-    public void init() throws OXException, JMSException {
-        topic = mqService.lookupTopic("oxEventTopic");
-        publisher = new PushMQPublisher(topic.getTopicName());
-        PushMQListener listener = new PushMQListener();
-        subscriber = new MQTopicAsyncSubscriber(topic.getTopicName(), listener);
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        return result;
     }
 
-    public void close() {
-        subscriber.close();
-        publisher.close();
-    }
-
-    public static PushMQInit getInit() {
-        return init;
-    }
-
-    public void stopListening() {
-        if (subscriber != null) {
-            subscriber.close();
-            subscriber = null;
-            LOG.info("PushMQ listener closed.");
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
         }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof AbstractPushMsObject)) {
+            return false;
+        }
+        final AbstractPushMsObject other = (AbstractPushMsObject) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        return true;
     }
 
-    public void startListening() {
-        try {
-            PushMQListener listener = new PushMQListener();
-            subscriber = new MQTopicAsyncSubscriber(topic.getTopicName(), listener);
-            LOG.info("PushMQ listener started.");
-        } catch (OXException e) {
-            LOG.error("Start of PushMQ listener failed.", e);
-        } catch (JMSException e) {
-            LOG.error("Start of PushMQ listener failed.", e);
-        }
-    }
 }

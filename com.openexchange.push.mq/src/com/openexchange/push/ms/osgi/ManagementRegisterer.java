@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.mq.osgi;
+package com.openexchange.push.ms.osgi;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -58,8 +58,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.push.mq.mbean.PushMQMBean;
-import com.openexchange.push.mq.mbean.PushMQMBeanImpl;
+import com.openexchange.push.ms.mbean.PushMsMBean;
+import com.openexchange.push.ms.mbean.PushMsMBeanImpl;
 
 /**
  * {@link ManagementRegisterer}
@@ -84,7 +84,7 @@ public class ManagementRegisterer implements ServiceTrackerCustomizer<Management
     @Override
     public ManagementService addingService(ServiceReference<ManagementService> reference) {
         final ManagementService management = context.getService(reference);
-        registerPushMQMBean(management);
+        registerPushMsMBean(management);
         return management;
     }
 
@@ -96,16 +96,16 @@ public class ManagementRegisterer implements ServiceTrackerCustomizer<Management
     @Override
     public void removedService(ServiceReference<ManagementService> reference, ManagementService service) {
         final ManagementService management = service;
-        unregisterPushMQMBean(management);
+        unregisterPushMsMBean(management);
         context.ungetService(reference);
     }
 
-    private void registerPushMQMBean(final ManagementService management) {
+    private void registerPushMsMBean(final ManagementService management) {
         if (objectName == null) {
             final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
             try {
-                objectName = getObjectName(PushMQMBeanImpl.class.getName(), PushMQMBean.PUSH_MQ_DOMAIN);
-                management.registerMBean(objectName, new PushMQMBeanImpl());
+                objectName = getObjectName(PushMsMBeanImpl.class.getName(), PushMsMBean.PUSH_MS_DOMAIN);
+                management.registerMBean(objectName, new PushMsMBeanImpl());
             } catch (final MalformedObjectNameException e) {
                 logger.error(e.getMessage(), e);
             } catch (final OXException e) {
@@ -116,7 +116,7 @@ public class ManagementRegisterer implements ServiceTrackerCustomizer<Management
         }
     }
 
-    private void unregisterPushMQMBean(final ManagementService management) {
+    private void unregisterPushMsMBean(final ManagementService management) {
         if (objectName != null) {
             final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
             try {

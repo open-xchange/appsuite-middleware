@@ -47,112 +47,93 @@
  *
  */
 
-package com.openexchange.push.mq;
+package com.openexchange.push.ms;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import javax.jms.ObjectMessage;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.event.RemoteEvent;
 import com.openexchange.groupware.Types;
-import com.openexchange.mq.topic.MQTopicListener;
+import com.openexchange.log.LogFactory;
+import com.openexchange.ms.Message;
+import com.openexchange.ms.MessageListener;
 import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.push.mq.registry.PushMQServiceRegistry;
+import com.openexchange.push.ms.registry.PushMsServiceRegistry;
 
 /**
- * {@link PushMQListener}
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link PushMsListener} - The {@link MessageListener message listener} for messaging-based push bundle.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PushMQListener implements MQTopicListener {
+public class PushMsListener implements MessageListener<PushMsObject> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMQListener.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMsListener.class));
 
-    private EventAdmin eventAdmin;
-    private EventFactoryService eventFactoryService;
+    private volatile String hostName;
 
     /**
-     * Initializes a new {@link PushMQListener}.
+     * Initializes a new {@link PushMsListener}.
      */
-    public PushMQListener() {
+    public PushMsListener() {
         super();
-        ServiceRegistry registry = PushMQServiceRegistry.getServiceRegistry();
-        eventAdmin = registry.getService(EventAdmin.class);
-        eventFactoryService = registry.getService(EventFactoryService.class);
     }
 
     @Override
-    public void close() {
-        eventAdmin = null;
-        eventFactoryService = null;
-    }
-
-    @Override
-    public void onText(String text) {
-        LOG.warn("Unsupported operation: TextMessage");
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void onObjectMessage(ObjectMessage objectMessage) {
-        LOG.warn("Unsupported operation: ObjectMessage");
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void onBytes(byte[] bytes) {
-        try {
-            Serializable obj = SerializableHelper.readObject(bytes);
-            PushMQObject pushObj = (PushMQObject) obj;
-            if (!getHostname().equals(pushObj.getHostname())) {
-                if (eventAdmin != null && eventFactoryService != null) {
-                    final int action;
-                    final String topicName;
-                    if (pushObj.getModule() == Types.FOLDER) {
-                        action = RemoteEvent.FOLDER_CHANGED;
-                        topicName = "com/openexchange/remote/folderchanged";
-                    } else {
-                        action = RemoteEvent.FOLDER_CONTENT_CHANGED;
-                        topicName = "com/openexchange/remote/foldercontentchanged";
-                    }
-                    for (final int user : pushObj.getUsers()) {
-                        RemoteEvent remEvent = eventFactoryService.newRemoteEvent(
+    public void onMessage(final Message<PushMsObject> message) {
+        final PushMsObject pushObj = message.getMessageObject();
+        if (!getHostname().equals(pushObj.getHostname())) {
+            final ServiceRegistry registry = PushMsServiceRegistry.getServiceRegistry();
+            final EventAdmin eventAdmin = registry.getService(EventAdmin.class);
+            final EventFactoryService eventFactoryService = registry.getService(EventFactoryService.class);
+            if (eventAdmin != null && eventFactoryService != null) {
+                final int action;
+                final String topicName;
+                if (pushObj.getModule() == Types.FOLDER) {
+                    action = RemoteEvent.FOLDER_CHANGED;
+                    topicName = "com/openexchange/remote/folderchanged";
+                } else {
+                    action = RemoteEvent.FOLDER_CONTENT_CHANGED;
+                    topicName = "com/openexchange/remote/foldercontentchanged";
+                }
+                for (final int user : pushObj.getUsers()) {
+                    final RemoteEvent remEvent =
+                        eventFactoryService.newRemoteEvent(
                             pushObj.getFolderId(),
                             user,
                             pushObj.getContextId(),
                             action,
                             pushObj.getModule(),
                             pushObj.getTimestamp());
-                        final Dictionary<String, RemoteEvent> ht = new Hashtable<String, RemoteEvent>();
-                        ht.put(RemoteEvent.EVENT_KEY, remEvent);
-                        eventAdmin.postEvent(new Event(topicName, ht));
-                    }
+                    final Dictionary<String, RemoteEvent> ht = new Hashtable<String, RemoteEvent>();
+                    ht.put(RemoteEvent.EVENT_KEY, remEvent);
+                    eventAdmin.postEvent(new Event(topicName, ht));
                 }
             }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (ClassNotFoundException e) {
-            LOG.error(e.getMessage(), e);
         }
     }
 
     private String getHostname() {
-        String hostname = "";
-        try {
-            InetAddress addr = InetAddress.getLocalHost();
-            hostname = addr.getHostName();
-        } catch (UnknownHostException e) {
-            LOG.error(e.getMessage(), e);
+        String tmp = hostName;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = hostName;
+                if (null == tmp) {
+                    tmp = "";
+                    try {
+                        tmp = InetAddress.getLocalHost().getHostName();
+                    } catch (final UnknownHostException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                    hostName = tmp;
+                }
+            }
         }
-        return hostname;
+        return tmp;
     }
 
 }

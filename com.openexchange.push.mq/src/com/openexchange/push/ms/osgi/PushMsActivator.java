@@ -47,10 +47,12 @@
  *
  */
 
-package com.openexchange.push.mq.osgi;
+package com.openexchange.push.ms.osgi;
 
-import static com.openexchange.push.mq.registry.PushMQServiceRegistry.getServiceRegistry;
+import static com.openexchange.push.ms.registry.PushMsServiceRegistry.getServiceRegistry;
 import java.util.Hashtable;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.logging.Log;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -58,40 +60,41 @@ import com.openexchange.context.ContextService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.management.ManagementService;
-import com.openexchange.mq.MQService;
+import com.openexchange.ms.MsService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.push.mq.PushMQHandler;
-import com.openexchange.push.mq.PushMQInit;
+import com.openexchange.push.ms.PushMsHandler;
+import com.openexchange.push.ms.PushMsInit;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link PushMQActivator} - OSGi bundle activator for push mq
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link PushMsActivator} - OSGi bundle activator for message-based push bundle.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PushMQActivator extends HousekeepingActivator {
-
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PushMQActivator.class));
-
-    private PushMQInit init;
+public class PushMsActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link PushMQActivator}.
+     * The {@link PushMsInit} reference
      */
-    public PushMQActivator() {
+    public static final AtomicReference<PushMsInit> INIT_REF = new AtomicReference<PushMsInit>();
+
+    /**
+     * Initializes a new {@link PushMsActivator}.
+     */
+    public PushMsActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            EventAdmin.class, EventFactoryService.class, ContextService.class, FolderService.class, MQService.class };
+        return new Class<?>[] { EventAdmin.class, EventFactoryService.class, ContextService.class, FolderService.class, MsService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: com.openexchange.push.mq");
+        final Log LOG = com.openexchange.log.Log.loggerFor(PushMsActivator.class);
+        LOG.info("Starting bundle: com.openexchange.push.ms");
         try {
             /*
              * (Re-)Initialize service registry with available services
@@ -108,12 +111,13 @@ public class PushMQActivator extends HousekeepingActivator {
             /*
              * Start-up
              */
-            init = new PushMQInit();
+            final PushMsInit init = new PushMsInit();
             init.init();
             final String[] topics = new String[] { EventConstants.EVENT_TOPIC, "com/openexchange/*" };
             final Hashtable<String, Object> ht = new Hashtable<String, Object>(1);
             ht.put(EventConstants.EVENT_TOPIC, topics);
-            registerService(EventHandler.class, new PushMQHandler(init.getPublisher()), ht);
+            registerService(EventHandler.class, new PushMsHandler(init.getPublisher()), ht);
+            INIT_REF.set(init);
             /*
              * Service trackers
              */
@@ -129,17 +133,24 @@ public class PushMQActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: com.openexchange.push.mq");
+        final Log LOG = com.openexchange.log.Log.loggerFor(PushMsActivator.class);
+        LOG.info("Stopping bundle: com.openexchange.push.ms");
         try {
-            init.close();
-            ServiceRegistry registry = getServiceRegistry();
+            final PushMsInit init = INIT_REF.get();
+            if (null != init) {
+                init.close();
+                INIT_REF.set(null);
+            }
+
+            final ServiceRegistry registry = getServiceRegistry();
             if (registry != null) {
                 registry.clearRegistry();
             }
+
             unregisterServices();
             closeTrackers();
             cleanUp();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
         }

@@ -47,62 +47,26 @@
  *
  */
 
-package com.openexchange.push.mq;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import com.openexchange.java.Streams;
+package com.openexchange.push.ms.mbean;
 
 
 /**
- * {@link SerializableHelper}
+ * {@link PushMsMBean}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class SerializableHelper {
+public interface PushMsMBean {
+
+    public static final String PUSH_MS_DOMAIN = "com.openexchange.push.ms";
 
     /**
-     * Initializes a new {@link SerializableHelper}.
+     * Start topic subscribers
      */
-    private SerializableHelper() {
-        super();
-    }
+    public void startListening();
 
     /**
-     * Writes specified {@link Serializable serializable} object to a <code>byte</code> array.
-     *
-     * @param object The serializable object
-     * @return The resulting <code>byte</code> array
-     * @throws IOException If writing the object fails
+     * Shutdown topic subscribers
      */
-    public static byte[] writeObject(final Serializable object) throws IOException {
-        if (null == object) {
-            return null;
-        }
-
-        final ByteArrayOutputStream sink = Streams.newByteArrayOutputStream(2048);
-        new ObjectOutputStream(sink).writeObject(object);
-        return sink.toByteArray();
-    }
-
-    /**
-     * Reads the object from specified <code>byte</code> array.
-     *
-     * @param bytes The object's byte description
-     * @return The read object
-     * @throws IOException If reading the object fails
-     * @throws ClassNotFoundException If such a class is unknown to associated class loader
-     */
-    @SuppressWarnings("unchecked")
-    public static <O> O readObject(final byte[] bytes) throws IOException, ClassNotFoundException {
-        if (null == bytes) {
-            return null;
-        }
-
-        return (O) new ObjectInputStream(Streams.newByteArrayInputStream(bytes)).readObject();
-    }
+    public void stopListening();
 
 }

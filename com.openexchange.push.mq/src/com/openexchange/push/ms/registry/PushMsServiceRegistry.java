@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,26 +47,31 @@
  *
  */
 
-package com.openexchange.push.mq.mbean;
+package com.openexchange.push.ms.registry;
 
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
- * {@link PushMQMBean}
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link PushMsServiceRegistry}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface PushMQMBean {
+public final class PushMsServiceRegistry {
 
-    public static final String PUSH_MQ_DOMAIN = "com.openexchange.push.mq";
-
-    /**
-     * Start topic subscribers
-     */
-    public void startListening();
+    private final static ServiceRegistry registry = new ServiceRegistry();
 
     /**
-     * Shutdown topic subscribers
+     * Gets the instance
      */
-    public void stopListening();
+    public static ServiceRegistry getServiceRegistry() {
+        return registry;
+    }
+
+    /**
+     * Initializes a new {@link PushMsServiceRegistry}.
+     */
+    private PushMsServiceRegistry() {
+        super();
+    }
 
 }

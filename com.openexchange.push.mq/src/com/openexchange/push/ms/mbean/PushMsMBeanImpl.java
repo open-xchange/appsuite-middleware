@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,49 @@
  *
  */
 
-package com.openexchange.push.mq.registry;
+package com.openexchange.push.ms.mbean;
 
-import com.openexchange.osgi.ServiceRegistry;
-
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import org.apache.commons.logging.Log;
+import com.openexchange.exception.OXException;
+import com.openexchange.push.ms.PushMsInit;
+import com.openexchange.push.ms.osgi.PushMsActivator;
 
 /**
- * {@link PushMQServiceRegistry}
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link PushMsMBeanImpl}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PushMQServiceRegistry {
-
-    private final static ServiceRegistry registry = new ServiceRegistry();
-
-    public static ServiceRegistry getServiceRegistry() {
-        return registry;
-    }
+public class PushMsMBeanImpl extends StandardMBean implements PushMsMBean {
 
     /**
-     * Initializes a new {@link PushMQServiceRegistry}.
+     * Initializes a new {@link PushMsMBeanImpl}.
      */
-    private PushMQServiceRegistry() {
-        super();
+    public PushMsMBeanImpl() throws NotCompliantMBeanException {
+        super(PushMsMBean.class);
+
+    }
+
+    @Override
+    public void startListening() {
+        PushMsInit init = PushMsActivator.INIT_REF.get();
+        if (null != init) {
+            try {
+                init.init();
+            } catch (OXException e) {
+                final Log LOG = com.openexchange.log.Log.loggerFor(PushMsMBeanImpl.class);
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    @Override
+    public void stopListening() {
+        PushMsInit init = PushMsActivator.INIT_REF.get();
+        if (null != init) {
+            init.close();
+        }
     }
 
 }

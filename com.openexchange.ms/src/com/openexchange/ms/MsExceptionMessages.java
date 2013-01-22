@@ -47,44 +47,55 @@
  *
  */
 
-package com.openexchange.push.mq.mbean;
+package com.openexchange.ms;
 
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
-import com.openexchange.push.mq.PushMQInit;
+import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link PushMQMBeanImpl}
+ * {@link MsExceptionMessages} - Exception messages for Message Queue (MQ) module that needs to be translated.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PushMQMBeanImpl extends StandardMBean implements PushMQMBean {
+public final class MsExceptionMessages implements LocalizableStrings {
+
+    // An error occurred: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+
+    // An I/O error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+
+    // No Connection Factory found for name: %1$s
+    // "Connection Factory" is a proper name, no translation applicable
+    public static final String CF_NOT_FOUND_MSG = "No Connection Factory found for name: %1$s";
+
+    // No such queue or could not be created: %1$s
+    public static final String QUEUE_NOT_FOUND_MSG = "No such queue or could not be created: %1$s";
+
+    // No such topic or could not be created: %1$s
+    public static final String TOPIC_NOT_FOUND_MSG = "No such topic or could not be created: %1$s";
+
+    // A JMS error occurred: %1$s
+    public static final String JMS_ERROR_MSG = "A JMS error occurred: %1$s";
+
+    // Illegal state: %1$s
+    public static final String ILLEGAL_STATE_MSG = "Illegal state: %1$s";
+
+    // A filter expression has not been validated.
+    public static final String INVALID_SELECTOR_MSG = "A filter expression has not been validated.";
+
+    // Either no such queue or a topic or could not be created: %1$s
+    // Please consider "queue" and "topic" as proper names, no translation applicable to them
+    public static final String DESTINATION_NOT_FOUND_MSG = "Either no such queue or a topic or could not be created: %1$s";
+
+    // A security problem occurred (authentication issues, permission issues,...)
+    public static final String SECURITY_ERROR_MSG = "A security problem occurred: %1$s";
 
     /**
-     * Initializes a new {@link PushMQMBeanImpl}.
+     * Initializes a new {@link MsExceptionMessages}.
      */
-    public PushMQMBeanImpl() throws NotCompliantMBeanException {
-        super(PushMQMBean.class);
-
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.push.mq.mbean.PushMQMBean#startListening()
-     */
-    @Override
-    public void startListening() {
-        PushMQInit init = PushMQInit.getInit();
-        init.startListening();
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.push.mq.mbean.PushMQMBean#stopListening()
-     */
-    @Override
-    public void stopListening() {
-        PushMQInit init = PushMQInit.getInit();
-        init.stopListening();
+    private MsExceptionMessages() {
+        super();
     }
 
 }

@@ -96,6 +96,11 @@ public final class HzTopic<E> implements Topic<E> {
     }
 
     @Override
+    public void destroy() {
+        hzTopic.destroy();
+    }
+
+    @Override
     public void publish(final E message) {
         hzTopic.publish(message);
     }

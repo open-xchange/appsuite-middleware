@@ -49,10 +49,9 @@
 
 package com.openexchange.ms;
 
-
 /**
  * {@link Dispatcher} - The super type for message dispatching.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Dispatcher<E> {
@@ -66,15 +65,22 @@ public interface Dispatcher<E> {
 
     /**
      * Adds given listener to this topic.
-     *
+     * 
      * @param listener The listener
      */
     void addMessageListener(MessageListener<E> listener);
 
     /**
      * Removes given listener from this topic
-     *
+     * 
      * @param listener The listener
      */
     void removeMessageListener(MessageListener<E> listener);
+
+    /**
+     * Destroys this instance cluster-wide.
+     * <p>
+     * Clears and releases all resources for this instance.
+     */
+    void destroy();
 }

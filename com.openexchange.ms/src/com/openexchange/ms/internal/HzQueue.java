@@ -100,6 +100,11 @@ public final class HzQueue<E> implements Queue<E> {
     }
 
     @Override
+    public void destroy() {
+        hzQueue.destroy();
+    }
+
+    @Override
     public int size() {
         return hzQueue.size();
     }
