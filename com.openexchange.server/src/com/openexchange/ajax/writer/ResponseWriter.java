@@ -561,7 +561,7 @@ public final class ResponseWriter {
             final OXException warning = warnings.get(0);
             writer.object();
             try {
-                writeException(warning.setCategory(Category.CATEGORY_WARNING), writer, locale);
+                writeException(warning/*.setCategory(Category.CATEGORY_WARNING)*/, writer, locale);
             } finally {
                 writer.endObject();
             }
@@ -580,7 +580,7 @@ public final class ResponseWriter {
                 for (final OXException warning : warnings) {
                     writer.object();
                     try {
-                        writeException(warning.setCategory(Category.CATEGORY_WARNING), writer, locale);
+                        writeException(warning/*.setCategory(Category.CATEGORY_WARNING)*/, writer, locale);
                     } finally {
                         writer.endObject();
                     }

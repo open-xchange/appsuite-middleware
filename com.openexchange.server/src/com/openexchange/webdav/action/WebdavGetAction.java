@@ -61,6 +61,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -131,14 +132,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 					LOG.debug("",e);
 				}*/
 			}
-
-			if(in != null) {
-				try {
-					in.close();
-				} catch (final IOException e) {
-					LOG.debug("",e);
-				}
-			}
+			Streams.close(in);
 		}
 	}
 

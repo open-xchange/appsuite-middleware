@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Eclipse-RegisterBuddy: com.hazelcast
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Hazelcast Distributed Cache Events
+Bundle-SymbolicName: com.openexchange.caching.events.hazelcast
+Bundle-Version: 7.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.hazelcast.core,
+ com.openexchange.caching.events,
+ com.openexchange.exception,
+ com.openexchange.hazelcast.configuration,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.caching.events.hazelcast.osgi.HzCacheEventHandlerActivator

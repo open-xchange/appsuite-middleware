@@ -2,12 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange URL Mail Attachment Bundle
 Bundle-SymbolicName: com.openexchange.url.mail.attachment
-Bundle-Version: 7.0.1
+Bundle-Version: 7.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.conversion,
  com.openexchange.exception,
  com.openexchange.groupware,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.mail,
  com.openexchange.mail.api,

@@ -130,7 +130,6 @@ public class URIValueDefinition extends ValueDefinition {
             }
             str = strBuilder.toString();
         }
-        System.out.println(str);
         result = new StringScanner(s.getScanner(), str);
         return result;
     }

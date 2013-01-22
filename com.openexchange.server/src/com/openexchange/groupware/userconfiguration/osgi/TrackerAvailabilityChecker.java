@@ -50,8 +50,10 @@
 package com.openexchange.groupware.userconfiguration.osgi;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfiguration.AvailabilityChecker;
 import com.openexchange.server.osgi.ServerActivator;
 
@@ -62,16 +64,32 @@ import com.openexchange.server.osgi.ServerActivator;
  */
 public class TrackerAvailabilityChecker<S> extends ServiceTracker<S, S> implements AvailabilityChecker {
 
+    /**
+     * Gets the checker for specified service.
+     *
+     * @param clazz The service's class
+     * @param defaultAvailability The default availability value
+     * @return The checker for given service
+     */
+    public static <S> AvailabilityChecker getAvailabilityCheckerFor(final Class<S> clazz, final boolean defaultAvailability) {
+        final BundleContext bundleContext = ServerActivator.getContext();
+        if (null == bundleContext) {
+            return UserConfiguration.TRUE_AVAILABILITY_CHECKER;
+        }
+        return new TrackerAvailabilityChecker<S>(clazz, defaultAvailability);
+    }
+
     private final AtomicBoolean available;
 
     /**
      * Initializes a new {@link TrackerAvailabilityChecker}.
      *
      * @param clazz The service's class to track
+     * @param defaultAvailability The default availability value
      */
-    public TrackerAvailabilityChecker(final Class<S> clazz) {
+    private TrackerAvailabilityChecker(final Class<S> clazz, final boolean defaultAvailability) {
         super(ServerActivator.getContext(), clazz, null);
-        available = new AtomicBoolean();
+        available = new AtomicBoolean(defaultAvailability);
     }
 
     @Override

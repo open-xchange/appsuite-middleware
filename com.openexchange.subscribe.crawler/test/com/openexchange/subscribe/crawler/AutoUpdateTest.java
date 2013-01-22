@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.SimConfigurationService;
+import com.openexchange.java.Streams;
 import com.openexchange.subscribe.crawler.internal.CrawlerUpdateTask;
 import com.openexchange.subscribe.crawler.osgi.Activator;
 
@@ -189,9 +190,11 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
     private void copyFileFromRepository(final String filename, final String destinationDirectoryPath){
         final File source = new File(allCrawlersRepositoryPath + filename);
         final File target = new File(destinationDirectoryPath + filename);
+        InputStream in = null;
+        OutputStream out = null;
         try {
-            final InputStream in = new FileInputStream(source);
-            final OutputStream out = new FileOutputStream(target);
+            in = new FileInputStream(source);
+            out = new FileOutputStream(target);
 
             final byte[] buf = new byte[1024];
             int len;
@@ -204,6 +207,8 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
             e.printStackTrace();
         } catch (final IOException e) {
             e.printStackTrace();
+        } finally {
+            Streams.close(in, out);
         }
     }
 }

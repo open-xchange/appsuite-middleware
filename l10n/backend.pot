@@ -208,6 +208,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mq/src/com/openexchange/mq/MQExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ms/src/com/openexchange/ms/MsExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:69
@@ -1037,6 +1038,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/TwitterMessagingExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mq/src/com/openexchange/mq/MQExceptionMessages.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ms/src/com/openexchange/ms/MsExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:62
@@ -3623,43 +3625,51 @@ msgstr ""
 #. No Connection Factory found for name: %1$s
 #. "Connection Factory" is a proper name, no translation applicable
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mq/src/com/openexchange/mq/MQExceptionMessages.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ms/src/com/openexchange/ms/MsExceptionMessages.java:70
 msgid "No Connection Factory found for name: %1$s"
 msgstr ""
 
 #. No such queue or could not be created: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mq/src/com/openexchange/mq/MQExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ms/src/com/openexchange/ms/MsExceptionMessages.java:73
 msgid "No such queue or could not be created: %1$s"
 msgstr ""
 
 #. No such topic or could not be created: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mq/src/com/openexchange/mq/MQExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ms/src/com/openexchange/ms/MsExceptionMessages.java:76
 msgid "No such topic or could not be created: %1$s"
 msgstr ""
 
 #. A JMS error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mq/src/com/openexchange/mq/MQExceptionMessages.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ms/src/com/openexchange/ms/MsExceptionMessages.java:79
 msgid "A JMS error occurred: %1$s"
 msgstr ""
 
 #. Illegal state: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mq/src/com/openexchange/mq/MQExceptionMessages.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ms/src/com/openexchange/ms/MsExceptionMessages.java:82
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:75
 msgid "Illegal state: %1$s"
 msgstr ""
 
 #. A filter expression has not been validated.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mq/src/com/openexchange/mq/MQExceptionMessages.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ms/src/com/openexchange/ms/MsExceptionMessages.java:85
 msgid "A filter expression has not been validated."
 msgstr ""
 
 #. Either no such queue or a topic or could not be created: %1$s
 #. Please consider "queue" and "topic" as proper names, no translation applicable to them
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mq/src/com/openexchange/mq/MQExceptionMessages.java:89
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ms/src/com/openexchange/ms/MsExceptionMessages.java:89
 msgid "Either no such queue or a topic or could not be created: %1$s"
 msgstr ""
 
 #. A security problem occurred (authentication issues, permission issues,...)
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mq/src/com/openexchange/mq/MQExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ms/src/com/openexchange/ms/MsExceptionMessages.java:92
 msgid "A security problem occurred: %1$s"
 msgstr ""
 

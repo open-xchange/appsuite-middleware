@@ -1,8 +1,8 @@
-open-xchange-freebusy (7.0.1-0) UNRELEASED; urgency=low
+open-xchange-freebusy (7.0.0-5) unstable; urgency=low
 
-  * prepare for 7.0.1
+  * Build for patch 2013-01-23
 
- -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Thu, 10 Jan 2013 10:10:30 +0100
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Tue, 15 Jan 2013 14:55:25 +0100
 
 open-xchange-freebusy (7.0.0-4) unstable; urgency=low
 

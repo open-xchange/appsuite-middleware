@@ -78,6 +78,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.groupware.update.tools.Constants;
+import com.openexchange.java.Streams;
 import com.openexchange.management.console.JMXAuthenticatorImpl;
 import com.openexchange.tools.console.TableWriter;
 import com.openexchange.tools.console.TableWriter.ColumnFormat;
@@ -183,7 +184,7 @@ public class ListExecutedTasksCLT {
                 TabularData taskList = (TabularData) mbsc.invoke(Constants.OBJECT_NAME, "listExecutedTasks", new Object[] { schemaName }, null);
                 writeTasks(taskList);
             } finally {
-                jmxConnector.close();
+                Streams.close(jmxConnector);
             }
         } catch (InstanceNotFoundException e) {
             System.err.println("Instance is not available: " + e.getMessage());

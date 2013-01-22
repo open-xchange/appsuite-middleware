@@ -1,8 +1,8 @@
-open-xchange-l10n (7.0.1-0) UNRELEASED; urgency=low
+open-xchange-l10n (7.0.0-5) unstable; urgency=low
 
-  * prepare for 7.0.1
+  * Build for patch 2013-01-23
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 10 Jan 2013 10:10:38 +0100
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 15 Jan 2013 14:55:30 +0100
 
 open-xchange-l10n (7.0.0-4) unstable; urgency=low
 
