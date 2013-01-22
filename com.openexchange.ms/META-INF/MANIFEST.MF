@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Eclipse-RegisterBuddy: com.hazelcast
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Messaging System Bundle
 Bundle-SymbolicName: com.openexchange.ms
@@ -14,6 +15,8 @@ Import-Package: com.hazelcast.config,
  com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.groupware,
+ com.openexchange.hazelcast,
+ com.openexchange.hazelcast.configuration,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.java.util,

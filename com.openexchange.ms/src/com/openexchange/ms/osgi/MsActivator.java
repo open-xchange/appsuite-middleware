@@ -54,6 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.ms.MsService;
 import com.openexchange.ms.internal.HzMsService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -74,44 +75,48 @@ public class MsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { HazelcastConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final BundleContext context = this.context;
-        final AtomicReference<MsService> msServiceRef = new AtomicReference<MsService>();
-        track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
-
-            @Override
-            public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
-                final HazelcastInstance hz = context.getService(reference);
-                final HzMsService msService = new HzMsService(hz);
-                if (msServiceRef.compareAndSet(null, msService)) {
-                    registerService(MsService.class, msService);
-                    return hz;
-                }
-                context.ungetService(reference);
-                return null;
-            }
-
-            @Override
-            public void modifiedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
-                // Ignore
-            }
-
-            @Override
-            public void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
-                if (null != service) {
-                    final MsService msService = msServiceRef.get();
-                    if (null != msService) {
-                        unregisterService(msService);
+        final HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
+        final boolean enabled = configService.isEnabled();
+        if (enabled) {
+            final BundleContext context = this.context;
+            final AtomicReference<MsService> msServiceRef = new AtomicReference<MsService>();
+            track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
+    
+                @Override
+                public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
+                    final HazelcastInstance hz = context.getService(reference);
+                    final HzMsService msService = new HzMsService(hz);
+                    if (msServiceRef.compareAndSet(null, msService)) {
+                        registerService(MsService.class, msService);
+                        return hz;
                     }
                     context.ungetService(reference);
+                    return null;
                 }
-            }
-        });
-        openTrackers();
+    
+                @Override
+                public void modifiedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
+                    // Ignore
+                }
+    
+                @Override
+                public void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
+                    if (null != service) {
+                        final MsService msService = msServiceRef.get();
+                        if (null != msService) {
+                            unregisterService(msService);
+                        }
+                        context.ungetService(reference);
+                    }
+                }
+            });
+            openTrackers();
+        }
     }
 
     @Override
