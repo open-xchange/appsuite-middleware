@@ -168,13 +168,14 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                             logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append('\n');
                         }
                     }
-
-                    String requestParameters = entry.getRequestParameters();
-                    if(!requestParameters.isEmpty()) {
-                        logBuilder
-                        .append("with parameters:\n")
-                        .append(requestParameters).append("\n");
-                    }
+                    
+                      // Make sure not to log any client specific parameters as security consideration 
+//                    String requestParameters = entry.getRequestParameters();
+//                    if(!requestParameters.isEmpty()) {
+//                        logBuilder
+//                        .append("with parameters:\n")
+//                        .append(requestParameters).append("\n");
+//                    }
 
                     RequestWatcherServiceImpl.LOG.info(
                         logBuilder
