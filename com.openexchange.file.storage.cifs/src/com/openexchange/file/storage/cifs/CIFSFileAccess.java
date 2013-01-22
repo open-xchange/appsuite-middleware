@@ -105,43 +105,36 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     @Override
     public void startTransaction() throws TransactionException {
         // Nothing to do
-
     }
 
     @Override
     public void commit() throws TransactionException {
         // Nothing to do
-
     }
 
     @Override
     public void rollback() throws TransactionException {
         // Nothing to do
-
     }
 
     @Override
     public void finish() throws TransactionException {
         // Nothing to do
-
     }
 
     @Override
     public void setTransactional(final boolean transactional) {
         // Nothing to do
-
     }
 
     @Override
     public void setRequestTransactional(final boolean transactional) {
         // Nothing to do
-
     }
 
     @Override
     public void setCommitsTransaction(final boolean commits) {
         // Nothing to do
-
     }
 
     @Override
