@@ -49,60 +49,48 @@
 
 package com.openexchange.ms.internal;
 
-import java.util.concurrent.ConcurrentMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.ms.MsService;
-import com.openexchange.ms.Queue;
-import com.openexchange.ms.Topic;
+import java.io.Serializable;
 
 /**
- * {@link HzMsService}
+ * {@link MessageData} - A wrapper for data element keeping track of sender identifier.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HzMsService implements MsService {
+public class MessageData<E> implements Serializable {
 
-    private final HazelcastInstance hz;
-    private final ConcurrentMap<String, Queue<?>> queues;
-    private final ConcurrentMap<String, Topic<?>> topics;
+    private static final long serialVersionUID = 7312460889378705573L;
+
+    private final E object;
+    private final String senderId;
 
     /**
-     * Initializes a new {@link HzMsService}.
+     * Initializes a new {@link MessageData}.
+     * 
+     * @param object The message's object
+     * @param senderId The identifier of the sender dispatching that message object
      */
-    public HzMsService(final HazelcastInstance hz) {
+    public MessageData(E object, String senderId) {
         super();
-        this.hz = hz;
-        queues = new NonBlockingHashMap<String, Queue<?>>(16);
-        topics = new NonBlockingHashMap<String, Topic<?>>(8);
+        this.object = object;
+        this.senderId = senderId;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <E> Queue<E> getQueue(final String name) {
-        Queue<E> queue = (Queue<E>) queues.get(name);
-        if (null == queue) {
-            final HzQueue<E> hzQueue = new HzQueue<E>(name, hz);
-            queue = (Queue<E>) queues.putIfAbsent(name, hzQueue);
-            if (null == queue) {
-                queue = hzQueue;
-            }
-        }
-        return queue;
+    /**
+     * Gets the object
+     * 
+     * @return The object
+     */
+    public E getObject() {
+        return object;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <E> Topic<E> getTopic(final String name) {
-        Topic<E> topic = (Topic<E>) topics.get(name);
-        if (null == topic) {
-            final HzTopic<E> hzTopic = new HzTopic<E>(name, hz);
-            topic = (Topic<E>) topics.putIfAbsent(name, hzTopic);
-            if (null == topic) {
-                topic = hzTopic;
-            }
-        }
-        return topic;
+    /**
+     * Gets the sender identifier
+     * 
+     * @return The sender identifier
+     */
+    public String getSenderId() {
+        return senderId;
     }
 
 }
