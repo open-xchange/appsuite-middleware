@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
+Eclipse-RegisterBuddy: com.hazelcast
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Hazelcast Distributed Cache Events
 Bundle-SymbolicName: com.openexchange.caching.events.hazelcast
-Bundle-Version: 7.0.1
+Bundle-Version: 7.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Eclipse-BuddyPolicy: dependent
 Import-Package: com.hazelcast.core,
  com.openexchange.caching.events,
  com.openexchange.exception,
