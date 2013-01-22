@@ -31,7 +31,7 @@ define("ui/ui", function () {
         logLevel : 'debug',
         transport : 'long-polling' ,
         fallbackTransport: 'long-polling',
-        timeout: 300000,
+        timeout: 50000,
         maxRequests : 3,
         headers : {session: session}
         };
