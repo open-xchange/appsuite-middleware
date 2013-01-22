@@ -52,6 +52,7 @@ package com.openexchange.ms.internal;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.ms.Message;
@@ -65,18 +66,20 @@ import com.openexchange.ms.Topic;
  */
 public final class HzTopic<E> implements Topic<E> {
 
-    private final ITopic<E> hzTopic;
+    private final ITopic<MessageData<E>> hzTopic;
     private final String senderId;
-    private final ConcurrentMap<MessageListener<E>, com.hazelcast.core.MessageListener<E>> registeredListeners;
+    private final String name;
+    private final ConcurrentMap<MessageListener<E>, com.hazelcast.core.MessageListener<MessageData<E>>> registeredListeners;
 
     /**
      * Initializes a new {@link HzTopic}.
      */
-    public HzTopic(final ITopic<E> hzTopic) {
+    public HzTopic(final String name, final HazelcastInstance hz) {
         super();
+        this.name = name;
         senderId = UUIDs.getUnformattedString(UUID.randomUUID());
-        this.hzTopic = hzTopic;
-        registeredListeners = new ConcurrentHashMap<MessageListener<E>, com.hazelcast.core.MessageListener<E>>(8);
+        this.hzTopic = hz.getTopic(name);
+        registeredListeners = new ConcurrentHashMap<MessageListener<E>, com.hazelcast.core.MessageListener<MessageData<E>>>(8);
     }
 
     @Override
@@ -86,7 +89,7 @@ public final class HzTopic<E> implements Topic<E> {
 
     @Override
     public String getName() {
-        return hzTopic.getName();
+        return name;
     }
 
     @Override
@@ -98,7 +101,7 @@ public final class HzTopic<E> implements Topic<E> {
 
     @Override
     public void removeMessageListener(final MessageListener<E> listener) {
-        final com.hazelcast.core.MessageListener<E> hzListener = registeredListeners.remove(listener);
+        final com.hazelcast.core.MessageListener<MessageData<E>> hzListener = registeredListeners.remove(listener);
         if (null != hzListener) {
             hzTopic.removeMessageListener(hzListener);
         }
@@ -111,12 +114,12 @@ public final class HzTopic<E> implements Topic<E> {
 
     @Override
     public void publish(final E message) {
-        hzTopic.publish(message);
+        hzTopic.publish(new MessageData<E>(message, senderId));
     }
 
     // ------------------------------------------------------------------------ //
 
-    private final class HzMessageListener implements com.hazelcast.core.MessageListener<E> {
+    private final class HzMessageListener implements com.hazelcast.core.MessageListener<MessageData<E>> {
 
         private final MessageListener<E> listener;
 
@@ -129,8 +132,9 @@ public final class HzTopic<E> implements Topic<E> {
         }
 
         @Override
-        public void onMessage(final com.hazelcast.core.Message<E> message) {
-            listener.onMessage(new Message<E>(getName(), getSenderId(), message.getMessageObject()));
+        public void onMessage(final com.hazelcast.core.Message<MessageData<E>> message) {
+            final MessageData<E> messageData = message.getMessageObject();
+            listener.onMessage(new Message<E>(getName(), messageData.getSenderId(), messageData.getObject()));
         }
     }
 }

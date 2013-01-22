@@ -70,6 +70,7 @@ public class Message<E> extends EventObject {
      * Initializes a new {@link Message}.
      * 
      * @param topicName The name of associated topic
+     * @param senderId The identifier of the resource that dispatched this message
      * @param messageObject The message's object
      */
     public Message(final String topicName, final String senderId, final E messageObject) {
