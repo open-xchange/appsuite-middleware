@@ -51,6 +51,8 @@ package com.openexchange.caching.events.ms.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
@@ -66,7 +68,7 @@ import com.openexchange.server.ServiceExceptionCode;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class MsCacheEventHandler implements CacheListener, MessageListener<CacheEvent> {
+public final class MsCacheEventHandler implements CacheListener, MessageListener<CacheEvent>, EventHandler {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(MsCacheEventHandler.class);
     private static final String TOPIC_NAME = "cacheEvents";
@@ -96,6 +98,15 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
         Topic<CacheEvent> topic = getTopic();
         this.senderId = topic.getSenderId();
         topic.addMessageListener(this);
+    }
+
+    @Override
+    public void handleEvent(Event event) {
+        // com.openexchange.push.ms.PushMsListener
+        
+        // com.openexchange.event.RemoteEvent
+        
+        // Topic: "com/openexchange/remote/*";
     }
     
     public void stop() {

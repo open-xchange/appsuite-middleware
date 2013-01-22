@@ -13,5 +13,6 @@ Import-Package: com.openexchange.caching.events,
  com.openexchange.server,
  org.apache.commons.logging,
  org.osgi.framework,
+ org.osgi.service.event,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.caching.events.ms.osgi.MsCacheEventHandlerActivator
