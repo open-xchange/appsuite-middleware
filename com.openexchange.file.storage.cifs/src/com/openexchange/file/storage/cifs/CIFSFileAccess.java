@@ -97,8 +97,8 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     /**
      * Initializes a new {@link CIFSFileAccess}.
      */
-    public CIFSFileAccess(final String rootUrl, final NtlmPasswordAuthentication auth, final FileStorageAccount account, final Session session, final FileStorageAccountAccess accountAccess) {
-        super(rootUrl, auth, account, session);
+    public CIFSFileAccess(final String rootUrl, final NtlmPasswordAuthentication auth, final FileStorageAccount account, final Session session, final CIFSAccountAccess accountAccess) {
+        super(rootUrl, auth, account, session, accountAccess);
         this.accountAccess = accountAccess;
     }
 

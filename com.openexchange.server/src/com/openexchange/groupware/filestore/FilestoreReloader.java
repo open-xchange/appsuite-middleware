@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,69 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.groupware.filestore;
 
-import java.io.Serializable;
-import java.util.Map;
+import java.net.URI;
+import com.openexchange.caching.dynamic.OXObjectFactory;
+import com.openexchange.caching.dynamic.Refresher;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link FileStorageAccount} - A file storage account.
+ * {@link FilestoreReloader}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
  */
-public interface FileStorageAccount extends Serializable, FileStorageConstants {
+public class FilestoreReloader extends Refresher<Filestore> implements Filestore {
+
+    private static final long serialVersionUID = -161900697168688664L;
+
+    private Filestore delegate;
 
     /**
-     * The identifier for default/primary file storage account.
+     * Default constructor.
+     * @throws OXException if some problem occurs with refreshing.
      */
-    public static final String DEFAULT_ID = "0";
+    public FilestoreReloader(final OXObjectFactory<Filestore> factory, final String regionName) throws OXException {
+        super(factory, regionName, false);
+        this.delegate = refresh();
+    }
 
     /**
-     * Gets this account's configuration.
-     *
-     * @return The configuration as a {@link Map}
+     * @throws RuntimeException if refreshing fails.
      */
-    Map<String, Object> getConfiguration();
+    private void updateDelegate() throws RuntimeException {
+        try {
+            this.delegate = refresh();
+        } catch (final OXException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 
-    /**
-     * Gets the identifier.
-     *
-     * @return The identifier
-     */
-    String getId();
+    @Override
+    public int getId() {
+        updateDelegate();
+        return delegate.getId();
+    }
 
-    /**
-     * Gets the display name.
-     *
-     * @return The display name
-     */
-    String getDisplayName();
+    @Override
+    public long getMaxContext() {
+        updateDelegate();
+        return delegate.getMaxContext();
+    }
 
-    /**
-     * Gets the associated file storage service.
-     *
-     * @return The associated file storage service
-     */
-    FileStorageService getFileStorageService();
+    @Override
+    public long getSize() {
+        updateDelegate();
+        return delegate.getSize();
+    }
 
+    @Override
+    public URI getUri() {
+        updateDelegate();
+        return delegate.getUri();
+    }
+    
+
+    
 }

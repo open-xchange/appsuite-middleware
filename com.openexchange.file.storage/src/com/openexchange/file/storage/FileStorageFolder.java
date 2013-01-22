@@ -92,21 +92,21 @@ public interface FileStorageFolder extends FileStorageConstants {
      *
      * @return The list of capabilities
      */
-    public Set<String> getCapabilities();
+    Set<String> getCapabilities();
 
     /**
      * Gets the identifier.
      *
      * @return The identifier
      */
-    public String getId();
+    String getId();
 
     /**
      * Gets the name.
      *
      * @return The name
      */
-    public String getName();
+    String getName();
 
     /**
      * Gets the permission for currently logged-in user accessing this folder
@@ -118,35 +118,35 @@ public interface FileStorageFolder extends FileStorageConstants {
      *
      * @return The own permission
      */
-    public FileStoragePermission getOwnPermission();
+    FileStoragePermission getOwnPermission();
 
     /**
      * Gets the parent identifier or <code>null</code> if this file storage folder denotes the root folder.
      *
      * @return The parent identifier or <code>null</code> if this file storage folder denotes the root folder
      */
-    public String getParentId();
+    String getParentId();
 
     /**
      * Gets the permissions associated with this file storage folder.
      *
      * @return The permissions as a collection of {@link FileStoragePermission}
      */
-    public List<FileStoragePermission> getPermissions();
+    List<FileStoragePermission> getPermissions();
 
     /**
      * Checks if this file storage folder has subfolders.
      *
      * @return <code>true</code> if this file storage folder has subfolders; otherwise <code>false</code>
      */
-    public boolean hasSubfolders();
+    boolean hasSubfolders();
 
     /**
      * Checks if this file storage folder has subscribed subfolders.
      *
      * @return <code>true</code> if this file storage folder has subscribed subfolders; otherwise <code>false</code>
      */
-    public boolean hasSubscribedSubfolders();
+    boolean hasSubscribedSubfolders();
 
     /**
      * Checks whether the denoted file storage folder is subscribed or not.
@@ -155,49 +155,49 @@ public interface FileStorageFolder extends FileStorageConstants {
      *
      * @return Whether the denoted file storage folder is subscribed or not
      */
-    public boolean isSubscribed();
+    boolean isSubscribed();
 
     /**
      * Gets the creation date.
      *
      * @return The creation date
      */
-    public Date getCreationDate();
+    Date getCreationDate();
 
     /**
      * Gets the last modified date.
      *
      * @return The last modified date
      */
-    public Date getLastModifiedDate();
+    Date getLastModifiedDate();
 
     /**
      * Checks if this folder is able to hold folders.
      *
      * @return <code>true</code> if this folder is able to hold folders; otherwise <code>false</code>
      */
-    public boolean isHoldsFolders();
+    boolean isHoldsFolders();
 
     /**
      * Checks if this folder is able to hold files.
      *
      * @return <code>true</code> if this folder is able to hold files; otherwise <code>false</code>
      */
-    public boolean isHoldsFiles();
+    boolean isHoldsFiles();
 
     /**
      * Checks if this folder denotes the root folder
      *
      * @return <code>true</code> if this folder denotes the root folder; otherwise <code>false</code>
      */
-    public boolean isRootFolder();
+    boolean isRootFolder();
 
     /**
      * Checks if this folder denotes a default folder.
      *
      * @return <code>true</code> if this folder denotes a default folder; otherwise <code>false</code>
      */
-    public boolean isDefaultFolder();
+    boolean isDefaultFolder();
 
     /**
      * Gets the number of files.
@@ -205,13 +205,13 @@ public interface FileStorageFolder extends FileStorageConstants {
      * @return The number of files or <code>-1</code> if this folder does not hold files
      * @see #isHoldsFiles()
      */
-    public int getFileCount();
+    int getFileCount();
 
     /**
      * Gets the properties associated with this folder.
      *
      * @return The properties
      */
-    public Map<String, Object> getProperties();
+    Map<String, Object> getProperties();
 
 }

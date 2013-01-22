@@ -47,72 +47,36 @@
  *
  */
 
-package com.openexchange.caching.events.hazelcast.internal;
+package com.openexchange.file.storage;
 
-import java.io.Serializable;
-import com.openexchange.caching.events.CacheEvent;
+import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link HzCacheEvent}
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link WarningsAware} - Aware of possible warnings.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HzCacheEvent implements Serializable {
-    
-    private static final long serialVersionUID = 5928511821652428940L;
-    
-    private CacheEvent cacheEvent;
-    private String senderID;
-    
-    public HzCacheEvent() {
-        this(null, null);
-    }
-    
-    public HzCacheEvent(CacheEvent cacheEvent, String senderID) {
-        super();
-        this.cacheEvent = cacheEvent;
-        this.senderID = senderID;
-    }
+public interface WarningsAware {
 
     /**
-     * Gets the cacheEvent
-     *
-     * @return The cacheEvent
+     * Gets the optional warnings.
+     * 
+     * @return The optional warnings
      */
-    public CacheEvent getCacheEvent() {
-        return cacheEvent;
-    }
+    List<OXException> getWarnings();
 
     /**
-     * Sets the cacheEvent
-     *
-     * @param cacheEvent The cacheEvent to set
+     * Adds given warning.
+     * 
+     * @param warning The warning to add
      */
-    public void setCacheEvent(CacheEvent cacheEvent) {
-        this.cacheEvent = cacheEvent;
-    }
+    void addWarning(OXException warning);
 
     /**
-     * Gets the senderID
-     *
-     * @return The senderID
+     * Removes given warning.
+     * 
+     * @param warning The warning to remove
      */
-    public String getSenderID() {
-        return senderID;
-    }
-
-    /**
-     * Sets the senderID
-     *
-     * @param senderID The senderID to set
-     */
-    public void setSenderID(String senderID) {
-        this.senderID = senderID;
-    }
-    
-    @Override
-    public String toString() {
-        return "HazelcastCacheMessage [cacheEvent=" + cacheEvent + ", senderID=" + senderID + "]";
-    }
-
+    void removeWarning(OXException warning);
 }

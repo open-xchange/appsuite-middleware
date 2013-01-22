@@ -68,6 +68,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
 import com.openexchange.session.Session;
 
@@ -93,8 +94,8 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
     /**
      * Initializes a new {@link CIFSFolderAccess}.
      */
-    public CIFSFolderAccess(final String rootUrl, final NtlmPasswordAuthentication auth, final FileStorageAccount account, final Session session) {
-        super(rootUrl, auth, account, session);
+    public CIFSFolderAccess(final String rootUrl, final NtlmPasswordAuthentication auth, final FileStorageAccount account, final Session session, final WarningsAware warningsAware) {
+        super(rootUrl, auth, account, session, warningsAware);
         login = (String) account.getConfiguration().get(CIFSConstants.CIFS_LOGIN);
         homeDirPath = (String) account.getConfiguration().get(CIFSConstants.CIFS_HOME_DIR);
     }

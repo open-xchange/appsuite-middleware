@@ -47,77 +47,73 @@
  *
  */
 
-package com.openexchange.caching.events.hazelcast.osgi;
+package com.openexchange.caching.events.ms.osgi;
 
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.caching.events.CacheEventService;
-import com.openexchange.caching.events.hazelcast.internal.HzCacheEventHandler;
+import com.openexchange.caching.events.ms.internal.MsCacheEventHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.ms.MsService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link HzCacheEventHandlerActivator}
+ * {@link MsCacheEventHandlerActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class HzCacheEventHandlerActivator extends HousekeepingActivator {
+public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HzCacheEventHandlerActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MsCacheEventHandlerActivator.class);
     
     /**
-     * Initializes a new {@link HzCacheEventHandlerActivator}.
+     * Initializes a new {@link MsCacheEventHandlerActivator}.
      */
-    public HzCacheEventHandlerActivator() {
+    public MsCacheEventHandlerActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CacheEventService.class, HazelcastConfigurationService.class };
+        return new Class<?>[] { CacheEventService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
-        if (false == getService(HazelcastConfigurationService.class).isEnabled()) {
-            LOG.info("Aborting startup since Hazelcast is disabled by configuration.");
-        }
         final BundleContext context = this.context;
         final CacheEventService cacheEventService = getService(CacheEventService.class);
-        track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
+        track(MsService.class, new ServiceTrackerCustomizer<MsService, MsService>() {
 
-            private volatile HzCacheEventHandler eventHandler;
+            private volatile MsCacheEventHandler eventHandler;
 
             @Override
-            public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
-                HazelcastInstance hazelcastInstance = context.getService(reference);
-                HzCacheEventHandler.setHazelcastInstance(hazelcastInstance);
-                LOG.debug("Initializing Hazelcast cache event handler");
+            public MsService addingService(ServiceReference<MsService> reference) {
+                MsService messagingService = context.getService(reference);
+                MsCacheEventHandler.setMsService(messagingService);
+                LOG.debug("Initializing messaging service cache event handler");
                 try {
-                    this.eventHandler = new HzCacheEventHandler(cacheEventService);
+                    this.eventHandler = new MsCacheEventHandler(cacheEventService);
                 } catch (OXException e) {
                     throw new IllegalStateException(
                         e.getMessage(), new BundleException(e.getMessage(), BundleException.ACTIVATOR_ERROR, e));
                 }
-                return hazelcastInstance;
+                return messagingService;
             }
 
             @Override
-            public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
+            public void modifiedService(ServiceReference<MsService> reference, MsService service) {
                 // Ignored
             }
 
             @Override
-            public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
-                LOG.debug("Stopping Hazelcast cache event handler");
+            public void removedService(ServiceReference<MsService> reference, MsService service) {
+                LOG.debug("Stopping messaging service cache event handler");
                 this.eventHandler.stop();
-                HzCacheEventHandler.setHazelcastInstance(null);
+                MsCacheEventHandler.setMsService(null);
             }
         });
         openTrackers();

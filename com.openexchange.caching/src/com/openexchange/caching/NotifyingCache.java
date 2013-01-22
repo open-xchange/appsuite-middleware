@@ -52,7 +52,6 @@ package com.openexchange.caching;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
-import java.util.UUID;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
@@ -76,8 +75,6 @@ public class NotifyingCache implements Cache, CacheListener {
     private final String region;
     private final CacheEventService eventService;
     private final boolean notifyOnLocalOperations;
-    private final String senderID;
-    private final boolean notifyAsynchronously;
     
     /**
      * Initializes a new {@link NotifyingCache}.
@@ -87,14 +84,12 @@ public class NotifyingCache implements Cache, CacheListener {
      * @param eventService A reference to the cache event service
      * @param notifyOnLocalOperations Whether to notify on local-only operations, too, or not
      */
-    public NotifyingCache(String region, Cache delegate, CacheEventService eventService, boolean notifyOnLocalOperations, boolean notifyAsynchronously) {
+    public NotifyingCache(String region, Cache delegate, CacheEventService eventService, boolean notifyOnLocalOperations) {
         super();
-        this.senderID = UUID.randomUUID().toString();
         this.region = region;
         this.delegate = delegate;
         this.eventService = eventService;
         this.notifyOnLocalOperations = notifyOnLocalOperations;
-        this.notifyAsynchronously = notifyAsynchronously;
         this.eventService.addListener(region, this);
     }
 
@@ -106,7 +101,7 @@ public class NotifyingCache implements Cache, CacheListener {
      * @param eventService A reference to the cache listener eventService
      */
     public NotifyingCache(String region, Cache delegate, CacheEventService notifier) {
-        this(region, delegate, notifier, false, true);
+        this(region, delegate, notifier, false);
     }
     
     /**
@@ -116,15 +111,6 @@ public class NotifyingCache implements Cache, CacheListener {
      */
     public boolean isNotifyOnLocalOperations() {
         return this.notifyOnLocalOperations;
-    }
-
-    /**
-     * Gets a value indicating whether notifications are performed notifyAsynchronously or not. 
-     * 
-     * @return <code>true</code>, if local operations lead to notifications, <code>false</code>, otherwise
-     */
-    public boolean isNotifyAsynchronously() {
-        return this.notifyAsynchronously;
     }
 
     @Override
@@ -185,82 +171,86 @@ public class NotifyingCache implements Cache, CacheListener {
     
     @Override
     public void put(Serializable key, Serializable obj) throws OXException {
-        delegate.put(key, obj);
-        if (true) {
+        put(key, obj, true);
+    }
+
+    @Override
+    public void put(Serializable key, Serializable obj, boolean invalidate) throws OXException {
+        delegate.put(key, obj, false);
+        if (invalidate) {
             fireInvalidate(key);
         }
     }
 
     @Override
     public void put(Serializable key, Serializable val, ElementAttributes attr) throws OXException {
-        delegate.put(key, val, attr);
-        if (true) {
+        put(key, val, attr);
+    }
+
+    @Override
+    public void put(Serializable key, Serializable val, ElementAttributes attr, boolean invalidate) throws OXException {
+        delegate.put(key, val, attr, false);
+        if (invalidate) {
             fireInvalidate(key);
         }
     }
 
     @Override
     public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr) throws OXException {
-        delegate.putInGroup(key, groupName, attr);
-        if (true) {
+        putInGroup(key, groupName, value, attr, true);
+    }
+
+    @Override
+    public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr, boolean invalidate) throws OXException {
+        delegate.putInGroup(key, groupName, value, attr, false);
+        if (invalidate) {
             fireInvalidate(key, groupName);
         }
     }
 
     @Override
     public void putInGroup(Serializable key, String groupName, Serializable value) throws OXException {
-        delegate.putInGroup(key, groupName, value);
-        if (true) {
+        putInGroup(key, groupName, value, true);
+    }
+
+    @Override
+    public void putInGroup(Serializable key, String groupName, Serializable value, boolean invalidate) throws OXException {
+        delegate.putInGroup(key, groupName, value, false);
+        if (invalidate) {
             fireInvalidate(key, groupName);
         }
     }
 
     @Override
     public void putSafe(Serializable key, Serializable value) throws OXException {
-        delegate.put(key, value);
-        if (true) {
-            fireInvalidate(key);
-        }
+        delegate.putSafe(key, value);
     }
 
     @Override
     public void remove(Serializable key) throws OXException {
         delegate.remove(key);
-        if (true) {
-            fireInvalidate(key);
-        }
+        fireInvalidate(key);
     }
 
     @Override
     public void localRemove(Serializable key) throws OXException {
         delegate.localRemove(key);
-        if (true) {
-            fireInvalidate(key);
-        }
     }
 
     @Override
     public void localPut(Serializable key, Serializable value) throws OXException {
         delegate.localPut(key, value);
-        if (true) {
-            fireInvalidate(key);
-        }
     }
 
     @Override
     public void removeFromGroup(Serializable key, String group) {
         delegate.removeFromGroup(key, group);
-        if (true) {
-            fireInvalidate(key, group);
-        }
+        fireInvalidate(key, group);
     }
 
     @Override
     public void localRemoveFromGroup(Serializable key, String group) {
         delegate.localRemoveFromGroup(key, group);
-        if (true) {
-            fireInvalidate(key, group);
-        }
     }
 
     @Override
@@ -304,8 +294,8 @@ public class NotifyingCache implements Cache, CacheListener {
     }
 
     @Override
-    public void onEvent(CacheEvent cacheEvent, String senderID) {
-        if (false == this.senderID.equals(senderID) && null != cacheEvent) {
+    public void onEvent(CacheEvent cacheEvent) {
+        if (null != cacheEvent) {
             try {
                 switch (cacheEvent.getOperation()) {
                 case INVALIDATE_GROUP:
@@ -329,7 +319,7 @@ public class NotifyingCache implements Cache, CacheListener {
 
     private void fireInvalidateGroup(String groupName) {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
-            eventService.notify(CacheEvent.INVALIDATE_GROUP(region, groupName), senderID);
+            eventService.notify(CacheEvent.INVALIDATE_GROUP(region, groupName));
         }
     }
     
@@ -339,7 +329,7 @@ public class NotifyingCache implements Cache, CacheListener {
 
     private void fireInvalidate(Serializable key, String groupName) {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
-            eventService.notify(CacheEvent.INVALIDATE(region, groupName, key), senderID);
+            eventService.notify(CacheEvent.INVALIDATE(region, groupName, key));
         }
     }
 

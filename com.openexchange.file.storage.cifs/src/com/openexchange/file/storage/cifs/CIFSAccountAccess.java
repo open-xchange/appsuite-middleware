@@ -50,12 +50,14 @@
 package com.openexchange.file.storage.cifs;
 
 import java.net.MalformedURLException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultWarningsAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -63,6 +65,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.session.Session;
 
 /**
@@ -70,7 +73,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CIFSAccountAccess implements FileStorageAccountAccess {
+public final class CIFSAccountAccess implements FileStorageAccountAccess, WarningsAware {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSAccountAccess.class));
 
@@ -100,6 +103,8 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
 
     private final FileStorageService service;
 
+    private final WarningsAware warningsAware;
+
     /**
      * Initializes a new {@link CIFSAccountAccess}.
      */
@@ -113,6 +118,22 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
         username = (String) configuration.get(CIFSConstants.CIFS_LOGIN);
         password = (String) configuration.get(CIFSConstants.CIFS_PASSWORD);
         this.service = service;
+        warningsAware = new DefaultWarningsAware(false);
+    }
+
+    @Override
+    public List<OXException> getWarnings() {
+        return warningsAware.getWarnings();
+    }
+
+    @Override
+    public void addWarning(OXException warning) {
+        warningsAware.addWarning(warning);
+    }
+
+    @Override
+    public void removeWarning(OXException warning) {
+        warningsAware.removeWarning(warning);
     }
 
     /**
@@ -226,7 +247,7 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
             synchronized (this) {
                 tmp = folderAccess;
                 if (null == tmp) {
-                    folderAccess = tmp = new CIFSFolderAccess(rootUrl, auth, account, session);
+                    folderAccess = tmp = new CIFSFolderAccess(rootUrl, auth, account, session, this);
                 }
             }
         }

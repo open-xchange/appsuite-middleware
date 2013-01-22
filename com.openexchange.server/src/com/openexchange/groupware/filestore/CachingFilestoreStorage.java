@@ -55,19 +55,18 @@ import java.sql.Connection;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-import com.openexchange.cache.dynamic.impl.CacheProxy;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 public class CachingFilestoreStorage extends FilestoreStorage {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CachingFilestoreStorage.class));
     private static final String REGION_NAME = "Filestore";
-    private static final Lock CACHE_LOCK = new ReentrantLock();
+    static final Lock CACHE_LOCK = new ReentrantLock();
 
     private final FilestoreStorage delegate;
 
@@ -77,27 +76,22 @@ public class CachingFilestoreStorage extends FilestoreStorage {
 
     @Override
     public Filestore getFilestore(final int id) throws OXException {
-        final FilestoreFactory factory = new FilestoreFactory(id, delegate);
-        try {
-            return CacheProxy.getCacheProxy(factory, REGION_NAME, Filestore.class);
-        } catch (final IllegalArgumentException e) {
-            /*
-             * Should not occur
-             */
-            LOG.error(e.getMessage(), e);
-            return delegate.getFilestore(id);
-        } catch (final OXException e) {
-            throw e;
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        final OXObjectFactory<Filestore> factory = new FilestoreFactory(id, delegate);
+        if (cacheService == null) {
+            return factory.load();
         }
+        return new FilestoreReloader(factory, REGION_NAME);
     }
 
     private static final class FilestoreFactory implements OXObjectFactory<Filestore> {
 
-        private final Integer id;
+        private static final long serialVersionUID = -4542868153240572103L;
 
+        private final Integer id;
         private final FilestoreStorage delegate;
 
-        public FilestoreFactory(final int id, final FilestoreStorage delegate) {
+        protected FilestoreFactory(final int id, final FilestoreStorage delegate) {
             super();
             this.id = I(id);
             this.delegate = delegate;
@@ -139,7 +133,7 @@ public class CachingFilestoreStorage extends FilestoreStorage {
             if (null != filestoreCache) {
                 CACHE_LOCK.lock();
                 try {
-                    filestoreCache.put(I(id), retval);
+                    filestoreCache.put(I(id), retval, false);
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 } finally {

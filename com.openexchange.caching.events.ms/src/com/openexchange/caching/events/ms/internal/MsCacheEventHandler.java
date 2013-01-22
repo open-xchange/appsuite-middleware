@@ -47,51 +47,66 @@
  *
  */
 
-package com.openexchange.caching.events.hazelcast.internal;
+package com.openexchange.caching.events.ms.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
-import com.hazelcast.core.HazelcastException;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.ITopic;
-import com.hazelcast.core.Message;
-import com.hazelcast.core.MessageListener;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.exception.OXException;
+import com.openexchange.ms.Message;
+import com.openexchange.ms.MessageListener;
+import com.openexchange.ms.MsService;
+import com.openexchange.ms.Topic;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
- * {@link HzCacheEventHandler}
+ * {@link MsCacheEventHandler}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class HzCacheEventHandler implements CacheListener, MessageListener<HzCacheEvent> {
+public final class MsCacheEventHandler implements CacheListener, MessageListener<CacheEvent>, EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HzCacheEventHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MsCacheEventHandler.class);
     private static final String TOPIC_NAME = "cacheEvents";
-    private static final AtomicReference<HazelcastInstance> HZ_REFERENCE = new AtomicReference<HazelcastInstance>();
+    private static final AtomicReference<MsService> MS_REFERENCE = new AtomicReference<MsService>();
     
     private final CacheEventService cacheEvents;
+    private final String senderId;
 
     /**
-     * Sets the specified {@link HazelcastInstance}.
+     * Sets the specified {@link MsService}.
      *
-     * @param hazelcast The {@link HazelcastInstance}
+     * @param service The {@link MsService}
      */
-    public static void setHazelcastInstance(final HazelcastInstance hazelcast) {
-        HZ_REFERENCE.set(hazelcast);
+    public static void setMsService(final MsService service) {
+        MS_REFERENCE.set(service);
     }
     
     /**
-     * Initializes a new {@link HzCacheEventHandler}.
+     * Initializes a new {@link MsCacheEventHandler}.
+     * 
      * @throws OXException 
      */
-    public HzCacheEventHandler(CacheEventService cacheEvents) throws OXException {
+    public MsCacheEventHandler(CacheEventService cacheEvents) throws OXException {
         super();
         this.cacheEvents = cacheEvents;
-        getTopic().addMessageListener(this);
+        cacheEvents.addListener(this);
+        Topic<CacheEvent> topic = getTopic();
+        this.senderId = topic.getSenderId();
+        topic.addMessageListener(this);
+    }
+
+    @Override
+    public void handleEvent(Event event) {
+        // com.openexchange.push.ms.PushMsListener
+
+        // com.openexchange.event.RemoteEvent
+        
+        // Topic: "com/openexchange/remote/*";
     }
     
     public void stop() {
@@ -104,37 +119,43 @@ public final class HzCacheEventHandler implements CacheListener, MessageListener
     }
 
     @Override
-    public void onEvent(CacheEvent cacheEvent, String senderID) {
+    public void onEvent(CacheEvent cacheEvent) {
         try {
-            getTopic().publish(new HzCacheEvent(cacheEvent, senderID));
+            getTopic().publish(cacheEvent);
         } catch (OXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warn("Error publishing cache event", e);
         }
     }
     
-    private ITopic<HzCacheEvent> getTopic() throws OXException {
-        try {
-            HazelcastInstance hazelcastInstance = HZ_REFERENCE.get();
-            if (null == hazelcastInstance || false == hazelcastInstance.getLifecycleService().isRunning()) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
-            }
-            return hazelcastInstance.getTopic(TOPIC_NAME);
-        } catch (HazelcastException e) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, HazelcastInstance.class.getName());
-        } catch (RuntimeException e) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, HazelcastInstance.class.getName());
+    private Topic<CacheEvent> getTopic() throws OXException {
+        MsService msService = MS_REFERENCE.get();
+        if (null == msService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MsService.class.getName());
         }
+        return msService.getTopic(TOPIC_NAME);
     }
 
     @Override
-    public void onMessage(Message<HzCacheEvent> message) {
-        if (null != message && this != message.getSource()) {
-            HzCacheEvent event = message.getMessageObject();
-            if (null != event) {
-                cacheEvents.notify(event.getCacheEvent(), event.getSenderID());                
+    public void onMessage(Message<CacheEvent> message) {
+        if (null != message && false == senderId.equals(message.getSenderId())) {
+            CacheEvent cacheEvent = message.getMessageObject();
+            if (null != cacheEvent) {
+                cacheEvents.notify(message.getMessageObject());
+            } else {
+                LOG.warn("Discarding empty cache event message.");
             }
         }
     }
+
+//    @Override
+//    public void onMessage(Message<CacheEvent> message) {
+//        if (null != message) {
+//            
+//            
+//            if (null != event) {
+//                cacheEvents.notify(event.getCacheEvent(), event.getSenderID());                
+//            }
+//        }
+//    }
 
 }

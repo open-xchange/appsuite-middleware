@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,49 +49,41 @@
 
 package com.openexchange.file.storage;
 
-import java.io.Serializable;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link FileStorageAccount} - A file storage account.
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link DefaultWarningsAware} - The default implementation of {@link WarningsAware}.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
  */
-public interface FileStorageAccount extends Serializable, FileStorageConstants {
+public class DefaultWarningsAware implements WarningsAware {
+
+    private final List<OXException> warnings;
 
     /**
-     * The identifier for default/primary file storage account.
+     * Initializes a new {@link DefaultWarningsAware}.
      */
-    public static final String DEFAULT_ID = "0";
+    public DefaultWarningsAware(final boolean concurrent) {
+        super();
+        warnings = concurrent ? new CopyOnWriteArrayList<OXException>() : new ArrayList<OXException>(4);
+    }
 
-    /**
-     * Gets this account's configuration.
-     *
-     * @return The configuration as a {@link Map}
-     */
-    Map<String, Object> getConfiguration();
+    @Override
+    public List<OXException> getWarnings() {
+        return warnings;
+    }
 
-    /**
-     * Gets the identifier.
-     *
-     * @return The identifier
-     */
-    String getId();
+    @Override
+    public void addWarning(final OXException warning) {
+        warnings.add(warning);
+    }
 
-    /**
-     * Gets the display name.
-     *
-     * @return The display name
-     */
-    String getDisplayName();
-
-    /**
-     * Gets the associated file storage service.
-     *
-     * @return The associated file storage service
-     */
-    FileStorageService getFileStorageService();
+    @Override
+    public void removeWarning(final OXException warning) {
+        warnings.remove(warning);
+    }
 
 }

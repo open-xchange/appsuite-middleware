@@ -88,6 +88,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -1595,6 +1596,14 @@ public final class OutlookFolderStorage implements FolderStorage {
                                             final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
                                             if (null != rootFolder) {
                                                 fsAccounts.add(userAccount);
+                                            }
+                                            if (accountAccess instanceof WarningsAware) {
+                                                final List<OXException> list = ((WarningsAware) accountAccess).getWarnings();
+                                                if (null != list && !list.isEmpty()) {
+                                                    for (OXException warning : list) {
+                                                        storageParameters.addWarning(warning);
+                                                    }
+                                                }
                                             }
                                         } finally {
                                             accountAccess.close();

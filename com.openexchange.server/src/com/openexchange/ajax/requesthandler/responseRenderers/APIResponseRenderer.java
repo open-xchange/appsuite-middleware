@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.servlet.ServletRequest;
@@ -71,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link APIResponseRenderer}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class APIResponseRenderer implements ResponseRenderer {
@@ -119,7 +120,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     /**
      * Returns the remembered session.
-     *
+     * 
      * @param req The Servlet request.
      * @return The remembered session
      */
@@ -133,7 +134,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     /**
      * Gets the locale for given HTTP request
-     *
+     * 
      * @param req The request
      * @return The locale
      */
@@ -143,7 +144,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     /**
      * Gets the locale for given server session
-     *
+     * 
      * @param session The server session
      * @return The locale
      */
@@ -163,7 +164,7 @@ public class APIResponseRenderer implements ResponseRenderer {
      * <li>The HTTP Servlet request has the <code>"respondWithHTML"</code> parameter set to <code>"true"</code></li>
      * <li>The HTTP Servlet request contains non-<code>null</code> <code>"callback"</code> parameter</li>
      * </ul>
-     *
+     * 
      * @param response The response to write
      * @param action The request's action
      * @param req The HTTP Servlet request
@@ -215,7 +216,7 @@ public class APIResponseRenderer implements ResponseRenderer {
                 writer.write(JS_FRAGMENT_PART2);
                 writer.write(callback);
                 writer.write(")(");
-                ResponseWriter.write(response, writer, localeFrom(req));
+                ResponseWriter.write(response, new EscapingWriter(writer), localeFrom(req));
                 writer.write(JS_FRAGMENT_PART3);
                 /*-
                  * Previous code:
@@ -256,7 +257,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     /**
      * Utility method that determines whether the request contains multipart content
-     *
+     * 
      * @param request The request to be evaluated.
      * @return <code>true</code> if the request is multipart; <code>false</code> otherwise.
      */
@@ -282,8 +283,118 @@ public class APIResponseRenderer implements ResponseRenderer {
     private static final Pattern RPL_ACTION = Pattern.compile("**action**", Pattern.LITERAL);
 
     private static String substituteJS(final String json, final String action) {
-        return RPL_ACTION.matcher(RPL_JSON.matcher(JS_FRAGMENT).replaceAll(Strings.quoteReplacement(json))).replaceAll(
+        return RPL_ACTION.matcher(RPL_JSON.matcher(JS_FRAGMENT).replaceAll(Strings.quoteReplacement(json.replaceAll(Pattern.quote("</") , "<\\/")))).replaceAll(
             Strings.quoteReplacement(action));
+    }
+
+//    public static void main(String[] args) throws Exception {
+//        final StringWriter sw = new StringWriter();
+//        EscapingWriter escapingWriter = new EscapingWriter(sw);
+//        escapingWriter.write("<h </script> hein <a>busen</a>");
+//        
+//        System.out.println(sw.toString());
+//    }
+
+    /**
+     * Escaped <tt>"&lt;/"</tt> char sequence to <tt>"&lt;\/"</tt>.
+     */
+    private static final class EscapingWriter extends Writer {
+
+        private char prev;
+        private final Writer writer;
+
+        protected EscapingWriter(final Writer writer) {
+            super();
+            this.writer = writer;
+        }
+
+        @Override
+        public void write(final int c) throws IOException {
+            if ('<' == c) {
+                prev = (char) c;
+            } else if ('/' == c) {
+                if ('<' == prev) {
+                    //  </   -->   <\/
+                    writer.write("<\\/");
+                    prev = '\0';
+                } else {
+                    writer.write(c);
+                }
+            } else {
+                if ('<' == prev) {
+                    writer.write('<');
+                    prev = '\0';
+                }
+                writer.write(c);
+            }
+        }
+
+        @Override
+        public void write(final char[] cbuf) throws IOException {
+            write(cbuf, 0, cbuf.length);
+        }
+
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
+            for (int i = off; i < len; i++) {
+                write(cbuf[i]);
+            }
+        }
+
+        @Override
+        public void write(final String str) throws IOException {
+            write(str, 0, str.length());
+        }
+
+        @Override
+        public void write(final String str, final int off, final int len) throws IOException {
+            for (int i = off; i < len; i++) {
+                write(str.charAt(i));
+            }
+        }
+
+        @Override
+        public Writer append(final CharSequence csq) throws IOException {
+            if (csq == null) {
+                write("null");
+            } else {
+                write(csq.toString());
+            }
+            return this;
+        }
+
+        @Override
+        public Writer append(final CharSequence csq, final int start, final int end) throws IOException {
+            CharSequence cs = (csq == null ? "null" : csq);
+            write(cs.subSequence(start, end).toString());
+            return this; 
+        }
+
+        @Override
+        public Writer append(final char c) throws IOException {
+            write(c);
+            return this;
+        }
+
+        @Override
+        public void flush() throws IOException {
+            if ('<' == prev) {
+                writer.write('<');
+                prev = '\0';
+            }
+            writer.flush();
+        }
+
+        @Override
+        public void close() throws IOException {
+            writer.close();
+        }
+
+        @Override
+        public String toString() {
+            return writer.toString();
+        }
+
     }
 
 }

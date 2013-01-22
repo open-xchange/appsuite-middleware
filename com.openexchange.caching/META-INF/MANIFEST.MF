@@ -27,3 +27,5 @@ Bundle-ClassPath: .,
 Export-Package: com.openexchange.caching,
  com.openexchange.caching.dynamic,
  com.openexchange.caching.objects
+Require-Bundle: com.hazelcast;resolution:=optional
+Eclipse-RegisterBuddy: com.hazelcast
