@@ -129,7 +129,9 @@ public abstract class AbstractDocumentConverter<V> implements SolrDocumentConver
     protected void addFieldInDocument(SolrInputDocument inputDocument, IndexField field, List<Object> values) {
         String fieldName = fieldConfig.getRawField(field);
         if (fieldName != null && values != null && !values.isEmpty()) {
-            inputDocument.addField(fieldName, values);
+            for (Object value : values) {
+                inputDocument.addField(fieldName, value);
+            }
         }
     }
     

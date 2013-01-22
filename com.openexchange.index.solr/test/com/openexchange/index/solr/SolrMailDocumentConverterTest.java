@@ -51,24 +51,32 @@ package com.openexchange.index.solr;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import javax.mail.internet.InternetAddress;
 import junit.framework.Assert;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrInputDocument;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
+import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.config.XMLBasedFieldConfiguration;
 import com.openexchange.index.solr.internal.mail.SolrMailDocumentConverter;
+import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
+import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.index.MailUUID;
+import com.openexchange.mail.mime.PlainTextAddress;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 
 
 /**
@@ -519,15 +527,105 @@ public class SolrMailDocumentConverterTest {
             Assert.assertEquals("Wrong flag value", userFlags.get(i), muf);
         }
         
-        checkAddresses((List<String>) solrDocument.getFieldValue("from") , mail.getFrom());
-        checkAddresses((List<String>) solrDocument.getFieldValue("to") , mail.getTo());
-        checkAddresses((List<String>) solrDocument.getFieldValue("cc") , mail.getCc());
-        checkAddresses((List<String>) solrDocument.getFieldValue("bcc") , mail.getBcc());
+        checkAddresses((List<Object>) solrDocument.getFieldValue("from") , mail.getFrom());
+        checkAddresses((List<Object>) solrDocument.getFieldValue("to") , mail.getTo());
+        checkAddresses((List<Object>) solrDocument.getFieldValue("cc") , mail.getCc());
+        checkAddresses((List<Object>) solrDocument.getFieldValue("bcc") , mail.getBcc());
 
         Assert.assertEquals("Wrong value for field subject_fr",  solrDocument.getFieldValue("subject_fr") , mail.getSubject());
     }
     
-    private void checkAddresses(List<String> plainText, InternetAddress[] addrs) {
+    @Test
+    public void testMailMessage2InputDocument() throws Exception {
+        SolrMailDocumentConverter converter = new SolrMailDocumentConverter(config);
+        MailMessage mail = new IDMailMessage("1234", "INBOX");
+        mail.setAccountId(2);
+        mail.addFrom(new QuotedInternetAddress("abc.def@gmail.com"));
+        mail.addFrom(new PlainTextAddress("def.ghi@gmail.com"));
+        mail.addTo(new QuotedInternetAddress("ghi.jkl@gmail.com"));
+        mail.addTo(new PlainTextAddress("jkl.mno@gmail.com"));
+        mail.addCc(new QuotedInternetAddress("mno.pqr@gmail.com"));
+        mail.addCc(new PlainTextAddress("pqr.stu@gmail.com"));
+        mail.addBcc(new QuotedInternetAddress("stu.vwx@gmail.com"));
+        mail.addBcc(new PlainTextAddress("vwx.yz@gmail.com"));
+        mail.setColorLabel(5);
+        mail.setHasAttachment(true);
+        mail.setReceivedDate(new Date());
+        mail.setSentDate(new Date());
+        mail.setSize(9876543210L);
+        mail.setFlags(1023);
+        mail.addUserFlags(new String[] {"these", "are", "some", "flags"});
+        mail.setSubject("This is the subject");
+        ContentAwareMailMessage toConvert = new ContentAwareMailMessage("This is the body", mail);
+        
+        SolrInputDocument document = converter.convert(1, 2, new StandardIndexDocument<MailMessage>(toConvert));
+        Assert.assertEquals("Wrong value uuid", MailUUID.newUUID(1, 2, mail.getAccountId(), mail.getFolder(), mail.getMailId()).toString(), document.getFieldValue("uuid"));
+        Assert.assertEquals("Wrong value folder", mail.getFolder(), document.getFieldValue("full_name"));
+        Assert.assertEquals("Wrong value id", mail.getMailId(), document.getFieldValue("id"));
+        Assert.assertEquals("Wrong value account", String.valueOf(mail.getAccountId()), document.getFieldValue("account"));
+        checkAddresses((List<Object>) document.getFieldValues("from"), mail.getFrom());
+        checkAddresses((List<Object>) document.getFieldValues("to"), mail.getTo());
+        checkAddresses((List<Object>) document.getFieldValues("cc"), mail.getCc());
+        checkAddresses((List<Object>) document.getFieldValues("bcc"), mail.getBcc());
+        Assert.assertEquals("Wrong value color label", mail.getColorLabel(), document.getFieldValue("color_label"));
+        Assert.assertEquals("Wrong value attachments", mail.hasAttachment(), document.getFieldValue("attachment"));
+        Assert.assertEquals("Wrong value received date", mail.getReceivedDate().getTime(), document.getFieldValue("received_date"));
+        Assert.assertEquals("Wrong value sent date", mail.getSentDate().getTime(), document.getFieldValue("sent_date"));
+        Assert.assertEquals("Wrong value size", mail.getSize(), document.getFieldValue("size"));
+        
+        Assert.assertEquals("Wrong value flag_answered", true, document.getFieldValue("flag_answered"));
+        Assert.assertEquals("Wrong value flag_deleted", true, document.getFieldValue("flag_deleted"));
+        Assert.assertEquals("Wrong value flag_draft", true, document.getFieldValue("flag_draft"));
+        Assert.assertEquals("Wrong value flag_flagged", true, document.getFieldValue("flag_flagged"));
+        Assert.assertEquals("Wrong value flag_recent", true, document.getFieldValue("flag_recent"));
+        Assert.assertEquals("Wrong value flag_seen", true, document.getFieldValue("flag_seen"));
+        Assert.assertEquals("Wrong value flag_user", true, document.getFieldValue("flag_user"));
+        Assert.assertEquals("Wrong value flag_spam", true, document.getFieldValue("flag_spam"));
+        Assert.assertEquals("Wrong value flag_forwarded", true, document.getFieldValue("flag_forwarded"));
+        Assert.assertEquals("Wrong value flag_read_ack", true, document.getFieldValue("flag_read_ack"));
+        String[] userFlags = mail.getUserFlags();
+        List<Object> ufl = (List<Object>) document.getFieldValues("user_flags");
+        for (int i = 0; i < userFlags.length; i++) {
+            Assert.assertEquals(userFlags[i], ufl.get(i));
+        }
+        
+        Assert.assertEquals("Wrong value subject", mail.getSubject(), document.getFieldValue("subject"));
+        Assert.assertEquals("Wrong value content", toConvert.getPrimaryContent(), document.getFieldValue("content"));
+    }
+    
+    @Test
+    public void testHighlighting() throws Exception {
+        SolrMailDocumentConverter converter = new SolrMailDocumentConverter(config);
+        Map<String, List<String>> highlights = new HashMap<String, List<String>>();
+        List<String> subject_genHighlights = new ArrayList<String>();
+        subject_genHighlights.add("blubb1");
+        List<String> subject_deHighlights = new ArrayList<String>();
+        subject_deHighlights.add("blubb2");
+        List<String> subject_nonExists = new ArrayList<String>(); // This must not appear in the converted document
+        subject_nonExists.add("abc");
+        List<String> fromHighlights = new ArrayList<String>();
+        fromHighlights.add("blubb3");
+        highlights.put("subject_gen", subject_genHighlights);
+        highlights.put("subject_de", subject_deHighlights);
+        highlights.put("subject_nonExists", subject_nonExists);
+        highlights.put("from", fromHighlights);
+        
+        IndexDocument<MailMessage> indexDocument = converter.convert(new SolrDocument(), highlights);
+        Map<IndexField, List<String>> highlighting = indexDocument.getHighlighting();
+        Assert.assertNotNull("highlighting was null", highlighting);
+        Assert.assertEquals("Wrong size", 2, highlighting.size());
+        
+        List<String> subjects = highlighting.get(MailIndexField.SUBJECT);
+        Assert.assertEquals("Wrong size", 2, subjects.size());
+        Assert.assertTrue("Missing value", subjects.contains("blubb1"));
+        Assert.assertTrue("Missing value", subjects.contains("blubb2"));
+        
+        List<String> from = highlighting.get(MailIndexField.FROM);
+        Assert.assertEquals("Wrong size", 1, from.size());
+        Assert.assertTrue("Missing value", from.contains("blubb3"));
+    }
+    
+    private void checkAddresses(List<Object> plainText, InternetAddress[] addrs) {
         Assert.assertEquals("Wrong array size", plainText.size(), addrs.length);
         for (int i = 0; i < addrs.length; i++) {
             InternetAddress addr = addrs[i];
