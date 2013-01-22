@@ -161,7 +161,7 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
      * @return The creation date
      */
     public Date getCreationDate() {
-        return creationDate;
+        return new Date(creationDate.getTime());
     }
 
     /**
