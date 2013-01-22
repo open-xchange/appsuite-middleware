@@ -73,20 +73,13 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
     private static final long serialVersionUID = -8490584616201401142L;
 
     private final int folderId;
-
     private final int module;
-
     private final int users[];
-
     private final Date creationDate = new Date();
-
     private final int hash;
-
     private final long timestamp;
-
     private final String topicName;
-
-    private String hostname;
+    private final String hostname;
 
     /**
      * Initializes a new {@link PushMsObject}.
@@ -105,13 +98,14 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
         hash = hashCode0();
         this.timestamp = timestamp;
         this.topicName = topicName;
-        this.hostname = "";
+        String hostname = "";
         try {
             InetAddress addr = InetAddress.getLocalHost();
-            this.hostname = addr.getHostName();
+            hostname = addr.getHostName();
         } catch (UnknownHostException e) {
             LOG.error(e.getMessage(), e);
         }
+        this.hostname = hostname;
     }
 
     public PushMsObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp, final String topicName, String hostname) {
