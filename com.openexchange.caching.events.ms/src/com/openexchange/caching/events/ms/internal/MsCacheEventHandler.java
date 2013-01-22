@@ -103,7 +103,7 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
     @Override
     public void handleEvent(Event event) {
         // com.openexchange.push.ms.PushMsListener
-        // com.openexchange.push.PushEventConstants
+
         // com.openexchange.event.RemoteEvent
         
         // Topic: "com/openexchange/remote/*";
