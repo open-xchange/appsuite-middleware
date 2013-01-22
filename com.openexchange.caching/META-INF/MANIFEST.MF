@@ -6,7 +6,8 @@ Bundle-Version: 7.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: dependent
-Import-Package: com.openexchange.config,
+Import-Package: com.openexchange.caching.events,
+ com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.i18n,

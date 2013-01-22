@@ -62,6 +62,7 @@ import com.openexchange.caching.CacheInformationMBean;
 import com.openexchange.caching.CacheKeyService;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.DefaultCacheKeyService;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.internal.JCSCacheInformation;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
@@ -103,7 +104,7 @@ public final class CacheActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, CacheEventService.class };
     }
 
     @Override
@@ -129,6 +130,7 @@ public final class CacheActivator extends HousekeepingActivator {
         JCSCacheServiceInit.initInstance();
         final ConfigurationService service = getService(ConfigurationService.class);
         JCSCacheServiceInit.getInstance().start(service);
+        JCSCacheServiceInit.getInstance().setCacheEventService(getService(CacheEventService.class));
         registerService(CacheKeyService.class, new DefaultCacheKeyService());
         /*
          * Register service

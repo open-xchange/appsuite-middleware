@@ -64,6 +64,7 @@ import org.apache.jcs.access.exception.CacheException;
 import org.apache.jcs.engine.control.CompositeCacheConfigurator;
 import org.apache.jcs.engine.control.CompositeCacheManager;
 import com.openexchange.caching.CacheExceptionCode;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
@@ -114,6 +115,11 @@ public final class JCSCacheServiceInit {
      * The configuration service
      */
     private ConfigurationService configurationService;
+
+    /**
+     * The cache event service
+     */
+    private CacheEventService cacheEventService;
 
     /**
      * The cache manager instance
@@ -400,6 +406,24 @@ public final class JCSCacheServiceInit {
      */
     public void setConfigurationService(final ConfigurationService configurationService) {
         this.configurationService = configurationService;
+    }
+
+    /**
+     * Sets the cache event service to specified reference.
+     *
+     * @param eventService The cache event service to set
+     */
+    public void setCacheEventService(final CacheEventService eventService) {
+        this.cacheEventService = eventService;
+    }
+    
+    /**
+     * Gets the cache event service
+     * 
+     * @return The event service
+     */
+    public CacheEventService getCacheEventService() {
+        return this.cacheEventService;
     }
 
     /**
