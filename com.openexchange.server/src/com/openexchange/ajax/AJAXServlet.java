@@ -872,7 +872,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
 	public static String substituteJS(final String json, final String action) {
-		return JS_FRAGMENT.replace("**json**", json).replace("**action**",
+		return JS_FRAGMENT.replace("**json**", json.replaceAll(Pattern.quote("</") , "<\\/")).replace("**action**",
 				action);
 	}
 
