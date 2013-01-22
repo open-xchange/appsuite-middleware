@@ -455,9 +455,9 @@ public final class FolderCacheManager {
                 }
                 if (elemAttribs == null || folderCache.isDistributed()) {
                     // Put with default attributes
-                    folderCache.put(key, folderProvider.getFolderObject());
+                    folderCache.put(key, folderProvider.getFolderObject(), false);
                 } else {
-                    folderCache.put(key, folderProvider.getFolderObject(), elemAttribs);
+                    folderCache.put(key, folderProvider.getFolderObject(), elemAttribs, false);
                 }
                 if (null != cond) {
                     cond.signalAll();
@@ -554,9 +554,9 @@ public final class FolderCacheManager {
             }
             if (elemAttribs == null || folderCache.isDistributed()) {
                 // Put with default attributes
-                folderCache.put(key, clone);
+                folderCache.put(key, clone, false);
             } else {
-                folderCache.put(key, clone, elemAttribs);
+                folderCache.put(key, clone, elemAttribs, false);
             }
             if (null != cond) {
                 cond.signalAll();

@@ -54,7 +54,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -62,6 +61,7 @@ import com.openexchange.caching.InvalidatedMarker;
 import com.openexchange.caching.SupportsLocalOperations;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -274,8 +274,8 @@ public final class SessionCache {
                     return false;
                 }
                 cachedSession.setMarkedAsRemoved(false);
-                cache.put(key, cachedSession);
-                cache.put(createUserKey(cachedSession, cache), cachedSession.getSessionId());
+                cache.put(key, cachedSession, false);
+                cache.put(createUserKey(cachedSession, cache), cachedSession.getSessionId(), false);
                 return true;
             } finally {
                 /*
@@ -310,8 +310,8 @@ public final class SessionCache {
             /*
              * Put to cache
              */
-            cache.put(createKey(cachedSession.getSessionId(), cache), cachedSession);
-            cache.put(createUserKey(cachedSession, cache), cachedSession.getSessionId());
+            cache.put(createKey(cachedSession.getSessionId(), cache), cachedSession, true);
+            cache.put(createUserKey(cachedSession, cache), cachedSession.getSessionId(), true);
         } finally {
             writeLock.unlock();
         }

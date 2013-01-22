@@ -319,7 +319,7 @@ public class LdapContactCache {
                 while (modifiedContacts.hasNext()) {
                     Contact contact = modifiedContacts.next();
                     newLastModified = getLatestModified(newLastModified, contact);
-                    cache.put(Integer.valueOf(contact.getObjectID()), contact);
+                    cache.put(Integer.valueOf(contact.getObjectID()), contact, false);
                     updated++;
                 }
                 deletedContacts = storage.doDeleted(null, Integer.toString(storage.getFolderID()), lastModified, new ContactField[] {
@@ -355,7 +355,7 @@ public class LdapContactCache {
                 while (contacts.hasNext()) {
                     Contact contact = contacts.next();
                     newLastModified = getLatestModified(newLastModified, contact);
-                    cache.put(Integer.valueOf(contact.getObjectID()), contact);
+                    cache.put(Integer.valueOf(contact.getObjectID()), contact, false);
                     added++;
                 }
             } finally {

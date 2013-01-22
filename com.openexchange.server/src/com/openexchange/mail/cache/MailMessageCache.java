@@ -532,7 +532,7 @@ public final class MailMessageCache {
                 (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (null == map) {
                 map = new DoubleKeyMap<CacheKey, String, MailMessage>(MailMessage.class);
-                cache.put(mapKey, map);
+                cache.put(mapKey, map, false);
             }
             for (final MailMessage mail : mails) {
                 if (mail != null) {

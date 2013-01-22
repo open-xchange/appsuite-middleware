@@ -165,9 +165,9 @@ public abstract class Refresher<T extends Serializable> {
         try {
             final Object tmp = cache.get(key);
             if (null == tmp) {
-                cache.put(key, obj);
+                cache.put(key, obj, false);
             } else if (tmp instanceof Condition) {
-                cache.put(key, obj);
+                cache.put(key, obj, false);
                 ((Condition) tmp).signalAll();
             } else {
                 // If object is already in cache, return it instead of putting new object into cache.

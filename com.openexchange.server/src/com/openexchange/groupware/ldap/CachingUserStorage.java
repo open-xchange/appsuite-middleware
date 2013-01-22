@@ -354,7 +354,7 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
                     if (null != cache.get(key)) {
                         cache.remove(key);
                     }
-                    cache.put(key, identifiers);
+                    cache.put(key, identifiers, false);
                 } catch (final OXException e) {
                     throw UserExceptionCode.CACHE_PROBLEM.create(e);
                 }

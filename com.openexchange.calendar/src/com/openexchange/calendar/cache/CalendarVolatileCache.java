@@ -288,7 +288,7 @@ public final class CalendarVolatileCache {
     public <V> void put(final Serializable key, final V obj) throws OXException {
         final Cache cache = this.cache;
         if (null != cache) {
-            cache.put(key, (Serializable) obj);
+            cache.put(key, (Serializable) obj, false);
         }
     }
 
