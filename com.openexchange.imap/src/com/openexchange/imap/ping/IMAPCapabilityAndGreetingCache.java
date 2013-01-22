@@ -150,7 +150,11 @@ public final class IMAPCapabilityAndGreetingCache {
     }
 
     private static CapabilityAndGreeting getCapabilityAndGreeting(final InetSocketAddress address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
-        final ConcurrentMap<InetSocketAddress, Future<CapabilityAndGreeting>> map = MAP;
+        ConcurrentMap<InetSocketAddress, Future<CapabilityAndGreeting>> map = MAP;
+        if (null == map) {
+            init();
+            map = MAP;
+        }
         Future<CapabilityAndGreeting> f = map.get(address);
         if (null == f) {
             final FutureTask<CapabilityAndGreeting> ft =
