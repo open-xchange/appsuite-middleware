@@ -68,28 +68,28 @@ public interface FileStorageService extends FileStorageConstants {
      *
      * @return The identifier
      */
-    public String getId();
+    String getId();
 
     /**
      * Gets the display name.
      *
      * @return The display name
      */
-    public String getDisplayName();
+    String getDisplayName();
 
     /**
      * Get the form description.
      *
      * @return The form description
      */
-    public DynamicFormDescription getFormDescription();
+    DynamicFormDescription getFormDescription();
 
     /**
      * Gets those properties from configuration which should be encrypted.
      *
      * @return Those properties from configuration which should be encrypted
      */
-    public Set<String> getSecretProperties();
+    Set<String> getSecretProperties();
 
     /**
      * Gets the account manager for this file storage service.
@@ -97,7 +97,7 @@ public interface FileStorageService extends FileStorageConstants {
      * @return The account manager
      * @throws OXException
      */
-    public FileStorageAccountManager getAccountManager() throws OXException;
+    FileStorageAccountManager getAccountManager() throws OXException;
 
     /**
      * Gets the account access for specified account identifier.
@@ -107,6 +107,6 @@ public interface FileStorageService extends FileStorageConstants {
      * @return The account access for specified account identifier
      * @throws OXException If account access cannot be returned for given account identifier
      */
-    public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException;
+    FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException;
 
 }

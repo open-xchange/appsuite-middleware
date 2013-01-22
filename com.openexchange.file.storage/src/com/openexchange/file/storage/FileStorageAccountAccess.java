@@ -65,7 +65,7 @@ public interface FileStorageAccountAccess extends FileStorageResource {
      *
      * @return The account identifier
      */
-    public String getAccountId();
+    String getAccountId();
 
     /**
      * Gets the file access for associated account.
@@ -73,7 +73,7 @@ public interface FileStorageAccountAccess extends FileStorageResource {
      * @return The file access
      * @throws OXException If file access cannot be returned
      */
-    public FileStorageFileAccess getFileAccess() throws OXException;
+    FileStorageFileAccess getFileAccess() throws OXException;
 
     /**
      * Gets the folder access for associated account.
@@ -81,7 +81,7 @@ public interface FileStorageAccountAccess extends FileStorageResource {
      * @return The folder access
      * @throws OXException If folder access cannot be returned
      */
-    public FileStorageFolderAccess getFolderAccess() throws OXException;
+    FileStorageFolderAccess getFolderAccess() throws OXException;
 
     /**
      * Convenience method to obtain root folder in a fast way; meaning no default folder check is performed which is not necessary to return
@@ -92,12 +92,12 @@ public interface FileStorageAccountAccess extends FileStorageResource {
      *
      * @throws OXException If returning the root folder fails
      */
-    public FileStorageFolder getRootFolder() throws OXException;
+    FileStorageFolder getRootFolder() throws OXException;
 
     /**
      * Retrieve the parent file storage service
      * @return
      */
-    public FileStorageService getService();
+    FileStorageService getService();
 
 }

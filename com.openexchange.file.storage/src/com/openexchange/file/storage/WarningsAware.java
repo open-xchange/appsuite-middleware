@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,49 +49,34 @@
 
 package com.openexchange.file.storage;
 
-import java.io.Serializable;
-import java.util.Map;
+import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link FileStorageAccount} - A file storage account.
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link WarningsAware} - Aware of possible warnings.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
  */
-public interface FileStorageAccount extends Serializable, FileStorageConstants {
+public interface WarningsAware {
 
     /**
-     * The identifier for default/primary file storage account.
+     * Gets the optional warnings.
+     * 
+     * @return The optional warnings
      */
-    public static final String DEFAULT_ID = "0";
+    List<OXException> getWarnings();
 
     /**
-     * Gets this account's configuration.
-     *
-     * @return The configuration as a {@link Map}
+     * Adds given warning.
+     * 
+     * @param warning The warning to add
      */
-    Map<String, Object> getConfiguration();
+    void addWarning(OXException warning);
 
     /**
-     * Gets the identifier.
-     *
-     * @return The identifier
+     * Removes given warning.
+     * 
+     * @param warning The warning to remove
      */
-    String getId();
-
-    /**
-     * Gets the display name.
-     *
-     * @return The display name
-     */
-    String getDisplayName();
-
-    /**
-     * Gets the associated file storage service.
-     *
-     * @return The associated file storage service
-     */
-    FileStorageService getFileStorageService();
-
+    void removeWarning(OXException warning);
 }

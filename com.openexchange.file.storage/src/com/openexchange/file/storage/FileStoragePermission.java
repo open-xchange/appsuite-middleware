@@ -122,69 +122,69 @@ public interface FileStoragePermission extends Cloneable {
      *
      * @return A clone of this instance.
      */
-    public Object clone();
+    Object clone();
 
     /**
      * Indicates whether some other object is "equal to" this one.
      */
     @Override
-    public boolean equals(Object obj);
+    boolean equals(Object obj);
 
     /**
      * Gets this folder permission's system bit mask.
      *
      * @return This folder permission's system bit mask
      */
-    public int getSystem();
+    int getSystem();
 
     /**
      * Sets this folder permission's system bit mask.
      *
      * @param system This folder permission's system bit mask
      */
-    public void setSystem(int system);
+    void setSystem(int system);
 
     /**
      * Checks if this folder permission's entity is a group.
      *
      * @return <code>true</code> if this folder permission's entity is a group; otherwise <code>false</code>
      */
-    public boolean isGroup();
+    boolean isGroup();
 
     /**
      * Sets if this folder permission's entity is a group.
      *
      * @param group <code>true</code> if this folder permission's entity is a group; otherwise <code>false</code>
      */
-    public void setGroup(boolean group);
+    void setGroup(boolean group);
 
     /**
      * Gets this folder permission's entity identifier.
      *
      * @return This folder permission's entity identifier
      */
-    public int getEntity();
+    int getEntity();
 
     /**
      * Sets this folder permission's entity identifier.
      *
      * @param entity The entity identifier
      */
-    public void setEntity(int entity);
+    void setEntity(int entity);
 
     /**
      * Checks if this folder permission denotes its entity as a folder administrator.
      *
      * @return <code>true</code> if this folder permission's entity is a folder administrator; otherwise <code>false</code>
      */
-    public boolean isAdmin();
+    boolean isAdmin();
 
     /**
      * Sets if this folder permission denotes its entity as a folder administrator.
      *
      * @param admin <code>true</code> if this folder permission's entity is a folder administrator; otherwise <code>false</code>
      */
-    public void setAdmin(boolean admin);
+    void setAdmin(boolean admin);
 
     /**
      * Gets the folder permission.
@@ -200,7 +200,7 @@ public interface FileStoragePermission extends Cloneable {
      *
      * @return The folder permission
      */
-    public int getFolderPermission();
+    int getFolderPermission();
 
     /**
      * Sets the folder permission.
@@ -216,7 +216,7 @@ public interface FileStoragePermission extends Cloneable {
      *
      * @param permission The folder permission
      */
-    public void setFolderPermission(int permission);
+    void setFolderPermission(int permission);
 
     /**
      * Gets the read permission.
@@ -231,7 +231,7 @@ public interface FileStoragePermission extends Cloneable {
      *
      * @return The read permission
      */
-    public int getReadPermission();
+    int getReadPermission();
 
     /**
      * Sets the read permission.
@@ -246,7 +246,7 @@ public interface FileStoragePermission extends Cloneable {
      *
      * @param permission The read permission
      */
-    public void setReadPermission(int permission);
+    void setReadPermission(int permission);
 
     /**
      * Gets the write permission.
@@ -261,7 +261,7 @@ public interface FileStoragePermission extends Cloneable {
      *
      * @return The write permission
      */
-    public int getWritePermission();
+    int getWritePermission();
 
     /**
      * Sets the write permission.
@@ -276,7 +276,7 @@ public interface FileStoragePermission extends Cloneable {
      *
      * @param permission The write permission
      */
-    public void setWritePermission(int permission);
+    void setWritePermission(int permission);
 
     /**
      * Gets the delete permission.
@@ -291,7 +291,7 @@ public interface FileStoragePermission extends Cloneable {
      *
      * @return The delete permission
      */
-    public int getDeletePermission();
+    int getDeletePermission();
 
     /**
      * Sets the delete permission.
@@ -306,7 +306,7 @@ public interface FileStoragePermission extends Cloneable {
      *
      * @param permission The delete permission
      */
-    public void setDeletePermission(int permission);
+    void setDeletePermission(int permission);
 
     /**
      * Convenience method to set all permissions at once.
@@ -320,16 +320,16 @@ public interface FileStoragePermission extends Cloneable {
      * @see #setWritePermission(int)
      * @see #setDeletePermission(int)
      */
-    public void setAllPermissions(int folderPermission, int readPermission, int writePermission, int deletePermission);
+    void setAllPermissions(int folderPermission, int readPermission, int writePermission, int deletePermission);
 
     /**
      * Convenience method which passes {@link #MAX_PERMISSION} to all permissions and sets folder administrator flag to <code>true</code>.
      */
-    public void setMaxPermissions();
+    void setMaxPermissions();
 
     /**
      * Convenience method which passes {@link #NO_PERMISSIONS} to all permissions and sets folder administrator flag to <code>false</code>.
      */
-    public void setNoPermissions();
+    void setNoPermissions();
 
 }
