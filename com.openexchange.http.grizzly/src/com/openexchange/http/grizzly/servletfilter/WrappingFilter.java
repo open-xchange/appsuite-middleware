@@ -79,6 +79,8 @@ public class WrappingFilter implements Filter {
     private int httpPort;
 
     private int httpsPort;
+    
+    private boolean isConsiderXForwards = false;
 
     @Override
     public void init(FilterConfig filterConfig) {
@@ -87,6 +89,7 @@ public class WrappingFilter implements Filter {
         this.httpsProtoValue = config.getHttpsProtoValue();
         this.httpPort = config.getHttpProtoPort();
         this.httpsPort = config.getHttpsProtoPort();
+        this.isConsiderXForwards = config.isConsiderXForwards();
     }
 
     @Override
@@ -97,7 +100,7 @@ public class WrappingFilter implements Filter {
         HttpServletResponseWrapper httpServletResponseWrapper = null;
 
         // Inspect X-Forwarded-Proto header and create HttpServletRequestWrapper accordingly
-        if (protocolHeader != null) {
+        if (isConsiderXForwards && protocolHeader != null) {
             String protocolHeaderValue = httpServletRequest.getHeader(protocolHeader);
             if (protocolHeader == null) {
                 httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);

@@ -82,6 +82,8 @@ public class OXRequest extends Request {
 
     private static GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
 
+    private boolean isConsiderXForwards = grizzlyConfig.isConsiderXForwards();
+
     private static final ThreadCache.CachedTypeIndex<Request> CACHE_IDX = ThreadCache.obtainIndex(Request.class, 16);
 
     public static Request create() {
@@ -107,7 +109,7 @@ public class OXRequest extends Request {
 
     /**
      * Gets the XForwardProto e.g. http/s
-     *
+     * 
      * @return The XForwardProto
      */
     public String getXForwardProto() {
@@ -116,7 +118,7 @@ public class OXRequest extends Request {
 
     /**
      * Sets the xForwardProto e.g. http/s
-     *
+     * 
      * @param XForwardProto The XForwardProto to set
      */
     public void setxForwardProto(String XForwardProto) {
@@ -125,7 +127,7 @@ public class OXRequest extends Request {
 
     /**
      * Gets the XForwardPort
-     *
+     * 
      * @return The XForwardPort
      */
     public int getXForwardPort() {
@@ -134,7 +136,7 @@ public class OXRequest extends Request {
 
     /**
      * Sets the XForwardPort
-     *
+     * 
      * @param XForwardPort The XForwardPort to set
      */
     public void setXForwardPort(int XForwardPort) {
@@ -143,7 +145,7 @@ public class OXRequest extends Request {
 
     @Override
     public String getScheme() {
-        if (XForwardProto != null) {
+        if (isConsiderXForwards && XForwardProto != null) {
             return XForwardProto;
         }
         return super.getScheme();
@@ -151,7 +153,7 @@ public class OXRequest extends Request {
 
     @Override
     public int getServerPort() {
-        if (XForwardPort > 0) {
+        if (isConsiderXForwards && XForwardPort > 0) {
             return XForwardPort;
         }
         return super.getServerPort();
@@ -394,12 +396,13 @@ public class OXRequest extends Request {
     }
 
     /**
-     * Override isSecure by first checking the X-Forward-Proto Header. Fallback is the original implementation if the header wasn't present.
-     * @return True if the X-Forward-Proto header indicates a secure connection or a real https connection was used. 
+     * Override isSecure by first checking the X-Forward-Proto Header. Fallback is the original implementation of the header wasn't present.
+     * 
+     * @return True if the X-Forward-Proto header indicates a secure connection or a real https connection was used.
      */
     @Override
     public boolean isSecure() {
-        if (XForwardProto != null) {
+        if (isConsiderXForwards && XForwardProto != null) {
             return XForwardProto.equals("https");
         }
         return super.isSecure();

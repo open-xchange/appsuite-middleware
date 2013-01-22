@@ -386,4 +386,15 @@ public class GrizzlyConfig implements Initialization {
         return isAJPEnabled;
     }
 
+    /**
+     * Gets if we should consider X-Forward-Headers that reach the backend.
+     * Those can be spoofed by clients so we have to make sure to consider the headers only if the proxy/proxies reliably override those
+     * headers for incoming requests.
+     * Disabled by default as we now use relative redirects for Grizzly.
+     * @return
+     */
+    public boolean isConsiderXForwards() {
+        return false;
+    }
+
 }
