@@ -197,7 +197,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
                 if (null == (userConfig = (UserConfiguration) cache.get(key))) {
                     userConfig = delegateStorage.getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
                     if (initExtendedPermissions) {
-                        cache.put(key, userConfig);
+                        cache.put(key, userConfig, false);
                     }
                 }
             } catch (final RuntimeException rte) {

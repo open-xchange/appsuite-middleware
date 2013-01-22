@@ -304,7 +304,7 @@ public abstract class Refresher<T extends Serializable> {
                         cache.remove(key);
                     }
                 }
-                cache.put(key, retval);
+                cache.put(key, retval, false);
                 cond.signalAll();
             } finally {
                 lock.unlock();

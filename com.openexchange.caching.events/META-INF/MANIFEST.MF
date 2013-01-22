@@ -1,5 +1,4 @@
 Manifest-Version: 1.0
-Eclipse-RegisterBuddy: com.hazelcast
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Cache Event Service
 Bundle-SymbolicName: com.openexchange.caching.events
@@ -16,3 +15,5 @@ Import-Package: com.openexchange.exception,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.caching.events.osgi.CacheEventServiceActivator
 Export-Package: com.openexchange.caching.events
+Require-Bundle: com.hazelcast;resolution:=optional
+Eclipse-RegisterBuddy: com.hazelcast

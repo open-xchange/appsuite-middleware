@@ -220,12 +220,28 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     }
 
     @Override
+    public void put(Serializable key, Serializable obj, boolean invalidate) throws OXException {
+        if (invalidate) {
+            throw CacheExceptionCode.FAILED_PUT.create(new UnsupportedOperationException("No invalidation support"));
+        }
+        put(key, obj);
+    }
+
+    @Override
     public void put(final Serializable key, final Serializable val, final ElementAttributes attr) throws OXException {
         try {
             cache.put(key, val, new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
         }
+    }
+
+    @Override
+    public void put(Serializable key, Serializable val, ElementAttributes attr, boolean invalidate) throws OXException {
+        if (invalidate) {
+            throw CacheExceptionCode.FAILED_PUT.create(new UnsupportedOperationException("No invalidation support"));
+        }
+        put(key, val, attr);
     }
 
     @Override
@@ -239,6 +255,14 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     }
 
     @Override
+    public void putInGroup(Serializable key, String groupName, Serializable value, boolean invalidate) throws OXException {
+        if (invalidate) {
+            throw CacheExceptionCode.FAILED_PUT.create(new UnsupportedOperationException("No invalidation support"));
+        }
+        putInGroup(key, groupName, value);
+    }
+
+    @Override
     public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws OXException {
         try {
             groupNames.add(groupName);
@@ -246,6 +270,14 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
         }
+    }
+
+    @Override
+    public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr, boolean invalidate) throws OXException {
+        if (invalidate) {
+            throw CacheExceptionCode.FAILED_PUT.create(new UnsupportedOperationException("No invalidation support"));
+        }
+        putInGroup(key, groupName, value, attr);
     }
 
     @Override
@@ -372,4 +404,5 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
         throw new OXException(666, "Illegal start,end range (" + start + ", " + end + ")");
     }
+
 }

@@ -110,18 +110,18 @@ public final class CacheEventServiceImpl implements CacheEventService {
     }
 
     @Override
-    public void notify(CacheEvent event, String senderID) {
+    public void notify(CacheEvent event) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("notify: " + event + " (" + senderID + ')');
+            LOG.debug("notify: " + event);
         }        
         List<Runnable> notificationRunnables = new ArrayList<Runnable>();
         if (null != event.getRegion()) {
             for (CacheListener listener : getListeners(event.getRegion())) {
-                notificationRunnables.add(getNotificationRunnable(listener, event, senderID));
+                notificationRunnables.add(getNotificationRunnable(listener, event));
             }
         }
         for (CacheListener listener : cacheListeners) {
-            notificationRunnables.add(getNotificationRunnable(listener, event, senderID));
+            notificationRunnables.add(getNotificationRunnable(listener, event));
         }
         if (0 < notificationRunnables.size()) {
             ExecutorService executorService = getExecutorService();
@@ -152,12 +152,12 @@ public final class CacheEventServiceImpl implements CacheEventService {
         return listeners;
     }
     
-    private static Runnable getNotificationRunnable(final CacheListener listener, final CacheEvent event, final String senderID) {
+    private static Runnable getNotificationRunnable(final CacheListener listener, final CacheEvent event) {
         return new Runnable() {
             
             @Override
             public void run() {
-                listener.onEvent(event, senderID);
+                listener.onEvent(event);
             }
         };
     }
