@@ -57,7 +57,14 @@ package com.openexchange.caching.events;
  */
 public enum CacheOperation {
     
+    /**
+     * Invalidation of a cache entry, due to update or removal 
+     */
     INVALIDATE,
+    
+    /**
+     * Invalidation of a cache group
+     */
     INVALIDATE_GROUP
     ;
 }

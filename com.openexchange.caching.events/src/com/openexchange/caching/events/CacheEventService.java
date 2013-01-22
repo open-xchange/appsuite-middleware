@@ -49,7 +49,6 @@
 
 package com.openexchange.caching.events;
 
-
 /**
  * {@link CacheEventService}
  * 
@@ -65,12 +64,32 @@ public interface CacheEventService {
      */
     void notify(CacheEvent event, String senderID);
 
+    /**
+     * Registers a cache listener to receive cache events for all regions.  
+     * 
+     * @param listener The cache listener to add
+     */
     void addListener(CacheListener listener);
     
+    /**
+     * Removes a registered cache listener.
+     * 
+     * @param listener The cache listener to remove
+     */
     void removeListener(CacheListener listener);
     
+    /**
+     * Adds a cache listener to receive cache events for a specific region.  
+     * 
+     * @param listener The cache listener to add
+     */
     void addListener(String region, CacheListener listener);
     
+    /**
+     * Removes a registered cache listener.
+     * 
+     * @param listener The cache listener to remove
+     */
     void removeListener(String region, CacheListener listener);
     
 }

@@ -61,7 +61,9 @@ public class CacheEvent implements Serializable {
     /**
      * Creates a new {@link CacheOperation#INVALIDATE} event.
      * 
-     * @param groupName The group name
+     * @param region The cache region 
+     * @param groupName The cache group name
+     * @param key The key of the affected cache entry
      * @return The cache event
      */
     public static CacheEvent INVALIDATE(String region, String groupName, Serializable key) {
@@ -71,14 +73,14 @@ public class CacheEvent implements Serializable {
     /**
      * Creates a new {@link CacheOperation#INVALIDATE_GROUP} event.
      * 
-     * @param groupName The group name
+     * @param region The cache region 
+     * @param groupName The cache group name
      * @return The cache event
      */
     public static CacheEvent INVALIDATE_GROUP(String region, String groupName) {
         return new CacheEvent(CacheOperation.INVALIDATE_GROUP, region, null, groupName);
     }
-    
-    
+        
     private static final long serialVersionUID = 7172029773641345572L;
     
     private CacheOperation operation;
@@ -89,11 +91,12 @@ public class CacheEvent implements Serializable {
     /**
      * Initializes a new {@link CacheEvent}.
      * 
-     * @param operation
-     * @param key
-     * @param groupName
+     * @param operation The cache operation
+     * @param region The cache region 
+     * @param groupName The cache group name
+     * @param key The key of the affected cache entry
      */
-    public CacheEvent(CacheOperation operation, String region, Serializable key, String groupName) {
+    private CacheEvent(CacheOperation operation, String region, Serializable key, String groupName) {
         super();
         this.operation = operation;
         this.region = region;
@@ -101,13 +104,6 @@ public class CacheEvent implements Serializable {
         this.groupName = groupName;
     }
     
-    /**
-     * Initializes a new {@link CacheEvent}.
-     */
-    public CacheEvent() {
-        this(null, null, null, null);
-    }
-
     /**
      * Gets the operation
      *

@@ -57,6 +57,12 @@ package com.openexchange.caching.events;
  */
 public interface CacheListener {
 
+    /**
+     * Called whenever a cache event occurs.
+     * 
+     * @param cacheEvent The cache event
+     * @param senderID The cache event's sender ID
+     */
     void onEvent(CacheEvent cacheEvent, String senderID);
     
 }
