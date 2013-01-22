@@ -52,7 +52,7 @@ package com.openexchange.ms;
 import java.util.concurrent.BlockingQueue;
 
 /**
- * {@link Queue} - Represents a topic for the p2p messaging model.
+ * {@link Queue} - Represents a queue for the p2p messaging model.
  * <p>
  * A queue follows the Point-to-Point Messaging Domain:<br>
  * <ul>
