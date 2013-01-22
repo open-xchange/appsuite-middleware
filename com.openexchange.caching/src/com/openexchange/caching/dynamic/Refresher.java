@@ -64,7 +64,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 
 /**
- *
+ * Checks if an object was removed from the cache and must be reloaded from storage.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class Refresher<T extends Serializable> {
@@ -94,11 +95,11 @@ public abstract class Refresher<T extends Serializable> {
      */
     public Refresher() {
         super();
-	}
+    }
 
     /**
      * Initializes a new {@link Refresher}.
-     *
+     * 
      * @throws IllegalArgumentException If provided region name is <code>null</code>
      */
     protected Refresher(final OXObjectFactory<T> factory, final String regionName, final boolean removeBeforePut) {
@@ -121,7 +122,7 @@ public abstract class Refresher<T extends Serializable> {
 
     /**
      * Checks if the object was removed from the cache and must be reloaded from the database.
-     *
+     * 
      * @throws OXException If refresh fails
      */
     protected T refresh() throws OXException {
@@ -171,9 +172,7 @@ public abstract class Refresher<T extends Serializable> {
                 ((Condition) tmp).signalAll();
             } else {
                 // If object is already in cache, return it instead of putting new object into cache.
-                @SuppressWarnings("unchecked")
-                final
-                T tmp2 = (T) tmp;
+                @SuppressWarnings("unchecked") final T tmp2 = (T) tmp;
                 retval = tmp2;
             }
         } finally {
@@ -204,8 +203,8 @@ public abstract class Refresher<T extends Serializable> {
          * Check for distributed cache nature
          */
         if (cache.isDistributed()) {
-        	// No need for locks
-        	retval = (T) cache.get(key);
+            // No need for locks
+            retval = (T) cache.get(key);
             if (null == retval) {
                 try {
                     if (cache instanceof PutIfAbsent) {
@@ -265,9 +264,7 @@ public abstract class Refresher<T extends Serializable> {
                     // Other thread finished loading the object.
                     final Object tmp2 = cache.get(key);
                     if (null != tmp2 && !(tmp2 instanceof Condition)) {
-                        @SuppressWarnings("unchecked")
-                        final
-                        T tmp3 = (T) tmp2;
+                        @SuppressWarnings("unchecked") final T tmp3 = (T) tmp2;
                         retval = tmp3;
                         cond = null;
                     }
@@ -277,9 +274,7 @@ public abstract class Refresher<T extends Serializable> {
                 }
             } else {
                 // Only other option is that the cache contains the delegate object.
-                @SuppressWarnings("unchecked")
-                final
-                T tmp2 = (T) tmp;
+                @SuppressWarnings("unchecked") final T tmp2 = (T) tmp;
                 retval = tmp2;
             }
         } catch (final InterruptedException e) {
