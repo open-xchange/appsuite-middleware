@@ -65,18 +65,11 @@ public final class MsExceptionMessages implements LocalizableStrings {
     // An I/O error occurred: %1$s
     public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
 
-    // No Connection Factory found for name: %1$s
-    // "Connection Factory" is a proper name, no translation applicable
-    public static final String CF_NOT_FOUND_MSG = "No Connection Factory found for name: %1$s";
-
     // No such queue or could not be created: %1$s
     public static final String QUEUE_NOT_FOUND_MSG = "No such queue or could not be created: %1$s";
 
     // No such topic or could not be created: %1$s
     public static final String TOPIC_NOT_FOUND_MSG = "No such topic or could not be created: %1$s";
-
-    // A JMS error occurred: %1$s
-    public static final String JMS_ERROR_MSG = "A JMS error occurred: %1$s";
 
     // Illegal state: %1$s
     public static final String ILLEGAL_STATE_MSG = "Illegal state: %1$s";

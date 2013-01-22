@@ -70,33 +70,29 @@ public enum MsExceptionCodes implements OXExceptionCode {
      */
     IO_ERROR(MsExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
     /**
-     * No connection factory found for name: %1$s
-     */
-    CF_NOT_FOUND(MsExceptionMessages.CF_NOT_FOUND_MSG, CATEGORY_ERROR, 3),
-    /**
      * No such queue or could not be created: %1$s
      */
-    QUEUE_NOT_FOUND(MsExceptionMessages.QUEUE_NOT_FOUND_MSG, CATEGORY_ERROR, 4),
+    QUEUE_NOT_FOUND(MsExceptionMessages.QUEUE_NOT_FOUND_MSG, CATEGORY_ERROR, 3),
     /**
      * No such topic or could not be created: %1$s
      */
-    TOPIC_NOT_FOUND(MsExceptionMessages.TOPIC_NOT_FOUND_MSG, CATEGORY_ERROR, 5),
+    TOPIC_NOT_FOUND(MsExceptionMessages.TOPIC_NOT_FOUND_MSG, CATEGORY_ERROR, 4),
     /**
      * Illegal state: %1$s
      */
-    ILLEGAL_STATE(MsExceptionMessages.ILLEGAL_STATE_MSG, CATEGORY_ERROR, 6),
+    ILLEGAL_STATE(MsExceptionMessages.ILLEGAL_STATE_MSG, CATEGORY_ERROR, 5),
     /**
      * A filter expression has not been validated.
      */
-    INVALID_SELECTOR(MsExceptionMessages.INVALID_SELECTOR_MSG, CATEGORY_ERROR, 7),
+    INVALID_SELECTOR(MsExceptionMessages.INVALID_SELECTOR_MSG, CATEGORY_ERROR, 6),
     /**
      * Either no such queue or a topic or could not be created: %1$s
      */
-    DESTINATION_NOT_FOUND(MsExceptionMessages.DESTINATION_NOT_FOUND_MSG, CATEGORY_ERROR, 8),
+    DESTINATION_NOT_FOUND(MsExceptionMessages.DESTINATION_NOT_FOUND_MSG, CATEGORY_ERROR, 7),
     /**
      * A security problem occurred: %1$s
      */
-    SECURITY_ERROR(MsExceptionMessages.SECURITY_ERROR_MSG, CATEGORY_PERMISSION_DENIED, 9),
+    SECURITY_ERROR(MsExceptionMessages.SECURITY_ERROR_MSG, CATEGORY_PERMISSION_DENIED, 8),
 
     ;
 
