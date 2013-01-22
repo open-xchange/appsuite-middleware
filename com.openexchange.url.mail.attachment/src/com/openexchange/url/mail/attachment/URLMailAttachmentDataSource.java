@@ -222,7 +222,11 @@ public final class URLMailAttachmentDataSource implements DataSource {
 
     private static void closeURLConnection(final URLConnection urlCon) {
         if (null != urlCon) {
-            Streams.close(urlCon.getInputStream());
+            try {
+                Streams.close(urlCon.getInputStream());
+            } catch (final Exception e) {
+                // Ignore
+            }
         }
     }
 
