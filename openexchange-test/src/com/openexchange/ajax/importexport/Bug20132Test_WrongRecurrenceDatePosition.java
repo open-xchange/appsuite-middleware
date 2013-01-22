@@ -1,8 +1,10 @@
 package com.openexchange.ajax.importexport;
 
+import java.util.List;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
@@ -91,9 +93,10 @@ public class Bug20132Test_WrongRecurrenceDatePosition extends ManagedAppointment
 		assertTrue(response.hasError());
 		ImportResult[] imports = response.getImports();
 		assertEquals(1, imports.length);
-		OXException exception = imports[0].getException();
-		assertEquals("TRUNCATED", exception.getCategory().toString());
-		String message = exception.getMessage();
+		List<ConversionWarning> warnings = imports[0].getWarnings();
+		assertEquals(1, warnings.size());
+		String message = warnings.get(0).getMessage();
+        assertTrue(message.contains("truncated"));
 		assertTrue(message.contains("Here comes a long (actually too long) story"));
 		System.out.println(message);
 	}
