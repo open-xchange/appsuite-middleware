@@ -1,5 +1,5 @@
 #! /bin/bash
-# postinst script for oxldapsync
+# postinst script for open-xchange-munin-scripts
 #
 # see: dh_installdeb(1)
 

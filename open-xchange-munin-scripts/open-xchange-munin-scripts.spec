@@ -1,20 +1,21 @@
 
-# norootforbuild
-
 Name:           open-xchange-munin-scripts
 BuildArch:	noarch
-Version:	0.1
-%define         ox_release 8
+#!BuildIgnore: post-build-checks
+BuildRequires:  ant
+BuildRequires:  ant-nodeps
+BuildRequires:  java-devel >= 1.6.0
+Version:	@OXVERSION@
+%define         ox_release 5
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-#URL:            
-Source:         %{name}_%{version}.orig.tar.gz
+URL:            http://www.open-xchange.com/
+Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Open-Xchange Munin scripts
-Requires:	open-xchange-common 
+Requires:	open-xchange-core >= @OXVERSION@
 Requires:       munin-node
-#
 
 %description
 Munin is a highly flexible and powerful solution used to create graphs of
@@ -27,19 +28,19 @@ Munin is written in Perl, and relies heavily on Tobi Oetiker's excellent
 RRDtool. To see a real example of Munin in action, you can follow a link
 from <http://munin.projects.linpro.no/> to a live installation.
 
+Authors:
+--------
+    Open-Xchange
+
 
 %prep
 %setup -q
 
 %build
 
-
 %install
-%__mkdir_p %{buildroot}/usr/share/munin/plugins/
-%__mkdir_p %{buildroot}/etc/munin/plugin-conf.d/
-%__cp ox_munin_scripts/* $RPM_BUILD_ROOT/usr/share/munin/plugins/
-%__cp plugin-conf.d/* $RPM_BUILD_ROOT/etc/munin/plugin-conf.d/
-chmod a+x $RPM_BUILD_ROOT/usr/share/munin/plugins/*
+export NO_BRP_CHECK_BYTECODE_VERSION=true
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
 TMPFILE=`mktemp /tmp/munin-node.configure.XXXXXXXXXX`

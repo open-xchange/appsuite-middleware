@@ -72,5 +72,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-unifiedmail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-upsell-multiple"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-munin-scripts"/>
 </provider>
 </psf>
