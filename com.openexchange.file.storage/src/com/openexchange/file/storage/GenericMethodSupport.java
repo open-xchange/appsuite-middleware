@@ -87,11 +87,8 @@ public class GenericMethodSupport {
         final Object o = args[i];
         if (o instanceof Number) {
             return ((Number) o).intValue();
-        } else if (o instanceof String) {
-            return Integer.parseInt((String) o);
-        } else {
-            return integer(0, o.toString());
         }
+        return Integer.parseInt(o.toString());
     }
 
     protected Date date(final int i, final Object... args) {
