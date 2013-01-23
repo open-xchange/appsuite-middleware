@@ -1,6 +1,7 @@
 * 2013-01-23 - marcus.klein@open-xchange.com
 
  - Fix for bug 24195: Added extension package for host name service configured through config cascade.
+ - Fix for bug 23938: Corrected default path in configuration files not to contain "groupware" anymore.
 
 * 2013-01-23 - thorben.betten@open-xchange.com
 

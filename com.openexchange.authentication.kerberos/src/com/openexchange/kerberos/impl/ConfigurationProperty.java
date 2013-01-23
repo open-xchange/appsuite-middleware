@@ -59,7 +59,7 @@ public enum ConfigurationProperty {
     /**
      * Path to the JAAS configuration file.
      */
-    JAAS_CONF("java.security.auth.login.config", "/opt/open-xchange/etc/groupware/kerberosLogin.conf"),
+    JAAS_CONF("java.security.auth.login.config", "/opt/open-xchange/etc/kerberosLogin.conf"),
     /**
      * Wether Suns Kerberos implementation should write debugging information or not.
      */
@@ -67,7 +67,7 @@ public enum ConfigurationProperty {
     /**
      * Path to the krb5.conf configuration file.
      */
-    KRB5_CONF("java.security.krb5.conf", "/opt/open-xchange/etc/groupware/krb5.conf"),
+    KRB5_CONF("java.security.krb5.conf", "/opt/open-xchange/etc/krb5.conf"),
     /**
      * Name of the module in the Java authentication and authorization configuration file.
      */
