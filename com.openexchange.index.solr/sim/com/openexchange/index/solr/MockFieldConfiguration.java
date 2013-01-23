@@ -47,59 +47,54 @@
  *
  */
 
-package com.openexchange.index.solr.internal.mail;
+package com.openexchange.index.solr;
 
-import java.util.EnumMap;
-import java.util.Map;
-import org.apache.commons.logging.Log;
+import java.util.Set;
 import com.openexchange.index.IndexField;
-import com.openexchange.index.solr.internal.FieldMapper;
-import com.openexchange.index.solr.internal.SolrField;
-import com.openexchange.mail.index.MailIndexField;
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
 
 
 /**
- * {@link MailFieldMapper}
+ * {@link MockFieldConfiguration}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class MailFieldMapper implements FieldMapper {
+public class MockFieldConfiguration implements FieldConfiguration {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailFieldMapper.class);
-
-    private static final MailFieldMapper INSTANCE = new MailFieldMapper();
-
-    private final Map<MailIndexField, SolrMailField> fieldMapping;
-
-
-    private MailFieldMapper() {
-        super();
-        fieldMapping = new EnumMap<MailIndexField, SolrMailField>(MailIndexField.class);
-        for (final SolrMailField field : SolrMailField.values()) {
-            MailIndexField indexField = field.indexField();
-            if (indexField != null) {
-                fieldMapping.put(indexField, field);
-            }
-        }
-    }
-
-    public static MailFieldMapper getInstance() {
-        return INSTANCE;
+    @Override
+    public boolean isLocalized(IndexField indexField) {
+        // TODO Auto-generated method stub
+        return false;
     }
 
     @Override
-    public SolrField solrFieldFor(IndexField indexField) {
-        if (indexField == null) {
-            return null;
-        }
+    public Set<String> getSolrFields(IndexField indexField) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-        if (!(indexField instanceof MailIndexField)) {
-            LOG.warn("Parameter 'indexField' must be of type " + MailIndexField.class.getName() + "!");
-            return null;
-        }
+    @Override
+    public Set<? extends IndexField> getIndexedFields() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-        MailIndexField mailIndexField = (MailIndexField) indexField;
-        return fieldMapping.get(mailIndexField);
+    @Override
+    public String getUUIDField() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public IndexField getIndexField(String solrField) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getRawField(IndexField indexField) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

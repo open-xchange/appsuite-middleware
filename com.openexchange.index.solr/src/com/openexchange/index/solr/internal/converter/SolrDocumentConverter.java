@@ -47,62 +47,28 @@
  *
  */
 
-package com.openexchange.indexedSearch.json;
+package com.openexchange.index.solr.internal.converter;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.indexedSearch.json.action.AbstractIndexAction;
-import com.openexchange.indexedSearch.json.action.IsIndexedAction;
-import com.openexchange.indexedSearch.json.action.PersonsAction;
-import com.openexchange.indexedSearch.json.action.SpotlightAction;
-import com.openexchange.indexedSearch.json.action.TopicsAction;
-import com.openexchange.server.ServiceLookup;
+import org.apache.solr.common.SolrDocument;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexField;
+import com.openexchange.index.IndexResult;
+
 
 /**
- * {@link IndexActionFactory}
+ * {@link SolrDocumentConverter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexActionFactory implements AJAXActionServiceFactory {
+public interface SolrDocumentConverter<V> {
 
-    private final Map<String, AbstractIndexAction> actions;
+    IndexDocument<V> convert(SolrDocument document) throws OXException;
 
-    /**
-     * Initializes a new {@link IndexActionFactory}.
-     *
-     * @param services The service look-up
-     */
-    public IndexActionFactory(final ServiceLookup services, final ResultConverters registry) {
-        super();
-        actions = new ConcurrentHashMap<String, AbstractIndexAction>(2);
+    IndexDocument<V> convert(SolrDocument document, Map<String, List<String>> highlightedFields) throws OXException;
 
-        final AbstractIndexAction action = new com.openexchange.indexedSearch.json.action.SearchAction(services, registry);
-        actions.put(action.getAction(), action);
-
-        final AbstractIndexAction action2 = new IsIndexedAction(services, registry);
-        actions.put(action2.getAction(), action2);
-        
-        final AbstractIndexAction action3 = new SpotlightAction(services, registry);
-        actions.put(action3.getAction(), action3);
-        
-        final AbstractIndexAction action4 = new PersonsAction(services, registry);
-        actions.put(action4.getAction(), action4);
-        
-        final AbstractIndexAction action5 = new TopicsAction(services, registry);
-        actions.put(action5.getAction(), action5);
-    }
-
-    @Override
-    public AJAXActionService createActionService(final String action) {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
+    IndexResult<V> createIndexResult(List<IndexDocument<V>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException;
 
 }

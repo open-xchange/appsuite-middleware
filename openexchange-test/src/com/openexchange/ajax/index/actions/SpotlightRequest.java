@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,54 @@
  *
  */
 
-package com.openexchange.caching.events.osgi;
+package com.openexchange.ajax.index.actions;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.caching.events.CacheEventService;
-import com.openexchange.caching.events.internal.CacheEventServiceImpl;
-import com.openexchange.caching.events.internal.CacheEventServiceLookup;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+
 
 /**
- * {@link CacheEventServiceActivator}
+ * {@link SpotlightRequest}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class CacheEventServiceActivator extends HousekeepingActivator {
+public class SpotlightRequest extends AbstractIndexRequest<GeneralIndexResponse> {
+    
+    private String searchTerm;
+    private int maxPersons;
+    private int maxTopics;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CacheEventServiceActivator.class);
-
-    /**
-     * Initializes a new {@link CacheEventServiceActivator}.
-     */
-    public CacheEventServiceActivator() {
+    public SpotlightRequest(String searchTerm, int maxPersons, int maxTopics) {
         super();
+        this.searchTerm = searchTerm;
+        this.maxPersons = maxPersons;
+        this.maxTopics = maxTopics;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ThreadPoolService.class };
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
-        CacheEventServiceLookup.set(this);
-        registerService(CacheEventService.class, new CacheEventServiceImpl());
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        Parameter[] params = new Parameter[4];
+        params[0] = new Parameter("searchTerm", searchTerm);
+        params[1] = new Parameter("maxPersons", maxPersons);
+        params[2] = new Parameter("maxTopics", maxTopics);
+        params[3] = new Parameter("action", "spotlight");
+        return params;
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
-        CacheEventServiceLookup.set(null);
-        super.stopBundle();
+    public AbstractAJAXParser<? extends GeneralIndexResponse> getParser() {
+        return new GeneralIndexParser(true);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }

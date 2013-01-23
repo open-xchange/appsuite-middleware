@@ -49,6 +49,9 @@
 
 package com.openexchange.index;
 
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * {@link IndexDocument} - Represents an indexed document.
@@ -63,4 +66,11 @@ public interface IndexDocument<V> {
      * @return The associated object
      */
     public V getObject();
+    
+    /**
+     * @return Optionally highlighted search results. If highlighting is supported depends on the 
+     * search handler configuration of the underlying index implementation. May be <code>null</code>
+     */
+    public Map<IndexField, List<String>> getHighlighting();
+    
 }

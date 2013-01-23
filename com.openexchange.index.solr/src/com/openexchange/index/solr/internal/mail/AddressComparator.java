@@ -50,21 +50,24 @@
 package com.openexchange.index.solr.internal.mail;
 
 import java.util.Comparator;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 
 public class AddressComparator implements Comparator<IndexDocument<MailMessage>> {
 
-    private final SolrMailField sortField;
+    private final MailIndexField sortField;
 
     private final Order order;
 
-    public AddressComparator(SolrMailField sortField, Order order) throws OXException {
+    public AddressComparator(MailIndexField sortField, Order order) throws OXException {
         super();
         this.order = order;
         this.sortField = sortField;

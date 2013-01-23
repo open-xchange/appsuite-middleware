@@ -47,18 +47,31 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
+package com.openexchange.ajax.index.actions;
 
-import com.openexchange.index.IndexField;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link FieldMapper}
+ * {@link GeneralIndexParser}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface FieldMapper {
+public class GeneralIndexParser extends AbstractAJAXParser<GeneralIndexResponse> {
 
-    SolrField solrFieldFor(IndexField indexField);
+    /**
+     * Initializes a new {@link GeneralIndexParser}.
+     * @param failOnError
+     */
+    protected GeneralIndexParser(boolean failOnError) {
+        super(failOnError);
+    }
+
+    @Override
+    protected GeneralIndexResponse createResponse(Response response) throws JSONException {
+        return new GeneralIndexResponse(response);
+    }
 
 }

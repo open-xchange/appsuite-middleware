@@ -47,26 +47,36 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
+package com.openexchange.ajax.index.actions;
 
-import java.util.List;
-import java.util.Map;
-import org.apache.solr.common.SolrDocument;
-import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexField;
-import com.openexchange.index.IndexResult;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 
 /**
- * {@link SolrResultConverter}
+ * {@link AbstractIndexRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface SolrResultConverter<V> {
+public abstract class AbstractIndexRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+    /**
+     * URL of the tasks AJAX interface.
+     */
+    private static final String CONFIG_URL = "/ajax/indexedSearch";
+    
+    
+    protected AbstractIndexRequest() {
+        super();
+    }
+    
+    @Override
+    public String getServletPath() {
+        return CONFIG_URL;
+    }
 
-    IndexDocument<V> convert(SolrDocument document) throws OXException;
-
-    IndexResult<V> createIndexResult(List<IndexDocument<V>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException;
-
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
 }

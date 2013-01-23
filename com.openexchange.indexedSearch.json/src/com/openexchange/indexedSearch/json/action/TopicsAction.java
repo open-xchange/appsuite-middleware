@@ -47,58 +47,29 @@
  *
  */
 
-package com.openexchange.index.solr.internal.infostore;
+package com.openexchange.indexedSearch.json.action;
 
-import java.util.EnumMap;
-import java.util.Map;
-import org.apache.commons.logging.Log;
-import com.openexchange.groupware.infostore.index.InfostoreIndexField;
-import com.openexchange.index.IndexField;
-import com.openexchange.index.solr.internal.FieldMapper;
-import com.openexchange.index.solr.internal.SolrField;
+import com.openexchange.index.SearchHandler;
+import com.openexchange.indexedSearch.json.ResultConverters;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link InfostoreFieldMapper}
+ * {@link TopicsAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class InfostoreFieldMapper implements FieldMapper {
+public class TopicsAction extends MailSearchAction {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreFieldMapper.class);
-
-    private static final InfostoreFieldMapper INSTANCE = new InfostoreFieldMapper();
-
-    private final Map<InfostoreIndexField, SolrInfostoreField> fieldMapping;
-
-
-    private InfostoreFieldMapper() {
-        super();
-        fieldMapping = new EnumMap<InfostoreIndexField, SolrInfostoreField>(InfostoreIndexField.class);
-        for (SolrInfostoreField solrField : SolrInfostoreField.values()) {
-            InfostoreIndexField indexField = solrField.indexField();
-            if (indexField != null) {
-                fieldMapping.put(indexField, solrField);
-            }
-        }
-    }
-
-    public static InfostoreFieldMapper getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public SolrField solrFieldFor(IndexField indexField) {
-        if (indexField == null) {
-            return null;
-        }
-
-        if (!(indexField instanceof InfostoreIndexField)) {
-            LOG.warn("Parameter 'indexField' must be of type " + InfostoreIndexField.class.getName() + "!");
-            return null;
-        }
-
-        return fieldMapping.get(indexField);
+    /**
+     * Initializes a new {@link TopicsAction}.
+     * @param action
+     * @param services
+     * @param registry
+     * @param searchHandler
+     */
+    public TopicsAction(ServiceLookup services, ResultConverters registry) {
+        super("topics", services, registry, SearchHandler.SEARCH_FOR_TOPIC);
     }
 
 }

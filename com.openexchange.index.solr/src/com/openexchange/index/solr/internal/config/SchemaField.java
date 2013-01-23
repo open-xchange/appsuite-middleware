@@ -47,20 +47,62 @@
  *
  */
 
-package com.openexchange.index.solr.internal;
+package com.openexchange.index.solr.internal.config;
 
 import com.openexchange.index.IndexField;
 
-/**
- * {@link SolrField}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- */
-public interface SolrField {
+public class SchemaField {
 
-    String solrName();
+    private final String name;
 
-    String parameterName();
+    private final String type;
 
-    IndexField indexField();
+    private final boolean indexed;
+
+    private final boolean stored;
+
+    private final boolean multiValued;
+    
+    private final boolean isLocalized;
+    
+    private final IndexField indexField;
+
+    public SchemaField(String name, String type, boolean indexed, boolean stored, boolean multiValued, boolean isLocalized, IndexField indexField) {
+        super();
+        this.name = name;
+        this.type = type;
+        this.indexed = indexed;
+        this.stored = stored;
+        this.multiValued = multiValued;
+        this.isLocalized = isLocalized;
+        this.indexField = indexField;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public boolean isIndexed() {
+        return indexed;
+    }
+
+    public boolean isStored() {
+        return stored;
+    }
+
+    public boolean isMultiValued() {
+        return multiValued;
+    }
+    
+    public boolean isLocalized() {
+        return isLocalized;
+    }
+    
+    public IndexField getIndexField() {
+        return indexField;
+    }
 }
