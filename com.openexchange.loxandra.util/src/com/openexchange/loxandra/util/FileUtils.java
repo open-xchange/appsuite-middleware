@@ -94,7 +94,8 @@ public class FileUtils {
 				log.info("Num bytes read: " + totalBytesRead);
 			} finally {
 				log.info("Closing input stream.");
-				input.close();
+				if (input != null)
+				    input.close();
 			}
 		} catch (FileNotFoundException ex) {
 			log.error("File not found.");
@@ -104,9 +105,38 @@ public class FileUtils {
 
 		return result;
 	}
+	
+	public static byte[] textToByteArray(String inputFileName) {
+	    File file = new File(inputFileName);
+	    byte[] result = new byte[(int)file.length()];
+	    
+	    try { 
+	        InputStream input = null;
+	        try {
+	            
+	            input = new BufferedInputStream(new FileInputStream(file));
+	        
+	        } finally {
+	            log.info("Closing input stream.");
+	            if (input != null)
+	                input.close();
+	        }
+	    } catch (FileNotFoundException ex) {
+	        log.error("File not found.");
+	    } catch (IOException ex) {
+	        log.error(ex);
+	    }
+	    
+	    return result;
+	                             
+	}
 
 	public static ByteBuffer binToByteBuffer(String filename) {
 		return ByteBuffer.wrap(binToByteArray(filename));
+	}
+	
+	public static ByteBuffer textToByteBuffer(String filename) {
+	    return ByteBuffer.wrap(textToByteArray(filename));
 	}
 
 	/**
@@ -124,7 +154,8 @@ public class FileUtils {
 				output.write(aInput);
 				log.info("OK");
 			} finally {
-				output.close();
+			    if (output != null)
+			        output.close();
 			}
 		} catch (FileNotFoundException ex) {
 			log.error("File not found.");
