@@ -119,7 +119,7 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
     }
 
     @Override
-    public void onEvent(CacheEvent cacheEvent) {
+    public void onEvent(Object sender, CacheEvent cacheEvent) {
         try {
             getTopic().publish(cacheEvent);
         } catch (OXException e) {
@@ -140,22 +140,11 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
         if (null != message && false == senderId.equals(message.getSenderId())) {
             CacheEvent cacheEvent = message.getMessageObject();
             if (null != cacheEvent) {
-                cacheEvents.notify(message.getMessageObject());
+                cacheEvents.notify(this, message.getMessageObject());
             } else {
                 LOG.warn("Discarding empty cache event message.");
             }
         }
     }
-
-//    @Override
-//    public void onMessage(Message<CacheEvent> message) {
-//        if (null != message) {
-//            
-//            
-//            if (null != event) {
-//                cacheEvents.notify(event.getCacheEvent(), event.getSenderID());                
-//            }
-//        }
-//    }
 
 }

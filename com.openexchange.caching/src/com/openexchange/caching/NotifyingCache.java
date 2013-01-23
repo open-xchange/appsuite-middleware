@@ -294,8 +294,8 @@ public class NotifyingCache implements Cache, CacheListener {
     }
 
     @Override
-    public void onEvent(CacheEvent cacheEvent) {
-        if (null != cacheEvent) {
+    public void onEvent(Object sender, CacheEvent cacheEvent) {
+        if (sender != this && null != cacheEvent) {
             try {
                 switch (cacheEvent.getOperation()) {
                 case INVALIDATE_GROUP:
@@ -319,7 +319,7 @@ public class NotifyingCache implements Cache, CacheListener {
 
     private void fireInvalidateGroup(String groupName) {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
-            eventService.notify(CacheEvent.INVALIDATE_GROUP(region, groupName));
+            eventService.notify(this, CacheEvent.INVALIDATE_GROUP(region, groupName));
         }
     }
     
@@ -329,7 +329,7 @@ public class NotifyingCache implements Cache, CacheListener {
 
     private void fireInvalidate(Serializable key, String groupName) {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
-            eventService.notify(CacheEvent.INVALIDATE(region, groupName, key));
+            eventService.notify(this, CacheEvent.INVALIDATE(region, groupName, key));
         }
     }
 

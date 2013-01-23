@@ -60,8 +60,9 @@ public interface CacheListener {
     /**
      * Called whenever a cache event occurs.
      * 
+     * @param sender The sender of the event
      * @param cacheEvent The cache event
      */
-    void onEvent(CacheEvent cacheEvent);
+    void onEvent(Object sender, CacheEvent cacheEvent);
     
 }
