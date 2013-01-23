@@ -233,7 +233,7 @@ public class AppsLoadServlet extends HttpServlet {
             sb.append("define('").append(module).append("','");
             String payload;
             if ("raw".equals(format)) {
-                payload = baos.toString("US-ASCII");
+                payload = baos.toString(0);
             } else {
                 payload = baos.toString(Charsets.UTF_8_NAME);
             }

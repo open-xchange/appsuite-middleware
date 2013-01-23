@@ -1,3 +1,7 @@
+* 2013-01-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24557: Proper byte2char conversion
+
 * 2013-01-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 24553: Escape "</" character sequence with "<\/"
