@@ -47,58 +47,45 @@
  *
  */
 
-package com.openexchange.index.solr.internal.attachments;
+package com.openexchange.ajax.index.actions;
 
-import java.util.EnumMap;
-import java.util.Map;
-import org.apache.commons.logging.Log;
-import com.openexchange.groupware.attach.index.AttachmentIndexField;
-import com.openexchange.index.IndexField;
-import com.openexchange.index.solr.internal.FieldMapper;
-import com.openexchange.index.solr.internal.SolrField;
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link AttachmentFieldMapper}
+ * {@link GeneralIndexRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class AttachmentFieldMapper implements FieldMapper {
+public class GeneralIndexRequest extends AbstractIndexRequest<GeneralIndexResponse> {
+    
+    private Parameter[] parameters;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AttachmentFieldMapper.class);
-
-    private static final AttachmentFieldMapper INSTANCE = new AttachmentFieldMapper();
-
-    private final Map<AttachmentIndexField, SolrAttachmentField> fieldMapping;
-
-
-    private AttachmentFieldMapper() {
+    public GeneralIndexRequest(Parameter[] parameters) {
         super();
-        fieldMapping = new EnumMap<AttachmentIndexField, SolrAttachmentField>(AttachmentIndexField.class);
-        for (SolrAttachmentField field : SolrAttachmentField.values()) {
-            AttachmentIndexField indexField = field.indexField();
-            if (indexField != null) {
-                fieldMapping.put(indexField, field);
-            }
-        }
-    }
-
-    public static AttachmentFieldMapper getInstance() {
-        return INSTANCE;
+        this.parameters = parameters;
     }
 
     @Override
-    public SolrField solrFieldFor(IndexField indexField) {
-        if (indexField == null) {
-            return null;
-        }
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
+    }
 
-        if (!(indexField instanceof AttachmentIndexField)) {
-            LOG.warn("Parameter 'indexField' must be of type " + AttachmentIndexField.class.getName() + "!");
-            return null;
-        }
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        return parameters;
+    }
 
-        return fieldMapping.get(indexField);
+    @Override
+    public AbstractAJAXParser<GeneralIndexResponse> getParser() {
+        return new GeneralIndexParser(true);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }

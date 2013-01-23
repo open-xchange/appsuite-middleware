@@ -76,7 +76,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
     private static Log LOG = LogFactory.getLog(HazelcastSessionStorageActivator.class);
-
+    
     /**
      * Name for the userSessions multi-map - no further configuration via config file needed
      */

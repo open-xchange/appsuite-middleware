@@ -70,6 +70,7 @@ import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.SolrIndexResult;
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
 import com.openexchange.solr.SolrCoreIdentifier;
 
@@ -81,6 +82,8 @@ import com.openexchange.solr.SolrCoreIdentifier;
 public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachment> {
 
     private final SolrQueryBuilder queryBuilder;
+    
+    private final SolrAttachmentDocumentConverter converter;
 
 
     /**
@@ -88,9 +91,10 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
      *
      * @param identifier
      */
-    public SolrAttachmentIndexAccess(SolrCoreIdentifier identifier, SolrQueryBuilder queryBuilder) {
-        super(identifier);
+    public SolrAttachmentIndexAccess(SolrCoreIdentifier identifier, SolrQueryBuilder queryBuilder, FieldConfiguration fieldConfig) {
+        super(identifier, fieldConfig);
         this.queryBuilder = queryBuilder;
+        converter = new SolrAttachmentDocumentConverter(fieldConfig);
     }
 
     @Override
@@ -100,7 +104,7 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
 
     @Override
     public Set<? extends IndexField> getIndexedFields() {
-        return SolrAttachmentField.getIndexedFields();
+        return fieldConfig.getIndexedFields();
     }
 
     @Override
@@ -144,7 +148,7 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
             uuids.add(AttachmentUUID.newUUID(contextId, userId, document.getObject()).toString());
         }
 
-        String deleteQuery = buildQueryStringWithOr(SolrAttachmentField.UUID.solrName(), uuids);
+        String deleteQuery = buildQueryStringWithOr(fieldConfig.getUUIDField(), uuids);
         if (deleteQuery != null) {
             deleteDocumentsByQuery(deleteQuery);
         }
@@ -153,9 +157,14 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
     @Override
     public IndexResult<Attachment> query0(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
         SolrQuery solrQuery = queryBuilder.buildQuery(parameters);
-        Set<SolrAttachmentField> solrFields = checkAndConvert(fields);
-        setFieldList(solrQuery, solrFields);
-        List<IndexDocument<Attachment>> results = queryChunkWise(new SolrAttachmentDocumentConverter(), solrQuery, parameters.getOff(), parameters.getLen(), 100);
+        setFieldList(solrQuery, fields);
+        List<IndexDocument<Attachment>> results = queryChunkWise(
+            fieldConfig.getUUIDField(),
+            converter,
+            solrQuery,
+            parameters.getOff(),
+            parameters.getLen(),
+            100);
         if (results.isEmpty()) {
             return Indexes.emptyResult();
         }
@@ -169,24 +178,8 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
         return null;
     }
 
-    private Set<SolrAttachmentField> checkAndConvert(Set<? extends IndexField> fields) {
-        Set<SolrAttachmentField> set;
-        if (fields == null) {
-            set = EnumSet.allOf(SolrAttachmentField.class);
-        } else {
-            set = EnumSet.noneOf(SolrAttachmentField.class);
-            for (IndexField indexField : fields) {
-                if (indexField instanceof AttachmentIndexField) {
-                    set.add(SolrAttachmentField.solrFieldFor((AttachmentIndexField) indexField));
-                }
-            }
-        }
-
-        return set;
-    }
-
     private SolrInputDocument convertToDocument(IndexDocument<Attachment> document) throws OXException {
-        return SolrAttachmentDocumentConverter.convertStatic(contextId, userId, document);
+        return converter.convert(contextId, userId, document);
     }
 
 }

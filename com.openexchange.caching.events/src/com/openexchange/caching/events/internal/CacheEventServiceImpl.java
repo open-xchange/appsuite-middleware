@@ -111,8 +111,6 @@ public final class CacheEventServiceImpl implements CacheEventService {
 
     @Override
     public void notify(Object sender, CacheEvent event) {
-        System.out.println(event);
-        
         if (LOG.isDebugEnabled()) {
             LOG.debug("notify: " + event);
         }        
