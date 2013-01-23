@@ -58,6 +58,7 @@ import com.openexchange.exception.OXException;
  * This is an optional interface that may be implemented by {@link FileStorageAccountAccess} subclasses.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @see DefaultWarningsAware
  */
 public interface WarningsAware {
 
