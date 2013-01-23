@@ -148,8 +148,8 @@ public abstract class AbstractCIFSAccess {
             }
             return !smbFolder.getName().endsWith("$/");
         } catch (final SmbException e) {
-            final String message = e.getMessage();
-            if ("The network name cannot be found.".equals(message) || "Access is denied.".equals(message)) {
+            final int status = e.getNtStatus();
+            if (SmbException.NT_STATUS_BAD_NETWORK_NAME == status || SmbException.NT_STATUS_ACCESS_DENIED == status) {
                 // This means that the named share was not found.
                 warningsAware.addWarning(CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage()));
                 return false;

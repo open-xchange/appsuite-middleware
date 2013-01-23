@@ -65,43 +65,43 @@ public enum CIFSExceptionCodes implements OXExceptionCode {
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(CIFSExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR(CIFSExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * A CIFS/SMB error occurred: %1$s
      */
-    SMB_ERROR(CIFSExceptionMessages.SMB_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    SMB_ERROR(CIFSExceptionMessages.SMB_ERROR_MSG, CATEGORY_USER_INPUT, 2),
     /**
      * Invalid CIFS/SMB URL: %1$s
      */
-    INVALID_SMB_URL(CIFSExceptionMessages.INVALID_SMB_URL_MSG, Category.CATEGORY_ERROR, 3),
+    INVALID_SMB_URL(CIFSExceptionMessages.INVALID_SMB_URL_MSG, CATEGORY_USER_INPUT, 3),
     /**
      * CIFS/SMB URL does not denote a directory: %1$s
      */
-    NOT_A_FOLDER(CIFSExceptionMessages.NOT_A_FOLDER_MSG, Category.CATEGORY_ERROR, 4),
+    NOT_A_FOLDER(CIFSExceptionMessages.NOT_A_FOLDER_MSG, CATEGORY_USER_INPUT, 4),
     /**
      * The CIFS/SMB resource does not exist: %1$s
      */
-    NOT_FOUND(CIFSExceptionMessages.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
+    NOT_FOUND(CIFSExceptionMessages.NOT_FOUND_MSG, CATEGORY_USER_INPUT, 5),
     /**
      * Update denied for CIFS/SMB resource: %1$s
      */
-    UPDATE_DENIED(CIFSExceptionMessages.UPDATE_DENIED_MSG, Category.CATEGORY_ERROR, 6),
+    UPDATE_DENIED(CIFSExceptionMessages.UPDATE_DENIED_MSG, CATEGORY_USER_INPUT, 6),
     /**
      * Delete denied for CIFS/SMB resource: %1$s
      */
-    DELETE_DENIED(CIFSExceptionMessages.DELETE_DENIED_MSG, Category.CATEGORY_ERROR, 7),
+    DELETE_DENIED(CIFSExceptionMessages.DELETE_DENIED_MSG, CATEGORY_USER_INPUT, 7),
     /**
      * CIFS/SMB URL does not denote a file: %1$s
      */
-    NOT_A_FILE(CIFSExceptionMessages.NOT_A_FILE_MSG, Category.CATEGORY_ERROR, 8),
+    NOT_A_FILE(CIFSExceptionMessages.NOT_A_FILE_MSG, CATEGORY_USER_INPUT, 8),
     /**
      * Missing file name.
      */
-    MISSING_FILE_NAME(CIFSExceptionMessages.MISSING_FILE_NAME_MSG, Category.CATEGORY_ERROR, 12),
+    MISSING_FILE_NAME(CIFSExceptionMessages.MISSING_FILE_NAME_MSG, CATEGORY_USER_INPUT, 12),
     /**
      * Versioning not supported by CIFS/SMB file storage.
      */
-    VERSIONING_NOT_SUPPORTED(CIFSExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 13),
+    VERSIONING_NOT_SUPPORTED(CIFSExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, CATEGORY_USER_INPUT, 13),
 
     ;
 
