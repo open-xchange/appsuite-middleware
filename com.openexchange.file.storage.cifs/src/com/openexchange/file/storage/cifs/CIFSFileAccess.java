@@ -77,6 +77,7 @@ import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.Charsets;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -221,9 +222,12 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             {
                 final String fid = file.getId();
                 if (null == fid) {
-                    final String name = file.getFileName();
-                    if (null == name) {
-                        throw CIFSExceptionCodes.MISSING_FILE_NAME.create();
+                    String name = file.getFileName();
+                    if (isEmpty(name)) {
+                        name = file.getTitle();
+                        if (isEmpty(name)) {
+                            throw CIFSExceptionCodes.MISSING_FILE_NAME.create();
+                        }
                     }
                     id = name;
                     file.setId(id);
@@ -249,6 +253,19 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 smbFile.setLastModified(now);
             }
             smbFile.setReadWrite();
+            /*
+             * Check for comment
+             */
+            final String description = file.getDescription();
+            if (!isEmpty(description)) {
+                final SmbFileOutputStream outputStream = new SmbFileOutputStream(smbFile, false);
+                try {
+                    outputStream.write(description.getBytes(Charsets.ISO_8859_1));
+                    outputStream.flush();
+                } finally {
+                    outputStream.close();
+                }
+            }
             /*
              * Invalidate
              */
