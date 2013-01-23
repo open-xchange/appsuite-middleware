@@ -116,6 +116,11 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess, Warnin
     }
 
     @Override
+    public List<OXException> getAndFlushWarnings() {
+        return warningsAware.getAndFlushWarnings();
+    }
+
+    @Override
     public void addWarning(OXException warning) {
         warningsAware.addWarning(warning);
     }

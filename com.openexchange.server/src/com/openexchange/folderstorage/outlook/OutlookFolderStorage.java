@@ -2838,7 +2838,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     private static void addWarnings(final StorageParameters storageParameters, final WarningsAware warningsAware) {
-        final List<OXException> list = warningsAware.getWarnings();
+        final List<OXException> list = warningsAware.getAndFlushWarnings();
         if (null != list && !list.isEmpty()) {
             for (OXException warning : list) {
                 storageParameters.addWarning(warning);

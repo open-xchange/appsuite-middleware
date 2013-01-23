@@ -73,7 +73,14 @@ public class DefaultWarningsAware implements WarningsAware {
 
     @Override
     public List<OXException> getWarnings() {
-        return warnings;
+        return new ArrayList<OXException>(warnings);
+    }
+
+    @Override
+    public List<OXException> getAndFlushWarnings() {
+        final List<OXException> ret = new ArrayList<OXException>(warnings);
+        warnings.clear();
+        return ret;
     }
 
     @Override

@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
+ * @see WarningsAware
  */
 public interface FileStorageAccountAccess extends FileStorageResource {
 
