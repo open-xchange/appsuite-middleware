@@ -47,62 +47,45 @@
  *
  */
 
-package com.openexchange.indexedSearch.json;
+package com.openexchange.ajax.index.actions;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.indexedSearch.json.action.AbstractIndexAction;
-import com.openexchange.indexedSearch.json.action.IsIndexedAction;
-import com.openexchange.indexedSearch.json.action.PersonsAction;
-import com.openexchange.indexedSearch.json.action.SpotlightAction;
-import com.openexchange.indexedSearch.json.action.TopicsAction;
-import com.openexchange.server.ServiceLookup;
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+
 
 /**
- * {@link IndexActionFactory}
+ * {@link GeneralIndexRequest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexActionFactory implements AJAXActionServiceFactory {
+public class GeneralIndexRequest extends AbstractIndexRequest<GeneralIndexResponse> {
+    
+    private Parameter[] parameters;
 
-    private final Map<String, AbstractIndexAction> actions;
-
-    /**
-     * Initializes a new {@link IndexActionFactory}.
-     *
-     * @param services The service look-up
-     */
-    public IndexActionFactory(final ServiceLookup services, final ResultConverters registry) {
+    public GeneralIndexRequest(Parameter[] parameters) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractIndexAction>(2);
-
-        final AbstractIndexAction action = new com.openexchange.indexedSearch.json.action.SearchAction(services, registry);
-        actions.put(action.getAction(), action);
-
-        final AbstractIndexAction action2 = new IsIndexedAction(services, registry);
-        actions.put(action2.getAction(), action2);
-        
-        final AbstractIndexAction action3 = new SpotlightAction(services, registry);
-        actions.put(action3.getAction(), action3);
-        
-        final AbstractIndexAction action4 = new PersonsAction(services, registry);
-        actions.put(action4.getAction(), action4);
-        
-        final AbstractIndexAction action5 = new TopicsAction(services, registry);
-        actions.put(action5.getAction(), action5);
+        this.parameters = parameters;
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) {
-        return actions.get(action);
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        return parameters;
+    }
+
+    @Override
+    public AbstractAJAXParser<GeneralIndexResponse> getParser() {
+        return new GeneralIndexParser(true);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.index.actions;
 
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
@@ -69,13 +70,13 @@ public class GeneralIndexResponse extends AbstractAJAXResponse {
         super(response);
     }
     
-    public JSONObject getJSON() {
+    public JSONValue getJSON() {
         Object data = getData();
         if (data == null) {
             return null;
         }
         
-        return (JSONObject) data;
+        return (JSONValue) data;
     }
 
 }

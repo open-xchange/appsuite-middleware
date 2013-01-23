@@ -55,17 +55,17 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link PersonsAndTopicsRequest}
+ * {@link SpotlightRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class PersonsAndTopicsRequest extends AbstractIndexRequest<GeneralIndexResponse> {
+public class SpotlightRequest extends AbstractIndexRequest<GeneralIndexResponse> {
     
     private String searchTerm;
     private int maxPersons;
     private int maxTopics;
 
-    public PersonsAndTopicsRequest(String searchTerm, int maxPersons, int maxTopics) {
+    public SpotlightRequest(String searchTerm, int maxPersons, int maxTopics) {
         super();
         this.searchTerm = searchTerm;
         this.maxPersons = maxPersons;

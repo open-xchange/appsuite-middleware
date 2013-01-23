@@ -91,6 +91,8 @@ public enum SearchHandler {
     /**
      * 
      */
-    PERSONS_AND_TOPICS
+    PERSONS_AND_TOPICS,
+    SEARCH_FOR_PERSON, 
+    SEARCH_FOR_TOPIC
 
 }

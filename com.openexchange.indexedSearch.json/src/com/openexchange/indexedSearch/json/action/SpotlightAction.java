@@ -87,20 +87,20 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link PersonsAndTopicsAction}
+ * {@link SpotlightAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class PersonsAndTopicsAction extends AbstractIndexAction {
+public class SpotlightAction extends AbstractIndexAction {
     
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PersonsAndTopicsAction.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SpotlightAction.class);
 
     /**
-     * Initializes a new {@link PersonsAndTopicsAction}.
+     * Initializes a new {@link SpotlightAction}.
      * @param services
      * @param registry
      */
-    public PersonsAndTopicsAction(ServiceLookup services, ResultConverters registry) {
+    public SpotlightAction(ServiceLookup services, ResultConverters registry) {
         super(services, registry);
     }
 
