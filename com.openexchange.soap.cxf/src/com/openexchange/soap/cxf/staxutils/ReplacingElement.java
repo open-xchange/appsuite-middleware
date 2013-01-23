@@ -63,6 +63,7 @@ class ReplacingElement {
     private QName expected;
     private XmlSchemaElement xmlSchema;
     private int childPosition = 0;
+    private boolean onlyWithName = false;
 
     public ReplacingElement(QName original) {
         super();
@@ -101,6 +102,14 @@ class ReplacingElement {
 
     public void resetChildPosition() {
         childPosition = 0;
+    }
+
+    public boolean isOnlyWithName() {
+        return onlyWithName;
+    }
+
+    public void setOnlyWithName() {
+        this.onlyWithName = true;
     }
 
     @Override

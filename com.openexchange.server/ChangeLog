@@ -2,6 +2,7 @@
 
  - Fix for bug 24195: Added extension package for host name service configured through config cascade.
  - Fix for bug 23938: Corrected default path in configuration files not to contain "groupware" anymore.
+ - Fix for bug 24484: If some attribute can be assigned through its attribute name, use attribute names for all other attributes, too.
 
 * 2013-01-23 - thorben.betten@open-xchange.com
 
