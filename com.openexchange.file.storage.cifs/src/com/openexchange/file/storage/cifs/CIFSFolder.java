@@ -148,8 +148,12 @@ public final class CIFSFolder extends DefaultFileStorageFolder implements TypeAw
                 /*
                  * Check permission
                  */
-                
-                
+                if (!smbFolder.canRead()) {
+                    ownPermission.setReadPermission(FileStoragePermission.NO_PERMISSIONS);
+                }
+                if (!smbFolder.canWrite()) {
+                    ownPermission.setReadPermission(FileStoragePermission.NO_PERMISSIONS);
+                }
                 /*
                  * Iterate headers
                  */
