@@ -158,7 +158,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -195,7 +195,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -261,7 +261,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -304,7 +304,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -334,7 +334,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -375,7 +375,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -427,7 +427,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -477,7 +477,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -523,7 +523,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -568,7 +568,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -631,7 +631,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -696,7 +696,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -818,7 +818,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {

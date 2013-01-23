@@ -123,7 +123,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         } catch (final SmbAuthException e) {
             throw FileStorageExceptionCodes.LOGIN_FAILED.create(e, login, rootUrl, CIFSConstants.ID);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -154,7 +154,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         } catch (final SmbAuthException e) {
             throw FileStorageExceptionCodes.LOGIN_FAILED.create(e, login, rootUrl, CIFSConstants.ID);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -339,7 +339,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         } catch (final SmbAuthException e) {
             throw FileStorageExceptionCodes.LOGIN_FAILED.create(e, login, rootUrl, CIFSConstants.ID);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -475,7 +475,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         } catch (final SmbAuthException e) {
             throw FileStorageExceptionCodes.LOGIN_FAILED.create(e, login, rootUrl, CIFSConstants.ID);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -514,7 +514,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -600,7 +600,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         } catch (final SmbAuthException e) {
             throw FileStorageExceptionCodes.LOGIN_FAILED.create(e, login, rootUrl, CIFSConstants.ID);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -659,7 +659,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -706,7 +706,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         } catch (final SmbAuthException e) {
             throw FileStorageExceptionCodes.LOGIN_FAILED.create(e, login, rootUrl, CIFSConstants.ID);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -756,7 +756,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         } catch (final SmbAuthException e) {
             throw FileStorageExceptionCodes.LOGIN_FAILED.create(e, login, rootUrl, CIFSConstants.ID);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
