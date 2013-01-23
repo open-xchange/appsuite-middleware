@@ -93,6 +93,15 @@ public class DefaultWarningsAware implements WarningsAware {
     /**
      * Initializes a new {@link DefaultWarningsAware}.
      */
+    public DefaultWarningsAware() {
+        this(false);
+    }
+
+    /**
+     * Initializes a new {@link DefaultWarningsAware}.
+     * 
+     * @param concurrent Whether concurrent access is supposed to be supported or not
+     */
     public DefaultWarningsAware(final boolean concurrent) {
         super();
         warnings = concurrent ? new CopyOnWriteArrayList<OXException>() : new ArrayList<OXException>(4);
