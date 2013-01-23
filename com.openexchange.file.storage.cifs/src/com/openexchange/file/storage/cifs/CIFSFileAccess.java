@@ -380,8 +380,8 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     private static final SmbFileFilter FILE_FILTER = new SmbFileFilter() {
 
         @Override
-        public boolean accept(SmbFile file) throws SmbException {
-            return file.isDirectory();
+        public boolean accept(final SmbFile file) throws SmbException {
+            return file.isFile();
         }
     };
 
@@ -404,9 +404,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              */
             final SmbFile[] subFiles = smbFolder.listFiles(FILE_FILTER);
             for (final SmbFile subFile : subFiles) {
-                if (subFile.isFile()) {
-                    subFile.delete();
-                }
+                subFile.delete();
             }
             /*
              * Invalidate
@@ -600,9 +598,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             }
             final List<File> files = new ArrayList<File>(subFiles.length);
             for (final SmbFile subFile : subFiles) {
-                if (subFile.isFile()) {
-                    files.add(new CIFSFile(fid, subFile.getName(), session.getUserId()).parseSmbFile(subFile, fields));
-                }
+                files.add(new CIFSFile(fid, subFile.getName(), session.getUserId()).parseSmbFile(subFile, fields));
             }
             /*
              * Return list
