@@ -261,6 +261,38 @@ public class PayloadTree implements VisitablePayload {
 
     }
 
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((root == null) ? 0 : root.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof PayloadTree))
+            return false;
+        PayloadTree other = (PayloadTree) obj;
+        if (root == null) {
+            if (other.root != null)
+                return false;
+        } else if (!root.equals(other.root))
+            return false;
+        return true;
+    }
+
     @Override
     public String toString() {
         String stringRepresentation = PayloadTree.class.getSimpleName() + "@" + hashCode();
