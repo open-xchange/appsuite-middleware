@@ -94,7 +94,9 @@ public class TrackerAvailabilityChecker<S> extends ServiceTracker<S, S> implemen
 
     @Override
     public void start() {
-        open();
+        if (available.compareAndSet(true, false)) {
+            open();
+        }
     }
 
     @Override
