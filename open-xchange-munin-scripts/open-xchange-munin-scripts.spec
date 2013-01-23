@@ -1,21 +1,21 @@
 
-Name:           open-xchange-munin-scripts
-BuildArch:	noarch
+Name:          open-xchange-munin-scripts
+BuildArch:	   noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant
-BuildRequires:  ant-nodeps
-BuildRequires:  java-devel >= 1.6.0
-Version:	@OXVERSION@
-%define         ox_release 5
-Release:        %{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
-License:        GNU General Public License (GPL)
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:            http://www.open-xchange.com/
-Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        Open-Xchange Munin scripts
-Requires:	open-xchange-core >= @OXVERSION@
-Requires:       munin-node
+BuildRequires: ant
+BuildRequires: ant-nodeps
+BuildRequires: java-devel >= 1.6.0
+Version:	   @OXVERSION@
+%define        ox_release 5
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
+License:       GNU General Public License (GPL)
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+URL:           http://www.open-xchange.com/
+Source:        %{name}_%{version}.orig.tar.bz2
+Summary:       Open-Xchange Munin scripts
+Requires:	   open-xchange-core >= @OXVERSION@
+Requires:      munin-node
 
 %description
 Munin is a highly flexible and powerful solution used to create graphs of
