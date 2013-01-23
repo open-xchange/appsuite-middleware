@@ -368,6 +368,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
                 metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()), false);
             } catch (ImageProcessingException e) {
                 LOG.warn("error getting metadata", e);
+                return null;
             }
             return ImageIO.read(managedFile.getInputStream());
         } catch (OXException e) {
