@@ -117,11 +117,8 @@ public class GenericMethodSupport {
     private long coerceToLong(final Object o) {
         if (o instanceof Number) {
             return ((Number) o).longValue();
-        } else if (o instanceof String) {
-            return Long.parseLong((String) o);
-        } else {
-            return coerceToLong(o.toString());
         }
+        return Long.parseLong(o.toString());
     }
 
 }
