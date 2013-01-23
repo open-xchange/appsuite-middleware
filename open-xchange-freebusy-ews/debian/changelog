@@ -1,3 +1,9 @@
+open-xchange-freebusy-ews (7.0.1-0) unstable; urgency=low
+
+  * prepare for 7.0.1
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Thu, 10 Jan 2013 10:09:25 +0100
+
 open-xchange-freebusy-ews (7.0.0-0) unstable; urgency=low
 
   * prepare for 7.0.0 release
