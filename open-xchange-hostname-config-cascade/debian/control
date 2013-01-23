@@ -1,0 +1,22 @@
+Source: open-xchange-hostname-config-cascade
+Section: web
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-hostname-config-cascade
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-config-cascade-hostname (<< 6.21.0-0)
+Conflicts: open-xchange-config-cascade-hostname (<< 6.21.0-0), open-xchange-hostname-ldap
+Description: This extension provides a HostnameService using information from the config cascade
+ Using this extension the hostname for contexts can be configured using the config cascade.
+
+###### http://wiki.debian.org/Renaming_a_Package #####
+Package: open-xchange-config-cascade-hostname
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-hostname-config-cascade
+Section: oldlibs
+Description: transitional dummy package

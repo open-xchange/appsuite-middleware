@@ -49,9 +49,7 @@
 
 package com.openexchange.file.storage.cifs.cache;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import jcifs.smb.SmbFile;
@@ -98,15 +96,12 @@ public final class SmbFileMap {
      * Removes elapsed entries from map.
      */
     public void shrink() {
-        final List<String> removeKeys = new ArrayList<String>(16);
         final long minStamp = System.currentTimeMillis() - maxLifeMillis;
-        for (final Entry<String, Wrapper> entry : map.entrySet()) {
-            final Wrapper wrapper = entry.getValue();
-            if (wrapper.getStamp() < minStamp) {
-                removeKeys.add(entry.getKey());
+        for (final Iterator<Wrapper> it = map.values().iterator(); it.hasNext();) {
+            if (it.next().getStamp() < minStamp) {
+                it.remove();
             }
         }
-        map.keySet().removeAll(removeKeys);
     }
 
     /**

@@ -54,8 +54,11 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link WarningsAware} - Aware of possible warnings.
+ * <p>
+ * This is an optional interface that may be implemented by {@link FileStorageAccountAccess} subclasses.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @see DefaultWarningsAware
  */
 public interface WarningsAware {
 
@@ -65,6 +68,13 @@ public interface WarningsAware {
      * @return The optional warnings
      */
     List<OXException> getWarnings();
+
+    /**
+     * Gets the optional warnings and flushes them; meaning subsequent invocations would return an empty list.
+     * 
+     * @return The optional warnings
+     */
+    List<OXException> getAndFlushWarnings();
 
     /**
      * Adds given warning.

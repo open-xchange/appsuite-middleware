@@ -102,7 +102,7 @@ public class CachingLoader implements PublicationDataLoaderService {
         if(cache == null) {
             return;
         }
-        cache.put(new PublicationKey(publication), (Serializable) loaded, modifyAttributes(cache.getDefaultElementAttributes()));
+        cache.put(new PublicationKey(publication), (Serializable) loaded, modifyAttributes(cache.getDefaultElementAttributes()), false);
     }
 
     private ElementAttributes modifyAttributes(final ElementAttributes attributes) {

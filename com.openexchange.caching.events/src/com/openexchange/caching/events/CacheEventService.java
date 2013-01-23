@@ -59,9 +59,10 @@ public interface CacheEventService {
     /**
      * Publishes a cache event to the registered listeners.
      * 
+     * @param sender The sender of the event 
      * @param event The cache event
      */
-    void notify(CacheEvent event);
+    void notify(Object sender, CacheEvent event);
 
     /**
      * Registers a cache listener to receive cache events for all regions.  

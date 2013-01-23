@@ -82,27 +82,16 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess, Warnin
      */
 
     private final FileStorageAccount account;
-
     private final Session session;
-
     private final String username;
-
     private final String password;
-
     private final String domain;
-
     private final AtomicBoolean connected;
-
     private volatile String rootUrl;
-
     private volatile NtlmPasswordAuthentication auth;
-
     private volatile FileStorageFolderAccess folderAccess;
-
     private volatile FileStorageFileAccess fileAccess;
-
     private final FileStorageService service;
-
     private final WarningsAware warningsAware;
 
     /**
@@ -124,6 +113,11 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess, Warnin
     @Override
     public List<OXException> getWarnings() {
         return warningsAware.getWarnings();
+    }
+
+    @Override
+    public List<OXException> getAndFlushWarnings() {
+        return warningsAware.getAndFlushWarnings();
     }
 
     @Override

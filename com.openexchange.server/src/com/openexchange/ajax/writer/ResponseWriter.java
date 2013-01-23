@@ -108,7 +108,10 @@ public final class ResponseWriter {
                 b = includeStackTraceOnError;
                 if (null == b) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    b = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.ajax.response.includeStackTraceOnError", false));
+                    if (null == service) {
+                        return false;
+                    }
+                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.ajax.response.includeStackTraceOnError", false));
                     includeStackTraceOnError = b;
                 }
             }
@@ -487,7 +490,8 @@ public final class ResponseWriter {
      * @throws IOException If an I/O error occurs during writing
      */
     public static void write(final Response response, final Writer writer) throws JSONException, IOException {
-        write(response, writer, response.getLocale() == null ? DEFAULT_LOCALE : response.getLocale());
+        final Locale locale = response.getLocale();
+        write(response, writer, locale == null ? DEFAULT_LOCALE : locale);
     }
 
     /**

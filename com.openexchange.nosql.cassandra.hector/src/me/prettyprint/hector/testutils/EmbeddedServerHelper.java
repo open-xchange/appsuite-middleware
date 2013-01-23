@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.db.commitlog.CommitLog;
 import org.apache.cassandra.io.util.FileUtils;
-import org.apache.cassandra.service.CassandraDaemon;
+import org.apache.cassandra.thrift.CassandraDaemon;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,7 +163,12 @@ public class EmbeddedServerHelper {
 
   public static void mkdirs()
   {
-          DatabaseDescriptor.createAllDirectories();
+          try {
+            DatabaseDescriptor.createAllDirectories();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
   }  
   
   public static void loadSchemaFromYaml()  

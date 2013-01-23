@@ -1,2 +1,0 @@
-munin-node-configure --libdir $(pwd)/ox_munin_scripts/ --shell | sh
-/etc/init.d/munin-node restart

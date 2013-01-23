@@ -1,3 +1,14 @@
+* 2013-01-23 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24195: Added extension package for host name service configured through config cascade.
+
+* 2013-01-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24557: Proper byte2char conversion
+ - Fix for bug 23576: Support for comment for CIFS connector (if no file data is available)
+ - Fix for bug 23578: Fixed file filter expression
+ - Fix for bug 24556: Added null guard
+
 * 2013-01-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 24553: Escape "</" character sequence with "<\/"
