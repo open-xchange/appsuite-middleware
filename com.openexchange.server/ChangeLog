@@ -1,3 +1,7 @@
+* 2013-01-23 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24195: Added extension package for host name service configured through config cascade.
+
 * 2013-01-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 24557: Proper byte2char conversion

@@ -51,7 +51,7 @@ package com.openexchange.config.cascade.hostname;
 
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 
 /**
@@ -70,13 +70,13 @@ public class ConfigurableHostnameService implements HostnameService {
         this.configViews = configViews;
     }
 
+    @Override
     public String getHostname(final int userId, final int contextId) {
         try {
             final ConfigView view = configViews.getView(userId, contextId);
             return view.get(HOSTNAME_KEY, String.class);
-        } catch (final AbstractOXException e) {
+        } catch (OXException e) {
             return null;
         }
     }
-
 }

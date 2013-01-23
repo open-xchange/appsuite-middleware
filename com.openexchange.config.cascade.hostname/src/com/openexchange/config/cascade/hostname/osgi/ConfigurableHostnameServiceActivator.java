@@ -52,7 +52,7 @@ package com.openexchange.config.cascade.hostname.osgi;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.hostname.ConfigurableHostnameService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link ConfigurableHostnameServiceActivator}
