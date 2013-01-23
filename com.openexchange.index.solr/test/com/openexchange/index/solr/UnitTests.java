@@ -69,7 +69,8 @@ import org.junit.runners.Suite.SuiteClasses;
     MailSolrIndexAccessTest.class,
     AddressComparatorTest.class,
     XMLBasedFieldConfigurationTest.class,
-    SolrMailDocumentConverterTest.class
+    SolrMailDocumentConverterTest.class,
+    SolrAttachmentDocumentConverterTest.class
 })
 
 public class UnitTests {

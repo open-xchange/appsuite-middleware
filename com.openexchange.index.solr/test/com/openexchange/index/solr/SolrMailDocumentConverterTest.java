@@ -625,6 +625,21 @@ public class SolrMailDocumentConverterTest {
         Assert.assertTrue("Missing value", from.contains("blubb3"));
     }
     
+    @Test
+    public void testNullValues() throws Exception {
+        SolrMailDocumentConverter converter = new SolrMailDocumentConverter(config);
+        IndexDocument<MailMessage> indexDocument = converter.convert(new SolrDocument(), null);
+        Assert.assertNotNull(indexDocument);
+        Assert.assertNotNull(indexDocument.getObject());
+        Assert.assertNull(indexDocument.getHighlighting());
+        
+        MailMessage mail = new IDMailMessage();
+        ContentAwareMailMessage toConvert = new ContentAwareMailMessage("This is the body", mail);
+        SolrInputDocument inputDocument = converter.convert(1, 2, new StandardIndexDocument<MailMessage>(toConvert));
+        Assert.assertNotNull(inputDocument);
+        Assert.assertNotNull(inputDocument.getFieldValue("uuid"));
+    }
+    
     private void checkAddresses(List<Object> plainText, InternetAddress[] addrs) {
         Assert.assertEquals("Wrong array size", plainText.size(), addrs.length);
         for (int i = 0; i < addrs.length; i++) {

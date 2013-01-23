@@ -166,9 +166,6 @@ public class SolrAttachmentDocumentConverter extends AbstractDocumentConverter<A
         if (objectId == null) {
             throw new IllegalArgumentException("Id must not be null!");
         }
-        if (file == null) {
-            throw new IllegalArgumentException("File must not be null!");
-        }
 
         setFieldInDocument(inputDocument, AttachmentIndexField.UUID, uuid);
         setFieldInDocument(inputDocument, AttachmentIndexField.MODULE, new Integer(module));
@@ -181,12 +178,15 @@ public class SolrAttachmentDocumentConverter extends AbstractDocumentConverter<A
         setFieldInDocument(inputDocument, AttachmentIndexField.FILE_NAME, fileName);
         setFieldInDocument(inputDocument, AttachmentIndexField.MIME_TYPE, mimeType);
         setFieldInDocument(inputDocument, AttachmentIndexField.MD5_SUM, md5Sum);
-        TextXtractService xtractService = Services.getService(TextXtractService.class);
-        try {
-            String extractedText = xtractService.extractFrom(file, mimeType);
-            setFieldInDocument(inputDocument, AttachmentIndexField.CONTENT, extractedText);
-        } catch (Throwable t) {
-            LOG.warn("Error during text extraction. Skipping attachments content...", t);
+        
+        if (file != null) {
+            TextXtractService xtractService = Services.getService(TextXtractService.class);
+            try {
+                String extractedText = xtractService.extractFrom(file, mimeType);
+                setFieldInDocument(inputDocument, AttachmentIndexField.CONTENT, extractedText);
+            } catch (Throwable t) {
+                LOG.warn("Error during text extraction. Skipping attachments content...", t);
+            }
         }
 
         return inputDocument;
