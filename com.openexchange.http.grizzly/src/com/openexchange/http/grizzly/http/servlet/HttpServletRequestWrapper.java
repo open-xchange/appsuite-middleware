@@ -319,7 +319,7 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
 
     @Override
     public boolean isSecure() {
-        return isSecure;
+        return delegate.isSecure();
     }
 
     @Override

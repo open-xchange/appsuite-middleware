@@ -146,6 +146,8 @@ public class Presence extends Stanza {
         if (other == null) {
             throw new IllegalArgumentException("Other Presence must not be null.");
         }
+        super.setFrom(other.getFrom());
+        super.setTo(other.getTo());
         this.error = other.error;
         this.message = other.message;
         this.payloads = other.deepCopyPayloads();
