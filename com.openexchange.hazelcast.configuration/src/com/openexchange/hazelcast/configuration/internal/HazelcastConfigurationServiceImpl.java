@@ -23,6 +23,7 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.tools.strings.TimeSpanParser;
 
@@ -93,7 +94,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
          */
         String interfaces = configService.getProperty("com.openexchange.hazelcast.interfaces");
         if (false == isEmpty(interfaces)) {
-            String[] ips = interfaces.split(" *, *");
+            String[] ips = Strings.splitByComma(interfaces);
             if (null != ips && 0 < ips.length) {
                 config.getNetworkConfig().getInterfaces().setInterfaces(Arrays.asList(ips)).setEnabled(true);
             }
