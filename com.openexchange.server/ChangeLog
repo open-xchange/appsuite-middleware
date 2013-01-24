@@ -1,3 +1,7 @@
+* 2013-01-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24535: Correctly recognize e-mail address when preparing database statement   
+ 
 * 2013-01-23 - marcus.klein@open-xchange.com
 
  - Fix for bug 24195: Added extension package for host name service configured through config cascade.

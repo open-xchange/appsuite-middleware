@@ -50,7 +50,6 @@
 package com.openexchange.contact.storage.rdb.mapping;
 
 import java.util.EnumMap;
-
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.internal.DistListMember;
 import com.openexchange.exception.OXException;
@@ -256,7 +255,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 
             @Override
             public boolean isSet(DistListMember member) {
-                return member.containsEmailfield();
+                return member.containsEmailaddress();
             }
 
             @Override
