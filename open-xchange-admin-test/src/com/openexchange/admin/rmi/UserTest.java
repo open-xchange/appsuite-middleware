@@ -407,7 +407,7 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final User usr = new User();
-        usr.setId(Integer.valueOf(2));
+        usr.setId(1); // Should be the admin id
         
         // enable and test it.
         UserModuleAccess access = oxu.getModuleAccess(ctx, usr, cred);
