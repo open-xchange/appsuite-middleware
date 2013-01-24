@@ -134,7 +134,7 @@ import com.openexchange.tools.versit.values.RecurrenceValue.Weekday;
  * <p>
  * <a href="http://tools.ietf.org/html/rfc2426">vCard MIME Directory Profile</a>
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Victor's parser for OX6)
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Viktor's parser for OX6)
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixing and refactoring)
  */
 public class OXContainerConverter {
