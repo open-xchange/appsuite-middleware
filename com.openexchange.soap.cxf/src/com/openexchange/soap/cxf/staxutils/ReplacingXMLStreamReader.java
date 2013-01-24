@@ -75,13 +75,11 @@ import org.apache.ws.commons.schema.XmlSchemaType;
  */
 public class ReplacingXMLStreamReader extends StreamReaderDelegate {
 
-    private final BindingOperationInfo bop;
     private final Stack<ReplacingElement> stack = new Stack<ReplacingElement>();
     private ReplacingElement current;
 
     public ReplacingXMLStreamReader(BindingOperationInfo bop, XMLStreamReader reader) {
         super(reader);
-        this.bop = bop;
         QName name = super.getName();
         ReplacingElement method = new ReplacingElement(name, name);
         stack.push(method);
@@ -171,8 +169,15 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
         // First try to use the given type name. But with PHP this type name is "Struct".
         if (null != name) {
             retval = byName(parent, seq.getItems(), name);
+            // If there is a single element that can be assigned through its name, then keep this scheme for the current hierarchy level of
+            // the sent XML SOAP request. This indicates, the client is able to sent correctly named elements and not only generic ones.
+            // Force him to use correctly named elements here. Otherwise a wrong order causes the wrong attribute to be assigned with wrong
+            // values using the byPosition() method. See bug 24484.
+            if (null != retval) {
+                parent.setOnlyWithName();
+            }
         }
-        if (null != retval || (null != name && strict)) {
+        if (null != retval || (null != name && strict) || parent.isOnlyWithName()) {
             return retval;
         }
         // If no child is found using the type name, fall back to child position because of PHP using "Struct" as type name.

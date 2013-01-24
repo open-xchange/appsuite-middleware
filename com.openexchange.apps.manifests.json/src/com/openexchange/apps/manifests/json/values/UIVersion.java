@@ -46,21 +46,33 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.rmi;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
+package com.openexchange.apps.manifests.json.values;
 
-import org.junit.Test;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.apps.manifests.ComputedServerConfigValueService;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
-public class AdminCoreTest extends AbstractTest {
 
-    @Test
-    public void testAllPluginsLoaded() throws MalformedURLException, RemoteException, NotBoundException {
-        final OXAdminCoreInterface oxadmincore = (OXAdminCoreInterface) Naming.lookup(getRMIHostUrl()+ OXAdminCoreInterface.RMI_NAME);
-        System.out.println(oxadmincore.allPluginsLoaded());
+
+/**
+ * {@link UIVersion}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class UIVersion implements ComputedServerConfigValueService {
+    
+    public static String UIVERSION = "";
+    
+    @Override
+    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
+
+        if (!serverConfig.has("version")) {
+            serverConfig.put("version", UIVERSION);
+        }        
     }
 
 }

@@ -1,6 +1,20 @@
+* 2013-01-24 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24528: Passing jsessionid as a fragment parameter to the web frontend.
+
+* 2013-01-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24432: Avoid closing InputStream too early
+
+* 2013-01-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24535: Correctly recognize e-mail address when preparing database statement   
+ 
 * 2013-01-23 - marcus.klein@open-xchange.com
 
  - Fix for bug 24195: Added extension package for host name service configured through config cascade.
+ - Fix for bug 23938: Corrected default path in configuration files not to contain "groupware" anymore.
+ - Fix for bug 24484: If some attribute can be assigned through its attribute name, use attribute names for all other attributes, too.
 
 * 2013-01-23 - thorben.betten@open-xchange.com
 

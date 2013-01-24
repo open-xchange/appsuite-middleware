@@ -69,6 +69,8 @@ import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.http.HttpManagersInit;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.events.CacheEventService;
+import com.openexchange.caching.events.internal.CacheEventServiceImpl;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
 import com.openexchange.calendar.CalendarReminderDelete;
@@ -801,7 +803,11 @@ public final class Init {
 
     public static void startAndInjectCache() throws OXException {
         if (null == TestServiceRegistry.getInstance().getService(CacheService.class)) {
+            CacheEventService cacheEventService = new CacheEventServiceImpl();
+            services.put(CacheEventService.class, cacheEventService);
+            TestServiceRegistry.getInstance().addService(CacheEventService.class, cacheEventService);
             JCSCacheServiceInit.initInstance();
+            JCSCacheServiceInit.getInstance().setCacheEventService((CacheEventService)services.get(CacheEventService.class));
             JCSCacheServiceInit.getInstance().start((ConfigurationService) services.get(ConfigurationService.class));
             final CacheService cache = JCSCacheService.getInstance();
             services.put(CacheService.class, cache);

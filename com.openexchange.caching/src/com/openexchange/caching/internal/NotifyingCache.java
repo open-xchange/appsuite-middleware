@@ -47,11 +47,16 @@
  *
  */
 
-package com.openexchange.caching;
+package com.openexchange.caching.internal;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheElement;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheStatistics;
+import com.openexchange.caching.ElementAttributes;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
@@ -296,6 +301,9 @@ public class NotifyingCache implements Cache, CacheListener {
     @Override
     public void onEvent(Object sender, CacheEvent cacheEvent) {
         if (sender != this && null != cacheEvent) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("onEvent: " + cacheEvent);
+            }
             try {
                 switch (cacheEvent.getOperation()) {
                 case INVALIDATE_GROUP:
@@ -319,7 +327,11 @@ public class NotifyingCache implements Cache, CacheListener {
 
     private void fireInvalidateGroup(String groupName) {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
-            eventService.notify(this, CacheEvent.INVALIDATE_GROUP(region, groupName));
+            CacheEvent event = CacheEvent.INVALIDATE_GROUP(region, groupName);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("fireInvalidateGroup: " + event);
+            }
+            eventService.notify(this, event);
         }
     }
     
@@ -329,7 +341,11 @@ public class NotifyingCache implements Cache, CacheListener {
 
     private void fireInvalidate(Serializable key, String groupName) {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
-            eventService.notify(this, CacheEvent.INVALIDATE(region, groupName, key));
+            CacheEvent event = CacheEvent.INVALIDATE(region, groupName, key);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("fireInvalidate: " + event);
+            }
+            eventService.notify(this, event);
         }
     }
 

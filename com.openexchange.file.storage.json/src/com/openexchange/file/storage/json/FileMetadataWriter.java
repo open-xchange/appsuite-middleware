@@ -53,8 +53,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,6 +61,8 @@ import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.meta.FileFieldGet;
+import com.openexchange.java.Strings;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -84,7 +84,7 @@ public class FileMetadataWriter {
     protected static final JSONHandler JSON = new JSONHandler();
 
     public JSONArray write(final SearchIterator<File> files, final List<File.Field> columns, final TimeZone timeZone) throws OXException {
-        final JSONArray array = new JSONArray();
+        final JSONArray array = new JSONArray(32);
         while (files.hasNext()) {
             array.put(writeArray(files.next(), columns, timeZone));
         }
@@ -93,7 +93,7 @@ public class FileMetadataWriter {
     }
 
     public JSONArray writeArray(final File f, final List<File.Field> columns, final TimeZone tz) {
-        final JSONArray array = new JSONArray();
+        final JSONArray array = new JSONArray(columns.size());
         for (final Field field : columns) {
             array.put( writeAttribute(f, field, tz));
         }
@@ -106,16 +106,20 @@ public class FileMetadataWriter {
     }
 
 
-    public static class JSONHandler extends AbstractFileFieldHandler {
+    private static class JSONHandler extends AbstractFileFieldHandler {
 
         private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
         private final FileFieldGet get = new FileFieldGet();
 
+        protected JSONHandler() {
+            super();
+        }
+
         @Override
         public Object handle(final Field field, final Object... args) {
             final Object value = field.doSwitch(get, args);
-            if (File.Field.FILE_MIMETYPE.equals(field)) {
+            if (File.Field.FILE_MIMETYPE == field) {
                 if (null == value) {
                     return value;
                 }
@@ -178,7 +182,6 @@ public class FileMetadataWriter {
 
     }
 
-
     public JSONObject write(final File file, final TimeZone timezone) {
         return File.Field.inject(new AbstractFileFieldHandler() {
 
@@ -195,4 +198,5 @@ public class FileMetadataWriter {
 
         }, new JSONObject());
     }
+
 }

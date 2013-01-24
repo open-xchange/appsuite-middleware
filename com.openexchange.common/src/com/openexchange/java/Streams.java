@@ -97,6 +97,36 @@ public class Streams {
     }
 
     /**
+     * Creates an appropriate <tt>ByteArrayInputStream</tt> carrying given <tt>ByteArrayOutputStream</tt>'s valid bytes.
+     *
+     * @param baos The <tt>ByteArrayOutputStream</tt> instance
+     * @return The associated <tt>ByteArrayInputStream</tt> instance
+     */
+    public static ByteArrayInputStream asInputStream(final ByteArrayOutputStream baos) {
+        if (null == baos) {
+            return null;
+        }
+        if (baos instanceof UnsynchronizedByteArrayOutputStream) {
+            return ((UnsynchronizedByteArrayOutputStream) baos).toByteArrayInputStream();
+        }
+        return new UnsynchronizedByteArrayInputStream(baos.toByteArray());
+    }
+
+    /**
+     * Creates an appropriate <tt>ByteArrayInputStream</tt> carrying given <tt>InputStream</tt>'s bytes.
+     * 
+     * @param in The <tt>InputStream</tt> instance
+     * @return The associated <tt>ByteArrayInputStream</tt> instance
+     * @throws IOException If an I/O error occurs
+     */
+    public static ByteArrayInputStream asInputStream(final InputStream in) throws IOException {
+        if (null == in) {
+            return null;
+        }
+        return newByteArrayInputStream(in);
+    }
+
+    /**
      * Writes specified input stream's content to a <code>ByteArrayOutputStream</code> array.
      *
      * @param is The input stream to read from
@@ -150,6 +180,7 @@ public class Streams {
      * @param s The string to read from
      * @return The reader
      */
+    @SuppressWarnings("resource")
     public static Reader newStringReader(final String s) {
         return null == s ? null : new UnsynchronizedStringReader(s);
     }
@@ -202,7 +233,18 @@ public class Streams {
      * @throws IOException If an I/O error occurs
      */
     public static ByteArrayInputStream newByteArrayInputStream(final InputStream inputStream) throws IOException {
-        return new UnsynchronizedByteArrayInputStream(stream2bytes(inputStream));
+        try {
+            @SuppressWarnings("resource")
+            final UnsynchronizedByteArrayOutputStream bos = new UnsynchronizedByteArrayOutputStream(4096);
+            final int buflen = 2048;
+            final byte[] buf = new byte[buflen];
+            for (int read; (read = inputStream.read(buf, 0, buflen)) > 0;) {
+                bos.write(buf, 0, read);
+            }
+            return bos.toByteArrayInputStream();
+        } finally {
+            close(inputStream);
+        }
     }
 
     /**

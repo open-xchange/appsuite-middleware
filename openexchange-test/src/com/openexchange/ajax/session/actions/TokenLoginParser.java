@@ -74,7 +74,7 @@ public final class TokenLoginParser extends AbstractRedirectParser<TokenLoginRes
     protected TokenLoginResponse createResponse(String location) throws JSONException {
         int fragIndex = location.indexOf('#');
         if (-1 == fragIndex) {
-            return new TokenLoginResponse(location, clientToken, null, null, -1, null, false);
+            return new TokenLoginResponse(location, null, clientToken, null, null, -1, null, false);
         }
         String path = location.substring(0, fragIndex);
         String[] params = location.substring(fragIndex + 1).split("&");
@@ -104,6 +104,6 @@ public final class TokenLoginParser extends AbstractRedirectParser<TokenLoginRes
         } else {
             store = Boolean.parseBoolean(booleanValue);
         }
-        return new TokenLoginResponse(path, clientToken, map.get(SERVER_TOKEN), map.get(PARAMETER_USER), userId, map.get("language"), store);
+        return new TokenLoginResponse(path, map.get("jsessionid"), clientToken, map.get(SERVER_TOKEN), map.get(PARAMETER_USER), userId, map.get("language"), store);
     }
 }

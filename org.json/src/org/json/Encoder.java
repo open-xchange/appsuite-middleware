@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,43 +46,59 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.rmi;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
+package org.json;
 
-import org.junit.Test;
+import com.fasterxml.jackson.core.io.JsonStringEncoder;
 
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+/**
+ * {@link Encoder} - Helper class used for efficient encoding of JSON String values (including JSON field names) into Strings or UTF-8 byte
+ * arrays.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class Encoder {
 
-public class TaskMgmtTest extends AbstractTest {
+    private static final Encoder INSTANCE = new Encoder();
 
-    @Test
-    public void testGetTaskResultsContextCredentialsInt() throws MalformedURLException, RemoteException, NotBoundException, Exception {
-        final OXTaskMgmtInterface oxtask = getTaskClient();
-        final Credentials cred = DummyCredentials();
-        final Context ctx = getTestContextObject(1, 50);
-
-        oxtask.getTaskResults(ctx, cred, 1);
+    /**
+     * Gets the instance
+     * 
+     * @return The instance
+     */
+    public static Encoder getInstance() {
+        return INSTANCE;
     }
 
-    @Test
-    public void testGetJobList() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, InvalidCredentialsException, StorageException, Exception {
-        final OXTaskMgmtInterface oxtask = getTaskClient();
-        final Credentials cred = DummyCredentials();
-        final Context ctx = getTestContextObject(1, 50);
+    private final JsonStringEncoder encoder;
 
-        System.out.println(oxtask.getJobList(ctx, cred));
+    /**
+     * Initializes a new {@link Encoder}.
+     */
+    private Encoder() {
+        super();
+        encoder = JsonStringEncoder.getInstance();
     }
 
-    private OXTaskMgmtInterface getTaskClient() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXTaskMgmtInterface) Naming.lookup(getRMIHostUrl()+ OXTaskMgmtInterface.RMI_NAME);
+    /**
+     * Method that will quote text contents using JSON standard quoting, and return results as a character array
+     */
+    public char[] quoteAsString(String input) {
+        return encoder.quoteAsString(input);
+    }
+
+    /**
+     * Will quote given JSON String value using standard quoting, encode results as UTF-8, and return result as a byte array.
+     */
+    public byte[] quoteAsUTF8(String text) {
+        return encoder.quoteAsUTF8(text);
+    }
+
+    /**
+     * Will encode given String as UTF-8 (without any quoting), return resulting byte array.
+     */
+    public byte[] encodeAsUTF8(String text) {
+        return encoder.encodeAsUTF8(text);
     }
 
 }

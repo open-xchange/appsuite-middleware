@@ -296,7 +296,9 @@ public class APIResponseRenderer implements ResponseRenderer {
 //    }
 
     /**
-     * Escaped <tt>"&lt;/"</tt> char sequence to <tt>"&lt;\/"</tt>.
+     * Escapes <tt>"&lt;/"</tt> char sequence to <tt>"&lt;\/"</tt>.
+     * 
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     private static final class EscapingWriter extends Writer {
 

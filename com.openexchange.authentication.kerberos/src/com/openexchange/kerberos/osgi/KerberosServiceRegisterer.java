@@ -70,7 +70,7 @@ public class KerberosServiceRegisterer implements ServiceTrackerCustomizer<Confi
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(KerberosServiceRegisterer.class));
     private final BundleContext context;
-    private ServiceRegistration registration;
+    private ServiceRegistration<KerberosService> registration;
     private KerberosServiceImpl impl;
 
     public KerberosServiceRegisterer(BundleContext context) {
@@ -86,7 +86,7 @@ public class KerberosServiceRegisterer implements ServiceTrackerCustomizer<Confi
             impl = new KerberosServiceImpl(KerberosConfiguration.getModuleName());
             try {
                 impl.login();
-                registration = context.registerService(KerberosService.class.getName(), impl, null);
+                registration = context.registerService(KerberosService.class, impl, null);
             } catch (OXException e) {
                 LOG.error("Initial login to Kerberos server failed. Check Open-Xchange principal and keytab.", e);
             }

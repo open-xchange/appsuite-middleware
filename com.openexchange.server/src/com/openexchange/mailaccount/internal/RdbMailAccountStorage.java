@@ -87,6 +87,8 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -454,6 +456,15 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         }
                     }
                 } while (rs.next());
+                // Add aliases, too
+                if (MailAccount.DEFAULT_ID == id) {
+                    final StringAllocator sb = new StringAllocator(128);
+                    sb.append(mailAccount.getPrimaryAddress());
+                    for (final String alias : UserStorage.getStorageUser(user, cid).getAliases()) {
+                        sb.append(", ").append(alias);
+                    }
+                    properties.put("addresses", sb.toString());
+                }
                 mailAccount.setProperties(properties);
             } else {
                 mailAccount.setProperties(Collections.<String, String> emptyMap());

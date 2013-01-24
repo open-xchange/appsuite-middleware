@@ -141,7 +141,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { Tables.getSnippetTable(), getSnippetContentName(), getSnippetAttachmentTable(), getSnippetMiscName() };
+        return new String[] { Tables.getSnippetTable(), getSnippetContentTable(), getSnippetAttachmentTable(), getSnippetMiscTable() };
     }
 
     @Override

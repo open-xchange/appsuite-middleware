@@ -83,7 +83,6 @@ import java.util.regex.Pattern;
 import javax.activation.FileTypeMap;
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
@@ -135,7 +134,7 @@ import com.openexchange.tools.versit.values.RecurrenceValue.Weekday;
  * <p>
  * <a href="http://tools.ietf.org/html/rfc2426">vCard MIME Directory Profile</a>
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Victor's parser for OX6)
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Viktor's parser for OX6)
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixing and refactoring)
  */
 public class OXContainerConverter {
@@ -823,12 +822,16 @@ public class OXContainerConverter {
             }
             // EMAIL
             else if (P_EMAIL.equals(property.name)) {
-                final String value = property.getValue().toString();
+                String value = property.getValue().toString();
+                String personal = null;
                 // fix for: 7249
                 boolean isProperEmailAddress = value != null && value.length() > 0;
                 if (isProperEmailAddress) {
                     try {
-                    	new InternetAddress(QuotedInternetAddress.toACE(value)).validate();
+                    	final QuotedInternetAddress address = new QuotedInternetAddress(value);
+                        address.validate();
+                        value = address.getIDNAddress();
+                        personal = address.getPersonal();
                     } catch (final AddressException e) {
                         isProperEmailAddress = false;
                     }
@@ -854,6 +857,8 @@ public class OXContainerConverter {
                                 if (null != displayNameParameter) {
                                     newEntry.setDisplayname(decodeQP(displayNameParameter.getValue(0).getText()));
                                 }
+                            } else {
+                                newEntry.setDisplayname(null == personal ? value : personal);
                             }
                             newEntry.setEmailaddress(value);
                             distributionList[distributionList.length - 1] = newEntry;

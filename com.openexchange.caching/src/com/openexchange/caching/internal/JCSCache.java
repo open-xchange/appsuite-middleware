@@ -77,6 +77,8 @@ import com.openexchange.caching.internal.cache2jcs.CacheStatistics2JCS;
 import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.Log;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link JCSCache} - A cache implementation that uses the <a href="http://jakarta.apache.org/jcs/">JCS</a> caching system.
@@ -84,6 +86,8 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JCSCache implements Cache, SupportsLocalOperations {
+
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(JCSCache.class));
 
     private final JCS cache;
 
@@ -119,24 +123,36 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
             synchronized (this) {
                 localOnly = this.localOnly;
                 if (null == localOnly) {
-                    AuxiliaryCache[] tmp;
-                    try {
-                        final Field auxCachesField = CompositeCache.class.getDeclaredField("auxCaches");
-                        auxCachesField.setAccessible(true);
-                        tmp = (AuxiliaryCache[]) auxCachesField.get(cacheControl);
-                    } catch (final Exception e) {
-                        tmp = null;
-                    }
-                    localOnly = Boolean.TRUE;
-                    if (null != tmp) {
-                        for (AuxiliaryCache aux : tmp) {
-                            if ((aux != null) && (ICache.LATERAL_CACHE == aux.getCacheType())) {
-                                localOnly = Boolean.FALSE;
-                                break;
+                    /*
+                     * check known auxiliaries first
+                     */
+                    if (JCSCacheServiceInit.getInstance().hasAuxiliary(cacheControl.getCacheName())) {
+                        localOnly = Boolean.FALSE;
+                    } else {
+                        /*
+                         * check aux caches field, too
+                         */
+                        AuxiliaryCache[] tmp;
+                        try {
+                            final Field auxCachesField = CompositeCache.class.getDeclaredField("auxCaches");
+                            auxCachesField.setAccessible(true);
+                            tmp = (AuxiliaryCache[]) auxCachesField.get(cacheControl);
+                        } catch (final Exception e) {
+                            tmp = null;
+                        }
+                        localOnly = Boolean.TRUE;
+                        if (null != tmp) {
+                            for (AuxiliaryCache aux : tmp) {
+                                if ((aux != null) && (ICache.LATERAL_CACHE == aux.getCacheType())) {
+                                    localOnly = Boolean.FALSE;
+                                    break;
+                                } 
                             }
                         }
                     }
                     this.localOnly = localOnly;
+                    LOG.info("Cache '" + cache.getCacheAttributes().getCacheName() + "' is operating in " +
+                        (localOnly.booleanValue() ? "local-only" : "distributed") + " mode");
                 }
             }
         }
@@ -222,7 +238,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void put(Serializable key, Serializable obj, boolean invalidate) throws OXException {
         if (invalidate) {
-            throw CacheExceptionCode.FAILED_PUT.create(new UnsupportedOperationException("No invalidation support"));
+            remove(key);
         }
         put(key, obj);
     }
@@ -239,7 +255,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void put(Serializable key, Serializable val, ElementAttributes attr, boolean invalidate) throws OXException {
         if (invalidate) {
-            throw CacheExceptionCode.FAILED_PUT.create(new UnsupportedOperationException("No invalidation support"));
+            remove(key);
         }
         put(key, val, attr);
     }
@@ -257,7 +273,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void putInGroup(Serializable key, String groupName, Serializable value, boolean invalidate) throws OXException {
         if (invalidate) {
-            throw CacheExceptionCode.FAILED_PUT.create(new UnsupportedOperationException("No invalidation support"));
+            removeFromGroup(key, groupName);
         }
         putInGroup(key, groupName, value);
     }
@@ -275,7 +291,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr, boolean invalidate) throws OXException {
         if (invalidate) {
-            throw CacheExceptionCode.FAILED_PUT.create(new UnsupportedOperationException("No invalidation support"));
+            removeFromGroup(key, groupName);
         }
         putInGroup(key, groupName, value, attr);
     }

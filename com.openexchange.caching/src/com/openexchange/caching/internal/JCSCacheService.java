@@ -58,7 +58,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.DefaultCacheKeyService;
-import com.openexchange.caching.NotifyingCache;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
@@ -128,15 +127,21 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
     public Cache getCache(final String name) throws OXException {
         Cache cache = caches.get(name);
         if (null == cache) {
-            CacheEventService notifier = JCSCacheServiceInit.getInstance().getCacheEventService();
-            if (null == notifier) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CacheEventService.class.getName());
-            }        
             try {
                 /*
                  * The JCS cache manager already tracks initialized caches though the same region name always points to the same cache
                  */
-                cache = new NotifyingCache(name, new JCSCache(JCS.getInstance(name)), notifier);
+                cache = new JCSCache(JCS.getInstance(name));
+                /*
+                 * Wrap with notifying cache if configured
+                 */
+                if (JCSCacheServiceInit.getInstance().isEventInvalidation()) {                    
+                    CacheEventService eventService = JCSCacheServiceInit.getInstance().getCacheEventService();
+                    if (null == eventService) {
+                        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CacheEventService.class.getName());
+                    }
+                    cache = new NotifyingCache(name, cache, eventService);
+                }
             } catch (final org.apache.jcs.access.exception.CacheException e) {
                 throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
             } catch (final NullPointerException npe) {

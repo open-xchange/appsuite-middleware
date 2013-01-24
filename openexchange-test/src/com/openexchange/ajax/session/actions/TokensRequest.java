@@ -63,24 +63,31 @@ import com.openexchange.ajax.framework.AJAXClient;
  */
 public final class TokensRequest extends AbstractRequest<TokensResponse> {
 
+    private String httpSessionId;
     private final boolean failOnError;
 
-    public TokensRequest(String clientToken, String serverToken, String client, boolean failOnError) {
+    public TokensRequest(String httpSessionId, String clientToken, String serverToken, String client, boolean failOnError) {
         super(new Parameter[] {
             new URLParameter(PARAMETER_ACTION, ACTION_TOKENS),
             new FieldParameter(CLIENT_TOKEN, clientToken),
             new FieldParameter(SERVER_TOKEN, serverToken),
             new FieldParameter(CLIENT_PARAM, client)
         });
+        this.httpSessionId = httpSessionId;
         this.failOnError = failOnError;
     }
 
-    public TokensRequest(String clientToken, String serverToken, boolean failOnError) {
-        this(clientToken, serverToken, AJAXClient.class.getName(), failOnError);
+    @Override
+    public String getServletPath() {
+        return super.getServletPath() + ";jsessionid=" + httpSessionId;
     }
 
-    public TokensRequest(String clientToken, String serverToken) {
-        this(clientToken, serverToken, true);
+    public TokensRequest(String httpSessionId, String clientToken, String serverToken, boolean failOnError) {
+        this(httpSessionId, clientToken, serverToken, AJAXClient.class.getName(), failOnError);
+    }
+
+    public TokensRequest(String httpSessionId, String clientToken, String serverToken) {
+        this(httpSessionId, clientToken, serverToken, true);
     }
 
     @Override

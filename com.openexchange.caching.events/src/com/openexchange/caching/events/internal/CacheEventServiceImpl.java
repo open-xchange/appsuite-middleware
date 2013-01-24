@@ -50,9 +50,10 @@
 package com.openexchange.caching.events.internal;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import org.apache.commons.logging.Log;
 import com.openexchange.caching.events.CacheEvent;
@@ -69,7 +70,7 @@ public final class CacheEventServiceImpl implements CacheEventService {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CacheEventServiceImpl.class);
     
-    private final Map<String, List<CacheListener>> cacheRegionListeners;
+    private final ConcurrentMap<String, List<CacheListener>> cacheRegionListeners;
     private final List<CacheListener> cacheListeners;
 
     /**
@@ -77,7 +78,7 @@ public final class CacheEventServiceImpl implements CacheEventService {
      */
     public CacheEventServiceImpl() {
         super();
-        cacheRegionListeners = new HashMap<String, List<CacheListener>>();
+        cacheRegionListeners = new ConcurrentHashMap<String, List<CacheListener>>();
         cacheListeners = new ArrayList<CacheListener>();
     }
 
@@ -150,8 +151,11 @@ public final class CacheEventServiceImpl implements CacheEventService {
     private List<CacheListener> getListeners(String region) {
         List<CacheListener> listeners = cacheRegionListeners.get(region);
         if (null == listeners) {
-            listeners = new ArrayList<CacheListener>();
-            cacheRegionListeners.put(region, listeners);
+            listeners = new CopyOnWriteArrayList<CacheListener>();
+            List<CacheListener> exitingListeners = cacheRegionListeners.putIfAbsent(region, listeners);
+            if (null != exitingListeners) {
+                return exitingListeners;
+            }
         }
         return listeners;
     }

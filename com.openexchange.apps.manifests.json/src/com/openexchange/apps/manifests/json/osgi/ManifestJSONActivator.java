@@ -63,6 +63,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.apps.manifests.ServerConfigMatcherService;
 import com.openexchange.apps.manifests.json.ManifestActionFactory;
+import com.openexchange.apps.manifests.json.values.UIVersion;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.simple.SimpleConverter;
@@ -86,6 +87,9 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
+	    
+	    UIVersion.UIVERSION = context.getBundle().getVersion().toString();
+	    
 		final ServiceTracker<ServerConfigMatcherService, ServerConfigMatcherService> matcherTracker = track(ServerConfigMatcherService.class);
 		final ServiceTracker<ComputedServerConfigValueService, ComputedServerConfigValueService> computedValueTracker = track(ComputedServerConfigValueService.class);
 
