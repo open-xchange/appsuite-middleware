@@ -203,7 +203,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
      */
     private BufferedImage getImage(String formatName) throws IOException {
         BufferedImage image = getSourceImage(formatName);
-        if (null != image) {
+        if (null != image && image.getHeight() > 3 && image.getWidth() > 3) {
             ImageInformation imageInformation = null != this.metadata ? getImageInformation(this.metadata) : null;
             for (ImageTransformation transformation : transformations) {
                 if (transformation.supports(formatName)) {
@@ -368,7 +368,6 @@ public class ImageTransformationsImpl implements ImageTransformations {
                 metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()), false);
             } catch (ImageProcessingException e) {
                 LOG.warn("error getting metadata", e);
-                return null;
             }
             return ImageIO.read(managedFile.getInputStream());
         } catch (OXException e) {
