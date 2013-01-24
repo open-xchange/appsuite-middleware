@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
@@ -197,19 +198,24 @@ public class CSVContactImporter extends AbstractImporter {
                 Streams.close(input);
             }
         }
+
         // reading entries...
-        final List<ImportIntention> intentions = new LinkedList<ImportIntention>();
-        final ContactSwitcher conSet = getContactSwitcher();
-        for(int lineNumber = 1; lineNumber < csv.size(); lineNumber++) {
-            // ...and writing them
-        	List<String> row = csv.get(lineNumber);
-        	ImportIntention intention = createIntention(fields, row, folder, conSet, lineNumber, sessObj);
-            intentions.add(intention);
+        final List<ImportIntention> intentions;
+        {
+            final int size = csv.size();
+            intentions = new ArrayList<ImportIntention>(size);
+            final ContactSwitcher conSet = getContactSwitcher();
+            for (int lineNumber = 1; lineNumber < size; lineNumber++) {
+                // ...and writing them
+                final List<String> row = csv.get(lineNumber);
+                final ImportIntention intention = createIntention(fields, row, folder, conSet, lineNumber, sessObj);
+                intentions.add(intention);
+            }
         }
 
         // Build a list of contacts to insert
-        final List<Contact> contacts = new LinkedList<Contact>();
-        for(final ImportIntention intention : intentions) {
+        final List<Contact> contacts = new ArrayList<Contact>(intentions.size());
+        for (final ImportIntention intention : intentions) {
             if (intention.contact != null) {
                 contacts.add(intention.contact);
             }
@@ -218,24 +224,22 @@ public class CSVContactImporter extends AbstractImporter {
         // Insert or update contacts
         final FolderUpdaterRegistry updaterRegistry = ImportExportServices.getUpdaterRegistry();
         final TargetFolderDefinition target = new TargetFolderDefinition(folder, sessObj.getUserId(), sessObj.getContext());
-
-        try {
+        {
             final FolderUpdaterService<Contact> folderUpdater = updaterRegistry.getFolderUpdater(target);
             if (folderUpdater == null) {
                 throw ImportExportExceptionCodes.CANNOT_IMPORT.create();
             }
             folderUpdater.save(contacts, target);
-        } catch (final OXException e) {
-            throw e;
         }
 
 
         // Build result list
+        final List<ImportResult> results = new ArrayList<ImportResult>(intentions.size());
 
-        final List<ImportResult> results = new LinkedList<ImportResult>();
-
-        for(final ImportIntention intention : intentions) {
-        	if (intention.contact != null && intention.contact.getObjectID() != 0) {
+        for (final ImportIntention intention : intentions) {
+            final boolean notNull = intention.contact != null;
+            final boolean isZero = intention.contact.getObjectID() == 0;
+            if (notNull && !isZero) {
                 final ImportResult result = new ImportResult();
                 result.setFolder(folder);
                 result.setObjectId(Integer.toString(intention.contact.getObjectID()));
@@ -244,10 +248,10 @@ public class CSVContactImporter extends AbstractImporter {
                     result.setException(intention.result.getException());
                 }
                 results.add(result);
-            } else if (intention.contact != null && intention.contact.getObjectID() == 0) {
-            	ImportResult notCreated = new ImportResult();
-            	notCreated.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(intention.contact));
-            	results.add(notCreated);
+            } else if (notNull && isZero) {
+                final ImportResult notCreated = new ImportResult();
+                notCreated.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(intention.contact));
+                results.add(notCreated);
             } else if (intention.result != null) {
                 results.add(intention.result);
             }
