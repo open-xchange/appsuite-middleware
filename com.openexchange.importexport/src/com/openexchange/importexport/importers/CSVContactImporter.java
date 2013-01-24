@@ -238,7 +238,7 @@ public class CSVContactImporter extends AbstractImporter {
 
         for (final ImportIntention intention : intentions) {
             final boolean notNull = intention.contact != null;
-            final boolean isZero = intention.contact.getObjectID() == 0;
+            final boolean isZero = notNull ? intention.contact.getObjectID() == 0 : true;
             if (notNull && !isZero) {
                 final ImportResult result = new ImportResult();
                 result.setFolder(folder);
