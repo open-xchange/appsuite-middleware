@@ -66,34 +66,37 @@ public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeService
 
     public void testGenericSubscribeServiceForWebDe() {
         // insert valid credentials here
-        String username = "";
-        String password = "";
+        String username = "peter.mueller1131@web.de";
+        String password = "r0deld0del";
 
         // create a CrawlerDescription
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("web.de");
         crawler.setId("com.openexchange.subscribe.crawler.webde");
-        crawler.setCrawlerApiVersion(616);
-        crawler.setPriority(2);
+        crawler.setCrawlerApiVersion(618);
+        crawler.setPriority(3);
         List<Step> steps = new LinkedList<Step>();
 
-        steps.add(new LoginPageByFormActionStep(
+        steps.add(new LoginPageByFormActionReturningStringStep(
             "Log in",
-            "http://web.de/fm/",
+            "http://web.de",
             "",
             "",
-            "https://login.web.de/intern/login/",
+            "https:\\/\\/login.web.de\\/intern\\/login\\?hal=true",
             "username",
             "password",
-            "(\\/online\\/.*)",
             2,
-            ""));
-        steps.add(new ConditionalPageByLinkRegexStep(
-            "Hit the link to web.de freemail if the user did not log out last time.",
-            "(/online/frame.*)"));
-        steps.add(new PageByLinkRegexStep("Use the site without frames", "/online/[^h]+.*"));
-        steps.add(new PageByLinkRegexStep("This is a fancy page that does not appear in the browser.", "/online/adressbuch/.*"));
-        steps.add(new PageByLinkRegexStep("Go to the contacts list.", "/online/adressbuch/.*"));
+            "web.de",
+            "",
+            "Augenblick bitte"));
+        //(https:\\/\\/uas.web.de\\/intern\\/jump\\?serviceID=mobile.web.mail.webde.live&session.*)
+//        steps.add(new ConditionalPageByLinkRegexStep(
+//            "Hit the link to web.de freemail if the user did not log out last time.",
+//            "(/online/frame.*)"));
+//        steps.add(new PageByLinkRegexStep("Use the site without frames", "/online/[^h]+.*"));
+//        steps.add(new PageByLinkRegexStep("This is a fancy page that does not appear in the browser.", "/online/adressbuch/.*"));
+//        steps.add(new PageByLinkRegexStep("Go to the contacts list.", "/online/adressbuch/.*"));
+        steps.add(new PageByUrlStep("Go to the address book", "https://mm.web.de/contacts?2"));
         steps.add(new AnchorsByLinkRegexStep("Get each contact.", "", "adr_show.*", true));
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(width=\"282\"><b>)"+VALID_NAME+"(<)", "display_name"));
