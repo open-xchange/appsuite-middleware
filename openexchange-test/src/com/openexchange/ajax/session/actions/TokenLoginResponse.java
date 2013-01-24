@@ -59,6 +59,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 public final class TokenLoginResponse extends AbstractAJAXResponse {
 
     private final String path;
+    private final String httpSessionId;
     private final String clientToken;
     private final String serverToken;
     private final String login;
@@ -66,9 +67,10 @@ public final class TokenLoginResponse extends AbstractAJAXResponse {
     private final String language;
     private final boolean store;
 
-    TokenLoginResponse(String path, String clientToken, String serverToken, String login, int userId, String language, boolean store) {
+    TokenLoginResponse(String path, String httpSessionId, String clientToken, String serverToken, String login, int userId, String language, boolean store) {
         super(null);
         this.path = path;
+        this.httpSessionId = httpSessionId;
         this.clientToken = clientToken;
         this.serverToken = serverToken;
         this.login = login;
@@ -79,6 +81,10 @@ public final class TokenLoginResponse extends AbstractAJAXResponse {
 
     public String getPath() {
         return path;
+    }
+
+    public String getHttpSessionId() {
+        return httpSessionId;
     }
 
     public String getClientToken() {
