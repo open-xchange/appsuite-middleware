@@ -63,6 +63,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -150,10 +152,14 @@ public class Datamining {
             reportAverageFilestoreSize();
             reportNumberOfContexts();
             Questions.reportNumberOfUsers();
-            Questions.reportNumberOfUsersWithEventsInPrivateCalendar();
+            Questions.reportNumberOfAppointments();
+            Questions.reportNumberOfUsersWhoCreatedAppointments();
+            Questions.reportAverageNumberOfAppointmentsPerUserWhoHasAppointmentsAtAll();
             Questions.reportNumberOfUsersWithEventsInPrivateCalendarThatAreInTheFutureAndAreNotYearlySeries();
             Questions.reportNumberOfUsersWhoChangedTheirCalendarInTheLast30Days();
-            Questions.reportNumberOfInfostoreObjects();
+            Questions.reportNumberOfDocuments();
+            Questions.reportNumberOfUsersWhoCreatedDocuments();
+            Questions.reportAverageNumberOfDocumentsPerUserWhoHasDocumentsAtAll();
             reportAverageNumberOfInfostoreObjectsPerContext();
             reportAverageNumberOfInfostoreObjectsPerSchema();
             Questions.reportNumberOfNewInfostoreObjectsInTheLast30Days();
@@ -175,7 +181,9 @@ public class Datamining {
             Questions.reportNumberOfUsersConnectedToTOnline();
             Questions.reportNumberOfUsersConnectedToGMX();
             Questions.reportNumberOfUsersConnectedToWebDe();
-            Questions.reportNumberOfUsersWithTasks();
+            Questions.reportNumberOfTasks();
+            Questions.reportNumberOfUsersWhoCreatedTasks();
+            Questions.reportAverageNumberOfTasksPerUserWhoHasTasksAtAll();
             Questions.reportNumberOfUsersWhoChangedTheirTasksInTheLast30Days();
             Questions.reportNumberOfUsersWhoSelectedTeamViewAsCalendarDefault();
             Questions.reportNumberOfUsersWhoSelectedCalendarViewAsCalendarDefault();
@@ -187,6 +195,12 @@ public class Datamining {
             Questions.reportNumberOfUsersWhoSelectedListViewAsInfostoreDefault();
             Questions.reportNumberOfUsersWhoSelectedHSplitViewAsInfostoreDefault();
             Questions.reportNumberOfUsersWhoActivatedMiniCalendar();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientOX6UIInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientAppSuiteUIInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientMobileUIInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientEASInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientCalDAVInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientCardDAVInTheLast30Days();
 
             rightNow = Calendar.getInstance();
             final long after = rightNow.getTime().getTime();
@@ -296,7 +310,7 @@ public class Datamining {
 
 			if (cl.hasOption("hostname")){
 				hostname = cl.getOptionValue("hostname");
-				dbName = (cl.hasOption("dbName")) ? cl.getOptionValue("dbName") : "configDB";
+				dbName = (cl.hasOption("dbName")) ? cl.getOptionValue("dbName") : "configdb";
 				dbPort = (cl.hasOption("dbPort")) ? cl.getOptionValue("dbPort") : "3306";
 
 				configDBURL = "jdbc:mysql://" + hostname + ":" + dbPort + "/" + dbName;
@@ -457,10 +471,11 @@ public class Datamining {
         try {
             InetAddress addr = InetAddress.getLocalHost();
             Calendar cal = Calendar.getInstance();
-            String date = Integer.toString(cal.get(Calendar.YEAR)) + "-" + Integer.toString(cal.get(Calendar.MONTH)) + "-" + Integer.toString(cal.get(Calendar.DAY_OF_MONTH));
-            filename = "open-xchange_datamining_" + addr.getHostAddress() + "_" + date + ".txt";
+            DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+            filename = "open-xchange_datamining_" + addr.getHostAddress() + "_" + dateFormat.format(cal.getTime()) + ".txt";
             report("hostIPAddress", addr.getHostAddress());
-            report("hostname", addr.getHostName());
+            report("hostname", addr.getHostName());            
+            report("dateOfReport", dateFormat.format(cal.getTime()));
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
