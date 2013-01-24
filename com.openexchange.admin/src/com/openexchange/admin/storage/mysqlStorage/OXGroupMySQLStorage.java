@@ -421,9 +421,9 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                     ResultSet rs3 = null;
                     try {
                         stmt3 = con.prepareStatement("SELECT member FROM groups_member cid=? AND id=?");
-                        stmt1.setInt(1, ctxId);
-                        stmt1.setInt(2, groupId);
-                        rs3 = stmt1.executeQuery();
+                        stmt3.setInt(1, ctxId);
+                        stmt3.setInt(2, groupId);
+                        rs3 = stmt3.executeQuery();
                         while (rs3.next()) {
                             members.add(Integer.valueOf(rs3.getInt(1)));
                         }
