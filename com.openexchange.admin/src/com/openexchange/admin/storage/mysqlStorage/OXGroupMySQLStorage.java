@@ -420,7 +420,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                     PreparedStatement stmt3 = null;
                     ResultSet rs3 = null;
                     try {
-                        stmt3 = con.prepareStatement("SELECT member FROM groups_member cid=? AND id=?");
+                        stmt3 = con.prepareStatement("SELECT member FROM groups_member WHERE cid=? AND id=?");
                         stmt3.setInt(1, ctxId);
                         stmt3.setInt(2, groupId);
                         rs3 = stmt3.executeQuery();
