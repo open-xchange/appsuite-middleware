@@ -52,8 +52,6 @@ package com.openexchange.importexport.importers;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.transformInputStreamToString;
 import static com.openexchange.java.Autoboxing.I;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -92,11 +90,11 @@ import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
 import com.openexchange.importexport.formats.csv.OxAjaxnameMapper;
 import com.openexchange.importexport.formats.csv.OxReadableNameMapper;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.tools.io.IOUtils;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -165,42 +163,37 @@ public class CSVContactImporter extends AbstractImporter {
         if (!canImport(sessObj, format, folders, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_IMPORT.create(folder, format);
         }
-        final InputStream input;
-        if (is.markSupported()) {
-            input = is;
-        } else {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try {
-                IOUtils.transfer(is, baos);
-            } catch (IOException e) {
-                throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
-            }
-            input = new ByteArrayInputStream(baos.toByteArray());
-        }
-        input.mark(Integer.MAX_VALUE);
-        String csvStr = transformInputStreamToString(input, "UTF-8");
-        CSVParser csvParser = getCSVParser();
-        List<List<String>> csv = csvParser.parse(csvStr);
-        if (csv.size() < 2) {
-        	throw ImportExportExceptionCodes.NO_CONTENT.create();
-        }
+        final List<List<String>> csv;
         // get header fields
-        final List<String> fields = csv.get(0);
-        if (!checkFields(fields)) {
-            throw ImportExportExceptionCodes.NO_VALID_CSV_COLUMNS.create();
-        }
-        if (!passesSanityTestForDisplayName(fields)) {
-            throw ImportExportExceptionCodes.NO_FIELD_FOR_NAMING.create();
-        }
-
-        // re-read now the we have guessed the format and the encoding
-        if (!"UTF-8".equalsIgnoreCase(getCurrentMapper().getEncoding())) {
-        	try {
-				input.reset();
-			} catch (IOException e) {
+        final List<String> fields;
+        {
+            InputStream input = null;
+            try {
+                input = is.markSupported() ? is : Streams.asInputStream(is);
+                input.mark(Integer.MAX_VALUE);
+                String csvStr = transformInputStreamToString(input, "UTF-8", false);
+                final CSVParser csvParser = getCSVParser();
+                csv = csvParser.parse(csvStr);
+                if (csv.size() < 2) {
+                    throw ImportExportExceptionCodes.NO_CONTENT.create();
+                }
+                fields = csv.get(0);
+                if (!checkFields(fields)) {
+                    throw ImportExportExceptionCodes.NO_VALID_CSV_COLUMNS.create();
+                }
+                if (!passesSanityTestForDisplayName(fields)) {
+                    throw ImportExportExceptionCodes.NO_FIELD_FOR_NAMING.create();
+                }
+                // re-read now the we have guessed the format and the encoding
+                if (!"UTF-8".equalsIgnoreCase(getCurrentMapper().getEncoding())) {
+                    input.reset();
+                    csvStr = transformInputStreamToString(input, getCurrentMapper().getEncoding(), false);
+                }
+            } catch (final IOException e) {
                 throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
-			}
-            csvStr = transformInputStreamToString(input, getCurrentMapper().getEncoding());
+            } finally {
+                Streams.close(input);
+            }
         }
         // reading entries...
         final List<ImportIntention> intentions = new LinkedList<ImportIntention>();
