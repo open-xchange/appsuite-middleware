@@ -129,41 +129,42 @@
     </types>
 
     <fields>
-        <field name="uuid" type="string" stored="true" indexed="true" />
-        <field name="folder_id" type="long" stored="true" indexed="true" />
-        <field name="id" type="int" stored="true" indexed="true" />
-        <field name="created_by" type="int" stored="true" indexed="true" />
-        <field name="modified_by" type="int" stored="true" indexed="true" />
-        <field name="creation_date" type="long" stored="true" indexed="true" />
-        <field name="last_modified" type="long" stored="true" indexed="true" />
-        <field name="version" type="int" stored="true" indexed="true" />
-        <field name="url" type="url" stored="true" indexed="true" />     
-        <field name="sequence_number" type="long" stored="true" indexed="true" />
-        <field name="categories" type="categories" stored="true" indexed="true" />
-        <field name="color_label" type="int" stored="true" indexed="true" />
-        <field name="filestore_location" type="string" stored="true" indexed="true" />
-        <field name="number_of_versions" type="int" stored="true" indexed="true" />
-        
-        <field name="title" type="text" stored="false" indexed="false" />   
-        <field name="title_gen" type="text" stored="true" indexed="true" />   
-        <field name="title_de" type="text_de" stored="true" indexed="true" />   
-        <field name="title_en" type="text_en" stored="true" indexed="true" />   
-        <field name="title_fr" type="text_fr" stored="true" indexed="true" />   
+        <field name="uuid" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.UUID" />
+        <field name="folder_id" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.FOLDER" />
+        <field name="id" type="int" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.ID" />
+        <field name="created_by" type="int" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.CREATED_BY" />
+        <field name="modified_by" type="int" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.MODIFIED_BY" />
+        <field name="creation_date" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.CREATED" />
+        <field name="last_modified" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.LAST_MODIFIED" />
+        <field name="version" type="int" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.VERSION" />
+        <field name="url" type="url" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.URL" />
+        <field name="sequence_number" type="long" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.SEQUENCE_NUMBER" />
+        <field name="categories" type="categories" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.CATEGORIES" />
+        <field name="color_label" type="int" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.COLOR_LABEL" />
+        <field name="filestore_location" type="string" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.FILESTORE_LOCATION" />
+        <field name="number_of_versions" type="int" stored="true" indexed="true" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.NUMBER_OF_VERSIONS" />
+
+        <field name="title" type="text" stored="false" indexed="false" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.TITLE" />
+        <field name="title_gen" type="text" stored="true" indexed="true" />
+        <field name="title_de" type="text_de" stored="true" indexed="true" />
+        <field name="title_en" type="text_en" stored="true" indexed="true" />
+        <field name="title_fr" type="text_fr" stored="true" indexed="true" />
         <field name="title_it" type="text_it" stored="true" indexed="true" />
         
-        <field name="description" type="text" stored="false" indexed="false" />
+        <field name="description" type="text" stored="false" indexed="false" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.DESCRIPTION" />
         <field name="description_gen" type="text" stored="false" indexed="true" />
         <field name="description_de" type="text_de" stored="false" indexed="true" />
         <field name="description_en" type="text_en" stored="false" indexed="true" />
         <field name="description_fr" type="text_fr" stored="false" indexed="true" />
         <field name="description_it" type="text_it" stored="false" indexed="true" />
         
-        <field name="version_comment" type="text" stored="false" indexed="false" />
+        <field name="version_comment" type="text" stored="false" indexed="false" oxIndexField="com.openexchange.groupware.infostore.index.InfostoreIndexField.VERSION_COMMENT" />
         <field name="version_comment_gen" type="text" stored="false" indexed="true" />
         <field name="version_comment_de" type="text_de" stored="false" indexed="true" />
         <field name="version_comment_en" type="text_en" stored="false" indexed="true" />
         <field name="version_comment_fr" type="text_fr" stored="false" indexed="true" />
         <field name="version_comment_it" type="text_it" stored="false" indexed="true" />
+
         
         <field name="locale" type="string" stored="true" indexed="false" />
     </fields>

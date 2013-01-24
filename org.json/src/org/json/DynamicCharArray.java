@@ -52,7 +52,7 @@ package org.json;
 
 /**
  * {@link DynamicCharArray} - The dynamic character array.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DynamicCharArray implements ICharArray {
@@ -91,7 +91,7 @@ public class DynamicCharArray implements ICharArray {
 
     /**
      * Appends specified character
-     * 
+     *
      * @param c The character to append
      * @return This character array with character appended
      */
@@ -108,7 +108,7 @@ public class DynamicCharArray implements ICharArray {
 
     /**
      * Appends specified String
-     * 
+     *
      * @param s The String
      * @return This character array with String appended
      */
@@ -134,7 +134,7 @@ public class DynamicCharArray implements ICharArray {
 
     /**
      * Appends specified characters
-     * 
+     *
      * @param chars The characters
      * @return This character array with characters appended
      */
@@ -144,7 +144,7 @@ public class DynamicCharArray implements ICharArray {
 
     /**
      * Appends specified characters
-     * 
+     *
      * @param chars The characters
      * @param offset The offset position
      * @param count The number of characters to append
@@ -188,6 +188,7 @@ public class DynamicCharArray implements ICharArray {
         return ca;
     }
 
+    @Override
     public void reset() {
         if (null != delegatee) {
             CharArrayPool.getInstance().offer(delegatee);
@@ -195,30 +196,37 @@ public class DynamicCharArray implements ICharArray {
         }
     }
 
+    @Override
     public int capacity() {
         return delegatee().capacity();
     }
 
+    @Override
     public int remainingCapacity() {
         return delegatee().remainingCapacity();
     }
 
+    @Override
     public int length() {
         return delegatee().length();
     }
 
+    @Override
     public char charAt(final int index) {
         return delegatee().charAt(index);
     }
 
+    @Override
     public CharSequence subSequence(final int start, final int end) {
         return delegatee().subSequence(start, end);
     }
 
+    @Override
     public void copyTo(final CharArray other) {
         delegatee().copyTo(other);
     }
 
+    @Override
     public void copyFrom(final CharArray other) {
         delegatee().copyFrom(other);
     }

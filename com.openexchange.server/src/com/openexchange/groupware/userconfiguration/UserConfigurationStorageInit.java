@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration.Permission;
 import com.openexchange.server.Initialization;
 
 /**
@@ -129,6 +130,7 @@ public final class UserConfigurationStorageInit implements Initialization {
             LOG.error(UserConfigurationStorageInit.class.getName() + " already started");
             return;
         }
+        // Initialize instance
         final String classNameProp = SystemConfig.getProperty(Property.USER_CONF_STORAGE);
         if (null == classNameProp) {
             throw UserConfigurationCodes.MISSING_SETTING.create(Property.USER_CONF_STORAGE.getPropertyName());
@@ -141,7 +143,6 @@ public final class UserConfigurationStorageInit implements Initialization {
                 LOG.info("UserConfigurationStorage implementation: " + implementingClass.getName());
             }
             UserConfigurationStorage.setInstance(implementingClass.newInstance());
-            started.set(true);
         } catch (final ClassNotFoundException e) {
             throw UserConfigurationCodes.CLASS_NOT_FOUND.create(e, classNameProp);
         } catch (final ClassCastException e) {
@@ -151,6 +152,10 @@ public final class UserConfigurationStorageInit implements Initialization {
         } catch (final IllegalAccessException e) {
             throw UserConfigurationCodes.CLASS_NOT_FOUND.create(e, classNameProp);
         }
+        // Initialize permissions
+        for (final Permission p : Permission.values()) {
+            p.start();
+        }
     }
 
     @Override
@@ -159,6 +164,11 @@ public final class UserConfigurationStorageInit implements Initialization {
             LOG.error(UserConfigurationStorageInit.class.getName() + " cannot be stopped since it has not been started before");
             return;
         }
+        // Shut-down permissions
+        for (final Permission p : Permission.values()) {
+            p.stop();
+        }
+        // Release instance
         UserConfigurationStorage.releaseInstance();
     }
 

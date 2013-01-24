@@ -109,7 +109,10 @@ public class Bug6825Test_TruncationOfFields extends ManagedAppointmentTest {
         final ICalImportResponse importresponse = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical, false));
         assertTrue(importresponse.hasError());
         final JSONObject data = ((JSONArray) importresponse.getData()).getJSONObject(0);
-        assertTrue(data.has("truncated"));
+        assertTrue(data.has("warnings"));
+        JSONArray warnings = data.getJSONArray("warnings");
+        assertEquals(1, warnings.length());
+        assertTrue(warnings.getJSONObject(0).toString().contains("truncated"));
     }
 
 

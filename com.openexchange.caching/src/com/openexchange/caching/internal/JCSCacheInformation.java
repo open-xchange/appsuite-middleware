@@ -60,6 +60,7 @@ import org.apache.jcs.engine.behavior.ICacheElement;
 import org.apache.jcs.engine.control.CompositeCacheManager;
 import org.apache.jcs.engine.memory.behavior.IMemoryCache;
 import com.openexchange.caching.CacheInformationMBean;
+import com.openexchange.java.Streams;
 
 /**
  * {@link JCSCacheInformation} - The {@link CacheInformationMBean} implementation of <a href="http://jakarta.apache.org/jcs/">JCS</a>
@@ -124,11 +125,7 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
         } catch (final Exception e) {
             LOG.info("Problem getting byte count. Likely cause is a non serializable object." + e.getMessage());
         } finally {
-            try {
-                out.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(out);
         }
         // 4 bytes lost for the serialization header
         return counter.getCount() - 4;

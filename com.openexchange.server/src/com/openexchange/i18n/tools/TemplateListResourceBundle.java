@@ -67,6 +67,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.Collections;
 
@@ -115,22 +116,16 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
                 is = getPropertyStream();
                 properties.load(is);
                 is.close();
+                is = null;
 
                 final File[] templateFiles = templatePath.listFiles(new StartsWithFilter(uniqueName()));
                 for (final File template : templateFiles) {
                     parseTemplate(template);
                 }
-
             } catch (final IOException e) {
                 LOG.error(e);
             } finally {
-                if (is != null) {
-                    try {
-                        is.close();
-                    } catch (final IOException e) {
-                        LOG.debug(e);
-                    }
-                }
+                Streams.close(is);
             }
 
             for (final Object key : properties.keySet()) {
@@ -168,13 +163,7 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
         } catch (final IOException x) {
             LOG.error(x);
         } finally {
-            if (r != null) {
-                try {
-                    r.close();
-                } catch (final IOException e) {
-                    LOG.debug(e);
-                }
-            }
+            Streams.close(r);
         }
     }
 

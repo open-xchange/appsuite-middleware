@@ -85,7 +85,9 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -108,7 +110,6 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.structure.Base64JSONString;
 import com.openexchange.mail.structure.StructureHandler;
 import com.openexchange.mail.structure.StructureMailMessageParser;
-import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -677,6 +678,9 @@ public final class MIMEStructureHandler implements StructureHandler {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -704,6 +708,9 @@ public final class MIMEStructureHandler implements StructureHandler {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -724,15 +731,12 @@ public final class MIMEStructureHandler implements StructureHandler {
                         }
                         bytes = out.toByteArray();
                     } catch (final IOException e) {
+                        if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                        }
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     } finally {
-                        if (null != inputStream) {
-                            try {
-                                inputStream.close();
-                            } catch (final IOException e) {
-                                LOG.error(e.getMessage(), e);
-                            }
-                        }
+                        Streams.close(inputStream);
                     }
                 }
                 // Add own JSONString implementation to support streaming

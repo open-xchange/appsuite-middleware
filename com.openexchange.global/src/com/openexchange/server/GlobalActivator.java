@@ -130,7 +130,7 @@ public final class GlobalActivator implements BundleActivator {
             dynamicClassLoaderActivator.start(context);
             this.dynamicClassLoaderActivator = dynamicClassLoaderActivator;
 
-            LOG.debug("Global bundle successfully started");
+            LOG.info("Global bundle successfully started");
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);

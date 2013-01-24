@@ -59,6 +59,7 @@ import java.io.OutputStream;
 import javax.activation.DataSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 
 /**
@@ -101,11 +102,7 @@ public final class FileDataSource implements DataSource {
     }
 
     private static void closeQuietly(final Closeable closeable) {
-        try {
-            closeable.close();
-        } catch (final Exception e) {
-            // Ignore
-        }
+        Streams.close(closeable);
     }
 
     private String contentType;

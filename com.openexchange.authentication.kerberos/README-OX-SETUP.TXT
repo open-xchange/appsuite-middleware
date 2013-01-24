@@ -2,8 +2,8 @@ Setting up a kerberized OX prototype
 ====================================
 
 - setup /etc/krb5.conf so that kinit works
-- copy jaas.conf to /opt/open-xchange/etc/groupware/jaas.conf
-- add the new parameters to /opt/open-xchange/etc/groupware/login.conf
+- copy jaas.conf to /opt/open-xchange/etc/jaas.conf
+- add the new parameters to /opt/open-xchange/etc/login.conf
   (see kerberos-server.patch)
 - install and user open-xchange-authentication-spnego instead of any other
   authbundle

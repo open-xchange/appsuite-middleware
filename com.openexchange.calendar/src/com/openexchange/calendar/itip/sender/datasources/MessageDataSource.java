@@ -57,6 +57,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import javax.activation.DataSource;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -182,11 +183,7 @@ public final class MessageDataSource implements DataSource {
             }
             return baos.toByteArray();
         } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(inputStream);
         }
     }
 }

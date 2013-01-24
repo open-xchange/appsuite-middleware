@@ -8,7 +8,7 @@ package org.json;
 public class JSONException extends Exception {
 
 	private static final long serialVersionUID = 5894276831604379907L;
-	
+
 	private Throwable cause;
 
     /**

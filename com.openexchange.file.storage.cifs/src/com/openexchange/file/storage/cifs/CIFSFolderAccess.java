@@ -68,6 +68,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
 import com.openexchange.session.Session;
 
@@ -93,8 +94,8 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
     /**
      * Initializes a new {@link CIFSFolderAccess}.
      */
-    public CIFSFolderAccess(final String rootUrl, final NtlmPasswordAuthentication auth, final FileStorageAccount account, final Session session) {
-        super(rootUrl, auth, account, session);
+    public CIFSFolderAccess(final String rootUrl, final NtlmPasswordAuthentication auth, final FileStorageAccount account, final Session session, final WarningsAware warningsAware) {
+        super(rootUrl, auth, account, session, warningsAware);
         login = (String) account.getConfiguration().get(CIFSConstants.CIFS_LOGIN);
         homeDirPath = (String) account.getConfiguration().get(CIFSConstants.CIFS_HOME_DIR);
     }
@@ -117,15 +118,13 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                 throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
             return true;
-        } catch (final OXException e) {
-            throw e;
         } catch (final SmbAuthException e) {
             throw FileStorageExceptionCodes.LOGIN_FAILED.create(e, login, rootUrl, CIFSConstants.ID);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -148,15 +147,13 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Convert to FileStorageFolder
              */
             return toFileStorageFolder(folderId, smbFolder);
-        } catch (final OXException e) {
-            throw e;
         } catch (final SmbAuthException e) {
             throw FileStorageExceptionCodes.LOGIN_FAILED.create(e, login, rootUrl, CIFSConstants.ID);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -269,7 +266,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                         homeDirPath = NOT_FOUND;
                     } catch (final IOException e) {
                         homeDirPath = NOT_FOUND;
-                    } catch (final Exception e) {
+                    } catch (final RuntimeException e) {
                         homeDirPath = NOT_FOUND;
                     }
                     if (DEBUG) {
@@ -333,15 +330,13 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Convert to FileStorageFolder
              */
             return toFileStorageFolder(homeDir.getPath(), homeDir).setType(FileStorageFolderType.HOME_DIRECTORY);
-        } catch (final OXException e) {
-            throw e;
         } catch (final SmbAuthException e) {
             throw FileStorageExceptionCodes.LOGIN_FAILED.create(e, login, rootUrl, CIFSConstants.ID);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -406,9 +401,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                 ((CIFSFolder) folder).setType(FileStorageFolderType.PUBLIC_FOLDER);
             }
             return subfolders;
-        } catch (final OXException e) {
-            throw e;
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -469,15 +462,13 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Return
              */
             return list.toArray(new FileStorageFolder[list.size()]);
-        } catch (final OXException e) {
-            throw e;
         } catch (final SmbAuthException e) {
             throw FileStorageExceptionCodes.LOGIN_FAILED.create(e, login, rootUrl, CIFSConstants.ID);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -510,13 +501,11 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              */
             SmbFileMapManagement.getInstance().dropFor(session);
             return fid;
-        } catch (final OXException e) {
-            throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -532,9 +521,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * CIFS/SMB does neither support permissions nor subscriptions
              */
             return fid;
-        } catch (final OXException e) {
-            throw e;
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -594,15 +581,13 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Return URL
              */
             return newUri;
-        } catch (final OXException e) {
-            throw e;
         } catch (final SmbAuthException e) {
             throw FileStorageExceptionCodes.LOGIN_FAILED.create(e, login, rootUrl, CIFSConstants.ID);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -655,13 +640,11 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Return URL
              */
             return newUri;
-        } catch (final OXException e) {
-            throw e;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -700,15 +683,13 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Return
              */
             return fid;
-        } catch (final OXException e) {
-            throw e;
         } catch (final SmbAuthException e) {
             throw FileStorageExceptionCodes.LOGIN_FAILED.create(e, login, rootUrl, CIFSConstants.ID);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -750,15 +731,13 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Invalidate
              */
             SmbFileMapManagement.getInstance().dropFor(session);
-        } catch (final OXException e) {
-            throw e;
         } catch (final SmbAuthException e) {
             throw FileStorageExceptionCodes.LOGIN_FAILED.create(e, login, rootUrl, CIFSConstants.ID);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

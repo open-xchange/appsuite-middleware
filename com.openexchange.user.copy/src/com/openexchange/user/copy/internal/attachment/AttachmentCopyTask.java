@@ -51,7 +51,6 @@ package com.openexchange.user.copy.internal.attachment;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.sql.Connection;
@@ -63,7 +62,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
@@ -72,6 +70,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.QuotaFileStorage;
 import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 import com.openexchange.tools.sql.DBUtils;
@@ -261,8 +261,9 @@ public class AttachmentCopyTask implements CopyUserTaskService {
 
     void copyFiles(final List<Attachment> attachments, final QuotaFileStorage srcFileStorage, final QuotaFileStorage dstFileStorage) throws OXException {
         for (final Attachment attachment : attachments) {
+            InputStream is = null;
             try {
-                final InputStream is = srcFileStorage.getFile(attachment.getFileId());
+                is = srcFileStorage.getFile(attachment.getFileId());
                 if (is == null) {
                     LOG.warn("Did not find file for attachment " + attachment.getId() + " (" + attachment.getFileId() + ").");
                     continue;
@@ -270,12 +271,10 @@ public class AttachmentCopyTask implements CopyUserTaskService {
 
                 final String newFileId = dstFileStorage.saveNewFile(is);
                 attachment.setFileId(newFileId);
-
-                is.close();
             } catch (final OXException e) {
                 throw UserCopyExceptionCodes.FILE_STORAGE_PROBLEM.create(e);
-            } catch (final IOException e) {
-                LOG.warn("Could not close input stream.", e);
+            } finally {
+                Streams.close(is);
             }
         }
     }

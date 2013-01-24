@@ -63,6 +63,7 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -222,12 +223,9 @@ public final class URLMailAttachmentDataSource implements DataSource {
     private static void closeURLConnection(final URLConnection urlCon) {
         if (null != urlCon) {
             try {
-                final InputStream stream = urlCon.getInputStream();
-                if (null != stream) {
-                    stream.close();
-                }
-            } catch (final IOException e) {
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(URLMailAttachmentDataSource.class)).error(e.getMessage(), e);
+                Streams.close(urlCon.getInputStream());
+            } catch (final Exception e) {
+                // Ignore
             }
         }
     }

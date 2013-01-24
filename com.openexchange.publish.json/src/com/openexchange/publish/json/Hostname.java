@@ -49,37 +49,64 @@
 
 package com.openexchange.publish.json;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.publish.Publication;
 
-
 /**
- * {@link Hostname}
+ * {@link Hostname} - Provides the host name for a given publication.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Hostname {
+
     private static final Hostname INSTANCE = new Hostname();
 
-    private HostnameService hostnameService;
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static Hostname getInstance() {
+        return INSTANCE;
+    }
 
-    public String getHostname(Publication pub) {
-        if(hostnameService == null) {
+    // ------------------------------------------------------------------------- //
+
+    private final AtomicReference<HostnameService> hostnameService;
+
+    /**
+     * Prevent initialization.
+     */
+    private Hostname() {
+        super();
+        hostnameService = new AtomicReference<HostnameService>();
+    }
+
+    /**
+     * Gets the host name for given publication.
+     *
+     * @param pub The publication
+     * @return The associated host name
+     */
+    public String getHostname(final Publication pub) {
+        if (null == pub) {
+            return null;
+        }
+        final HostnameService hostnameService = this.hostnameService.get();
+        if (hostnameService == null) {
             return null;
         }
         return hostnameService.getHostname(pub.getUserId(), pub.getContext().getContextId());
     }
 
-
-    public void setHostnameService(HostnameService hostnameService) {
-        this.hostnameService = hostnameService;
+    /**
+     * Sets the host name service.
+     *
+     * @param hostnameService The service
+     */
+    public void setHostnameService(final HostnameService hostnameService) {
+        this.hostnameService.set(hostnameService);
     }
 
-    private Hostname() {
-
-    }
-
-    public static Hostname getInstance() {
-        return INSTANCE;
-    }
 }

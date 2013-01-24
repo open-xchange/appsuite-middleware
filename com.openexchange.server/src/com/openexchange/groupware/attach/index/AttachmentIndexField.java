@@ -59,6 +59,7 @@ import com.openexchange.index.IndexField;
  */
 public enum AttachmentIndexField implements IndexField {
 
+    UUID,
     MODULE,
     SERVICE,
     ACCOUNT,

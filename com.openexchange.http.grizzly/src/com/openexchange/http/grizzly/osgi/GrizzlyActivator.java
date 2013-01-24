@@ -51,6 +51,7 @@ package com.openexchange.http.grizzly.osgi;
 
 import java.util.concurrent.ExecutorService;
 import org.glassfish.grizzly.comet.CometAddOn;
+import org.glassfish.grizzly.http.ajp.AjpAddOn;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.OXHttpServer;
@@ -155,7 +156,14 @@ public class GrizzlyActivator extends HousekeepingActivator {
             serverConfiguration.setMaxRequestParameters(grizzlyConfig.getMaxRequestParameters());
 
             final NetworkListener networkListener = new NetworkListener("http-listener", grizzlyConfig.getHttpHost(), grizzlyConfig.getHttpPort());
-            // networkListener.setChunkingEnabled(false);
+
+            if (grizzlyConfig.isAJPEnabled()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Enabling AJP for Grizzly server.");
+                }
+                networkListener.registerAddOn(new AjpAddOn());
+            }
+
             TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport();
             networkListener.setTransport(configuredTcpNioTransport);
 

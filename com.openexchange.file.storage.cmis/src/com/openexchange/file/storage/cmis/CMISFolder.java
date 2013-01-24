@@ -65,6 +65,7 @@ import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link CMISFolder}
@@ -102,7 +103,7 @@ public final class CMISFolder extends DefaultFileStorageFolder {
      * @param folder The CMIS folder denoting the directory
      * @throws OXException If parsing CMIS folder property set fails
      */
-    public void parseSmbFolder(final Folder folder) throws OXException {
+    public void parseCmisFolder(final Folder folder) throws OXException {
         if (null != folder) {
             try {
                 final CMISEntityMapping mapping = CMISEntityMapping.DEFAULT.get();
@@ -118,14 +119,15 @@ public final class CMISFolder extends DefaultFileStorageFolder {
                             permission.setNoPermissions();
                             permission.setFolderPermission(FileStoragePermission.READ_FOLDER);
                             permission.setEntity(userId);
-                            for (final String perm : perms) {
-                                if ("read".equalsIgnoreCase(perm) || "cmis:read".equalsIgnoreCase(perm)) {
+                            for (String perm : perms) {
+                                perm = toLowerCase(perm);
+                                if ("read".equals(perm) || "cmis:read".equals(perm)) {
                                     permission.setReadPermission(FileStoragePermission.READ_ALL_OBJECTS);
-                                } else if ("write".equalsIgnoreCase(perm) || "cmis:write".equalsIgnoreCase(perm)) {
+                                } else if ("write".equals(perm) || "cmis:write".equals(perm)) {
                                     permission.setWritePermission(FileStoragePermission.READ_ALL_OBJECTS);
                                     permission.setDeletePermission(FileStoragePermission.DELETE_ALL_OBJECTS);
                                     permission.setFolderPermission(FileStoragePermission.CREATE_SUB_FOLDERS);
-                                } else if ("all".equalsIgnoreCase(perm) || "cmis:all".equalsIgnoreCase(perm)) {
+                                } else if ("all".equals(perm) || "cmis:all".equals(perm)) {
                                     permission.setMaxPermissions();
                                 }
                             }
@@ -175,6 +177,19 @@ public final class CMISFolder extends DefaultFileStorageFolder {
                 throw CMISExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

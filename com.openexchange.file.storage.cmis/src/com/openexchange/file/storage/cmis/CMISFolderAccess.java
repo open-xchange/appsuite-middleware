@@ -196,7 +196,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
          * Convert to a folder
          */
         final CMISFolder cmisFolder = new CMISFolder(session.getUserId());
-        cmisFolder.parseSmbFolder(folder);
+        cmisFolder.parseCmisFolder(folder);
         cmisFolder.setFileCount(fileCount);
         cmisFolder.setSubfolders(hasSubdir);
         cmisFolder.setSubscribedSubfolders(hasSubdir);

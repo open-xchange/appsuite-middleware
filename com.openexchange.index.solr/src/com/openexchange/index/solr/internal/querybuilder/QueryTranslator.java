@@ -49,6 +49,8 @@
 
 package com.openexchange.index.solr.internal.querybuilder;
 
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
+
 /**
  * {@link QueryTranslator}
  *
@@ -56,7 +58,7 @@ package com.openexchange.index.solr.internal.querybuilder;
  */
 public interface QueryTranslator {
 
-    public void init(String name, Configuration config) throws TranslationException;
+    public void init(String name, Configuration config, FieldConfiguration fieldConfig) throws TranslationException;
 
     public String translate(Object o) throws TranslationException;
 }

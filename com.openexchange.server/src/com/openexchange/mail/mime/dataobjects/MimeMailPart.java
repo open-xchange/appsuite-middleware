@@ -309,6 +309,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
@@ -362,6 +365,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             try {
                 return part.getInputStream();
             } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(
                         new com.openexchange.java.StringAllocator(256).append("Part's input stream could not be obtained: ").append(
@@ -481,6 +487,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             if ("No content".equals(e.getMessage())) {
@@ -562,6 +571,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -848,6 +860,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
                 throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
             } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         }

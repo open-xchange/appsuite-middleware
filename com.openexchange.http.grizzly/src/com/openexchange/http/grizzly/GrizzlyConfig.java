@@ -96,9 +96,12 @@ public class GrizzlyConfig implements Initialization {
 
     /** Unique backend route for every single backend behind the load balancer */
     private String backendRoute = "OX0";
-    
+
     /** Do we want to send absolute or relative redirects */
     private boolean isAbsoluteRedirect = false;
+
+    /** Do we want to enable the AJP Filter for incoming requests */
+    private boolean isAJPEnabled = false;
 
     // server properties
 
@@ -162,6 +165,7 @@ public class GrizzlyConfig implements Initialization {
         this.isWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
         this.isCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
         this.isAbsoluteRedirect = configService.getBoolProperty("com.openexchange.http.grizzly.doAbsoluteRedirect", false);
+        this.isAJPEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasAJPEnabled", false);
 
         // server properties
         this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W")));
@@ -289,7 +293,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the isForceHttps
-     * 
+     *
      * @return The isForceHttps
      */
     public boolean isForceHttps() {
@@ -364,7 +368,7 @@ public class GrizzlyConfig implements Initialization {
         return httpsProtoPort;
     }
 
-    
+
     /**
      * Gets the isAbsoluteRedirect
      *
@@ -372,6 +376,25 @@ public class GrizzlyConfig implements Initialization {
      */
     public boolean isAbsoluteRedirect() {
         return isAbsoluteRedirect;
+    }
+
+    /**
+     * Gets the isAJPEnabled property.
+     * @return the isAJPEnabled property.
+     */
+    public boolean isAJPEnabled() {
+        return isAJPEnabled;
+    }
+
+    /**
+     * Gets if we should consider X-Forward-Headers that reach the backend.
+     * Those can be spoofed by clients so we have to make sure to consider the headers only if the proxy/proxies reliably override those
+     * headers for incoming requests.
+     * Disabled by default as we now use relative redirects for Grizzly.
+     * @return
+     */
+    public boolean isConsiderXForwards() {
+        return false;
     }
 
 }

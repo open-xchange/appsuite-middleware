@@ -734,7 +734,7 @@ public class NoSQLSessionStorageService implements SessionStorageService {
         Session[] sessions = getUserSessions(userId, contextId);
         return null != sessions ? sessions.length : 0;
     }
-    
+
     public static NoSQLSessionStorageService getStorageService() {
         return instance;
     }

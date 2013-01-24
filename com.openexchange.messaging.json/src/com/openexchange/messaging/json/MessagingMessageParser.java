@@ -66,6 +66,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.java.Streams;
 import com.openexchange.messaging.ByteArrayContent;
 import com.openexchange.messaging.CaptchaParams;
 import com.openexchange.messaging.ContentDisposition;
@@ -256,13 +257,7 @@ public class MessagingMessageParser {
                             bodyPart.setContent(attachmentContent, "application/octet-stream");
                             bodyPart.setDisposition(MessagingPart.ATTACHMENT);
                         } finally {
-                            try {
-                                in.close();
-                            } catch (final IOException e) {
-                                com.openexchange.log.LogFactory.getLog(MessagingMessageParser.BinaryContentParser.class).error(
-                                    "Couldn't close input stream.",
-                                    e);
-                            }
+                            Streams.close(in);
                         }
                     }
                     mimeMultipartContent.addBodyPart(bodyPart);
@@ -498,13 +493,7 @@ public class MessagingMessageParser {
                     }
                     return new ByteArrayContent(out.toByteArray());
                 } finally {
-                    try {
-                        in.close();
-                    } catch (final IOException e) {
-                        com.openexchange.log.LogFactory.getLog(MessagingMessageParser.BinaryContentParser.class).error(
-                            "Couldn't close input stream.",
-                            e);
-                    }
+                    Streams.close(in);
                 }
             } else if (byte[].class.isInstance(content)) {
                 return new ByteArrayContent((byte[]) content);

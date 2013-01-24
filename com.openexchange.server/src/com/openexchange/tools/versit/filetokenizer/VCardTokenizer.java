@@ -57,6 +57,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.ICalendar;
@@ -148,13 +149,7 @@ public class VCardTokenizer {
             }
         } catch (final IOException e) {
             LOG.error("IOException while trying to tokenize stream that was a VCARD (supposedly)", e);
-            if (vcard != null) {
-                try {
-                    vcard.close();
-                } catch (final IOException e1) {
-                    LOG.error("Tried to close stream of VCARD that was closed already", e);
-                }
-            }
+            Streams.close(vcard);
         }
         return chunks;
     }

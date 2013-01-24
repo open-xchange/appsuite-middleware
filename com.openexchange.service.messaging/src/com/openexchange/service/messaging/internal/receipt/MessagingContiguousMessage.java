@@ -55,8 +55,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.service.messaging.Message;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.service.messaging.Message;
 import com.openexchange.service.messaging.MessagingServiceExceptionCode;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
@@ -136,11 +137,7 @@ public final class MessagingContiguousMessage {
             } catch (final ClassNotFoundException e) {
                 throw MessagingServiceExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
-                try {
-                    ois.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
+                Streams.close(ois);
             }
         }
     }

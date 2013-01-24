@@ -62,6 +62,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
@@ -80,12 +81,18 @@ public class PresenceBuilderTest {
     private JSONObject presenceJSON = null;
 
     private final static String readFile(String file) throws IOException, URISyntaxException {
-        URL path = PresenceBuilderTest.class.getResource(file);
-        FileChannel channel = new FileInputStream(new File(path.toURI())).getChannel();
-        ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
-        channel.read(buffer);
-        channel.close();
-        return new String(buffer.array());
+        FileChannel channel = null;
+        try {
+            URL path = PresenceBuilderTest.class.getResource(file);
+            channel = new FileInputStream(new File(path.toURI())).getChannel();
+            ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
+            channel.read(buffer);
+            channel.close();
+            channel = null;
+            return new String(buffer.array());
+        } finally {
+            Streams.close(channel);
+        }
      }
 
     /**

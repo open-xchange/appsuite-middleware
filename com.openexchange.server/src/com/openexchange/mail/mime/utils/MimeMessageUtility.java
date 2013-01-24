@@ -107,6 +107,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.image.ImageActionFactory;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
@@ -124,7 +125,6 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
-import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -136,7 +136,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
  * {@link MimeMessageUtility} - Utilities for MIME messages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MimeMessageUtility {
@@ -173,7 +173,7 @@ public final class MimeMessageUtility {
 
     /**
      * Checks whether another attempt to load content of a message and/or part should be performed.
-     * 
+     *
      * @param e The exception to check
      * @return <code>true</code> to retry; otherwise <code>false</code>
      */
@@ -197,7 +197,7 @@ public final class MimeMessageUtility {
      * <p>
      * Note that returned instance of {@link MailDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
      * safety:
-     * 
+     *
      * <pre>
      * ...
      * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
@@ -206,7 +206,7 @@ public final class MimeMessageUtility {
      * }
      * ...
      * </pre>
-     * 
+     *
      * @return The {@link MailDateFormat} for specified session
      */
     public static MailDateFormat getDefaultMailDateFormat() {
@@ -218,7 +218,7 @@ public final class MimeMessageUtility {
      * <p>
      * Note that returned instance of {@link MailDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
      * safety:
-     * 
+     *
      * <pre>
      * ...
      * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
@@ -227,7 +227,7 @@ public final class MimeMessageUtility {
      * }
      * ...
      * </pre>
-     * 
+     *
      * @param session The user session
      * @return The {@link MailDateFormat} for specified session
      * @throws OXException If {@link MailDateFormat} cannot be returned
@@ -247,7 +247,7 @@ public final class MimeMessageUtility {
      * <p>
      * Note that returned instance of {@link MailDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
      * safety:
-     * 
+     *
      * <pre>
      * ...
      * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(timeZoneId);
@@ -256,7 +256,7 @@ public final class MimeMessageUtility {
      * }
      * ...
      * </pre>
-     * 
+     *
      * @param timeZoneId The time zone identifier
      * @return The {@link MailDateFormat} for specified time zone identifier
      * @throws OXException If {@link MailDateFormat} cannot be returned
@@ -293,7 +293,7 @@ public final class MimeMessageUtility {
     /**
      * Checks if specified headers are empty. The passed headers are considered as all the values for a certain header or <code>null</code>
      * if no headers exist.
-     * 
+     *
      * @param headers The values for a certain header
      * @return <code>true</code> if specified headers are empty; otherwise <code>false</code>
      */
@@ -332,11 +332,11 @@ public final class MimeMessageUtility {
      * Detects if given HTML content contains inlined images
      * <p>
      * Example:
-     * 
+     *
      * <pre>
      * &lt;img src=&quot;cid:s345asd845@12drg&quot;&gt;
      * </pre>
-     * 
+     *
      * @param htmlContent The HTML content
      * @return <code>true</code> if given HTML content contains inlined images; otherwise <code>false</code>
      */
@@ -346,7 +346,7 @@ public final class MimeMessageUtility {
 
     /**
      * Gathers all occurring content IDs in HTML content and returns them as a list
-     * 
+     *
      * @param htmlContent The HTML content
      * @return an instance of <code>{@link List}</code> containing all occurring content IDs
      */
@@ -381,7 +381,7 @@ public final class MimeMessageUtility {
 
     /**
      * Gets the plain Content-Id value; meaning possible starting <code>'&lt;'</code> and trailing <code>'&gt;'</code> stripped off.
-     * 
+     *
      * @param contentId The Content-Id value to process
      * @return The plain Content-Id value
      */
@@ -403,7 +403,7 @@ public final class MimeMessageUtility {
     /**
      * Compares (case insensitive) the given values of message header "Content-ID". The leading/trailing characters '<code>&lt;</code>' and
      * ' <code>&gt;</code>' are ignored during comparison
-     * 
+     *
      * @param contentId1 The first content ID
      * @param contentId2 The second content ID
      * @return <code>true</code> if both are equal; otherwise <code>false</code>
@@ -424,7 +424,7 @@ public final class MimeMessageUtility {
 
     /**
      * Checks if specified &lt;image&gt; tag's <code>src</code> attribute seems to point to OX image Servlet.
-     * 
+     *
      * @param imageTag The &lt;image&gt; tag
      * @return <code>true</code> if image Servlet is addressed; otherwise <code>false</code>
      */
@@ -458,7 +458,7 @@ public final class MimeMessageUtility {
      * &nbsp;&nbsp;&lt;img&nbsp;src=&quot;/ajax/image?uid=12gf356j7&quot;&gt;
      * </code></li>
      * </ul>
-     * 
+     *
      * @param htmlContent The HTML content
      * @return <code>true</code> if given HTML content contains references to local image files; otherwise <code>false</code>
      */
@@ -479,7 +479,7 @@ public final class MimeMessageUtility {
 
     /**
      * Determines specified part's real filename if any available.
-     * 
+     *
      * @param part The part whose filename shall be determined
      * @return The part's real filename or <code>null</code> if none present
      */
@@ -531,7 +531,7 @@ public final class MimeMessageUtility {
 
     /**
      * Checks if given multipart contains (file) attachments
-     * 
+     *
      * @param mp The multipart to examine
      * @param subtype The multipart's subtype
      * @return <code>true</code> if given multipart contains (file) attachments; otherwise <code>false</code>
@@ -577,7 +577,7 @@ public final class MimeMessageUtility {
 
     /**
      * Checks if given BODYSTRUCTURE item indicates to contain (file) attachments
-     * 
+     *
      * @param bodystructure The BODYSTRUCTURE item
      * @return <code>true</code> if given BODYSTRUCTURE item indicates to contain (file) attachments; otherwise <code>false</code>
      */
@@ -612,7 +612,7 @@ public final class MimeMessageUtility {
 
     /**
      * Decodes a "Subject" header obtained from ENVELOPE fetch item.
-     * 
+     *
      * @param subject The subject obtained from ENVELOPE fetch item
      * @return The decoded subject value
      */
@@ -651,7 +651,7 @@ public final class MimeMessageUtility {
 
     /**
      * Decodes a string header obtained from ENVELOPE fetch item.
-     * 
+     *
      * @param value The header value
      * @return The decoded header value
      */
@@ -666,7 +666,7 @@ public final class MimeMessageUtility {
 
     /**
      * Internal method to decode a string header obtained from ENVELOPE fetch item.
-     * 
+     *
      * @param value The header value
      * @return The decoded header value
      */
@@ -695,7 +695,7 @@ public final class MimeMessageUtility {
      * If the charset-conversion fails for any sequence, an {@link UnsupportedEncodingException} is thrown.
      * <p>
      * If the String is not a RFC 2047 style encoded header, it is returned as-is
-     * 
+     *
      * @param headerValue The possibly encoded header value
      * @return The possibly decoded header value
      */
@@ -806,7 +806,7 @@ public final class MimeMessageUtility {
 
     /**
      * Checks if given raw header contains non-ascii characters.
-     * 
+     *
      * @param rawHeader The raw header
      * @return The proper unicode string
      */
@@ -834,7 +834,7 @@ public final class MimeMessageUtility {
 
     /**
      * Checks whether the specified string's characters are ASCII 7 bit
-     * 
+     *
      * @param s The string to check
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
@@ -849,7 +849,7 @@ public final class MimeMessageUtility {
 
     /**
      * Decodes a multi-mime-encoded header value using the algorithm specified in RFC 2047, Section 6.1 in a safe manner.
-     * 
+     *
      * @param headerValue The possibly encoded header value
      * @return The possibly decoded header value
      */
@@ -908,13 +908,13 @@ public final class MimeMessageUtility {
     /**
      * Prepares specified encoded word, thus even corrupt headers are properly handled.<br>
      * Here is an example of such a corrupt header:
-     * 
+     *
      * <pre>
      * =?windows-1258?Q?foo_bar@mail.foobar.com, _Foo_B=E4r_=28fb@somewhere,
      *  =@unspecified-domain,  =?windows-1258?Q?de=29@mail.foobar.com,
      *  _Jane_Doe@mail.foobar.com, ?=
      * </pre>
-     * 
+     *
      * @param eword The possibly corrupt encoded word
      * @param charset The charset
      * @return The prepared encoded word which won't cause a {@link ParseException parse error} during decoding
@@ -992,7 +992,7 @@ public final class MimeMessageUtility {
      * <p>
      * Returns the value of the "filename" parameter from the "Content-Disposition" header field. If its not available, returns the value of
      * the "name" parameter from the "Content-Type" header field. Returns <code>null</code> if both are absent.
-     * 
+     *
      * @param mailPart The mail part whose filename shall be returned
      * @return The mail part's decoded filename or <code>null</code>.
      */
@@ -1017,7 +1017,7 @@ public final class MimeMessageUtility {
      * parsing address headers in mail messages.
      * <p>
      * Additionally the personal parts are MIME encoded using default MIME charset.
-     * 
+     *
      * @param addresslist - comma separated address strings
      * @param strict - <code>true</code> to enforce RFC822 syntax; otherwise <code>false</code>
      * @return An array of <code>InternetAddress</code> objects
@@ -1068,7 +1068,7 @@ public final class MimeMessageUtility {
      * parsing address headers in mail messages.
      * <p>
      * Additionally the personal parts are MIME encoded using default MIME charset.
-     * 
+     *
      * @param addresslist - comma separated address strings
      * @param strict - <code>true</code> to enforce RFC822 syntax; otherwise <code>false</code>
      * @param failOnError - <code>true</code> to fail if parsing fails; otherwise <code>false</code> to get a plain-text representation
@@ -1153,7 +1153,7 @@ public final class MimeMessageUtility {
      * that will work as a literal replacement <code>s</code> in the <code>appendReplacement</code> method of the {@link Matcher} class. The
      * <code>String</code> produced will match the sequence of characters in <code>s</code> treated as a literal sequence. Slashes ('\') and
      * dollar signs ('$') will be given no special meaning.
-     * 
+     *
      * @param s The string to be literalized
      * @return A literal string replacement
      */
@@ -1190,19 +1190,19 @@ public final class MimeMessageUtility {
      * <p>
      * This method guarantees that the resulting string can be used to build an Internet address according to RFC 822 syntax so that the
      * <code>{@link InternetAddress#parse(String)}</code> constructor won't throw an instance of <code>{@link AddressException}</code>.
-     * 
+     *
      * <pre>
      * final String quotedPersonal = quotePersonal(&quot;Doe, Jane&quot;);
-     * 
+     *
      * final String buildAddr = quotedPersonal + &quot; &lt;someone@somewhere.com&gt;&quot;;
      * System.out.println(buildAddr);
      * // Plain Address: &quot;=?UTF-8?Q?Doe=2C_Jan=C3=A9?=&quot; &lt;someone@somewhere.com&gt;
-     * 
+     *
      * final InternetAddress ia = new InternetAddress(buildAddr);
      * System.out.println(ia.toUnicodeString());
      * // Unicode Address: &quot;Doe, Jane&quot; &lt;someone@somewhere.com&gt;
      * </pre>
-     * 
+     *
      * @param personal The personal's string representation
      * @return The properly quoted personal for building an Internet address according to RFC 822 syntax
      */
@@ -1212,7 +1212,7 @@ public final class MimeMessageUtility {
 
     /**
      * Quotes given phrase if needed.
-     * 
+     *
      * @param phrase The phrase
      * @param encode <code>true</code> to encode phrase according to RFC 822 syntax if needed; otherwise <code>false</code>
      * @return The quoted phrase
@@ -1254,7 +1254,7 @@ public final class MimeMessageUtility {
 
     /**
      * Folds specified <code>Content-Type</code> value.
-     * 
+     *
      * @param contentDisposition The <code>Content-Type</code> value
      * @return The folded <code>Content-Type</code> value
      */
@@ -1266,7 +1266,7 @@ public final class MimeMessageUtility {
 
     /**
      * Folds specified <code>Content-Disposition</code> value.
-     * 
+     *
      * @param contentDisposition The <code>Content-Disposition</code> value
      * @return The folded <code>Content-Disposition</code> value
      */
@@ -1280,7 +1280,7 @@ public final class MimeMessageUtility {
      * <tt>used</tt> indicates how many characters have been used in the current line; it is usually the length of the header name.
      * <p>
      * Note that line breaks in the string aren't escaped; they probably should be.
-     * 
+     *
      * @param used The characters used in line so far
      * @param foldMe The string to fold
      * @return The folded string
@@ -1349,7 +1349,7 @@ public final class MimeMessageUtility {
 
     /**
      * Unfolds a folded header. Any line breaks that aren't escaped and are followed by whitespace are removed.
-     * 
+     *
      * @param headerLine The header line to unfold
      * @return The unfolded string
      */
@@ -1452,17 +1452,17 @@ public final class MimeMessageUtility {
      * desirable to encode more text than will fit in an 'encoded-word' of 75 characters, multiple 'encoded-word's (separated by CRLF SPACE)
      * may be used.&quot;
      * <p>
-     * 
+     *
      * <pre>
      * Subject: =?UTF-8?Q?Kombatibilit=C3=A4t?=\r\n =?UTF-8?Q?sliste?=
      * </pre>
-     * 
+     *
      * Should be unfolded to:
-     * 
+     *
      * <pre>
      * Subject: =?UTF-8?Q?Kombatibilit=C3=A4t?==?UTF-8?Q?sliste?=
      * </pre>
-     * 
+     *
      * @param encodedWords The possibly folded encoded-words
      * @return The unfolded encoded-words
      */
@@ -1474,7 +1474,7 @@ public final class MimeMessageUtility {
 
     /**
      * Gets the matching header out of RFC 822 data input stream.
-     * 
+     *
      * @param headerName The header name
      * @param inputStream The input stream
      * @param closeStream <code>true</code> to close the stream on finish; otherwise <code>false</code>
@@ -1557,18 +1557,14 @@ public final class MimeMessageUtility {
             throw e;
         } finally {
             if (close) {
-                try {
-                    inputStream.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
+                Streams.close(inputStream);
             }
         }
     }
 
     /**
      * Writes specified part's headers to given output stream.
-     * 
+     *
      * @param p The part
      * @param os The output stream
      * @throws OXException If an I/O error occurs
@@ -1606,13 +1602,16 @@ public final class MimeMessageUtility {
             los.writeln();
             os.flush();
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
      * Writes specified part's headers to given output stream.
-     * 
+     *
      * @param p The part
      * @param os The output stream
      * @throws OXException If an error occurs
@@ -1649,13 +1648,16 @@ public final class MimeMessageUtility {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
      * Writes specified part's headers to given output stream.
-     * 
+     *
      * @param p The part
      * @param os The output stream
      * @throws OXException If an error occurs
@@ -1682,6 +1684,9 @@ public final class MimeMessageUtility {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -1720,7 +1725,7 @@ public final class MimeMessageUtility {
 
     /**
      * Drops invalid "X-Original-Headers" header from RFC822 source file.
-     * 
+     *
      * @param file The file
      * @param newTempFile The new file (to write cleansed content to)
      * @return The resulting file

@@ -91,8 +91,9 @@ public class ServletActivator extends AbstractSessionServletActivator {
         PublicationServlet.setFactory(publicationHandlerFactory);
         PublicationTargetServlet.setFactory(publicationTargetHandlerFactory);
 
-        registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix() + TARGET_ALIAS_APPENDIX, new PublicationTargetServlet());
-        registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix() + PUB_ALIAS_APPENDIX, new PublicationServlet());
+        final String prefix = getService(DispatcherPrefixService.class).getPrefix();
+        registerSessionServlet(prefix + TARGET_ALIAS_APPENDIX, new PublicationTargetServlet());
+        registerSessionServlet(prefix + PUB_ALIAS_APPENDIX, new PublicationServlet());
     }
 
     @Override

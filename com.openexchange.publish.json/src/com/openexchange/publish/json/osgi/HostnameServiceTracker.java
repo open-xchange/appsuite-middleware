@@ -61,24 +61,27 @@ import com.openexchange.publish.json.Hostname;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class HostnameServiceTracker extends ServiceTracker {
+public class HostnameServiceTracker extends ServiceTracker<HostnameService, HostnameService> {
 
     private final Hostname hostname;
 
-    public HostnameServiceTracker(BundleContext context, Hostname hostname) {
+    /**
+     * Initializes a new {@link HostnameServiceTracker}.
+     */
+    public HostnameServiceTracker(final BundleContext context, final Hostname hostname) {
         super(context, HostnameService.class.getName(), null);
         this.hostname = hostname;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        Object service = super.addingService(reference);
-        hostname.setHostnameService((HostnameService) service);
+    public HostnameService addingService(final ServiceReference<HostnameService> reference) {
+        final HostnameService service = super.addingService(reference);
+        hostname.setHostnameService(service);
         return service;
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<HostnameService> reference, final HostnameService service) {
         hostname.setHostnameService(null);
     }
 

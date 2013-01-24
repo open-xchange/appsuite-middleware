@@ -59,9 +59,11 @@ import javax.mail.Address;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.SendFailedException;
+import javax.mail.Store;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
@@ -132,6 +134,18 @@ public class MimeMailException extends OXException {
         return handleMessagingException(e, mailConfig, mailConfig.getSession());
     }
 
+    /**
+     * Handles given instance of {@link MessagingException} and creates an appropriate instance of {@link OXException}
+     *
+     * @param e The messaging exception
+     * @param mailConfig The corresponding mail configuration used to add information like mail server etc.
+     * @param session The session providing user information
+     * @return An appropriate instance of {@link OXException}
+     */
+    public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session) {
+        return handleMessagingException(e, mailConfig, session, null);
+    }
+
     private static final String STR_EMPTY = "";
 
     private static final String ERR_TMP = "temporary error, please try again later";
@@ -155,9 +169,10 @@ public class MimeMailException extends OXException {
      * @param e The messaging exception
      * @param mailConfig The corresponding mail configuration used to add information like mail server etc.
      * @param session The session providing user information
+     * @param folder The optional folder
      * @return An appropriate instance of {@link OXException}
      */
-    public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session) {
+    public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session, final Folder folder) {
         try {
             if ((e instanceof javax.mail.AuthenticationFailedException) || ((e.getMessage() != null) && (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_AUTH_FAILED) != -1))) {
                 if (null != mailConfig && MailAccount.DEFAULT_ID == mailConfig.getAccountId()) {
@@ -187,63 +202,75 @@ public class MimeMailException extends OXException {
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.FOLDER_CLOSED_EXT.create(
                         e,
-                        null == f ? e.getMessage() : f.getFullName(),
+                        null == f ? appendInfo(e.getMessage(), folder) : f.getFullName(),
                         mailConfig.getServer(),
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()));
                 }
-                return MimeMailExceptionCode.FOLDER_CLOSED.create(e, null == f ? e.getMessage() : f.getFullName());
+                return MimeMailExceptionCode.FOLDER_CLOSED.create(e, null == f ? appendInfo(e.getMessage(), folder) : f.getFullName());
             } else if (e instanceof javax.mail.FolderNotFoundException) {
                 final Folder f = ((javax.mail.FolderNotFoundException) e).getFolder();
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.FOLDER_NOT_FOUND_EXT.create(
                         e,
-                        null == f ? e.getMessage() : f.getFullName(),
+                        null == f ? appendInfo(e.getMessage(), folder) : f.getFullName(),
                         mailConfig.getServer(),
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()));
                 }
-                return MimeMailExceptionCode.FOLDER_NOT_FOUND.create(e, null == f ? e.getMessage() : f.getFullName());
+                return MimeMailExceptionCode.FOLDER_NOT_FOUND.create(e, null == f ? appendInfo(e.getMessage(), folder) : f.getFullName());
             } else if (e instanceof javax.mail.IllegalWriteException) {
-                return MimeMailExceptionCode.ILLEGAL_WRITE.create(e, e.getMessage());
+                return MimeMailExceptionCode.ILLEGAL_WRITE.create(e, appendInfo(e.getMessage(), folder));
             } else if (e instanceof javax.mail.MessageRemovedException) {
-                return MimeMailExceptionCode.MESSAGE_REMOVED.create(e, e.getMessage());
+                return MimeMailExceptionCode.MESSAGE_REMOVED.create(e, appendInfo(e.getMessage(), folder));
             } else if (e instanceof javax.mail.MethodNotSupportedException) {
-                return MimeMailExceptionCode.METHOD_NOT_SUPPORTED.create(e, e.getMessage());
+                return MimeMailExceptionCode.METHOD_NOT_SUPPORTED.create(e, appendInfo(e.getMessage(), folder));
             } else if (e instanceof javax.mail.NoSuchProviderException) {
-                return MimeMailExceptionCode.NO_SUCH_PROVIDER.create(e, e.getMessage());
+                return MimeMailExceptionCode.NO_SUCH_PROVIDER.create(e, appendInfo(e.getMessage(), folder));
             } else if (e instanceof javax.mail.internet.ParseException) {
                 if (e instanceof javax.mail.internet.AddressException) {
                     final String optRef = ((AddressException) e).getRef();
                     return MimeMailExceptionCode.INVALID_EMAIL_ADDRESS.create(e, optRef == null ? STR_EMPTY : optRef);
                 }
-                return MimeMailExceptionCode.PARSE_ERROR.create(e, e.getMessage());
+                return MimeMailExceptionCode.PARSE_ERROR.create(e, appendInfo(e.getMessage(), folder));
             } else if (e instanceof javax.mail.ReadOnlyFolderException) {
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.READ_ONLY_FOLDER_EXT.create(
                         e,
-                        e.getMessage(),
+                        appendInfo(e.getMessage(), folder),
                         mailConfig.getServer(),
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()));
                 }
-                return MimeMailExceptionCode.READ_ONLY_FOLDER.create(e, e.getMessage());
+                return MimeMailExceptionCode.READ_ONLY_FOLDER.create(e, appendInfo(e.getMessage(), folder));
             } else if (e instanceof javax.mail.search.SearchException) {
-                return MimeMailExceptionCode.SEARCH_ERROR.create(e, e.getMessage());
+                return MimeMailExceptionCode.SEARCH_ERROR.create(e, appendInfo(e.getMessage(), folder));
             } else if (e instanceof com.sun.mail.smtp.SMTPSendFailedException) {
                 final SMTPSendFailedException exc = (SMTPSendFailedException) e;
                 if ((exc.getReturnCode() == 552) || (exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1)) {
                     return MimeMailExceptionCode.MESSAGE_TOO_LARGE.create(exc, new Object[0]);
+                }
+                final Exception nextException = exc.getNextException();
+                if (nextException instanceof com.sun.mail.smtp.SMTPSendFailedException) {
+                    final SMTPSendFailedException smtpExc = (SMTPSendFailedException) nextException;
+                    final Address[] invalidAddresses = smtpExc.getInvalidAddresses();
+                    if (null == invalidAddresses || invalidAddresses.length == 0) {
+                        return MimeMailExceptionCode.SEND_FAILED_MSG_EXT.create(exc, exc.getMessage(), '('+smtpExc.getMessage()+')');
+                    }
+                }
+                String serverInfo = null;
+                if (nextException instanceof com.sun.mail.smtp.SMTPAddressFailedException) {
+                    serverInfo = nextException.getMessage();
                 }
                 final Address[] addrs = exc.getInvalidAddresses();
                 if (null == addrs || addrs.length == 0) {
                     // No invalid addresses available
                     return MimeMailExceptionCode.SEND_FAILED_MSG.create(exc, exc.getMessage());
                 }
-                return MimeMailExceptionCode.SEND_FAILED.create(exc, Arrays.toString(exc.getInvalidAddresses()));
+                return MimeMailExceptionCode.SEND_FAILED_EXT.create(exc, Arrays.toString(addrs), null == serverInfo ? "" : '('+serverInfo+')');
             } else if (e instanceof javax.mail.SendFailedException) {
                 final SendFailedException exc = (SendFailedException) e;
                 if (exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1) {
@@ -296,7 +323,7 @@ public class MimeMailException extends OXException {
                 /*
                  * Default case
                  */
-                return MimeMailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
+                return MimeMailExceptionCode.MESSAGING_ERROR.create(e, appendInfo(e.getMessage(), folder));
             }
             /*
              * Messaging exception has a nested exception
@@ -339,9 +366,9 @@ public class MimeMailException extends OXException {
                     mailInterfaceMonitor.changeNumBrokenConnections(true);
                     return MimeMailExceptionCode.BROKEN_CONNECTION.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer());
                 }
-                return MimeMailExceptionCode.SOCKET_ERROR.create(e, e.getMessage());
+                return MimeMailExceptionCode.SOCKET_ERROR.create(e, appendInfo(e.getMessage(), folder));
             } else if (nextException instanceof java.net.UnknownHostException) {
-                return MimeMailExceptionCode.UNKNOWN_HOST.create(e, e.getMessage());
+                return MimeMailExceptionCode.UNKNOWN_HOST.create(e, appendInfo(e.getMessage(), folder));
             } else if (nextException instanceof java.net.SocketTimeoutException) {
                 mailInterfaceMonitor.changeNumBrokenConnections(true);
                 return MimeMailExceptionCode.CONNECT_ERROR.create(
@@ -356,9 +383,9 @@ public class MimeMailException extends OXException {
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
-                        nextException.getMessage());
+                        appendInfo(nextException.getMessage(), folder));
                 }
-                return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, nextException.getMessage());
+                return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, appendInfo(nextException.getMessage(), folder));
             } else if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.PROCESSING_ERROR_WE_EXT.create(
@@ -367,9 +394,9 @@ public class MimeMailException extends OXException {
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
-                        skipTag(nextException.getMessage()));
+                        appendInfo(skipTag(nextException.getMessage()), folder));
                 }
-                return MimeMailExceptionCode.PROCESSING_ERROR_WE.create(e, skipTag(nextException.getMessage()));
+                return MimeMailExceptionCode.PROCESSING_ERROR_WE.create(e, appendInfo(skipTag(nextException.getMessage()), folder));
             } else if (nextException instanceof com.sun.mail.iap.BadCommandException) {
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.PROCESSING_ERROR_EXT.create(
@@ -378,9 +405,9 @@ public class MimeMailException extends OXException {
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
-                        nextException.getMessage());
+                        appendInfo(nextException.getMessage(), folder));
                 }
-                return MimeMailExceptionCode.PROCESSING_ERROR.create(e, nextException.getMessage());
+                return MimeMailExceptionCode.PROCESSING_ERROR.create(e, appendInfo(nextException.getMessage(), folder));
             } else if (nextException instanceof com.sun.mail.iap.ProtocolException) {
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.PROCESSING_ERROR_EXT.create(
@@ -389,27 +416,27 @@ public class MimeMailException extends OXException {
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
-                        nextException.getMessage());
+                        appendInfo(nextException.getMessage(), folder));
                 }
-                return MimeMailExceptionCode.PROCESSING_ERROR.create(e, nextException.getMessage());
+                return MimeMailExceptionCode.PROCESSING_ERROR.create(e, appendInfo(nextException.getMessage(), folder));
             } else if (nextException instanceof java.io.IOException) {
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.IO_ERROR_EXT.create(
                         e,
-                        nextException.getMessage(),
+                        appendInfo(nextException.getMessage(), folder),
                         mailConfig.getServer(),
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()));
                 }
-                return MimeMailExceptionCode.IO_ERROR.create(nextException, nextException.getMessage());
+                return MimeMailExceptionCode.IO_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder));
             } else if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_QUOTA) != -1) {
                 return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, EMPTY_ARGS);
             }
             /*
              * Default case
              */
-            return MimeMailExceptionCode.MESSAGING_ERROR.create(nextException, nextException.getMessage());
+            return MimeMailExceptionCode.MESSAGING_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder));
         } catch (final Throwable t) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(t.getMessage(), t);
@@ -417,8 +444,29 @@ public class MimeMailException extends OXException {
             /*
              * This routine should not fail since it's purpose is wrap a corresponding mail error around specified messaging error
              */
-            return MimeMailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
+            return MimeMailExceptionCode.MESSAGING_ERROR.create(e, appendInfo(e.getMessage(), folder));
         }
+    }
+
+    /**
+     * Appends command information to given information string.
+     *
+     * @param info The information
+     * @param folder The optional folder
+     * @return The command with optional information appended
+     */
+    public static String appendInfo(final String info, final Folder folder) {
+        if (null == folder) {
+            return info;
+        }
+        final StringAllocator sb = new StringAllocator(info);
+        sb.append(" (folder=\"").append(folder.getFullName()).append('"');
+        final Store store = folder.getStore();
+        if (null != store) {
+            sb.append(", store=\"").append(store.toString()).append('"');
+        }
+        sb.append(')');
+        return sb.toString();
     }
 
     private static final Pattern PATTERN_TAG = Pattern.compile("A[0-9]+ (.+)");

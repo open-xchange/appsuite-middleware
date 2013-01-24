@@ -57,6 +57,7 @@ import java.util.concurrent.locks.Lock;
 import com.openexchange.concurrent.NonBlockingSynchronizer;
 import com.openexchange.concurrent.Synchronizable;
 import com.openexchange.concurrent.Synchronizer;
+import com.openexchange.java.Streams;
 
 /**
  * {@link SynchronizableBufferedInputStream} - A synchronizable version of {@link BufferedInputStream}.
@@ -411,9 +412,7 @@ public class SynchronizableBufferedInputStream extends BufferedInputStream imple
                 if (bufUpdater.compareAndSet(this, buffer, null)) {
                     final InputStream input = in;
                     in = null;
-                    if (input != null) {
-                        input.close();
-                    }
+                    Streams.close(input);
                     return;
                 }
                 // Else retry in case a new buf was CASed in fill()

@@ -77,14 +77,14 @@ public interface ICharArray extends CharSequence {
 
     /**
      * Copies content to specified character array.
-     * 
+     *
      * @param other The character array top copy to
      */
     public void copyTo(CharArray other);
 
     /**
      * Copies content from specified character array.
-     * 
+     *
      * @param other The character array to copy from
      */
     public void copyFrom(CharArray other);

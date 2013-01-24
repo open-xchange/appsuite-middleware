@@ -84,7 +84,7 @@ public class ServletActivator extends HousekeepingActivator {
     private final PublicationServicesActivator activator;
     private volatile boolean registered;
     private volatile I18nServiceTrackerCustomizer customizer;
-    
+
     /**
      * Initializes a new {@link ServletActivator}.
      */

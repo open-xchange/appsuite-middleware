@@ -434,7 +434,7 @@ public final class LogProperties {
      * "propertyName3=propertyValue3"
      * </pre>
      * where the properties are sorted alphabetically.
-     * 
+     *
      * @param nonMatching The property name to ignore
      */
     public static String getAndPrettyPrint(final LogProperties.Name nonMatching) {
@@ -450,7 +450,7 @@ public final class LogProperties {
      * "propertyName3=propertyValue3"
      * </pre>
      * where the properties are sorted alphabetically.
-     * 
+     *
      * @param nonMatching The property names to ignore
      */
     public static String getAndPrettyPrint(final LogProperties.Name... nonMatching) {
@@ -466,7 +466,7 @@ public final class LogProperties {
      * "propertyName3=propertyValue3"
      * </pre>
      * where the properties are sorted alphabetically.
-     * 
+     *
      * @param nonMatching The property names to ignore
      */
     public static String getAndPrettyPrint(final Collection<LogProperties.Name> nonMatching) {

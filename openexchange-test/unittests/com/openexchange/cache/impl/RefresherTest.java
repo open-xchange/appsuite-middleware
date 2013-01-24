@@ -266,6 +266,22 @@ public class RefresherTest extends TestCase {
                 public Set<?> getKeysInRange(int start, int end) throws OXException {
                     throw new UnsupportedOperationException();
                 }
+                @Override
+                public void put(Serializable key, Serializable obj, boolean invalidate) throws OXException {
+                    put(key, obj);
+                }
+                @Override
+                public void put(Serializable key, Serializable val, ElementAttributes attr, boolean invalidate) throws OXException {
+                    put(key, val, attr);
+                }
+                @Override
+                public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr, boolean invalidate) throws OXException {
+                    putInGroup(key, groupName, value, attr);
+                }
+                @Override
+                public void putInGroup(Serializable key, String groupName, Serializable value, boolean invalidate) throws OXException {
+                    putInGroup(key, groupName, value);
+                }
             };
             @Override
             public void freeCache(final String name) {

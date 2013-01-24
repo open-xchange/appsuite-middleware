@@ -56,6 +56,7 @@ import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -99,11 +100,7 @@ public class MimeBinaryContent implements BinaryContent {
         } catch (final IOException e) {
             throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeBinaryContent.class)).error("Couldn't close stream.", e);
-            }
+            Streams.close(inputStream);
         }
     }
 

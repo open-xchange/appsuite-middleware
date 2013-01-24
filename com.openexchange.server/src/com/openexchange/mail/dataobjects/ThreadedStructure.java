@@ -52,7 +52,7 @@ package com.openexchange.mail.dataobjects;
 import java.util.List;
 
 /**
- * {@link ThreadedStructure}
+ * {@link ThreadedStructure} - A container providing thread-sorted mails.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

@@ -56,6 +56,7 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import org.apache.commons.logging.Log;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.cifs.cache.SmbFileMap;
 import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
 import com.openexchange.session.Session;
@@ -95,10 +96,16 @@ public abstract class AbstractCIFSAccess {
     protected final FileStorageAccount account;
 
     /**
+     * The warnings-aware reference.
+     */
+    protected final WarningsAware warningsAware;
+
+    /**
      * Initializes a new {@link AbstractCIFSAccess}.
      */
-    protected AbstractCIFSAccess(final String rootUrl, final NtlmPasswordAuthentication auth, final FileStorageAccount account, final Session session) {
+    protected AbstractCIFSAccess(final String rootUrl, final NtlmPasswordAuthentication auth, final FileStorageAccount account, final Session session, final WarningsAware warningsAware) {
         super();
+        this.warningsAware = warningsAware;
         this.rootUrl = rootUrl;
         this.account = account;
         this.session = session;
@@ -136,11 +143,15 @@ public abstract class AbstractCIFSAccess {
      */
     protected boolean exists(final SmbFile smbFolder) throws SmbException {
         try {
-            return smbFolder.exists();
+            if (!smbFolder.exists()) {
+                return false;
+            }
+            return !smbFolder.getName().endsWith("$/");
         } catch (final SmbException e) {
-            final String message = e.getMessage();
-            if ("The network name cannot be found.".equals(message) || "Access is denied.".equals(message)) {
+            final int status = e.getNtStatus();
+            if (SmbException.NT_STATUS_BAD_NETWORK_NAME == status || SmbException.NT_STATUS_ACCESS_DENIED == status) {
                 // This means that the named share was not found.
+                warningsAware.addWarning(CIFSExceptionCodes.forSmbException(e));
                 return false;
             }
             throw e;
@@ -154,6 +165,10 @@ public abstract class AbstractCIFSAccess {
      * @return <code>true</code> if <code>SmbException</code> indicates that associated resource is not readable; otherwise <code>false</code>
      */
     protected boolean indicatesNotReadable(final SmbException e) {
+        final int status = e.getNtStatus();
+        if (SmbException.NT_STATUS_ACCESS_DENIED == status) {
+            return true;
+        }
         final String message = e.getMessage();
         if (message.startsWith("Invalid operation") || "Access is denied.".equals(message) || "Failed to connect to server".equals(message)) {
             return true;

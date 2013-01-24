@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -68,7 +67,11 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.userconfiguration.osgi.TrackerAvailabilityChecker;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
+import com.openexchange.passwordchange.PasswordChangeService;
+import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -82,13 +85,40 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserConfiguration.class));
 
-    /** The en_US locale */
-    static final Locale US = Locale.US;
+    /** Checks if associated {@link Permission permission}'s service is available. */
+    public static interface AvailabilityChecker extends Initialization {
+
+        /**
+         * Indicates if associated {@link Permission permission}'s service is available.
+         *
+         * @return <code>true</code> if available; otherwise <code>false</code>
+         */
+        boolean isAvailable();
+    }
+
+    /** Returns always <code>true</code> */
+    public static final AvailabilityChecker TRUE_AVAILABILITY_CHECKER = new AvailabilityChecker() {
+
+        @Override
+        public boolean isAvailable(){
+            return true;
+        }
+
+        @Override
+        public void start() {
+            // Nothing to do
+        }
+
+        @Override
+        public void stop() {
+            // Nothing to do
+        }
+    };
 
     /**
      * Enumeration of known permissions.
      */
-    public static enum Permission {
+    public static enum Permission implements Initialization {
 
         WEBMAIL(UserConfiguration.WEBMAIL, "WebMail"),
         CALENDAR(UserConfiguration.CALENDAR, "Calendar"),
@@ -110,7 +140,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
         DELEGATE_TASKS(UserConfiguration.DELEGATE_TASKS, "DelegateTasks"),
         EDIT_GROUP(UserConfiguration.EDIT_GROUP, "EditGroup"),
         EDIT_RESOURCE(UserConfiguration.EDIT_RESOURCE, "EditResource"),
-        EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD, "EditPassword"),
+        EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD, "EditPassword", TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, true)),
         COLLECT_EMAIL_ADDRESSES(UserConfiguration.COLLECT_EMAIL_ADDRESSES, "CollectEMailAddresses"),
         MULTIPLE_MAIL_ACCOUNTS(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS, "MultipleMailAccounts"),
         SUBSCRIPTION(UserConfiguration.SUBSCRIPTION, "Subscription"),
@@ -135,8 +165,8 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
             @Override
             public boolean execute(final int bit, final Permission p) {
-                if (bit == (bits & bit)) {
-                    set.add(p.name().toLowerCase(US));
+                if (bit == (bits & bit) && p.isAvailable()) {
+                    set.add(toLowerCase(p.name()));
                 }
                 return true;
             }
@@ -153,13 +183,39 @@ public final class UserConfiguration implements Serializable, Cloneable {
         }
 
         /** The associated bit constant */
-        int bit;
+        final int bit;
         /** The associated tag name */
-        String tagName;
+        final String tagName;
+        /** The availability checker */
+        private final AvailabilityChecker checker;
 
         private Permission(final int bit, final String name) {
+            this(bit, name, TRUE_AVAILABILITY_CHECKER);
+        }
+
+        private Permission(final int bit, final String name, final AvailabilityChecker checker) {
             this.bit = bit;
             this.tagName = name;
+            this.checker = checker;
+        }
+
+        @Override
+        public void start() throws OXException {
+            checker.start();
+        }
+
+        @Override
+        public void stop() throws OXException {
+            checker.stop();
+        }
+
+        /**
+         * Indicates if associated {@link Permission permission}'s service is available.
+         *
+         * @return <code>true</code> if available; otherwise <code>false</code>
+         */
+        public boolean isAvailable() {
+            return checker.isAvailable();
         }
 
         /**
@@ -201,7 +257,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
             final List<Permission> permissions = new ArrayList<Permission>(pa.length);
             for (final Permission p : pa) {
                 final int bit = p.bit;
-                if ((bits & bit) == bit) {
+                if (((bits & bit) == bit) && p.checker.isAvailable()) {
                     permissions.add(p);
                 }
             }
@@ -1161,10 +1217,9 @@ public final class UserConfiguration implements Serializable, Cloneable {
     	if (permissionBit == 0) {
     		return true;
     	}
-        final List<Permission> permission = Permission.byBits(permissionBit);
         Set<String> extendedPermissions = getExtendedPermissions();
-        for (Permission p : permission) {
-        	if (!extendedPermissions.contains(p.name().toLowerCase())) {
+        for (final Permission p : Permission.byBits(permissionBit)) {
+        	if (!extendedPermissions.contains(toLowerCase(p.name()))) {
         		return false;
         	}
 		}
@@ -1191,7 +1246,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration enabled named permission; otherwise <code>false</code>
      */
     public boolean hasPermission(final String name) {
-    	return getExtendedPermissions().contains(name.toLowerCase());
+    	return getExtendedPermissions().contains(toLowerCase(name));
     }
 
     private boolean hasPermissionInternal(final int permission) {
@@ -1289,12 +1344,12 @@ public final class UserConfiguration implements Serializable, Cloneable {
                         for (final String permissionModifier : P_SPLIT.split(permissions)) {
                             final char firstChar = permissionModifier.charAt(0);
                             if ('-' == firstChar) {
-                                retval.remove(permissionModifier.substring(1).toLowerCase(US));
+                                retval.remove(toLowerCase(permissionModifier.substring(1)));
                             } else {
                                 if ('+' == firstChar) {
-                                    retval.add(permissionModifier.substring(1).toLowerCase(US));
+                                    retval.add(toLowerCase(permissionModifier.substring(1)));
                                 } else {
-                                    retval.add(permissionModifier.toLowerCase(US));
+                                    retval.add(toLowerCase(permissionModifier));
                                 }
                             }
                         }
@@ -1307,6 +1362,17 @@ public final class UserConfiguration implements Serializable, Cloneable {
             }
         }
         return retval;
+    }
+
+    /** ASCII-wise lower-case */
+    static String toLowerCase(final CharSequence chars) {
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

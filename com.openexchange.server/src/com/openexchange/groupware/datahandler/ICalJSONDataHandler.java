@@ -90,6 +90,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -343,11 +344,7 @@ public final class ICalJSONDataHandler implements DataHandler {
         try {
             return iCalParser.parseAppointments(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings);
         } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                LOG.error("Error closing input stream", e);
-            }
+            Streams.close(inputStream);
         }
     }
 
@@ -356,11 +353,7 @@ public final class ICalJSONDataHandler implements DataHandler {
         try {
             return iCalParser.parseTasks(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings);
         } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                LOG.error("Error closing input stream", e);
-            }
+            Streams.close(inputStream);
         }
     }
 
@@ -445,13 +438,7 @@ public final class ICalJSONDataHandler implements DataHandler {
                     }
                     out.flush();
                 } finally {
-                    if (out != null) {
-                        try {
-                            out.close();
-                        } catch (final IOException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
+                    Streams.close(out);
                 }
                 file = tmpFile;
             }

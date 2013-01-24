@@ -227,7 +227,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             final int contextId = session.getContextId();
             for (final List<MailMessage> mails : structure.getMails()) {
                 if (mails != null && !mails.isEmpty()) {
-                    final JSONObject jo = new JSONObject();
+                    final JSONObject jo = new JSONObject(32);
                     writeThreadSortedMail(mails, jo, writers, headerWriters, containsMultipleFolders, writeThreadAsObjects, userId, contextId);
                     jsonWriter.value(jo);
                 }
@@ -283,19 +283,19 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         MailListField.ID, MailListField.FOLDER_ID });
 
     private void writeThreadSortedMail(final List<MailMessage> mails, final JSONObject jMail, final MailFieldWriter[] writers, final MailFieldWriter[] headerWriters, final boolean containsMultipleFolders, final boolean writeThreadAsObjects, final int userId, final int contextId) throws OXException, JSONException {
-        final MailMessage mail = mails.get(0);
-        int accountID = mail.getAccountId();
+        final MailMessage rootMessage = mails.get(0);
+        int accountID = rootMessage.getAccountId();
         for (int j = 0; j < writers.length; j++) {
-            writers[j].writeField(jMail, mail, 0, true, accountID, userId, contextId);
+            writers[j].writeField(jMail, rootMessage, 0, true, accountID, userId, contextId);
         }
         if (null != headerWriters) {
             for (int j = 0; j < headerWriters.length; j++) {
-                headerWriters[j].writeField(jMail, mail, 0, true, accountID, userId, contextId);
+                headerWriters[j].writeField(jMail, rootMessage, 0, true, accountID, userId, contextId);
             }
         }
         int unreadCount = 0;
         // Add child nodes
-        final JSONArray jChildMessages = new JSONArray();
+        final JSONArray jChildMessages = new JSONArray(mails.size());
         if (writeThreadAsObjects) {
             for (final MailMessage child : mails) {
                 final JSONObject jChild = new JSONObject();

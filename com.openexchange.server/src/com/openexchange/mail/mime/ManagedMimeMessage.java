@@ -68,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -183,6 +184,9 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -261,11 +265,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
         {
             Closeable closeable;
             while ((closeable = closeables.poll()) != null) {
-                try {
-                    closeable.close();
-                } catch (final Exception e) {
-                    // Ignore
-                }
+                Streams.close(closeable);
             }
         }
         final ManagedFile managedFile = this.managedFile;
@@ -322,13 +322,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
             mail.writeTo(out);
             out.flush();
         } finally {
-            if (null != out) {
-                try {
-                    out.close();
-                } catch (final IOException e) {
-                    // Ignore
-                }
-            }
+            Streams.close(out);
         }
         return new SharedFileInputStream(file, DEFAULT_BUFFER_SIZE);
     }

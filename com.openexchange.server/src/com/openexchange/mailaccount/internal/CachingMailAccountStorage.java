@@ -259,7 +259,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             try {
                 if (cache.get(key) == null) {
                     final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
-                    cache.put(key, mailAccount);
+                    cache.put(key, mailAccount, false);
                 }
             } finally {
                 cacheLock.unlock();

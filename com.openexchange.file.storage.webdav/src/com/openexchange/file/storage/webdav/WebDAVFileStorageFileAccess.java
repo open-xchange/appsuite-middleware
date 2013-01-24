@@ -101,6 +101,7 @@ import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.webdav.workarounds.LiberalUnLockMethod;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -708,11 +709,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                     /*
                      * Close given stream
                      */
-                    try {
-                        data.close();
-                    } catch (final IOException e) {
-                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(WebDAVFileStorageFileAccess.class)).error(e.getMessage(), e);
-                    }
+                    Streams.close(data);
                 }
             }
         } catch (final OXException e) {
@@ -724,9 +721,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final DavException e) {
             throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            if (e instanceof OXException) {
-                throw new OXException(e);
-            }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

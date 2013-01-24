@@ -50,6 +50,7 @@
 package com.openexchange.ajax.helper;
 
 import com.openexchange.java.Charsets;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link HTMLDetector} - Detects HTML tags in a byte sequence.
@@ -57,8 +58,6 @@ import com.openexchange.java.Charsets;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTMLDetector {
-
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HTMLDetector.class));
 
     /**
      * Initializes a new {@link HTMLDetector}.
@@ -104,7 +103,7 @@ public final class HTMLDetector {
         // lower-case
         if (indexOf(
             sequence,
-            Charsets.toAsciiBytes(tmp.append('<').append(tag.toLowerCase()).append('>')),
+            Charsets.toAsciiBytes(tmp.append('<').append(toLowerCase(tag)).append('>')),
             0,
             sequence.length,
             null) != -1) {
@@ -114,7 +113,7 @@ public final class HTMLDetector {
         // upper-case
         return (indexOf(
             sequence,
-            Charsets.toAsciiBytes(tmp.append('<').append(tag.toUpperCase()).append('>')),
+            Charsets.toAsciiBytes(tmp.append('<').append(toLowerCase(tag)).append('>')),
             0,
             sequence.length,
             null) != -1);
@@ -198,5 +197,18 @@ public final class HTMLDetector {
             failure[i] = j;
         }
         return failure;
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 }

@@ -52,7 +52,7 @@ package com.openexchange.threadpool;
 /**
  * {@link AbstractTask} - An abstract {@link Task} which leaves {@link #afterExecute(Throwable)}, {@link #beforeExecute(Thread)}, and
  * {@link #setThreadName(ThreadRenamer)} empty.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractTask<V> implements Task<V> {
@@ -66,7 +66,7 @@ public abstract class AbstractTask<V> implements Task<V> {
 
     /**
      * Executes this task with current thread.
-     * 
+     *
      * @return The task's return value or <code>null</code> if an {@code Exception} occurred (in that {@link #afterExecute(Throwable)} is
      *         invoked with a non-<code>null</code> {@code Throwable} reference)
      */
@@ -87,7 +87,7 @@ public abstract class AbstractTask<V> implements Task<V> {
 
     /**
      * Execute with respect to <code>beforeExecute()</code> and <code>afterExecute()</code> methods
-     * 
+     *
      * @param currentThread The current thread
      * @return The return value or <code>null</code>
      */

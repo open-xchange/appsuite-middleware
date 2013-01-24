@@ -288,7 +288,7 @@ public final class CalendarVolatileCache {
     public <V> void put(final Serializable key, final V obj) throws OXException {
         final Cache cache = this.cache;
         if (null != cache) {
-            cache.put(key, (Serializable) obj);
+            cache.put(key, (Serializable) obj, false);
         }
     }
 
@@ -307,7 +307,7 @@ public final class CalendarVolatileCache {
             for (final Attribute<?> attribute : attributes) {
                 attribute.applyToElementAttaributes(elementAttributes);
             }
-            cache.put(key, (Serializable) obj, elementAttributes);
+            cache.put(key, (Serializable) obj, elementAttributes, false);
         }
     }
 
@@ -322,7 +322,7 @@ public final class CalendarVolatileCache {
     public <V> void putInGroup(final Serializable key, final String group, final V value) throws OXException {
         final Cache cache = this.cache;
         if (null != cache) {
-            cache.putInGroup(key, group, (Serializable) value);
+            cache.putInGroup(key, group, (Serializable) value, false);
         }
     }
 
@@ -342,7 +342,7 @@ public final class CalendarVolatileCache {
             for (final Attribute<?> attribute : attributes) {
                 attribute.applyToElementAttaributes(elementAttributes);
             }
-            cache.putInGroup(key, group, value, elementAttributes);
+            cache.putInGroup(key, group, value, elementAttributes, false);
         }
     }
 

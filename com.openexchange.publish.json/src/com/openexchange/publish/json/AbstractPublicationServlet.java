@@ -57,17 +57,23 @@ import org.apache.commons.logging.Log;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link AbstractPublicationServlet}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public abstract class AbstractPublicationServlet extends PermissionServlet{
+public abstract class AbstractPublicationServlet extends PermissionServlet {
+
+    /**
+     * Initializes a new {@link AbstractPublicationServlet}.
+     */
+    protected AbstractPublicationServlet() {
+        super();
+    }
 
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
@@ -88,6 +94,7 @@ public abstract class AbstractPublicationServlet extends PermissionServlet{
     }
 
     protected OXException wrapThrowable(final Throwable t) {
+        ExceptionUtils.handleThrowable(t);
         return THROWABLE.create(t, t.getMessage());
     }
 

@@ -234,6 +234,7 @@ public final class Conversation {
     /**
      * Gets the messages.
      *
+     * @param comparator The comparator used for sorting listed messages
      * @return The messages with given sorting
      */
     public List<MailMessage> getMessages(final Comparator<MailMessage> comparator) {
@@ -248,7 +249,11 @@ public final class Conversation {
         return ret;
     }
 
-    /** Simple wrapper class */
+    /**
+     * Simple wrapper class for having a message as hash key.
+     * <p>
+     * The key is built from its identifier and folder full name.
+     */
     private static final class MailMessageWrapper {
 
         final MailMessage message;

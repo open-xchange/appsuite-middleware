@@ -59,14 +59,13 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.codec.binary.Base64;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
-import com.openexchange.log.Log;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.BinaryContent;
@@ -270,11 +269,7 @@ public class MessagingMessageWriter {
                 } catch (final RuntimeException e) {
                     throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                 } finally {
-                    try {
-                        is.close();
-                    } catch (final IOException e) {
-                        Log.valueOf(LogFactory.getLog(MessagingMessageWriter.class)).error("Closing input stream failed.", e);
-                    }
+                    Streams.close(is);
                 }
             }
             /*

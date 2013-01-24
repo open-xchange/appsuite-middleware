@@ -49,39 +49,50 @@
 
 package com.openexchange.appsuite;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 
 /**
- * @author Viktor Pracht <viktor.pracht@open-xchange.com>
+ * {@link AppsLoadServlet} - Provides App Suite data for loading applciations.
+ *
+ * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class AppsLoadServlet extends HttpServlet {
 
     private static final long serialVersionUID = -8909104490806162791L;
 
-    private static org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AppsLoadServlet.class));
-
-    private final Map<String, byte[]> cache = new ConcurrentHashMap<String, byte[]>();
-
-    private String version;
-
-    private final File root, zoneinfo;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AppsLoadServlet.class);
 
     private static String ZONEINFO = "io.ox/core/date/tz/zoneinfo/";
 
-    public AppsLoadServlet(File root, File zoneinfo) {
+    private final Map<String, byte[]> cache;
+    private final AtomicReference<String> version;
+    private final File root, zoneinfo;
+
+    /**
+     * Initializes a new {@link AppsLoadServlet}.
+     */
+    public AppsLoadServlet(final File root, final File zoneinfo) {
+        super();
+        version = new AtomicReference<String>();
+        cache = new ConcurrentHashMap<String, byte[]>();
         this.root = root;
         this.zoneinfo = zoneinfo;
     }
@@ -95,10 +106,10 @@ public class AppsLoadServlet extends HttpServlet {
         "\\\\f", "\\\\r", "\\\\x0e", "\\\\x0f", "\\\\x10", "\\\\x11", "\\\\x12", "\\\\x13", "\\\\x14", "\\\\x15", "\\\\x16", "\\\\x17",
         "\\\\x18", "\\\\x19", "\\\\x1a", "\\\\x1b", "\\\\x1c", "\\\\x1d", "\\\\x1e", "\\\\x1f" };
 
-    private static void escape(CharSequence s, StringBuffer sb) {
-        Matcher e = escapeRE.matcher(s);
+    private static void escape(final CharSequence s, final StringBuffer sb) {
+        final Matcher e = escapeRE.matcher(s);
         while (e.find()) {
-            int chr = e.group().codePointAt(0);
+            final int chr = e.group().codePointAt(0);
             String replacement;
             switch (chr) {
             case 0x27:
@@ -125,58 +136,67 @@ public class AppsLoadServlet extends HttpServlet {
         if (name.length() > 256) {
             name = name.substring(0, 256);
         }
-        StringBuffer sb = new StringBuffer();
+        final StringBuffer sb = new StringBuffer();
         escape(name, sb);
         return sb.toString();
     }
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         // create a new HttpSession if it's missing
         req.getSession(true);
         super.service(req, resp);
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String[] modules = req.getPathInfo().split(",");
-        if (modules.length < 2) {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        final String[] modules = Strings.splitByComma(req.getPathInfo());
+        final int length = modules.length;
+        if (length < 2) {
             return; // no actual files requested
         }
-        if (version == null || modules[0].compareTo(version) > 0) {
-            version = modules[0];
-            cache.clear();
-            LOG.debug("Started serving version " + version);
+        // Set version if null or lower than given one
+        {
+            final String currentVersion = modules[0];
+            String version;
+            do {
+                version = this.version.get();
+            } while ((version == null || currentVersion.compareTo(version) > 0) && !this.version.compareAndSet(version, currentVersion));
         }
         resp.setContentType("text/javascript;charset=UTF-8");
-        resp.setDateHeader("Expires", (new Date()).getTime() + (long) 3e10); // + almost a year
-        OutputStream out = resp.getOutputStream();
-        for (int i = 1; i < modules.length; i++) {
-            String module = modules[i];
+        resp.setDateHeader("Expires", System.currentTimeMillis() + (long) 3e10); // + almost a year
+        final OutputStream out = resp.getOutputStream();
+        for (int i = 1; i < length; i++) {
+            final String module = modules[i];
 
             // Module names may only contain letters, digits, '_', '-', '/' and
             // '.', but not "..".
-            Matcher m = moduleRE.matcher(module);
+            final Matcher m = moduleRE.matcher(module);
             if (!m.matches()) {
-                String escapedName = escapeName(module);
+                final String escapedName = escapeName(module);
                 LOG.debug("Invalid module name: '" + escapedName + "'");
                 out.write(("console.error('Invalid module name: \\'" + escapedName + "\\'');\n").getBytes("UTF-8"));
+                out.flush();
                 continue;
             }
 
             byte[] data = cache.get(module);
             if (data == null) {
-                data = readFile(module, m.group(1), m.group(2));
-                cache.put(module, data);
+                try {
+                    data = readFile(module, m.group(1), m.group(2));
+                    cache.put(module, data);
+                } catch (final IllegalStateException e) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Illegal path specified.");
+                    return;
+                }
             }
             out.write(data);
+            out.flush();
         }
     }
 
-    private byte[] readFile(String module, String format, String name) throws UnsupportedEncodingException {
-        File filename;
-        byte[] data;
-
+    private byte[] readFile(final String module, final String format, final String name) throws IOException {
+        final File filename;
         // Map module name to file name
         if (name.startsWith(ZONEINFO)) {
             filename = new File(zoneinfo, name.substring(ZONEINFO.length()));
@@ -185,38 +205,44 @@ public class AppsLoadServlet extends HttpServlet {
         }
         LOG.debug("Reading " + filename);
 
-        // Read the entire file into a byte array
-        try {
-            RandomAccessFile f = new RandomAccessFile(filename, "r");
-            data = new byte[(int) f.length()];
-            f.readFully(data);
-            f.close();
-        } catch (IOException e) {
-            LOG.debug("Could not read '" + escapeName(filename.getPath()) + "'");
-            return ("console.error('Could not read \\'" + escapeName(module) + "\\'');\n").getBytes("UTF-8");
+        // Read the entire file's bytes
+        final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
+        {
+            InputStream in = null;
+            try {
+                in = new FileInputStream(filename);
+                final int buflen = 2048;
+                final byte[] buf = new byte[buflen];
+                for (int read = in.read(buf, 0, buflen); read > 0; read = in.read(buf, 0, buflen)) {
+                    baos.write(buf, 0, read);
+                }
+                baos.flush(); // no-op
+            } catch (final IOException e) {
+                LOG.debug("Could not read from '" + escapeName(filename.getPath()) + "'");
+                return ("console.error('Could not read \\'" + escapeName(module) + "\\'');\n").getBytes("UTF-8");
+            } finally {
+                Streams.close(in);
+            }
         }
 
         // Special cases for JavaScript-friendly reading of raw files:
         // /text;* returns the file as a UTF-8 string
         // /raw;* maps every byte to [u+0000..u+00ff]
         if (format != null) {
-            StringBuffer sb = new StringBuffer();
+            final StringBuffer sb = new StringBuffer();
             sb.append("define('").append(module).append("','");
             String payload;
             if ("raw".equals(format)) {
-                char[] raw = new char[data.length];
-                for (int i = 0; i < data.length; i++) {
-                    raw[i] = (char) (data[i] & 255);
-                }
-                payload = new String(raw);
+                payload = baos.toString(0);
             } else {
-                payload = new String(data, "UTF-8");
+                payload = baos.toString(Charsets.UTF_8_NAME);
             }
             escape(payload, sb);
             sb.append("');\n");
-            return sb.toString().getBytes("UTF-8");
+            return sb.toString().getBytes(Charsets.UTF_8);
         }
 
-        return data;
+        return baos.toByteArray();
     }
+
 }

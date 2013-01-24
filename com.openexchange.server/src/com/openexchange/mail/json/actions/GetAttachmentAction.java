@@ -77,6 +77,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
@@ -214,7 +215,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 }
                 out.flush();
             } finally {
-                attachmentInputStream.close();
+                Streams.close(attachmentInputStream);
             }
             /*
              * Create file holder
@@ -234,6 +235,9 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              */
             return result;
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());

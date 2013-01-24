@@ -1898,7 +1898,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             }
 
                         } else if (paramtype.equalsIgnoreCase("java.util.Date")) {
-                            final Date fieldvalue = rs.getDate(fieldname);
+                            final Date fieldvalue = rs.getTimestamp(fieldname);
                             method.invoke(newuser, fieldvalue);
                         } else if (paramtype.equalsIgnoreCase("java.util.Locale")) {
                             final String locale = rs.getString(fieldname);

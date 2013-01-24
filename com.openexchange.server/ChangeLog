@@ -1,3 +1,36 @@
+* 2013-01-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24535: Correctly recognize e-mail address when preparing database statement   
+ 
+* 2013-01-23 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24195: Added extension package for host name service configured through config cascade.
+ - Fix for bug 23938: Corrected default path in configuration files not to contain "groupware" anymore.
+ - Fix for bug 24484: If some attribute can be assigned through its attribute name, use attribute names for all other attributes, too.
+
+* 2013-01-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24557: Proper byte2char conversion
+ - Fix for bug 23576: Support for comment for CIFS connector (if no file data is available)
+ - Fix for bug 23578: Fixed file filter expression
+ - Fix for bug 24556: Added null guard
+
+* 2013-01-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24553: Escape "</" character sequence with "<\/"
+
+* 2013-01-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24538: Added folder and account information to error messages where possible
+ - Fix for bug 24537: Changed category to let error message be displayed instead of default one
+ - Fix for bug 24536: Transform "com.sun.mail.util.MessageRemovedIOException" orderly to a "Mail could not be found (MSG-0032)" message
+ - Fix for bug 24182: Signal permissions with respect to available service; e.g "edit-password" permission
+
+* 2013-01-20 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24512: Fixed NPE.
+ - Fix for bug 21822: Duplicate invitation mails.
+
 * 2013-01-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 24531: Fixed UTF-8 encoding

@@ -93,11 +93,11 @@ public final class CMISFile extends DefaultFile {
      * Parses specified document.
      *
      * @param document The document
-     * @throws OXException If parsing SMB file fails
+     * @throws OXException If parsing CMIS file fails
      * @return This CIFS file
      */
     public CMISFile parseSmbFile(final Document document) throws OXException {
-        return parseSmbFile(document, null);
+        return parseCmisFile(document, null);
     }
 
     /**
@@ -105,10 +105,10 @@ public final class CMISFile extends DefaultFile {
      *
      * @param document The document
      * @param fields The fields to consider
-     * @throws OXException If parsing SMB file fails
+     * @throws OXException If parsing CMIS file fails
      * @return This CIFS file with property set applied
      */
-    public CMISFile parseSmbFile(final Document document, final List<Field> fields) throws OXException {
+    public CMISFile parseCmisFile(final Document document, final List<Field> fields) throws OXException {
         if (null != document) {
             try {
                 {
