@@ -59,8 +59,6 @@ import java.util.Set;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.CacheAccess;
 import org.apache.jcs.access.exception.ObjectExistsException;
-import org.apache.jcs.auxiliary.AuxiliaryCache;
-import org.apache.jcs.engine.behavior.ICache;
 import org.apache.jcs.engine.behavior.ICacheElement;
 import org.apache.jcs.engine.control.CompositeCache;
 import org.apache.jcs.engine.control.group.GroupAttrName;
@@ -77,6 +75,8 @@ import com.openexchange.caching.internal.cache2jcs.CacheStatistics2JCS;
 import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.Log;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link JCSCache} - A cache implementation that uses the <a href="http://jakarta.apache.org/jcs/">JCS</a> caching system.
@@ -84,6 +84,8 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JCSCache implements Cache, SupportsLocalOperations {
+
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(JCSCache.class));
 
     private final JCS cache;
 
@@ -119,24 +121,27 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
             synchronized (this) {
                 localOnly = this.localOnly;
                 if (null == localOnly) {
-                    AuxiliaryCache[] tmp;
-                    try {
-                        final Field auxCachesField = CompositeCache.class.getDeclaredField("auxCaches");
-                        auxCachesField.setAccessible(true);
-                        tmp = (AuxiliaryCache[]) auxCachesField.get(cacheControl);
-                    } catch (final Exception e) {
-                        tmp = null;
-                    }
-                    localOnly = Boolean.TRUE;
-                    if (null != tmp) {
-                        for (AuxiliaryCache aux : tmp) {
-                            if ((aux != null) && (ICache.LATERAL_CACHE == aux.getCacheType())) {
-                                localOnly = Boolean.FALSE;
-                                break;
-                            }
-                        }
-                    }
+                    localOnly = Boolean.valueOf(false == JCSCacheServiceInit.getInstance().hasAuxiliary(cacheControl.getCacheName()));
+//                    AuxiliaryCache[] tmp;
+//                    try {
+//                        final Field auxCachesField = CompositeCache.class.getDeclaredField("auxCaches");
+//                        auxCachesField.setAccessible(true);
+//                        tmp = (AuxiliaryCache[]) auxCachesField.get(cacheControl);
+//                    } catch (final Exception e) {
+//                        tmp = null;
+//                    }
+//                    localOnly = Boolean.TRUE;
+//                    if (null != tmp) {
+//                        for (AuxiliaryCache aux : tmp) {
+//                            if ((aux != null) && (ICache.LATERAL_CACHE == aux.getCacheType())) {
+//                                localOnly = Boolean.FALSE;
+//                                break;
+//                            }
+//                        }
+//                    }
                     this.localOnly = localOnly;
+                    LOG.info("Cache '" + cache.getCacheAttributes().getCacheName() + "' is operating in " +
+                        (localOnly.booleanValue() ? "local-only" : "distributed") + " mode");
                 }
             }
         }

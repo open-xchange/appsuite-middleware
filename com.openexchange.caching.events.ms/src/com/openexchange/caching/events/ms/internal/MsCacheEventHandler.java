@@ -120,7 +120,10 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
 
     @Override
     public void onEvent(Object sender, CacheEvent cacheEvent) {
-        try {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("publish: " + cacheEvent + " [" + senderId + "]");
+        }
+        try {            
             getTopic().publish(cacheEvent);
         } catch (OXException e) {
             LOG.warn("Error publishing cache event", e);
@@ -140,6 +143,9 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
         if (null != message && false == senderId.equals(message.getSenderId())) {
             CacheEvent cacheEvent = message.getMessageObject();
             if (null != cacheEvent) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("onMessage: " + message.getMessageObject() + " [" + message.getSenderId() + "]");
+                }
                 cacheEvents.notify(this, message.getMessageObject());
             } else {
                 LOG.warn("Discarding empty cache event message.");

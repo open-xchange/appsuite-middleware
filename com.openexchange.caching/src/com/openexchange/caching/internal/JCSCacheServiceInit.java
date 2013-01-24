@@ -53,9 +53,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -157,12 +159,18 @@ public final class JCSCacheServiceInit {
     private Set<String> defaultCacheRegions;
 
     /**
+     * Holds all cache region names that were configured to use a lateral auxiliary cache
+     */
+    private final Set<String> auxiliaryCacheRegions;
+    
+    /**
      * Initializes a new {@link JCSCacheServiceInit}
      */
     private JCSCacheServiceInit() {
         super();
         started = new AtomicBoolean();
         auxiliaryNames = new HashSet<String>(4);
+        auxiliaryCacheRegions = new HashSet<String>();
     }
 
     private static Properties loadProperties(final String cacheConfigFile) throws OXException {
@@ -190,6 +198,11 @@ public final class JCSCacheServiceInit {
     }
 
     private void configure(final Properties properties) throws OXException {
+        preProcessAuxiliaries(properties, "LTCP", "SessionLTCP");
+        doConfigure(properties);
+    }
+    
+    private void doConfigure(final Properties properties) throws OXException {
         synchronized (ccmInstance) {
             if (null == props) {
                 /*
@@ -251,6 +264,16 @@ public final class JCSCacheServiceInit {
             return;
         }
         ccmInstance.freeCache(cacheName);
+    }
+    
+    /**
+     * Gets a value indicating whether the supplied cache region was configured to use an auxiliary cache or not.
+     * 
+     * @param cacheName The name of the cache region
+     * @return <code>true</code>, if the region has an auxiliary cache, <code>false</code>, otherwise 
+     */
+    public boolean hasAuxiliary(String cacheName) {
+        return auxiliaryCacheRegions.contains(cacheName);
     }
 
     private void initializeCompositeCacheManager(final boolean obtainMutex) {
@@ -471,6 +494,51 @@ public final class JCSCacheServiceInit {
             }
         }
         return ret;
+    }
+
+    /**
+     * Pre-processes the supplied JCS properties and removes all references to the supplied auxiliaries, storing the affected cache 
+     * regions in the {@link #auxiliaryCacheRegions} set.
+     *     
+     * @param properties The properties to pre-process
+     * @param auxiliaries The name of the auxiliary caches to remove
+     */
+    private void preProcessAuxiliaries(Properties properties, String...auxiliaries) {
+        if (null != properties) {
+            List<Object> propertiesToClear = new ArrayList<Object>();
+            for (Entry<Object, Object> property : properties.entrySet()) {
+                /*
+                 * check for matching auxiliary cache value
+                 */
+                String auxiliary = (String)property.getValue();
+                boolean matches = false;
+                for (String aux : auxiliaries) {
+                    if (aux.equals(auxiliary)) {
+                        matches = true;
+                        break;
+                    }
+                }
+                if (matches) {
+                    String key = (String)property.getKey();
+                    if (key.startsWith(REGION_PREFIX)) {
+                        /*
+                         * remember cache region
+                         */
+                        auxiliaryCacheRegions.add(key.substring(REGION_PREFIX.length()));
+                        /*
+                         * remember property to clear afterwards
+                         */
+                        propertiesToClear.add(property.getKey());
+                    }
+                }
+            }
+            /*
+             * clear properties referencing the auxiliaries
+             */
+            for (Object key : propertiesToClear) {
+                properties.put(key, "");
+            }
+        }
     }
 
 }
