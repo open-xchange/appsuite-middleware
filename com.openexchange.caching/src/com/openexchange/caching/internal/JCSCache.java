@@ -59,6 +59,8 @@ import java.util.Set;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.CacheAccess;
 import org.apache.jcs.access.exception.ObjectExistsException;
+import org.apache.jcs.auxiliary.AuxiliaryCache;
+import org.apache.jcs.engine.behavior.ICache;
 import org.apache.jcs.engine.behavior.ICacheElement;
 import org.apache.jcs.engine.control.CompositeCache;
 import org.apache.jcs.engine.control.group.GroupAttrName;
@@ -121,24 +123,33 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
             synchronized (this) {
                 localOnly = this.localOnly;
                 if (null == localOnly) {
-                    localOnly = Boolean.valueOf(false == JCSCacheServiceInit.getInstance().hasAuxiliary(cacheControl.getCacheName()));
-//                    AuxiliaryCache[] tmp;
-//                    try {
-//                        final Field auxCachesField = CompositeCache.class.getDeclaredField("auxCaches");
-//                        auxCachesField.setAccessible(true);
-//                        tmp = (AuxiliaryCache[]) auxCachesField.get(cacheControl);
-//                    } catch (final Exception e) {
-//                        tmp = null;
-//                    }
-//                    localOnly = Boolean.TRUE;
-//                    if (null != tmp) {
-//                        for (AuxiliaryCache aux : tmp) {
-//                            if ((aux != null) && (ICache.LATERAL_CACHE == aux.getCacheType())) {
-//                                localOnly = Boolean.FALSE;
-//                                break;
-//                            }
-//                        }
-//                    }
+                    /*
+                     * check known auxiliaries first
+                     */
+                    if (JCSCacheServiceInit.getInstance().hasAuxiliary(cacheControl.getCacheName())) {
+                        localOnly = Boolean.FALSE;
+                    } else {
+                        /*
+                         * check aux caches field, too
+                         */
+                        AuxiliaryCache[] tmp;
+                        try {
+                            final Field auxCachesField = CompositeCache.class.getDeclaredField("auxCaches");
+                            auxCachesField.setAccessible(true);
+                            tmp = (AuxiliaryCache[]) auxCachesField.get(cacheControl);
+                        } catch (final Exception e) {
+                            tmp = null;
+                        }
+                        localOnly = Boolean.TRUE;
+                        if (null != tmp) {
+                            for (AuxiliaryCache aux : tmp) {
+                                if ((aux != null) && (ICache.LATERAL_CACHE == aux.getCacheType())) {
+                                    localOnly = Boolean.FALSE;
+                                    break;
+                                } 
+                            }
+                        }
+                    }
                     this.localOnly = localOnly;
                     LOG.info("Cache '" + cache.getCacheAttributes().getCacheName() + "' is operating in " +
                         (localOnly.booleanValue() ? "local-only" : "distributed") + " mode");
@@ -227,7 +238,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void put(Serializable key, Serializable obj, boolean invalidate) throws OXException {
         if (invalidate) {
-            throw CacheExceptionCode.FAILED_PUT.create(new UnsupportedOperationException("No invalidation support"));
+            remove(key);
         }
         put(key, obj);
     }
@@ -244,7 +255,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void put(Serializable key, Serializable val, ElementAttributes attr, boolean invalidate) throws OXException {
         if (invalidate) {
-            throw CacheExceptionCode.FAILED_PUT.create(new UnsupportedOperationException("No invalidation support"));
+            remove(key);
         }
         put(key, val, attr);
     }
@@ -262,7 +273,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void putInGroup(Serializable key, String groupName, Serializable value, boolean invalidate) throws OXException {
         if (invalidate) {
-            throw CacheExceptionCode.FAILED_PUT.create(new UnsupportedOperationException("No invalidation support"));
+            removeFromGroup(key, groupName);
         }
         putInGroup(key, groupName, value);
     }
@@ -280,7 +291,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr, boolean invalidate) throws OXException {
         if (invalidate) {
-            throw CacheExceptionCode.FAILED_PUT.create(new UnsupportedOperationException("No invalidation support"));
+            removeFromGroup(key, groupName);
         }
         putInGroup(key, groupName, value, attr);
     }

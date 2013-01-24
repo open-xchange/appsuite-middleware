@@ -196,9 +196,11 @@ public final class JCSCacheServiceInit {
         }
         return props;
     }
-
+    
     private void configure(final Properties properties) throws OXException {
-        preProcessAuxiliaries(properties, "LTCP", "SessionLTCP");
+        if (isEventInvalidation()) {
+            preProcessAuxiliaries(properties, "LTCP", "SessionLTCP");
+        }
         doConfigure(properties);
     }
     
@@ -275,7 +277,7 @@ public final class JCSCacheServiceInit {
     public boolean hasAuxiliary(String cacheName) {
         return auxiliaryCacheRegions.contains(cacheName);
     }
-
+    
     private void initializeCompositeCacheManager(final boolean obtainMutex) {
         if (obtainMutex) {
             synchronized (this) {
@@ -447,6 +449,15 @@ public final class JCSCacheServiceInit {
      */
     public CacheEventService getCacheEventService() {
         return this.cacheEventService;
+    }
+
+    /**
+     * Gets a value indicating whether remote cache invalidations should be performed using the internal cache event service or not.
+     *  
+     * @return <code>true</code> if cache events should be performed via the cache event messaging service, <code>false</code>, otherwise 
+     */
+    public boolean isEventInvalidation() {
+        return configurationService.getBoolProperty("com.openexchange.caching.jcs.eventInvalidation", true);
     }
 
     /**

@@ -47,11 +47,16 @@
  *
  */
 
-package com.openexchange.caching;
+package com.openexchange.caching.internal;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheElement;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheStatistics;
+import com.openexchange.caching.ElementAttributes;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
