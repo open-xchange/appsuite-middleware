@@ -163,9 +163,9 @@ public class CSVContactImporter extends AbstractImporter {
         if (!canImport(sessObj, format, folders, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_IMPORT.create(folder, format);
         }
-        final List<List<String>> csv;
+        List<List<String>> csv;
         // get header fields
-        final List<String> fields;
+        List<String> fields;
         {
             InputStream input = null;
             try {
@@ -188,6 +188,8 @@ public class CSVContactImporter extends AbstractImporter {
                 if (!"UTF-8".equalsIgnoreCase(getCurrentMapper().getEncoding())) {
                     input.reset();
                     csvStr = transformInputStreamToString(input, getCurrentMapper().getEncoding(), false);
+                    csv = csvParser.parse(csvStr);
+                    fields = csv.get(0);
                 }
             } catch (final IOException e) {
                 throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
