@@ -296,7 +296,9 @@ public class NotifyingCache implements Cache, CacheListener {
     @Override
     public void onEvent(Object sender, CacheEvent cacheEvent) {
         if (sender != this && null != cacheEvent) {
-            System.out.println("onEvent: " + cacheEvent);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("onEvent: " + cacheEvent);
+            }
             try {
                 switch (cacheEvent.getOperation()) {
                 case INVALIDATE_GROUP:
