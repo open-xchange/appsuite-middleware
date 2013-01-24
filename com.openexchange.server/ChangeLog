@@ -1,3 +1,7 @@
+* 2013-01-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24432: Avoid closing InputStream too early
+
 * 2013-01-24 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24535: Correctly recognize e-mail address when preparing database statement   
