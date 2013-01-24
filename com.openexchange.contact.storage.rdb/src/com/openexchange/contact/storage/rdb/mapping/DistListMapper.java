@@ -265,7 +265,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 
 			@Override
 			public void remove(DistListMember member) {
-				member.removeEmailfield();
+				member.removeEmailaddress();
 			}
         });
 
