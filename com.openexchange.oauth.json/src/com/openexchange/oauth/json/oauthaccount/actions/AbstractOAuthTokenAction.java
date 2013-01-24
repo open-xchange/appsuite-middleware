@@ -136,7 +136,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
      */
     private String stripExpireParam(final String token) {
     	Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");
-    	
+
         if (token.indexOf("&expires") < 0) {
             return token;
         }
@@ -146,7 +146,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
             m.appendReplacement(sb, "");
         }
         m.appendTail(sb);
-        return sb.toString();		
+        return sb.toString();
 	}
 
 	private static boolean isEmpty(final String string) {

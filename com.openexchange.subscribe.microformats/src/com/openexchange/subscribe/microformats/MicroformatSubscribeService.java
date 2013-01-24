@@ -59,6 +59,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -132,12 +133,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         } catch (IOException e) {
             throw OXMFSubscriptionErrorMessage.IOException.create(e);
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                }
-            }
+            Streams.close(reader);
         }
     }
 

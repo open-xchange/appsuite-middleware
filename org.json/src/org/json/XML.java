@@ -97,7 +97,7 @@ public class XML {
         }
         return sb.toString();
     }
-    
+
     private static final String STR_CONTENT = "content";
 
     /**
@@ -175,7 +175,7 @@ public class XML {
         	t = x.nextToken();
             if (name == null) {
                 throw x.syntaxError("Mismatched close tag" + t);
-            }            
+            }
             if (!t.equals(name)) {
                 throw x.syntaxError("Mismatched " + name + " and " + t);
             }

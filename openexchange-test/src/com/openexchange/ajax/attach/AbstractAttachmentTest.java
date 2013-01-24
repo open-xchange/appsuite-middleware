@@ -394,7 +394,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 	    final Map<String, Object> datasourceDefinition = new HashMap<String, Object>();
 
 	    datasourceDefinition.put("identifier", "com.openexchange.url.mail.attachment");
-	    datasourceDefinition.put("url", "http://one-finger-salute.org/middle_finger.png");
+	    datasourceDefinition.put("url", "http://one-finger-salute.org/img/middle_finger.png");
 
 	    Response res = attach(getWebConversation(), sessionId,folderId, attachedId, moduleId, datasourceDefinition);
 

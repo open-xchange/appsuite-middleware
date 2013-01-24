@@ -67,6 +67,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.service.messaging.Message;
 import com.openexchange.service.messaging.MessagingServiceExceptionCode;
@@ -188,11 +189,7 @@ public final class MessagingDatagramPoster {
                     oos.writeObject(p);
                     oos.flush();
                 } finally {
-                    try {
-                        oos.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
+                    Streams.close(oos);
                 }
                 payload = baos.toByteArray();
             }

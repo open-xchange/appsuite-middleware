@@ -70,7 +70,7 @@ import com.fasterxml.jackson.core.JsonToken;
  * <li>Numbers may have the <code>0-</code> <small>(octal)</small> or <code>0x-</code> <small>(hex)</small> prefix.</li>
  * <li>Comments written in the slashshlash, slashstar, and hash conventions will be ignored.</li>
  * </ul>
- * 
+ *
  * @author JSON.org
  * @version 2
  */
@@ -91,7 +91,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Construct an empty JSONArray.
-     * 
+     *
      * @throws IllegalArgumentException If the specified initial capacity is negative
      */
     public JSONArray(final int initialCapacity) {
@@ -101,7 +101,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Construct a JSONArray from a JSONTokener.
-     * 
+     *
      * @param x A JSONTokener
      * @throws JSONException If there is a syntax error.
      */
@@ -140,7 +140,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Construct a JSONArray from a reader.
-     * 
+     *
      * @param reader A reader that begins with <code>[</code>&nbsp;<small>(left bracket)</small> and ends with <code>]</code>
      *            &nbsp;<small>(right bracket)</small>.
      * @throws JSONException If there is a syntax error reader's content..
@@ -152,7 +152,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Construct a JSONArray from a source sJSON text.
-     * 
+     *
      * @param string A string that begins with <code>[</code>&nbsp;<small>(left bracket)</small> and ends with <code>]</code>
      *            &nbsp;<small>(right bracket)</small>.
      * @throws JSONException If there is a syntax error.
@@ -186,7 +186,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Construct a JSONArray from a JSONArray.
-     * 
+     *
      * @param jsonArray A JSONArray.
      */
     public JSONArray(final JSONArray jsonArray) {
@@ -195,7 +195,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Construct a JSONArray from a Collection.
-     * 
+     *
      * @param collection A Collection.
      */
     public JSONArray(final Collection<? extends Object> collection) {
@@ -229,7 +229,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Gets this JSON array's iterator.
-     * 
+     *
      * @return The iterator
      */
     public Iterator<Object> iterator() {
@@ -238,7 +238,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Get the object value associated with an index.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return An object value.
      * @throws JSONException If there is no value for the index.
@@ -253,7 +253,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Get the boolean value associated with an index. The string values "true" and "false" are converted to boolean.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return The truth.
      * @throws JSONException If there is no value for the index or if the value is not convertable to boolean.
@@ -270,7 +270,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Get the double value associated with an index.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return The value.
      * @throws JSONException If the key is not found or if the value cannot be converted to a number.
@@ -286,7 +286,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Get the int value associated with an index.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return The value.
      * @throws JSONException If the key is not found or if the value cannot be converted to a number. if the value cannot be converted to a
@@ -299,7 +299,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Get the JSONArray associated with an index.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return A JSONArray value.
      * @throws JSONException If there is no value for the index. or if the value is not a JSONArray
@@ -314,7 +314,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Get the JSONObject associated with an index.
-     * 
+     *
      * @param index subscript
      * @return A JSONObject value.
      * @throws JSONException If there is no value for the index or if the value is not a JSONObject
@@ -329,7 +329,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Get the long value associated with an index.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return The value.
      * @throws JSONException If the key is not found or if the value cannot be converted to a number.
@@ -341,7 +341,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Get the string associated with an index.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return A string value.
      * @throws JSONException If there is no value for the index.
@@ -352,7 +352,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Determine if the value is null.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return true if the value at the index is null, or if there is no value.
      */
@@ -363,7 +363,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Make a string from the contents of this JSONArray. The <code>separator</code> string is inserted between each element. Warning: This
      * method assumes that the data structure is acyclical.
-     * 
+     *
      * @param separator A string that will be inserted between the elements.
      * @return a string.
      * @throws JSONException If the array contains an invalid number.
@@ -382,7 +382,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Get the number of elements in the JSONArray, included nulls.
-     * 
+     *
      * @return The length (or size).
      */
     @Override
@@ -392,7 +392,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Get the optional object value associated with an index.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return An object value, or null if there is no object at that index.
      */
@@ -403,7 +403,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Get the optional boolean value associated with an index. It returns false if there is no value at that index, or if the value is not
      * Boolean.TRUE or the String "true".
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return The truth.
      */
@@ -414,7 +414,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Get the optional boolean value associated with an index. It returns the defaultValue if there is no value at that index or if it is
      * not a Boolean or the String "true" or "false" (case insensitive).
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @param defaultValue A boolean default.
      * @return The truth.
@@ -430,7 +430,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Get the optional double value associated with an index. NaN is returned if there is no value for the index, or if the value is not a
      * number and cannot be converted to a number.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return The value.
      */
@@ -441,7 +441,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Get the optional double value associated with an index. The defaultValue is returned if there is no value for the index, or if the
      * value is not a number and cannot be converted to a number.
-     * 
+     *
      * @param index subscript
      * @param defaultValue The default value.
      * @return The value.
@@ -457,7 +457,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Get the optional int value associated with an index. Zero is returned if there is no value for the index, or if the value is not a
      * number and cannot be converted to a number.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return The value.
      */
@@ -468,7 +468,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Get the optional int value associated with an index. The defaultValue is returned if there is no value for the index, or if the value
      * is not a number and cannot be converted to a number.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @param defaultValue The default value.
      * @return The value.
@@ -483,7 +483,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Get the optional JSONArray associated with an index.
-     * 
+     *
      * @param index subscript
      * @return A JSONArray value, or null if the index has no value, or if the value is not a JSONArray.
      */
@@ -495,7 +495,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Get the optional JSONObject associated with an index. Null is returned if the key is not found, or null if the index has no value, or
      * if the value is not a JSONObject.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return A JSONObject value.
      */
@@ -507,7 +507,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Get the optional long value associated with an index. Zero is returned if there is no value for the index, or if the value is not a
      * number and cannot be converted to a number.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return The value.
      */
@@ -518,7 +518,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Get the optional long value associated with an index. The defaultValue is returned if there is no value for the index, or if the
      * value is not a number and cannot be converted to a number.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @param defaultValue The default value.
      * @return The value.
@@ -534,7 +534,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Get the optional string value associated with an index. It returns an empty string if there is no value at that index. If the value
      * is not a string and is not null, then it is coverted to a string.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @return A String value.
      */
@@ -544,7 +544,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Get the optional string associated with an index. The defaultValue is returned if the key is not found.
-     * 
+     *
      * @param index The index must be between 0 and length() - 1.
      * @param defaultValue The default value.
      * @return A String value.
@@ -556,7 +556,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Append a boolean value. This increases the array's length by one.
-     * 
+     *
      * @param value A boolean value.
      * @return this.
      */
@@ -567,7 +567,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Put a value in the JSONArray, where the value will be a JSONArray which is produced from a Collection.
-     * 
+     *
      * @param value A Collection value.
      * @return this.
      */
@@ -578,7 +578,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Append a double value. This increases the array's length by one.
-     * 
+     *
      * @param value A double value.
      * @throws JSONException if the value is not finite.
      * @return this.
@@ -592,7 +592,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Append an int value. This increases the array's length by one.
-     * 
+     *
      * @param value An int value.
      * @return this.
      */
@@ -603,7 +603,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Append an long value. This increases the array's length by one.
-     * 
+     *
      * @param value A long value.
      * @return this.
      */
@@ -614,7 +614,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Put a value in the JSONArray, where the value will be a JSONObject which is produced from a Map.
-     * 
+     *
      * @param value A Map value.
      * @return this.
      */
@@ -625,7 +625,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Append an object value. This increases the array's length by one.
-     * 
+     *
      * @param value An object value. The value should be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the
      *            JSONObject.NULL object.
      * @return this.
@@ -638,7 +638,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Put or replace a boolean value in the JSONArray. If the index is greater than the length of the JSONArray, then null elements will be
      * added as necessary to pad it out.
-     * 
+     *
      * @param index The subscript.
      * @param value A boolean value.
      * @return this.
@@ -651,7 +651,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Put a value in the JSONArray, where the value will be a JSONArray which is produced from a Collection.
-     * 
+     *
      * @param index The subscript.
      * @param value A Collection value.
      * @return this.
@@ -665,7 +665,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Put or replace a double value. If the index is greater than the length of the JSONArray, then null elements will be added as
      * necessary to pad it out.
-     * 
+     *
      * @param index The subscript.
      * @param value A double value.
      * @return this.
@@ -679,7 +679,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Put or replace an int value. If the index is greater than the length of the JSONArray, then null elements will be added as necessary
      * to pad it out.
-     * 
+     *
      * @param index The subscript.
      * @param value An int value.
      * @return this.
@@ -693,7 +693,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Put or replace a long value. If the index is greater than the length of the JSONArray, then null elements will be added as necessary
      * to pad it out.
-     * 
+     *
      * @param index The subscript.
      * @param value A long value.
      * @return this.
@@ -706,7 +706,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Put a value in the JSONArray, where the value will be a JSONObject which is produced from a Map.
-     * 
+     *
      * @param index The subscript.
      * @param value The Map value.
      * @return this.
@@ -720,7 +720,7 @@ public class JSONArray extends AbstractJSONValue {
     /**
      * Put or replace an object value in the JSONArray. If the index is greater than the length of the JSONArray, then null elements will be
      * added as necessary to pad it out.
-     * 
+     *
      * @param index The subscript.
      * @param value The value to put into the array. The value should be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String,
      *            or the JSONObject.NULL object.
@@ -744,7 +744,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Produce a JSONObject by combining a JSONArray of names with the values of this JSONArray.
-     * 
+     *
      * @param names A JSONArray containing a list of key strings. These will be paired with the values.
      * @return A JSONObject, or null if there are no names or if this JSONArray has no values.
      * @throws JSONException If any of the names are null.
@@ -767,7 +767,7 @@ public class JSONArray extends AbstractJSONValue {
      * syntactically correct JSON text then null will be returned instead. This could occur if the array contains an invalid number.
      * <p>
      * Warning: This method assumes that the data structure is acyclical.
-     * 
+     *
      * @return a printable, displayable, transmittable representation of the array.
      */
     @Override
@@ -780,7 +780,7 @@ public class JSONArray extends AbstractJSONValue {
      * syntactically correct JSON text then null will be returned instead. This could occur if the array contains an invalid number.
      * <p>
      * Warning: This method assumes that the data structure is acyclical.
-     * 
+     *
      * @param asciiOnly Whether to use only ASCII characters
      * @return a printable, displayable, transmittable representation of the array.
      */
@@ -817,7 +817,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Make a prettyprinted JSON text of this JSONArray. Warning: This method assumes that the data structure is acyclical.
-     * 
+     *
      * @param indentFactor The number of spaces to add to each level of indentation.
      * @return a printable, displayable, transmittable representation of the object, beginning with <code>[</code>&nbsp;<small>(left
      *         bracket)</small> and ending with <code>]</code>&nbsp;<small>(right bracket)</small>.
@@ -845,7 +845,7 @@ public class JSONArray extends AbstractJSONValue {
                 writer.resetCharArray();
             }
         }
-        
+
         return toString(indentFactor, 0);
     }
 
@@ -922,7 +922,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Writes specified JSON array to given generator.
-     * 
+     *
      * @param ja The JSON array
      * @param jGenerator The generator
      * @throws IOException If an I/O error occurs
@@ -945,7 +945,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Parses specified reader's content to a JSON array.
-     * 
+     *
      * @param reader The reader to read from
      * @return The parsed JSON array
      * @throws JSONException If an error occurs
@@ -967,7 +967,7 @@ public class JSONArray extends AbstractJSONValue {
 
     /**
      * Parses specified JSON array from given parser.
-     * 
+     *
      * @param jParser The JSON parser with {@link JsonToken#START_ARRAY} already consumed
      * @return The JSON array
      * @throws JSONException If an error occurs

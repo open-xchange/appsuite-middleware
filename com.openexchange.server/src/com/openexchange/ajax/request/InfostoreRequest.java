@@ -55,7 +55,6 @@ import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,6 +91,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.TimeZoneUtils;
@@ -1028,13 +1028,7 @@ public class InfostoreRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.error("", e);
             }
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (final IOException e) {
-                    LOG.debug("", e);
-                }
-            }
+            Streams.close(in);
         }
 
         w.object();

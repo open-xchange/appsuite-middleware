@@ -83,24 +83,24 @@ public class SnappyActivator extends HousekeepingActivator {
 	protected void startBundle() throws Exception {
 		log.info("starting com.openexchange.nosql.cassandra.snappyjava bundle");
 		SnappyServiceLookUp.set(this);
-		
+
 		ConfigurationService config = SnappyServiceLookUp.getService(ConfigurationService.class);
 		File snappyProps = config.getFileByName("snappy.properties");
 		if (null != snappyProps) {
             System.setProperty("snappy.config", snappyProps.getAbsolutePath().toString());
         }
-		
+
 		Properties prop = new Properties();
 		String configUrl = System.getProperty("snappy.config");
 		prop.load(new FileInputStream(configUrl));
-		
+
 		String snappyNativePath = prop.getProperty(snappyPathProp);
-		
+
     	String osName = System.getProperty("os.name");
     	String osArch = System.getProperty("os.arch");
     	String fileSeparator = System.getProperty("file.separator");
     	log.info(osName + " " + osArch);
-    	
+
     	String postfix = null;
     	if (osName.equals("Linux")) {
     		postfix = ".so";

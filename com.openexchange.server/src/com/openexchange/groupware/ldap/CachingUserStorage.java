@@ -285,7 +285,7 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
                 }
                 identifier = delegate.getUserId(uid, context);
                 try {
-                    cache.put(key, Integer.valueOf(identifier));
+                    cache.put(key, Integer.valueOf(identifier), false);
                 } catch (final OXException e) {
                     throw LdapExceptionCode.CACHE_PROBLEM.create(e, new Object[0]).setPrefix("USR");
                 }
@@ -354,7 +354,7 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
                     if (null != cache.get(key)) {
                         cache.remove(key);
                     }
-                    cache.put(key, identifiers);
+                    cache.put(key, identifiers, false);
                 } catch (final OXException e) {
                     throw UserExceptionCode.CACHE_PROBLEM.create(e);
                 }

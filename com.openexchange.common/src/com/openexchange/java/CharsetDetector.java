@@ -464,11 +464,7 @@ public final class CharsetDetector {
              */
             return null == firstPossibleCharset ? FALLBACK : firstPossibleCharset;
         } finally {
-            try {
-                in.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(in);
         }
     }
 

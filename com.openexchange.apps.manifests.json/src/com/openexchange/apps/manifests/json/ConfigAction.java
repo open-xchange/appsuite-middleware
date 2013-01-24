@@ -71,6 +71,7 @@ import com.openexchange.apps.manifests.json.values.Hosts;
 import com.openexchange.apps.manifests.json.values.Languages;
 import com.openexchange.apps.manifests.json.values.Manifests;
 import com.openexchange.apps.manifests.json.values.ServerVersion;
+import com.openexchange.apps.manifests.json.values.UIVersion;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -101,7 +102,8 @@ public class ConfigAction implements AJAXActionService {
 				new Capabilities(services),
 				new Hosts(),
 				new ServerVersion(),
-				new Languages(services)
+				new Languages(services),
+				new UIVersion()
 		};
 	}
 

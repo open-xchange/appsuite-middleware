@@ -70,6 +70,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenRegistry;
@@ -244,9 +245,7 @@ public class MailAttachment extends AJAXServlet {
                 }
             } finally {
                 token.close();
-                if (null != attachmentInputStream) {
-                    attachmentInputStream.close();
-                }
+                Streams.close(attachmentInputStream);
                 if (null != file) {
                     file.delete();
                 }

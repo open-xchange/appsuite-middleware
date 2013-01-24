@@ -68,6 +68,7 @@ import junit.framework.TestCase;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tx.ConfigurableDBProvider;
+import com.openexchange.java.Streams;
 
 /**
  * {@link SQLTestCase}
@@ -101,9 +102,7 @@ public abstract class SQLTestCase extends TestCase {
             input = new FileInputStream(filename);
             properties.load(input);
         } finally {
-            if (input != null) {
-                input.close();
-            }
+            Streams.close(input);
         }
     }
 

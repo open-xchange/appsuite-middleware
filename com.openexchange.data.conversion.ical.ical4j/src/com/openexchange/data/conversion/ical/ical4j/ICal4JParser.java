@@ -94,6 +94,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
@@ -306,13 +307,7 @@ public class ICal4JParser implements ICalParser {
     }
 
     protected static void closeSafe(final Closeable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (final IOException e) {
-                // Ignore
-            }
-        }
+        Streams.close(closeable);
     }
 
     protected CalendarDataObject convertAppointment(int index, VEvent vevent, TimeZone defaultTZ, List<AttributeConverter<VEvent,Appointment>> all, Context ctx, List<ConversionWarning> warnings) throws ConversionError {

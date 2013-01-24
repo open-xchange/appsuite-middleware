@@ -53,7 +53,7 @@ import java.io.Writer;
 
 /**
  * {@link JSONValue} - The base class for all JSON representations.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface JSONValue {
@@ -63,7 +63,7 @@ public interface JSONValue {
      * Invokes {@link #write(Writer, boolean)} with latter parameter set to <code>false</code>.
      * <p>
      * <b>Warning</b>: This method assumes that the data structure is acyclically.
-     * 
+     *
      * @param The writer to write to
      * @return The specified writer for chained invocations
      * @throws JSONException If writing the JSON object fails (e.g. I/O error)
@@ -74,7 +74,7 @@ public interface JSONValue {
      * Write the contents of this JSON value as JSON text to a writer. For compactness, no whitespace is added.
      * <p>
      * <b>Warning</b>: This method assumes that the data structure is acyclically.
-     * 
+     *
      * @param The writer to write to
      * @param asciiOnly <code>true</code> to only write ASCII characters; otherwise <code>false</code>
      * @return The specified writer for chained invocations
@@ -89,7 +89,7 @@ public interface JSONValue {
 
     /**
      * Get the number of elements stored in this JSON value.
-     * 
+     *
      * @return The number of elements stored in this JSON value.
      */
     public int length();
@@ -98,7 +98,7 @@ public interface JSONValue {
      * Make a pretty-printed JSON text of this JSON value.
      * <p>
      * Warning: This method assumes that the data structure is acyclically.
-     * 
+     *
      * @param indentFactor The number of spaces to add to each level of indentation.
      * @param indent The indention of the top level.
      * @return A printable, displayable, and transmittable representation of the JSON value.
@@ -108,28 +108,28 @@ public interface JSONValue {
 
     /**
      * Check if this value represents a JSON array.
-     * 
+     *
      * @return <code>true</code> if this value represents a JSON array; otherwise <code>false</code>
      */
     public boolean isArray();
 
     /**
      * Check if this value represents a JSON object.
-     * 
+     *
      * @return <code>true</code> if this value represents a JSON object; otherwise <code>false</code>
      */
     public boolean isObject();
 
     /**
      * Gets the {@link JSONValue}'s {@link JSONObject} representation (if appropriate).
-     * 
+     *
      * @return The associated {@link JSONObject} or <code>null</code>
      */
     public JSONObject toObject();
 
     /**
      * Gets the {@link JSONValue}'s {@link JSONArray} representation (if appropriate).
-     * 
+     *
      * @return The associated {@link JSONArray} or <code>null</code>
      */
     public JSONArray toArray();

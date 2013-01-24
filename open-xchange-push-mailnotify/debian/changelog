@@ -1,8 +1,14 @@
-open-xchange-push-mailnotify (7.0.1-0) UNRELEASED; urgency=low
+open-xchange-push-mailnotify (7.0.1-0) unstable; urgency=low
 
   * prepare for 7.0.1
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 10 Jan 2013 10:11:06 +0100
+
+open-xchange-push-mailnotify (7.0.0-5) unstable; urgency=low
+
+  * Build for patch 2013-01-23
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 15 Jan 2013 14:55:42 +0100
 
 open-xchange-push-mailnotify (7.0.0-4) unstable; urgency=low
 

@@ -1,0 +1,5 @@
+open-xchange-hostname-config-cascade (7.0.1-0) unstable; urgency=low
+
+  * Initial packaging
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 23 Jan 2013 14:04:39 +0100

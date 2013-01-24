@@ -102,7 +102,7 @@ public class AppointmentNotificationPool implements
 	private final ReentrantLock lock = new ReentrantLock();
 
 	private final Map<Integer, Map<Integer, QueueItem>> items = new HashMap<Integer, Map<Integer, QueueItem>>();
-	
+
 	private final Map<Integer, Map<NotificationParticipant, List<Appointment>>> sent = new HashMap<Integer, Map<NotificationParticipant, List<Appointment>>>();
 
 	public AppointmentNotificationPool(TimerService timer,
@@ -175,20 +175,20 @@ public class AppointmentNotificationPool implements
             participants = new HashMap<NotificationParticipant, List<Appointment>>();
             sent.put(session.getContextId(), participants);
         }
-        
+
         List<Appointment> appointments = participants.get(recipient);
         if (appointments == null) {
             appointments = new ArrayList<Appointment>();
             participants.put(recipient, appointments);
         }
-        
+
         appointments.remove(appointment); // Stops working, if equals() depends on more than the objectId
         appointments.add(appointment);
     }
-    
+
     /**
      * Searches for an Appointment about a recipient was already informed. Removes this appointments from memory.
-     * 
+     *
      * @param participant
      * @param appointment
      * @param contextId
@@ -199,7 +199,7 @@ public class AppointmentNotificationPool implements
         if (participants == null) {
             return null;
         }
-        
+
         List<Appointment> appointments = participants.get(participant);
         if (appointments == null) {
             return null;
@@ -212,17 +212,17 @@ public class AppointmentNotificationPool implements
             }
         }
         appointments.remove(retval);
-        
+
         if (appointments.isEmpty()) {
             participants.remove(participant);
         }
         if (participants.isEmpty()) {
             sent.remove(contextId);
         }
-        
+
         return retval;
     }
-    
+
     private void clearSentItems(int contextId) {
         sent.remove(contextId);
     }
@@ -445,7 +445,7 @@ public class AppointmentNotificationPool implements
                 }
             }
         }
-        
+
         private boolean isAlreadyInformed(NotificationParticipant participant, Appointment mostRecent, int contextId) {
             Appointment alreadySent = removeFromSent(participant, mostRecent, contextId);
             if (alreadySent != null) {

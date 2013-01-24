@@ -68,6 +68,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.Streams;
 
 /**
  * {@link HTMLFilterHandler} - The HTML white-list filter.
@@ -300,13 +301,7 @@ public final class HTMLFilterHandler implements HtmlHandler {
                             }
                             mapStr = new String(DEFAULT_WHITELIST);
                         } finally {
-                            if (null != reader) {
-                                try {
-                                    reader.close();
-                                } catch (final Exception e) {
-                                    LOG.error(e.getMessage(), e);
-                                }
-                            }
+                            Streams.close(reader);
                         }
                     }
                 }

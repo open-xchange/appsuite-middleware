@@ -174,8 +174,25 @@ public interface Cache {
      * @param key The key
      * @param obj Object to store
      * @exception OXException If put operation on cache fails
+     * @deprecated Use {@link #put(Serializable, Serializable, boolean)} instead and supply the <code>invalidate</code>-flag explicitly.
      */
+    @Deprecated 
     public void put(Serializable key, Serializable obj) throws OXException;
+
+    /**
+     * Place a new object in the cache, associated with key name. If there is currently an object associated with name in the cache it is
+     * replaced. Names are scoped to a cache so they must be unique within the cache they are placed.
+     * <p>
+     * If the put-operation is caused by an existing item being changed, set the <code>invalidate</code>-flag to <code>true</code> so that 
+     * auxiliary caches get informed, too. If it is caused by just populating the cache from the database or another persistent storage,
+     * set it to<code>false</code>. 
+     *
+     * @param key The key
+     * @param obj Object to store
+     * @param invalidate <code>true</code> to trigger remote invalidation processing for the cache entry, <code>false</code>, otherwise.
+     * @exception OXException If put operation on cache fails
+     */
+    public void put(Serializable key, Serializable obj, boolean invalidate) throws OXException;
 
     /**
      * Constructs a cache element with these attributes, and puts it into the cache.
@@ -186,8 +203,28 @@ public interface Cache {
      * @param val The object to store
      * @param attr The object's element attributes
      * @exception OXException If put operation on cache fails
+     * @deprecated Use {@link #put(Serializable, Serializable, ElementAttributes, boolean)} instead and supply the <code>invalidate</code>-
+     *             flag explicitly.
      */
+    @Deprecated
     public void put(Serializable key, Serializable val, ElementAttributes attr) throws OXException;
+
+    /**
+     * Constructs a cache element with these attributes, and puts it into the cache.
+     * <p>
+     * If the key or the value is null, and InvalidArgumentException is thrown.
+     * <p>
+     * If the put-operation is caused by an existing item being changed, set the <code>invalidate</code>-flag to <code>true</code> so that 
+     * auxiliary caches get informed, too. If it is caused by just populating the cache from the database or another persistent storage,
+     * set it to<code>false</code>. 
+     *
+     * @param key The key
+     * @param val The object to store
+     * @param attr The object's element attributes
+     * @param invalidate <code>true</code> to trigger remote invalidation processing for the cache entry, <code>false</code>, otherwise.
+     * @exception OXException If put operation on cache fails
+     */
+    public void put(Serializable key, Serializable val, ElementAttributes attr, boolean invalidate) throws OXException;
 
     /**
      * Allows the user to put an object into a group within a particular cache. This method allows the object's attributes to be
@@ -198,8 +235,28 @@ public interface Cache {
      * @param value The object to cache
      * @param attr The objects attributes.
      * @throws OXException If put operation on cache fails
+     * @deprecated Use {@link #putInGroup(Serializable, String, Object, ElementAttributes, boolean)} instead and supply the 
+     *             <code>invalidate</code>-flag explicitly.
      */
+    @Deprecated
     public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr) throws OXException;
+
+    /**
+     * Allows the user to put an object into a group within a particular cache. This method allows the object's attributes to be
+     * individually specified.
+     * <p>
+     * If the put-operation is caused by an existing item being changed, set the <code>invalidate</code>-flag to <code>true</code> so that 
+     * auxiliary caches get informed, too. If it is caused by just populating the cache from the database or another persistent storage,
+     * set it to<code>false</code>. 
+     *
+     * @param key The key
+     * @param groupName The group name.
+     * @param value The object to cache
+     * @param attr The objects attributes.
+     * @param invalidate <code>true</code> to trigger remote invalidation processing for the cache entry, <code>false</code>, otherwise.
+     * @throws OXException If put operation on cache fails
+     */
+    public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr, boolean invalidate) throws OXException;
 
     /**
      * Allows the user to put an object into a group within a particular cache. This method sets the object's attributes to the default for
@@ -209,8 +266,27 @@ public interface Cache {
      * @param groupName The group name.
      * @param value The object to cache
      * @throws OXException If put operation on cache fails
+     * @deprecated Use {@link #putInGroup(Serializable, String, Serializable, boolean)} instead and supply the <code>invalidate</code>-
+     *             flag explicitly.
      */
+    @Deprecated
     public void putInGroup(Serializable key, String groupName, Serializable value) throws OXException;
+
+    /**
+     * Allows the user to put an object into a group within a particular cache. This method sets the object's attributes to the default for
+     * the cache.
+     * <p>
+     * If the put-operation is caused by an existing item being changed, set the <code>invalidate</code>-flag to <code>true</code> so that 
+     * auxiliary caches get informed, too. If it is caused by just populating the cache from the database or another persistent storage,
+     * set it to<code>false</code>. 
+     *
+     * @param key The key
+     * @param groupName The group name.
+     * @param value The object to cache
+     * @param invalidate <code>true</code> to trigger remote invalidation processing for the cache entry, <code>false</code>, otherwise.
+     * @throws OXException If put operation on cache fails
+     */
+    public void putInGroup(Serializable key, String groupName, Serializable value, boolean invalidate) throws OXException;
 
     /**
      * Place a new object in the cache, associated with key. If there is currently an object associated with key in the cache an exception

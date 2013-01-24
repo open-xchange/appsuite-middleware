@@ -105,6 +105,30 @@
             <str>query</str>
         </arr>
     </requestHandler>
+    
+    <requestHandler name="personsAndTopics" class="solr.SearchHandler">
+        <lst name="invariants">
+            <str name="defType">edismax</str>
+            <str name="echoParams">explicit</str>
+            <float name="tie">0.01</float>
+            <str name="qf">
+                file_name^100 content_gen^50 content_en^50 content_de^50 content_fr^50 content_it^50
+            </str>
+            <str name="fq">module:19</str>
+            <str name="hl">true</str>
+            <str name="hl.snippets">1</str>
+            <str name="hl.usePhraseHighlighter">true</str>
+            <str name="hl.requireFieldMatch">true</str>
+        </lst>
+        <lst name="defaults">
+            <str name="fl">uuid file_name content_gen content_en content_de content_fr content_it</str>
+        </lst>
+
+        <arr name="components">
+            <str>query</str>
+            <str>highlight</str>
+        </arr>
+    </requestHandler>
 
     <requestHandler name="/update" class="solr.XmlUpdateRequestHandler">
         <lst name="defaults">

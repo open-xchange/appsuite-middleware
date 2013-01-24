@@ -67,6 +67,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Streams;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.linkedin.osgi.Activator;
 
@@ -129,9 +130,13 @@ public class LinkedInConnectionTest extends TestCase {
     }
 
     public void testUsageOfExistingAccount() throws OXException {
-        final List<Contact> contacts = linkedIn.getContacts(null,1,1,1);
-        for (final Contact contact : contacts){
-            System.out.println(contact.getGivenName() + " " + contact.getSurName()+", "+contact.getEmail1());
+        try {
+            final List<Contact> contacts = linkedIn.getContacts(null,1,1,1);
+            for (final Contact contact : contacts){
+                System.out.println(contact.getGivenName() + " " + contact.getSurName()+", "+contact.getEmail1());
+            }
+        } catch (final org.scribe.exceptions.OAuthConnectionException e) {
+            // OAuth provider is not reachable due to network problems
         }
     }
 
@@ -158,13 +163,7 @@ public class LinkedInConnectionTest extends TestCase {
         } catch (final IOException e) {
             e.printStackTrace();
         } finally {
-            if (null != reader) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    // Ignore
-                }
-            }
+            Streams.close(reader);
         }
     }
 

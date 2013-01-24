@@ -58,7 +58,7 @@ import org.json.helpers.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link JSONInputStream} - Directly converts a given {@link JSONValue} to a readable input stream.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONInputStream extends InputStream {
@@ -234,7 +234,7 @@ public final class JSONInputStream extends InputStream {
 
     /**
      * Initializes a new {@link JSONInputStream}.
-     * 
+     *
      * @param jsonValue The JSON value to read from
      * @param charset The charset
      */

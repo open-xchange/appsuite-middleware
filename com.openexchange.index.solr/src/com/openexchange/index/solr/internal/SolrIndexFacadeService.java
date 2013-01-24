@@ -50,17 +50,23 @@
 package com.openexchange.index.solr.internal;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.logging.Log;
+import org.xml.sax.SAXException;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.index.AttachmentIndexField;
+import com.openexchange.groupware.infostore.index.InfostoreIndexField;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
@@ -68,19 +74,16 @@ import com.openexchange.index.IndexManagementService;
 import com.openexchange.index.IndexProperties;
 import com.openexchange.index.solr.ModuleSet;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
-import com.openexchange.index.solr.internal.attachments.AttachmentFieldMapper;
-import com.openexchange.index.solr.internal.attachments.SolrAttachmentField;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentIndexAccess;
-import com.openexchange.index.solr.internal.infostore.InfostoreFieldMapper;
-import com.openexchange.index.solr.internal.infostore.SolrInfostoreField;
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
+import com.openexchange.index.solr.internal.config.XMLBasedFieldConfiguration;
 import com.openexchange.index.solr.internal.infostore.SolrInfostoreIndexAccess;
-import com.openexchange.index.solr.internal.mail.MailFieldMapper;
-import com.openexchange.index.solr.internal.mail.SolrMailField;
 import com.openexchange.index.solr.internal.mail.SolrMailIndexAccess;
 import com.openexchange.index.solr.internal.querybuilder.BuilderException;
 import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
 import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
 import com.openexchange.log.LogFactory;
+import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.session.Session;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrProperties;
@@ -115,6 +118,13 @@ public class SolrIndexFacadeService implements IndexFacadeService {
     private SolrQueryBuilder infostoreBuilder;
 
     private SolrQueryBuilder mailBuilder;
+    
+    private FieldConfiguration mailFieldConfig;
+    
+    private FieldConfiguration attachmentFieldConfig;
+    
+    private FieldConfiguration infostoreFieldConfig;
+    
 
     /**
      * Initializes a new {@link SolrIndexFacadeService}.
@@ -164,26 +174,59 @@ public class SolrIndexFacadeService implements IndexFacadeService {
         try {
             ConfigurationService config = Services.getService(ConfigurationService.class);
             String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
-            attachmentBuilder = new SimpleQueryBuilder(
-                configDir + File.separatorChar + "attachment-querybuilder.properties",
-                SolrAttachmentField.MODULE,
-                SolrAttachmentField.ACCOUNT,
-                SolrAttachmentField.FOLDER,
-                AttachmentFieldMapper.getInstance());
-
-            infostoreBuilder = new SimpleQueryBuilder(
-                configDir + File.separatorChar + "infostore-querybuilder.properties",
-                null,
-                null,
-                SolrInfostoreField.FOLDER,
-                InfostoreFieldMapper.getInstance());
-
-            mailBuilder = new SimpleQueryBuilder(
-                configDir + File.separatorChar + "mail-querybuilder.properties",
-                null,
-                SolrMailField.ACCOUNT,
-                SolrMailField.FULL_NAME,
-                MailFieldMapper.getInstance());
+            try {
+                String mailSchema = config.getProperty(SolrProperties.SCHEMA_FILE_MAIL);
+                String mailConfig = config.getProperty(SolrProperties.CONFIG_FILE_MAIL);
+                mailFieldConfig = new XMLBasedFieldConfiguration(mailConfig, mailSchema);
+                String accountField = mailFieldConfig.getSolrFields(MailIndexField.ACCOUNT).iterator().next();
+                String folderField = mailFieldConfig.getSolrFields(MailIndexField.FULL_NAME).iterator().next();
+                mailBuilder = new SimpleQueryBuilder(
+                        configDir + File.separatorChar + "mail-querybuilder.properties",
+                        null,
+                        accountField,
+                        folderField,
+                        mailFieldConfig);
+            } catch (SAXException e) {
+                throw new IllegalStateException("Error while initializing FieldConfiguration for Mail module: " + e.getMessage(), e);
+            } catch (IOException e) {
+                throw new IllegalStateException("Error while initializing FieldConfiguration for Mail module: " + e.getMessage(), e);
+            }
+            
+            try {
+                String attachmentSchema = config.getProperty(SolrProperties.SCHEMA_FILE_ATTACHMENTS);
+                String attachmentConfig = config.getProperty(SolrProperties.CONFIG_FILE_ATTACHMENTS);
+                attachmentFieldConfig = new XMLBasedFieldConfiguration(attachmentConfig, attachmentSchema);
+                String moduleField = attachmentFieldConfig.getSolrFields(AttachmentIndexField.MODULE).iterator().next();
+                String accountField = attachmentFieldConfig.getSolrFields(AttachmentIndexField.ACCOUNT).iterator().next();
+                String folderField = attachmentFieldConfig.getSolrFields(AttachmentIndexField.FOLDER).iterator().next();
+                attachmentBuilder = new SimpleQueryBuilder(
+                        configDir + File.separatorChar + "attachment-querybuilder.properties",
+                        moduleField,
+                        accountField,
+                        folderField,
+                        attachmentFieldConfig);
+            } catch (SAXException e) {
+                throw new IllegalStateException("Error while initializing FieldConfiguration for Attachment module: " + e.getMessage(), e);
+            } catch (IOException e) {
+                throw new IllegalStateException("Error while initializing FieldConfiguration for Attachment module: " + e.getMessage(), e);
+            }
+            
+            try {
+                String infostoreSchema = config.getProperty(SolrProperties.SCHEMA_FILE_INFOSTORE);
+                String infostoreConfig = config.getProperty(SolrProperties.CONFIG_FILE_INFOSTORE);
+                infostoreFieldConfig = new XMLBasedFieldConfiguration(infostoreConfig, infostoreSchema);
+                String folderField = infostoreFieldConfig.getSolrFields(InfostoreIndexField.FOLDER).iterator().next();
+                infostoreBuilder = new SimpleQueryBuilder(
+                        configDir + File.separatorChar + "infostore-querybuilder.properties",
+                        null,
+                        null,
+                        folderField,
+                        infostoreFieldConfig);
+            } catch (SAXException e) {
+                throw new IllegalStateException("Error while initializing FieldConfiguration for Infostore module: " + e.getMessage(), e);
+            } catch (IOException e) {
+                throw new IllegalStateException("Error while initializing FieldConfiguration for Infostore module: " + e.getMessage(), e);
+            }
         } catch (BuilderException e) {
             throw new IllegalStateException("Could not initialize query builder." + e);
         }
@@ -265,19 +308,19 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                 if (mailBuilder == null) {
                     throw new IllegalStateException("QueryBuilder for module mail is not initialized.");
                 }
-                return new SolrMailIndexAccess(identifier, mailBuilder);
+                return new SolrMailIndexAccess(identifier, mailBuilder, mailFieldConfig);
 
             case Types.INFOSTORE:
                 if (infostoreBuilder == null) {
                     throw new IllegalStateException("QueryBuilder for module infostore is not initialized.");
                 }
-                return new SolrInfostoreIndexAccess(identifier, infostoreBuilder);
+                return new SolrInfostoreIndexAccess(identifier, infostoreBuilder, infostoreFieldConfig);
 
             case Types.ATTACHMENT:
                 if (attachmentBuilder == null) {
                     throw new IllegalStateException("QueryBuilder for module attachments is not initialized.");
                 }
-                return new SolrAttachmentIndexAccess(identifier, attachmentBuilder);
+                return new SolrAttachmentIndexAccess(identifier, attachmentBuilder, attachmentFieldConfig);
 
             default:
                 throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);

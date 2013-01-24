@@ -1,4 +1,4 @@
-open-xchange-contact-storage-ldap (7.0.1-0) UNRELEASED; urgency=low
+open-xchange-contact-storage-ldap (7.0.1-0) unstable; urgency=low
 
   * prepare for 7.0.1
 

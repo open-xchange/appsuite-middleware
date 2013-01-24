@@ -197,7 +197,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
                 if (null == (userConfig = (UserConfiguration) cache.get(key))) {
                     userConfig = delegateStorage.getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
                     if (initExtendedPermissions) {
-                        cache.put(key, userConfig);
+                        cache.put(key, userConfig, false);
                     }
                 }
             } catch (final RuntimeException rte) {
@@ -229,7 +229,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         for (final UserConfiguration userConfig : userConfigs) {
             cacheWriteLock.lock();
             try {
-                cache.put(getKey(userConfig.getUserId(), ctx, cache), userConfig);
+                cache.put(getKey(userConfig.getUserId(), ctx, cache), userConfig, false);
             } catch (final RuntimeException rte) {
                 return getFallback().getUserConfiguration(ctx, users);
             } finally {

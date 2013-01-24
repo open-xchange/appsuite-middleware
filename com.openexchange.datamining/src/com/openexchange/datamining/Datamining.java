@@ -63,12 +63,12 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Properties;
-import com.mysql.jdbc.MySQLConnection;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -76,6 +76,8 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import com.mysql.jdbc.MySQLConnection;
+import com.openexchange.java.Streams;
 
 /**
  * This is a simple Tool to get an idea how a specific installation of Open-Xchange is used. Operating on the MySQL-database exclusively it
@@ -150,10 +152,14 @@ public class Datamining {
             reportAverageFilestoreSize();
             reportNumberOfContexts();
             Questions.reportNumberOfUsers();
-            Questions.reportNumberOfUsersWithEventsInPrivateCalendar();
+            Questions.reportNumberOfAppointments();
+            Questions.reportNumberOfUsersWhoCreatedAppointments();
+            Questions.reportAverageNumberOfAppointmentsPerUserWhoHasAppointmentsAtAll();
             Questions.reportNumberOfUsersWithEventsInPrivateCalendarThatAreInTheFutureAndAreNotYearlySeries();
             Questions.reportNumberOfUsersWhoChangedTheirCalendarInTheLast30Days();
-            Questions.reportNumberOfInfostoreObjects();
+            Questions.reportNumberOfDocuments();
+            Questions.reportNumberOfUsersWhoCreatedDocuments();
+            Questions.reportAverageNumberOfDocumentsPerUserWhoHasDocumentsAtAll();
             reportAverageNumberOfInfostoreObjectsPerContext();
             reportAverageNumberOfInfostoreObjectsPerSchema();
             Questions.reportNumberOfNewInfostoreObjectsInTheLast30Days();
@@ -175,7 +181,9 @@ public class Datamining {
             Questions.reportNumberOfUsersConnectedToTOnline();
             Questions.reportNumberOfUsersConnectedToGMX();
             Questions.reportNumberOfUsersConnectedToWebDe();
-            Questions.reportNumberOfUsersWithTasks();
+            Questions.reportNumberOfTasks();
+            Questions.reportNumberOfUsersWhoCreatedTasks();
+            Questions.reportAverageNumberOfTasksPerUserWhoHasTasksAtAll();
             Questions.reportNumberOfUsersWhoChangedTheirTasksInTheLast30Days();
             Questions.reportNumberOfUsersWhoSelectedTeamViewAsCalendarDefault();
             Questions.reportNumberOfUsersWhoSelectedCalendarViewAsCalendarDefault();
@@ -187,6 +195,12 @@ public class Datamining {
             Questions.reportNumberOfUsersWhoSelectedListViewAsInfostoreDefault();
             Questions.reportNumberOfUsersWhoSelectedHSplitViewAsInfostoreDefault();
             Questions.reportNumberOfUsersWhoActivatedMiniCalendar();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientOX6UIInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientAppSuiteUIInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientMobileUIInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientEASInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientCalDAVInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientCardDAVInTheLast30Days();
 
             rightNow = Calendar.getInstance();
             final long after = rightNow.getTime().getTime();
@@ -296,7 +310,7 @@ public class Datamining {
 
 			if (cl.hasOption("hostname")){
 				hostname = cl.getOptionValue("hostname");
-				dbName = (cl.hasOption("dbName")) ? cl.getOptionValue("dbName") : "configDB";
+				dbName = (cl.hasOption("dbName")) ? cl.getOptionValue("dbName") : "configdb";
 				dbPort = (cl.hasOption("dbPort")) ? cl.getOptionValue("dbPort") : "3306";
 
 				configDBURL = "jdbc:mysql://" + hostname + ":" + dbPort + "/" + dbName;
@@ -417,12 +431,13 @@ public class Datamining {
     }
 
     private static void printReport() {
+        FileOutputStream fos = null;
+        OutputStreamWriter out = null;
         try {
-            FileOutputStream fos = new FileOutputStream(reportfilePath + filename);
-            OutputStreamWriter out = new OutputStreamWriter(fos, "UTF-8");
+            fos = new FileOutputStream(reportfilePath + filename);
+            out = new OutputStreamWriter(fos, "UTF-8");
             out.write(reportStringBuilder.toString());
-            out.close();
-            fos.close();
+            out.flush();
             System.out.println("report written to this file : " + reportfilePath + filename);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -430,6 +445,8 @@ public class Datamining {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            Streams.close(out, fos);
         }
     }
 
@@ -457,10 +474,11 @@ public class Datamining {
         try {
             InetAddress addr = InetAddress.getLocalHost();
             Calendar cal = Calendar.getInstance();
-            String date = Integer.toString(cal.get(Calendar.YEAR)) + "-" + Integer.toString(cal.get(Calendar.MONTH)) + "-" + Integer.toString(cal.get(Calendar.DAY_OF_MONTH));
-            filename = "open-xchange_datamining_" + addr.getHostAddress() + "_" + date + ".txt";
+            DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+            filename = "open-xchange_datamining_" + addr.getHostAddress() + "_" + dateFormat.format(cal.getTime()) + ".txt";
             report("hostIPAddress", addr.getHostAddress());
-            report("hostname", addr.getHostName());
+            report("hostname", addr.getHostName());            
+            report("dateOfReport", dateFormat.format(cal.getTime()));
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }

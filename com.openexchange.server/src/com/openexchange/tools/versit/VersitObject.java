@@ -51,6 +51,8 @@ package com.openexchange.tools.versit;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -62,18 +64,34 @@ public class VersitObject {
 
     public final String name;
 
-    private final HashMap<String, Property> Index = new HashMap<String, Property>();
-
-    private final ArrayList<Property> Properties = new ArrayList<Property>();
-
-    private final ArrayList<VersitObject> Children = new ArrayList<VersitObject>();
+    private final HashMap<String, List<Property>> Index = new HashMap<String, List<Property>>();
+    private final List<Property> Properties = new ArrayList<Property>(16);
+    private final List<VersitObject> Children = new ArrayList<VersitObject>(2);
 
     public VersitObject(final String name) {
         this.name = name;
     }
 
+    /**
+     * Gets the first property associated with given name (if there is any).
+     *
+     * @param name The property name
+     * @return The (first) property or <code>null</code>
+     */
     public Property getProperty(final String name) {
-        return Index.get(name.toUpperCase(Locale.ENGLISH));
+        final List<Property> list = Index.get(name.toUpperCase(Locale.ENGLISH));
+        return null == list ? null : (list.isEmpty() ? null : list.get(0));
+    }
+
+    /**
+     * Gets the properties associated with given name.
+     *
+     * @param name The name
+     * @return The properties or <code>null</code>
+     */
+    public List<Property> getProperties(final String name) {
+        final List<Property> list = Index.get(name.toUpperCase(Locale.ENGLISH));
+        return null == list ? null : new ArrayList<Property>(list);
     }
 
     public Property getProperty(final int index) {
@@ -85,7 +103,13 @@ public class VersitObject {
     }
 
     public void addProperty(final Property property) {
-        Index.put(property.name.toUpperCase(Locale.ENGLISH), property);
+        final String propName = property.name.toUpperCase(Locale.ENGLISH);
+        List<Property> list = Index.get(propName);
+        if (null == list) {
+            list = new LinkedList<Property>();
+            Index.put(propName, list);
+        }
+        list.add(property);
         Properties.add(property);
     }
 

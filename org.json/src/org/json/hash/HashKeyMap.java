@@ -57,7 +57,7 @@ import java.util.Set;
 
 /**
  * {@link HashKeyMap} - The <code>String</code> map backed by a <code>HashKey</code> map.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @see HashKey
  */
@@ -74,7 +74,7 @@ public final class HashKeyMap<V> implements Map<String, V> {
 
     /**
      * Initializes a new {@link HashKeyMap}.
-     * 
+     *
      * @param initialCapacity The map's initial capacity
      */
     public HashKeyMap(final int initialCapacity) {
@@ -83,7 +83,7 @@ public final class HashKeyMap<V> implements Map<String, V> {
 
     /**
      * Initializes a new {@link HashKeyMap} from specified backing map.
-     * 
+     *
      * @param map The backing map
      */
     public HashKeyMap(final Map<HashKey, V> map) {
@@ -91,34 +91,42 @@ public final class HashKeyMap<V> implements Map<String, V> {
         this.map = map;
     }
 
+    @Override
     public int size() {
         return map.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
+    @Override
     public boolean containsKey(final Object key) {
         return map.containsKey(HashKey.valueOf(key.toString()));
     }
 
+    @Override
     public boolean containsValue(final Object value) {
         return map.containsValue(value);
     }
 
+    @Override
     public V get(final Object key) {
         return map.get(HashKey.valueOf(key.toString()));
     }
 
+    @Override
     public V put(final String key, final V value) {
         return map.put(HashKey.valueOf(key), value);
     }
 
+    @Override
     public V remove(final Object key) {
         return map.remove(HashKey.valueOf(key.toString()));
     }
 
+    @Override
     public void putAll(final Map<? extends String, ? extends V> m) {
         if (null == m || m.isEmpty()) {
             return;
@@ -129,18 +137,22 @@ public final class HashKeyMap<V> implements Map<String, V> {
         }
     }
 
+    @Override
     public void clear() {
         map.clear();
     }
 
+    @Override
     public Set<String> keySet() {
         return new HashKeySet(map.keySet());
     }
 
+    @Override
     public Collection<V> values() {
         return map.values();
     }
 
+    @Override
     public Set<java.util.Map.Entry<String, V>> entrySet() {
         return new HashKeyEntrySet<V>(map.entrySet());
     }

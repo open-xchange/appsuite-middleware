@@ -68,6 +68,7 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.upload.impl.UploadException;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
@@ -159,7 +160,7 @@ public final class GetAction implements ETagAwareAJAXActionService {
                 }
                 out.flush();
             } finally {
-                close(contentInputStream);
+                Streams.close(contentInputStream);
             }
             /*
              * Create file holder
@@ -181,17 +182,6 @@ public final class GetAction implements ETagAwareAJAXActionService {
             return result;
         } catch (final IOException e) {
             throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private static void close(final Closeable toClose) {
-        if (null == toClose) {
-            return;
-        }
-        try {
-            toClose.close();
-        } catch (final IOException e) {
-            // Ignore
         }
     }
 

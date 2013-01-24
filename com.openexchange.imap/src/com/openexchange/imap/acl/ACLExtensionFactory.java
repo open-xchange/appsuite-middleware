@@ -77,7 +77,17 @@ public final class ACLExtensionFactory {
      * @return The factory instance.
      */
     public static ACLExtensionFactory getInstance() {
-        return instance;
+        ACLExtensionFactory tmp = instance;
+        if (null == tmp) {
+            synchronized (ACLExtensionFactory.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    tmp = new ACLExtensionFactory();
+                    instance = tmp;
+                }
+            }
+        }
+        return tmp;
     }
 
     private final AtomicBoolean instantiated;

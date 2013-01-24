@@ -60,6 +60,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.java.Streams;
 
 /**
  * {@link TestServlet} - Default TestServlet for basic server tests.
@@ -211,13 +212,7 @@ public class TestServlet extends HttpServlet {
              */
             return "";
         } finally {
-            if (null != isr) {
-                try {
-                    isr.close();
-                } catch (final IOException e) {
-                    // Ignore
-                }
-            }
+            Streams.close(isr);
         }
     }
 }

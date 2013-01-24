@@ -154,6 +154,9 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
 	public static final String NO_CONTENT_MSG = "The uploaded file did not contain any content";
 
+	// Something went wrong reading from specified file. Please try again.
+    public static final String IOEXCEPTION_RETRY_MSG = "Something went wrong reading from specified file. Please try again.";
+
     private ImportExportExceptionMessages() {
         super();
     }

@@ -79,6 +79,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -178,11 +179,7 @@ public final class ImportAction extends AbstractMailAction {
                             message = new MimeMessage(defaultSession, is);
                             message.removeHeader("x-original-headers");
                         } finally {
-                            try {
-                                is.close();
-                            } catch (final Exception e) {
-                                LOG.error("Closing file item stream failed.", e);
-                            }
+                            Streams.close(is);
                         }
                         final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
                         if (isEmpty(fromAddr)) {
@@ -281,7 +278,7 @@ public final class ImportAction extends AbstractMailAction {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {

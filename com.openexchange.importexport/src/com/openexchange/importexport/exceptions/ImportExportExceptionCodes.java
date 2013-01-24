@@ -147,6 +147,8 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     NEED_FOLDER(NEED_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 1312),
     IRREGULAR_COLUMN_ID(IRREGULAR_COLUMN_ID_MSG, Category.CATEGORY_USER_INPUT, 1313),
     NO_CONTENT(NO_CONTENT_MSG, Category.CATEGORY_USER_INPUT, 1314),
+    /** Something went wrong reading from specified file. Please try again. */
+    IOEXCEPTION_RETRY(IOEXCEPTION_RETRY_MSG, CATEGORY_TRY_AGAIN, 1314),
     ;
 
     private String message;

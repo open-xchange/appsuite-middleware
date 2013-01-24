@@ -62,8 +62,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.FileStorageCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -147,20 +148,7 @@ class State {
         } catch (final IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
-            if (null != reader) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-            if (null != isr) {
-                try {
-                    isr.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
+            Streams.close(reader, isr);
         }
     }
 
@@ -171,10 +159,10 @@ class State {
      * @throws OXException if an error occurs.
      */
     InputStream saveState() throws OXException {
+        BufferedWriter writer = null;
         try {
             final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
-            final OutputStreamWriter osw = new OutputStreamWriter(baos, "ISO-8859-1");
-            final BufferedWriter writer = new BufferedWriter(osw);
+            writer = new BufferedWriter(new OutputStreamWriter(baos, "ISO-8859-1"));
             writer.write(String.valueOf(depth));
             writer.newLine();
             writer.write(String.valueOf(entries));
@@ -186,13 +174,14 @@ class State {
                 writer.write(iter.next());
                 writer.newLine();
             }
-            writer.close();
-            osw.close();
+            writer.flush();
             return new ByteArrayInputStream(baos.toByteArray());
         } catch (final UnsupportedEncodingException e) {
             throw FileStorageCodes.ENCODING.create(e);
         } catch (final IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(writer);
         }
     }
 

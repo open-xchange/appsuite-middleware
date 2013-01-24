@@ -52,12 +52,11 @@ package com.openexchange.importexport.importers;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.transformInputStreamToString;
 import static com.openexchange.java.Autoboxing.I;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
@@ -92,11 +91,11 @@ import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
 import com.openexchange.importexport.formats.csv.OxAjaxnameMapper;
 import com.openexchange.importexport.formats.csv.OxReadableNameMapper;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.tools.io.IOUtils;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -165,56 +164,58 @@ public class CSVContactImporter extends AbstractImporter {
         if (!canImport(sessObj, format, folders, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_IMPORT.create(folder, format);
         }
-        final InputStream input;
-        if (is.markSupported()) {
-            input = is;
-        } else {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try {
-                IOUtils.transfer(is, baos);
-            } catch (IOException e) {
-                throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
-            }
-            input = new ByteArrayInputStream(baos.toByteArray());
-        }
-        input.mark(Integer.MAX_VALUE);
-        String csvStr = transformInputStreamToString(input, "UTF-8");
-        CSVParser csvParser = getCSVParser();
-        List<List<String>> csv = csvParser.parse(csvStr);
-        if (csv.size() < 2) {
-        	throw ImportExportExceptionCodes.NO_CONTENT.create();
-        }
+        List<List<String>> csv;
         // get header fields
-        final List<String> fields = csv.get(0);
-        if (!checkFields(fields)) {
-            throw ImportExportExceptionCodes.NO_VALID_CSV_COLUMNS.create();
-        }
-        if (!passesSanityTestForDisplayName(fields)) {
-            throw ImportExportExceptionCodes.NO_FIELD_FOR_NAMING.create();
+        List<String> fields;
+        {
+            InputStream input = null;
+            try {
+                input = is.markSupported() ? is : Streams.asInputStream(is);
+                input.mark(Integer.MAX_VALUE);
+                String csvStr = transformInputStreamToString(input, "UTF-8", false);
+                final CSVParser csvParser = getCSVParser();
+                csv = csvParser.parse(csvStr);
+                if (csv.size() < 2) {
+                    throw ImportExportExceptionCodes.NO_CONTENT.create();
+                }
+                fields = csv.get(0);
+                if (!checkFields(fields)) {
+                    throw ImportExportExceptionCodes.NO_VALID_CSV_COLUMNS.create();
+                }
+                if (!passesSanityTestForDisplayName(fields)) {
+                    throw ImportExportExceptionCodes.NO_FIELD_FOR_NAMING.create();
+                }
+                // re-read now the we have guessed the format and the encoding
+                if (!"UTF-8".equalsIgnoreCase(getCurrentMapper().getEncoding())) {
+                    input.reset();
+                    csvStr = transformInputStreamToString(input, getCurrentMapper().getEncoding(), false);
+                    csv = csvParser.parse(csvStr);
+                    fields = csv.get(0);
+                }
+            } catch (final IOException e) {
+                throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
+            } finally {
+                Streams.close(input);
+            }
         }
 
-        // re-read now the we have guessed the format and the encoding
-        if (!"UTF-8".equalsIgnoreCase(getCurrentMapper().getEncoding())) {
-        	try {
-				input.reset();
-			} catch (IOException e) {
-                throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
-			}
-            csvStr = transformInputStreamToString(input, getCurrentMapper().getEncoding());
-        }
         // reading entries...
-        final List<ImportIntention> intentions = new LinkedList<ImportIntention>();
-        final ContactSwitcher conSet = getContactSwitcher();
-        for(int lineNumber = 1; lineNumber < csv.size(); lineNumber++) {
-            // ...and writing them
-        	List<String> row = csv.get(lineNumber);
-        	ImportIntention intention = createIntention(fields, row, folder, conSet, lineNumber, sessObj);
-            intentions.add(intention);
+        final List<ImportIntention> intentions;
+        {
+            final int size = csv.size();
+            intentions = new ArrayList<ImportIntention>(size);
+            final ContactSwitcher conSet = getContactSwitcher();
+            for (int lineNumber = 1; lineNumber < size; lineNumber++) {
+                // ...and writing them
+                final List<String> row = csv.get(lineNumber);
+                final ImportIntention intention = createIntention(fields, row, folder, conSet, lineNumber, sessObj);
+                intentions.add(intention);
+            }
         }
 
         // Build a list of contacts to insert
-        final List<Contact> contacts = new LinkedList<Contact>();
-        for(final ImportIntention intention : intentions) {
+        final List<Contact> contacts = new ArrayList<Contact>(intentions.size());
+        for (final ImportIntention intention : intentions) {
             if (intention.contact != null) {
                 contacts.add(intention.contact);
             }
@@ -223,24 +224,22 @@ public class CSVContactImporter extends AbstractImporter {
         // Insert or update contacts
         final FolderUpdaterRegistry updaterRegistry = ImportExportServices.getUpdaterRegistry();
         final TargetFolderDefinition target = new TargetFolderDefinition(folder, sessObj.getUserId(), sessObj.getContext());
-
-        try {
+        {
             final FolderUpdaterService<Contact> folderUpdater = updaterRegistry.getFolderUpdater(target);
             if (folderUpdater == null) {
                 throw ImportExportExceptionCodes.CANNOT_IMPORT.create();
             }
             folderUpdater.save(contacts, target);
-        } catch (final OXException e) {
-            throw e;
         }
 
 
         // Build result list
+        final List<ImportResult> results = new ArrayList<ImportResult>(intentions.size());
 
-        final List<ImportResult> results = new LinkedList<ImportResult>();
-
-        for(final ImportIntention intention : intentions) {
-        	if (intention.contact != null && intention.contact.getObjectID() != 0) {
+        for (final ImportIntention intention : intentions) {
+            final boolean notNull = intention.contact != null;
+            final boolean isZero = notNull ? intention.contact.getObjectID() == 0 : true;
+            if (notNull && !isZero) {
                 final ImportResult result = new ImportResult();
                 result.setFolder(folder);
                 result.setObjectId(Integer.toString(intention.contact.getObjectID()));
@@ -249,10 +248,10 @@ public class CSVContactImporter extends AbstractImporter {
                     result.setException(intention.result.getException());
                 }
                 results.add(result);
-            } else if (intention.contact != null && intention.contact.getObjectID() == 0) {
-            	ImportResult notCreated = new ImportResult();
-            	notCreated.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(intention.contact));
-            	results.add(notCreated);
+            } else if (notNull && isZero) {
+                final ImportResult notCreated = new ImportResult();
+                notCreated.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(intention.contact));
+                results.add(notCreated);
             } else if (intention.result != null) {
                 results.add(intention.result);
             }

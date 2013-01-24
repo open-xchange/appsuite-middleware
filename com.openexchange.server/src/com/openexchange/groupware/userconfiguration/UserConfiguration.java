@@ -87,7 +87,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /** Checks if associated {@link Permission permission}'s service is available. */
     public static interface AvailabilityChecker extends Initialization {
-        
+
         /**
          * Indicates if associated {@link Permission permission}'s service is available.
          *
@@ -97,7 +97,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
 
     /** Returns always <code>true</code> */
-    static final AvailabilityChecker TRUE_AVAILABILITY_CHECKER = new AvailabilityChecker() {
+    public static final AvailabilityChecker TRUE_AVAILABILITY_CHECKER = new AvailabilityChecker() {
 
         @Override
         public boolean isAvailable(){
@@ -140,7 +140,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
         DELEGATE_TASKS(UserConfiguration.DELEGATE_TASKS, "DelegateTasks"),
         EDIT_GROUP(UserConfiguration.EDIT_GROUP, "EditGroup"),
         EDIT_RESOURCE(UserConfiguration.EDIT_RESOURCE, "EditResource"),
-        EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD, "EditPassword", new TrackerAvailabilityChecker<PasswordChangeService>(PasswordChangeService.class)),
+        EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD, "EditPassword", TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, true)),
         COLLECT_EMAIL_ADDRESSES(UserConfiguration.COLLECT_EMAIL_ADDRESSES, "CollectEMailAddresses"),
         MULTIPLE_MAIL_ACCOUNTS(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS, "MultipleMailAccounts"),
         SUBSCRIPTION(UserConfiguration.SUBSCRIPTION, "Subscription"),
@@ -208,7 +208,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
         public void stop() throws OXException {
             checker.stop();
         }
-        
+
         /**
          * Indicates if associated {@link Permission permission}'s service is available.
          *

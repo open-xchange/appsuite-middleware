@@ -72,7 +72,7 @@ public final class ImapUtility {
 
     /**
      * Appends command information to given information string.
-     * 
+     *
      * @param info The information
      * @param imapFolder The optional IMAP folder
      * @return The command with optional information appended
@@ -93,7 +93,7 @@ public final class ImapUtility {
 
     /**
      * Appends command information to given information string.
-     * 
+     *
      * @param info The information
      * @param fullName The optional full name of associated folder
      * @param store The optional description of connected IMAP store

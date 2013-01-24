@@ -50,10 +50,10 @@
 package com.openexchange.file.storage.webdav;
 
 import java.io.IOException;
-import java.io.InputStream;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 
 /**
@@ -104,10 +104,7 @@ public abstract class AbstractWebDAVAccess {
              * Ensure closing response
              */
             try {
-                final InputStream stream = httpMethod.getResponseBodyAsStream();
-                if (null != stream) {
-                    stream.close();
-                }
+                Streams.close(httpMethod.getResponseBodyAsStream());
             } catch (final IOException e) {
                 com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractWebDAVAccess.class)).error(e.getMessage(), e);
             } finally {

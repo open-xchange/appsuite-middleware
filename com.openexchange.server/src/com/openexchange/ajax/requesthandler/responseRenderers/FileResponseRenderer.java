@@ -279,7 +279,7 @@ public class FileResponseRenderer implements ResponseRenderer {
      * Checks specified <i>Content-Disposition</i> value against passed {@link IFileHolder file}.
      * <p>
      * E.g. <code>"inline"</code> is not allowed for <code>"text/html"</code> MIME type.
-     * 
+     *
      * @param contentDisposition The <i>Content-Disposition</i> value to cehck
      * @param file The file
      * @return The checked <i>Content-Disposition</i> value

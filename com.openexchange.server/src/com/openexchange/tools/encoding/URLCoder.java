@@ -50,12 +50,11 @@
 package com.openexchange.tools.encoding;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.BitSet;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -97,13 +96,7 @@ public final class URLCoder {
                 baos.write((byte) chr);
             }
         }
-        final String retval = Charsets.toString(baos.toByteArray(), charset);
-        try {
-            baos.close();
-        } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return retval;
+        return Charsets.toString(baos.toByteArray(), charset);
     }
 
     public static String encode(final String source, final Charset charset) {

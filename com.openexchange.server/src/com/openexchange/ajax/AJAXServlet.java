@@ -705,11 +705,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 return new String(baos.toByteArray(), Charsets.ISO_8859_1);
             }
         } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                LOG.debug(e.getMessage(), e);
-            }
+            Streams.close(inputStream);
         }
     }
 
@@ -740,7 +736,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.ISO_8859_1);
-    
+
     /**
      * BitSet of www-form-url safe characters.
      */
@@ -961,7 +957,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
 	public static String substituteJS(final String json, final String action) {
-		return JS_FRAGMENT.replace("**json**", json).replace("**action**",
+		return JS_FRAGMENT.replace("**json**", json.replaceAll(Pattern.quote("</") , "<\\/")).replace("**action**",
 				action);
 	}
 

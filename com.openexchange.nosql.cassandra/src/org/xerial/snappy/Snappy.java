@@ -19,7 +19,7 @@
 // Snappy.java
 // Since: 2011/03/29
 //
-// $URL$ 
+// $URL$
 // $Author$
 //--------------------------------------
 package org.xerial.snappy;
@@ -33,9 +33,9 @@ import java.util.Properties;
 
 /**
  * Snappy API for data compression/decompression
- * 
+ *
  * @author leo
- * 
+ *
  */
 public class Snappy
 {
@@ -56,7 +56,7 @@ public class Snappy
 
     /**
      * Copy bytes from source to destination
-     * 
+     *
      * @param src
      *            pointer to the source array
      * @param offset
@@ -79,7 +79,7 @@ public class Snappy
      * array copy to generate the result. If you want to reduce the memory copy
      * cost, use {@link #compress(byte[], int, int, byte[], int)} or
      * {@link #compress(ByteBuffer, ByteBuffer)}.
-     * 
+     *
      * @param input
      *            the input data
      * @return the compressed byte array
@@ -92,7 +92,7 @@ public class Snappy
     /**
      * Compress the input buffer content in [inputOffset,
      * ...inputOffset+inputLength) then output to the specified output buffer.
-     * 
+     *
      * @param input
      * @param inputOffset
      * @param inputLength
@@ -111,13 +111,13 @@ public class Snappy
      * Compress the content in the given input buffer. After the compression,
      * you can retrieve the compressed data from the output buffer [pos() ...
      * limit()) (compressed data size = limit() - pos() = remaining())
-     * 
+     *
      * @param uncompressed
      *            buffer[pos() ... limit()) containing the input data
      * @param compressed
      *            output of the compressed data. Uses range [pos()..].
      * @return byte size of the compressed data.
-     * 
+     *
      * @throws SnappyError
      *             when the input is not a direct buffer
      */
@@ -146,7 +146,7 @@ public class Snappy
 
     /**
      * Compress the input char array
-     * 
+     *
      * @param input
      * @return the compressed data
      */
@@ -156,7 +156,7 @@ public class Snappy
 
     /**
      * Compress the input double array
-     * 
+     *
      * @param input
      * @return the compressed data
      */
@@ -166,7 +166,7 @@ public class Snappy
 
     /**
      * Compress the input float array
-     * 
+     *
      * @param input
      * @return the compressed data
      */
@@ -176,7 +176,7 @@ public class Snappy
 
     /**
      * Compress the input int array
-     * 
+     *
      * @param input
      * @return the compressed data
      */
@@ -186,7 +186,7 @@ public class Snappy
 
     /**
      * Compress the input long array
-     * 
+     *
      * @param input
      * @return the compressed data
      */
@@ -196,7 +196,7 @@ public class Snappy
 
     /**
      * Compress the input short array
-     * 
+     *
      * @param input
      * @return the compressed data
      */
@@ -206,7 +206,7 @@ public class Snappy
 
     /**
      * Compress the input String
-     * 
+     *
      * @param s
      * @return the compressed data
      * @throws IOException
@@ -222,7 +222,7 @@ public class Snappy
 
     /**
      * Compress the input string using the given encoding
-     * 
+     *
      * @param s
      * @param encoding
      * @return the compressed data
@@ -236,7 +236,7 @@ public class Snappy
 
     /**
      * Compress the input string using the given encoding
-     * 
+     *
      * @param s
      * @param encoding
      * @return the compressed data
@@ -250,7 +250,7 @@ public class Snappy
 
     /**
      * Get the native library version of the snappy
-     * 
+     *
      * @return native library version
      */
     public static String getNativeLibraryVersion() {
@@ -312,7 +312,7 @@ public class Snappy
     /**
      * Get the maximum byte size needed for compressing data of the given byte
      * size.
-     * 
+     *
      * @param byteSize
      *            byte size of the data to compress
      * @return maximum byte size of the compressed data
@@ -323,7 +323,7 @@ public class Snappy
 
     /**
      * Compress the input data and produce a byte array of the uncompressed data
-     * 
+     *
      * @param data
      *            input array. The input MUST be an array type
      * @param byteSize
@@ -341,7 +341,7 @@ public class Snappy
     /**
      * Compress the input buffer [offset,... ,offset+length) contents, then
      * write the compressed data to the output buffer[offset, ...)
-     * 
+     *
      * @param input
      *            input array. This MUST be a primitive array type
      * @param inputOffset
@@ -369,13 +369,13 @@ public class Snappy
     /**
      * Uncompress the content in the input buffer. The uncompressed data is
      * written to the output buffer.
-     * 
+     *
      * Note that if you pass the wrong data or the range [inputOffset,
      * inputOffset + inputLength) that cannot be uncompressed, your JVM might
      * crash due to the access violation exception issued in the native code
      * written in C++. To avoid this type of crash, use
      * {@link #isValidCompressedBuffer(byte[], int, int)} first.
-     * 
+     *
      * @param input
      *            input byte array
      * @param inputOffset
@@ -400,7 +400,7 @@ public class Snappy
 
     /**
      * High-level API for uncompressing the input byte array.
-     * 
+     *
      * @param input
      * @return the uncompressed byte array
      * @throws IOException
@@ -414,13 +414,13 @@ public class Snappy
     /**
      * Uncompress the content in the input buffer. The uncompressed data is
      * written to the output buffer.
-     * 
+     *
      * Note that if you pass the wrong data or the range [inputOffset,
      * inputOffset + inputLength) that cannot be uncompressed, your JVM might
      * crash due to the access violation exception issued in the native code
      * written in C++. To avoid this type of crash, use
      * {@link #isValidCompressedBuffer(byte[], int, int)} first.
-     * 
+     *
      * @param input
      * @param inputOffset
      * @param inputLength
@@ -437,19 +437,19 @@ public class Snappy
     /**
      * Uncompress the content in the input buffer. The result is dumped to the
      * specified output buffer.
-     * 
+     *
      * Note that if you pass the wrong data or the range [pos(), limit()) that
      * cannot be uncompressed, your JVM might crash due to the access violation
      * exception issued in the native code written in C++. To avoid this type of
      * crash, use {@link #isValidCompressedBuffer(ByteBuffer)} first.
-     * 
-     * 
+     *
+     *
      * @param compressed
      *            buffer[pos() ... limit()) containing the input data
      * @param uncompressed
      *            output of the the uncompressed data. It uses buffer[pos()..]
      * @return uncompressed data size
-     * 
+     *
      * @throws IOException
      *             when failed to uncompress the given input
      * @throws SnappyError
@@ -478,7 +478,7 @@ public class Snappy
 
     /**
      * Uncompress the input data as char array
-     * 
+     *
      * @param input
      * @return the uncompressed data
      * @throws IOException
@@ -489,7 +489,7 @@ public class Snappy
 
     /**
      * Uncompress the input[offset, .., offset+length) as a char array
-     * 
+     *
      * @param input
      * @param offset
      * @param length
@@ -505,7 +505,7 @@ public class Snappy
 
     /**
      * Uncompress the input as a double array
-     * 
+     *
      * @param input
      * @return the uncompressed data
      * @throws IOException
@@ -520,7 +520,7 @@ public class Snappy
     /**
      * Get the uncompressed byte size of the given compressed input. This
      * operation takes O(1) time.
-     * 
+     *
      * @param input
      * @return uncompressed byte size of the the given input data
      * @throws IOException
@@ -534,7 +534,7 @@ public class Snappy
     /**
      * Get the uncompressed byte size of the given compressed input. This
      * operation takes O(1) time.
-     * 
+     *
      * @param input
      * @param offset
      * @param length
@@ -554,7 +554,7 @@ public class Snappy
     /**
      * Get the uncompressed byte size of the given compressed input. This
      * operation taks O(1) time.
-     * 
+     *
      * @param compressed
      *            input data [pos() ... limit())
      * @return uncompressed byte length of the given input
@@ -574,7 +574,7 @@ public class Snappy
 
     /**
      * Uncompress the input as a float array
-     * 
+     *
      * @param input
      * @return the uncompressed data
      * @throws IOException
@@ -585,7 +585,7 @@ public class Snappy
 
     /**
      * Uncompress the input[offset, offset+length) as a float array
-     * 
+     *
      * @param input
      * @param offset
      * @param length
@@ -601,7 +601,7 @@ public class Snappy
 
     /**
      * Uncompress the input data as an int array
-     * 
+     *
      * @param input
      * @return the uncompressed data
      * @throws IOException
@@ -612,7 +612,7 @@ public class Snappy
 
     /**
      * Uncompress the input[offset, offset+length) as an int array
-     * 
+     *
      * @param input
      * @param offset
      * @param length
@@ -628,7 +628,7 @@ public class Snappy
 
     /**
      * Uncompress the input data as a long array
-     * 
+     *
      * @param input
      * @return the uncompressed data
      * @throws IOException
@@ -639,7 +639,7 @@ public class Snappy
 
     /**
      * Uncompress the input[offset, offset+length) as a long array
-     * 
+     *
      * @param input
      * @param offset
      * @param length
@@ -655,7 +655,7 @@ public class Snappy
 
     /**
      * Uncompress the input as a short array
-     * 
+     *
      * @param input
      * @return the uncompressed data
      * @throws IOException
@@ -666,7 +666,7 @@ public class Snappy
 
     /**
      * Uncompress the input[offset, offset+length) as a short array
-     * 
+     *
      * @param input
      * @param offset
      * @param length
@@ -682,7 +682,7 @@ public class Snappy
 
     /**
      * Uncompress the input as a String
-     * 
+     *
      * @param input
      * @return the uncompressed dasta
      * @throws IOException
@@ -698,7 +698,7 @@ public class Snappy
 
     /**
      * Uncompress the input[offset, offset+length) as a String
-     * 
+     *
      * @param input
      * @param offset
      * @param length
@@ -717,7 +717,7 @@ public class Snappy
     /**
      * Uncompress the input[offset, offset+length) as a String of the given
      * encoding
-     * 
+     *
      * @param input
      * @param offset
      * @param length
@@ -735,7 +735,7 @@ public class Snappy
     /**
      * Uncompress the input[offset, offset+length) as a String of the given
      * encoding
-     * 
+     *
      * @param input
      * @param offset
      * @param length
@@ -752,7 +752,7 @@ public class Snappy
 
     /**
      * Uncompress the input as a String of the given encoding
-     * 
+     *
      * @param input
      * @param encoding
      * @return the uncompressed data
@@ -767,7 +767,7 @@ public class Snappy
 
     /**
      * Uncompress the input as a String of the given encoding
-     * 
+     *
      * @param input
      * @param encoding
      * @return the uncompressed data

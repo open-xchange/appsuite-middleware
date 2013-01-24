@@ -68,6 +68,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.groupware.update.tools.Constants;
+import com.openexchange.java.Streams;
 import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
@@ -152,7 +153,7 @@ public final class UpdateTaskSchemasAndVersionsCLT {
 
                 System.out.println(output);
             } finally {
-                jmxConnector.close();
+                Streams.close(jmxConnector);
             }
 
         } catch (final ParseException e) {

@@ -88,6 +88,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -1467,6 +1468,9 @@ public final class OutlookFolderStorage implements FolderStorage {
                     defaultFileStorageAccess.connect();
                     try {
                         final FileStorageFolder personalFolder = defaultFileStorageAccess.getFolderAccess().getPersonalFolder();
+                        if (defaultFileStorageAccess instanceof WarningsAware) {
+                            addWarnings(storageParameters, (WarningsAware) defaultFileStorageAccess);
+                        }
                         final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(
                             fileStorageService.getId(),
                             defaultAccount.getId(),
@@ -1500,6 +1504,9 @@ public final class OutlookFolderStorage implements FolderStorage {
                             final FileStorageFolder folder = publicFolders[i];
                             final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(serviceId, accountId, folder.getId());
                             ret[i] = new OutlookId(fsfi.toString(), i, folder.getName());
+                        }
+                        if (defaultFileStorageAccess instanceof WarningsAware) {
+                            addWarnings(storageParameters, (WarningsAware) defaultFileStorageAccess);
                         }
                         return ret;
                     } finally {
@@ -1595,6 +1602,9 @@ public final class OutlookFolderStorage implements FolderStorage {
                                             final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
                                             if (null != rootFolder) {
                                                 fsAccounts.add(userAccount);
+                                            }
+                                            if (accountAccess instanceof WarningsAware) {
+                                                addWarnings(storageParameters, (WarningsAware) accountAccess);
                                             }
                                         } finally {
                                             accountAccess.close();
@@ -2826,4 +2836,14 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
         return tmp;
     }
+
+    private static void addWarnings(final StorageParameters storageParameters, final WarningsAware warningsAware) {
+        final List<OXException> list = warningsAware.getAndFlushWarnings();
+        if (null != list && !list.isEmpty()) {
+            for (OXException warning : list) {
+                storageParameters.addWarning(warning);
+            }
+        }
+    }
+
 }

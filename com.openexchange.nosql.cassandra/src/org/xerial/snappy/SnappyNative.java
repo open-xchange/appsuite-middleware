@@ -19,7 +19,7 @@
 // SnappyNative.java
 // Since: 2011/03/30
 //
-// $URL$ 
+// $URL$
 // $Author$
 //--------------------------------------
 package org.xerial.snappy;
@@ -31,14 +31,14 @@ import java.nio.ByteBuffer;
  * <b>Internal only - Do not use this class.</b> JNI interface of the
  * {@link SnappyNativeAPI} implementation. The native method in this class is
  * defined in SnappyNative.h (genereted by javah) and SnappyNative.cpp
- * 
+ *
  * <p>
  * <b> DO NOT USE THIS CLASS since the direct use of this class might break the
  * native library code loading in {@link SnappyLoader}. </b>
  * </p>
- * 
+ *
  * @author leo
- * 
+ *
  */
 public class SnappyNative implements SnappyNativeAPI
 {

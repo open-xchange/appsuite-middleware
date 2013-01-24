@@ -62,9 +62,9 @@ import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.mail.AddressComparator;
-import com.openexchange.index.solr.internal.mail.SolrMailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 
@@ -114,13 +114,13 @@ public class AddressComparatorTest extends TestCase {
         documents.add(m3);
         Collections.shuffle(documents);
 
-        AddressComparator comp = new AddressComparator(SolrMailField.FROM, Order.ASC);
+        AddressComparator comp = new AddressComparator(MailIndexField.FROM, Order.ASC);
         Collections.sort(documents, comp);
         assertTrue(documents.get(0) == m1);
         assertTrue(documents.get(1) == m2);
         assertTrue(documents.get(2) == m3);
 
-        comp = new AddressComparator(SolrMailField.FROM, Order.DESC);
+        comp = new AddressComparator(MailIndexField.FROM, Order.DESC);
         Collections.sort(documents, comp);
         assertTrue(documents.get(0) == m1);
         assertTrue(documents.get(1) == m2);
@@ -146,7 +146,7 @@ public class AddressComparatorTest extends TestCase {
         documents.add(m3);
         Collections.shuffle(documents);
 
-        AddressComparator comp = new AddressComparator(SolrMailField.FROM, Order.ASC);
+        AddressComparator comp = new AddressComparator(MailIndexField.FROM, Order.ASC);
         Collections.sort(documents, comp);
         assertTrue(documents.get(0) == m1);
         assertTrue(documents.get(1) == m3);

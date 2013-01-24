@@ -80,6 +80,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.java.util.TimeZones;
 
 /**
  *
@@ -1342,9 +1343,7 @@ public class UserTest extends AbstractTest {
         aliase.add("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         usr.setAliases(aliase);
 
-        // TODO dates should be created with time zone UTC. But then assertDatesAreEqualAtYMD fails because of legacy date to java.sql.Date
-        // conversion.
-        final Calendar cal = Calendar.getInstance();
+        final Calendar cal = Calendar.getInstance(TimeZones.UTC);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
@@ -1502,15 +1501,13 @@ public class UserTest extends AbstractTest {
     }
 
     private static void assertDatesAreEqualsAtYMD(String message, Date date1, Date date2) {
-        // TODO time zone UTC should be used for calendar but then the legace date to java.sql.Date conversion breaks this test.
-        Calendar cal1 = Calendar.getInstance();
-        Calendar cal2 = Calendar.getInstance();
+        Calendar cal1 = Calendar.getInstance(TimeZones.UTC);
+        Calendar cal2 = Calendar.getInstance(TimeZones.UTC);
         if (date1 != null && date2 != null) {
             cal1.setTime(date1);
             cal2.setTime(date2);
             assertEquals(message, cal1.get(Calendar.YEAR), cal2.get(Calendar.YEAR));
             assertEquals(message, cal1.get(Calendar.MONTH), cal2.get(Calendar.MONTH));
-            // TODO Wrong day at this place can only be fixed by using useLegacyDatetimeCode=false for MySQL connections.
             assertEquals(message, cal1.get(Calendar.DAY_OF_MONTH), cal2.get(Calendar.DAY_OF_MONTH));
         }
     }

@@ -68,6 +68,7 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -75,6 +76,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -100,7 +102,7 @@ import com.openexchange.version.Version;
  */
 public class MailObject {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailObject.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailObject.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -109,6 +111,8 @@ public class MailObject {
     private static volatile UnknownHostException warnSpam;
 
     static {
+        // Ensure every mail-related stuff is orderly started
+        MailInitialization.MailcapInitialization.getInstance().start();
         try {
             staticHostName = InetAddress.getLocalHost().getCanonicalHostName();
         } catch (final UnknownHostException e) {
@@ -352,7 +356,7 @@ public class MailObject {
             multipart.addBodyPart(bodyPart);
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);                
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {

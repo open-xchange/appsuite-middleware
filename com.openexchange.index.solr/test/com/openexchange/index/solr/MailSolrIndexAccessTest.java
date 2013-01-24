@@ -51,6 +51,9 @@ package com.openexchange.index.solr;
 
 import java.util.Random;
 import junit.framework.TestCase;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexManagementService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
@@ -75,7 +78,25 @@ public class MailSolrIndexAccessTest extends TestCase {
         Services.setServiceLookup(new ServiceLookup() {
             @Override
             public <S> S getService(Class<? extends S> clazz) {
-                return (S) new MockConfigurationService();
+                if (clazz.equals(ConfigurationService.class)) {
+                    return (S) new MockConfigurationService();
+                } else if (clazz.equals(IndexManagementService.class)) {
+                    return (S) new IndexManagementService() {
+                        
+                        @Override
+                        public void unlockIndex(int contextId, int userId, int module) throws OXException {}
+                        
+                        @Override
+                        public void lockIndex(int contextId, int userId, int module) throws OXException {}
+                        
+                        @Override
+                        public boolean isLocked(int contextId, int userId, int module) throws OXException {
+                            return false;
+                        }
+                    };
+                } else {
+                    return null;
+                }
             }
 
             @Override

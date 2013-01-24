@@ -60,45 +60,45 @@ import org.apache.commons.logging.Log;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class TokenUtils {
-	
+
 	private static final Log log = com.openexchange.log.Log.loggerFor(TokenUtils.class);
-	
+
 	/**
 	 * Method for calculating unique tokens for each node
 	 * in a Cassandra cluster.<br/><br/>
-	 * 
+	 *
 	 * Formula: (2^127 / numberOfNodes) * n, where n=0..numberOfNodes-1
-	 * 
+	 *
 	 * @param numberOfNodes number of nodes
 	 * @return tokens BigInteger array with tokens
 	 */
 	public static BigInteger[] calculateTokens(int numberOfNodes) {
 		int i = 0;
 		BigInteger[] tokens = new BigInteger[numberOfNodes];
-		
+
 		while (i < numberOfNodes) {
 			BigInteger n = BigInteger.valueOf(numberOfNodes);
 			BigInteger pow = BigInteger.valueOf(2).pow(127);
             BigInteger token = pow.divide(n).multiply(BigInteger.valueOf(i));
             tokens[i] = token;
             log.info("Node " + i + ": " + token);
-            
+
             i++;
 		}
-		
+
 		return tokens;
 	}
-	
+
 	/**
 	 * Generates tokens based on the size of the cluster. Works both
 	 * ways, i.e. grow and shrink.<br/><br/>
-	 * 
+	 *
 	 * Originally written in Python by <a href="http://paul.querna.org/">Paul Querna</a><br/>
 	 * Ported in Java by <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
-	 * 
+	 *
 	 * @param currentNodes
 	 * @param futureNodes
-	 * 
+	 *
 	 * @return ArrayList with new tokens
 	 */
 	public static BigInteger[] resizeCluster(int currentNodes, int futureNodes) {
@@ -107,56 +107,56 @@ public class TokenUtils {
 		BigInteger[] cn = calculateTokens(currentNodes);
 		log.debug("Future tokens");
 		BigInteger[] fn = calculateTokens(futureNodes);
-		
+
 		int c = 0;
 		int f = 0;
-		
+
 		ArrayList<String> p = new ArrayList<String>();
 		log.debug("Re-Balanced");
 		while (c < cn.length && f < fn.length) {
 			BigInteger current = cn[c];
 			BigInteger future = fn[f];
-			
+
 			if (future.compareTo(current) == 0) {
 				p = pending(p);
 				log.debug("Node " + c + " stays at " + current );
 				tokens[f] = current;
-				c++;				
+				c++;
 			}
-			
+
 			if (future.compareTo(current) == 1) {
 				p = pending(p);
 				log.debug("Node " + c + " ===> " + future);
 				tokens[f] = future;
 				c++;
 			}
-			
+
 			if (future.compareTo(current) == -1) {
 				p.add("New node at: " + future);
 			}
 			f++;
 		}
-		
+
 		if (p.size() > 1) {
 			p = pending(p);
 		}
-		
+
 		while (f < fn.length) {
 			log.debug("New node at: " + fn[f]);
 			tokens[f] = fn[f];
 			f++;
 		}
-		
+
 		return tokens;
 	}
-	
+
 	/**
 	 * Print out any pending nodes. Works in conjunction with {@link #resizeCluster(int, int)} method.
 	 * @param pending
 	 * @return an ArrayList
 	 */
 	private static ArrayList<String> pending(ArrayList<String> pending) {
-		Iterator<String> iter = pending.iterator(); 
+		Iterator<String> iter = pending.iterator();
 		while (iter.hasNext()) {
 			String type = iter.next();
 			log.debug(type);
@@ -164,7 +164,7 @@ public class TokenUtils {
 		pending.clear();
 		return pending;
 	}
-	
+
 	/**
 	 * Generates a SHA1 String
 	 * @param value to hash
@@ -188,11 +188,11 @@ public class TokenUtils {
 		}
 		return buf.toString();
 	}
-	
+
 	/**
-	 * Test various consistency settings in a cluster. 
+	 * Test various consistency settings in a cluster.
 	 * Calculations are based in <a href="http://www.datastax.com/docs/1.1/dml/data_consistency">Tunable Consistency for Client Requests</a>
-	 * 
+	 *
 	 * @param clusterSize size of the cluster
 	 * @param replicationFactor replication factor
 	 * @param writeLevel {@link Level}
@@ -201,23 +201,23 @@ public class TokenUtils {
 	public static void calculateConsistencies(int clusterSize, int replicationFactor, Level writeLevel, Level readLevel) {
 		int r = realSize(replicationFactor, readLevel);
 		int w = realSize(replicationFactor, writeLevel);
-		
+
 		log.info("Reads are " + ((r + w > replicationFactor) ? "consistent." : "eventually consistent."));
 		log.info("Reading from " + ((r > 1) ? r + " nodes" : 1 + " node"));
 		log.info("Writing to " + ((w > 1) ? w + " nodes" : 1 + " node"));
-		
+
 		int survival = replicationFactor - Math.max(r, w);
-		
-		log.info("The cluster can survive the loss of " + 
+
+		log.info("The cluster can survive the loss of " +
 				((survival > 1) ? survival + " nodes" : survival == 1 ? "1 node" : "no nodes"));
 		log.info("Every node holds "
 				+ (((float) replicationFactor / (float) clusterSize) * 100)
 				+ " % of data");
 	}
-	
+
 	/** Simple enum mapping the Levels of R/W in Cassandra */
 	private enum Level {ONE, QUORUM, ALL};
-	
+
 	private static int realSize(int n, Level l) {
 		switch(l) {
 		case ONE:

@@ -62,6 +62,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Streams;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionHandler;
@@ -101,9 +102,7 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
                 line = buffy.readLine();
             }
         } finally {
-            if(buffy != null) {
-                buffy.close();
-            }
+            Streams.close(buffy);
         }
         return bob.toString();
     }

@@ -302,7 +302,6 @@ public class PayloadTreeNodeTest {
     public void testEqualsObject() {
         assertEquals(new PayloadTreeNode(payloadElement1), new PayloadTreeNode(payloadElement1));
         assertEquals(new PayloadTreeNode(payloadElement1).addChild(payloadTreeNode2), new PayloadTreeNode(payloadElement1).addChild(payloadTreeNode2));
-        assertEquals(new PayloadTreeNode(payloadElement1).addChild(payloadTreeNode2), new PayloadTreeNode(payloadElement1).addChild(payloadTreeNode3));
     }
 
 }

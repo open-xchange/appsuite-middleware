@@ -62,6 +62,7 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.internal.filewatcher.FileListener;
+import com.openexchange.java.Streams;
 
 /**
  * {@link PropertyWatcher}
@@ -201,11 +202,7 @@ public final class PropertyWatcher implements FileListener {
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         } finally {
-            try {
-                fis.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(fis);
         }
     }
 

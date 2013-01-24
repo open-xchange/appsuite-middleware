@@ -58,13 +58,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -155,15 +155,10 @@ public final class CSVLibrary {
         return ret;
     }
 
-    public static String transformInputStreamToString(final InputStream is, final String encoding) throws OXException{
-        final InputStreamReader isr;
+    public static String transformInputStreamToString(final InputStream is, final String encoding, final boolean close) throws OXException{
+        InputStreamReader isr = null;
         try {
             isr = new InputStreamReader(is, encoding);
-        } catch (final UnsupportedEncodingException e) {
-            LOG.fatal(e);
-            throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
-        }
-        try {
             final StringAllocator bob = new StringAllocator(8192);
             boolean isUTF8 = encoding.equalsIgnoreCase("UTF-8");
             boolean firstPartSpecialTreatment = isUTF8;
@@ -179,10 +174,19 @@ public final class CSVLibrary {
             	}
             }
             return bob.toString();
+        } catch (final UnsupportedEncodingException e) {
+            LOG.error(e.getMessage(), e);
+            throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
         } catch (final IOException e) {
+            if ("Bad file descriptor".equals(e.getMessage())) {
+                // Stream is already closed
+                throw ImportExportExceptionCodes.IOEXCEPTION_RETRY.create(e);
+            }
             throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
         } finally {
-            Streams.close(isr);
+            if (close) {
+                Streams.close(isr);
+            }
         }
     }
 
