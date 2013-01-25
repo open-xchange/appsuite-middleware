@@ -1078,7 +1078,6 @@ public class Login extends AJAXServlet {
         try {
             if (response.hasError() || null == result) {
                 final Locale locale;
-                
                 if (null == result) {
                     locale = Tools.getLocaleByAcceptLanguage(req, null);
                 } else {
