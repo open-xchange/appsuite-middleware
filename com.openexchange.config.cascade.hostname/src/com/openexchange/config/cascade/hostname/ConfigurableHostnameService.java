@@ -56,7 +56,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 
 /**
  * {@link ConfigurableHostnameService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ConfigurableHostnameService implements HostnameService {

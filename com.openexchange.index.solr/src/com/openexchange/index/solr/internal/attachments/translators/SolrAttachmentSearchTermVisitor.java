@@ -76,7 +76,7 @@ public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
     private final Configuration configuration;
 
     private final StringBuilder queryBuilder;
-    
+
     private final FieldConfiguration fieldConfig;
 
 

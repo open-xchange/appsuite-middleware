@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link APIResponseRenderer}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class APIResponseRenderer implements ResponseRenderer {
@@ -120,7 +120,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     /**
      * Returns the remembered session.
-     * 
+     *
      * @param req The Servlet request.
      * @return The remembered session
      */
@@ -134,7 +134,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     /**
      * Gets the locale for given HTTP request
-     * 
+     *
      * @param req The request
      * @return The locale
      */
@@ -144,7 +144,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     /**
      * Gets the locale for given server session
-     * 
+     *
      * @param session The server session
      * @return The locale
      */
@@ -164,7 +164,7 @@ public class APIResponseRenderer implements ResponseRenderer {
      * <li>The HTTP Servlet request has the <code>"respondWithHTML"</code> parameter set to <code>"true"</code></li>
      * <li>The HTTP Servlet request contains non-<code>null</code> <code>"callback"</code> parameter</li>
      * </ul>
-     * 
+     *
      * @param response The response to write
      * @param action The request's action
      * @param req The HTTP Servlet request
@@ -257,7 +257,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     /**
      * Utility method that determines whether the request contains multipart content
-     * 
+     *
      * @param request The request to be evaluated.
      * @return <code>true</code> if the request is multipart; <code>false</code> otherwise.
      */
@@ -289,7 +289,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     /**
      * Escapes <tt>"&lt;/"</tt> char sequence to <tt>"&lt;\/"</tt>.
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     private static final class EscapingWriter extends Writer {
@@ -362,7 +362,7 @@ public class APIResponseRenderer implements ResponseRenderer {
         public Writer append(final CharSequence csq, final int start, final int end) throws IOException {
             CharSequence cs = (csq == null ? "null" : csq);
             write(cs.subSequence(start, end).toString());
-            return this; 
+            return this;
         }
 
         @Override

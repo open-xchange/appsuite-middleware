@@ -64,15 +64,15 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UIVersion implements ComputedServerConfigValueService {
-    
+
     public static String UIVERSION = "";
-    
+
     @Override
     public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
 
         if (!serverConfig.has("version")) {
             serverConfig.put("version", UIVERSION);
-        }        
+        }
     }
 
 }

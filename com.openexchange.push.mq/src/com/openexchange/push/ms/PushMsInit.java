@@ -53,7 +53,6 @@ import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.MsExceptionCodes;
 import com.openexchange.ms.MsService;
 import com.openexchange.ms.Topic;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.push.ms.registry.PushMsServiceRegistry;
 
 /**

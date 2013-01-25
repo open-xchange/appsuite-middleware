@@ -118,13 +118,13 @@ public class SolrIndexFacadeService implements IndexFacadeService {
     private SolrQueryBuilder infostoreBuilder;
 
     private SolrQueryBuilder mailBuilder;
-    
+
     private FieldConfiguration mailFieldConfig;
-    
+
     private FieldConfiguration attachmentFieldConfig;
-    
+
     private FieldConfiguration infostoreFieldConfig;
-    
+
 
     /**
      * Initializes a new {@link SolrIndexFacadeService}.
@@ -191,7 +191,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
             } catch (IOException e) {
                 throw new IllegalStateException("Error while initializing FieldConfiguration for Mail module: " + e.getMessage(), e);
             }
-            
+
             try {
                 String attachmentSchema = config.getProperty(SolrProperties.SCHEMA_FILE_ATTACHMENTS);
                 String attachmentConfig = config.getProperty(SolrProperties.CONFIG_FILE_ATTACHMENTS);
@@ -210,7 +210,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
             } catch (IOException e) {
                 throw new IllegalStateException("Error while initializing FieldConfiguration for Attachment module: " + e.getMessage(), e);
             }
-            
+
             try {
                 String infostoreSchema = config.getProperty(SolrProperties.SCHEMA_FILE_INFOSTORE);
                 String infostoreConfig = config.getProperty(SolrProperties.CONFIG_FILE_INFOSTORE);

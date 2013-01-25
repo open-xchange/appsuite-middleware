@@ -261,7 +261,7 @@ public class PayloadTree implements VisitablePayload {
 
     }
 
-    
+
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
@@ -278,18 +278,23 @@ public class PayloadTree implements VisitablePayload {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (!(obj instanceof PayloadTree))
+        }
+        if (!(obj instanceof PayloadTree)) {
             return false;
+        }
         PayloadTree other = (PayloadTree) obj;
         if (root == null) {
-            if (other.root != null)
+            if (other.root != null) {
                 return false;
-        } else if (!root.equals(other.root))
+            }
+        } else if (!root.equals(other.root)) {
             return false;
+        }
         return true;
     }
 

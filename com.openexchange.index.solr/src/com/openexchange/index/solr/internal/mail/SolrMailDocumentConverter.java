@@ -85,8 +85,8 @@ import com.openexchange.mail.text.TextFinder;
 public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMessage> {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrMailDocumentConverter.class);
-    
-    
+
+
     public SolrMailDocumentConverter(FieldConfiguration fieldConfig) {
         super(fieldConfig);
     }
@@ -95,12 +95,12 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
     public IndexDocument<MailMessage> convert(SolrDocument document) throws OXException {
         return convertInternal(document);
     }
-    
+
     @Override
     public IndexDocument<MailMessage> convert(SolrDocument document, Map<String, List<String>> highlightedFields) throws OXException {
         StandardIndexDocument<MailMessage> indexDocument = convertInternal(document);
         addHighlighting(indexDocument, highlightedFields);
-        
+
         return indexDocument;
     }
 
@@ -120,7 +120,7 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
         setFieldInDocument(inputDocument, MailIndexField.TIMESTAMP, System.currentTimeMillis());
         setFieldInDocument(inputDocument, MailIndexField.UUID, uuid.toString());
         setFieldInDocument(inputDocument, MailIndexField.ACCOUNT, String.valueOf(accountId));
-    
+
         /*
          * Envelope data
          */
@@ -135,7 +135,7 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
         setFieldInDocument(inputDocument, MailIndexField.SIZE, mail.getSize());
         setFieldInDocument(inputDocument, MailIndexField.RECEIVED_DATE, mail.getReceivedDate() == null ? null : mail.getReceivedDate().getTime());
         setFieldInDocument(inputDocument, MailIndexField.SENT_DATE, mail.getSentDate() == null ? null : mail.getSentDate().getTime());
-    
+
         /*
          * Flags
          */
@@ -150,7 +150,7 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
         setFieldInDocument(inputDocument, MailIndexField.FLAG_SPAM, Boolean.valueOf((flags & MailMessage.FLAG_SPAM) > 0));
         setFieldInDocument(inputDocument, MailIndexField.FLAG_FORWARDED, Boolean.valueOf((flags & MailMessage.FLAG_FORWARDED) > 0));
         setFieldInDocument(inputDocument, MailIndexField.FLAG_READ_ACK, Boolean.valueOf((flags & MailMessage.FLAG_READ_ACK) > 0));
-    
+
         /*
          * User flags
          */
@@ -158,12 +158,12 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
         if (null != userFlags && userFlags.length > 0) {
             setFieldInDocument(inputDocument, MailIndexField.USER_FLAGS, Arrays.asList(userFlags));
         }
-    
+
         /*
          * Subject
          */
         setFieldInDocument(inputDocument, MailIndexField.SUBJECT, mail.getSubject());
-    
+
         String text = null;
         try {
             if (mail instanceof ContentAwareMailMessage) {
@@ -180,19 +180,19 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
         } catch (Throwable t) {
             LOG.warn("Error during text extraction. Setting content to null.", t);
         }
-    
+
         if (null != text) {
             String contentField = fieldConfig.getRawField(MailIndexField.CONTENT);
             if (contentField != null) {
                 inputDocument.setField(contentField, text);
             }
         }
-    
+
         String contentFlagField = fieldConfig.getRawField(MailIndexField.CONTENT_FLAG);
         if (contentFlagField != null) {
             inputDocument.setField(contentFlagField, Boolean.TRUE);
         }
-    
+
         return inputDocument;
     }
 
@@ -217,7 +217,7 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
                 // ignore
             }
         }
-        
+
         mail.addFrom(calculateAddressField(MailIndexField.FROM, document));
         mail.addTo(calculateAddressField(MailIndexField.TO, document));
         mail.addCc(calculateAddressField(MailIndexField.CC, document));
@@ -227,29 +227,29 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
         if (hasAttachment != null) {
             mail.setHasAttachment(hasAttachment.booleanValue());
         }
-        
+
         Integer colorLabel = getFieldValue(MailIndexField.COLOR_LABEL, document);
         if (colorLabel != null) {
             mail.setColorLabel(colorLabel.intValue());
         }
-        
+
         Long size = getFieldValue(MailIndexField.SIZE, document);
         if (size != null) {
             mail.setSize(size.longValue());
         }
-        
+
         Long sentDate = getFieldValue(MailIndexField.SENT_DATE, document);
         if (sentDate != null) {
             mail.setSentDate(new Date(sentDate.longValue()));
         }
-        
+
         Long receivedDate = getFieldValue(MailIndexField.RECEIVED_DATE, document);
         if (receivedDate != null) {
             mail.setReceivedDate(new Date(receivedDate.longValue()));
         }
-        
+
         setFlags(mail, document);
-        
+
         String subject = getFieldValue(MailIndexField.SUBJECT, document);
         if (subject != null) {
             mail.setSubject(subject);
@@ -257,7 +257,7 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
 
         return new StandardIndexDocument<MailMessage>(mail);
     }
-    
+
     private void setFlags(MailMessage mail, SolrDocument document) throws OXException {
         int flags = 0;
         Boolean b = getFieldValue(MailIndexField.FLAG_ANSWERED, document);
@@ -301,7 +301,7 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
             flags |= MailMessage.FLAG_USER;
         }
         mail.setFlags(flags);
-        
+
         Object userFlagsObject = getFieldValue(MailIndexField.USER_FLAGS, document);
         if (userFlagsObject != null) {
             if (userFlagsObject instanceof String) {
@@ -316,13 +316,13 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
             }
         }
     }
-    
+
     private InternetAddress[] calculateAddressField(MailIndexField indexField, SolrDocument document) throws OXException {
         List<String> addressList = getFieldValue(indexField, document);
         if (addressList == null || addressList.isEmpty()) {
             return new InternetAddress[0];
         }
-        
+
         InternetAddress[] addrs = new InternetAddress[addressList.size()];
         if (addressList != null && !addressList.isEmpty()) {
             for (int i = 0; i < addrs.length; i++) {
@@ -334,10 +334,10 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
                 }
             }
         }
-        
+
         return addrs;
     }
-    
+
     private static List<Object> createAddressHeader(final InternetAddress[] addrs) {
         if (addrs == null || addrs.length == 0) {
             return null;

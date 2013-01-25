@@ -62,9 +62,9 @@ public class SchemaField {
     private final boolean stored;
 
     private final boolean multiValued;
-    
+
     private final boolean isLocalized;
-    
+
     private final IndexField indexField;
 
     public SchemaField(String name, String type, boolean indexed, boolean stored, boolean multiValued, boolean isLocalized, IndexField indexField) {
@@ -97,11 +97,11 @@ public class SchemaField {
     public boolean isMultiValued() {
         return multiValued;
     }
-    
+
     public boolean isLocalized() {
         return isLocalized;
     }
-    
+
     public IndexField getIndexField() {
         return indexField;
     }

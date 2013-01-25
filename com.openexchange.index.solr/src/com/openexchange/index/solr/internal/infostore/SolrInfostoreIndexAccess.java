@@ -80,7 +80,7 @@ import com.openexchange.solr.SolrCoreIdentifier;
 public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMetadata> {
 
     private final SolrQueryBuilder queryBuilder;
-    
+
     private final SolrInfostoreDocumentConverter converter;
 
 

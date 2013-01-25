@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link PresenceStatusChangePublisher} - Listens for PresenceStatus changes at the PresenceStatusService and publishes the status change
  * via the MessageDispatcher to all clients that are subscribed to the client who just changed his staus.
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresenceStatusChangePublisher implements PresenceChangeListener {
@@ -75,7 +75,7 @@ public class PresenceStatusChangePublisher implements PresenceChangeListener {
 
     /**
      * Initializes a new {@link PresenceStatusChangePublisher}.
-     * 
+     *
      * @param serviceLookup The servicelookup to use.
      */
     public PresenceStatusChangePublisher(ServiceLookup serviceLookup) {
@@ -102,7 +102,7 @@ public class PresenceStatusChangePublisher implements PresenceChangeListener {
 
     /**
      * Handles a presence by retriev
-     * 
+     *
      * @param stanza
      * @param session
      */
@@ -141,7 +141,7 @@ public class PresenceStatusChangePublisher implements PresenceChangeListener {
 
     /**
      * Send a Presence Stanza update to a contact.
-     * 
+     *
      * @param contact The contact that should receive the update
      * @param presence The Presence Stanza that caused the update.
      * @param session The associated ServerSession

@@ -168,8 +168,8 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                             logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append('\n');
                         }
                     }
-                    
-                      // Make sure not to log any client specific parameters as security consideration 
+
+                      // Make sure not to log any client specific parameters as security consideration
 //                    String requestParameters = entry.getRequestParameters();
 //                    if(!requestParameters.isEmpty()) {
 //                        logBuilder

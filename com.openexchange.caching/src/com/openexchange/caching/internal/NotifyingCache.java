@@ -65,25 +65,25 @@ import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 
 /**
- * {@link NotifyingCache} 
- * 
- * {@link Cache} implementation that notifies listeners about specific cache operations on it's delegate, and performs the necessary 
- * invalidation operations upon event retrieval. 
+ * {@link NotifyingCache}
+ *
+ * {@link Cache} implementation that notifies listeners about specific cache operations on it's delegate, and performs the necessary
+ * invalidation operations upon event retrieval.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class NotifyingCache implements Cache, CacheListener {
-    
+
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(NotifyingCache.class));
-    
+
     private final Cache delegate;
     private final String region;
     private final CacheEventService eventService;
     private final boolean notifyOnLocalOperations;
-    
+
     /**
      * Initializes a new {@link NotifyingCache}.
-     * 
+     *
      * @param region The cache region name
      * @param delegate The underlying cache
      * @param eventService A reference to the cache event service
@@ -100,7 +100,7 @@ public class NotifyingCache implements Cache, CacheListener {
 
     /**
      * Initializes a new {@link NotifyingCache}.
-     * 
+     *
      * @param region The cache region name
      * @param delegate The underlying cache
      * @param eventService A reference to the cache listener eventService
@@ -108,10 +108,10 @@ public class NotifyingCache implements Cache, CacheListener {
     public NotifyingCache(String region, Cache delegate, CacheEventService notifier) {
         this(region, delegate, notifier, false);
     }
-    
+
     /**
-     * Gets a value indicating whether notifications on local-only operations are enabled or not. 
-     * 
+     * Gets a value indicating whether notifications on local-only operations are enabled or not.
+     *
      * @return <code>true</code>, if local operations lead to notifications, <code>false</code>, otherwise
      */
     public boolean isNotifyOnLocalOperations() {
@@ -173,7 +173,7 @@ public class NotifyingCache implements Cache, CacheListener {
         delegate.invalidateGroup(group);
         fireInvalidateGroup(group);
     }
-    
+
     @Override
     public void put(Serializable key, Serializable obj) throws OXException {
         put(key, obj, true);
@@ -322,7 +322,7 @@ public class NotifyingCache implements Cache, CacheListener {
             } catch (OXException e) {
                 LOG.error("Error handling cache event: " + cacheEvent, e);
             }
-        }        
+        }
     }
 
     private void fireInvalidateGroup(String groupName) {
@@ -334,7 +334,7 @@ public class NotifyingCache implements Cache, CacheListener {
             eventService.notify(this, event);
         }
     }
-    
+
     private void fireInvalidate(Serializable key) {
         fireInvalidate(key, null);
     }

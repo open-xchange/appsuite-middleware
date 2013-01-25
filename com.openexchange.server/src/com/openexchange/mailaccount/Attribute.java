@@ -107,7 +107,7 @@ public enum Attribute {
     REPLY_TO_LITERAL(MailAccountFields.REPLY_TO, 1038),
     // Addresses
     ADDRESSES(MailAccountFields.ADDRESSES, 1039),
-    
+
     ;
 
     public static final Set<Attribute> MAIL_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(

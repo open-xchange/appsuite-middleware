@@ -59,14 +59,14 @@ package com.openexchange.ms;
  * the client has created a subscription, and the subscriber must continue to be active in order for it to consume messages.</li>
  * </ul>
  * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.3.gif" alt="pub-sub">
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Topic<E> extends MessageDispatcher<E> {
 
     /**
      * Publishes specified message to this topic.
-     * 
+     *
      * @param message The message; prefer POJOs
      */
     void publish(E message);

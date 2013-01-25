@@ -67,7 +67,7 @@ import com.openexchange.ms.Queue;
 
 /**
  * {@link HzQueue}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HzQueue<E> implements Queue<E> {

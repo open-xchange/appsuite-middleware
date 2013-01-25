@@ -56,7 +56,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link ConfigurableHostnameServiceActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ConfigurableHostnameServiceActivator extends HousekeepingActivator {

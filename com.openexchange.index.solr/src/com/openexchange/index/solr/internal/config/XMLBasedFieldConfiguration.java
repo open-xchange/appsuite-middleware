@@ -70,23 +70,23 @@ import com.openexchange.index.IndexField;
 
 /**
  * {@link XMLBasedFieldConfiguration}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class XMLBasedFieldConfiguration implements FieldConfiguration {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(XMLBasedFieldConfiguration.class);
-    
+
     private final Set<IndexField> indexedFields = new HashSet<IndexField>();
-    
+
     private final Map<IndexField, Set<String>> indexFields = new HashMap<IndexField, Set<String>>();
-    
+
     private final Map<String, IndexField> reverseIndexFields = new HashMap<String, IndexField>();
-    
+
     private final Map<IndexField, SchemaField> schemaFields = new HashMap<IndexField, SchemaField>();
-    
+
     private String uniqueKey = null;
-    
+
 
     public XMLBasedFieldConfiguration(String configPath, String schemaPath) throws SAXException, IOException {
         super();
@@ -111,7 +111,7 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
                     if (langid.isNotEmpty() && "false".equals(langid.first().content())) {
                         continue;
                     }
-                    
+
                     /*
                      * If it's active, we use this one for the initialization and escape from the loop
                      */
@@ -123,7 +123,7 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
                             solrConfig.addLocalizedField(str.trim());
                         }
                     }
-                    
+
                     Match langid_whitelist = processorMatch.find(new NameFilter("langid.whitelist"));
                     if (langid_whitelist.isNotEmpty()) {
                         String content = langid_whitelist.first().content();
@@ -132,24 +132,24 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
                             solrConfig.addLanguage(str.trim());
                         }
                     }
-                    
+
                     Match langid_fallback = processorMatch.find(new NameFilter("langid.fallback"));
                     solrConfig.setFallback(langid_fallback.first().content());
                     break;
                 }
             }
         }
-        
+
         return solrConfig;
     }
-    
+
     private void initSchema(SolrConfig solrConfig, String schemaPath) throws SAXException, IOException {
         Match schema = JOOX.$(new File(schemaPath));
         Match uniqueKeyMatch = schema.find("uniqueKey");
         if (uniqueKeyMatch.isNotEmpty()) {
             uniqueKey = uniqueKeyMatch.first().content();
         }
-        
+
         Match fieldsMatch = schema.find("fields");
         if (fieldsMatch.isNotEmpty()) {
             Match fieldMatch = fieldsMatch.first().find("field");
@@ -176,11 +176,11 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
                         LOG.warn("Could not instantiate Enum value " + enumValue + " for class " + enumClass, e);
                     }
                 }
-                
+
                 if (indexField != null) {
                     SchemaField schemaField = new SchemaField(name, type, isLocalized ? true : indexed, stored, multiValued, isLocalized, indexField);
                     schemaFields.put(indexField, schemaField);
-                    
+
                     if (isLocalized) {
                         Set<String> localizedFields = solrConfig.localizeField(name);
                         indexFields.put(indexField, localizedFields);
@@ -191,7 +191,7 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
                         indexFields.put(indexField, Collections.singleton(name));
                         reverseIndexFields.put(name, indexField);
                     }
-                    
+
                     if (schemaField.isIndexed()) {
                         indexedFields.add(indexField);
                     }
@@ -199,47 +199,47 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
             }
         }
     }
-    
+
     @Override
     public Set<String> getSolrFields(IndexField indexField) {
         return indexFields.get(indexField);
     }
-    
+
     @Override
     public Set<? extends IndexField> getIndexedFields() {
         return new HashSet<IndexField>(indexedFields);
     }
-    
+
     @Override
     public String getUUIDField() {
         return uniqueKey;
     }
-    
+
     @Override
     public IndexField getIndexField(String solrField) {
         return reverseIndexFields.get(solrField);
     }
-    
+
     @Override
     public String getRawField(IndexField indexField) {
         SchemaField schemaField = schemaFields.get(indexField);
         if (schemaField == null) {
             return null;
         }
-        
+
         return schemaField.getName();
     }
-    
+
     @Override
     public boolean isLocalized(IndexField indexField) {
         SchemaField schemaField = schemaFields.get(indexField);
         return schemaField.isLocalized();
     }
-    
+
     private static final class NameFilter implements Filter {
-        
+
         private final String name;
-        
+
         public NameFilter(String name) {
             super();
             this.name = name;
@@ -253,49 +253,49 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
                     return true;
                 }
             }
-            
+
             return false;
         }
     }
-    
+
     private static final class SolrConfig {
-        
+
         private final Set<String> localizedFields = new HashSet<String>();
-        
+
         private final Set<String> whitelist = new HashSet<String>();
-        
+
         private String fallback = null;
-        
+
         public SolrConfig() {
             super();
         }
-        
+
         public void addLocalizedField(String field) {
             localizedFields.add(field);
         }
-        
+
         public void addLanguage(String language) {
             whitelist.add(language);
         }
-        
+
         public void setFallback(String fallback) {
             this.fallback = fallback;
         }
-        
+
         public boolean isLocalized(String field) {
             return localizedFields.contains(field);
         }
-        
+
         public Set<String> localizeField(String field) {
             Set<String> fields = new HashSet<String>();
             if (fallback != null) {
                 fields.add(field + '_' + fallback);
             }
-            
+
             for (String language : whitelist) {
                 fields.add(field + '_' + language);
             }
-            
+
             return fields;
         }
     }

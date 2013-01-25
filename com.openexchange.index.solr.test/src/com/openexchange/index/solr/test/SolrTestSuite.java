@@ -61,10 +61,10 @@ public class SolrTestSuite implements OSGiTest {
 
     @Override
     public Class<?>[] getTestClasses() {
-        return new Class<?>[] { 
-            SolrMailIndexAccessTest.class, 
-//            SolrInfostoreIndexAccessTest.class, 
-            SolrAttachmentIndexAccessTest.class 
+        return new Class<?>[] {
+            SolrMailIndexAccessTest.class,
+//            SolrInfostoreIndexAccessTest.class,
+            SolrAttachmentIndexAccessTest.class
             };
     }
 

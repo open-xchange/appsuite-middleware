@@ -182,5 +182,5 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     public String getObfuscationKey() {
         return obfuscationKey;
     }
-    
+
 }

@@ -59,21 +59,21 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class AltIdPredicate implements Predicate<String, HazelcastStoredSession> {
-    
+
     private static final long serialVersionUID = -3741029445819911943L;
-    
+
     private String altId;
-    
+
     /**
      * Initializes a new {@link AltIdPredicate}.
-     * 
+     *
      * @param altId The alternative ID to match
      */
     public AltIdPredicate(String altId) {
         super();
         this.altId = altId;
     }
-    
+
     /**
      * Initializes a new {@link AltIdPredicate}.
      */
@@ -86,5 +86,5 @@ public class AltIdPredicate implements Predicate<String, HazelcastStoredSession>
         return null != mapEntry && null != mapEntry.getValue() && null != altId &&
             altId.equals(mapEntry.getValue().getParameter(Session.PARAM_ALTERNATIVE_ID));
     }
-    
+
 }

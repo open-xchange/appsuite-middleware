@@ -79,7 +79,7 @@ public class WrappingFilter implements Filter {
     private int httpPort;
 
     private int httpsPort;
-    
+
     private boolean isConsiderXForwards = false;
 
     @Override

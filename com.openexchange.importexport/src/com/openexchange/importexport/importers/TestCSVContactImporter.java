@@ -61,7 +61,7 @@ import com.openexchange.java.Streams;
 
 /**
  * {@link TestCSVContactImporter}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class TestCSVContactImporter extends CSVContactImporter {

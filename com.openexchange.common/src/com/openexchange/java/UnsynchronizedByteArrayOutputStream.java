@@ -215,7 +215,7 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
     /**
      * Creates a newly allocated <tt>ByteArrayInputStream</tt>. Its size is the current size of this output stream and the valid contents of
      * the buffer have been copied into it.
-     * 
+     *
      * @return The current contents of this output stream, as a <tt>ByteArrayInputStream</tt>.
      */
     public ByteArrayInputStream toByteArrayInputStream() {
@@ -225,7 +225,7 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
     /**
      * Creates a newly allocated byte array. Its size is the current size of this output stream and the valid contents of the buffer have
      * been copied into it.
-     * 
+     *
      * @return The current contents of this output stream, as a byte array.
      */
     @Override

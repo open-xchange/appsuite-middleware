@@ -87,9 +87,9 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
-	    
+
 	    UIVersion.UIVERSION = context.getBundle().getVersion().toString();
-	    
+
 		final ServiceTracker<ServerConfigMatcherService, ServerConfigMatcherService> matcherTracker = track(ServerConfigMatcherService.class);
 		final ServiceTracker<ComputedServerConfigValueService, ComputedServerConfigValueService> computedValueTracker = track(ComputedServerConfigValueService.class);
 

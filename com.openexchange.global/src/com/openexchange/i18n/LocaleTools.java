@@ -56,7 +56,7 @@ import com.openexchange.java.StringAllocator;
 
 /**
  * Tool methods for handling locales.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -80,7 +80,7 @@ public final class LocaleTools {
 
     /**
      * Gets the sane (non-<code>null</code>) locale for specified locale.
-     * 
+     *
      * @param locale The locale to check for <code>null</code>
      * @return The passed locale or <tt>en_US</tt> if passed locale is <code>null</code>
      */
@@ -91,7 +91,7 @@ public final class LocaleTools {
     /**
      * Splits the full locale identifier into its parts and creates the corresponding locale. Currently the fullIdentifier must match the
      * pattern <code>&lt;language&gt; + &quot;_&quot; + &lt;country&gt; + &quot;_&quot; + &lt;variant&gt;</code>.
-     * 
+     *
      * @param fullIdentifier full locale identifier compliant to RFC 2798 and 2068.
      * @return the locale or <code>null</code> if the pattern doesn't match.
      */

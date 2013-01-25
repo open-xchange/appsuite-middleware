@@ -486,7 +486,7 @@ public class Datamining {
             DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
             filename = "open-xchange_datamining_" + addr.getHostAddress() + "_" + dateFormat.format(cal.getTime()) + ".txt";
             report("hostIPAddress", addr.getHostAddress());
-            report("hostname", addr.getHostName());            
+            report("hostname", addr.getHostName());
             report("dateOfReport", dateFormat.format(cal.getTime()));
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -637,7 +637,7 @@ public class Datamining {
         }
         return numberOfObjects;
     }
-    
+
     protected static BigInteger maximumForAllSchemata(String sql) {
         BigInteger numberOfObjects = new BigInteger("0");
         for (Schema schema : allSchemata) {
@@ -668,7 +668,7 @@ public class Datamining {
         }
         return numberOfObjects;
     }
-    
+
     protected static Float averageForAllSchemata(String sql) {
         Float numberOfObjects = new Float("0");
         for (Schema schema : allSchemata) {

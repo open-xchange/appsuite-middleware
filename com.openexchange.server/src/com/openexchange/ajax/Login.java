@@ -1016,7 +1016,7 @@ public class Login extends AJAXServlet {
                     properties.put("client.capabilities", capabilities);
                 }
             }
-            
+
             result = login.doLogin(req);
             if (null == result) {
                 return true;

@@ -114,7 +114,7 @@ public class Streams {
 
     /**
      * Creates an appropriate <tt>ByteArrayInputStream</tt> carrying given <tt>InputStream</tt>'s bytes.
-     * 
+     *
      * @param in The <tt>InputStream</tt> instance
      * @return The associated <tt>ByteArrayInputStream</tt> instance
      * @throws IOException If an I/O error occurs

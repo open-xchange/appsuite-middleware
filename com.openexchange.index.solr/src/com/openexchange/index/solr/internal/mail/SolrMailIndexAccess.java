@@ -86,7 +86,7 @@ import com.openexchange.solr.SolrCoreIdentifier;
 public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     private final SolrQueryBuilder queryBuilder;
-    
+
     private final SolrMailDocumentConverter converter;
 
     /**

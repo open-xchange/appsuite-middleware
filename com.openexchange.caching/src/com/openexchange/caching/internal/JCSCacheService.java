@@ -84,12 +84,12 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
      * Holds references to already initialized caches
      */
     private final ConcurrentMap<String, Cache> caches;
-    
+
     /**
      * Initializes a new {@link JCSCacheService}
      */
     private JCSCacheService() {
-        super();        
+        super();
         this.caches = new ConcurrentHashMap<String, Cache>();
     }
 
@@ -135,7 +135,7 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
                 /*
                  * Wrap with notifying cache if configured
                  */
-                if (JCSCacheServiceInit.getInstance().isEventInvalidation()) {                    
+                if (JCSCacheServiceInit.getInstance().isEventInvalidation()) {
                     CacheEventService eventService = JCSCacheServiceInit.getInstance().getCacheEventService();
                     if (null == eventService) {
                         throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CacheEventService.class.getName());
@@ -156,7 +156,7 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
                 cache = existingCache;
             }
         }
-        return cache;        
+        return cache;
     }
 
     @Override

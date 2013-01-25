@@ -56,7 +56,7 @@ import org.junit.Test;
 
 /**
  * {@link FluidPayloadTreeNodeBuilderTest}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class FluidPayloadTreeNodeBuilderTest {
@@ -64,7 +64,7 @@ public class FluidPayloadTreeNodeBuilderTest {
     /*
      * Build a single PayloadTreeNode. Can be created by simply giving the params needed for the PayloadElement constructor.
      * A PayloadTreeNode with an internal PayloadElement based on those params will then be created.
-     * 
+     *
      *            1
      */
     @Test
@@ -80,11 +80,11 @@ public class FluidPayloadTreeNodeBuilderTest {
 
     /*
      * First level children can be added by simply giving the params needed for the PayloadElement constructor. A PayloadTreeNode with an
-     * internal PayloadElement based on those params will then be created.   
-     * 
+     * internal PayloadElement based on those params will then be created.
+     *
      *            1
      *           /
-     *          2 
+     *          2
      */
     @Test
     public void testPayloadTreeNodeWithFirstLevelChild() {
@@ -92,7 +92,7 @@ public class FluidPayloadTreeNodeBuilderTest {
             .withPayload(1, "Integer", "testNameSpace", "testElement")
             .andChild(2, "Integer", "testNameSpace", "testElement")
             .build();
-        
+
         PayloadTreeNode handCraftedNode = new PayloadTreeNode(new PayloadElement(1, "Integer", "testNameSpace", "testElement"));
         handCraftedNode.addChild(new PayloadTreeNode(new PayloadElement(2, "Integer", "testNameSpace", "testElement")));
 
@@ -101,8 +101,8 @@ public class FluidPayloadTreeNodeBuilderTest {
 
     /*
      * First level children can be added by simply giving the params needed for the PayloadElement constructor. A PayloadTreeNode with an
-     * internal PayloadElement based on those params will then be created.   
-     * 
+     * internal PayloadElement based on those params will then be created.
+     *
      *            1
      *           /\
      *          2  3
@@ -114,7 +114,7 @@ public class FluidPayloadTreeNodeBuilderTest {
             .andChild(new PayloadElement(2, "Integer", "testNameSpace", "testElement"))
             .andChild(new PayloadElement(3, "Integer", "testNameSpace", "testElement"))
             .build();
-        
+
         PayloadTreeNode handCraftedNode = new PayloadTreeNode(new PayloadElement(1, "Integer", "testNameSpace", "testElement"));
         handCraftedNode.addChild(new PayloadTreeNode(new PayloadElement(2, "Integer", "testNameSpace", "testElement")));
         handCraftedNode.addChild(new PayloadTreeNode(new PayloadElement(3, "Integer", "testNameSpace", "testElement")));
@@ -125,7 +125,7 @@ public class FluidPayloadTreeNodeBuilderTest {
 
     /*
      * Multi level children can be added by combining withChild() and builder()
-     * 
+     *
      *            1
      *           /\
      *          2  4
@@ -165,7 +165,7 @@ public class FluidPayloadTreeNodeBuilderTest {
 
         assertEquals("Builder- and handCraftedNode should be equal", builderNode, handCraftedNode);
     }
-    
+
     /*
      * Build a PayloadTree with the help of the fluent builder.
      */
@@ -201,9 +201,9 @@ public class FluidPayloadTreeNodeBuilderTest {
         payloadTreeNode4.addChild(payloadTreeNode5);
         payloadTreeNode4.addChild(payloadTreeNode6);
         handCraftedRootNode.addChild(payloadTreeNode4);
-        
+
         PayloadTree handCraftedTree = new PayloadTree(handCraftedRootNode);
-        
+
         assertEquals("BuilderTree and handcraftedTree should be equal",builderTree, handCraftedTree);
     }
 

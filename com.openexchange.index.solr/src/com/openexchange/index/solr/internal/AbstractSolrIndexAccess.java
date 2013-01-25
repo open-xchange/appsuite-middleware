@@ -95,7 +95,7 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractSolrIndexAccess.class);
 
     private final Lock folderCacheLock = new ReentrantLock();
-    
+
     protected final FieldConfiguration fieldConfig;
 
     protected final int contextId;
@@ -329,7 +329,7 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
             if ((fetched + maxRows) > len) {
                 maxRows = (len - fetched);
             }
-            
+
             solrQuery.setRows(maxRows);
             QueryResponse queryResponse = query(solrQuery);
             Map<String, Map<String, List<String>>> highlighting = queryResponse.getHighlighting();
@@ -345,7 +345,7 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
                         }
                     }
                 }
-                
+
                 indexDocuments.add(converter.convert(document));
             }
 
@@ -359,12 +359,12 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
 
         return indexDocuments;
     }
-    
+
     protected Set<String> collectFields(Set<? extends IndexField> fields) {
         if (fields == null) {
             return null;
         }
-        
+
         Set<String> allFields = new HashSet<String>();
         for (IndexField indexField : fields) {
             Set<String> solrFields = fieldConfig.getSolrFields(indexField);
@@ -372,15 +372,15 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
                 allFields.addAll(solrFields);
             }
         }
-        
+
         return allFields;
     }
-    
+
     protected void setFieldList(SolrQuery solrQuery, Set<? extends IndexField> fields) {
         if (fields == null) {
             return;
         }
-        
+
         Set<String> allFields = collectFields(fields);
         for (String field : allFields) {
             solrQuery.addField(field);

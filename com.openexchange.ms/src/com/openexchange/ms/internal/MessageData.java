@@ -53,7 +53,7 @@ import java.io.Serializable;
 
 /**
  * {@link MessageData} - A wrapper for data element keeping track of sender identifier.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessageData<E> implements Serializable {
@@ -65,7 +65,7 @@ public class MessageData<E> implements Serializable {
 
     /**
      * Initializes a new {@link MessageData}.
-     * 
+     *
      * @param object The message's object
      * @param senderId The identifier of the sender dispatching that message object
      */
@@ -77,7 +77,7 @@ public class MessageData<E> implements Serializable {
 
     /**
      * Gets the object
-     * 
+     *
      * @return The object
      */
     public E getObject() {
@@ -86,7 +86,7 @@ public class MessageData<E> implements Serializable {
 
     /**
      * Gets the sender identifier
-     * 
+     *
      * @return The sender identifier
      */
     public String getSenderId() {

@@ -73,7 +73,7 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
     private static final Log LOG = com.openexchange.log.Log.loggerFor(MsCacheEventHandler.class);
     private static final String TOPIC_NAME = "cacheEvents";
     private static final AtomicReference<MsService> MS_REFERENCE = new AtomicReference<MsService>();
-    
+
     private final CacheEventService cacheEvents;
     private final String senderId;
 
@@ -85,11 +85,11 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
     public static void setMsService(final MsService service) {
         MS_REFERENCE.set(service);
     }
-    
+
     /**
      * Initializes a new {@link MsCacheEventHandler}.
-     * 
-     * @throws OXException 
+     *
+     * @throws OXException
      */
     public MsCacheEventHandler(CacheEventService cacheEvents) throws OXException {
         super();
@@ -105,10 +105,10 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
         // com.openexchange.push.ms.PushMsListener
 
         // com.openexchange.event.RemoteEvent
-        
+
         // Topic: "com/openexchange/remote/*";
     }
-    
+
     public void stop() {
         cacheEvents.removeListener(this);
         try {
@@ -123,13 +123,13 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
         if (LOG.isDebugEnabled()) {
             LOG.debug("publish: " + cacheEvent + " [" + senderId + "]");
         }
-        try {            
+        try {
             getTopic().publish(cacheEvent);
         } catch (OXException e) {
             LOG.warn("Error publishing cache event", e);
         }
     }
-    
+
     private Topic<CacheEvent> getTopic() throws OXException {
         MsService msService = MS_REFERENCE.get();
         if (null == msService) {

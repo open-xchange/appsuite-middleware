@@ -85,7 +85,7 @@ public class SolrInfostoreDocumentConverter extends AbstractDocumentConverter<Do
     public SolrInfostoreDocumentConverter(FieldConfiguration fieldConfig) {
         super(fieldConfig);
     }
-    
+
     @Override
     public IndexResult<DocumentMetadata> createIndexResult(List<IndexDocument<DocumentMetadata>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
         return new SolrIndexResult<DocumentMetadata>(documents.size(), documents, facetCounts);
@@ -95,15 +95,15 @@ public class SolrInfostoreDocumentConverter extends AbstractDocumentConverter<Do
     public IndexDocument<DocumentMetadata> convert(SolrDocument document) throws OXException {
         return convertInternal(document);
     }
-    
+
     @Override
     public IndexDocument<DocumentMetadata> convert(SolrDocument document, Map<String, List<String>> highlightedFields) throws OXException {
         StandardIndexDocument<DocumentMetadata> indexDocument = convertInternal(document);
         addHighlighting(indexDocument, highlightedFields);
-        
+
         return indexDocument;
     }
-    
+
     public SolrInputDocument convert(int contextId, int userId, IndexDocument<DocumentMetadata> indexDocument) throws OXException {
         DocumentMetadata file = indexDocument.getObject();
         SolrInputDocument document = new SolrInputDocument();
@@ -126,7 +126,7 @@ public class SolrInfostoreDocumentConverter extends AbstractDocumentConverter<Do
         document.setField(fieldConfig.getUUIDField(), InfostoreUUID.newUUID(contextId, userId, indexDocument.getObject()));
         return document;
     }
-    
+
     private StandardIndexDocument<DocumentMetadata> convertInternal(SolrDocument document) throws OXException {
         DocumentMetadata file = new SolrDocumentMetadata();
         SetSwitch setter = new SetSwitch(file);
@@ -148,7 +148,7 @@ public class SolrInfostoreDocumentConverter extends AbstractDocumentConverter<Do
                 }
             }
         }
-        
+
         StandardIndexDocument<DocumentMetadata> indexDocument = new StandardIndexDocument<DocumentMetadata>(file);
         return indexDocument;
     }

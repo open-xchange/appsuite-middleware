@@ -89,10 +89,10 @@ public enum SearchHandler {
      */
     GET_REQUEST,
     /**
-     * 
+     *
      */
     PERSONS_AND_TOPICS,
-    SEARCH_FOR_PERSON, 
+    SEARCH_FOR_PERSON,
     SEARCH_FOR_TOPIC
 
 }

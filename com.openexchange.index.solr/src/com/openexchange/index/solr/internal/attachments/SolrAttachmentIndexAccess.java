@@ -82,7 +82,7 @@ import com.openexchange.solr.SolrCoreIdentifier;
 public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachment> {
 
     private final SolrQueryBuilder queryBuilder;
-    
+
     private final SolrAttachmentDocumentConverter converter;
 
 

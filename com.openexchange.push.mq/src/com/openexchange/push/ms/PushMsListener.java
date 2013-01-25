@@ -67,7 +67,7 @@ import com.openexchange.push.ms.registry.PushMsServiceRegistry;
 
 /**
  * {@link PushMsListener} - The {@link MessageListener message listener} for messaging-based push bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PushMsListener implements MessageListener<PushMsObject> {

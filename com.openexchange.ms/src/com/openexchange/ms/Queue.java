@@ -62,7 +62,7 @@ import java.util.concurrent.BlockingQueue;
  * <li>The receiver acknowledges the successful processing of a message.</li>
  * </ul>
  * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.2.gif" alt="p2p">
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Queue<E> extends MessageDispatcher<E>, BlockingQueue<E> {

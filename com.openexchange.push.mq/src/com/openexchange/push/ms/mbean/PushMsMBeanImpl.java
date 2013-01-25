@@ -58,7 +58,7 @@ import com.openexchange.push.ms.osgi.PushMsActivator;
 
 /**
  * {@link PushMsMBeanImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PushMsMBeanImpl extends StandardMBean implements PushMsMBean {

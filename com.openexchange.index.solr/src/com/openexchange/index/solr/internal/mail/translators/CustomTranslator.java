@@ -365,14 +365,14 @@ public class CustomTranslator implements QueryTranslator {
         public void visit(HeaderTerm term) {
             throw new IllegalStateException("Unsupported search term: " + HeaderTerm.class.getName());
         }
-        
+
         private void appendStringTerm(IndexField indexField, SearchTerm<String> term) {
             Set<String> solrFields = fieldConfig.getSolrFields(indexField);
             if (solrFields == null || solrFields.isEmpty()) {
                 LOG.warn("Did not find index fields for field " + indexField.toString() + ". Skipping this field in search query...");
                 return;
             }
-            
+
             String pattern = term.getPattern();
             Iterator<String> it = solrFields.iterator();
             queryBuilder.append('(');

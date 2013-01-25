@@ -59,7 +59,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link CIFSExceptionCodes} - Enumeration of all {@link CIFSException}s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -433,7 +433,7 @@ public enum CIFSExceptionCodes implements OXExceptionCode {
 
     /**
      * Gets the appropriate <code>OXException</code> for given <code>SmbException</code> instance.
-     * 
+     *
      * @param e The SMB exception
      * @return The appropriate <code>OXException</code>
      */
@@ -491,7 +491,7 @@ public enum CIFSExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -500,7 +500,7 @@ public enum CIFSExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -510,7 +510,7 @@ public enum CIFSExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
