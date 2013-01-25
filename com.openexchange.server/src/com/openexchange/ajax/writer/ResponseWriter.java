@@ -81,7 +81,7 @@ import com.openexchange.log.Log;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * JSON writer for the response container objekt.
+ * JSON writer for the response container object.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -95,7 +95,29 @@ public final class ResponseWriter {
     /**
      * The default locale.
      */
-    private static final Locale DEFAULT_LOCALE = Locale.US;
+    private static volatile Locale defaultLocale;
+    private static Locale defaultLocale() {
+        Locale tmp = defaultLocale;
+        if (null == tmp) {
+            synchronized (ResponseWriter.class) {
+                tmp = defaultLocale;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        tmp = Locale.US;
+                    } else {
+                        final String property = service.getProperty("com.openexchange.i18n.defaultLocale");
+                        tmp = null == property ? Locale.US : LocaleTools.getLocale(property);
+                        if (null == tmp) {
+                            tmp = Locale.US;
+                        }
+                    }
+                    defaultLocale = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
 
     private ResponseWriter() {
         super();
@@ -130,7 +152,7 @@ public final class ResponseWriter {
      */
     public static JSONObject getJSON(final Response response) throws JSONException {
         final JSONObject json = new JSONObject(8);
-        write(response, json, DEFAULT_LOCALE);
+        write(response, json, defaultLocale());
         return json;
     }
 
@@ -156,7 +178,7 @@ public final class ResponseWriter {
      * @throws JSONException If writing JSON fails
      */
     public static void write(final Response response, final JSONObject json) throws JSONException {
-        write(response, json, DEFAULT_LOCALE);
+        write(response, json, defaultLocale());
     }
 
     /**
@@ -253,7 +275,7 @@ public final class ResponseWriter {
      * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addWarnings(final JSONObject json, final List<OXException> warnings) throws JSONException {
-        addWarnings(json, warnings, DEFAULT_LOCALE);
+        addWarnings(json, warnings, defaultLocale());
     }
 
     /**
@@ -301,7 +323,7 @@ public final class ResponseWriter {
      * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addException(final JSONObject json, final OXException exception) throws JSONException {
-        addException(json, exception, DEFAULT_LOCALE);
+        addException(json, exception, defaultLocale());
     }
 
     /**
@@ -509,7 +531,7 @@ public final class ResponseWriter {
      */
     public static void write(final Response response, final Writer writer) throws JSONException, IOException {
         final Locale locale = response.getLocale();
-        write(response, writer, locale == null ? DEFAULT_LOCALE : locale);
+        write(response, writer, locale == null ? defaultLocale() : locale);
     }
 
     /**
@@ -563,7 +585,7 @@ public final class ResponseWriter {
      * @throws JSONException If writing JSON fails
      */
     public static void writeWarnings(final List<OXException> warnings, final JSONWriter writer) throws JSONException {
-        writeWarnings(warnings, writer, DEFAULT_LOCALE);
+        writeWarnings(warnings, writer, defaultLocale());
     }
 
     /**
@@ -631,7 +653,7 @@ public final class ResponseWriter {
      * @throws JSONException - if writing fails
      */
     public static void writeException(final OXException exc, final JSONWriter writer) throws JSONException {
-        writeException(exc, writer, DEFAULT_LOCALE);
+        writeException(exc, writer, defaultLocale());
     }
 
     /**
