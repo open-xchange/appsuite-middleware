@@ -287,14 +287,6 @@ public class APIResponseRenderer implements ResponseRenderer {
             Strings.quoteReplacement(action));
     }
 
-//    public static void main(String[] args) throws Exception {
-//        final StringWriter sw = new StringWriter();
-//        EscapingWriter escapingWriter = new EscapingWriter(sw);
-//        escapingWriter.write("<h </script> hein <a>busen</a>");
-//        
-//        System.out.println(sw.toString());
-//    }
-
     /**
      * Escapes <tt>"&lt;/"</tt> char sequence to <tt>"&lt;\/"</tt>.
      * 
