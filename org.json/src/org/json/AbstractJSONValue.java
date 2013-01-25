@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
-import org.json.helpers.StringAllocator;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -288,56 +287,6 @@ abstract class AbstractJSONValue implements JSONValue {
         } else {
             jGenerator.writeString(v.toString());
         }
-    }
-
-    private static String toAscii(final String str) {
-        if (null == str) {
-            return str;
-        }
-        final int length = str.length();
-        if (0 == length || isAscii(str)) {
-            return str;
-        }
-        final StringAllocator sa = new StringAllocator((length * 3)/2 + 1);
-        for (int i = 0; i < length; i++) {
-            final char c = str.charAt(i);
-            if (c > 127) {
-                appendAsJsonUnicode(c, sa);
-            } else {
-                sa.append(c);
-            }
-        }
-        return sa.toString();
-    }
-
-    private static void appendAsJsonUnicode(final int ch, final StringAllocator sa) {
-        sa.append("\\u");
-        final String hex = Integer.toString(ch, 16);
-        for (int i = hex.length(); i < 4; i++) {
-            sa.append('0');
-        }
-        sa.append(hex);
-    }
-
-    /**
-     * Checks whether the specified string's characters are ASCII 7 bit
-     *
-     * @param s The string to check
-     * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
-     */
-    protected static boolean isAscii(final String s) {
-        if (null == s) {
-            return true;
-        }
-        final int length = s.length();
-        if (0 == length) {
-            return true;
-        }
-        boolean isAscci = true;
-        for (int i = 0; (i < length) && isAscci; i++) {
-            isAscci = (s.charAt(i) < 128);
-        }
-        return isAscci;
     }
 
 }
