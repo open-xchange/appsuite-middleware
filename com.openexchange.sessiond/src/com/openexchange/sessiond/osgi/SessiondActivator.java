@@ -56,20 +56,15 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
-import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.cache.SessionCache;
-import com.openexchange.sessiond.cache.SessionCacheConfiguration;
 import com.openexchange.sessiond.event.SessiondEventHandler;
-import com.openexchange.sessiond.impl.InvalidatedAwareSessiondService;
 import com.openexchange.sessiond.impl.SessionControl;
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessionImpl;
@@ -100,7 +95,7 @@ public final class SessiondActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CacheService.class, EventAdmin.class, CryptoService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, CryptoService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -108,9 +103,6 @@ public final class SessiondActivator extends HousekeepingActivator {
         // Don't stop the sessiond
         if (LOG.isWarnEnabled()) {
             LOG.warn("Absent service: " + clazz.getName());
-        }
-        if (CacheService.class.equals(clazz)) {
-            SessionCacheConfiguration.getInstance().stop();
         }
         getServiceRegistry().removeService(clazz);
     }
@@ -121,13 +113,6 @@ public final class SessiondActivator extends HousekeepingActivator {
             LOG.info("Re-available service: " + clazz.getName());
         }
         getServiceRegistry().addService(clazz, getService(clazz));
-        if (CacheService.class.equals(clazz)) {
-            try {
-                SessionCacheConfiguration.getInstance().start();
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
     }
 
     @Override
@@ -149,7 +134,7 @@ public final class SessiondActivator extends HousekeepingActivator {
                 LOG.info("starting bundle: com.openexchange.sessiond");
             }
             SessiondInit.getInstance().start();
-            final SessiondService serviceImpl = new InvalidatedAwareSessiondService(new SessiondServiceImpl());
+            final SessiondService serviceImpl = /*new InvalidatedAwareSessiondService*/(new SessiondServiceImpl());
             SessiondService.SERVICE_REFERENCE.set(serviceImpl);
             registerService(SessiondService.class, serviceImpl);
             registerService(SessionCounter.class, SessionHandler.SESSION_COUNTER);
@@ -190,22 +175,7 @@ public final class SessiondActivator extends HousekeepingActivator {
             SessiondService.SERVICE_REFERENCE.set(null);
             // Put remaining sessions into cache for remote distribution, if no session storage exist
             final List<SessionControl> sessions = SessionHandler.getSessions();
-            if (null == storageService) {
-                try {
-                    for (final SessionControl sessionControl : sessions) {
-                        if (null != sessionControl) {
-                            SessionCache.getInstance().putCachedSession((sessionControl.getSession()).createCachedSession());
-                        }
-                    }
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("stopping bundle: com.openexchange.sessiond.\nRemaining active sessions were put into session cache for remote distribution\n");
-                    }
-                } catch (final OXException e) {
-                    LOG.warn("Missing caching service. Remaining active sessions could not be put into session cache for remote distribution.");
-                } catch (final RuntimeException e) {
-                    LOG.warn("Remaining active sessions could not be put into session cache for remote distribution.", e);
-                }
-            } else {
+            if (null != storageService) {
                 try {
                     final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
                     for (final SessionControl sessionControl : sessions) {

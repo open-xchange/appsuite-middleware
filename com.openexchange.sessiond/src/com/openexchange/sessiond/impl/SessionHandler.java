@@ -73,15 +73,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
@@ -171,29 +170,26 @@ public final class SessionHandler {
      *
      * @param userId The user ID
      * @param contextId The context ID
-     * @param propagate <code>true</code> for remote removal; otherwise <code>false</code>
      * @return The wrapper objects for removed sessions
      */
-    public static Session[] removeUserSessions(final int userId, final int contextId, final boolean propagate) {
+    public static Session[] removeUserSessions(final int userId, final int contextId) {
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return new Session[0];
         }
+        /*
+         * remove from session data
+         */
         final SessionControl[] control = sessionData.removeUserSessions(userId, contextId);
         final Session[] retval = new Session[control.length];
-        Session[] retval2 = null;
-        int i = 0;
-        if (propagate) {
-            for (final SessionControl sessionControl : control) {
-                try {
-                    SessionCache.getInstance().putCachedSessionForRemoteRemoval(sessionControl.getSession().createCachedSession());
-                    retval[i++] = sessionControl.getSession();
-                } catch (final OXException e) {
-                    LOG.error("Remote removal failed for session " + sessionControl.getSession().getSecret(), e);
-                }
-            }
+        for (int i = 0; i < retval.length; i++) {
+            retval[i] = control[i].getSession();
         }
+        /*
+         * remove from storage if available, too
+         */
+        Session[] retval2 = null;
         final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
         if (storageService != null) {
             try {
@@ -210,8 +206,8 @@ public final class SessionHandler {
             }
         }
         if (INFO) {
-            LOG.info(new StringBuilder(64).append(propagate ? "Remote" : "Local").append(" removal of user sessions: User=").append(userId).append(
-                ", Context=").append(contextId).toString());
+            LOG.info(new StringAllocator(64).append(null != storageService ? "Remote" : "Local")
+                .append(" removal of user sessions: User=").append(userId).append(", Context=").append(contextId).toString());
         }
         return merge(retval, retval2);
     }
@@ -220,24 +216,20 @@ public final class SessionHandler {
      * Removes all sessions associated with given context.
      *
      * @param contextId The context ID
-     * @param propagate <code>true</code> for remote removal; otherwise <code>false</code>
      */
-    public static void removeContextSessions(final int contextId, final boolean propagate) {
+    public static void removeContextSessions(final int contextId) {
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return;
         }
-        final List<SessionControl> list = sessionData.removeContextSessions(contextId);
-        if (propagate) {
-            for (final SessionControl sessionControl : list) {
-                try {
-                    SessionCache.getInstance().putCachedSessionForRemoteRemoval(sessionControl.getSession().createCachedSession());
-                } catch (final OXException e) {
-                    LOG.warn("Remote removal failed for session " + sessionControl.getSession().getSecret(), e);
-                }
-            }
-        }
+        /*
+         * remove from session data
+         */
+        sessionData.removeContextSessions(contextId);
+        /*
+         * remove from storage if available, too
+         */
         final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
         if (storageService != null) {
             try {
@@ -255,7 +247,8 @@ public final class SessionHandler {
             }
         }
         if (INFO) {
-            LOG.info(new StringBuilder(64).append(propagate ? "Remote" : "Local").append(" removal of sessions: Context=").append(contextId).toString());
+            LOG.info(new StringAllocator(64).append(null != storageService ? "Remote" : "Local")
+                .append(" removal of sessions: Context=").append(contextId).toString());
         }
     }
 
@@ -806,23 +799,6 @@ public final class SessionHandler {
                     }
                 }
             }
-        } else {
-            // Look-up cache if current session wrapped by session-control is marked for removal
-            try {
-                final SessionCache cache = SessionCache.getInstance();
-                final Session session = sessionControl.getSession();
-                final CachedSession cachedSession = cache.getCachedSessionByUser(session.getUserId(), session.getContextId());
-                if (null != cachedSession && cachedSession.isMarkedAsRemoved()) {
-                    final String cSessionId = cachedSession.getSessionId();
-                    if (sessionId.equals(cSessionId)) {
-                        cache.removeCachedSession(cSessionId);
-                        sessionData.clearSession(sessionId);
-                        return null;
-                    }
-                }
-            } catch (final OXException e) {
-                LOG.error("Unable to look-up session cache", e);
-            }
         }
         /*-
          * Ensure session is available in session storage
@@ -868,22 +844,6 @@ public final class SessionHandler {
                     LOG.error(e.getMessage(), e);
                 }
             }
-        } else {
-            // Look-up cache if current session wrapped by session-control is marked for removal
-            try {
-                final SessionCache cache = SessionCache.getInstance();
-                final Session session = sessionControl.getSession();
-                final CachedSession cachedSession = cache.getCachedSessionByUser(session.getUserId(), session.getContextId());
-                if (null != cachedSession) {
-                    if (cachedSession.isMarkedAsRemoved()) {
-                        cache.removeCachedSession(cachedSession.getSecret());
-                        removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
-                        return null;
-                    }
-                }
-            } catch (final OXException e) {
-                LOG.error("Unable to look-up session cache", e);
-            }
         }
         return sessionControl;
     }
@@ -899,21 +859,6 @@ public final class SessionHandler {
     public static SessionControl getCachedSession(final String sessionId) {
         if (DEBUG) {
             LOG.debug(new StringBuilder("getCachedSession <").append(sessionId).append('>').toString());
-        }
-        try {
-            final CachedSession cachedSession = SessionCache.getInstance().removeCachedSession(sessionId);
-            if (null != cachedSession) {
-                if (cachedSession.isMarkedAsRemoved()) {
-                    removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
-                } else {
-                    // A cache hit! Add to local session containers
-                    LOG.info("Migrate session: " + cachedSession.getSessionId());
-                    final SessionData sessionData = sessionDataRef.get();
-                    return null == sessionData ? null : sessionData.addSession(new SessionImpl(cachedSession), noLimit);
-                }
-            }
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
         }
         final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
         if (storageService != null) {
