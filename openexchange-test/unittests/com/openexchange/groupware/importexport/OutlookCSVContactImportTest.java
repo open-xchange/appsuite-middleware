@@ -69,26 +69,18 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.formats.csv.DutchOutlookMapper;
-import com.openexchange.importexport.formats.csv.EnglishOutlookMapper;
-import com.openexchange.importexport.formats.csv.FrenchOutlookMapper;
-import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
-import com.openexchange.importexport.importers.CSVContactImporter;
+import com.openexchange.importexport.importers.TestCSVContactImporter;
 
 public class OutlookCSVContactImportTest extends AbstractContactTest{
-	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getEnglishOutlookName()+","+ContactField.EMAIL1.getEnglishOutlookName()+","+ContactField.BIRTHDAY.getEnglishOutlookName()+"\n";
+	public String IMPORT_HEADERS = "Last Name,E-mail Address,Birthday\n";
 	public String IMPORT_ONE = IMPORT_HEADERS + NAME1+", "+EMAIL1+", "+DATE1;
 	public static String DATE1 = "4/1/1981";
 
 	@SuppressWarnings("deprecation")
-	public OutlookCSVContactImportTest(){
+	public OutlookCSVContactImportTest() throws Exception{
 		super();
 		defaultFormat = Format.OUTLOOK_CSV;
-		imp = new CSVContactImporter();
-		((CSVContactImporter) imp).addFieldMapper(new EnglishOutlookMapper());
-		((CSVContactImporter) imp).addFieldMapper(new GermanOutlookMapper());
-		((CSVContactImporter) imp).addFieldMapper(new FrenchOutlookMapper());
-		((CSVContactImporter) imp).addFieldMapper(new DutchOutlookMapper());
+		imp = new TestCSVContactImporter();
 	}
 
 	//workaround for JUnit 3 runner
@@ -98,7 +90,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 
 	protected void checkFirstResult(final int objectID ) throws OXException, OXException, ParseException {
 		final Contact co = new RdbContactSQLImpl(sessObj).getObjectById(objectID, folderId);
-		assertEquals("Checking name" ,  NAME1 , co.getGivenName());
+		assertEquals("Checking name" ,  NAME1 , co.getSurName());
 		assertEquals("Checking e-Mail" ,  EMAIL1 , co.getEmail1());
 
 		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
@@ -162,14 +154,14 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	 * "private" flag is being set
 	 */
 	@Test public void bug7710() throws UnsupportedEncodingException, NumberFormatException, OXException, OXException {
-		String file = ContactField.SUR_NAME.getGermanOutlookName() + ", " + ContactField.PRIVATE_FLAG.getGermanOutlookName() + "\nTobias Prinz,PRIVAT";
+		String file = "Nachname, Vertraulichkeit\nTobias Prinz,PRIVAT";
 		List<ImportResult> results = importStuff(file);
 		assertEquals("Only one result", (Integer) 1, (Integer) results.size());
 		ImportResult res = results.get(0);
 		Contact conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
 		assertTrue("Is private?", conObj.getPrivateFlag());
 
-		file = ContactField.SUR_NAME.getGermanOutlookName() + ", " + ContactField.PRIVATE_FLAG.getGermanOutlookName() + "\nTobias Prinz,\u00d6FFENTLICH";
+		file = "Nachname, Vertraulichkeit\nTobias Prinz,\u00d6FFENTLICH";
 		results = importStuff(file);
 		assertEquals("Only one result", (Integer) 1, (Integer) results.size());
 		res = results.get(0);
@@ -287,7 +279,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 
 
     @Test public void dontImportIfDisplayNameCanBeFormedAtAll() throws Exception{
-        final String file = ContactField.COUNTRY_BUSINESS.getEnglishOutlookName() + "\nNo one likes an empty entry with a country field only";
+        final String file = "Business Country\nNo one likes an empty entry with a country field only";
         try {
             importStuff(file);
             fail("Should throw exception");
@@ -297,7 +289,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
     }
 
     @Test public void dontImportIfNoDisplayNameCanBeFormedForAGivenContact() throws Exception{
-        final String file = ContactField.SUR_NAME.getEnglishOutlookName()+ "," + ContactField.COUNTRY_BUSINESS.getReadableName()+ "\n,Something unimportant";
+        final String file = "Sur name,Bullshit\n,Something unimportant";
         final List<ImportResult> results = importStuff(file);
         assertEquals("Should give one result", 1, results.size());
         ImportResult res = results.get(0);

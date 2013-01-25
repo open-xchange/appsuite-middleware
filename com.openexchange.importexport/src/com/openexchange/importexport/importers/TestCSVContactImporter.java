@@ -47,43 +47,45 @@
  *
  */
 
-package com.openexchange.groupware.contacts;
+package com.openexchange.importexport.importers;
 
-import junit.framework.TestCase;
-
-import com.openexchange.groupware.contact.helpers.ContactField;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Properties;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.importexport.formats.csv.PropertyDrivenMapper;
+import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.Streams;
 
 /**
- * Tests the translations of several mappers (currently Outlook)
- * which map names for ContactFields from Outlook and back.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
+ * {@link TestCSVContactImporter}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ContactFieldMapperTest extends TestCase {
+public class TestCSVContactImporter extends CSVContactImporter {
 
-	public static void testFrenchOutlook(){
-		assertEquals("Checking title in French," , ContactField.TITLE, ContactField.getByFrenchOutlookName("Titre"));
-		assertEquals("Checking middle name in French," , ContactField.MIDDLE_NAME, ContactField.getByFrenchOutlookName("Deuxi\u00e8me pr\u00e9nom"));
+    public TestCSVContactImporter() throws Exception {
+        final ConfigurationService conf = ImportExportServices.getConfigurationService();
+        final String path = conf.getProperty("com.openexchange.import.mapper.path");
+        final File dir = new File(path);
+        final File[] files = dir.listFiles();
 
-		assertEquals("Checking field of Titre," , "Titre" , ContactField.TITLE.getFrenchOutlookName());
-		assertEquals("Checking field of Deuxi\u00e8me pr\u00e9nom," , "Deuxi\u00e8me pr\u00e9nom" , ContactField.MIDDLE_NAME.getFrenchOutlookName());
-	}
+        for (final File file : files) {
+            if (!file.getName().endsWith(".properties")) {
+                continue;
+            }
+            final Properties props = new Properties();
+            final InputStream in = new BufferedInputStream(new FileInputStream(file));
+            try {
+                props.load(in);
+            } finally {
+                Streams.close(in);
+            }
+            final PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);
+            addFieldMapper(mapper);
+        }
+    }
 
-	public static void testGermanOutlook(){
-		assertEquals("Checking title in German," , ContactField.TITLE, ContactField.getByGermanOutlookName("Anrede"));
-		assertEquals("Checking middle name in German," , ContactField.MIDDLE_NAME, ContactField.getByGermanOutlookName("Weitere Vornamen"));
-
-		assertEquals("Checking field of Anrede," , "Anrede" , ContactField.TITLE.getGermanOutlookName());
-		assertEquals("Checking field of Weitere Vornamen," , "Weitere Vornamen" , ContactField.MIDDLE_NAME.getGermanOutlookName());
-	}
-
-	public static void testEnglishOutlook(){
-		assertEquals("Checking title in English," , ContactField.TITLE, ContactField.getByEnglishOutlookName("Title"));
-		assertEquals("Checking middle name in English," , ContactField.MIDDLE_NAME, ContactField.getByEnglishOutlookName("Middle Name"));
-
-		assertEquals("Checking field of Title," , "Title" , ContactField.TITLE.getEnglishOutlookName());
-		assertEquals("Checking field of Middle Name," , "Middle Name" , ContactField.MIDDLE_NAME.getEnglishOutlookName());
-	}
 }
-
