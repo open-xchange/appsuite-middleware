@@ -217,12 +217,12 @@ public interface Category extends Serializable {
 
         @Override
         public Type getType() {
-            return Category.EnumType.TRY_AGAIN;
+            return Category.EnumType.CONNECTIVITY;
         }
 
         @Override
         public String toString() {
-            return Category.EnumType.TRY_AGAIN.getName();
+            return Category.EnumType.CONNECTIVITY.getName();
         }
 
         @Override
