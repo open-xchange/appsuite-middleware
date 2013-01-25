@@ -81,7 +81,7 @@ public final class MailAccountWriter {
      * @throws JSONException If writing JSON fails
      */
     public static JSONObject write(final MailAccount account) throws JSONException {
-        final JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject(48);
         final int accountId = account.getId();
         json.put(MailAccountFields.ID, accountId);
         json.put(MailAccountFields.LOGIN, account.getLogin());
@@ -139,6 +139,9 @@ public final class MailAccountWriter {
         if (props.containsKey("pop3.path")) {
             json.put(MailAccountFields.POP3_PATH, props.get("pop3.path"));
         }
+        if (props.containsKey("addresses")) {
+            json.put(MailAccountFields.ADDRESSES, props.get("addresses"));
+        }
         return json;
     }
 
@@ -159,10 +162,10 @@ public final class MailAccountWriter {
      * @throws OXException If writing JSON fails
      */
     public static JSONArray writeArray(final MailAccount[] mailAccounts, final List<Attribute> attributes) throws OXException {
-        final JSONArray rows = new JSONArray();
+        final JSONArray rows = new JSONArray(mailAccounts.length);
         for (final MailAccount account : mailAccounts) {
             final MailAccountGetSwitch getter = new MailAccountGetSwitch(account);
-            final JSONArray row = new JSONArray();
+            final JSONArray row = new JSONArray(64);
             for (final Attribute attribute : attributes) {
                 if (Attribute.PASSWORD_LITERAL == attribute || Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
                     row.put(JSONObject.NULL);

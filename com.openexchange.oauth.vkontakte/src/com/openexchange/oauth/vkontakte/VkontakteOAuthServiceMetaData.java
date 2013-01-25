@@ -66,7 +66,7 @@ public final class VkontakteOAuthServiceMetaData extends AbstractOAuthServiceMet
 
     /**
      * Initializes a new {@link VkontakteOAuthServiceMetaData}.
-     * 
+     *
      * @param configService The configuration service
      */
     public VkontakteOAuthServiceMetaData(ConfigurationService configService) {

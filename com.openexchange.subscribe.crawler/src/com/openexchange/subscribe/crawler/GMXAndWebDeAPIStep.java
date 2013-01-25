@@ -452,7 +452,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                         }
 
                     }
-                    
+
 
                     contacts.add(contact);
                     // An error in parsing one contact should not bring them all down

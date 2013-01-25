@@ -61,8 +61,8 @@ import com.openexchange.sessionstorage.StoredSession;
 
 /**
  * {@link Obfuscator}
- * 
- * Utility class to wrap/unwrap sessions before/after putting/getting them from the session storage.   
+ *
+ * Utility class to wrap/unwrap sessions before/after putting/getting them from the session storage.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -70,22 +70,22 @@ public class Obfuscator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionImpl.class));
     private static final String[] WRAPPED_PARMETERS = { Session.PARAM_ALTERNATIVE_ID, Session.PARAM_CAPABILITIES };
-    
+
     private final String obfuscationKey;
-    
+
     /**
      * Initializes a new {@link Obfuscator}.
-     * 
+     *
      * @param obfuscationKey The key used to (un)obfuscate session passwords
      */
     public Obfuscator(String obfuscationKey) {
         super();
         this.obfuscationKey = obfuscationKey;
     }
-    
+
     /**
      * Wraps a session before putting it to the storage.
-     * 
+     *
      * @param session The session
      * @return the wrapped session
      */
@@ -100,13 +100,13 @@ public class Obfuscator {
             }
         }
         return new StoredSession(session.getSessionID(), session.getLoginName(), obfuscate(session.getPassword()), session.getContextId(),
-            session.getUserId(), session.getSecret(), session.getLogin(), session.getRandomToken(), session.getLocalIp(), 
+            session.getUserId(), session.getSecret(), session.getLogin(), session.getRandomToken(), session.getLocalIp(),
             session.getAuthId(), session.getHash(), session.getClient(), parameters);
     }
-    
+
     /**
      * Unwraps a session after getting it from the storage.
-     * 
+     *
      * @param session The session
      * @return The unwrapped session
      */
@@ -114,8 +114,8 @@ public class Obfuscator {
         if (null == session) {
             return null;
         }
-        SessionImpl sessionImpl = new SessionImpl(session.getUserId(), session.getLoginName(), unobfuscate(session.getPassword()), session.getContextId(), 
-            session.getSessionID(), session.getSecret(), session.getRandomToken(), session.getLocalIp(), session.getLogin(), 
+        SessionImpl sessionImpl = new SessionImpl(session.getUserId(), session.getLoginName(), unobfuscate(session.getPassword()), session.getContextId(),
+            session.getSessionID(), session.getSecret(), session.getRandomToken(), session.getLocalIp(), session.getLogin(),
             session.getAuthId(), session.getHash(), session.getClient());
         for (String param : WRAPPED_PARMETERS) {
             if (session.containsParameter(param)) {
@@ -124,7 +124,7 @@ public class Obfuscator {
         }
         return sessionImpl;
     }
-    
+
     private String obfuscate(final String string) {
         if (isEmpty(string)) {
             return string;
@@ -147,7 +147,7 @@ public class Obfuscator {
             LOG.error("Could not unobfuscate string", e);
             return string;
         }
-    }    
+    }
 
     private static boolean isEmpty(final String str) {
         if (null == str) {

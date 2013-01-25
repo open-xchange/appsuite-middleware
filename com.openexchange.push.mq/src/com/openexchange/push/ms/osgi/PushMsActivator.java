@@ -69,7 +69,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link PushMsActivator} - OSGi bundle activator for message-based push bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PushMsActivator extends HousekeepingActivator {

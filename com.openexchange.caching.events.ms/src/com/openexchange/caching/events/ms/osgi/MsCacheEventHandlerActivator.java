@@ -68,7 +68,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(MsCacheEventHandlerActivator.class);
-    
+
     /**
      * Initializes a new {@link MsCacheEventHandlerActivator}.
      */

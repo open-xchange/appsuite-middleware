@@ -47,43 +47,44 @@
  *
  */
 
-package com.openexchange.groupware.contacts;
+package com.openexchange.sessionstorage.hazelcast;
 
-import junit.framework.TestCase;
-
-import com.openexchange.groupware.contact.helpers.ContactField;
+import com.hazelcast.core.MapEntry;
+import com.hazelcast.query.Predicate;
+import com.openexchange.session.Session;
 
 /**
- * Tests the translations of several mappers (currently Outlook)
- * which map names for ContactFields from Outlook and back.
+ * {@link AltIdPredicate}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ContactFieldMapperTest extends TestCase {
+public class AltIdPredicate implements Predicate<String, HazelcastStoredSession> {
 
-	public static void testFrenchOutlook(){
-		assertEquals("Checking title in French," , ContactField.TITLE, ContactField.getByFrenchOutlookName("Titre"));
-		assertEquals("Checking middle name in French," , ContactField.MIDDLE_NAME, ContactField.getByFrenchOutlookName("Deuxi\u00e8me pr\u00e9nom"));
+    private static final long serialVersionUID = -3741029445819911943L;
 
-		assertEquals("Checking field of Titre," , "Titre" , ContactField.TITLE.getFrenchOutlookName());
-		assertEquals("Checking field of Deuxi\u00e8me pr\u00e9nom," , "Deuxi\u00e8me pr\u00e9nom" , ContactField.MIDDLE_NAME.getFrenchOutlookName());
-	}
+    private String altId;
 
-	public static void testGermanOutlook(){
-		assertEquals("Checking title in German," , ContactField.TITLE, ContactField.getByGermanOutlookName("Anrede"));
-		assertEquals("Checking middle name in German," , ContactField.MIDDLE_NAME, ContactField.getByGermanOutlookName("Weitere Vornamen"));
+    /**
+     * Initializes a new {@link AltIdPredicate}.
+     *
+     * @param altId The alternative ID to match
+     */
+    public AltIdPredicate(String altId) {
+        super();
+        this.altId = altId;
+    }
 
-		assertEquals("Checking field of Anrede," , "Anrede" , ContactField.TITLE.getGermanOutlookName());
-		assertEquals("Checking field of Weitere Vornamen," , "Weitere Vornamen" , ContactField.MIDDLE_NAME.getGermanOutlookName());
-	}
+    /**
+     * Initializes a new {@link AltIdPredicate}.
+     */
+    public AltIdPredicate() {
+        super();
+    }
 
-	public static void testEnglishOutlook(){
-		assertEquals("Checking title in English," , ContactField.TITLE, ContactField.getByEnglishOutlookName("Title"));
-		assertEquals("Checking middle name in English," , ContactField.MIDDLE_NAME, ContactField.getByEnglishOutlookName("Middle Name"));
+    @Override
+    public boolean apply(MapEntry<String, HazelcastStoredSession> mapEntry) {
+        return null != mapEntry && null != mapEntry.getValue() && null != altId &&
+            altId.equals(mapEntry.getValue().getParameter(Session.PARAM_ALTERNATIVE_ID));
+    }
 
-		assertEquals("Checking field of Title," , "Title" , ContactField.TITLE.getEnglishOutlookName());
-		assertEquals("Checking field of Middle Name," , "Middle Name" , ContactField.MIDDLE_NAME.getEnglishOutlookName());
-	}
 }
-

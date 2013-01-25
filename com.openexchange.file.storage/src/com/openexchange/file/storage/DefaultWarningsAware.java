@@ -58,32 +58,32 @@ import com.openexchange.exception.OXException;
  * {@link DefaultWarningsAware} - The default implementation of {@link WarningsAware}.
  * <p>
  * Supposed to be used to add {@code WarningsAware} in a delegate-fashion:
- * 
+ *
  * <pre>
- * 
+ *
  * private final WarningsAware warningsAware = new DefaultWarningsAware();
- * 
+ *
  * &#064;Override
  * public List&lt;OXException&gt; getWarnings() {
  *     return warningsAware.getWarnings();
  * }
- * 
+ *
  * &#064;Override
  * public List&lt;OXException&gt; getAndFlushWarnings() {
  *     return warningsAware.getAndFlushWarnings();
  * }
- * 
+ *
  * &#064;Override
  * public void addWarning(OXException warning) {
  *     warningsAware.addWarning(warning);
  * }
- * 
+ *
  * &#064;Override
  * public void removeWarning(OXException warning) {
  *     warningsAware.removeWarning(warning);
  * }
  * </pre>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultWarningsAware implements WarningsAware {
@@ -99,7 +99,7 @@ public class DefaultWarningsAware implements WarningsAware {
 
     /**
      * Initializes a new {@link DefaultWarningsAware}.
-     * 
+     *
      * @param concurrent Whether concurrent access is supposed to be supported or not
      */
     public DefaultWarningsAware(final boolean concurrent) {

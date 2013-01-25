@@ -186,13 +186,13 @@ public final class IndexAJAXRequest {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
-    
+
     public boolean optBoolean(final String name, final boolean fallback) throws OXException {
         final String parameter = request.getParameter(name);
         if (null == parameter) {
             return fallback;
         }
-        
+
         return Boolean.parseBoolean(parameter);
     }
 

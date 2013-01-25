@@ -71,7 +71,7 @@ import com.openexchange.index.solr.internal.querybuilder.Configuration;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrAttachmentSearchTermVisitorTest {
-    
+
     private static final String FIELD_NAME = "objectId";
 
     @Test
@@ -84,38 +84,38 @@ public class SolrAttachmentSearchTermVisitorTest {
         ORTerm orTerm1 = new ORTerm(new SearchTerm<?>[] { t1, t2 });
         ORTerm orTerm2 = new ORTerm(new SearchTerm<?>[] { t3, t4 });
         ANDTerm andTerm = new ANDTerm(new SearchTerm<?>[] { orTerm1, orTerm2 });
-        
+
         FieldConfiguration fieldConfig = new FieldConfiguration() {
-            
+
             @Override
             public boolean isLocalized(IndexField indexField) {
                 // TODO Auto-generated method stub
                 return false;
             }
-            
+
             @Override
             public String getUUIDField() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public Set<String> getSolrFields(IndexField indexField) {
                 return Collections.singleton(FIELD_NAME);
             }
-            
+
             @Override
             public String getRawField(IndexField indexField) {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public Set<? extends IndexField> getIndexedFields() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public IndexField getIndexField(String solrField) {
                 // TODO Auto-generated method stub

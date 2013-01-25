@@ -69,7 +69,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 public final class CacheEventServiceImpl implements CacheEventService {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CacheEventServiceImpl.class);
-    
+
     private final ConcurrentMap<String, List<CacheListener>> cacheRegionListeners;
     private final List<CacheListener> cacheListeners;
 
@@ -114,7 +114,7 @@ public final class CacheEventServiceImpl implements CacheEventService {
     public void notify(Object sender, CacheEvent event) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("notify: " + event);
-        }        
+        }
         List<Runnable> notificationRunnables = new ArrayList<Runnable>();
         if (null != event.getRegion()) {
             for (CacheListener listener : getListeners(event.getRegion())) {
@@ -144,7 +144,7 @@ public final class CacheEventServiceImpl implements CacheEventService {
 
     /**
      * Gets the registered cache listeners for a region.
-     * 
+     *
      * @param region The cache region name
      * @return The cache listeners, or an empty list if no listeners are registered
      */
@@ -159,17 +159,17 @@ public final class CacheEventServiceImpl implements CacheEventService {
         }
         return listeners;
     }
-    
+
     private static Runnable getNotificationRunnable(final CacheListener listener, final Object sender, final CacheEvent event) {
         return new Runnable() {
-            
+
             @Override
             public void run() {
                 listener.onEvent(sender, event);
             }
         };
     }
-    
+
     private static ExecutorService getExecutorService() {
         ThreadPoolService threadPoolService = CacheEventServiceLookup.getService(ThreadPoolService.class);
         return null != threadPoolService ? threadPoolService.getExecutor() : null;

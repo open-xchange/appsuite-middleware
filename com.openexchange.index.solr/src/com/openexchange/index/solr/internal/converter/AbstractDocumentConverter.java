@@ -68,10 +68,10 @@ import com.openexchange.index.solr.internal.config.FieldConfiguration;
  * @param <V>
  */
 public abstract class AbstractDocumentConverter<V> implements SolrDocumentConverter<V> {
-    
+
     protected final FieldConfiguration fieldConfig;
 
-    
+
     /**
      * Initializes a new {@link AbstractDocumentConverter}.
      * @param fieldConfig
@@ -87,7 +87,7 @@ public abstract class AbstractDocumentConverter<V> implements SolrDocumentConver
             if (solrFields == null || solrFields.isEmpty()) {
                 return null;
             }
-            
+
             for (String field : solrFields) {
                 if (document.containsKey(field)) {
                     try {
@@ -107,17 +107,17 @@ public abstract class AbstractDocumentConverter<V> implements SolrDocumentConver
             if (value == null) {
                 return null;
             }
-            
+
             try {
                 return (T) value;
             } catch (final ClassCastException e) {
                 throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e, "Unexpected type: " + e.getMessage());
             }
         }
-        
+
         return null;
     }
-    
+
     protected void setFieldInDocument(SolrInputDocument inputDocument, IndexField field, Object value) {
         String fieldName = fieldConfig.getRawField(field);
         if (fieldName != null && value != null) {
@@ -134,7 +134,7 @@ public abstract class AbstractDocumentConverter<V> implements SolrDocumentConver
             }
         }
     }
-    
+
     protected void addHighlighting(StandardIndexDocument<V> indexDocument, Map<String, List<String>> highlightedFields) {
         if (indexDocument != null && highlightedFields != null) {
             for (String solrField : highlightedFields.keySet()) {

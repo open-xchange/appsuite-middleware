@@ -172,7 +172,7 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
                     if (searchTerm == null) {
                         throw new IllegalArgumentException("Parameter 'search term' must not be null!");
                     }
-                    
+
                     String finalTerm;
                     if (translator == null) {
                         if (!(searchTerm instanceof String)) {
@@ -182,7 +182,7 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
                     } else {
                         finalTerm = translator.translate(searchTerm);
                     }
-                    
+
                     solrQuery.setQuery(finalTerm);
                     solrQuery.setQueryType(handlerName);
                     break;

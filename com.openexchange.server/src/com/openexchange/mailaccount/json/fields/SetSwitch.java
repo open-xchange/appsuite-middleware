@@ -317,4 +317,10 @@ public class SetSwitch implements AttributeSwitch {
         return null;
     }
 
+    @Override
+    public Object addresses() {
+        desc.addProperty("addresses", (String) value);
+        return null;
+    }
+
 }

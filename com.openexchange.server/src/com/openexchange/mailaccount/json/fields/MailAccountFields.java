@@ -132,4 +132,6 @@ public final class MailAccountFields {
 
     public static final String POP3_PATH = "pop3_path";
 
+    public static final String ADDRESSES = "addresses";
+
 }

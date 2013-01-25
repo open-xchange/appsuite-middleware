@@ -50,7 +50,6 @@
 package com.openexchange.filemanagement.json.actions;
 
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;

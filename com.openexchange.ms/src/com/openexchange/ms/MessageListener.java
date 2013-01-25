@@ -52,7 +52,7 @@ package com.openexchange.ms;
 
 /**
  * {@link MessageListener} - A message listener.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessageListener<E> {
@@ -62,7 +62,7 @@ public interface MessageListener<E> {
      * <p>
      * Note that topic guarantees message ordering. Therefore there is only one thread invoking onMessage. The user shouldn't keep the
      * thread busy and preferably dispatch it via an Executor. This will increase the performance of the topic.
-     * 
+     *
      * @param message The received message
      */
     void onMessage(Message<E> message);

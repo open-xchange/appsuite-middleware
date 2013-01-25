@@ -80,12 +80,12 @@ public interface SessiondConfigInterface {
      * @return <code>true</code> if autologin is enabled.
      */
     boolean isAutoLogin();
-    
+
     /**
      * Gets a key to encrypt passwords when putting session into storage.
-     * 
+     *
      * @return The obfuscation key
      */
     String getObfuscationKey();
-    
+
 }

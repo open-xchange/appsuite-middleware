@@ -60,16 +60,16 @@ import java.util.Map;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class StandardIndexDocument<V> implements IndexDocument<V> {
-    
+
     private Map<IndexField, List<String>> highlighting = null;
 
     private final V object;
-    
-    
+
+
     public StandardIndexDocument(V object) {
         this(object, null);
     }
-    
+
     public StandardIndexDocument(V object, Map<IndexField, List<String>> highlighting) {
         super();
         this.object = object;
@@ -82,17 +82,17 @@ public class StandardIndexDocument<V> implements IndexDocument<V> {
     public V getObject() {
         return object;
     }
-    
+
     @Override
     public Map<IndexField, List<String>> getHighlighting() {
         return highlighting;
     }
-    
+
     public void addHighlighting(IndexField indexField, List<String> highlights) {
         if (highlighting == null) {
             highlighting = new HashMap<IndexField, List<String>>();
         }
-        
+
         List<String> previous = highlighting.get(indexField);
         if (previous == null) {
             highlighting.put(indexField, highlights);

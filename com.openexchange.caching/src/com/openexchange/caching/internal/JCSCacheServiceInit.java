@@ -162,7 +162,7 @@ public final class JCSCacheServiceInit {
      * Holds all cache region names that were configured to use a lateral auxiliary cache
      */
     private final Set<String> auxiliaryCacheRegions;
-    
+
     /**
      * Initializes a new {@link JCSCacheServiceInit}
      */
@@ -196,14 +196,14 @@ public final class JCSCacheServiceInit {
         }
         return props;
     }
-    
+
     private void configure(final Properties properties) throws OXException {
         if (isEventInvalidation()) {
             preProcessAuxiliaries(properties, "LTCP", "SessionLTCP");
         }
         doConfigure(properties);
     }
-    
+
     private void doConfigure(final Properties properties) throws OXException {
         synchronized (ccmInstance) {
             if (null == props) {
@@ -267,17 +267,17 @@ public final class JCSCacheServiceInit {
         }
         ccmInstance.freeCache(cacheName);
     }
-    
+
     /**
      * Gets a value indicating whether the supplied cache region was configured to use an auxiliary cache or not.
-     * 
+     *
      * @param cacheName The name of the cache region
-     * @return <code>true</code>, if the region has an auxiliary cache, <code>false</code>, otherwise 
+     * @return <code>true</code>, if the region has an auxiliary cache, <code>false</code>, otherwise
      */
     public boolean hasAuxiliary(String cacheName) {
         return auxiliaryCacheRegions.contains(cacheName);
     }
-    
+
     private void initializeCompositeCacheManager(final boolean obtainMutex) {
         if (obtainMutex) {
             synchronized (this) {
@@ -441,10 +441,10 @@ public final class JCSCacheServiceInit {
     public void setCacheEventService(final CacheEventService eventService) {
         this.cacheEventService = eventService;
     }
-    
+
     /**
      * Gets the cache event service
-     * 
+     *
      * @return The event service
      */
     public CacheEventService getCacheEventService() {
@@ -453,8 +453,8 @@ public final class JCSCacheServiceInit {
 
     /**
      * Gets a value indicating whether remote cache invalidations should be performed using the internal cache event service or not.
-     *  
-     * @return <code>true</code> if cache events should be performed via the cache event messaging service, <code>false</code>, otherwise 
+     *
+     * @return <code>true</code> if cache events should be performed via the cache event messaging service, <code>false</code>, otherwise
      */
     public boolean isEventInvalidation() {
         return configurationService.getBoolProperty("com.openexchange.caching.jcs.eventInvalidation", true);
@@ -508,9 +508,9 @@ public final class JCSCacheServiceInit {
     }
 
     /**
-     * Pre-processes the supplied JCS properties and removes all references to the supplied auxiliaries, storing the affected cache 
+     * Pre-processes the supplied JCS properties and removes all references to the supplied auxiliaries, storing the affected cache
      * regions in the {@link #auxiliaryCacheRegions} set.
-     *     
+     *
      * @param properties The properties to pre-process
      * @param auxiliaries The name of the auxiliary caches to remove
      */

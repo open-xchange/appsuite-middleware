@@ -176,16 +176,16 @@ public interface Cache {
      * @exception OXException If put operation on cache fails
      * @deprecated Use {@link #put(Serializable, Serializable, boolean)} instead and supply the <code>invalidate</code>-flag explicitly.
      */
-    @Deprecated 
+    @Deprecated
     public void put(Serializable key, Serializable obj) throws OXException;
 
     /**
      * Place a new object in the cache, associated with key name. If there is currently an object associated with name in the cache it is
      * replaced. Names are scoped to a cache so they must be unique within the cache they are placed.
      * <p>
-     * If the put-operation is caused by an existing item being changed, set the <code>invalidate</code>-flag to <code>true</code> so that 
+     * If the put-operation is caused by an existing item being changed, set the <code>invalidate</code>-flag to <code>true</code> so that
      * auxiliary caches get informed, too. If it is caused by just populating the cache from the database or another persistent storage,
-     * set it to<code>false</code>. 
+     * set it to<code>false</code>.
      *
      * @param key The key
      * @param obj Object to store
@@ -214,9 +214,9 @@ public interface Cache {
      * <p>
      * If the key or the value is null, and InvalidArgumentException is thrown.
      * <p>
-     * If the put-operation is caused by an existing item being changed, set the <code>invalidate</code>-flag to <code>true</code> so that 
+     * If the put-operation is caused by an existing item being changed, set the <code>invalidate</code>-flag to <code>true</code> so that
      * auxiliary caches get informed, too. If it is caused by just populating the cache from the database or another persistent storage,
-     * set it to<code>false</code>. 
+     * set it to<code>false</code>.
      *
      * @param key The key
      * @param val The object to store
@@ -235,7 +235,7 @@ public interface Cache {
      * @param value The object to cache
      * @param attr The objects attributes.
      * @throws OXException If put operation on cache fails
-     * @deprecated Use {@link #putInGroup(Serializable, String, Object, ElementAttributes, boolean)} instead and supply the 
+     * @deprecated Use {@link #putInGroup(Serializable, String, Object, ElementAttributes, boolean)} instead and supply the
      *             <code>invalidate</code>-flag explicitly.
      */
     @Deprecated
@@ -245,9 +245,9 @@ public interface Cache {
      * Allows the user to put an object into a group within a particular cache. This method allows the object's attributes to be
      * individually specified.
      * <p>
-     * If the put-operation is caused by an existing item being changed, set the <code>invalidate</code>-flag to <code>true</code> so that 
+     * If the put-operation is caused by an existing item being changed, set the <code>invalidate</code>-flag to <code>true</code> so that
      * auxiliary caches get informed, too. If it is caused by just populating the cache from the database or another persistent storage,
-     * set it to<code>false</code>. 
+     * set it to<code>false</code>.
      *
      * @param key The key
      * @param groupName The group name.
@@ -276,9 +276,9 @@ public interface Cache {
      * Allows the user to put an object into a group within a particular cache. This method sets the object's attributes to the default for
      * the cache.
      * <p>
-     * If the put-operation is caused by an existing item being changed, set the <code>invalidate</code>-flag to <code>true</code> so that 
+     * If the put-operation is caused by an existing item being changed, set the <code>invalidate</code>-flag to <code>true</code> so that
      * auxiliary caches get informed, too. If it is caused by just populating the cache from the database or another persistent storage,
-     * set it to<code>false</code>. 
+     * set it to<code>false</code>.
      *
      * @param key The key
      * @param groupName The group name.

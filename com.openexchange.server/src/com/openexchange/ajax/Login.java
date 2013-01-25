@@ -64,6 +64,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1015,6 +1016,7 @@ public class Login extends AJAXServlet {
                     properties.put("client.capabilities", capabilities);
                 }
             }
+
             result = login.doLogin(req);
             if (null == result) {
                 return true;
@@ -1069,7 +1071,18 @@ public class Login extends AJAXServlet {
         }
         try {
             if (response.hasError() || null == result) {
-                ResponseWriter.write(response, resp.getWriter());
+                final Locale locale;
+                if (null == result) {
+                    locale = Tools.getLocaleByAcceptLanguage(req, null);
+                } else {
+                    final User user = result.getUser();
+                    if (null == user) {
+                        locale = Tools.getLocaleByAcceptLanguage(req, null);
+                    } else {
+                        locale = user.getLocale();
+                    }
+                }
+                ResponseWriter.write(response, resp.getWriter(), locale);
                 return false;
             }
             final Session session = result.getSession();

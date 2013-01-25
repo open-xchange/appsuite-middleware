@@ -53,15 +53,15 @@ import java.io.Serializable;
 
 /**
  * {@link CacheEvent}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CacheEvent implements Serializable {
-    
+
     /**
      * Creates a new {@link CacheOperation#INVALIDATE} event.
-     * 
-     * @param region The cache region 
+     *
+     * @param region The cache region
      * @param groupName The cache group name
      * @param key The key of the affected cache entry
      * @return The cache event
@@ -69,30 +69,30 @@ public class CacheEvent implements Serializable {
     public static CacheEvent INVALIDATE(String region, String groupName, Serializable key) {
         return new CacheEvent(CacheOperation.INVALIDATE, region, key, groupName);
     }
-    
+
     /**
      * Creates a new {@link CacheOperation#INVALIDATE_GROUP} event.
-     * 
-     * @param region The cache region 
+     *
+     * @param region The cache region
      * @param groupName The cache group name
      * @return The cache event
      */
     public static CacheEvent INVALIDATE_GROUP(String region, String groupName) {
         return new CacheEvent(CacheOperation.INVALIDATE_GROUP, region, null, groupName);
     }
-        
+
     private static final long serialVersionUID = 7172029773641345572L;
-    
+
     private CacheOperation operation;
     private Serializable key;
     private String groupName;
     private String region;
-    
+
     /**
      * Initializes a new {@link CacheEvent}.
-     * 
+     *
      * @param operation The cache operation
-     * @param region The cache region 
+     * @param region The cache region
      * @param groupName The cache group name
      * @param key The key of the affected cache entry
      */
@@ -103,7 +103,7 @@ public class CacheEvent implements Serializable {
         this.key = key;
         this.groupName = groupName;
     }
-    
+
     /**
      * Gets the operation
      *
@@ -175,7 +175,7 @@ public class CacheEvent implements Serializable {
     public void setRegion(String region) {
         this.region = region;
     }
-    
+
     @Override
     public String toString() {
         return "CacheEvent [operation=" + operation + ", region=" + region + ", key=" + key + ", groupName=" + groupName + "]";

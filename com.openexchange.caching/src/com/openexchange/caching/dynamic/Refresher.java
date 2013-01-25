@@ -65,7 +65,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * Checks if an object was removed from the cache and must be reloaded from storage.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class Refresher<T extends Serializable> {
@@ -99,7 +99,7 @@ public abstract class Refresher<T extends Serializable> {
 
     /**
      * Initializes a new {@link Refresher}.
-     * 
+     *
      * @throws IllegalArgumentException If provided region name is <code>null</code>
      */
     protected Refresher(final OXObjectFactory<T> factory, final String regionName, final boolean removeBeforePut) {
@@ -122,7 +122,7 @@ public abstract class Refresher<T extends Serializable> {
 
     /**
      * Checks if the object was removed from the cache and must be reloaded from the database.
-     * 
+     *
      * @throws OXException If refresh fails
      */
     protected T refresh() throws OXException {

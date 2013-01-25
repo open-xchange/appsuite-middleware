@@ -51,7 +51,7 @@ package com.openexchange.ms;
 
 /**
  * {@link MessageDispatcher} - The super type for message dispatching.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @see Topic
  * @see Queue
@@ -60,28 +60,28 @@ public interface MessageDispatcher<E> {
 
     /**
      * Gets the topic's name
-     * 
+     *
      * @return The name
      */
     String getName();
 
     /**
      * Adds given listener to this topic.
-     * 
+     *
      * @param listener The listener
      */
     void addMessageListener(MessageListener<E> listener);
 
     /**
      * Removes given listener from this topic
-     * 
+     *
      * @param listener The listener
      */
     void removeMessageListener(MessageListener<E> listener);
 
     /**
      * Gets the sender identifier,
-     * 
+     *
      * @return The sender identifier
      */
     String getSenderId();

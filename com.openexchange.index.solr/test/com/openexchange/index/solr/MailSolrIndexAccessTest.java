@@ -82,13 +82,13 @@ public class MailSolrIndexAccessTest extends TestCase {
                     return (S) new MockConfigurationService();
                 } else if (clazz.equals(IndexManagementService.class)) {
                     return (S) new IndexManagementService() {
-                        
+
                         @Override
                         public void unlockIndex(int contextId, int userId, int module) throws OXException {}
-                        
+
                         @Override
                         public void lockIndex(int contextId, int userId, int module) throws OXException {}
-                        
+
                         @Override
                         public boolean isLocked(int contextId, int userId, int module) throws OXException {
                             return false;

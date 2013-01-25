@@ -78,24 +78,24 @@ public class SolrAttachmentDocumentConverter extends AbstractDocumentConverter<A
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrAttachmentDocumentConverter.class);
 
-    
+
     /**
      * Initializes a new {@link SolrAttachmentDocumentConverter}.
      */
     public SolrAttachmentDocumentConverter(FieldConfiguration fieldConfig) {
         super(fieldConfig);
     }
-    
+
     @Override
     public IndexDocument<Attachment> convert(SolrDocument document) throws OXException {
         return convertInternal(document);
     }
-    
+
     @Override
     public IndexDocument<Attachment> convert(SolrDocument document, Map<String, List<String>> highlightedFields) throws OXException {
         StandardIndexDocument<Attachment> indexDocument = convertInternal(document);
         addHighlighting(indexDocument, highlightedFields);
-        
+
         return indexDocument;
     }
 
@@ -103,7 +103,7 @@ public class SolrAttachmentDocumentConverter extends AbstractDocumentConverter<A
     public IndexResult<Attachment> createIndexResult(List<IndexDocument<Attachment>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
         return new SolrIndexResult<Attachment>(documents.size(), documents, null);
     }
-    
+
     private StandardIndexDocument<Attachment> convertInternal(SolrDocument document) throws OXException {
         Attachment attachment = new Attachment();
         Integer module = getFieldValue(AttachmentIndexField.MODULE, document);
@@ -178,7 +178,7 @@ public class SolrAttachmentDocumentConverter extends AbstractDocumentConverter<A
         setFieldInDocument(inputDocument, AttachmentIndexField.FILE_NAME, fileName);
         setFieldInDocument(inputDocument, AttachmentIndexField.MIME_TYPE, mimeType);
         setFieldInDocument(inputDocument, AttachmentIndexField.MD5_SUM, md5Sum);
-        
+
         if (file != null) {
             TextXtractService xtractService = Services.getService(TextXtractService.class);
             try {

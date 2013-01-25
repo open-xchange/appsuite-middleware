@@ -63,7 +63,6 @@ import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
-import com.hazelcast.core.MapEntry;
 import com.hazelcast.core.MultiMap;
 import com.hazelcast.query.Predicate;
 import com.hazelcast.query.SqlPredicate;
@@ -412,17 +411,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             if (null == altId) {
                 throw new NullPointerException("altId is null.");
             }
-            Predicate<String, HazelcastStoredSession> altIdPredicate = new Predicate<String, HazelcastStoredSession>() {
-
-                private static final long serialVersionUID = -4810797295980425113L;
-
-                @Override
-                public boolean apply(MapEntry<String, HazelcastStoredSession> mapEntry) {
-                    return null != mapEntry && null != mapEntry.getValue() &&
-                        altId.equals(mapEntry.getValue().getParameter(Session.PARAM_ALTERNATIVE_ID));
-                }
-            };
-            for (HazelcastStoredSession session : filter(altIdPredicate)) {
+            for (HazelcastStoredSession session : filter(new AltIdPredicate(altId))) {
                 if (null != session && altId.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
                     return session;
                 }

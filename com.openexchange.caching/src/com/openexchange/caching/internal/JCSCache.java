@@ -146,7 +146,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
                                 if ((aux != null) && (ICache.LATERAL_CACHE == aux.getCacheType())) {
                                     localOnly = Boolean.FALSE;
                                     break;
-                                } 
+                                }
                             }
                         }
                     }

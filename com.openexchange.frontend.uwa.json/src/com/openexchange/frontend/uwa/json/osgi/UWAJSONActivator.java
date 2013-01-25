@@ -62,7 +62,7 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 
 /**
  * {@link UWAJSONActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UWAJSONActivator extends AbstractSessionServletActivator {

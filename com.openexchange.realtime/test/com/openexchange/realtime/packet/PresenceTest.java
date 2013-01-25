@@ -68,7 +68,7 @@ import com.openexchange.realtime.payload.PayloadTree;
  */
 public class PresenceTest {
 
-    private static ID fromID = new ID("ox", "marc.arens", "premium", null); 
+    private static ID fromID = new ID("ox", "marc.arens", "premium", null);
     private static PresenceState away = PresenceState.AWAY;
     private static String message = "I'll be back!";
     private static byte priority = 1;
@@ -87,7 +87,7 @@ public class PresenceTest {
         assertEquals(Type.NONE, initialPresence.getType());
         assertNull(initialPresence.getError());
         assertEquals(Collections.EMPTY_LIST, initialPresence.getPayloads());
-        
+
     }
 
     @Test

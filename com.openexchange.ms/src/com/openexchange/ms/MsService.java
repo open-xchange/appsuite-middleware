@@ -51,14 +51,14 @@ package com.openexchange.ms;
 
 /**
  * {@link MsService} - The messaging service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MsService {
 
     /**
      * Gets the distributed queue with the specified name.
-     * 
+     *
      * @param name The name of the distributed queue
      * @return The distributed queue with the specified name
      */
@@ -66,7 +66,7 @@ public interface MsService {
 
     /**
      * Returns the distributed topic with the specified name.
-     * 
+     *
      * @param name The name of the distributed topic
      * @return The distributed topic with the specified name
      */

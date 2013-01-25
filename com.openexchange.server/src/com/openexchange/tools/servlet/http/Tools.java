@@ -72,6 +72,7 @@ import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -494,6 +495,33 @@ public final class Tools {
         return pos > 0 ? httpSessionId : httpSessionId + '.' + ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName();
     }
 
+    private static final String NAME_ACCEPT_LANGUAGE = "Accept-Language".intern();
+
+    /**
+     * Gets the locale by <i>Accept-Language</i> header.
+     *
+     * @param request The request
+     * @param defaultLocale The default locale to return if absent
+     * @return The parsed locale
+     */
+    public static Locale getLocaleByAcceptLanguage(final HttpServletRequest request, final Locale defaultLocale) {
+        if (null == request) {
+            return defaultLocale;
+        }
+        String header = request.getHeader(NAME_ACCEPT_LANGUAGE);
+        if (isEmpty(header)) {
+            return defaultLocale;
+        }
+        int pos = header.indexOf(';');
+        if (pos > 0) {
+            header = header.substring(0, pos);
+        }
+        header = header.trim();
+        pos = header.indexOf(',');
+        final Locale l = LocaleTools.getLocale(pos > 0 ? header.substring(0, pos) : header);
+        return null == l ? defaultLocale : l;
+    }
+
     /**
      * Part of HTTP content type header.
      */
@@ -568,4 +596,17 @@ public final class Tools {
     private static com.openexchange.authentication.Cookie getCookie(final Cookie cookie) {
         return new AuthCookie(cookie);
     }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }

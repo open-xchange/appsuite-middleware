@@ -69,7 +69,7 @@ public class CustomTranslator implements QueryTranslator {
     private Configuration config;
 
     private String name;
-    
+
     private FieldConfiguration fieldConfig;
 
 

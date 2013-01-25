@@ -49,10 +49,8 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,27 +58,19 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
-
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.exporters.CSVContactExporter;
 import com.openexchange.importexport.exporters.Exporter;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.formats.csv.DutchOutlookMapper;
-import com.openexchange.importexport.formats.csv.EnglishOutlookMapper;
-import com.openexchange.importexport.formats.csv.FrenchOutlookMapper;
-import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
-import com.openexchange.importexport.formats.csv.OxAjaxnameMapper;
-import com.openexchange.importexport.formats.csv.OxReadableNameMapper;
 import com.openexchange.importexport.importers.CSVContactImporter;
-import com.openexchange.importexport.importers.Importer;
+import com.openexchange.importexport.importers.TestCSVContactImporter;
 import com.openexchange.test.OXTestToolkit;
 
 
@@ -131,9 +121,7 @@ public class CSVContactExportTest extends AbstractContactTest {
 	}
 
 	@Test public void exportData() throws NumberFormatException, Exception{
-		final CSVContactImporter imp = new CSVContactImporter();
-        imp.addFieldMapper(new OxAjaxnameMapper());
-        imp.addFieldMapper(new OxReadableNameMapper());
+		final CSVContactImporter imp = new TestCSVContactImporter();
 		InputStream is;
 
 		//importing prior to export test

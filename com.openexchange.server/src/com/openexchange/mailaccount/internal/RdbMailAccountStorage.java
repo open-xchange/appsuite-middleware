@@ -460,8 +460,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (MailAccount.DEFAULT_ID == id) {
                     final StringAllocator sb = new StringAllocator(128);
                     sb.append(mailAccount.getPrimaryAddress());
+                    final Set<String> s = new HashSet<String>(4);
+                    s.add(mailAccount.getPrimaryAddress());
                     for (final String alias : UserStorage.getStorageUser(user, cid).getAliases()) {
-                        sb.append(", ").append(alias);
+                        if (s.add(alias)) {
+                            sb.append(", ").append(alias);
+                        }
                     }
                     properties.put("addresses", sb.toString());
                 }

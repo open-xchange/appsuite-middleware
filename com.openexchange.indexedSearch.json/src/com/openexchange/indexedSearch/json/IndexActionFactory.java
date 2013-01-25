@@ -84,13 +84,13 @@ public class IndexActionFactory implements AJAXActionServiceFactory {
 
         final AbstractIndexAction action2 = new IsIndexedAction(services, registry);
         actions.put(action2.getAction(), action2);
-        
+
         final AbstractIndexAction action3 = new SpotlightAction(services, registry);
         actions.put(action3.getAction(), action3);
-        
+
         final AbstractIndexAction action4 = new PersonsAction(services, registry);
         actions.put(action4.getAction(), action4);
-        
+
         final AbstractIndexAction action5 = new TopicsAction(services, registry);
         actions.put(action5.getAction(), action5);
     }

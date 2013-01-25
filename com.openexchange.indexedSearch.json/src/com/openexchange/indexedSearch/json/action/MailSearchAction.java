@@ -82,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class MailSearchAction extends AbstractIndexAction {
-    
+
     protected static final Log LOG = com.openexchange.log.Log.loggerFor(MailSearchAction.class);
 
     private final SearchHandler searchHandler;
@@ -105,14 +105,14 @@ public abstract class MailSearchAction extends AbstractIndexAction {
         long start = System.currentTimeMillis();
         ServerSession session = req.getSession();
         String searchTerm = req.checkParameter("searchTerm");
-        
+
         IndexFacadeService indexFacade = getService(IndexFacadeService.class);
         IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
         QueryParameters params = new QueryParameters.Builder()
             .setHandler(searchHandler)
             .setSearchTerm(searchTerm)
             .build();
-        
+
         IndexResult<MailMessage> result = indexAccess.query(params, null);
         List<IndexDocument<MailMessage>> documents = result.getResults();
         JSONArray jsonResult = new JSONArray();
@@ -123,34 +123,34 @@ public abstract class MailSearchAction extends AbstractIndexAction {
             String folder = mail.getFolder();
             String fullname = MailFolderUtility.prepareFullname(accountId, folder);
             json.put(FolderChildFields.FOLDER_ID, fullname == null ? JSONObject.NULL : fullname);
-            
+
             String id = mail.getMailId();
             json.put(DataFields.ID, id == null ? JSONObject.NULL : id);
-            
+
             addAddresses(mail.getFrom(), MailJSONField.FROM, json);
             addAddresses(mail.getTo(), MailJSONField.RECIPIENT_TO, json);
             addAddresses(mail.getCc(), MailJSONField.RECIPIENT_CC, json);
             addAddresses(mail.getBcc(), MailJSONField.RECIPIENT_BCC, json);
-            
+
             String subject = mail.getSubject();
             json.put(MailJSONField.SUBJECT.getKey(), subject == null ? JSONObject.NULL : subject);
             jsonResult.put(json);
         }
-        
-        
+
+
         if (LOG.isDebugEnabled()) {
             long diff = System.currentTimeMillis() - start;
             LOG.debug("Duration: " + diff + "ms.");
         }
-        
+
         return new AJAXRequestResult(jsonResult, "json");
     }
-    
+
     private void addAddresses(InternetAddress[] addrs, MailJSONField field, JSONObject json) throws JSONException {
         if (addrs == null || addrs.length == 0) {
             return;
         }
-        
+
         json.put(field.getKey(), MessageWriter.getAddressesAsArray(addrs));
     }
 

@@ -86,7 +86,7 @@ public class MsActivator extends HousekeepingActivator {
             final BundleContext context = this.context;
             final AtomicReference<MsService> msServiceRef = new AtomicReference<MsService>();
             track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
-    
+
                 @Override
                 public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
                     final HazelcastInstance hz = context.getService(reference);
@@ -98,12 +98,12 @@ public class MsActivator extends HousekeepingActivator {
                     context.ungetService(reference);
                     return null;
                 }
-    
+
                 @Override
                 public void modifiedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
                     // Ignore
                 }
-    
+
                 @Override
                 public void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
                     if (null != service) {

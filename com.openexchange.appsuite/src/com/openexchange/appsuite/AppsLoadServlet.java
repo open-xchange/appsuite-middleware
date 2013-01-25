@@ -71,7 +71,7 @@ import com.openexchange.java.Strings;
 
 /**
  * {@link AppsLoadServlet} - Provides App Suite data for loading applciations.
- * 
+ *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class AppsLoadServlet extends HttpServlet {

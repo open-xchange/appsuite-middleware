@@ -60,7 +60,6 @@ import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.io.IOUtils;
 
 /**
  * Class holding configuration options loaded from property files can extend this class to inherit usefull methods.

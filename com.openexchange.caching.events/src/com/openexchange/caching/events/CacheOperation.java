@@ -52,16 +52,16 @@ package com.openexchange.caching.events;
 
 /**
  * {@link CacheOperation}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public enum CacheOperation {
-    
+
     /**
-     * Invalidation of a cache entry, due to update or removal 
+     * Invalidation of a cache entry, due to update or removal
      */
     INVALIDATE,
-    
+
     /**
      * Invalidation of a cache group
      */

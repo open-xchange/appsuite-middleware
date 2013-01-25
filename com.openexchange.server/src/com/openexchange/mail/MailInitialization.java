@@ -86,7 +86,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
     public static final class MailcapInitialization implements Initialization {
 
         private static final MailcapInitialization CAP_INSTANCE = new MailcapInitialization();
-        
+
         /**
          * Gets the instance
          *
@@ -279,7 +279,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 
     /**
      * Handles the (possibly temporary) unavailability of caching service
-     * 
+     *
      * @throws AbstractOXException If mail caches shut-down fails
      */
     public void shutDownCaches() throws OXException {
@@ -289,7 +289,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 
     /**
      * Handles the re-availability of caching service
-     * 
+     *
      * @throws AbstractOXException If mail caches start-up fails
      */
     public void startUpCaches() throws OXException {

@@ -47,23 +47,45 @@
  *
  */
 
-package com.openexchange.importexport.formats.csv;
+package com.openexchange.importexport.importers;
 
-import com.openexchange.groupware.contact.helpers.ContactField;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Properties;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.importexport.formats.csv.PropertyDrivenMapper;
+import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.Streams;
+
 /**
- * This class maps names of fields found in OX CSV files to names used by OX internally and vice versa. This class has been generated automatically
- * from i18n files.
+ * {@link TestCSVContactImporter}
  *
- * @deprecated Use the PropertyDrivenMapper with .properties files instead.
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-@Deprecated
-public class OxReadableNameMapper extends AbstractOutlookMapper {
-	public OxReadableNameMapper() {
-		ContactField[] fields = ContactField.values();
+public class TestCSVContactImporter extends CSVContactImporter {
 
-		for(ContactField field: fields) {
-			store(field, field.getReadableName());
-		}
-	}
+    public TestCSVContactImporter() throws Exception {
+        final ConfigurationService conf = ImportExportServices.getConfigurationService();
+        final String path = conf.getProperty("com.openexchange.import.mapper.path");
+        final File dir = new File(path);
+        final File[] files = dir.listFiles();
+
+        for (final File file : files) {
+            if (!file.getName().endsWith(".properties")) {
+                continue;
+            }
+            final Properties props = new Properties();
+            final InputStream in = new BufferedInputStream(new FileInputStream(file));
+            try {
+                props.load(in);
+            } finally {
+                Streams.close(in);
+            }
+            final PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);
+            addFieldMapper(mapper);
+        }
+    }
+
 }

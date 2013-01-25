@@ -147,16 +147,16 @@ public abstract class AbstractIndexAction implements AJAXActionService {
         }
         return isWhitespace;
     }
-    
+
     protected static String tryCast(Object obj) {
         if (obj == null) {
             return null;
         }
-        
+
         if (obj instanceof String) {
             return (String) obj;
         }
-        
+
         return null;
     }
 

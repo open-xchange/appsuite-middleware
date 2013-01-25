@@ -68,144 +68,144 @@ import com.openexchange.mail.index.MailIndexField;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class XMLBasedFieldConfigurationTest {
-    
-    private static final String SOLR_CONFIG = 
-            "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + 
-    		"<config>\n" + 
-    		"    <abortOnConfigurationError>\n" + 
-    		"        ${solr.abortOnConfigurationError:true}\n" + 
-    		"    </abortOnConfigurationError>\n" + 
-    		"\n" + 
-    		"    <luceneMatchVersion>LUCENE_36</luceneMatchVersion>\n" + 
-    		"\n" + 
-    		"    <dataDir>${solr.core.dataDir}</dataDir>\n" + 
-    		"    <lib dir=\"${libDir:/opt/open-xchange/solr/lib}\" />\n" + 
-    		"\n" + 
-    		"    <configIndex>\n" + 
-    		"        <useCompoundFile>false</useCompoundFile>\n" + 
-    		"        <ramBufferSizeMB>32</ramBufferSizeMB>\n" + 
-    		"        <mergeFactor>10</mergeFactor>\n" + 
-    		"        <maxFieldLength>10000</maxFieldLength>\n" + 
-    		"        <unlockOnStartup>true</unlockOnStartup>\n" + 
-    		"        <reopenReaders>true</reopenReaders>\n" + 
-    		"        <writeLockTimeout>1000</writeLockTimeout>\n" + 
-    		"        <commitLockTimeout>10000</commitLockTimeout>\n" + 
-    		"        <lockType>simple</lockType>\n" + 
-    		"        <deletionPolicy class=\"solr.SolrDeletionPolicy\">\n" + 
-    		"            <str name=\"keepOptimizedOnly\">false</str>\n" + 
-    		"            <str name=\"maxCommitsToKeep\">1</str>\n" + 
-    		"        </deletionPolicy>\n" + 
-    		"    </configIndex>\n" + 
-    		"\n" + 
-    		"    <updateHandler class=\"solr.DirectUpdateHandler2\" />\n" + 
-    		"\n" + 
-    		"    <query>\n" + 
-    		"        <maxBooleanClauses>1024</maxBooleanClauses>\n" + 
-    		"        <filterCache class=\"solr.FastLRUCache\" size=\"512\" initialSize=\"512\" autowarmCount=\"0\" />\n" + 
-    		"        <queryResultCache class=\"solr.LRUCache\" size=\"512\" initialSize=\"512\" autowarmCount=\"0\" />\n" + 
-    		"        <documentCache class=\"solr.LRUCache\" size=\"512\" initialSize=\"512\" autowarmCount=\"0\" />\n" + 
-    		"        <enableLazyFieldLoading>true</enableLazyFieldLoading>\n" + 
-    		"        <queryResultWindowSize>20</queryResultWindowSize>\n" + 
-    		"        <queryResultMaxDocsCached>200</queryResultMaxDocsCached>\n" + 
-    		"        <listener event=\"newSearcher\" class=\"solr.QuerySenderListener\">\n" + 
-    		"            <arr name=\"queries\"></arr>\n" + 
-    		"        </listener>\n" + 
-    		"        <useColdSearcher>false</useColdSearcher>\n" + 
-    		"        <maxWarmingSearchers>5</maxWarmingSearchers>\n" + 
-    		"    </query>\n" + 
-    		"\n" + 
-    		"    <requestDispatcher handleSelect=\"true\">\n" + 
-    		"        <requestParsers enableRemoteStreaming=\"false\" multipartUploadLimitInKB=\"2048000\" />\n" + 
-    		"        <httpCaching never304=\"true\" />\n" + 
-    		"    </requestDispatcher>\n" + 
-    		"\n" + 
-    		"    <!-- For debugging purposes only -->\n" + 
-    		"    <requestHandler name=\"standard\" class=\"solr.SearchHandler\" default=\"false\">\n" + 
-    		"        <lst name=\"defaults\">\n" + 
-    		"            <str name=\"echoParams\">explicit</str>\n" + 
-    		"        </lst>\n" + 
-    		"    </requestHandler>\n" + 
-    		"\n" + 
-    		"    <updateRequestProcessorChain name=\"langid\">\n" + 
-    		"        <processor class=\"org.apache.solr.update.processor.TikaLanguageIdentifierUpdateProcessorFactory\">\n" + 
-    		"            <bool name=\"langid\">true</bool>\n" + 
-    		"            <str name=\"langid.fl\">subject,content</str>\n" + 
-    		"            <str name=\"langid.whitelist\">de,en,fr,it</str>\n" + 
-    		"            <str name=\"langid.langField\">locale</str>\n" + 
-    		"            <bool name=\"langid.map\">true</bool>\n" + 
-    		"            <str name=\"langid.threshold\">0.2</str>\n" + 
-    		"            <str name=\"langid.fallback\">gen</str>\n" + 
-    		"        </processor>\n" + 
-    		"        <processor class=\"solr.LogUpdateProcessorFactory\" />\n" + 
-    		"        <processor class=\"solr.RunUpdateProcessorFactory\" />\n" + 
-    		"    </updateRequestProcessorChain>\n" + 
+
+    private static final String SOLR_CONFIG =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
+    		"<config>\n" +
+    		"    <abortOnConfigurationError>\n" +
+    		"        ${solr.abortOnConfigurationError:true}\n" +
+    		"    </abortOnConfigurationError>\n" +
+    		"\n" +
+    		"    <luceneMatchVersion>LUCENE_36</luceneMatchVersion>\n" +
+    		"\n" +
+    		"    <dataDir>${solr.core.dataDir}</dataDir>\n" +
+    		"    <lib dir=\"${libDir:/opt/open-xchange/solr/lib}\" />\n" +
+    		"\n" +
+    		"    <configIndex>\n" +
+    		"        <useCompoundFile>false</useCompoundFile>\n" +
+    		"        <ramBufferSizeMB>32</ramBufferSizeMB>\n" +
+    		"        <mergeFactor>10</mergeFactor>\n" +
+    		"        <maxFieldLength>10000</maxFieldLength>\n" +
+    		"        <unlockOnStartup>true</unlockOnStartup>\n" +
+    		"        <reopenReaders>true</reopenReaders>\n" +
+    		"        <writeLockTimeout>1000</writeLockTimeout>\n" +
+    		"        <commitLockTimeout>10000</commitLockTimeout>\n" +
+    		"        <lockType>simple</lockType>\n" +
+    		"        <deletionPolicy class=\"solr.SolrDeletionPolicy\">\n" +
+    		"            <str name=\"keepOptimizedOnly\">false</str>\n" +
+    		"            <str name=\"maxCommitsToKeep\">1</str>\n" +
+    		"        </deletionPolicy>\n" +
+    		"    </configIndex>\n" +
+    		"\n" +
+    		"    <updateHandler class=\"solr.DirectUpdateHandler2\" />\n" +
+    		"\n" +
+    		"    <query>\n" +
+    		"        <maxBooleanClauses>1024</maxBooleanClauses>\n" +
+    		"        <filterCache class=\"solr.FastLRUCache\" size=\"512\" initialSize=\"512\" autowarmCount=\"0\" />\n" +
+    		"        <queryResultCache class=\"solr.LRUCache\" size=\"512\" initialSize=\"512\" autowarmCount=\"0\" />\n" +
+    		"        <documentCache class=\"solr.LRUCache\" size=\"512\" initialSize=\"512\" autowarmCount=\"0\" />\n" +
+    		"        <enableLazyFieldLoading>true</enableLazyFieldLoading>\n" +
+    		"        <queryResultWindowSize>20</queryResultWindowSize>\n" +
+    		"        <queryResultMaxDocsCached>200</queryResultMaxDocsCached>\n" +
+    		"        <listener event=\"newSearcher\" class=\"solr.QuerySenderListener\">\n" +
+    		"            <arr name=\"queries\"></arr>\n" +
+    		"        </listener>\n" +
+    		"        <useColdSearcher>false</useColdSearcher>\n" +
+    		"        <maxWarmingSearchers>5</maxWarmingSearchers>\n" +
+    		"    </query>\n" +
+    		"\n" +
+    		"    <requestDispatcher handleSelect=\"true\">\n" +
+    		"        <requestParsers enableRemoteStreaming=\"false\" multipartUploadLimitInKB=\"2048000\" />\n" +
+    		"        <httpCaching never304=\"true\" />\n" +
+    		"    </requestDispatcher>\n" +
+    		"\n" +
+    		"    <!-- For debugging purposes only -->\n" +
+    		"    <requestHandler name=\"standard\" class=\"solr.SearchHandler\" default=\"false\">\n" +
+    		"        <lst name=\"defaults\">\n" +
+    		"            <str name=\"echoParams\">explicit</str>\n" +
+    		"        </lst>\n" +
+    		"    </requestHandler>\n" +
+    		"\n" +
+    		"    <updateRequestProcessorChain name=\"langid\">\n" +
+    		"        <processor class=\"org.apache.solr.update.processor.TikaLanguageIdentifierUpdateProcessorFactory\">\n" +
+    		"            <bool name=\"langid\">true</bool>\n" +
+    		"            <str name=\"langid.fl\">subject,content</str>\n" +
+    		"            <str name=\"langid.whitelist\">de,en,fr,it</str>\n" +
+    		"            <str name=\"langid.langField\">locale</str>\n" +
+    		"            <bool name=\"langid.map\">true</bool>\n" +
+    		"            <str name=\"langid.threshold\">0.2</str>\n" +
+    		"            <str name=\"langid.fallback\">gen</str>\n" +
+    		"        </processor>\n" +
+    		"        <processor class=\"solr.LogUpdateProcessorFactory\" />\n" +
+    		"        <processor class=\"solr.RunUpdateProcessorFactory\" />\n" +
+    		"    </updateRequestProcessorChain>\n" +
     		"</config>";
-    
-    private static final String SCHEMA = 
-            "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + 
-    		"<schema name=\"OX Test Schema\" version=\"1.5\">\n" + 
-    		"    <types>\n" + 
-    		"        <fieldType name=\"string\" class=\"solr.StrField\" sortMissingLast=\"true\" omitNorms=\"true\" />\n" + 
-    		"        <fieldType name=\"int\" class=\"solr.IntField\" omitNorms=\"true\" />\n" + 
-    		"    </types>\n" + 
-    		"\n" + 
-    		"    <fields>\n" + 
-    		"        <!-- Common Fields -->\n" + 
-    		"        <field name=\"uuid\" type=\"string\" stored=\"true\" indexed=\"true\" oxIndexField=\"com.openexchange.mail.index.MailIndexField.UUID\" />\n" + 
-    		"\n" + 
-    		"        <field name=\"subject\" type=\"text\" stored=\"false\" indexed=\"false\" oxIndexField=\"com.openexchange.mail.index.MailIndexField.SUBJECT\" />\n" + 
-    		"        <field name=\"subject_gen\" type=\"text\" stored=\"true\" indexed=\"true\" />\n" + 
-    		"        <field name=\"subject_de\" type=\"text_de\" stored=\"true\" indexed=\"true\" />\n" + 
-    		"        <field name=\"subject_en\" type=\"text_en\" stored=\"true\" indexed=\"true\" />\n" + 
-    		"        <field name=\"subject_fr\" type=\"text_fr\" stored=\"true\" indexed=\"true\" />\n" + 
-    		"        <field name=\"subject_it\" type=\"text_it\" stored=\"true\" indexed=\"true\" />\n" + 
-    		"        \n" + 
-    		"        <field name=\"no_enum\" type=\"text\" stored=\"false\" indexed=\"true\" oxIndexField=\"com.openexchange.index.solr.NoEnum.VALUE\" /> \n" + 
-    		"        \n" + 
-    		"        <field name=\"locale\" type=\"string\" stored=\"true\" indexed=\"false\" />\n" + 
-    		"    </fields>\n" + 
-    		"\n" + 
-    		"    <uniqueKey>uuid</uniqueKey>\n" + 
-    		"    <solrQueryParser defaultOperator=\"OR\" />\n" + 
-    		"    <defaultSearchField>uuid</defaultSearchField>\n" + 
-    		"</schema>\n" + 
+
+    private static final String SCHEMA =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
+    		"<schema name=\"OX Test Schema\" version=\"1.5\">\n" +
+    		"    <types>\n" +
+    		"        <fieldType name=\"string\" class=\"solr.StrField\" sortMissingLast=\"true\" omitNorms=\"true\" />\n" +
+    		"        <fieldType name=\"int\" class=\"solr.IntField\" omitNorms=\"true\" />\n" +
+    		"    </types>\n" +
+    		"\n" +
+    		"    <fields>\n" +
+    		"        <!-- Common Fields -->\n" +
+    		"        <field name=\"uuid\" type=\"string\" stored=\"true\" indexed=\"true\" oxIndexField=\"com.openexchange.mail.index.MailIndexField.UUID\" />\n" +
+    		"\n" +
+    		"        <field name=\"subject\" type=\"text\" stored=\"false\" indexed=\"false\" oxIndexField=\"com.openexchange.mail.index.MailIndexField.SUBJECT\" />\n" +
+    		"        <field name=\"subject_gen\" type=\"text\" stored=\"true\" indexed=\"true\" />\n" +
+    		"        <field name=\"subject_de\" type=\"text_de\" stored=\"true\" indexed=\"true\" />\n" +
+    		"        <field name=\"subject_en\" type=\"text_en\" stored=\"true\" indexed=\"true\" />\n" +
+    		"        <field name=\"subject_fr\" type=\"text_fr\" stored=\"true\" indexed=\"true\" />\n" +
+    		"        <field name=\"subject_it\" type=\"text_it\" stored=\"true\" indexed=\"true\" />\n" +
+    		"        \n" +
+    		"        <field name=\"no_enum\" type=\"text\" stored=\"false\" indexed=\"true\" oxIndexField=\"com.openexchange.index.solr.NoEnum.VALUE\" /> \n" +
+    		"        \n" +
+    		"        <field name=\"locale\" type=\"string\" stored=\"true\" indexed=\"false\" />\n" +
+    		"    </fields>\n" +
+    		"\n" +
+    		"    <uniqueKey>uuid</uniqueKey>\n" +
+    		"    <solrQueryParser defaultOperator=\"OR\" />\n" +
+    		"    <defaultSearchField>uuid</defaultSearchField>\n" +
+    		"</schema>\n" +
     		"";
-    
+
     private static FieldConfiguration config;
 
     private static File configFile;
 
     private static File schemaFile;
-    
+
     @BeforeClass
     public static void setUp() throws Exception {
         configFile = File.createTempFile("solrTestConfig", "xml");
         schemaFile = File.createTempFile("solrTestSchema", "xml");
-        
+
         FileWriter fw = new FileWriter(configFile);
         fw.write(SOLR_CONFIG);
         fw.flush();
         fw.close();
-        
+
         fw = new FileWriter(schemaFile);
         fw.write(SCHEMA);
         fw.flush();
         fw.close();
-        
+
         config = new XMLBasedFieldConfiguration(configFile.getAbsolutePath(), schemaFile.getAbsolutePath());
     }
-    
+
     @AfterClass
     public static void tearDown() throws Exception {
         if (configFile != null) {
             configFile.delete();
         }
-        
+
         if (schemaFile != null) {
             schemaFile.delete();
         }
     }
-    
+
     @Test
     public void testGetIndexedFields() throws Exception {
         Set<? extends IndexField> indexedFields = config.getIndexedFields();
@@ -213,19 +213,19 @@ public class XMLBasedFieldConfigurationTest {
         Assert.assertTrue("Missing field uuid", indexedFields.contains(MailIndexField.UUID));
         Assert.assertTrue("Missing field subject", indexedFields.contains(MailIndexField.SUBJECT));
     }
-    
+
     @Test
     public void testIsLocalized() throws Exception {
         Assert.assertTrue(config.isLocalized(MailIndexField.SUBJECT));
         Assert.assertFalse(config.isLocalized(MailIndexField.UUID));
     }
-    
+
     @Test
     public void testGetSolrFields() throws Exception {
         Set<String> solrFields = config.getSolrFields(MailIndexField.UUID);
         Assert.assertTrue(solrFields.size() == 1);
         Assert.assertEquals("uuid", solrFields.iterator().next());
-        
+
         solrFields = config.getSolrFields(MailIndexField.SUBJECT);
         Assert.assertTrue(solrFields.size() == 5);
         Assert.assertTrue(solrFields.contains("subject_gen"));
@@ -234,12 +234,12 @@ public class XMLBasedFieldConfigurationTest {
         Assert.assertTrue(solrFields.contains("subject_it"));
         Assert.assertTrue(solrFields.contains("subject_fr"));
     }
-    
+
     @Test
     public void testGetUUIDField() throws Exception {
         Assert.assertEquals("uuid", config.getUUIDField());
     }
-    
+
     @Test
     public void testGetIndexField() throws Exception {
         Assert.assertEquals(MailIndexField.SUBJECT, config.getIndexField("subject_gen"));
@@ -247,10 +247,10 @@ public class XMLBasedFieldConfigurationTest {
         Assert.assertEquals(MailIndexField.SUBJECT, config.getIndexField("subject_de"));
         Assert.assertEquals(MailIndexField.SUBJECT, config.getIndexField("subject_it"));
         Assert.assertEquals(MailIndexField.SUBJECT, config.getIndexField("subject_fr"));
-        
+
         Assert.assertEquals(MailIndexField.UUID, config.getIndexField("uuid"));
     }
-    
+
     @Test
     public void testGetRawField() throws Exception {
         Assert.assertEquals("uuid", config.getRawField(MailIndexField.UUID));

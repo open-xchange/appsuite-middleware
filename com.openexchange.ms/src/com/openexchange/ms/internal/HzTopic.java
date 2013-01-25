@@ -61,7 +61,7 @@ import com.openexchange.ms.Topic;
 
 /**
  * {@link HzTopic}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HzTopic<E> implements Topic<E> {

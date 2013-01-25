@@ -78,7 +78,7 @@ public final class CacheEventServiceLookup {
     public static ServiceLookup get() {
         return ref.get();
     }
-    
+
     /**
      * Sets the service look-up
      *

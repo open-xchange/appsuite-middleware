@@ -56,7 +56,7 @@ import com.openexchange.realtime.presence.hazelcast.impl.HazelcastPresenceStatus
 
 /**
  * {@link RealtimeHazelcastPresenceActivator}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RealtimeHazelcastPresenceActivator extends HousekeepingActivator {

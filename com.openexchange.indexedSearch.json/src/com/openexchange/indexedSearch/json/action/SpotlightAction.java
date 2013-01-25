@@ -92,7 +92,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SpotlightAction extends AbstractIndexAction {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SpotlightAction.class);
 
     /**
@@ -114,7 +114,7 @@ public class SpotlightAction extends AbstractIndexAction {
         final boolean searchAttachments = req.optBoolean("searchAttachments", false);
         final int maxAttachments = req.optInt("maxAttachments") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxAttachments");
         final IndexFacadeService indexFacade = getService(IndexFacadeService.class);
-        
+
         Future<JSONArray> attachmentFuture = null;
         if (searchAttachments) {
             ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
@@ -136,7 +136,7 @@ public class SpotlightAction extends AbstractIndexAction {
                         .setSearchTerm(searchTerm)
                         .setLength(maxAttachments)
                         .build();
-                    
+
                     IndexResult<Attachment> result = indexAccess.query(params, null);
                     List<IndexDocument<Attachment>> documents = result.getResults();
                     Set<String> attachments = new LinkedHashSet<String>();
@@ -152,26 +152,26 @@ public class SpotlightAction extends AbstractIndexAction {
                             }
                         }
                     }
-                    
+
                     JSONArray array = new JSONArray();
                     for (String attachment : attachments) {
                         JSONObject json = new JSONObject();
                         json.put("value", attachment);
                         array.put(json);
                     }
-                    
+
                     return array;
                 }
             });
         }
-        
+
         IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
         QueryParameters params = new QueryParameters.Builder()
             .setHandler(SearchHandler.PERSONS_AND_TOPICS)
             .setSearchTerm(searchTerm)
             .setLength(maxPersons + maxTopics)
             .build();
-        
+
         IndexResult<MailMessage> result = indexAccess.query(params, null);
         List<IndexDocument<MailMessage>> documents = result.getResults();
         Set<String> persons = new LinkedHashSet<String>();
@@ -200,31 +200,31 @@ public class SpotlightAction extends AbstractIndexAction {
                 }
             }
         }
-        
+
         JSONArray personsArray = new JSONArray();
         int i = 0;
         for (String person : persons) {
             if (++i > maxPersons) {
                 break;
             }
-            
+
             JSONObject json = new JSONObject();
             json.put("value", person);
             personsArray.put(json);
         }
-        
+
         JSONArray topicsArray = new JSONArray();
         i = 0;
         for (String topic : topics) {
             if (++i > maxTopics) {
                 break;
             }
-            
+
             JSONObject json = new JSONObject();
             json.put("value", topic);
             topicsArray.put(json);
         }
-        
+
         JSONObject resultObject = new JSONObject();
         resultObject.put("persons", personsArray);
         resultObject.put("topics", topicsArray);
@@ -239,17 +239,17 @@ public class SpotlightAction extends AbstractIndexAction {
                 LOG.warn("Could not search for attachments", e);
             }
         }
-        
+
         long diff = System.currentTimeMillis() - start;
         LOG.warn("Duration: " + diff + "ms.");
         return new AJAXRequestResult(resultObject, "json");
     }
-    
+
     private static void addInternetAddresses(InternetAddress[] addrs, Set<String> resultSet) {
         if (addrs == null || addrs.length == 0) {
             return;
         }
-        
+
         for (InternetAddress addr : addrs) {
             String personal = addr.getPersonal();
             String address = addr.getAddress();

@@ -275,7 +275,7 @@ public class OXHCardParserTest extends TestCase {
                 return;
             }
         }
-        
+
         assertTrue("Should contain an image but does not", contact.containsImage1());
     }
 
