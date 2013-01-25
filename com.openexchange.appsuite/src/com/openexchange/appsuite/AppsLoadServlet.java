@@ -71,7 +71,7 @@ import com.openexchange.java.Strings;
 
 /**
  * {@link AppsLoadServlet} - Provides App Suite data for loading applciations.
- *
+ * 
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class AppsLoadServlet extends HttpServlet {
@@ -83,7 +83,9 @@ public class AppsLoadServlet extends HttpServlet {
     private static String ZONEINFO = "io.ox/core/date/tz/zoneinfo/";
 
     private final Map<String, byte[]> cache;
+
     private final AtomicReference<String> version;
+
     private final File root, zoneinfo;
 
     /**
@@ -158,10 +160,10 @@ public class AppsLoadServlet extends HttpServlet {
         // Set version if null or lower than given one
         {
             final String currentVersion = modules[0];
-            String version;
-            do {
-                version = this.version.get();
-            } while ((version == null || currentVersion.compareTo(version) > 0) && !this.version.compareAndSet(version, currentVersion));
+            String version = this.version.get();
+            if ((version == null || currentVersion.compareTo(version) > 0) && this.version.compareAndSet(version, currentVersion)) {
+                cache.clear();
+            }
         }
         resp.setContentType("text/javascript;charset=UTF-8");
         resp.setDateHeader("Expires", System.currentTimeMillis() + (long) 3e10); // + almost a year
@@ -195,6 +197,7 @@ public class AppsLoadServlet extends HttpServlet {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private byte[] readFile(final String module, final String format, final String name) throws IOException {
         final File filename;
         // Map module name to file name
@@ -219,7 +222,7 @@ public class AppsLoadServlet extends HttpServlet {
                 baos.flush(); // no-op
             } catch (final IOException e) {
                 LOG.debug("Could not read from '" + escapeName(filename.getPath()) + "'");
-                return ("console.error('Could not read \\'" + escapeName(module) + "\\'');\n").getBytes("UTF-8");
+                return ("define('" + escapeName(module) + "', function () { throw new Error(\"Could not read '" + escapeName(name) + "'\"); });\n").getBytes(Charsets.UTF_8);
             } finally {
                 Streams.close(in);
             }
@@ -231,13 +234,7 @@ public class AppsLoadServlet extends HttpServlet {
         if (format != null) {
             final StringBuffer sb = new StringBuffer();
             sb.append("define('").append(module).append("','");
-            String payload;
-            if ("raw".equals(format)) {
-                payload = baos.toString(0);
-            } else {
-                payload = baos.toString(Charsets.UTF_8_NAME);
-            }
-            escape(payload, sb);
+            escape("raw".equals(format) ? baos.toString(0) : baos.toString(Charsets.UTF_8_NAME), sb);
             sb.append("');\n");
             return sb.toString().getBytes(Charsets.UTF_8);
         }
