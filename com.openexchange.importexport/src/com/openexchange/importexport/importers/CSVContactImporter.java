@@ -84,12 +84,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.formats.csv.ContactFieldMapper;
-import com.openexchange.importexport.formats.csv.DutchOutlookMapper;
-import com.openexchange.importexport.formats.csv.EnglishOutlookMapper;
-import com.openexchange.importexport.formats.csv.FrenchOutlookMapper;
-import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
-import com.openexchange.importexport.formats.csv.OxAjaxnameMapper;
-import com.openexchange.importexport.formats.csv.OxReadableNameMapper;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
@@ -446,16 +440,6 @@ public class CSVContactImporter extends AbstractImporter {
 
 
 	private LinkedList<ContactFieldMapper> getMappers() {
-		if (mappers == null) {
-			LOG.debug("Using fallback for mappers, should have been loaded from .properties files before");
-			mappers = new LinkedList<ContactFieldMapper>();
-			mappers.add(new GermanOutlookMapper());
-			mappers.add(new FrenchOutlookMapper());
-			mappers.add(new DutchOutlookMapper());
-			mappers.add(new EnglishOutlookMapper());
-			mappers.add(new OxAjaxnameMapper());
-			mappers.add(new OxReadableNameMapper());
-		}
 		return mappers;
 	}
 

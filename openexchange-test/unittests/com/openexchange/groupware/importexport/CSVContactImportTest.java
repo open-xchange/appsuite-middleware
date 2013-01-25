@@ -53,27 +53,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-
 import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
-
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.formats.csv.OxAjaxnameMapper;
-import com.openexchange.importexport.formats.csv.OxReadableNameMapper;
-import com.openexchange.importexport.importers.CSVContactImporter;
+import com.openexchange.importexport.importers.TestCSVContactImporter;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
@@ -95,11 +89,9 @@ public class CSVContactImportTest extends AbstractContactTest {
         return new JUnit4TestAdapter(CSVContactImportTest.class);
     }
 
-    public CSVContactImportTest(){
+    public CSVContactImportTest() throws Exception{
         super();
-        imp = new CSVContactImporter();
-        ((CSVContactImporter) imp).addFieldMapper(new OxAjaxnameMapper());
-        ((CSVContactImporter) imp).addFieldMapper(new OxReadableNameMapper());
+        imp = new TestCSVContactImporter();
         defaultFormat = Format.CSV;
     }
 
@@ -146,28 +138,6 @@ public class CSVContactImportTest extends AbstractContactTest {
         checkFirstResult(
             Integer.parseInt(
                 res.getObjectId()));
-
-        //cleaning up
-        contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
-    }
-
-    @Test public void importOneDistributionList() throws Exception{
-        final List<ImportResult> results = importStuff(ContactField.DISPLAY_NAME.getAjaxName() + "," + ContactField.MARK_AS_DISTRIBUTIONLIST.getAjaxName() + "\n" + "my list,true");
-        assertTrue("One result?" , results.size() == 1);
-        final ImportResult res = results.get(0);
-        if(res.hasError()){
-            res.getException().printStackTrace();
-        }
-        assertTrue( res.isCorrect() );
-
-        //basic check: 1 entry in folder
-        final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
-        assertTrue("One contact in folder?", 1 == contactSql.getNumberOfContacts(folderId));
-
-        //detailed check:
-        final Contact co = new RdbContactSQLImpl(sessObj).getObjectById(Integer.parseInt(res.getObjectId()), folderId);
-
-        assertTrue("Should be a distribution list", co.getMarkAsDistribtuionlist());
 
         //cleaning up
         contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
