@@ -52,11 +52,9 @@ package com.openexchange.sessionstorage.nosql.osgi;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
-import com.openexchange.exception.OXException;
 import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessionstorage.SessionStorageService;
-import com.openexchange.sessionstorage.exceptions.OXSessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.nosql.NoSQLSessionStorageConfiguration;
 import com.openexchange.sessionstorage.nosql.NoSQLSessionStorageService;
 import com.openexchange.sessionstorage.nosql.Services;
@@ -84,20 +82,12 @@ public class NoSQLSessionStorageActivator extends HousekeepingActivator {
             String keyspace = configService.getProperty("com.openexchange.sessionstorage.nosql.keyspace", "ox");
             String cf_name = configService.getProperty("com.openexchange.sessionstorage.nosql.cfname", "sessionstorage");
             int defaultLifetime = configService.getIntProperty("com.openexchange.sessionstorage.nosql.defaultLifetime", 604800);
-            String encryptionKey = configService.getProperty("com.openexchange.sessionstorage.nosql.encryptionKey");
-            if (encryptionKey == null) {
-                OXException e = OXSessionStorageExceptionCodes.SESSIONSTORAGE_NO_ENCRYPTION_KEY.create();
-                log.error(e.getMessage(), e);
-                throw e;
-            }
             NoSQLSessionStorageConfiguration config = new NoSQLSessionStorageConfiguration(
                 host,
                 port,
                 keyspace,
                 cf_name,
                 defaultLifetime,
-                encryptionKey,
-                getService(CryptoService.class),
                 getService(TimerService.class));
             NoSQLSessionStorageService service = new NoSQLSessionStorageService(config);
             registerService(SessionStorageService.class, new NoSQLSessionStorageService(config));
