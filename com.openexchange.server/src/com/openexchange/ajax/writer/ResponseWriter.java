@@ -129,7 +129,7 @@ public final class ResponseWriter {
      * @throws JSONException If writing JSON fails
      */
     public static JSONObject getJSON(final Response response) throws JSONException {
-        final JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject(8);
         write(response, json, DEFAULT_LOCALE);
         return json;
     }
@@ -143,7 +143,7 @@ public final class ResponseWriter {
      * @throws JSONException If writing JSON fails
      */
     public static JSONObject getJSON(final Response response, final Locale locale) throws JSONException {
-        final JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject(8);
         write(response, json, locale);
         return json;
     }
@@ -239,7 +239,7 @@ public final class ResponseWriter {
         if (null == warning) {
             return;
         }
-        final JSONObject jsonWarning = new JSONObject();
+        final JSONObject jsonWarning = new JSONObject(8);
         addException(jsonWarning, warning.setCategory(Category.CATEGORY_WARNING), locale);
         json.put(WARNINGS, jsonWarning);
     }
@@ -270,7 +270,7 @@ public final class ResponseWriter {
             return;
         }
         if (1 == warnings.size()) {
-            final JSONObject jsonWarning = new JSONObject();
+            final JSONObject jsonWarning = new JSONObject(8);
             final OXException warning = warnings.get(0).setCategory(Category.CATEGORY_WARNING);
             addException(jsonWarning, warning, locale);
             json.put(WARNINGS, jsonWarning);
@@ -279,7 +279,7 @@ public final class ResponseWriter {
                 addException(json, warning, locale);
             }
         } else {
-            final JSONArray jsonArray = new JSONArray();
+            final JSONArray jsonArray = new JSONArray(warnings.size());
             for (final OXException warning : warnings) {
                 final JSONObject jsonWarning = new JSONObject();
                 addException(jsonWarning, warning.setCategory(Category.CATEGORY_WARNING), locale);
@@ -350,9 +350,9 @@ public final class ResponseWriter {
             }
             // Enforce first condition; review later on
             if ((null == args) || (0 == args.length)) {
-                json.put(ERROR_PARAMS, new JSONArray());
+                json.put(ERROR_PARAMS, new JSONArray(0));
             } else {
-                final JSONArray jArray = new JSONArray();
+                final JSONArray jArray = new JSONArray(args.length);
                 for (final Object arg : args) {
                     jArray.put(arg);
                 }
@@ -367,7 +367,7 @@ public final class ResponseWriter {
             if (1 == categories.size()) {
                 json.put(ERROR_CATEGORIES, categories.get(0).toString());
             } else {
-                final JSONArray jArray = new JSONArray();
+                final JSONArray jArray = new JSONArray(categories.size());
                 for (final Category category : categories) {
                     jArray.put(category.toString());
                 }
@@ -389,9 +389,9 @@ public final class ResponseWriter {
         }
         if (includeStackTraceOnError()) {
             // Write exception
-            final JSONArray jsonStack = new JSONArray();
-            jsonStack.put(exception.getSoleMessage());
             StackTraceElement[] traceElements = exception.getStackTrace();
+            final JSONArray jsonStack = new JSONArray(traceElements.length << 1);
+            jsonStack.put(exception.getSoleMessage());
             Throwable cause = exception;
             final StringBuilder tmp = new StringBuilder(64);
             while (null != traceElements && traceElements.length > 0) {
@@ -433,7 +433,7 @@ public final class ResponseWriter {
     }
 
     private static void toJSON(final JSONObject json, final ProblematicAttribute[] problematics) throws JSONException {
-        final JSONArray array = new JSONArray();
+        final JSONArray array = new JSONArray(problematics.length);
         for (final ProblematicAttribute problematic : problematics) {
             array.put(toJSON(problematic));
         }
@@ -452,7 +452,7 @@ public final class ResponseWriter {
     }
 
     public static JSONObject toJSON(final Truncated truncated) throws JSONException {
-        final JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject(3);
         json.put(TruncatedFields.ID, truncated.getId());
         json.put(TruncatedFields.LENGTH, truncated.getLength());
         json.put(TruncatedFields.MAX_SIZE, truncated.getMaxSize());
@@ -460,7 +460,7 @@ public final class ResponseWriter {
     }
 
     public static JSONObject toJSON(final Parsing parsing) throws JSONException {
-        final JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject(1);
         json.put(ParsingFields.NAME, parsing.getAttribute());
         return json;
     }
@@ -469,7 +469,7 @@ public final class ResponseWriter {
      * This method adds the old truncated ids.
      */
     private static void addTruncated(final JSONObject json, final ProblematicAttribute[] problematics) throws JSONException {
-        final JSONArray array = new JSONArray();
+        final JSONArray array = new JSONArray(problematics.length);
         for (final ProblematicAttribute problematic : problematics) {
             if (Truncated.class.isAssignableFrom(problematic.getClass())) {
                 array.put(((Truncated) problematic).getId());
@@ -487,7 +487,7 @@ public final class ResponseWriter {
      */
     public static void write(final Response response, final JSONWriter writer, final Locale locale) throws JSONException {
         writer.object();
-        final JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject(8);
         write(response, json, locale);
         final Set<Map.Entry<String, Object>> entrySet = json.entrySet();
         final int len = entrySet.size();
