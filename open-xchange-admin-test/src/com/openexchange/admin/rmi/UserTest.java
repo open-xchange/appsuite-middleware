@@ -407,8 +407,9 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final User usr = new User();
-        usr.setId(1); // Should be the admin id
-        
+        // Administrator gets always principal identifier 2. The group users gets principal identifier 1.
+        usr.setId(Integer.valueOf(2));
+
         // enable and test it.
         UserModuleAccess access = oxu.getModuleAccess(ctx, usr, cred);
         access.setPublicFolderEditable(true);
