@@ -67,10 +67,7 @@ public class AllCrawlersTestSuite{
         testSuite.addTestSuite(GMXTest.class);
         testSuite.addTestSuite(GoogleMailTest.class);
         testSuite.addTestSuite(WebDeTest.class);
-        testSuite.addTestSuite(YahooComTest.class);
-        testSuite.addTestSuite(GMXComTest.class);
         testSuite.addTestSuite(TOnlineDETEst.class);
-        testSuite.addTestSuite(XINGTest.class);
         return testSuite;
     }
 }
