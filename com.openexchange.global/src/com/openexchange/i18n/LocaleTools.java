@@ -52,10 +52,11 @@ package com.openexchange.i18n;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.StringAllocator;
 
 /**
  * Tool methods for handling locales.
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -68,7 +69,7 @@ public final class LocaleTools {
 
     private static final String STR_EMPTY = "";
 
-    private static final Pattern identifierPattern = Pattern.compile("(\\p{Lower}{2})(?:_(\\p{Upper}{2}))?(?:_([a-zA-Z]{2}))?");
+    private static final Pattern identifierPattern = Pattern.compile("(\\p{Lower}{2})(?:[_-]([a-zA-Z]{2}))?(?:[_-]([a-zA-Z]{2}))?");
 
     /**
      * Prevent instantiation
@@ -79,7 +80,7 @@ public final class LocaleTools {
 
     /**
      * Gets the sane (non-<code>null</code>) locale for specified locale.
-     *
+     * 
      * @param locale The locale to check for <code>null</code>
      * @return The passed locale or <tt>en_US</tt> if passed locale is <code>null</code>
      */
@@ -90,7 +91,7 @@ public final class LocaleTools {
     /**
      * Splits the full locale identifier into its parts and creates the corresponding locale. Currently the fullIdentifier must match the
      * pattern <code>&lt;language&gt; + &quot;_&quot; + &lt;country&gt; + &quot;_&quot; + &lt;variant&gt;</code>.
-     *
+     * 
      * @param fullIdentifier full locale identifier compliant to RFC 2798 and 2068.
      * @return the locale or <code>null</code> if the pattern doesn't match.
      */
@@ -100,7 +101,7 @@ public final class LocaleTools {
         if (match.matches()) {
             final String country = match.group(2);
             final String variant = match.group(3);
-            retval = new Locale(match.group(1), country == null ? STR_EMPTY : country, variant == null ? STR_EMPTY : variant);
+            retval = new Locale(toLowerCase(match.group(1)), country == null ? STR_EMPTY : toUpperCase(country), variant == null ? STR_EMPTY : variant);
         }
         return retval;
     }
@@ -109,12 +110,34 @@ public final class LocaleTools {
      * An own implementation of toLowerCase() to avoid circularity problems between Locale and String. The most straightforward algorithm is
      * used. Look at optimizations later.
      */
-    public static String toLowerCase(final String str) {
-        final char[] buf = new char[str.length()];
-        for (int i = 0; i < buf.length; i++) {
-            buf[i] = Character.toLowerCase(str.charAt(i));
+    public static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
         }
-        return new String(buf);
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
+
+    /**
+     * An own implementation of toUpperCase() to avoid circularity problems between Locale and String. The most straightforward algorithm is
+     * used. Look at optimizations later.
+     */
+    public static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+        }
+        return builder.toString();
     }
 
 }
