@@ -138,12 +138,12 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public int removeUserSessions(final int userId, final Context ctx) {
-        return SessionHandler.removeUserSessions(userId, ctx.getContextId(), true).length;
+        return SessionHandler.removeUserSessions(userId, ctx.getContextId()).length;
     }
 
     @Override
     public void removeContextSessions(final int contextId) {
-        SessionHandler.removeContextSessions(contextId, true);
+        SessionHandler.removeContextSessions(contextId);
     }
 
     @Override

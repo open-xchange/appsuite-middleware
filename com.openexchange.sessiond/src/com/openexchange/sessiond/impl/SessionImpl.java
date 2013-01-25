@@ -50,22 +50,15 @@
 package com.openexchange.sessiond.impl;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.caching.objects.CachedSession;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
@@ -75,9 +68,6 @@ import com.openexchange.sessionstorage.SessionStorageService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionImpl implements PutIfAbsent {
-
-    // A random-enough key for encrypting and decrypting passwords on their way through the caching system.
-    private static final String OBFUSCATION_KEY_PROPERTY = "com.openexchange.sessiond.encryptionKey";
 
     private final String loginName;
     private String password;
@@ -92,7 +82,6 @@ public final class SessionImpl implements PutIfAbsent {
     private String hash;
     private String client;
     private final ConcurrentMap<String, Object> parameters;
-    private boolean isVolatile;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionImpl.class));
 
@@ -155,36 +144,6 @@ public final class SessionImpl implements PutIfAbsent {
             parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());
         } else {
             parameters.put(PARAM_ALTERNATIVE_ID, altId);
-        }
-    }
-
-    /**
-     * Initializes a new {@link SessionImpl} from specified cached session.
-     *
-     * @param cachedSession The cached session
-     */
-    protected SessionImpl(final CachedSession cachedSession) {
-        super();
-        userId = cachedSession.getUserId();
-        contextId = cachedSession.getContextId();
-        loginName = cachedSession.getLoginName();
-        password = unobfuscate( cachedSession.getPassword() );
-        sessionId = cachedSession.getSessionId();
-        secret = cachedSession.getSecret();
-        randomToken = cachedSession.getRandomToken();
-        login = cachedSession.getLogin();
-        localIp = cachedSession.getLocalIp();
-        authId = cachedSession.getAuthId();
-        hash = cachedSession.getHash();
-        final Map<String, Serializable> params = cachedSession.getParameters();
-        parameters = new ConcurrentHashMap<String, Object>(params.size());
-        for (final Entry<String, Serializable> entry : params.entrySet()) {
-            parameters.put(entry.getKey(), entry.getValue());
-        }
-        parameters.put(PARAM_LOCK, new ReentrantLock());
-        parameters.put(PARAM_COUNTER, new AtomicInteger());
-        if (!parameters.containsKey(PARAM_ALTERNATIVE_ID)) {
-            parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());
         }
     }
 
@@ -307,54 +266,6 @@ public final class SessionImpl implements PutIfAbsent {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Creates a new instance of {@link CachedSession} holding this session's state and information ready for being put into session cache.
-     *
-     * @return An appropriate instance of {@link CachedSession}
-     */
-    public CachedSession createCachedSession() {
-        return new CachedSession(userId, loginName, obfuscate( password ), contextId, sessionId, secret, randomToken, localIp, login, authId, hash, client, parameters);
-    }
-
-    private String obfuscate(final String string) {
-        if (isEmpty(string)) {
-            return string;
-        }
-        try {
-            final String key = getObfuscationKey();
-            return isEmpty(key) ? string : SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).encrypt(string, key);
-        } catch (final OXException e) {
-            LOG.error("Could not obfuscate a string before migration", e);
-            return string;
-        }
-    }
-
-    private static boolean isEmpty(final String str) {
-        if (null == str) {
-            return true;
-        }
-        final int length = str.length();
-        boolean empty = true;
-        for (int i = 0; empty && i < length; i++) {
-            empty = Character.isWhitespace(str.charAt(i));
-        }
-        return empty;
-    }
-
-    private String getObfuscationKey() {
-        return SessiondServiceRegistry.getServiceRegistry().getService(ConfigurationService.class).getProperty(OBFUSCATION_KEY_PROPERTY);
-    }
-
-    private String unobfuscate(final String string) {
-        try {
-            final String key = getObfuscationKey();
-            return SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).decrypt(string, key);
-        } catch (final OXException e) {
-            LOG.error("Could not decode string after migration", e);
-            return string;
-        }
     }
 
     @Override

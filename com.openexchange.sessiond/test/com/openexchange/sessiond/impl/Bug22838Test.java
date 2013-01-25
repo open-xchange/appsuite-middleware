@@ -84,7 +84,7 @@ public class Bug22838Test extends TestCase {
     }
 
     public void testMergeEmptyArrayWithNull() throws Exception {
-        Session[] retval = SessionHandler.removeUserSessions(0, 0, true);
+        Session[] retval = SessionHandler.removeUserSessions(0, 0);
         assertEquals("Array length not 0", 0, retval.length);
     }
 
