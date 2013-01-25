@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -82,6 +82,8 @@ public class Questions {
 
     public static final String AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CONTACTS_AT_ALL = "averageNumberOfContactsPerUserWhoHasContactsAtAll";
     
+    public static final String AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CREATED_CONTACTS = "averageNumberOfContactsPerUserWhoHasCreatedContacts";
+    
     public static final String AVERAGE_NUMBER_OF_APPOINTMENTS_PER_USER_WHO_HAS_APPOINTMENTS_AT_ALL = "averageNumberOfAppointmentsPerUserWhoHasAppointmentsAtAll";
     
     public static final String AVERAGE_NUMBER_OF_TASKS_PER_USER_WHO_HAS_TASKS_AT_ALL = "averageNumberOfTasksPerUserWhoHasTasksAtAll";
@@ -89,10 +91,24 @@ public class Questions {
     public static final String AVERAGE_NUMBER_OF_DOCUMENTS_PER_USER_WHO_HAS_DOCUMENTS_AT_ALL = "averageNumberOfDocumentsPerUserWhoHasDocumentsAtAll";
 
     public static final String NUMBER_OF_USERS_WHO_CHANGED_THEIR_CONTACTS_IN_THE_LAST30_DAYS = "numberOfUsersWhoChangedTheirContactsInTheLast30Days";
+    
+    public static final String NUMBER_OF_USERS_WHO_HAVE_CONTACTS = "numberOfUsersWhoHaveContacts";
 
     public static final String NUMBER_OF_USERS_WHO_CREATED_CONTACTS = "numberOfUsersWhoCreatedContacts";
+    
+    public static final String MAXIMUM_NUMBER_OF_CONTACTS_FOR_ONE_USER = "maximumNumberOfContactsForOneUser";
+    
+    public static final String MAXIMUM_NUMBER_OF_CREATED_CONTACTS_FOR_ONE_USER = "maximumNumberOfCreatedContactsForOneUser";
+    
+    public static final String MAXIMUM_NUMBER_OF_CREATED_APPOINTMENTS_FOR_ONE_USER = "maximumNumberOfCreatedAppointmentsForOneUser";
+    
+    public static final String MAXIMUM_NUMBER_OF_CREATED_DOCUMENTS_FOR_ONE_USER = "maximumNumberOfCreatedDocumentsForOneUser";
+    
+    public static final String MAXIMUM_NUMBER_OF_CREATED_TASKS_FOR_ONE_USER = "maximumNumberOfCreatedTasksForOneUser";
 
     public static final String NUMBER_OF_CONTACTS = "numberOfContacts";
+    
+    public static final String NUMBER_OF_USER_CREATED_CONTACTS = "numberOfUSerCreatedContacts";    
     
     public static final String NUMBER_OF_USERS_WHO_CREATED_APPOINTMENTS = "numberOfUsersWhoCreatedAppointments";
 
@@ -157,6 +173,10 @@ public class Questions {
     public static final String NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_CALDAV_IN_THE_LAST_30_DAYS = "numberOfUsersWhoUsedCalDAVInTheLast30Days";
     
     public static final String NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_CARDDAV_IN_THE_LAST_30_DAYS = "numberOfUsersWhoUsedCardDAVInTheLast30Days";
+    
+    public static final String AVERAGE_DOCUMENT_SIZE = "averageDocumentSize";
+    
+    
 
     protected static void reportNumberOfUsers() {
         try {
@@ -240,6 +260,16 @@ public class Questions {
         }
     }
     
+    protected static void reportNumberOfUserCreatedContacts() {
+        try {
+            Datamining.allTheQuestions.add(NUMBER_OF_USER_CREATED_CONTACTS);
+            String sql = "SELECT count(*) FROM prg_contacts WHERE userid IS NULL AND field02 IS NOT NULL AND field03 IS NOT NULL;";
+            BigInteger numberOfContacts = Datamining.countOverAllSchemata(sql);
+            Datamining.report(NUMBER_OF_USER_CREATED_CONTACTS, numberOfContacts.toString());
+        } catch (Exception e) {
+        }
+    }
+    
     protected static void reportNumberOfAppointments() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_APPOINTMENTS);
@@ -270,12 +300,72 @@ public class Questions {
         }
     }
 
+    protected static void reportNumberOfUsersWhoHaveContacts() {
+        try {
+            Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_HAVE_CONTACTS);
+            String sql = "SELECT count(DISTINCT created_from, cid) FROM prg_contacts WHERE userid IS NULL;";
+            BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
+            Datamining.report(NUMBER_OF_USERS_WHO_HAVE_CONTACTS, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
     protected static void reportNumberOfUsersWhoCreatedContacts() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_CREATED_CONTACTS);
-            String sql = "SELECT count(DISTINCT created_from, cid) FROM prg_contacts WHERE userid IS NULL;";
+            String sql = "SELECT count(DISTINCT created_from, cid) FROM prg_contacts WHERE userid IS NULL AND field02 IS NOT NULL AND field03 IS NOT NULL;";
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CREATED_CONTACTS, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    protected static void reportMaximumNumberOfContactsForOneUser() {
+        try {
+            Datamining.allTheQuestions.add(MAXIMUM_NUMBER_OF_CREATED_CONTACTS_FOR_ONE_USER);
+            String sql = "SELECT MAX(count) FROM (SELECT cid, created_from, count(*) AS count FROM prg_contacts WHERE userid IS NULL GROUP BY cid, created_from) AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.maximumForAllSchemata(sql);
+            Datamining.report(MAXIMUM_NUMBER_OF_CREATED_CONTACTS_FOR_ONE_USER, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    protected static void reportMaximumNumberOfCreatedAppointmentsForOneUser() {
+        try {
+            Datamining.allTheQuestions.add(MAXIMUM_NUMBER_OF_CREATED_APPOINTMENTS_FOR_ONE_USER);
+            String sql = "SELECT MAX(count) FROM (SELECT cid, created_from, count(*) AS count FROM prg_dates) AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.maximumForAllSchemata(sql);
+            Datamining.report(MAXIMUM_NUMBER_OF_CREATED_APPOINTMENTS_FOR_ONE_USER, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    protected static void reportMaximumNumberOfCreatedDocumentsForOneUser() {
+        try {
+            Datamining.allTheQuestions.add(MAXIMUM_NUMBER_OF_CREATED_DOCUMENTS_FOR_ONE_USER);
+            String sql = "SELECT MAX(count) FROM (SELECT cid, created_by, count(*) AS count FROM infostore_document) AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.maximumForAllSchemata(sql);
+            Datamining.report(MAXIMUM_NUMBER_OF_CREATED_DOCUMENTS_FOR_ONE_USER, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    protected static void reportMaximumNumberOfCreatedTasksForOneUser() {
+        try {
+            Datamining.allTheQuestions.add(MAXIMUM_NUMBER_OF_CREATED_TASKS_FOR_ONE_USER);
+            String sql = "SELECT MAX(count) FROM (SELECT cid, created_from, count(*) AS count FROM task) AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.maximumForAllSchemata(sql);
+            Datamining.report(MAXIMUM_NUMBER_OF_CREATED_TASKS_FOR_ONE_USER, numberOfInfostoreObjects.toString());
+        } catch (Exception e) {
+        }
+    }
+    
+    protected static void reportMaximumNumberOfCreatedContactsForOneUser() {
+        try {
+            Datamining.allTheQuestions.add(MAXIMUM_NUMBER_OF_CREATED_CONTACTS_FOR_ONE_USER);
+            String sql = "SELECT MAX(count) FROM (SELECT cid, created_from, count(*) AS count FROM prg_contacts WHERE userid IS NULL AND field02 IS NOT NULL AND field03 IS NOT NULL GROUP BY cid, created_from) AS x;";
+            BigInteger numberOfInfostoreObjects = Datamining.maximumForAllSchemata(sql);
+            Datamining.report(MAXIMUM_NUMBER_OF_CREATED_CONTACTS_FOR_ONE_USER, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
         }
     }
@@ -313,7 +403,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoChangedTheirContactsInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_CHANGED_THEIR_CONTACTS_IN_THE_LAST30_DAYS);
-            String sql = "SELECT count(DISTINCT created_from, cid) FROM prg_contacts WHERE userid IS NULL AND (DATE(FROM_UNIXTIME(SUBSTRING(CAST(changing_date AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW());";
+            String sql = "SELECT count(DISTINCT created_from, cid) FROM prg_contacts WHERE userid IS NULL AND field02 IS NOT NULL AND field03 IS NOT NULL AND (DATE(FROM_UNIXTIME(SUBSTRING(CAST(changing_date AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW());";
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CHANGED_THEIR_CONTACTS_IN_THE_LAST30_DAYS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
@@ -344,6 +434,19 @@ public class Questions {
         } catch (Exception e) {
         }
     }
+    
+    protected static void reportAverageDocumentSize() {
+    	try {
+            Datamining.allTheQuestions.add(AVERAGE_DOCUMENT_SIZE);
+            
+            String sql = "SELECT AVG(file_size) FROM infostore_document;";
+            Float result = Datamining.averageForAllSchemata(sql);
+            int resultInt = Math.round(result);
+            
+            Datamining.report(AVERAGE_DOCUMENT_SIZE, Tools.humanReadableBytes(Integer.toString(resultInt)));
+        } catch (Exception e) {
+        }
+    }
 
     public static void reportAverageNumberOfContactsPerUserWhoHasContactsAtAll() {
         try {
@@ -353,10 +456,27 @@ public class Questions {
             // divide the two (numberOfContacts / (numberOfUsers - numberOfContexts)) -> average number of contacts per User
 
             float numberOfContacts = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_CONTACTS));
-            float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_CONTACTS));
+            float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_HAVE_CONTACTS));
 
             Datamining.report(
                 AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CONTACTS_AT_ALL,
+                Float.toString(numberOfContacts / numberOfUsers));
+        } catch (Exception e) {
+        }
+    }
+    
+    public static void reportAverageNumberOfContactsPerUserWhoHasCreatedContacts() {
+        try {
+            Datamining.allTheQuestions.add(AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CREATED_CONTACTS);
+            // take numberOfContacts
+            // take numberOfUsers and subtract numberOfContexts (thereby not counting the context-admins) -> relevant number of users
+            // divide the two (numberOfContacts / (numberOfUsers - numberOfContexts)) -> average number of contacts per User
+
+            float numberOfContacts = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USER_CREATED_CONTACTS));
+            float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_CONTACTS));
+
+            Datamining.report(
+                AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CREATED_CONTACTS,
                 Float.toString(numberOfContacts / numberOfUsers));
         } catch (Exception e) {
         }
