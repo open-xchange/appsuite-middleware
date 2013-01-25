@@ -330,7 +330,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
         @Override
         public void write(final char[] cbuf, final int off, final int len) throws IOException {
-            for (int i = off; i < len; i++) {
+            for (int i = off, end = off + len; i < end; i++) {
                 write(cbuf[i]);
             }
         }
@@ -342,7 +342,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
         @Override
         public void write(final String str, final int off, final int len) throws IOException {
-            for (int i = off; i < len; i++) {
+            for (int i = off, end = off + len; i < end; i++) {
                 write(str.charAt(i));
             }
         }
