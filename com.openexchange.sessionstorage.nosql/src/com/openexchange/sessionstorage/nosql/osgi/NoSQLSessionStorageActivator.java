@@ -51,7 +51,6 @@ package com.openexchange.sessionstorage.nosql.osgi;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.crypto.CryptoService;
 import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessionstorage.SessionStorageService;
@@ -110,7 +109,7 @@ public class NoSQLSessionStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, EmbeddedCassandraService.class, CryptoService.class, TimerService.class };
+        return new Class<?>[] { ConfigurationService.class, EmbeddedCassandraService.class, TimerService.class };
     }
 
 }
