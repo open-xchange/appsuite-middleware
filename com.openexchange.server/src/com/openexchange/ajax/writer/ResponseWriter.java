@@ -74,6 +74,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Parsing;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.exception.OXExceptionConstants;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.Log;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -231,6 +233,7 @@ public final class ResponseWriter {
      * @param warning The warning
      * @param locale The locale
      * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addWarning(final JSONObject json, final OXException warning, final Locale locale) throws JSONException {
         if (null == warning) {
@@ -247,6 +250,7 @@ public final class ResponseWriter {
      * @param json The JSON object
      * @param warnings The warnings
      * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addWarnings(final JSONObject json, final List<OXException> warnings) throws JSONException {
         addWarnings(json, warnings, DEFAULT_LOCALE);
@@ -259,6 +263,7 @@ public final class ResponseWriter {
      * @param warnings The warnings
      * @param locale The locale
      * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addWarnings(final JSONObject json, final List<OXException> warnings, final Locale locale) throws JSONException {
         if (null == warnings || warnings.isEmpty()) {
@@ -293,6 +298,7 @@ public final class ResponseWriter {
      * @param json The JSON object
      * @param exception The exception to write
      * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addException(final JSONObject json, final OXException exception) throws JSONException {
         addException(json, exception, DEFAULT_LOCALE);
@@ -306,6 +312,7 @@ public final class ResponseWriter {
      * @param exception The exception to write
      * @param locale The locale
      * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addException(final JSONObject json, final OXException exception, final Locale locale) throws JSONException {
         addException(json, ERROR, exception, locale);
@@ -319,9 +326,20 @@ public final class ResponseWriter {
      * @param exception The exception to write
      * @param locale The locale
      * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addException(final JSONObject json, String errorKey, final OXException exception, final Locale locale) throws JSONException {
-        json.put(errorKey, exception.getDisplayMessage(locale));
+        final Locale l;
+        {
+            final String property = exception.getProperty(OXExceptionConstants.PROPERTY_LOCALE);
+            if (null == property) {
+                l = locale;
+            } else {
+                final Locale parsedLocale = LocaleTools.getLocale(property);
+                l = null == parsedLocale ? locale : parsedLocale;
+            }
+        }
+        json.put(errorKey, exception.getDisplayMessage(l));
         /*
          * Put argument JSON array for compatibility reasons
          */

@@ -1017,10 +1017,6 @@ public class Login extends AJAXServlet {
                 }
             }
             
-            if (true) {
-                throw LoginExceptionCodes.ACCOUNT_LOCKED.create("silie");
-            }
-            
             result = login.doLogin(req);
             if (null == result) {
                 return true;

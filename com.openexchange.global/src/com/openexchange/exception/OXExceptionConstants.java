@@ -189,4 +189,9 @@ public interface OXExceptionConstants {
      */
     public static final String PROPERTY_RESPONSE = "com.openexchange.exception.response";
 
+    /**
+     * The property name for user's locale (instance of <tt>java.lang.String</tt>; e.g. <tt>"en_US"</tt>).
+     */
+    public static final String PROPERTY_LOCALE = "com.openexchange.exception.locale";
+
 }
