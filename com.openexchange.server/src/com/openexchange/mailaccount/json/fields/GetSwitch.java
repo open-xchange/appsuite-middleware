@@ -258,4 +258,9 @@ public class GetSwitch implements AttributeSwitch {
         return desc.getProperties().get("pop3.storage");
     }
 
+    @Override
+    public Object addresses() {
+        return desc.getProperties().get("addresses");
+    }
+
 }
