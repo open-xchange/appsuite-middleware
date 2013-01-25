@@ -294,30 +294,31 @@ public class APIResponseRenderer implements ResponseRenderer {
      */
     private static final class EscapingWriter extends Writer {
 
-        private char prev;
+        private int prev;
         private final Writer writer;
 
         protected EscapingWriter(final Writer writer) {
             super();
             this.writer = writer;
+            prev = 0;
         }
 
         @Override
         public void write(final int c) throws IOException {
             if ('<' == c) {
-                prev = (char) c;
+                prev = c;
             } else if ('/' == c) {
-                if ('<' == prev) {
+                if (prev > 0) {
                     //  </   -->   <\/
                     writer.write("<\\/");
-                    prev = '\0';
+                    prev = 0;
                 } else {
                     writer.write(c);
                 }
             } else {
-                if ('<' == prev) {
+                if (prev > 0) {
                     writer.write('<');
-                    prev = '\0';
+                    prev = 0;
                 }
                 writer.write(c);
             }
