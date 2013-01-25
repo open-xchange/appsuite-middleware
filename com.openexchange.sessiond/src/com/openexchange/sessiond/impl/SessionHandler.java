@@ -120,6 +120,8 @@ public final class SessionHandler {
 
     private static volatile boolean noLimit;
 
+    private static Obfuscator obfuscator;
+
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
     /** Logger */
@@ -162,6 +164,7 @@ public final class SessionHandler {
                 LOG.error("create instance of SessionIdGenerator", exc);
             }
             noLimit = (config.getMaxSessions() == 0);
+            obfuscator = new Obfuscator(config.getObfuscationKey());
         }
     }
 
@@ -350,7 +353,7 @@ public final class SessionHandler {
                             return storageService.getAnyActiveSessionForUser(userId, contextId);
                         }
                     };
-                    final Session storedSession = getFrom(c, null);
+                    final Session storedSession = obfuscator.unwrap(getFrom(c, null));
                     if (null != storedSession) {
                         retval = sessionToSessionControl(storedSession);
                     }
@@ -377,7 +380,7 @@ public final class SessionHandler {
 
                         @Override
                         public Session call() throws Exception {
-                            return storageService.findFirstSessionForUser(userId, contextId);
+                            return obfuscator.unwrap(storageService.findFirstSessionForUser(userId, contextId));
                         }
                     };
                     retval = getFrom(c, null);
@@ -719,7 +722,7 @@ public final class SessionHandler {
                             return storageService.getSessionByRandomToken(randomToken, newIP);
                         }
                     };
-                    final Session s = getFrom(c, null);
+                    final Session s = obfuscator.unwrap(getFrom(c, null));
                     if (null != s) {
                         return s;
                     }
@@ -836,7 +839,7 @@ public final class SessionHandler {
                             return storageService.getSessionByAlternativeId(altId);
                         }
                     };
-                    final Session session = getFrom(c, null);
+                    final Session session = obfuscator.unwrap(getFrom(c, null));
                     if (null != session) {
                         return sessionToSessionControl(session);
                     }
@@ -870,7 +873,7 @@ public final class SessionHandler {
                         return storageService.getCachedSession(sessionId);
                     }
                 };
-                final Session session = getFrom(c, null);
+                final Session session = obfuscator.unwrap(getFrom(c, null));
                 if (null != session) {
                     return sessionToSessionControl(session);
                 }
@@ -910,7 +913,7 @@ public final class SessionHandler {
                 if (null != list && !list.isEmpty()) {
                     final List<SessionControl> result = new ArrayList<SessionControl>();
                     for (final Session s : list) {
-                        result.add(sessionToSessionControl(s));
+                        result.add(sessionToSessionControl(obfuscator.unwrap(s)));
                     }
                     return result;
                 }
@@ -1307,12 +1310,12 @@ public final class SessionHandler {
         public Void call() throws Exception {
             try {
                 if (addIfAbsent) {
-                    if (sessionStorageService.addSessionIfAbsent(session)) {
+                    if (sessionStorageService.addSessionIfAbsent(obfuscator.wrap(session))) {
                         LOG.info("Put session " + session.getSessionID() + " with auth Id " + session.getAuthId() + " into session storage.");
                         postSessionStored(session);
                     }
                 } else {
-                    sessionStorageService.addSession(session);
+                    sessionStorageService.addSession(obfuscator.wrap(session));
                     LOG.info("Put session " + session.getSessionID() + " with auth Id " + session.getAuthId() + " into session storage.");
                     postSessionStored(session);
                 }
@@ -1348,7 +1351,7 @@ public final class SessionHandler {
 
         @Override
         public Session call() throws Exception {
-            return storageService.lookupSession(sessionId);
+            return obfuscator.unwrap(storageService.lookupSession(sessionId));
         }
     }
 

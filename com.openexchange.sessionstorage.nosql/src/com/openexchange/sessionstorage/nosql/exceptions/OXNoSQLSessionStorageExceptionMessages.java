@@ -58,8 +58,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class OXNoSQLSessionStorageExceptionMessages implements LocalizableStrings {
 
-    public static final String NOSQL_SESSIONSTORAGE_NO_ENCRYPTION_KEY_MSG = "Could not find encryption key.";
-
     public final static String NOSQL_SESSIONSTORAGE_START_FAILED_MSG = "Start of SessionStorageService failed.";
 
     public final static String NOSQL_SESSIONSTORAGE_SAVE_FAILED_MSG = "Saving session with sessionId %1$s failed.";
