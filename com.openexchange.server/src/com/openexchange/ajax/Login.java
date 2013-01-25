@@ -1017,12 +1017,6 @@ public class Login extends AJAXServlet {
                 }
             }
             
-            if (true) {
-                OXException exception = LoginExceptionCodes.ACCOUNT_LOCKED.create("silie");
-                exception.setProperty(LoginExceptionCodes.PROPERTY_LOCALE, "de_DE");
-                throw exception;
-            }
-            
             result = login.doLogin(req);
             if (null == result) {
                 return true;
