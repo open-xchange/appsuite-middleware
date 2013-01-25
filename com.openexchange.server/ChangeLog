@@ -1,6 +1,7 @@
 * 2013-01-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 24594: Fixed writing char sequence in EscapingWriter
+ - Fix for bug 24599: Fixed 'com.openexchange.exception.Category.CATEGORY_CONNECTIVITY' constant
 
 * 2013-01-24 - marcus.klein@open-xchange.com
 
