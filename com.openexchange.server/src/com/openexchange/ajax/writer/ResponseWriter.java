@@ -92,10 +92,10 @@ public final class ResponseWriter {
      */
     private static final Set<String> RESERVED_IDENTIFIERS = ResponseFields.RESERVED_IDENTIFIERS;
 
+    private static volatile Locale defaultLocale;
     /**
      * The default locale.
      */
-    private static volatile Locale defaultLocale;
     private static Locale defaultLocale() {
         Locale tmp = defaultLocale;
         if (null == tmp) {
