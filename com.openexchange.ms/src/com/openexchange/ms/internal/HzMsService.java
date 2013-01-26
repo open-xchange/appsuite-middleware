@@ -73,7 +73,7 @@ public final class HzMsService implements MsService {
     public HzMsService(final HazelcastInstance hz) {
         super();
         this.hz = hz;
-        queues = new NonBlockingHashMap<String, Queue<?>>(8;
+        queues = new NonBlockingHashMap<String, Queue<?>>(8);
         topics = new NonBlockingHashMap<String, Topic<?>>(16);
     }
 
