@@ -55,7 +55,7 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link MsExceptionCodes} - Enumeration of all {@link OXException}s known in Message Queue (MQ) module.
+ * {@link MsExceptionCodes} - Enumeration of all {@link OXException}s known in Messaging Service (MS) module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
