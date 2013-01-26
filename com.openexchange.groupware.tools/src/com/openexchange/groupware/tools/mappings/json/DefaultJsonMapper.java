@@ -123,7 +123,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 
 	@Override
 	public JSONObject serialize(O object, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException {
-		JSONObject jsonObject = new JSONObject();
+		JSONObject jsonObject = new JSONObject(fields.length);
 		this.serialize(object, jsonObject, fields, timeZone, session);
 		return jsonObject;
 	}
@@ -175,9 +175,10 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 
 	@Override
 	public JSONArray serialize(List<O> objects, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException {
-		JSONArray jsonArray = new JSONArray();
+		JSONArray jsonArray = new JSONArray(objects.size());
+		final int length = fields.length;
 		for (O object : objects) {
-			JSONArray itemArray = new JSONArray();
+            JSONArray itemArray = new JSONArray(length);
 			for (E field : fields) {
 				itemArray.put(get(field).serialize(object, timeZone, session));
 			}
