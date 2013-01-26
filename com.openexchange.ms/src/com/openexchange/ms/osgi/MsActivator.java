@@ -89,6 +89,10 @@ public class MsActivator extends HousekeepingActivator {
 
                 @Override
                 public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
+                    if (msServiceRef.get() != null) {
+                        return null;
+                    }
+                    // Get HazelcastInstance from service reference
                     final HazelcastInstance hz = context.getService(reference);
                     final HzMsService msService = new HzMsService(hz);
                     if (msServiceRef.compareAndSet(null, msService)) {
