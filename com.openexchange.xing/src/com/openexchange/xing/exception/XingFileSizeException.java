@@ -23,6 +23,8 @@
 
 package com.openexchange.xing.exception;
 
+import com.openexchange.xing.XingAPI;
+
 /**
  * Thrown when trying to upload a file larger than the API can handle. See
  * {@link XingAPI#MAX_UPLOAD_SIZE}.
