@@ -100,7 +100,7 @@ public final class HzQueue<E> implements Queue<E> {
 
     @Override
     public void addMessageListener(final MessageListener<E> listener) {
-        final HzMessageListener hzListener = new HzMessageListener(listener);
+        final HzMessageListener<E> hzListener = new HzMessageListener<E>(listener);
         hzQueue.addItemListener(hzListener, true);
         registeredListeners.put(listener, hzListener);
     }
@@ -306,7 +306,7 @@ public final class HzQueue<E> implements Queue<E> {
 
     // ------------------------------------------------------------------------ //
 
-    private final class HzMessageListener implements com.hazelcast.core.ItemListener<MessageData<E>> {
+    private static final class HzMessageListener<E> implements com.hazelcast.core.ItemListener<MessageData<E>> {
 
         private final MessageListener<E> listener;
 
@@ -321,7 +321,7 @@ public final class HzQueue<E> implements Queue<E> {
         @Override
         public void itemAdded(final ItemEvent<MessageData<E>> item) {
             final MessageData<E> messageData = item.getItem();
-            listener.onMessage(new Message<E>(getName(), messageData.getSenderId(), messageData.getObject()));
+            listener.onMessage(new Message<E>(item.getSource().toString(), messageData.getSenderId(), messageData.getObject()));
         }
 
         @Override

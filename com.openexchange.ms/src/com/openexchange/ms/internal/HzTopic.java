@@ -94,7 +94,7 @@ public final class HzTopic<E> implements Topic<E> {
 
     @Override
     public void addMessageListener(final MessageListener<E> listener) {
-        final HzMessageListener hzListener = new HzMessageListener(listener);
+        final HzMessageListener<E> hzListener = new HzMessageListener<E>(listener);
         hzTopic.addMessageListener(hzListener);
         registeredListeners.put(listener, hzListener);
     }
@@ -119,7 +119,7 @@ public final class HzTopic<E> implements Topic<E> {
 
     // ------------------------------------------------------------------------ //
 
-    private final class HzMessageListener implements com.hazelcast.core.MessageListener<MessageData<E>> {
+    private static final class HzMessageListener<E> implements com.hazelcast.core.MessageListener<MessageData<E>> {
 
         private final MessageListener<E> listener;
 
@@ -134,7 +134,7 @@ public final class HzTopic<E> implements Topic<E> {
         @Override
         public void onMessage(final com.hazelcast.core.Message<MessageData<E>> message) {
             final MessageData<E> messageData = message.getMessageObject();
-            listener.onMessage(new Message<E>(getName(), messageData.getSenderId(), messageData.getObject()));
+            listener.onMessage(new Message<E>(message.getSource().toString(), messageData.getSenderId(), messageData.getObject()));
         }
     }
 }
