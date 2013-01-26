@@ -215,7 +215,7 @@ public final class OXFolderAdminHelper {
             ResultSet rs = null;
             try {
                 stmt =
-                    writeCon.prepareStatement("SELECT permission_id, admin_flag FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
+                    writeCon.prepareStatement("SELECT permission_id, admin_flag, system FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, id);
@@ -225,7 +225,7 @@ public final class OXFolderAdminHelper {
                 final boolean prevEditable = update && rs.getInt(2) > 0;
                 final int system;
                 if(update) {
-                    system = rs.getInt(2);
+                    system = rs.getInt(3);
                 } else {
                     system = -1;
                 }
