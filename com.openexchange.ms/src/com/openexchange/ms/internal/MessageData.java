@@ -69,7 +69,7 @@ public class MessageData<E> implements Serializable {
      * @param object The message's object
      * @param senderId The identifier of the sender dispatching that message object
      */
-    public MessageData(E object, String senderId) {
+    public MessageData(final E object, final String senderId) {
         super();
         this.object = object;
         this.senderId = senderId;
