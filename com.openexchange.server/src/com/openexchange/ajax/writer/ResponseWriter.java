@@ -355,10 +355,10 @@ public final class ResponseWriter {
         {
             final String property = exception.getProperty(OXExceptionConstants.PROPERTY_LOCALE);
             if (null == property) {
-                l = locale;
+                l = LocaleTools.getSaneLocale(locale);
             } else {
                 final Locale parsedLocale = LocaleTools.getLocale(property);
-                l = null == parsedLocale ? locale : parsedLocale;
+                l = null == parsedLocale ? LocaleTools.getSaneLocale(locale) : parsedLocale;
             }
         }
         json.put(errorKey, exception.getDisplayMessage(l));
