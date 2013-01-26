@@ -168,7 +168,7 @@ public class JSONCoercion {
         }
         if (value instanceof Map) {
             @SuppressWarnings("unchecked") final Map<String, ?> map = (Map<String, ?>) value;
-            final JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject(map.size());
             for (final Map.Entry<String, ?> entry : map.entrySet()) {
                 jsonObject.put(entry.getKey(), coerceToJSON(entry.getValue()));
             }
@@ -176,7 +176,7 @@ public class JSONCoercion {
         }
         if (value instanceof Collection) {
             final Collection<?> collection = (Collection<?>) value;
-            final JSONArray jsonArray = new JSONArray();
+            final JSONArray jsonArray = new JSONArray(collection.size());
             for (final Object object : collection) {
                 jsonArray.put(coerceToJSON(object));
             }
@@ -184,7 +184,7 @@ public class JSONCoercion {
         }
         if (isArray(value)) {
             final int length = Array.getLength(value);
-            final JSONArray jsonArray = new JSONArray();
+            final JSONArray jsonArray = new JSONArray(length);
             for (int i = 0; i < length; i++) {
                 final Object object = Array.get(value, i);
                 jsonArray.put(coerceToJSON(object));
@@ -194,7 +194,7 @@ public class JSONCoercion {
         /*
          * Put directly
          */
-        new JSONArray().put(value); // Is valid in JSON?
+        new JSONArray(1).put(value); // Is valid in JSON?
         return value;
     }
 
