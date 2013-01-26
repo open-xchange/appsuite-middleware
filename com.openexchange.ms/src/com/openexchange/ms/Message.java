@@ -53,7 +53,7 @@ import java.util.EventObject;
 
 /**
  * {@link Message} - Represents a message e.g. published through a topic
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Message<E> extends EventObject {
@@ -68,20 +68,29 @@ public class Message<E> extends EventObject {
 
     /**
      * Initializes a new {@link Message}.
-     *
-     * @param topicName The name of associated topic
+     * 
+     * @param name The name of associated topic/queue
      * @param senderId The identifier of the resource that dispatched this message
      * @param messageObject The message's object
      */
-    public Message(final String topicName, final String senderId, final E messageObject) {
-        super(topicName);
+    public Message(final String name, final String senderId, final E messageObject) {
+        super(name);
         this.messageObject = messageObject;
         this.senderId = senderId;
     }
 
     /**
+     * Gets the name of associated topic/queue.
+     * 
+     * @return The name
+     */
+    public String getName() {
+        return getSource().toString();
+    }
+
+    /**
      * Gets the sender identifier,
-     *
+     * 
      * @return The sender identifier
      */
     public String getSenderId() {
@@ -90,7 +99,7 @@ public class Message<E> extends EventObject {
 
     /**
      * Gets the message's object.
-     *
+     * 
      * @return The message's object
      */
     public E getMessageObject() {
