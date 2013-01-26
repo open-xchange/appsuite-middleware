@@ -5,7 +5,7 @@ import com.hazelcast.config.Config;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link HazelcastConfigurationService}
+ * {@link HazelcastConfigurationService} - Provides the Hazelcast configuration.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
