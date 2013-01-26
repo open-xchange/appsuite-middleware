@@ -249,7 +249,7 @@ public final class ResponseWriter {
     }
 
     /**
-     * Writes specified warning to given JSON object using passed locale.
+     * Writes specified warning to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
      * @param warning The warning
@@ -267,7 +267,7 @@ public final class ResponseWriter {
     }
 
     /**
-     * Writes specified warnings to given JSON object using default locale.
+     * Writes specified warnings to given JSON object using default locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
      * @param warnings The warnings
@@ -279,7 +279,7 @@ public final class ResponseWriter {
     }
 
     /**
-     * Writes specified warnings to given JSON object using passed locale.
+     * Writes specified warnings to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
      * @param warnings The warnings
@@ -315,7 +315,7 @@ public final class ResponseWriter {
     }
 
     /**
-     * Writes specified exception to given JSON object using default locale.
+     * Writes specified exception to given JSON object using default locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
      * @param exception The exception to write
@@ -327,7 +327,7 @@ public final class ResponseWriter {
     }
 
     /**
-     * Writes specified exception to given JSON object using passed locale.
+     * Writes specified exception to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
      * @param errorKey The key value for the error value inside the JSON object
@@ -341,7 +341,7 @@ public final class ResponseWriter {
     }
 
     /**
-     * Writes specified exception to given JSON object using passed locale.
+     * Writes specified exception to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
      * @param errorKey The key value for the error value inside the JSON object
