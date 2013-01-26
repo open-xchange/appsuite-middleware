@@ -53,6 +53,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
@@ -71,6 +72,38 @@ import org.json.JSONValue;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JSONCoercion {
+
+    /**
+     * Coerces given JSON data to its Java representation.
+     *
+     * @param object The JSON data to coerce
+     * @return The resulting Java representation.
+     * @throws JSONException If coercion fails
+     */
+    public static Object coerceToNative(final JSONValue object) throws JSONException {
+        if (null == object) {
+            return null;
+        }
+        if (object.isArray()) {
+            final JSONArray jsonArray = object.toArray();
+            final int length = jsonArray.length();
+            final List<Object> list = new ArrayList<Object>(length);
+            for (int i = 0; i < length; i++) {
+                list.add(coerceToNative(jsonArray.get(i)));
+            }
+            return list;
+        }
+        if (object.isObject()) {
+            final JSONObject jsonObject = object.toObject();
+            final Map<String, Object> map = new LinkedHashMap<String, Object>(jsonObject.length());
+            for (final String key : jsonObject.keySet()) {
+                map.put(key, coerceToNative(jsonObject.get(key)));
+            }
+            return map;
+        }
+        return object;
+    }
+
     /**
      * Coerces given JSON data to its Java representation.
      *
@@ -138,7 +171,7 @@ public class JSONCoercion {
         }
         if (value instanceof Map) {
             @SuppressWarnings("unchecked") final Map<String, ?> map = (Map<String, ?>) value;
-            final JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject(map.size());
             for (final Map.Entry<String, ?> entry : map.entrySet()) {
                 jsonObject.put(entry.getKey(), coerceToJSON(entry.getValue()));
             }
@@ -146,7 +179,7 @@ public class JSONCoercion {
         }
         if (value instanceof Collection) {
             final Collection<?> collection = (Collection<?>) value;
-            final JSONArray jsonArray = new JSONArray();
+            final JSONArray jsonArray = new JSONArray(collection.size());
             for (final Object object : collection) {
                 jsonArray.put(coerceToJSON(object));
             }
@@ -154,7 +187,7 @@ public class JSONCoercion {
         }
         if (isArray(value)) {
             final int length = Array.getLength(value);
-            final JSONArray jsonArray = new JSONArray();
+            final JSONArray jsonArray = new JSONArray(length);
             for (int i = 0; i < length; i++) {
                 final Object object = Array.get(value, i);
                 jsonArray.put(coerceToJSON(object));
