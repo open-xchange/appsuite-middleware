@@ -96,6 +96,9 @@ public final class LocaleTools {
      * @return the locale or <code>null</code> if the pattern doesn't match.
      */
     public static Locale getLocale(final String fullIdentifier) {
+        if (null == fullIdentifier) {
+            return null;
+        }
         final Matcher match = identifierPattern.matcher(fullIdentifier);
         Locale retval = null;
         if (match.matches()) {
