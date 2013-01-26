@@ -78,7 +78,11 @@ import com.openexchange.xing.session.Session.ProxyInfo;
  */
 public class RESTUtility {
 
+    /**
+     * No initialization.
+     */
     private RESTUtility() {
+        super();
     }
 
     private static final DateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy kk:mm:ss ZZZZZ", Locale.US);
