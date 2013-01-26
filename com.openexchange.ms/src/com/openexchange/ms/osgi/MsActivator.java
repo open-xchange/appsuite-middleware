@@ -110,6 +110,7 @@ public class MsActivator extends HousekeepingActivator {
                         final MsService msService = msServiceRef.get();
                         if (null != msService) {
                             unregisterService(msService);
+                            msServiceRef.set(null);
                         }
                         context.ungetService(reference);
                     }
