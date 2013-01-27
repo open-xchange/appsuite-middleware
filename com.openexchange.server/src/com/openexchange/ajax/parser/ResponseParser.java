@@ -169,17 +169,14 @@ public final class ResponseParser {
                 // Start at second line: i = 1
                 for (int i = 1; i < length; i++) {
                     final String line = jStack.optString(i, null);
-                    final StackTraceElement ste;
-                    if (null == line) {
-                        ste = null;
-                    } else {
+                    StackTraceElement ste = null;
+                    if (null != line) {
                         if (line.startsWith("Caused by: ")) {
                             t.setStackTrace(stack.toArray(new StackTraceElement[0]));
                             stack = new ArrayList<StackTraceElement>(length);
                             final Throwable parent = t;
                             t = new Throwable(line);
                             parent.initCause(t);
-                            ste = null;
                         } else {
                             final int parenthesisStart = line.indexOf('(');
                             final int methodStart = line.substring(0, parenthesisStart).lastIndexOf('.');
