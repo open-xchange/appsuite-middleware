@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="test"/>
 	<classpathentry exported="true" kind="lib" path="lib/concurrentlinkedhashmap-lru-1.3.2.jar" sourcepath="lib/concurrentlinkedhashmap-lru-1.3.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/scribe-java-1.3.3.jar" sourcepath="lib/scribe-java-1.3.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jsr305.jar" sourcepath="source/jsr_305_sources.jar"/>

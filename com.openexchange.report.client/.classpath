@@ -7,5 +7,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rmi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
