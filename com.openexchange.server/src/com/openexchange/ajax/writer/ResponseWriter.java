@@ -441,15 +441,15 @@ public final class ResponseWriter {
             sb.append("(Native Method)");
         } else {
             final String fileName = element.getFileName();
-            if (null != fileName) {
+            if (null == fileName) {
+                sb.append("(Unknown Source)");
+            } else {
                 sb.append('(').append(fileName);
                 final int lineNumber = element.getLineNumber();
                 if (lineNumber >= 0) {
                     sb.append(':').append(lineNumber);
                 }
                 sb.append(')');
-            } else {
-                sb.append("(Unknown Source)");
             }
         }
     }
