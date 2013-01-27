@@ -47,43 +47,45 @@
  *
  */
 
-package com.openexchange.tools.hash;
+package com.openexchange.java;
+
+import java.util.Arrays;
+
 
 /**
- * {@link DefaultHashKeyGenerator} - The {@link HashKeyGenerator generator} using a salt.
+ * {@link IntHashKey} - A key consisting of one or more <code>int</code> values.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DefaultHashKeyGenerator implements HashKeyGenerator {
+public class IntHashKey {
 
-    private final String salt;
+    private final int[] ints;
 
-    private final int hashStart;
-
-    /**
-     * Initializes a new {@link DefaultHashKeyGenerator}.
-     *
-     * @param salt The salt
-     */
-    public DefaultHashKeyGenerator(final String salt) {
-        this(salt, HashKey.DEFAULT_HASH);
-    }
+    private final int hash;
 
     /**
-     * Initializes a new {@link DefaultHashKeyGenerator}.
-     *
-     * @param salt The salt
-     * @param hashStart The hash start
+     * Initializes a new {@link IntHashKey}.
      */
-    public DefaultHashKeyGenerator(final String salt, final int hashStart) {
+    public IntHashKey(final int... ints) {
         super();
-        this.salt = salt;
-        this.hashStart = hashStart;
+        this.ints = ints;
+        hash = Arrays.hashCode(ints);
     }
 
     @Override
-    public HashKey newHashKey(final String key) {
-        return HashKey.valueOf(key, hashStart, salt);
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof IntHashKey)) {
+            return false;
+        }
+        return Arrays.equals(ints, ((IntHashKey) obj).ints);
     }
 
 }
