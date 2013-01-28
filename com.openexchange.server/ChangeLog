@@ -1,6 +1,10 @@
+* 2013-01-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24610: For Debian based distributions now only java6-runtime-headless is necessary
+
 * 2013-01-28 - thorben.betten@open-xchange.com
 
- - Fix for bug 24613: Fixed fowarding multiple messages residing in in different folders
+ - Fix for bug 24613: Fixed forwarding multiple messages residing in in different folders
 
 * 2013-01-25 - marc.arens@open-xchange.com
 
