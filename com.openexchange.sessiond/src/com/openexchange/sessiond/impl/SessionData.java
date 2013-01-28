@@ -734,14 +734,15 @@ final class SessionData {
     }
 
     void move2FirstContainer(final String sessionId) {
+        SessionControl control = null;
         wlock.lock();
         try {
             boolean movedSession = false;
             for (int i = 1; i < sessionList.size() && !movedSession; i++) {
                 final SessionContainer container = sessionList.get(i);
                 if (container.containsSessionId(sessionId)) {
-                    final SessionControl sessionControl = container.removeSessionById(sessionId);
-                    sessionList.getFirst().putSessionControl(sessionControl);
+                    control = container.removeSessionById(sessionId);
+                    sessionList.getFirst().putSessionControl(control);
                     LOG.trace("Moved from container " + i + " to first one.");
                     movedSession = true;
                 }
@@ -759,6 +760,9 @@ final class SessionData {
             wlock.unlock();
         }
         unscheduleTask2MoveSession2FirstContainer(sessionId);
+        if (null != control) {
+            SessionHandler.postSessionTouched(control.getSession());
+        }
     }
 
     void move2FirstContainerLongTerm(final String sessionId) {

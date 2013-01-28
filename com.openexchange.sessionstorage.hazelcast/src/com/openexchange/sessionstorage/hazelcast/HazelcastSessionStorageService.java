@@ -541,6 +541,23 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     /**
+     * 'Touches' a session in the storage causing the map entry's idle time being reseted. 
+     * 
+     * @param sessionID The session ID
+     * @throws OXException
+     */
+    public void touch(String sessionID) throws OXException {
+        /*
+         * calling containsKey resets map entries idle-time
+         */
+        if (false == sessions().containsKey(sessionID)) {
+            LOG.warn("Ignoring keep-alive even for not found session ID: " + sessionID);
+        } else {
+            LOG.debug("Received keep-alive for '" + sessionID + "'.");
+        }
+    }
+    
+    /**
      * Filters the stored sessions by a {@link Predicate}.
      *
      * @param predicate The predicate to use for filtering
