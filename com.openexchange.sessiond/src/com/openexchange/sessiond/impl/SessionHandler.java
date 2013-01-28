@@ -120,7 +120,8 @@ public final class SessionHandler {
 
     private static volatile boolean noLimit;
 
-    private static Obfuscator obfuscator;
+    /** The obfuscator */
+    protected static Obfuscator obfuscator;
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
