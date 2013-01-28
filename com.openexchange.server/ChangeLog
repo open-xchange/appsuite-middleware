@@ -5,6 +5,7 @@
 * 2013-01-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 24613: Fixed forwarding multiple messages residing in in different folders
+ - Fix for bug bug 24593: Check for special characters \u2028 and \u2029 to enforce escaping these characters orderly
 
 * 2013-01-25 - marc.arens@open-xchange.com
 
