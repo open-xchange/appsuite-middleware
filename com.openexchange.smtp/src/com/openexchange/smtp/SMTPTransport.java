@@ -94,6 +94,7 @@ import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -742,10 +743,12 @@ public final class SMTPTransport extends MailTransport {
     protected void shutdown() {
         SMTPSessionProperties.resetDefaultSessionProperties();
         SMTPCapabilityCache.tearDown();
+        MailInitialization.MailcapInitialization.getInstance().stop();
     }
 
     @Override
     protected void startup() {
+        MailInitialization.MailcapInitialization.getInstance().start();
         SMTPCapabilityCache.init();
     }
 
