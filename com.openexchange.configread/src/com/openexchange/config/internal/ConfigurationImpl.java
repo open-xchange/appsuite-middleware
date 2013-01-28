@@ -243,7 +243,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
     }
 
-    void processPropertiesFile(final File propFile) {
+    synchronized void processPropertiesFile(final File propFile) {
         try {
             if (!propFile.exists() || !propFile.canRead()) {
                 return;
