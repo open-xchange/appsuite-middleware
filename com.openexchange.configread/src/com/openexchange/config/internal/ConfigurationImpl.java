@@ -228,7 +228,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         public void processFile(File file);
     }
 
-    private void processDirectory(final File dir, final FileFilter fileFilter, final FileProcessor processor) {
+    private synchronized void processDirectory(final File dir, final FileFilter fileFilter, final FileProcessor processor) {
         final File[] files = dir.listFiles(fileFilter);
         if (files == null) {
             LOG.info(MessageFormat.format("Can't read {0}. Skipping.", dir));
@@ -243,7 +243,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
     }
 
-    synchronized void processPropertiesFile(final File propFile) {
+    void processPropertiesFile(final File propFile) {
         try {
             if (!propFile.exists() || !propFile.canRead()) {
                 return;
