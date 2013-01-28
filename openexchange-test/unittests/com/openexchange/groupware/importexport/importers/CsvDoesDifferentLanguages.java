@@ -52,6 +52,7 @@ package com.openexchange.groupware.importexport.importers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
+import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +61,7 @@ import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.Expectations;
 import com.openexchange.groupware.importexport.AbstractContactTest;
+import com.openexchange.groupware.importexport.CSVContactImportTest;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.importers.CSVContactImporter;
@@ -72,6 +74,10 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CsvDoesDifferentLanguages extends AbstractContactTest {
+
+    public static junit.framework.Test suite() {
+        return new JUnit4TestAdapter(CsvDoesDifferentLanguages.class);
+    }
 
     private final String dutch =
         "Voornaam,Achternaam,Weergavenaam,Bijnaam," +
