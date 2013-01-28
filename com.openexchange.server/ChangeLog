@@ -1,3 +1,7 @@
+* 2013-01-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24613: Fixed fowarding multiple messages residing in in different folders
+
 * 2013-01-25 - marc.arens@open-xchange.com
 
  - Fix for bug 24575: Invalid content type in response: application/octet-stream;charset=UTF-8 instead of email message 
