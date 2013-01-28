@@ -71,10 +71,10 @@ public class TestCSVContactImporter extends CSVContactImporter {
         final String path = conf.getProperty("com.openexchange.import.mapper.path");
         final File dir = new File(path);
         if (!dir.exists()) {
-            throw new IllegalStateException("Denoted path does not exists: " + path);
+            throw new IllegalStateException("Denoted file path does not exists: " + path);
         }
         if (!dir.isDirectory()) {
-            throw new IllegalStateException("Denoted path is not a directory: " + path);
+            throw new IllegalStateException("Denoted file path is not a directory: " + path);
         }
         final File[] files = dir.listFiles();
 
