@@ -98,6 +98,8 @@ public class Streams {
 
     /**
      * Creates an appropriate <tt>ByteArrayInputStream</tt> carrying given <tt>ByteArrayOutputStream</tt>'s valid bytes.
+     * <p>
+     * <b>Note</b>: The byte array from specified <tt>ByteArrayOutputStream</tt> is possibly shared to <tt>ByteArrayInputStream</tt>.
      *
      * @param baos The <tt>ByteArrayOutputStream</tt> instance
      * @return The associated <tt>ByteArrayInputStream</tt> instance
