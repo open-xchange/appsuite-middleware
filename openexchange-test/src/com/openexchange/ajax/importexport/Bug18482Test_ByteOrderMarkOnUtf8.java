@@ -115,7 +115,7 @@ public class Bug18482Test_ByteOrderMarkOnUtf8 extends AbstractManagedContactTest
 		CSVImportRequest importRequest = new CSVImportRequest(folderID, stream, false);
 		AbstractAJAXResponse response = manager.getClient().execute(importRequest);
 
-		System.out.println(response.getData());
+		System.out.println("Test output: " + response.getResponse().getJSON());
 		assertFalse(response.hasError());
 		assertFalse(response.hasConflicts());
 
