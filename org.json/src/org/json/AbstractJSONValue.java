@@ -55,6 +55,7 @@ import java.io.Writer;
 import java.lang.reflect.Constructor;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonGenerator.Feature;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -63,7 +64,7 @@ import com.fasterxml.jackson.core.util.MinimalPrettyPrinter;
 
 /**
  * {@link AbstractJSONValue} - The abstract {@link JSONValue} providing some general-purpose methods.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 abstract class AbstractJSONValue implements JSONValue {
@@ -92,8 +93,17 @@ abstract class AbstractJSONValue implements JSONValue {
     private static final int SB_SIZE = 0x2000;
 
     /**
+     * Feature that specifies that all characters beyond 7-bit ASCII range (i.e. code points of 128 and above) need to be output using
+     * format-specific escapes (for JSON, backslash escapes), if format uses escaping mechanisms (which is generally true for textual
+     * formats but not for binary formats).
+     * <p>
+     * Feature is disabled by default.
+     */
+    private static final Feature ESCAPE_NON_ASCII = JsonGenerator.Feature.ESCAPE_NON_ASCII;
+
+    /**
      * Reads the content from given reader.
-     *
+     * 
      * @param reader The reader
      * @return The reader's content
      * @throws IOException If an I/O error occurs
@@ -116,7 +126,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Acquires next token from given {@link JsonParser} ignoring possible <code>"Unexpected character"</code> exception.
-     *
+     * 
      * @param jParser The JSON parser
      * @return The next token with possible <code>"Unexpected character"</code> exception(s) ignored
      * @throws IOException If an I/O error occurs
@@ -138,7 +148,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Creates a new JSON parser.
-     *
+     * 
      * @param reader The reader to read from
      * @return The new parser reading from given stream
      * @throws IOException If a JSON error occurs
@@ -156,7 +166,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Creates a new JSON generator.
-     *
+     * 
      * @param writer The writer to write to
      * @return The created generator
      * @throws IOException If an I/O error occurs
@@ -166,14 +176,14 @@ abstract class AbstractJSONValue implements JSONValue {
         jGenerator.disable(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM);
         jGenerator.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
         if (asciiOnly) {
-            jGenerator.enable(JsonGenerator.Feature.ESCAPE_NON_ASCII);
+            jGenerator.enable(ESCAPE_NON_ASCII);
         }
         return jGenerator;
     }
 
     /**
      * Writes end character and flushes generator.
-     *
+     * 
      * @param jGenerator The generator to write to and to flush
      * @param isJsonObject Whether generating a JSON object or a JSON array
      */
@@ -198,7 +208,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Generates String directly from given character array.
-     *
+     * 
      * @param off The offset
      * @param len The length
      * @param chars The character array
@@ -236,7 +246,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Closes given <code>java.io.Closeable</code> instance (if non-<code>null</code>).
-     *
+     * 
      * @param closeable The <code>java.io.Closeable</code> instance
      */
     protected static void close(final java.io.Closeable closeable) {
@@ -251,7 +261,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Writes to given generator.
-     *
+     * 
      * @param asciiOnly Whether to write only ASCII characters
      * @param jGenerator The generator
      * @throws IOException If an I/O error occurs
@@ -261,7 +271,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Writes specified object to given generator.
-     *
+     * 
      * @param v The object
      * @param asciiOnly Whether to allow only ASCII characters
      * @param jGenerator The generator
@@ -285,8 +295,37 @@ abstract class AbstractJSONValue implements JSONValue {
         } else if (v instanceof Boolean) {
             jGenerator.writeBoolean(((Boolean) v).booleanValue());
         } else {
-            jGenerator.writeString(v.toString());
+            // Write as String value
+            if (jGenerator.isEnabled(ESCAPE_NON_ASCII)) {
+                jGenerator.writeString(v.toString());
+            } else {
+                final String str = v.toString();
+                if (escapeNonAscii(str)) {
+                    // Escape non-ascii characters
+                    final int prev = jGenerator.getHighestEscapedChar();
+                    // Set to ASCII only
+                    jGenerator.setHighestNonEscapedChar(127);
+                    jGenerator.writeString(str);
+                    // Restore
+                    jGenerator.setHighestNonEscapedChar(prev);
+                } else {
+                    jGenerator.writeString(str);
+                }
+            }
         }
+    }
+
+    /**
+     * Indicates whether to escape non-ASCII characters.
+     * 
+     * @param str The string to check
+     * @return <code>true</code> to escape them; otherwise <code>false</code>
+     */
+    protected static boolean escapeNonAscii(final String str) {
+        if (null == str) {
+            return false;
+        }
+        return str.indexOf('\u2028') >= 0 || str.indexOf('\u2029') >= 0;
     }
 
 }

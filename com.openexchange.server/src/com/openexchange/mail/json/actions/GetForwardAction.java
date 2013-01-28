@@ -143,9 +143,10 @@ public final class GetForwardAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final String[] folders = new String[paths.length()];
-            final String[] ids = new String[paths.length()];
-            for (int i = 0; i < folders.length; i++) {
+            final int length = paths.length();
+            final String[] folders = new String[length];
+            final String[] ids = new String[length];
+            for (int i = 0; i < length; i++) {
                 final JSONObject folderAndID = paths.getJSONObject(i);
                 folders[i] = folderAndID.getString(AJAXServlet.PARAMETER_FOLDERID);
                 ids[i] = folderAndID.getString(AJAXServlet.PARAMETER_ID);

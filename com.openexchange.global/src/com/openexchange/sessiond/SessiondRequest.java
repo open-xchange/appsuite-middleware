@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,92 +47,73 @@
  *
  */
 
-package org.json.hash;
+package com.openexchange.sessiond;
+
+import java.util.concurrent.CountDownLatch;
 
 /**
- * {@link HashKey} - Uses a safe hash key computation if a <code>String</code> is intended to be used as hash key.
- *
+ * {@link SessiondRequest} - Represents a request which is executed partly asynchronously.
+ * <p>
+ * Ensure request is fully completed by invoking {@link #awaitCompletion()}.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HashKey {
+public final class SessiondRequest<V> {
+
+    private final V value;
+    private volatile CountDownLatch latch;
 
     /**
-     * Returns the computation-safe hash key for specified <code>String</code> key.
-     *
-     * @param key The <code>String</code> key
-     * @return The computation-safe hash key
+     * Initializes a new {@link SessiondRequest}.
      */
-    public static HashKey valueOf(final String key) {
-        return new HashKey(key);
-    }
-
-    private static final int DEFAULT_HASH = 5381;
-
-    private static final int MULTIPLICATION_CONSTANT = 33;
-
-    private static int calcSafeHashCode(final char[] val) {
-        int h = DEFAULT_HASH;
-        final int len = val.length;
-        if (len > 0) {
-            final int fac = MULTIPLICATION_CONSTANT;
-            for (int i = 0; i < len; i++) {
-                h = fac * h + val[i];
-            }
-        }
-        return h;
-    }
-
-    /** The value is used for character storage. */
-    private final char value[];
-
-    /** The count is the number of characters in the String. */
-    private final int count;
-
-    /** Cache the hash code for the string */
-    private final int hash; // Default to 5381
-
-    /**
-     * Initializes a new {@link HashKey}.
-     */
-    private HashKey(final String key) {
+    public SessiondRequest(final V value) {
         super();
-        value = key.toCharArray();
-        count = value.length;
-        hash = calcSafeHashCode(value);
+        this.value = value;
     }
 
-    @Override
-    public int hashCode() {
-        return hash;
+    /**
+     * Initializes a new {@link SessiondRequest}.
+     */
+    public SessiondRequest(final V value, final CountDownLatch latch) {
+        super();
+        this.value = value;
+        this.latch = latch;
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
+    /**
+     * Sets the latch.
+     * 
+     * @param latch The latch to set
+     * @return This request with given latch applied
+     * @throws IllegalStateException If latch is already applied
+     */
+    public SessiondRequest<V> setLatch(final CountDownLatch latch) {
+        if (null != this.latch) {
+            throw new IllegalStateException("Latch already set.");
         }
-        if (!(obj instanceof HashKey)) {
-            return false;
-        }
-        final HashKey other = (HashKey) obj;
-        if (count != other.count) {
-            return false;
-        }
-        int n = count;
-        final char v1[] = value;
-        final char v2[] = other.value;
-        int i = 0;
-        while (n-- != 0) {
-            if (v1[i] != v2[i++]) {
-                return false;
-            }
-        }
-        return true;
+        this.latch = latch;
+        return this;
     }
 
-    @Override
-    public String toString() {
-        return new String(value);
+    /**
+     * Awaits completion of this request.
+     * 
+     * @throws InterruptedException If waiting is interrupted
+     */
+    public void awaitCompletion() throws InterruptedException {
+        final CountDownLatch latch = this.latch;
+        if (null != latch) {
+            latch.await();
+        }
+    }
+
+    /**
+     * Gets the value (immediately available).
+     * 
+     * @return The value
+     */
+    public V getValue() {
+        return value;
     }
 
 }

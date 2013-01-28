@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
@@ -120,7 +121,8 @@ public final class SessionHandler {
 
     private static volatile boolean noLimit;
 
-    private static Obfuscator obfuscator;
+    /** The obfuscator */
+    protected static Obfuscator obfuscator;
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
@@ -164,7 +166,10 @@ public final class SessionHandler {
                 LOG.error("create instance of SessionIdGenerator", exc);
             }
             noLimit = (config.getMaxSessions() == 0);
-            obfuscator = new Obfuscator(config.getObfuscationKey());
+            synchronized (SessionHandler.class) {
+                // Make it visible to other threads, too
+                obfuscator = new Obfuscator(config.getObfuscationKey());
+            }
         }
     }
 
@@ -423,7 +428,7 @@ public final class SessionHandler {
             addedSession = sessionData.addSession(session, noLimit).getSession();
             final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
             if (sessionStorageService != null) {
-                storeSession(addedSession, sessionStorageService, false);
+                storeSessionSync(addedSession, sessionStorageService, false);
             }
             // Post event for created session
             postSessionCreation(addedSession);
@@ -439,17 +444,47 @@ public final class SessionHandler {
     }
 
     /**
+     * (Synchronously) Stores specified session.
+     *
+     * @param session The session to store
+     * @param sessionStorageService The storage service
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code>
+     * @param async Whether to perform task asynchronously or not
+     */
+    public static void storeSessionSync(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
+        storeSession(session, sessionStorageService, addIfAbsent, false, null);
+    }
+
+    /**
+     * (Asynchronously) Stores specified session.
+     *
+     * @param session The session to store
+     * @param sessionStorageService The storage service
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code>
+     * @param latch The latch needed to signal completion of invocation
+     */
+    public static void storeSessionAsync(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final CountDownLatch latch) {
+        storeSession(session, sessionStorageService, addIfAbsent, true, latch);
+    }
+
+    /**
      * Stores specified session.
      *
      * @param session The session to store
      * @param sessionStorageService The storage service
      * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code>
+     * @param async Whether to perform task asynchronously or not
+     * @param latch The latch needed when invoked asynchronously; otherwise simply pass <code>null</code>
      */
-    public static void storeSession(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
+    public static void storeSession(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final boolean async, final CountDownLatch latch) {
         if (null == session || null == sessionStorageService) {
             return;
         }
-        ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent));
+        if (async) {
+            ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch));            
+        } else {
+            new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch).call();
+        }
     }
 
     /**
@@ -463,7 +498,7 @@ public final class SessionHandler {
             return;
         }
         for (final SessionImpl session : sessions) {
-            storeSession(session, sessionStorageService, true);
+            storeSessionSync(session, sessionStorageService, true);
         }
     }
 
@@ -763,7 +798,7 @@ public final class SessionHandler {
         final SessionImpl addedSession = sessionControl.getSession();
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
-            storeSession(addedSession, sessionStorageService, false);
+            storeSessionSync(addedSession, sessionStorageService, false);
         }
         // Post event for created session
         postSessionCreation(addedSession);
@@ -1213,6 +1248,26 @@ public final class SessionHandler {
         }
     }
 
+    /**
+     * Broadcasts the {@link SessiondEventConstants#TOPIC_TOUCH_SESSION} event, usually after the session has been moved to the first 
+     * container.
+     * 
+     * @param session The session that was touched
+     */
+    static void postSessionTouched(final Session session) {
+        final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
+        if (eventAdmin != null) {
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+            dic.put(SessiondEventConstants.PROP_SESSION, session);
+            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
+            final Event event = new Event(SessiondEventConstants.TOPIC_TOUCH_SESSION, dic);
+            eventAdmin.postEvent(event);
+            if (DEBUG) {
+                LOG.debug("Posted event for touched session");
+            }
+        }
+    }
+
     public static void addThreadPoolService(final ThreadPoolService service) {
         final SessionData sessionData = sessionDataRef.get();
         if (null != sessionData) {
@@ -1298,16 +1353,18 @@ public final class SessionHandler {
         private final SessionStorageService sessionStorageService;
         private final boolean addIfAbsent;
         private final SessionImpl session;
+        private final CountDownLatch optLatch;
 
-        protected StoreSessionTask(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
+        protected StoreSessionTask(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final CountDownLatch optLatch) {
             super();
             this.sessionStorageService = sessionStorageService;
             this.addIfAbsent = addIfAbsent;
             this.session = session;
+            this.optLatch = optLatch;
         }
 
         @Override
-        public Void call() throws Exception {
+        public Void call() {
             try {
                 if (addIfAbsent) {
                     if (sessionStorageService.addSessionIfAbsent(obfuscator.wrap(session))) {
@@ -1332,6 +1389,11 @@ public final class SessionHandler {
                     LOG.info(s, e);
                 } else {
                     LOG.info(s);
+                }
+            } finally {
+                final CountDownLatch latch = optLatch;
+                if (null != latch) {
+                    latch.countDown();
                 }
             }
             return null;
