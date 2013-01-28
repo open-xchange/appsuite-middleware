@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
@@ -427,7 +428,7 @@ public final class SessionHandler {
             addedSession = sessionData.addSession(session, noLimit).getSession();
             final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
             if (sessionStorageService != null) {
-                storeSession(addedSession, sessionStorageService, false);
+                storeSessionSync(addedSession, sessionStorageService, false);
             }
             // Post event for created session
             postSessionCreation(addedSession);
@@ -450,8 +451,20 @@ public final class SessionHandler {
      * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code>
      * @param async Whether to perform task asynchronously or not
      */
-    public static void storeSession(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
-        storeSession(session, sessionStorageService, addIfAbsent, false);
+    public static void storeSessionSync(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
+        storeSession(session, sessionStorageService, addIfAbsent, false, null);
+    }
+
+    /**
+     * (Asynchronously) Stores specified session.
+     *
+     * @param session The session to store
+     * @param sessionStorageService The storage service
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code>
+     * @param latch The latch needed to signal completion of invocation
+     */
+    public static void storeSessionAsync(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final CountDownLatch latch) {
+        storeSession(session, sessionStorageService, addIfAbsent, true, latch);
     }
 
     /**
@@ -461,15 +474,16 @@ public final class SessionHandler {
      * @param sessionStorageService The storage service
      * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code>
      * @param async Whether to perform task asynchronously or not
+     * @param latch The latch needed when invoked asynchronously; otherwise simply pass <code>null</code>
      */
-    public static void storeSession(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final boolean async) {
+    public static void storeSession(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final boolean async, final CountDownLatch latch) {
         if (null == session || null == sessionStorageService) {
             return;
         }
         if (async) {
-            ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent));            
+            ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch));            
         } else {
-            new StoreSessionTask(session, sessionStorageService, addIfAbsent).call();
+            new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch).call();
         }
     }
 
@@ -484,7 +498,7 @@ public final class SessionHandler {
             return;
         }
         for (final SessionImpl session : sessions) {
-            storeSession(session, sessionStorageService, true);
+            storeSessionSync(session, sessionStorageService, true);
         }
     }
 
@@ -784,7 +798,7 @@ public final class SessionHandler {
         final SessionImpl addedSession = sessionControl.getSession();
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
-            storeSession(addedSession, sessionStorageService, false);
+            storeSessionSync(addedSession, sessionStorageService, false);
         }
         // Post event for created session
         postSessionCreation(addedSession);
@@ -1339,12 +1353,14 @@ public final class SessionHandler {
         private final SessionStorageService sessionStorageService;
         private final boolean addIfAbsent;
         private final SessionImpl session;
+        private final CountDownLatch optLatch;
 
-        protected StoreSessionTask(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
+        protected StoreSessionTask(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final CountDownLatch optLatch) {
             super();
             this.sessionStorageService = sessionStorageService;
             this.addIfAbsent = addIfAbsent;
             this.session = session;
+            this.optLatch = optLatch;
         }
 
         @Override
@@ -1373,6 +1389,11 @@ public final class SessionHandler {
                     LOG.info(s, e);
                 } else {
                     LOG.info(s);
+                }
+            } finally {
+                final CountDownLatch latch = optLatch;
+                if (null != latch) {
+                    latch.countDown();
                 }
             }
             return null;
