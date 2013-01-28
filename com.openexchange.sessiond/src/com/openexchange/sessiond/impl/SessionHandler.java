@@ -439,17 +439,34 @@ public final class SessionHandler {
     }
 
     /**
+     * (Synchronously) Stores specified session.
+     *
+     * @param session The session to store
+     * @param sessionStorageService The storage service
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code>
+     * @param async Whether to perform task asynchronously or not
+     */
+    public static void storeSession(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
+        storeSession(session, sessionStorageService, addIfAbsent, false);
+    }
+
+    /**
      * Stores specified session.
      *
      * @param session The session to store
      * @param sessionStorageService The storage service
      * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code>
+     * @param async Whether to perform task asynchronously or not
      */
-    public static void storeSession(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
+    public static void storeSession(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final boolean async) {
         if (null == session || null == sessionStorageService) {
             return;
         }
-        ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent));
+        if (async) {
+            ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent));            
+        } else {
+            new StoreSessionTask(session, sessionStorageService, addIfAbsent).call();
+        }
     }
 
     /**
@@ -1307,7 +1324,7 @@ public final class SessionHandler {
         }
 
         @Override
-        public Void call() throws Exception {
+        public Void call() {
             try {
                 if (addIfAbsent) {
                     if (sessionStorageService.addSessionIfAbsent(obfuscator.wrap(session))) {
