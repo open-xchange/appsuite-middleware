@@ -30,6 +30,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,7 +41,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import org.json.hash.HashKeyMap;
 import org.json.helpers.CharArrayWriter;
 import org.json.helpers.UnsynchronizedStringReader;
 import org.json.helpers.UnsynchronizedStringWriter;
@@ -202,7 +202,7 @@ public class JSONObject extends AbstractJSONValue {
      */
     public JSONObject() {
         super();
-        this.myHashMap = new HashKeyMap<Object>();
+        this.myHashMap = new HashMap<String, Object>();
     }
 
     /**
@@ -210,7 +210,7 @@ public class JSONObject extends AbstractJSONValue {
      */
     public JSONObject(final int initialCapacity) {
         super();
-        this.myHashMap = new HashKeyMap<Object>(initialCapacity);
+        this.myHashMap = new HashMap<String, Object>(initialCapacity);
     }
 
     /**
@@ -310,14 +310,14 @@ public class JSONObject extends AbstractJSONValue {
     public JSONObject(final Map<String, ? extends Object> map) {
         super();
         if (null == map || map.isEmpty()) {
-            this.myHashMap = new HashKeyMap<Object>();
+            this.myHashMap = new HashMap<String, Object>();
         } else {
             final int max = MAX_SIZE.get();
             final int size = map.size();
             if (max > 0 && size > max) {
                 throw new IllegalStateException("Max. size (" + max + ") for JSON object exceeded");
             }
-            this.myHashMap = new HashKeyMap<Object>(map.size());
+            this.myHashMap = new HashMap<String, Object>(map.size());
             for (final Map.Entry<String, ? extends Object> entry : map.entrySet()) {
                 final Object value = entry.getValue();
                 if (value instanceof JSONValue) {
