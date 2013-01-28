@@ -57,7 +57,6 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -332,7 +331,9 @@ public class DispatcherServlet extends SessionServlet {
                 return;
             }
             // Handle other OXExceptions
-            if (e.isLoggable(LogLevel.ERROR)) {
+            if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
+                LOG.error(new StringAllocator("Unexpected error: '").append(e.getMessage()).append('\'').toString(), e);
+            } else if (e.isLoggable(LogLevel.ERROR)) {
                 if (LogProperties.isEnabled()) {
                     final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
                     logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
@@ -342,7 +343,7 @@ public class DispatcherServlet extends SessionServlet {
                 }
             }
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
-            APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? httpRequest.getMethod().toUpperCase(Locale.US) : action, httpRequest, httpResponse);
+            APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
             if(LogProperties.isEnabled()) {
                 final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
@@ -353,7 +354,7 @@ public class DispatcherServlet extends SessionServlet {
             }
             final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
-            APIResponseRenderer.writeResponse(new Response().setException(exception), null == action ? httpRequest.getMethod().toUpperCase(Locale.US) : action, httpRequest, httpResponse);
+            APIResponseRenderer.writeResponse(new Response().setException(exception), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
         } finally {
             if (null != state) {
                 dispatcher.end(state);
@@ -401,6 +402,20 @@ public class DispatcherServlet extends SessionServlet {
             throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
         }
         candidate.write(requestData, result, httpRequest, httpResponse);
+    }
+
+    /** ASCII-wise to upper-case */
+    private String toUpperCase(CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+        }
+        return builder.toString();
     }
 
 }

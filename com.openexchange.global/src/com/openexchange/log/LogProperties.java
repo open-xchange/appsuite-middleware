@@ -474,21 +474,21 @@ public final class LogProperties {
         final Props logProperties = getLogProperties();
         // If we have additional log properties from the ThreadLocal add it to the logBuilder
         if (logProperties != null) {
-            StringAllocator logBuilder = new StringAllocator(1024);
-            Map<LogProperties.Name, Object> propertyMap = logProperties.getMap();
+            final StringAllocator logBuilder = new StringAllocator(1024);
+            final Map<LogProperties.Name, Object> propertyMap = logProperties.getMap();
             // Sort the properties for readability
-            Map<String, String> sorted = new TreeMap<String, String>();
-            for (Entry<LogProperties.Name, Object> propertyEntry : propertyMap.entrySet()) {
-                LogProperties.Name propertyName = propertyEntry.getKey();
+            final Map<String, String> sorted = new TreeMap<String, String>();
+            for (final Entry<LogProperties.Name, Object> propertyEntry : propertyMap.entrySet()) {
+                final LogProperties.Name propertyName = propertyEntry.getKey();
                 if (null == nonMatching || !nonMatching.contains(propertyName)) {
-                    Object value = propertyEntry.getValue();
+                    final Object value = propertyEntry.getValue();
                     if (null != value) {
                         sorted.put(propertyName.getName(), value.toString());
                     }
                 }
             }
             // And add them to the logBuilder
-            for (Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
+            for (final Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
                 logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append('\n');
             }
             logString=logBuilder.toString();
