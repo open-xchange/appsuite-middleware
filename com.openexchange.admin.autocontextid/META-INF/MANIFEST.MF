@@ -27,6 +27,6 @@ Import-Package: com.openexchange.admin.console,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.tools.pipesnfilters,
- org.apache.commons.logging;version="1.0.4",
- org.osgi.framework;version="1.3.0",
+ org.apache.commons.logging,
+ org.osgi.framework,
  org.osgi.util.tracker
