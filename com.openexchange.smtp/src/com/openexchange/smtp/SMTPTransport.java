@@ -589,8 +589,6 @@ public final class SMTPTransport extends MailTransport {
             }
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, smtpConfig);
-        } catch (final IOException e) {
-            throw SMTPExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -643,8 +641,6 @@ public final class SMTPTransport extends MailTransport {
             return MimeMessageConverter.convertMessage(smtpMessage);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, smtpConfig);
-        } catch (final IOException e) {
-            throw SMTPExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -734,7 +730,7 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
-    private void transport(final SMTPMessage smtpMessage, final Address[] recipients, final Transport transport) throws IOException, MessagingException {
+    private void transport(final SMTPMessage smtpMessage, final Address[] recipients, final Transport transport) throws MessagingException {
         try {
             transport.sendMessage(smtpMessage, recipients);
         } catch (final MessagingException e) {
