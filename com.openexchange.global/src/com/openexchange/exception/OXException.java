@@ -62,6 +62,7 @@ import java.util.MissingFormatArgumentException;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.Category.EnumType;
 import com.openexchange.exception.internal.I18n;
@@ -621,7 +622,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         /*
          * Finally return
          */
-        return sb.toString();
+        return dropSubsequentWhitespaces(sb.toString());
     }
 
     /**
@@ -650,7 +651,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         /*
          * Finally return
          */
-        return sb.toString();
+        return dropSubsequentWhitespaces(sb.toString());
     }
 
     /**
@@ -863,7 +864,7 @@ public class OXException extends Exception implements OXExceptionConstants {
                 LOG.error("Illegal message format: >>" + msg + "<<", e);
             }
         }
-        return msg;
+        return dropSubsequentWhitespaces(msg);
     }
 
     /**
@@ -1088,6 +1089,15 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public Set<String> getPropertyNames() {
         return Collections.unmodifiableSet(properties.keySet());
+    }
+
+    private static final Pattern P = Pattern.compile("(\\p{L}) {2,}(\\p{L})");
+    /** Drops multiple subsequent white-spaces from given message */
+    private static String dropSubsequentWhitespaces(final String message) {
+        if (null == message) {
+            return message;
+        }
+        return P.matcher(message).replaceAll("$1 $2");
     }
 
 }
