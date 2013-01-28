@@ -275,6 +275,13 @@ public class OXHttpServer extends HttpServer {
 
         for (final NetworkListener listener : listeners.values()) {
             configureListener(listener);
+        }
+        
+        if (serverConfig.isJmxEnabled()) {
+            enableJMX();
+        }
+        
+        for (final NetworkListener listener : listeners.values()) {
             try {
                 listener.start();
             } catch (IOException ioe) {
@@ -287,10 +294,6 @@ public class OXHttpServer extends HttpServer {
 
                 throw ioe;
             }
-        }
-
-        if (serverConfig.isJmxEnabled()) {
-            enableJMX();
         }
 
         setupHttpHandler();
