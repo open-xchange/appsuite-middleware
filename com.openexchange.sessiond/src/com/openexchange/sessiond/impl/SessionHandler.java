@@ -164,7 +164,10 @@ public final class SessionHandler {
                 LOG.error("create instance of SessionIdGenerator", exc);
             }
             noLimit = (config.getMaxSessions() == 0);
-            obfuscator = new Obfuscator(config.getObfuscationKey());
+            synchronized (SessionHandler.class) {
+                // Make it visible to other threads, too
+                obfuscator = new Obfuscator(config.getObfuscationKey());
+            }
         }
     }
 
