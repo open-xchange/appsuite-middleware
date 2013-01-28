@@ -368,46 +368,37 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(
-                        new com.openexchange.java.StringAllocator(256).append("Part's input stream could not be obtained: ").append(
-                            e.getMessage() == null ? "<no error message given>" : e.getMessage()).append(
-                            ". Trying to read from part's raw input stream instead").toString(),
-                        e);
-                }
-                try {
-                    if (part instanceof MimeBodyPart) {
-                        return ((MimeBodyPart) part).getRawInputStream();
-                    } else if (part instanceof MimeMessage) {
-                        return ((MimeMessage) part).getRawInputStream();
-                    }
-                } catch (final MessagingException me) {
-                    me.setNextException(e);
-                    throw me;
-                }
-                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                return getRawInputStream(e);
             } catch (final MessagingException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(
-                        new com.openexchange.java.StringAllocator(256).append("Part's input stream could not be obtained: ").append(
-                            e.getMessage() == null ? "<no error message given>" : e.getMessage()).append(
-                            ". Trying to read from part's raw input stream instead").toString(),
-                        e);
-                }
-                try {
-                    if (part instanceof MimeBodyPart) {
-                        return ((MimeBodyPart) part).getRawInputStream();
-                    } else if (part instanceof MimeMessage) {
-                        return ((MimeMessage) part).getRawInputStream();
-                    }
-                } catch (final MessagingException me) {
-                    me.setNextException(e);
-                    throw me;
-                }
-                throw MimeMailException.handleMessagingException(e);
+                return getRawInputStream(e);
             }
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    private InputStream getRawInputStream(final Exception e) throws MessagingException, OXException {
+        try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(
+                    new com.openexchange.java.StringAllocator(256).append("Part's input stream could not be obtained: ").append(
+                        e.getMessage() == null ? "<no error message given>" : e.getMessage()).append(
+                        ". Trying to read from part's raw input stream instead").toString(),
+                    e);
+            }
+            if (part instanceof MimeBodyPart) {
+                return ((MimeBodyPart) part).getRawInputStream();
+            } else if (part instanceof MimeMessage) {
+                return ((MimeMessage) part).getRawInputStream();
+            }
+            // Not possible to obtain raw input stream
+            if (e instanceof MessagingException) {
+                throw MimeMailException.handleMessagingException((MessagingException) e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (final MessagingException me) {
+            me.setNextException(e);
+            throw me;
         }
     }
 
