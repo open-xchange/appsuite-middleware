@@ -57,6 +57,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
@@ -171,16 +173,29 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     @Override
     public void addSession(final Session session) throws OXException {
         if (null != session) {
+            boolean addedSession = false;
             try {
-                sessions().set(session.getSessionID(), new HazelcastStoredSession(session), 0, TimeUnit.SECONDS);
+                Future<HazelcastStoredSession> future = sessions().putAsync(session.getSessionID(), new HazelcastStoredSession(session));
                 userSessions().put(getKey(session.getContextId(), session.getUserId()), session.getSessionID());
+                future.get();
+                addedSession = true;
             } catch (HazelcastException e) {
                 throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
-            } catch (OXException e) {
-                if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
-                    throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
+            } catch (ExecutionException e) {
+                // (never thrown)
+                throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                if (false == addedSession) {
+                    // simple rollback
+                    try {
+                        userSessions().remove(getKey(session.getContextId(), session.getUserId()), session.getSessionID());
+                    } catch (Exception e) {
+                        LOG.warn("Error rolling back adding user-session", e);
+                    }
                 }
-                throw e;
             }
         }
     }
