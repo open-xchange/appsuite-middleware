@@ -573,13 +573,13 @@ public class MailObject {
         try {
             msg.writeTo(bos);
         } catch (final javax.activation.UnsupportedDataTypeException e) {
-            final Object content = msg.getContent();
-            if (!(content instanceof Multipart)) {
+            final String cts = msg.getHeader("Content-Type", null);
+            if (null == cts || !cts.startsWith("multipart/")) {
                 throw e;
             }
             boolean throwIt = false;
             try {
-                final Multipart multipart = (Multipart) content;
+                final Multipart multipart = (Multipart) msg.getContent();
                 final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(2048);
                 multipart.writeTo(baos);
                 msg.setDataHandler(new DataHandler(new MessageDataSource(Streams.asInputStream(baos), multipart.getContentType())));

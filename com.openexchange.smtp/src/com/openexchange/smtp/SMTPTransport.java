@@ -740,10 +740,10 @@ public final class SMTPTransport extends MailTransport {
         } catch (final MessagingException e) {
             boolean throwIt = true;
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
-                final Object content = smtpMessage.getContent();
-                if (content instanceof Multipart) {
+                final String cts = smtpMessage.getHeader("Content-Type", null);
+                if ((null != cts) && cts.startsWith("multipart/")) {
                     try {
-                        final Multipart multipart = (Multipart) content;
+                        final Multipart multipart = (Multipart) smtpMessage.getContent();
                         final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
                         multipart.writeTo(baos);
                         smtpMessage.setDataHandler(new DataHandler(new MessageDataSource(Streams.asInputStream(baos), multipart.getContentType())));
