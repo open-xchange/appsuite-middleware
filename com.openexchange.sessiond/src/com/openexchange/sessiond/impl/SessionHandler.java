@@ -1234,6 +1234,26 @@ public final class SessionHandler {
         }
     }
 
+    /**
+     * Broadcasts the {@link SessiondEventConstants#TOPIC_TOUCH_SESSION} event, usually after the session has been moved to the first 
+     * container.
+     * 
+     * @param session The session that was touched
+     */
+    static void postSessionTouched(final Session session) {
+        final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
+        if (eventAdmin != null) {
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+            dic.put(SessiondEventConstants.PROP_SESSION, session);
+            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
+            final Event event = new Event(SessiondEventConstants.TOPIC_TOUCH_SESSION, dic);
+            eventAdmin.postEvent(event);
+            if (DEBUG) {
+                LOG.debug("Posted event for touched session");
+            }
+        }
+    }
+
     public static void addThreadPoolService(final ThreadPoolService service) {
         final SessionData sessionData = sessionDataRef.get();
         if (null != sessionData) {

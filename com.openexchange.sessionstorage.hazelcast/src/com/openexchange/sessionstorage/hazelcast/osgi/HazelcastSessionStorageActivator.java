@@ -49,19 +49,27 @@
 
 package com.openexchange.sessionstorage.hazelcast.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.Services;
@@ -99,14 +107,40 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
             track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
                 private volatile ServiceRegistration<SessionStorageService> sessionStorageRegistration;
+                private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
 
                 @Override
                 public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
                     final HazelcastInstance hazelcastInstance = context.getService(reference);
                     HazelcastSessionStorageService.setHazelcastInstance(hazelcastInstance);
-                    sessionStorageRegistration = context.registerService(SessionStorageService.class,
-                        new HazelcastSessionStorageService(
-                            discoverSessionsMapName(hazelcastInstance.getConfig()), USER_SESSIONS_NAME), null);
+                    /*
+                     * create & register session storage service
+                     */
+                    final HazelcastSessionStorageService sessionStorageService = new HazelcastSessionStorageService(
+                        discoverSessionsMapName(hazelcastInstance.getConfig()), USER_SESSIONS_NAME);
+                    sessionStorageRegistration = context.registerService(SessionStorageService.class, sessionStorageService, null);
+                    /*
+                     * create & register event handler
+                     */
+                    final EventHandler eventHandler = new EventHandler() {
+
+                        @Override
+                        public void handleEvent(Event osgiEvent) {
+                            if (null != osgiEvent && SessiondEventConstants.TOPIC_TOUCH_SESSION.equals(osgiEvent.getTopic())) {
+                                Session touchedSession = (Session)osgiEvent.getProperty(SessiondEventConstants.PROP_SESSION);
+                                if (null != touchedSession && null != touchedSession.getSessionID()) {
+                                    try {
+                                        sessionStorageService.touch(touchedSession.getSessionID());
+                                    } catch (OXException e) {
+                                        LOG.warn("error handling OSGi event", e);
+                                    }
+                                }
+                            }                            
+                        }
+                    };                    
+                    Dictionary<String, String> properties = new Hashtable<String, String>(1);
+                    properties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
+                    eventHandlerRegistration = context.registerService(EventHandler.class, eventHandler, properties); 
                     return hazelcastInstance;
                 }
 
@@ -117,7 +151,18 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
                 @Override
                 public void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
-                    final ServiceRegistration<SessionStorageService> sessionStorageRegistration = this.sessionStorageRegistration;
+                    /*
+                     * remove event handler registration
+                     */
+                    ServiceRegistration<EventHandler> eventHandlerRegistration = this.eventHandlerRegistration;
+                    if (null != eventHandlerRegistration) {
+                        eventHandlerRegistration.unregister();
+                        this.sessionStorageRegistration = null;
+                    }
+                    /*
+                     * remove session storage registration
+                     */
+                    ServiceRegistration<SessionStorageService> sessionStorageRegistration = this.sessionStorageRegistration;
                     if (null != sessionStorageRegistration) {
                         sessionStorageRegistration.unregister();
                         this.sessionStorageRegistration = null;
