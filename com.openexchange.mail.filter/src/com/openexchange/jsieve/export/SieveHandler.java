@@ -271,9 +271,6 @@ public class SieveHandler {
 
         punycode = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.PUNYCODE.property));
 
-
-        punycode = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.PUNYCODE.property));
-
         final StringBuilder commandBuilder = new StringBuilder(64);
 
         if (issueTLS) {
