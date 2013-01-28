@@ -50,6 +50,7 @@
 package com.openexchange.groupware.container.mail;
 
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,6 +74,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -92,7 +94,6 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.version.Version;
 
 /**
@@ -552,8 +553,8 @@ public class MailObject {
              */
             final MailTransport transport = MailTransport.getInstance(session);
             try {
-                final UnsynchronizedByteArrayOutputStream bos = new UnsynchronizedByteArrayOutputStream();
-                msg.writeTo(bos);
+                final ByteArrayOutputStream bos = Streams.newByteArrayOutputStream(2048);
+                writeTo(msg, bos);
                 transport.sendRawMessage(bos.toByteArray());
                 if (DEBUG) {
                     LOG.debug("Sent mail:\n" + new String(bos.toByteArray()));
@@ -565,6 +566,33 @@ public class MailObject {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void writeTo(final MimeMessage msg, final ByteArrayOutputStream bos) throws IOException, MessagingException {
+        try {
+            msg.writeTo(bos);
+        } catch (final javax.activation.UnsupportedDataTypeException e) {
+            final Object content = msg.getContent();
+            if (!(content instanceof Multipart)) {
+                throw e;
+            }
+            boolean throwIt = false;
+            try {
+                final Multipart multipart = (Multipart) content;
+                final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(2048);
+                multipart.writeTo(baos);
+                msg.setDataHandler(new DataHandler(new MessageDataSource(Streams.asInputStream(baos), multipart.getContentType())));
+                saveChangesSafe(msg);
+                bos.reset();
+                msg.writeTo(bos);
+                throwIt = false;
+            } catch (final Exception ignore) {
+                // Ignore
+            }
+            if (throwIt) {
+                throw e;
+            }
         }
     }
 
