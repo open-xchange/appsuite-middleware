@@ -759,7 +759,7 @@ public final class SMTPTransport extends MailTransport {
 
     private String encodePassword(final String password) throws OXException {
         String tmpPass = password;
-        if (password != null) {
+        if (tmpPass != null) {
             try {
                 tmpPass = new String(password.getBytes(Charsets.forName(getTransportConfig0().getSMTPProperties().getSmtpAuthEnc())), Charsets.ISO_8859_1);
             } catch (final UnsupportedCharsetException e) {
