@@ -260,11 +260,8 @@ public final class SMTPTransport extends MailTransport {
      * Executes all tasks queued for execution
      */
     private void doInvocations() {
-        while (!pendingInvocations.isEmpty()) {
-            final Runnable task = pendingInvocations.poll();
-            if (null != task) {
-                task.run();
-            }
+        for (Runnable task = pendingInvocations.poll(); task != null; task = pendingInvocations.poll()) {
+            task.run();
         }
     }
 
