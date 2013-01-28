@@ -112,9 +112,10 @@ public class Bug18482Test_ByteOrderMarkOnUtf8 extends AbstractManagedContactTest
         }
 
 		InputStream stream = new ByteArrayInputStream( streambase );
-		CSVImportRequest importRequest = new CSVImportRequest(folderID, stream);
+		CSVImportRequest importRequest = new CSVImportRequest(folderID, stream, false);
 		AbstractAJAXResponse response = manager.getClient().execute(importRequest);
 
+		System.out.println(response.getData());
 		assertFalse(response.hasError());
 		assertFalse(response.hasConflicts());
 
