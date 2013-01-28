@@ -81,12 +81,18 @@ public final class SessiondRequest<V> {
     }
 
     /**
-     * Sets the latch
+     * Sets the latch.
      * 
      * @param latch The latch to set
+     * @return This request with given latch applied
+     * @throws IllegalStateException If latch is already applied
      */
-    public void setLatch(final CountDownLatch latch) {
+    public SessiondRequest<V> setLatch(final CountDownLatch latch) {
+        if (null != this.latch) {
+            throw new IllegalStateException("Latch already set.");
+        }
         this.latch = latch;
+        return this;
     }
 
     /**
