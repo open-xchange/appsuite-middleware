@@ -158,7 +158,7 @@ public class CSVContactImporter extends AbstractImporter {
         if (!canImport(sessObj, format, folders, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_IMPORT.create(folder, format);
         }
-        List<List<String>> csv;
+        List<List<String>> csv = null;
         // get header fields
         List<String> fields;
         {
@@ -166,26 +166,18 @@ public class CSVContactImporter extends AbstractImporter {
             try {
                 input = is.markSupported() ? is : Streams.asInputStream(is);
                 input.mark(Integer.MAX_VALUE);
-                String csvStr = transformInputStreamToString(input, "UTF-8", false);
-                final CSVParser csvParser = getCSVParser();
-                csv = csvParser.parse(csvStr);
+                csv = checkFields(input);
+                if (csv == null) {
+                    throw ImportExportExceptionCodes.NO_VALID_CSV_COLUMNS.create();
+                }
                 if (csv.size() < 2) {
                     throw ImportExportExceptionCodes.NO_CONTENT.create();
                 }
                 fields = csv.get(0);
-                if (!checkFields(fields)) {
-                    throw ImportExportExceptionCodes.NO_VALID_CSV_COLUMNS.create();
-                }
                 if (!passesSanityTestForDisplayName(fields)) {
                     throw ImportExportExceptionCodes.NO_FIELD_FOR_NAMING.create();
                 }
-                // re-read now the we have guessed the format and the encoding
-                if (!"UTF-8".equalsIgnoreCase(getCurrentMapper().getEncoding())) {
-                    input.reset();
-                    csvStr = transformInputStreamToString(input, getCurrentMapper().getEncoding(), false);
-                    csv = csvParser.parse(csvStr);
-                    fields = csv.get(0);
-                }
+                
             } catch (final IOException e) {
                 throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
             } finally {
@@ -395,6 +387,31 @@ public class CSVContactImporter extends AbstractImporter {
             this.result = result;
             this.contact = contact;
         }
+    }
+
+    public List<List<String>> checkFields(final InputStream input) throws OXException, IOException {
+        currentMapper = null;
+        int highestAmountOfMappedFields = 0;
+
+        List<List<String>> csv = null;
+        
+        for (ContactFieldMapper mapper : getMappers()) {
+            String csvStr = transformInputStreamToString(input, mapper.getEncoding(), false);
+            final CSVParser csvParser = getCSVParser();
+            csv = csvParser.parse(csvStr);
+            int mappedFields = 0;
+            for (final String name : csv.get(0)) {
+                if (mapper.getFieldByName(name) != null) {
+                    mappedFields++;
+                }
+            }
+            if (mappedFields > highestAmountOfMappedFields) {
+                currentMapper = mapper;
+                highestAmountOfMappedFields = mappedFields;
+            }
+            input.reset();
+        }
+        return getCurrentMapper() == null ? null : csv;
     }
 
 	public boolean checkFields(final List<String> fields) {
