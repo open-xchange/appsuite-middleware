@@ -103,7 +103,7 @@ public class Message<E> extends EventObject {
     }
 
     /**
-     * Gets the sender identifier,
+     * Gets this message's sender identifier,
      * 
      * @return The sender identifier
      */
