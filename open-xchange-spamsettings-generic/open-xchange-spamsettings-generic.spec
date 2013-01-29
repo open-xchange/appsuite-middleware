@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 6
+%define         ox_release 7
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -19,19 +19,6 @@ Requires:       open-xchange-messaging >= @OXVERSION@
 
 %description
 This bundle provides a generic interface for spam settings
-
-Authors:
---------
-    Open-Xchange
-
-%package        gui
-Group:          Applications/Productivity
-Summary:        Generic spam settings GUI Bundle
-Requires:       open-xchange-spamsettings-generic-gui-theme >= @OXVERSION@
-Requires:       open-xchange-gui
-
-%description    gui
-Generic spam settings GUI Bundle
 
 Authors:
 --------
@@ -52,7 +39,6 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 %endif
 
 ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml build
-ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=%{name} -DbuildTarget=installGui -f build/build.xml build
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -63,14 +49,9 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 /opt/open-xchange/osgi/bundle.d/*
 /opt/open-xchange/bundles/*
 
-%files gui
-%defattr(-,root,root)
-%defattr(-,root,root)
-%dir %{docroot}/ox6/plugins/com.openexchange.spamsettings.generic
-%{docroot}/ox6/plugins/com.openexchange.spamsettings.generic/*
-%doc com.openexchange.spamsettings.generic/ChangeLog
-
 %changelog
+* Mon Jan 21 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-01-24
 * Thu Jan 03 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for public patch 2013-01-15
 * Wed Oct 10 2012 Carsten Hoeger <choeger@open-xchange.com>
