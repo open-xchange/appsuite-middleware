@@ -393,12 +393,12 @@ public class CSVContactImporter extends AbstractImporter {
         currentMapper = null;
         int highestAmountOfMappedFields = 0;
 
-        List<List<String>> csv = null;
+        List<List<String>> retval = null;
         
         for (ContactFieldMapper mapper : getMappers()) {
             String csvStr = transformInputStreamToString(input, mapper.getEncoding(), false);
             final CSVParser csvParser = getCSVParser();
-            csv = csvParser.parse(csvStr);
+            List<List<String>>  csv = csvParser.parse(csvStr);
             int mappedFields = 0;
             for (final String name : csv.get(0)) {
                 if (mapper.getFieldByName(name) != null) {
@@ -408,10 +408,11 @@ public class CSVContactImporter extends AbstractImporter {
             if (mappedFields > highestAmountOfMappedFields) {
                 currentMapper = mapper;
                 highestAmountOfMappedFields = mappedFields;
+                retval = csv;
             }
             input.reset();
         }
-        return getCurrentMapper() == null ? null : csv;
+        return getCurrentMapper() == null ? null : retval;
     }
 
 	public boolean checkFields(final List<String> fields) {
