@@ -90,6 +90,7 @@ public class ContextOnlyUWAService implements UWAWidgetService {
 
     @Override
     public void create(final UWAWidget widget) throws OXException {
+        UWAUtility.checkUrl(widget);
         try {
             final int dbId = idGenerator.getId("uwaWidget", ctxId);
             widget.setId(String.valueOf(dbId));
@@ -119,6 +120,7 @@ public class ContextOnlyUWAService implements UWAWidgetService {
 
     @Override
     public void update(final UWAWidget widget, final List<? extends Attribute<UWAWidget>> modified) throws OXException {
+        UWAUtility.checkUrl(widget);
         try {
             contextWidgets.update(widget, modified);
         } catch (final SQLException x) {

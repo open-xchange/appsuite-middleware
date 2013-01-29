@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,73 @@
  *
  */
 
-package com.openexchange.frontend.uwa;
+package com.openexchange.frontend.uwa.internal;
 
+import java.net.MalformedURLException;
 import com.openexchange.exception.OXException;
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.frontend.uwa.UWAWidget;
+import com.openexchange.frontend.uwa.UWAWidgetExceptionCodes;
 
 /**
- * {@link UWAWidgetExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
- *
- * @author Francisco Laguna <fla@synapps.de>
+ * {@link UWAUtility} - A utility class for UAW module.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UWAWidgetExceptionMessages implements LocalizableStrings {
-
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-    public static final String SQL_ERROR_MSG = "The database returned an error: %1$s";
-    public static final String NOT_FOUND_MSG = "The uwa widget with the id %1$s could not be found";
-    public static final String PROTECTED_MSG = "The widget with the id %1$s is protected and only positional information can be updated";
-
-    // The string cannot be parsed to a valid URL.
-    public static final String INVALID_URL_MSG = "The string cannot be parsed to a valid URL.";
-
+public final class UWAUtility {
 
     /**
-     * Initializes a new {@link UWAWidgetExceptionMessages}.
+     * Initializes a new {@link UWAUtility}.
      */
-    private UWAWidgetExceptionMessages() {
+    private UWAUtility() {
         super();
+    }
+
+    /**
+     * Checks given UWA widget's URL string for syntactical correctness.
+     * 
+     * @param uwaWidget The UWA widget
+     * @throws OXException If UWA widget's URL string is invalid
+     */
+    public static void checkUrl(final UWAWidget uwaWidget) throws OXException {
+        if (null == uwaWidget) {
+            return;
+        }
+        checkUrl(uwaWidget.getURL());
+    }
+
+    /**
+     * Checks given URL string for syntactical correctness.
+     * 
+     * @param sUrl The URL string
+     * @throws OXException If URL string is invalid
+     */
+    public static void checkUrl(final String sUrl) throws OXException {
+        if (isEmpty(sUrl)) {
+            // Nothing to check
+            return;
+        }
+        try {
+            final java.net.URL url = new java.net.URL(sUrl);
+            final String protocol = url.getProtocol();
+            if (!"http".equals(protocol) && !"https".equals(protocol)) {
+                throw new MalformedURLException("Only http & https protocols supported.");
+            }
+        } catch (final MalformedURLException e) {
+            throw UWAWidgetExceptionCodes.INVALID_URL.create(e, new Object[0]);
+        }
+    }
+
+    /** Checks for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

@@ -185,6 +185,7 @@ public class CompositeUWAService implements UWAWidgetService {
 
     @Override
     public void create(final UWAWidget widget) throws OXException {
+        UWAUtility.checkUrl(widget);
         try {
             final int dbId = idGenerator.getId("uwaWidget", ctxId);
             final String id = IDMangler.mangle("user", ""+dbId);
@@ -264,6 +265,7 @@ public class CompositeUWAService implements UWAWidgetService {
 
     @Override
     public void update(final UWAWidget widget, final List<? extends Attribute<UWAWidget>> modified) throws OXException {
+        UWAUtility.checkUrl(widget);
         if (isProtected(widget.getId())) {
             if (!onlyPositionFields(modified)) {
                 throw UWAWidgetExceptionCodes.PROTECTED.create(widget.getId());
