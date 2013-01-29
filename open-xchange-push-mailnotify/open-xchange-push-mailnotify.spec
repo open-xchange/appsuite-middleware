@@ -52,6 +52,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push_m
 %doc com.openexchange.push.mail.notify/ChangeLog
 
 %changelog
+* Mon Jan 21 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-01-24
 * Tue Jan 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-01-23
 * Thu Jan 03 2013 Carsten Hoeger <choeger@open-xchange.com>
