@@ -274,8 +274,8 @@ if ox_exists_property MimeTypeFile $pfile; then
     ox_remove_property MimeTypeFile $pfile
 fi
 pfile=/opt/open-xchange/etc/import.properties
-if ox_exists_property com.openexchange.import.mapper.path $pfile; then
-    ox_remove_property com.openexchange.import.mapper.path $pfile
+if ! ox_exists_property com.openexchange.import.mapper.path $pfile; then
+    ox_set_property com.openexchange.import.mapper.path /opt/open-xchange/importCSV $pfile
 fi
 pfile=/opt/open-xchange/etc/mail.properties
 if ox_exists_property com.openexchange.mail.JavaMailProperties $pfile; then
