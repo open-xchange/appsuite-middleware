@@ -198,6 +198,11 @@ public abstract class OXServlet extends WebDavServlet {
         public String getClientToken() {
             return null;
         }
+
+        @Override
+        public boolean isTransient() {
+            return OXServlet.isTransient(interfaze);
+        }
     }
 
     /**
@@ -525,4 +530,20 @@ public abstract class OXServlet extends WebDavServlet {
         return doc;
     }
 
+    /**
+     * Gets a value indicating whether to create a transient session or not, based on the supplied interface.   
+     * 
+     * @param iface The interface
+     * @return <code>true</code> if the interface can use a transient session, <code>false</code>, otherwise  
+     */
+    protected static boolean isTransient(Interface iface) {
+        switch (iface) {
+        case CALDAV:
+        case CARDDAV:
+            return true;
+        default:
+            return false;
+        }
+    }
+    
 }

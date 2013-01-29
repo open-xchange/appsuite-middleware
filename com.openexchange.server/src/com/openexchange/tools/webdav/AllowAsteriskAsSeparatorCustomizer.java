@@ -145,6 +145,11 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
             public String getClientToken() {
                 return loginReq.getClientToken();
             }
+
+            @Override
+            public boolean isTransient() {
+                return loginReq.isTransient();
+            }
         };
     }
 }

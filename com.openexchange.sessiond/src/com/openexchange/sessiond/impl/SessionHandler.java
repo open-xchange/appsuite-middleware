@@ -406,10 +406,11 @@ public final class SessionHandler {
      * @param contextId The context identifier
      * @param clientHost The client host name or IP address
      * @param login The full user's login; e.g. <i>test@foo.bar</i>
+     * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
      * @return The created session
      * @throws OXException If creating a new session fails
      */
-    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, final String clientToken) throws OXException {
+    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, final String clientToken, final boolean tranzient) throws OXException {
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
@@ -426,9 +427,12 @@ public final class SessionHandler {
         final SessionImpl addedSession;
         if (null == clientToken) {
             addedSession = sessionData.addSession(session, noLimit).getSession();
-            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-            if (sessionStorageService != null) {
-                storeSessionSync(addedSession, sessionStorageService, false);
+            // store session if not marked as transient
+            if (false == tranzient) {
+                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+                if (sessionStorageService != null) {
+                    storeSessionSync(addedSession, sessionStorageService, false);
+                }
             }
             // Post event for created session
             postSessionCreation(addedSession);

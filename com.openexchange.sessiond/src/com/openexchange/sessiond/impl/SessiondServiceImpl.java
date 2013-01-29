@@ -104,7 +104,8 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             param.getAuthId(),
             param.getHash(),
             param.getClient(),
-            param.getClientToken());
+            param.getClientToken(),
+            param.isTransient());
         if (null == session) {
             return null;
         }
