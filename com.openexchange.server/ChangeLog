@@ -1,3 +1,7 @@
+* 2013-01-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24625: Proper wild-card to regex conversion
+
 * 2013-01-28 - marcus.klein@open-xchange.com
 
  - Fix for bug 24610: For Debian based distributions now only java6-runtime-headless is necessary
