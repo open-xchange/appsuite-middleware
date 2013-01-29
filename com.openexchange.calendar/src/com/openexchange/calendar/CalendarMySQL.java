@@ -4058,7 +4058,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         boolean ret = false;
         try {
             readcon = DBPool.pickup(context);
-            final PreparedStatement pst = readcon.prepareStatement("SELECT object_id from del_dates_members WHERE object_id = ? AND cid = ?");
+            final PreparedStatement pst = readcon.prepareStatement("SELECT 1 from del_dates_members WHERE object_id = ? AND cid = ?");
             ResultSet rs = null;
             try {
                 pst.setInt(1, oid);
@@ -4077,7 +4077,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return ret;
     }
 
-    private static final String SQL_CHECK_DEL_MASTER = "SELECT intfield01 FROM del_dates WHERE intfield01 = ? AND cid = ?";
+    private static final String SQL_CHECK_DEL_MASTER = "SELECT 1 FROM del_dates WHERE intfield01 = ? AND cid = ?";
 
     /**
      * Checks if an entry can be found in backup table for specified identifier
@@ -4113,7 +4113,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return ret;
     }
 
-    private static final String SQL_CHECK_DEL_PART = "SELECT object_id FROM del_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?";
+    private static final String SQL_CHECK_DEL_PART = "SELECT 1 FROM del_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?";
 
     /**
      * Checks if specified participant is contained in participants' backup table.

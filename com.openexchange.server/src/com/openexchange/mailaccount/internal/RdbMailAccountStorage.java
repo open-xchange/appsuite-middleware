@@ -1177,7 +1177,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     /*
                      * Check existence of transport entry
                      */
-                    stmt = con.prepareStatement("SELECT id FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
+                    stmt = con.prepareStatement("SELECT 1 FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
                     int pos = 1;
                     stmt.setLong(pos++, cid);
                     stmt.setLong(pos++, mailAccount.getId());

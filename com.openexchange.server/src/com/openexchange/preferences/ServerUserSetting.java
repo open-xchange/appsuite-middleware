@@ -59,11 +59,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -619,7 +619,7 @@ public class ServerUserSetting {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT user FROM user_setting_server WHERE cid=? AND user=?");
+            stmt = con.prepareStatement("SELECT 1 FROM user_setting_server WHERE cid=? AND user=?");
             stmt.setInt(1, cid);
             stmt.setInt(2, user);
             rs = stmt.executeQuery();

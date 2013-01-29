@@ -119,7 +119,7 @@ public final class CheckConfigDBTables {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT id FROM oauthServiceProvider WHERE id = ?");
+            stmt = con.prepareStatement("SELECT 1 FROM oauthServiceProvider WHERE id = ?");
             stmt.setInt(1, OAuthProviderConstants.DEFAULT_PROVIDER);
             rs = stmt.executeQuery();
             contains = rs.next();
