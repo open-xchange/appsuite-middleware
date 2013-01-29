@@ -52,6 +52,7 @@ package com.openexchange.sessionstorage.hazelcast;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +74,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link HazelcastSessionStorageService} - The {@link SessionStorageService} backed by {@link HazelcastInstance}.
@@ -223,55 +225,73 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public Session[] removeUserSessions(final int userId, final int contextId) throws OXException {
-        try {
-            Collection<String> removedSessionIDs = userSessions().remove(getKey(contextId, userId));
-            if (null != removedSessionIDs && 0 < removedSessionIDs.size()) {
-                Map<String, HazelcastStoredSession> removedSessions = sessions().getAll(new HashSet<String>(removedSessionIDs));
-                if (null != removedSessions && 0 < removedSessions.size()) {
-                    return removedSessions.values().toArray(new Session[removedSessions.size()]);
-                }
-            }
+        /*
+         * remove user sessions
+         */
+        Collection<String> removedSessionIDs = userSessions().remove(getKey(contextId, userId));
+        if (null == removedSessionIDs || 0 == removedSessionIDs.size()) {
             return new Session[0];
-        } catch (HazelcastException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
-            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (OXException e) {
-            if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
-                if (DEBUG) {
-                    LOG.debug(e.getMessage(), e);
-                }
-                return new Session[0];
-            }
-            throw e;
         }
+        /*
+         * remove corresponding stored sessions
+         */
+        IMap<String, HazelcastStoredSession> sessions = sessions();
+        Map<String, Future<HazelcastStoredSession>> futures = 
+            new HashMap<String, Future<HazelcastStoredSession>>(removedSessionIDs.size());
+        for (String sessionID : removedSessionIDs) {
+            futures.put(sessionID, sessions.removeAsync(sessionID));
+        }
+        List<Session> removedSessions = new ArrayList<Session>(removedSessionIDs.size());
+        for (Entry<String, Future<HazelcastStoredSession>> future : futures.entrySet()) {
+            try {
+                removedSessions.add(future.getValue().get());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw SessionStorageExceptionCodes.REMOVE_FAILED.create(e, future.getKey());
+            } catch (ExecutionException e) {
+                throw SessionStorageExceptionCodes.REMOVE_FAILED.create(
+                    ThreadPools.launderThrowable(e, HazelcastException.class), future.getKey());
+            }
+        }
+        return removedSessions.toArray(new Session[removedSessions.size()]);
     }
 
     @Override
     public void removeContextSessions(final int contextId) throws OXException {
-        try {
-            IMap<String, HazelcastStoredSession> sessions = sessions();
-            if (null != sessions && 0 < sessions.size()) {
-                for (Entry<String, HazelcastStoredSession> entry : sessions.entrySet(new SqlPredicate("contextId = " + contextId))) {
-                    Session removedSession = sessions.remove(entry.getKey());
-                    if (null != removedSession) {
-                        userSessions().remove(getKey(removedSession.getContextId(), removedSession.getContextId()));
-                    }
-                }
+        /*
+         * search sessions by context ID
+         */
+        IMap<String, HazelcastStoredSession> sessions = sessions();
+        Set<String> sessionIDs = sessions.keySet(new SqlPredicate("contextId = " + contextId));
+        if (null == sessionIDs || 0 == sessionIDs.size()) {
+            return;
+        }
+        /*
+         * schedule remove operations
+         */
+        Map<String, Future<HazelcastStoredSession>> futures = new HashMap<String, Future<HazelcastStoredSession>>(sessionIDs.size());
+        for (String sessionID : sessionIDs) {
+            futures.put(sessionID, sessions.removeAsync(sessionID));
+        }
+        /*
+         * collect removed sessions, remove corresponding user sessions
+         */
+        MultiMap<Long, String> userSessions = userSessions();
+        for (Entry<String, Future<HazelcastStoredSession>> future : futures.entrySet()) {
+            try {
+                 HazelcastStoredSession removedSession = future.getValue().get();
+                 if (null != removedSession) {
+                     userSessions.remove(getKey(removedSession.getContextId(), removedSession.getContextId()));
+                 } else {
+                     LOG.debug("Session with ID '" + future.getKey() + "' not found, unable to remove from storage.");
+                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw SessionStorageExceptionCodes.REMOVE_FAILED.create(e, future.getKey());
+            } catch (ExecutionException e) {
+                throw SessionStorageExceptionCodes.REMOVE_FAILED.create(
+                    ThreadPools.launderThrowable(e, HazelcastException.class), future.getKey());
             }
-        } catch (HazelcastException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
-            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (OXException e) {
-            if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
-                if (DEBUG) {
-                    LOG.debug(e.getMessage(), e);
-                }
-            }
-            throw e;
         }
     }
 
