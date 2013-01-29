@@ -121,4 +121,10 @@ final class AddSessionParameterImpl implements AddSessionParameter {
     public String getClientToken() {
         return request.getClientToken();
     }
+
+    @Override
+    public boolean isTransient() {
+        return request.isTransient();
+    }
+    
 }

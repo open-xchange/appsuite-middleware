@@ -188,6 +188,10 @@ public class SessiondTest extends TestCase {
             public String getClientToken() {
                 return "testToken";
             }
+            @Override
+            public boolean isTransient() {
+                return false;
+            }
         });
     }
 
@@ -237,6 +241,10 @@ public class SessiondTest extends TestCase {
             @Override
             public String getClientToken() {
                 return "testToken";
+            }
+            @Override
+            public boolean isTransient() {
+                return false;
             }
         });
         sessiondCon.getSession(session.getSessionID());
@@ -289,6 +297,10 @@ public class SessiondTest extends TestCase {
             public String getClientToken() {
                 return "testToken";
             }
+            @Override
+            public boolean isTransient() {
+                return false;
+            }
         });
         sessiondCon.removeSession(session.getSessionID());
     }
@@ -339,6 +351,10 @@ public class SessiondTest extends TestCase {
             @Override
             public String getClientToken() {
                 return "testToken";
+            }
+            @Override
+            public boolean isTransient() {
+                return false;
             }
         });
         sessiondCon.getSession(session.getSessionID());

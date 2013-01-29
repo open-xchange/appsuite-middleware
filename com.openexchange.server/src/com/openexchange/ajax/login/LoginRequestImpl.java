@@ -71,6 +71,7 @@ public class LoginRequestImpl implements LoginRequest {
     private final String serverName;
     private final int serverPort;
     private final String httpSessionID;
+    private boolean tranzient;
 
     public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID) {
         super();
@@ -174,4 +175,20 @@ public class LoginRequestImpl implements LoginRequest {
     public String getHttpSessionID() {
         return httpSessionID;
     }
+
+    @Override
+    public boolean isTransient() {
+        return tranzient;
+    }
+    
+    /**
+     * Sets if whether the session should be created in a transient way or not, i.e. the session should not be distributed to other nodes 
+     * in the cluster or put into another persistent storage.
+     * 
+     * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
+     */
+    public void setTransient(boolean tranzient) {
+        this.tranzient = tranzient;
+    }
+
 }
