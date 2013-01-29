@@ -112,7 +112,9 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
             @Override
             public void removedService(ServiceReference<MsService> reference, MsService service) {
                 LOG.debug("Stopping messaging service cache event handler");
-                this.eventHandler.stop();
+                if (null != eventHandler) {
+                    this.eventHandler.stop();
+                }
                 MsCacheEventHandler.setMsService(null);
             }
         });
