@@ -1852,31 +1852,35 @@ public final class CacheFolderStorage implements FolderStorage {
         final Map<String, Folder> ret = new ConcurrentHashMap<String, Folder>(size);
         int taskCount = 0;
         for (final java.util.Map.Entry<FolderStorage, TIntList> entry : map.entrySet()) {
-            final FolderStorage tmp = entry.getKey();
-            final int[] indexes = entry.getValue().toArray();
+            final FolderStorage fs = entry.getKey();
+            /*
+             * Create the list of IDs to load with current storage
+             */
+            final List<String> ids;
+            {
+                final int[] indexes = entry.getValue().toArray();
+                ids = new ArrayList<String>(indexes.length);
+                for (final int index : indexes) {
+                    ids.add(folderIds.get(index));
+                }
+            }
+            /*
+             * Submit task
+             */
             completionService.submit(new Callable<Object>() {
 
                 @Override
                 public Object call() throws Exception {
                     final StorageParameters newParameters = paramsProvider.getStorageParameters();
-                    final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
-                    if (tmp.startTransaction(newParameters, false)) {
-                        openedStorages.add(tmp);
-                    }
+                    boolean started = fs.startTransaction(newParameters, false);
                     try {
-                        /*
-                         * Create the list of IDs to load with current storage
-                         */
-                        final List<String> ids = new ArrayList<String>(indexes.length);
-                        for (final int index : indexes) {
-                            ids.add(folderIds.get(index));
-                        }
                         /*
                          * Load them & commit
                          */
-                        final List<Folder> folders = tmp.getFolders(treeId, ids, storageType, newParameters);
-                        for (final FolderStorage fs : openedStorages) {
+                        final List<Folder> folders = fs.getFolders(treeId, ids, storageType, newParameters);
+                        if (started) {
                             fs.commitTransaction(newParameters);
+                            started = false;
                         }
                         /*
                          * Fill into map
@@ -1888,16 +1892,12 @@ public final class CacheFolderStorage implements FolderStorage {
                          * Return
                          */
                         return null;
-                    } catch (final OXException e) {
-                        for (final FolderStorage fs : openedStorages) {
-                            fs.rollback(newParameters);
-                        }
-                        throw e;
                     } catch (final RuntimeException e) {
-                        for (final FolderStorage fs : openedStorages) {
+                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e);
+                    } finally {
+                        if (started) {
                             fs.rollback(newParameters);
                         }
-                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e);
                     }
                 }
             });
