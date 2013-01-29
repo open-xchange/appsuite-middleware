@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -63,12 +63,12 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Properties;
-import com.mysql.jdbc.MySQLConnection;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -76,6 +76,8 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import com.mysql.jdbc.MySQLConnection;
+import com.openexchange.java.Streams;
 
 /**
  * This is a simple Tool to get an idea how a specific installation of Open-Xchange is used. Operating on the MySQL-database exclusively it
@@ -150,20 +152,32 @@ public class Datamining {
             reportAverageFilestoreSize();
             reportNumberOfContexts();
             Questions.reportNumberOfUsers();
-            Questions.reportNumberOfUsersWithEventsInPrivateCalendar();
+            Questions.reportNumberOfAppointments();
+            Questions.reportNumberOfUsersWhoCreatedAppointments();
+            Questions.reportMaximumNumberOfCreatedAppointmentsForOneUser();
+            Questions.reportAverageNumberOfAppointmentsPerUserWhoHasAppointmentsAtAll();
             Questions.reportNumberOfUsersWithEventsInPrivateCalendarThatAreInTheFutureAndAreNotYearlySeries();
             Questions.reportNumberOfUsersWhoChangedTheirCalendarInTheLast30Days();
-            Questions.reportNumberOfInfostoreObjects();
+            Questions.reportNumberOfDocuments();
+            Questions.reportNumberOfUsersWhoCreatedDocuments();
+            Questions.reportMaximumNumberOfCreatedDocumentsForOneUser();
+            Questions.reportAverageNumberOfDocumentsPerUserWhoHasDocumentsAtAll();
             reportAverageNumberOfInfostoreObjectsPerContext();
             reportAverageNumberOfInfostoreObjectsPerSchema();
             Questions.reportNumberOfNewInfostoreObjectsInTheLast30Days();
             Questions.reportNumberOfChangedInfostoreObjectsInTheLast30Days();
             Questions.reportNumberOfUsersWithNewInfostoreObjectsInTheLast30Days();
             Questions.reportSliceAndDiceOnDocumentSize();
+            Questions.reportAverageDocumentSize();
             Questions.reportNumberOfContacts();
+            Questions.reportNumberOfUserCreatedContacts();
+            Questions.reportNumberOfUsersWhoHaveContacts();
             Questions.reportNumberOfUsersWhoCreatedContacts();
-            Questions.reportNumberOfUsersWhoChangedTheirContactsInTheLast30Days();
+            Questions.reportMaximumNumberOfContactsForOneUser();
+            Questions.reportMaximumNumberOfCreatedContactsForOneUser();
             Questions.reportAverageNumberOfContactsPerUserWhoHasContactsAtAll();
+            Questions.reportAverageNumberOfContactsPerUserWhoHasCreatedContacts();
+            Questions.reportNumberOfUsersWhoChangedTheirContactsInTheLast30Days();
             Questions.reportNumberOfUsersWithLinkedSocialNetworkingAccounts();
             Questions.reportNumberOfUsersConnectedToFacebook();
             Questions.reportNumberOfUsersConnectedToLinkedIn();
@@ -175,7 +189,10 @@ public class Datamining {
             Questions.reportNumberOfUsersConnectedToTOnline();
             Questions.reportNumberOfUsersConnectedToGMX();
             Questions.reportNumberOfUsersConnectedToWebDe();
-            Questions.reportNumberOfUsersWithTasks();
+            Questions.reportNumberOfTasks();
+            Questions.reportNumberOfUsersWhoCreatedTasks();
+            Questions.reportMaximumNumberOfCreatedTasksForOneUser();
+            Questions.reportAverageNumberOfTasksPerUserWhoHasTasksAtAll();
             Questions.reportNumberOfUsersWhoChangedTheirTasksInTheLast30Days();
             Questions.reportNumberOfUsersWhoSelectedTeamViewAsCalendarDefault();
             Questions.reportNumberOfUsersWhoSelectedCalendarViewAsCalendarDefault();
@@ -187,6 +204,12 @@ public class Datamining {
             Questions.reportNumberOfUsersWhoSelectedListViewAsInfostoreDefault();
             Questions.reportNumberOfUsersWhoSelectedHSplitViewAsInfostoreDefault();
             Questions.reportNumberOfUsersWhoActivatedMiniCalendar();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientOX6UIInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientAppSuiteUIInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientMobileUIInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientEASInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientCalDAVInTheLast30Days();
+            Questions.reportNumberOfUsersWhoLoggedInWithClientCardDAVInTheLast30Days();
 
             rightNow = Calendar.getInstance();
             final long after = rightNow.getTime().getTime();
@@ -296,7 +319,7 @@ public class Datamining {
 
 			if (cl.hasOption("hostname")){
 				hostname = cl.getOptionValue("hostname");
-				dbName = (cl.hasOption("dbName")) ? cl.getOptionValue("dbName") : "configDB";
+				dbName = (cl.hasOption("dbName")) ? cl.getOptionValue("dbName") : "configdb";
 				dbPort = (cl.hasOption("dbPort")) ? cl.getOptionValue("dbPort") : "3306";
 
 				configDBURL = "jdbc:mysql://" + hostname + ":" + dbPort + "/" + dbName;
@@ -417,12 +440,13 @@ public class Datamining {
     }
 
     private static void printReport() {
+        FileOutputStream fos = null;
+        OutputStreamWriter out = null;
         try {
-            FileOutputStream fos = new FileOutputStream(reportfilePath + filename);
-            OutputStreamWriter out = new OutputStreamWriter(fos, "UTF-8");
+            fos = new FileOutputStream(reportfilePath + filename);
+            out = new OutputStreamWriter(fos, "UTF-8");
             out.write(reportStringBuilder.toString());
-            out.close();
-            fos.close();
+            out.flush();
             System.out.println("report written to this file : " + reportfilePath + filename);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -430,6 +454,8 @@ public class Datamining {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            Streams.close(out, fos);
         }
     }
 
@@ -457,10 +483,11 @@ public class Datamining {
         try {
             InetAddress addr = InetAddress.getLocalHost();
             Calendar cal = Calendar.getInstance();
-            String date = Integer.toString(cal.get(Calendar.YEAR)) + "-" + Integer.toString(cal.get(Calendar.MONTH)) + "-" + Integer.toString(cal.get(Calendar.DAY_OF_MONTH));
-            filename = "open-xchange_datamining_" + addr.getHostAddress() + "_" + date + ".txt";
+            DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+            filename = "open-xchange_datamining_" + addr.getHostAddress() + "_" + dateFormat.format(cal.getTime()) + ".txt";
             report("hostIPAddress", addr.getHostAddress());
             report("hostname", addr.getHostName());
+            report("dateOfReport", dateFormat.format(cal.getTime()));
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
@@ -609,6 +636,68 @@ public class Datamining {
             }
         }
         return numberOfObjects;
+    }
+
+    protected static BigInteger maximumForAllSchemata(String sql) {
+        BigInteger numberOfObjects = new BigInteger("0");
+        for (Schema schema : allSchemata) {
+            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
+            MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
+            if (conn != null) {
+                Statement query;
+                try {
+                    query = conn.createStatement();
+                    ResultSet result = query.executeQuery(sql);
+                    while (result.next()) {
+                        String numberInOneSchema = result.getString(1);
+                        BigInteger numberInThisSchema = new BigInteger(numberInOneSchema);
+                        if (numberInThisSchema.compareTo(numberOfObjects) == 1){
+                        	numberOfObjects = numberInThisSchema;
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return numberOfObjects;
+    }
+
+    protected static Float averageForAllSchemata(String sql) {
+        Float numberOfObjects = new Float("0");
+        for (Schema schema : allSchemata) {
+            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
+            MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
+            if (conn != null) {
+                Statement query;
+                try {
+                    query = conn.createStatement();
+                    ResultSet result = query.executeQuery(sql);
+                    while (result.next()) {
+                        String numberInOneSchema = result.getString(1);
+                        Float numberInThisSchema = new Float(numberInOneSchema);
+                        numberOfObjects = numberOfObjects + numberInThisSchema;
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        Float averageNumberOfObjects = new Float("0");
+        averageNumberOfObjects = numberOfObjects / allSchemata.size();
+        return averageNumberOfObjects;
     }
 
     public static String getFilename(){
