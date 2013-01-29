@@ -24,6 +24,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-l10n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-calendar-printing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-manage-group-resource"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-datamining"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-dataretrieval"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-mailfilter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-pop3"/>

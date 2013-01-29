@@ -1,7 +1,6 @@
-open-xchange-core (6.22.1-10) unstable; urgency=low
+open-xchange-datamining (6.22.1-0) unstable; urgency=low
 
-
-  * prepare for 6.22.1
+  * Initial import
 
  -- Karsten Will <karsten.will@open-xchange.com>  Tue, 15 Jan 2013 11:50:00 +0100
 
