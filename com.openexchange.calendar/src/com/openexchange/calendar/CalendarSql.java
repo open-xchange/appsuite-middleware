@@ -65,6 +65,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -528,10 +529,11 @@ public class CalendarSql implements AppointmentSQLInterface {
         final User user = Tools.getUser(session, ctx);
         try {
             writecon = DBPool.pickupWriteable(ctx);
-
             final CalendarOperation co = new CalendarOperation();
             final CalendarSqlImp cimp = CalendarSql.cimp;
             final CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder, writecon, checkPermissions);
+            DBPool.pushWrite(ctx, writecon);
+            writecon = null;
 
             if (cdao.isIgnoreOutdatedSequence() && cdao.getSequence() < edao.getSequence()) {
                 // Silently ignore updates on Appointments with an outdated Sequence. OLOX2-Requirement.
@@ -576,6 +578,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     }
                 }
 
+                writecon = DBPool.pickupWriteable(ctx);
                 try {
                     writecon.setAutoCommit(false);
                     if (cdao.containsParentFolderID()) {
@@ -593,19 +596,13 @@ public class CalendarSql implements AppointmentSQLInterface {
                         throw bue;
                     }
                 } catch(final SQLException sqle) {
-                    try {
-                        if (writecon != null) {
-                            writecon.rollback();
-                        }
-                    } catch(final SQLException rb) {
-                        LOG.error("Rollback failed: " + rb.getMessage(), rb);
-                    }
+                    Databases.rollback(writecon);
                     throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
                 } finally {
-                    if (writecon != null) {
-                        writecon.setAutoCommit(true);
-                    }
+                    Databases.autocommit(writecon);
                 }
+                DBPool.pushWrite(ctx, writecon);
+                writecon = null;
             }
             return conflicts;
         } catch(final DataTruncation dt) {
@@ -639,9 +636,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch (final RuntimeException e) {
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(26));
         } finally {
-            if (writecon != null) {
-                DBPool.pushWrite(ctx, writecon);
-            }
+            DBPool.pushWrite(ctx, writecon);
         }
     }
 
