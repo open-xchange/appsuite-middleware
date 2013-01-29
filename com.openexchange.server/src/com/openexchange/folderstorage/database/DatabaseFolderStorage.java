@@ -944,6 +944,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         }
                     }
                 }
+                provider.close();
+                provider = null;
                 /*
                  * Set proper tree identifier
                  */
@@ -987,6 +989,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     false,
                     "del_oxfolder_tree",
                     "del_oxfolder_permissions");
+            provider.close();
+            provider = null;
             final int size = folders.size();
             final List<Folder> ret = new ArrayList<Folder>(size);
             for (int i = 0; i < size; i++) {
@@ -1804,12 +1808,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     private static ConnectionProvider getConnection(final boolean modify, final StorageParameters storageParameters) throws OXException {
-        final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         ConnectionMode connection = optParameter(ConnectionMode.class, PARAM_CONNECTION, storageParameters);
         if (null != connection) {
             return new NonClosingConnectionProvider(connection/*, databaseService, context.getContextId()*/);
         }
         final Context context = storageParameters.getContext();
+        final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         connection = modify ? new ConnectionMode(databaseService.getWritable(context), true) : new ConnectionMode(databaseService.getReadOnly(context), false);
         return new ClosingConnectionProvider(connection, databaseService, context.getContextId());
     }
