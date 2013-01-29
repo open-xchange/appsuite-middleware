@@ -244,6 +244,11 @@ public class IntegrationTest extends TestCase {
             public String getClientToken() {
                 return null;
             }
+
+            @Override
+            public boolean isTransient() {
+                return true;
+            }
         });
 
         return ServerSessionAdapter.valueOf(login.getSession());
