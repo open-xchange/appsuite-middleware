@@ -136,7 +136,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
      */
     @Override
     public Group[] searchGroups(final String pattern, final boolean loadMembers, final Context ctx) throws OXException {
-        final Pattern pat = Pattern.compile(pattern.replace("*", ".*"), Pattern.CASE_INSENSITIVE);
+        final Pattern pat = Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE);
         final Group zero = GroupTools.getGroupZero(ctx);
         final Matcher match = pat.matcher(zero.getDisplayName());
         final List<Group> groups = new ArrayList<Group>();
@@ -173,6 +173,45 @@ public final class GroupsWithGroupZero extends GroupStorage {
     @Override
     public void deleteGroup(final Context ctx, final Connection con, final int groupId, final Date lastRead) throws OXException {
         delegate.deleteGroup(ctx, con, groupId, lastRead);
+    }
+
+    private static final gnu.trove.set.TIntSet SPECIALS = new gnu.trove.set.hash.TIntHashSet(new int[] {
+        '+', '(', ')', '[', ']', '$', '^', '.', '{', '}', '|', '\\' });
+
+    /**
+     * Converts specified wild-card string to a regular expression
+     *
+     * @param wildcard The wild-card string to convert
+     * @return An appropriate regular expression ready for being used in a {@link Pattern#compile(String) pattern}
+     */
+    private static String wildcardToRegex(final String wildcard) {
+        if (null == wildcard) {
+            // Accept all if null
+            return "^.*$";
+        }
+        if (wildcard.indexOf('*') < 0 && wildcard.indexOf('?') < 0) {
+            // Literal pattern
+            return Pattern.quote(wildcard);
+        }
+        // Generate appropriate regex
+        final com.openexchange.java.StringAllocator s = new com.openexchange.java.StringAllocator(wildcard.length());
+        s.append('^');
+        final int len = wildcard.length();
+        for (int i = 0; i < len; i++) {
+            final char c = wildcard.charAt(i);
+            if (c == '*') {
+                s.append(".*");
+            } else if (c == '?') {
+                s.append('.');
+            } else if (SPECIALS.contains(c)) {
+                s.append('\\');
+                s.append(c);
+            } else {
+                s.append(c);
+            }
+        }
+        s.append('$');
+        return (s.toString());
     }
 
 }
