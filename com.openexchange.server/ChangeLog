@@ -2,6 +2,7 @@
 
  - Fix for bug 24625: Proper wild-card to regex conversion
  - Fix for bug 24629: reduce connection's in-use time
+ - Fix for bug 24638: Reduce connection's in-use time
 
 * 2013-01-28 - marcus.klein@open-xchange.com
 
