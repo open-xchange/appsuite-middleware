@@ -888,9 +888,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public List<Folder> getFolders(final String treeId, final List<String> folderIdentifiers, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(false, storageParameters);
+        ConnectionProvider provider = null;
         try {
-            final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
             final UserConfiguration userConfiguration;
@@ -934,6 +933,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 /*
                  * Batch load
                  */
+                provider = getConnection(false, storageParameters);
+                final Connection con = provider.getConnection();
                 if (!map.isEmpty()) {
                     final Session session = storageParameters.getSession();
                     for (final FolderObject folderObject : getFolderObjects(map.keys(), ctx, con)) {
@@ -975,6 +976,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             for (final String folderIdentifier : folderIdentifiers) {
                 list.add(getUnsignedInteger(folderIdentifier));
             }
+            provider = getConnection(false, storageParameters);
+            final Connection con = provider.getConnection();
             final List<FolderObject> folders =
                 OXFolderBatchLoader.loadFolderObjectsFromDB(
                     list.toArray(),
@@ -1000,7 +1003,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
         } catch (final OXException e) {
             throw e;
         } finally {
-            provider.close();
+            if (null != provider) {
+                provider.close();
+            }
         }
     }
 
@@ -1800,11 +1805,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     private static ConnectionProvider getConnection(final boolean modify, final StorageParameters storageParameters) throws OXException {
         final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        final Context context = storageParameters.getContext();
         ConnectionMode connection = optParameter(ConnectionMode.class, PARAM_CONNECTION, storageParameters);
         if (null != connection) {
             return new NonClosingConnectionProvider(connection/*, databaseService, context.getContextId()*/);
         }
+        final Context context = storageParameters.getContext();
         connection = modify ? new ConnectionMode(databaseService.getWritable(context), true) : new ConnectionMode(databaseService.getReadOnly(context), false);
         return new ClosingConnectionProvider(connection, databaseService, context.getContextId());
     }

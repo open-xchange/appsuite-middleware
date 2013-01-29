@@ -95,6 +95,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.cache.lock.TreeLockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMap;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
+import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.internal.performers.ClearPerformer;
 import com.openexchange.folderstorage.internal.performers.CreatePerformer;
@@ -1872,7 +1873,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 @Override
                 public Object call() throws Exception {
                     final StorageParameters newParameters = paramsProvider.getStorageParameters();
-                    boolean started = fs.startTransaction(newParameters, false);
+                    boolean started = !DatabaseFolderType.getInstance().equals(fs.getFolderType()) && fs.startTransaction(newParameters, false);
                     try {
                         /*
                          * Load them & commit
