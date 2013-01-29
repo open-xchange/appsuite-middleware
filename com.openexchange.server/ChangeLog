@@ -4,6 +4,10 @@
  - Fix for bug 24629: reduce connection's in-use time
  - Fix for bug 24638: Reduce connection's in-use time
  - Fix for bug 24651: Fixed XSS vulnerability for UWA modules
+ - Fix for bug 24649: Fixed Path Traversal vulnerability at publications
+ - Fix for bug 24650: Fixed XSS vulnerability at TestServlet
+ - Fix for bug 24652: Fixed XSS vulnerability for (infostore) attachments
+ - Fix for bug 24653: Fixed HTTP Header Injection/Response Splitting vulnerability for "redirect" servlet and other places
 
 * 2013-01-28 - marcus.klein@open-xchange.com
 
