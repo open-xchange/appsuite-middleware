@@ -63,6 +63,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -362,6 +363,43 @@ public final class MimeMessageUtility {
     }
 
     /**
+     * Checks if given Content-Id value is contained in specified collection.
+     *
+     * @param contentId The Content-Id value
+     * @param contentIds The collection
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public static boolean containsContentId(final String contentId, final Collection<String> contentIds) {
+        for (final String current : contentIds) {
+            if (equalsCID(contentId, current)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets the plain Content-Id value; meaning possible starting <code>'&lt;'</code> and trailing <code>'&gt;'</code> stripped off.
+     * 
+     * @param contentId The Content-Id value to process
+     * @return The plain Content-Id value
+     */
+    public static String getPlainContentId(final String contentId) {
+        if ((null == contentId) || (0 >= contentId.length())) {
+            return contentId;
+        }
+        String ret = contentId;
+        if ('<' == ret.charAt(0)) {
+            ret = ret.substring(1);
+        }
+        final int mlen = ret.length() - 1;
+        if (mlen > 0 && '>' == ret.charAt(mlen)) {
+            ret = ret.substring(0, mlen);
+        }
+        return ret;
+    }
+
+    /**
      * Compares (case insensitive) the given values of message header "Content-ID". The leading/trailing characters '<code>&lt;</code>' and
      * ' <code>&gt;</code>' are ignored during comparison
      * 
@@ -404,7 +442,7 @@ public final class MimeMessageUtility {
         if (prefix.charAt(0) == '/') {
             prefix = prefix.substring(1);
         }
-        return tmp.indexOf(prefix+IMAGE_ALIAS_APPENDIX, fromIndex) >= 0 || tmp.indexOf(prefix+FILE_ALIAS_APPENDIX, fromIndex) >= 0;
+        return tmp.indexOf(prefix + IMAGE_ALIAS_APPENDIX, fromIndex) >= 0 || tmp.indexOf(prefix + FILE_ALIAS_APPENDIX, fromIndex) >= 0;
     }
 
     /**
@@ -1110,6 +1148,36 @@ public final class MimeMessageUtility {
         return addressList;
     }
 
+    /**
+     * Returns a literal replacement <code>String</code> for the specified <code>String</code>. This method produces a <code>String</code>
+     * that will work as a literal replacement <code>s</code> in the <code>appendReplacement</code> method of the {@link Matcher} class. The
+     * <code>String</code> produced will match the sequence of characters in <code>s</code> treated as a literal sequence. Slashes ('\') and
+     * dollar signs ('$') will be given no special meaning.
+     * 
+     * @param s The string to be literalized
+     * @return A literal string replacement
+     */
+    public static String quoteReplacement(final String s) {
+        if (isEmpty(s) || ((s.indexOf('\\') == -1) && (s.indexOf('$') == -1))) {
+            return s;
+        }
+        final int length = s.length();
+        final StringBuilder sb = new StringBuilder(length << 1);
+        for (int i = 0; i < length; i++) {
+            final char c = s.charAt(i);
+            if (c == '\\') {
+                sb.append('\\');
+                sb.append('\\');
+            } else if (c == '$') {
+                sb.append('\\');
+                sb.append('$');
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
     // private static final Pattern PAT_QUOTED = Pattern.compile("(^\")([^\"]+?)(\"$)");
 
     // private static final Pattern PAT_QUOTABLE_CHAR = Pattern.compile("[.,:;<>\"]");
@@ -1368,8 +1436,8 @@ public final class MimeMessageUtility {
     static {
         final String regex = "(\\?=)" + "(?:\r?\n(?:\t| +))" + "(=\\?)";
         PAT_ENC_WORDS = Pattern.compile(regex);
-        //final String regexEncodedWord = "(=\\?\\S+?\\?\\S+?\\?.+?\\?=)";
-        //PAT_ENC_WORDS = Pattern.compile(regexEncodedWord + "(?:\r?\n(?:\t| +))" + regexEncodedWord);
+        // final String regexEncodedWord = "(=\\?\\S+?\\?\\S+?\\?.+?\\?=)";
+        // PAT_ENC_WORDS = Pattern.compile(regexEncodedWord + "(?:\r?\n(?:\t| +))" + regexEncodedWord);
     }
 
     /**
@@ -1562,9 +1630,7 @@ public final class MimeMessageUtility {
             /*
              * Write headers
              */
-            @SuppressWarnings("unchecked")
-            final
-            Enumeration<Header> headers = p.getAllHeaders();
+            @SuppressWarnings("unchecked") final Enumeration<Header> headers = p.getAllHeaders();
             final StringBuilder sb = new StringBuilder(256);
             while (headers.hasMoreElements()) {
                 final Header header = headers.nextElement();
@@ -1664,8 +1730,7 @@ public final class MimeMessageUtility {
             in = new BufferedInputStream(new FileInputStream(file));
             out = new BufferedOutputStream(new FileOutputStream(newTempFile));
             {
-                @SuppressWarnings("resource")
-				final LineReaderInputStream instream = new LineReaderInputStreamAdaptor(in, -1);
+                @SuppressWarnings("resource") final LineReaderInputStream instream = new LineReaderInputStreamAdaptor(in, -1);
                 int lineCount = 0;
                 final ByteArrayBuffer linebuf = new ByteArrayBuffer(64);
                 final FieldBuilder fieldBuilder = new DefaultFieldBuilder(-1);

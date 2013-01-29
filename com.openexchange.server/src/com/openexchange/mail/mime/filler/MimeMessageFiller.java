@@ -893,15 +893,27 @@ public class MimeMessageFiller {
                     /*
                      * Add referenced parts from ONE referenced mail
                      */
+                    List<String> cidList = null;
                     for (int i = 0; i < size; i++) {
                         if (null == contentIds) {
                             final MailPart mailPart = mail.getEnclosedMailPart(i);
-                            if (mailPart.getContentType().startsWith("image/")) {
-                                if (null == mailPart.getContentId()) {
+                            boolean add = false;
+                            if (embeddedImages && mailPart.getContentType().startsWith("image/")) {
+                                final String contentId = mailPart.getContentId();
+                                if (null != contentId) {
+                                    // Check if image is already inlined inside HTML content
+                                    if (null == cidList) {
+                                        cidList = MimeMessageUtility.getContentIDs(content);
+                                    }
+                                    add = !MimeMessageUtility.containsContentId(contentId, cidList);
+                                } else {
                                     // A regular file-attachment image
-                                    addMessageBodyPart(primaryMultipart, mailPart, false);
+                                    add = true;
                                 }
                             } else {
+                                add = true;
+                            }
+                            if (add) {
                                 addMessageBodyPart(primaryMultipart, mailPart, false);
                             }
                         } else {
@@ -909,9 +921,9 @@ public class MimeMessageFiller {
                             boolean add = true;
                             if (mailPart.getContentType().startsWith("image/")) {
                                 final String contentId = mailPart.getContentId();
-                                if (null != contentId /*&& contentIds.contains(contentId)*/) {
+                                if (null != contentId) {
                                     // Ignore
-                                    add = false;
+                                    add = !MimeMessageUtility.containsContentId(contentId, contentIds);
                                 }
                             }
                             if (add) {

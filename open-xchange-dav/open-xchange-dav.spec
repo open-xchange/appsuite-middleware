@@ -81,6 +81,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Mon Jan 21 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2013-01-24
 * Thu Jan 03 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Build for public patch 2013-01-15
 * Fri Dec 28 2012 Steffen Templin <marcus.klein@open-xchange.com>
