@@ -194,7 +194,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
             return Pattern.quote(wildcard);
         }
         // Generate appropriate regex
-        final com.openexchange.java.StringAllocator s = new com.openexchange.java.StringAllocator(wildcard.length());
+        final StringBuilder s = new StringBuilder(wildcard.length());
         s.append('^');
         final int len = wildcard.length();
         for (int i = 0; i < len; i++) {
