@@ -77,120 +77,125 @@ import com.openexchange.oauth.httpclient.OAuthHTTPRequestBuilder;
 
 public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericRequestBuilder<T>> {
 
-	protected Map<String, String> parameters = new TreeMap<String, String>();
-	protected Map<String, String> headers = new TreeMap<String, String>();
-	protected OAuthHTTPRequestBuilder coreBuilder;
+    protected Map<String, String> parameters = new TreeMap<String, String>();
+    protected Map<String, String> headers = new TreeMap<String, String>();
+    protected OAuthHTTPRequestBuilder coreBuilder;
 
-	private boolean isVerbatimUrl;
-	private String verbatimUrl;
-	private String baseUrl;
-	protected OAuthService service;
-	protected Class<? extends org.scribe.builder.api.Api> provider;
+    private boolean isVerbatimUrl;
+    private String verbatimUrl;
+    private String baseUrl;
+    protected OAuthService service;
+    protected Class<? extends org.scribe.builder.api.Api> provider;
 
-	public ScribeGenericHTTPRequestBuilder(OAuthHTTPRequestBuilder coreBuilder) {
-		this.coreBuilder = coreBuilder;
-		provider = getProvider(coreBuilder.getApi());
+    public ScribeGenericHTTPRequestBuilder(OAuthHTTPRequestBuilder coreBuilder) {
+        this.coreBuilder = coreBuilder;
+        provider = getProvider(coreBuilder.getApi());
 
-		service = new ServiceBuilder()
-        .provider(getProvider(coreBuilder.getApi()))
-        .apiKey(coreBuilder.getApiKey())
-        .apiSecret(coreBuilder.getSecret())
-        .build();
-	}
+        service =
+            new ServiceBuilder().provider(getProvider(coreBuilder.getApi())).apiKey(coreBuilder.getApiKey()).apiSecret(
+                coreBuilder.getSecret()).build();
+    }
 
-	public abstract Verb getVerb();
+    public abstract Verb getVerb();
 
-	protected Class<? extends Api> getProvider(API api) {
-		switch(api) {
-		case FACEBOOK: return FacebookApi.class;
-		case LINKEDIN: return LinkedInApi.class;
-		case TWITTER: return TwitterApi.class;
-		case YAHOO: return YahooApi.class;
-		case TUMBLR: return TumblrApi.class;
-		case FLICKR: return FlickrApi.class;
-		case DROPBOX: return DropBoxApi.class;
-		case XING: return XingApi.class;
-		case VKONTAKTE: return VkontakteApi.class;
-		// Add new API enums above
+    protected Class<? extends Api> getProvider(API api) {
+        switch (api) {
+        case FACEBOOK:
+            return FacebookApi.class;
+        case LINKEDIN:
+            return LinkedInApi.class;
+        case TWITTER:
+            return TwitterApi.class;
+        case YAHOO:
+            return YahooApi.class;
+        case TUMBLR:
+            return TumblrApi.class;
+        case FLICKR:
+            return FlickrApi.class;
+        case DROPBOX:
+            return DropBoxApi.class;
+        case XING:
+            return XingApi.class;
+        case VKONTAKTE:
+            return VkontakteApi.class;
+            // Add new API enums above
 
-		case OTHER: // fall-through
-		default:
-		}
-		throw new IllegalStateException("Unsupported API type: "+api);
-	}
+        case OTHER: // fall-through
+        default:
+        }
+        throw new IllegalStateException("Unsupported API type: " + api);
+    }
 
-	public T url(String url) {
-		isVerbatimUrl = false;
-		this.baseUrl = url;
-		return (T) this;
-	}
+    public T url(String url) {
+        isVerbatimUrl = false;
+        this.baseUrl = url;
+        return (T) this;
+    }
 
-	public T verbatimURL(String url) {
-		isVerbatimUrl = true;
-		this.verbatimUrl = url;
-		return (T) this;
-	}
+    public T verbatimURL(String url) {
+        isVerbatimUrl = true;
+        this.verbatimUrl = url;
+        return (T) this;
+    }
 
-	public T parameter(String parameter, String value) {
-		parameters.put(parameter, value);
-		return (T) this;
-	}
+    public T parameter(String parameter, String value) {
+        parameters.put(parameter, value);
+        return (T) this;
+    }
 
-	public T parameters(Map<String, String> parameters) {
-		this.parameters.putAll(parameters);
-		return (T) this;
-	}
+    public T parameters(Map<String, String> parameters) {
+        this.parameters.putAll(parameters);
+        return (T) this;
+    }
 
-	public T header(String header, String value) {
-		headers.put(header, value);
-		return (T) this;
-	}
+    public T header(String header, String value) {
+        headers.put(header, value);
+        return (T) this;
+    }
 
-	public T headers(Map<String, String> cookies) {
-		headers.putAll(cookies);
-		return (T) this;
-	}
+    public T headers(Map<String, String> cookies) {
+        headers.putAll(cookies);
+        return (T) this;
+    }
 
-	public HTTPRequest build() throws OXException {
-		String finalUrl;
-		try {
-			finalUrl = isVerbatimUrl ? verbatimUrl : URIUtil.encodeQuery(baseUrl);
-		} catch (URIException e) {
-			finalUrl = baseUrl;
-		}
+    public HTTPRequest build() throws OXException {
+        String finalUrl;
+        try {
+            finalUrl = isVerbatimUrl ? verbatimUrl : URIUtil.encodeQuery(baseUrl);
+        } catch (URIException e) {
+            finalUrl = baseUrl;
+        }
 
-		OAuthRequest request = new OAuthRequest(getVerb(), finalUrl);
-		setParameters(parameters, request);
-		setHeaders(headers, request);
-		modify(request);
-		service.signRequest(getToken(), request);
-		return new OAuthHTTPRequest(request, parameters);
-	}
+        OAuthRequest request = new OAuthRequest(getVerb(), finalUrl);
+        setParameters(parameters, request);
+        setHeaders(headers, request);
+        modify(request);
+        service.signRequest(getToken(), request);
+        return new OAuthHTTPRequest(request, parameters);
+    }
 
-	protected void setHeaders(Map<String, String> headers, OAuthRequest request) {
-		for(Map.Entry<String, String> header: headers.entrySet()) {
-			if (header.getKey() != null && header.getValue() != null) {
-				request.addHeader(header.getKey(), header.getValue());
-			}
-		}
-	}
+    protected void setHeaders(Map<String, String> headers, OAuthRequest request) {
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            if (header.getKey() != null && header.getValue() != null) {
+                request.addHeader(header.getKey(), header.getValue());
+            }
+        }
+    }
 
-	protected void setParameters(Map<String, String> params,
-			OAuthRequest request) {
-		for(Map.Entry<String, String> param: params.entrySet()) {
-			if (param.getKey() != null && param.getValue() != null) {
-				request.addQuerystringParameter(param.getKey(), param.getValue());
-			}
-		}
-	}
+    protected void setParameters(Map<String, String> params, OAuthRequest request) {
+        for (Map.Entry<String, String> param : params.entrySet()) {
+            if (param.getKey() != null && param.getValue() != null) {
+                request.addQuerystringParameter(param.getKey(), param.getValue());
+            }
+        }
+    }
 
-	protected void modify(OAuthRequest request) {
+    protected void modify(OAuthRequest request) {
+        // Nope
+    }
 
-	}
-
-	private Token getToken() {
-		return new Token(coreBuilder.getAccount().getToken(), coreBuilder.getAccount().getSecret());
-	}
-
+    private Token getToken() {
+        return new Token(coreBuilder.getAccount().getToken(), coreBuilder.getAccount().getSecret());
+    }
 
 }
