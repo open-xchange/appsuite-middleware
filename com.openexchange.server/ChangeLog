@@ -1,3 +1,7 @@
+* 2013-01-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24291: Corrected dependencies of the meta packages.
+
 * 2013-01-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 24632: Respond with a meaningful error if OAuth.signed HTTP request cannot be performed
