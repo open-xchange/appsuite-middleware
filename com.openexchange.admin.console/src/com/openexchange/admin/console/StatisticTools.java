@@ -426,16 +426,18 @@ public class StatisticTools extends AbstractJMXTools {
         /*
          * maps
          */
-        for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=Map,Cluster=*,name=*"), null)) {
-            ObjectName objectName = mbean.getObjectName();
-            MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
-            for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
-                try {
-                    System.out.println(objectName + "," + attributeInfo.getName() + " = " + mbc.getAttribute(
-                        objectName,
-                        attributeInfo.getName()));
-                } catch (Exception e) {
-                    System.out.println(objectName + "," + attributeInfo.getName() + " = [" + e.getMessage() + "]");
+        for (String type : new String[] { "Map", "MultiMap", "Topic", "Queue" }) {
+            for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",Cluster=*,name=*"), null)) {
+                ObjectName objectName = mbean.getObjectName();
+                MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
+                for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
+                    try {
+                        System.out.println(objectName + "," + attributeInfo.getName() + " = " + mbc.getAttribute(
+                            objectName,
+                            attributeInfo.getName()));
+                    } catch (Exception e) {
+                        System.out.println(objectName + "," + attributeInfo.getName() + " = [" + e.getMessage() + "]");
+                    }
                 }
             }
         }
