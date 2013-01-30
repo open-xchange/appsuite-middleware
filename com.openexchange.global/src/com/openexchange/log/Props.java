@@ -49,10 +49,12 @@
 
 package com.openexchange.log;
 
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogProperties.Name;
@@ -65,15 +67,16 @@ import com.openexchange.log.LogProperties.Name;
 public final class Props {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(Props.class);
-
     private final EnumMap<LogProperties.Name, Object> map;
+    private final Set<LogProperties.Name> keys;
 
     /**
      * Initializes a new {@link Props}.
      */
     protected Props() {
         super();
-        this.map = new EnumMap<LogProperties.Name, Object>(LogProperties.Name.class);
+        map = new EnumMap<LogProperties.Name, Object>(LogProperties.Name.class);
+        keys = map.keySet();
     }
 
     /**
@@ -83,7 +86,8 @@ public final class Props {
      */
     protected Props(final Props other) {
         super();
-        this.map = new EnumMap<LogProperties.Name, Object>(other.map);
+        map = new EnumMap<LogProperties.Name, Object>(other.map);
+        keys = map.keySet();
     }
 
     @Override
@@ -194,6 +198,17 @@ public final class Props {
     public void remove(final Name name) {
         if (null != name) {
             map.remove(name.getName());
+        }
+    }
+
+    /**
+     * Removes the properties associated with given names.
+     *
+     * @param names The property names
+     */
+    public void remove(final Collection<Name> names) {
+        if (null != names) {
+            keys.removeAll(names);
         }
     }
 

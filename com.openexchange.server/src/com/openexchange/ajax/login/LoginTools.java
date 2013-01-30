@@ -67,6 +67,8 @@ import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -188,6 +190,17 @@ public final class LoginTools {
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         final String httpSessionId = req.getSession(true).getId();
+        // Add properties
+        {
+            final Props props = LogProperties.getLogProperties();
+            props.put(LogProperties.Name.LOGIN_LOGIN, login);
+            props.put(LogProperties.Name.LOGIN_CLIENT_IP, clientIP);
+            props.put(LogProperties.Name.LOGIN_USER_AGENT, userAgent);
+            props.put(LogProperties.Name.LOGIN_AUTH_ID, authId);
+            props.put(LogProperties.Name.LOGIN_CLIENT, client);
+            props.put(LogProperties.Name.LOGIN_VERSION, version);
+        }
+        // Return
         return new LoginRequestImpl(
             login,
             password,
