@@ -72,6 +72,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
+import com.openexchange.sessionstorage.hazelcast.HazelcastStoredSession;
 import com.openexchange.sessionstorage.hazelcast.Services;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -116,8 +117,10 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                     /*
                      * create & register session storage service
                      */
+                    String sessionsName = discoverSessionsMapName(hazelcastInstance.getConfig());
                     final HazelcastSessionStorageService sessionStorageService = new HazelcastSessionStorageService(
-                        discoverSessionsMapName(hazelcastInstance.getConfig()), USER_SESSIONS_NAME);
+                        sessionsName, USER_SESSIONS_NAME);
+                    hazelcastInstance.<String, HazelcastStoredSession> getMap(sessionsName).addLocalEntryListener(sessionStorageService);
                     sessionStorageRegistration = context.registerService(SessionStorageService.class, sessionStorageService, null);
                     /*
                      * create & register event handler
@@ -135,12 +138,12 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                                         LOG.warn("error handling OSGi event", e);
                                     }
                                 }
-                            }                            
+                            }
                         }
-                    };                    
+                    };
                     Dictionary<String, String> properties = new Hashtable<String, String>(1);
                     properties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
-                    eventHandlerRegistration = context.registerService(EventHandler.class, eventHandler, properties); 
+                    eventHandlerRegistration = context.registerService(EventHandler.class, eventHandler, properties);
                     return hazelcastInstance;
                 }
 
