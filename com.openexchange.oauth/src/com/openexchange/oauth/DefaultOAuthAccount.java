@@ -57,9 +57,7 @@ package com.openexchange.oauth;
 public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccount {
 
     private int id;
-
     private String displayName;
-
     private OAuthServiceMetaData metaData;
 
     /**

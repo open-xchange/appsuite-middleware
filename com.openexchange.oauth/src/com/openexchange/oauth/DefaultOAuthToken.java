@@ -57,7 +57,6 @@ package com.openexchange.oauth;
 public class DefaultOAuthToken implements OAuthToken {
 
     private String token;
-
     private String secret;
 
     /**
