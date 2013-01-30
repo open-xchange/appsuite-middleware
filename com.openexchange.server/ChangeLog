@@ -1,3 +1,7 @@
+* 2013-01-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24654: Don't fall-back to User-Agent header if client identifier is missing on login attempt
+
 * 2013-01-30 - marcus.klein@open-xchange.com
 
  - Fix for bug 24291: Corrected dependencies of the meta packages.
