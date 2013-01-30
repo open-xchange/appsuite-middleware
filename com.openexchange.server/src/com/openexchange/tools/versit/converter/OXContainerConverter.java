@@ -1796,7 +1796,7 @@ public class OXContainerConverter {
                         type.addValue(new ParameterValue(param));
                     }
                     try {
-                        imageData = 1 == 1 ? scaleImageIfNeeded(imageData, contact.getImageContentType()) : imageData;
+                        imageData = scaleImageIfNeeded(imageData, contact.getImageContentType());
                     } catch (IOException x) {
                         LOG.error("error scaling image, falling back to unscaled image.", x);
                     } catch (OXException x) {
