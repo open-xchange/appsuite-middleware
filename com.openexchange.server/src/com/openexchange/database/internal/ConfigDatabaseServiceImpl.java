@@ -61,6 +61,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 
@@ -85,15 +86,15 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     private Connection get(final boolean write) throws OXException {
         final AssignmentImpl assign = assignmentService.getConfigDBAssignment();
-        LogProperties.putLogProperty("com.openexchange.database.schema", null);
+        LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, ForceLog.valueOf("configdb"));
         return ReplicationMonitor.checkFallback(pools, assign, false, write);
         // TODO Enable the following if the configuration database gets a table replicationMonitor.
         // return ReplicationMonitor.checkActualAndFallback(pools, assign, false, write);
     }
 
-    private void back(final Connection con) {
+    private static void back(final Connection con) {
         if (null == con) {
-            LogProperties.putLogProperty("com.openexchange.database.schema", null);
+            LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
             LOG.error(e.getMessage(), e);
             return;
@@ -104,7 +105,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
             OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error(e1.getMessage(), e1);
         } finally {
-            LogProperties.putLogProperty("com.openexchange.database.schema", null);
+            LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
         }
     }
 
