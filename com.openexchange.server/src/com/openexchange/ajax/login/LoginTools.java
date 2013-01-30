@@ -65,10 +65,14 @@ import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -81,6 +85,22 @@ import com.openexchange.tools.servlet.http.Tools;
 public final class LoginTools {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginTools.class);
+
+    private static volatile Integer maxLoginLength;
+    private static int maxLoginLength() {
+        Integer tmp = maxLoginLength;
+        if (null == tmp) {
+            synchronized (LoginTools.class) {
+                tmp = maxLoginLength;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Integer.valueOf(null == service ? 256 : service.getIntProperty("com.openexchange.login.maxLoginLength", 256));
+                    maxLoginLength = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
 
     private LoginTools() {
         super();
@@ -174,6 +194,12 @@ public final class LoginTools {
     }
 
     public static LoginRequestImpl parseLogin(HttpServletRequest req, String login, String password, boolean strict, String defaultClient, boolean forceHTTPS) throws OXException {
+        {
+            final int maxLoginLength = maxLoginLength();
+            if (maxLoginLength > 0 && maxLoginLength < login.length()) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(LoginFields.LOGIN_PARAM, Strings.abbreviate(login, 256));
+            }
+        }
         final String authId = parseAuthId(req, strict);
         final String client = parseClient(req, strict, defaultClient);
         final String version;
@@ -193,12 +219,12 @@ public final class LoginTools {
         // Add properties
         {
             final Props props = LogProperties.getLogProperties();
-            props.put(LogProperties.Name.LOGIN_LOGIN, login);
-            props.put(LogProperties.Name.LOGIN_CLIENT_IP, clientIP);
-            props.put(LogProperties.Name.LOGIN_USER_AGENT, userAgent);
-            props.put(LogProperties.Name.LOGIN_AUTH_ID, authId);
-            props.put(LogProperties.Name.LOGIN_CLIENT, client);
-            props.put(LogProperties.Name.LOGIN_VERSION, version);
+            props.put(LogProperties.Name.LOGIN_LOGIN, ForceLog.valueOf(Strings.abbreviate(login, 256)));
+            props.put(LogProperties.Name.LOGIN_CLIENT_IP, ForceLog.valueOf(clientIP));
+            props.put(LogProperties.Name.LOGIN_USER_AGENT, ForceLog.valueOf(userAgent));
+            props.put(LogProperties.Name.LOGIN_AUTH_ID, ForceLog.valueOf(authId));
+            props.put(LogProperties.Name.LOGIN_CLIENT, ForceLog.valueOf(client));
+            props.put(LogProperties.Name.LOGIN_VERSION, ForceLog.valueOf(version));
         }
         // Return
         return new LoginRequestImpl(
