@@ -47,11 +47,20 @@
  *
  */
 
-
 package com.openexchange.http.client;
 
 import com.openexchange.http.client.builder.HTTPRequestBuilder;
 
+/**
+ * A HTTP client for performing HTTP requests.
+ */
 public interface HTTPClient {
-	public HTTPRequestBuilder getBuilder();
+
+    /**
+     * Gets the associated HTTP request builder.
+     * 
+     * @return The HTTP request builder
+     */
+    public HTTPRequestBuilder getBuilder();
+
 }
