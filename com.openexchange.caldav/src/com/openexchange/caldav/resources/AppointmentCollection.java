@@ -278,6 +278,10 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                     CalendarDataObject[] changeExceptions = getCalendarCollection().getChangeExceptionsByRecurrence(
                         appointment.getRecurrenceID(), BASIC_COLUMNS, factory.getSession());
                     if (null != changeExceptions && 0 < changeExceptions.length) {
+                        // TODO: workaround for bug #24682
+                        for (CalendarDataObject changeException : changeExceptions) {
+                            changeException.setParentFolderID(appointment.getParentFolderID());
+                        }
                         knownExceptions.put(Integer.valueOf(appointment.getRecurrenceID()), changeExceptions);
                     }
                 }
