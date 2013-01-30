@@ -74,14 +74,9 @@ public final class DatabaseServiceImpl implements DatabaseService {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DatabaseServiceImpl.class));
 
     private final Pools pools;
-
     private final ConfigDatabaseService configDatabaseService;
-
     private final ContextDatabaseAssignmentService assignmentService;
 
-    /**
-     * Default constructor.
-     */
     public DatabaseServiceImpl(Pools pools, ConfigDatabaseService configDatabaseService, ContextDatabaseAssignmentService assignmentService) {
         super();
         this.pools = pools;
@@ -95,7 +90,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         return ReplicationMonitor.checkActualAndFallback(pools, assign, noTimeout, write);
     }
 
-    private void back(final Connection con) {
+    private static void back(final Connection con) {
         if (null == con) {
             LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();

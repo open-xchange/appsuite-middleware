@@ -61,17 +61,14 @@ public class AssignmentImpl implements Serializable, Assignment {
     private static final long serialVersionUID = -3426601066426517436L;
 
     private final int contextId;
-
     private final int serverId;
 
-    private final int writePoolId;
-
     private final int readPoolId;
+    private final int writePoolId;
 
     private final String schema;
 
-    private boolean transactionInitialized = false;
-
+    private boolean transactionInitialized;
     private long transaction;
 
     /**
@@ -82,7 +79,7 @@ public class AssignmentImpl implements Serializable, Assignment {
      * @param writePoolId
      * @param schema
      */
-    AssignmentImpl(final int contextId, final int serverId, final int readPoolId, final int writePoolId, final String schema) {
+    AssignmentImpl(int contextId, int serverId, int readPoolId, int writePoolId, String schema) {
         super();
         this.contextId = contextId;
         this.serverId = serverId;
@@ -131,5 +128,51 @@ public class AssignmentImpl implements Serializable, Assignment {
     void setTransaction(long transaction) {
         this.transaction = transaction;
         transactionInitialized = true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + serverId;
+        result = prime * result + readPoolId;
+        result = prime * result + writePoolId;
+        result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        AssignmentImpl other = (AssignmentImpl) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (serverId != other.serverId) {
+            return false;
+        }
+        if (readPoolId != other.readPoolId) {
+            return false;
+        }
+        if (writePoolId != other.writePoolId) {
+            return false;
+        }
+        if (schema == null) {
+            if (other.schema != null) {
+                return false;
+            }
+        } else if (!schema.equals(other.schema)) {
+            return false;
+        }
+        return true;
     }
 }

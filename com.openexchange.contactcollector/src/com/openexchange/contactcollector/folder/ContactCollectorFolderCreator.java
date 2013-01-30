@@ -101,7 +101,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (databaseService != null) {
+            if (databaseService != null && null != con) {
                 databaseService.backWritable(cid, con);
             }
         }

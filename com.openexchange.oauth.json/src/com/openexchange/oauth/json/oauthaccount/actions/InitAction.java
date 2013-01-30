@@ -62,7 +62,6 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -139,7 +138,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          */
         final String callbackUrl;
         {
-            final StringAllocator callbackUrlBuilder = new StringAllocator(512);
+            final StringBuilder callbackUrlBuilder = new StringBuilder();
             callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
             callbackUrlBuilder.append(request.getHostname());
             callbackUrlBuilder.append(PREFIX.get().getPrefix()).append("oauth/accounts");
