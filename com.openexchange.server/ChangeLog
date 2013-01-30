@@ -1,3 +1,7 @@
+* 2013-01-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24641: Added dynamic parsing for boolean operands in search filters  
+ 
 * 2013-01-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 24625: Proper wild-card to regex conversion
