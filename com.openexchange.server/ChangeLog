@@ -1,6 +1,8 @@
 * 2013-01-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 24654: Don't fall-back to User-Agent header if client identifier is missing on login attempt
+ - Fix for bug 24624: Introduced property "com.openexchange.user.maxClientCount" to limit allowed number of client identifiers
+                      stored/tracked per user
 
 * 2013-01-30 - marcus.klein@open-xchange.com
 
