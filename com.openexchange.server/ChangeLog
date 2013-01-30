@@ -7,6 +7,7 @@
  - Fix for bug 24632: Respond with a meaningful error if OAuth.signed HTTP request cannot be performed
  - Fix for bug 24677: Orderly delegate waiting/idl'ing flag to actual MailAccess instance
  - Fix for bug 24666: Introduced property "com.openexchange.login.maxLoginLength" to specify max. allowed length for a login string
+ - Fix for bug 24680: Check file name prior to MIME encoding attempt
 
 * 2013-01-30 - tobias.friedrich@open-xchange.com
 
