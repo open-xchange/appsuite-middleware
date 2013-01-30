@@ -52,6 +52,9 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+cat<<EOF > README.TXT
+This is an empty package.
+EOF
 
 %post core
 . /opt/open-xchange/lib/oxfunctions.sh
@@ -75,6 +78,7 @@ fi
 
 %files
 %defattr(-,root,root)
+%doc README.TXT
 
 %files core
 %defattr(-,root,root)
