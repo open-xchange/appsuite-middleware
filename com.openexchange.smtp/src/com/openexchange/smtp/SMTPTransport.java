@@ -577,7 +577,7 @@ public final class SMTPTransport extends MailTransport {
                     transport.connect(server, port, null, null);
                 }
                 saveChangesSafe(smtpMessage);
-                transport(smtpMessage, smtpMessage.getAllRecipients(), transport);
+                transport(smtpMessage, smtpMessage.getAllRecipients(), transport, smtpConfig);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
             } catch (final javax.mail.AuthenticationFailedException e) {
                 throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -625,7 +625,7 @@ public final class SMTPTransport extends MailTransport {
                         transport.connect(server, port, null, null);
                     }
                     saveChangesSafe(smtpMessage);
-                    transport(smtpMessage, recipients, transport);
+                    transport(smtpMessage, recipients, transport, smtpConfig);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 } catch (final javax.mail.AuthenticationFailedException e) {
                     throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -709,7 +709,7 @@ public final class SMTPTransport extends MailTransport {
                     /*
                      * TODO: Do encryption here
                      */
-                    transport(smtpMessage, recipients, transport);
+                    transport(smtpMessage, recipients, transport, smtpConfig);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 } catch (final javax.mail.AuthenticationFailedException e) {
                     throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -727,29 +727,30 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
-    private void transport(final SMTPMessage smtpMessage, final Address[] recipients, final Transport transport) throws MessagingException {
+    private void transport(final SMTPMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
         try {
             transport.sendMessage(smtpMessage, recipients);
         } catch (final MessagingException e) {
             boolean throwIt = true;
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
-                final String cts = smtpMessage.getHeader("Content-Type", null);
-                if ((null != cts) && cts.startsWith("multipart/")) {
-                    try {
-                        final Multipart multipart = (Multipart) smtpMessage.getContent();
-                        final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
-                        multipart.writeTo(baos);
-                        smtpMessage.setDataHandler(new DataHandler(new MessageDataSource(Streams.asInputStream(baos), multipart.getContentType())));
-                        saveChangesSafe(smtpMessage);
-                        transport.sendMessage(smtpMessage, recipients);
-                        throwIt = false;
-                    } catch (final Exception ignore) {
-                        // Ignore
+                try {
+                    final String cts = smtpMessage.getHeader("Content-Type", null);
+                    if ((null != cts) && cts.startsWith("multipart/")) {
+                            final Multipart multipart = (Multipart) smtpMessage.getContent();
+                            final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
+                            multipart.writeTo(baos);
+                            smtpMessage.setDataHandler(new DataHandler(new MessageDataSource(Streams.asInputStream(baos), multipart.getContentType())));
+                            saveChangesSafe(smtpMessage);
+                            transport.sendMessage(smtpMessage, recipients);
+                            throwIt = false;
                     }
+                } catch (final Exception ignore) {
+                    // Ignore
+                    LOG.warn("Attempt to recover from \"" + e.getNextException().getMessage() + "\" failed.", ignore);
                 }
             }
             if (throwIt) {
-                throw e;
+                throw MimeMailException.handleMessagingException(e, smtpConfig);
             }
         }
     }
