@@ -65,14 +65,12 @@ import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -85,22 +83,6 @@ import com.openexchange.tools.servlet.http.Tools;
 public final class LoginTools {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginTools.class);
-
-    private static volatile Integer maxLoginLength;
-    private static int maxLoginLength() {
-        Integer tmp = maxLoginLength;
-        if (null == tmp) {
-            synchronized (LoginTools.class) {
-                tmp = maxLoginLength;
-                if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? 256 : service.getIntProperty("com.openexchange.login.maxLoginLength", 256));
-                    maxLoginLength = tmp;
-                }
-            }
-        }
-        return tmp.intValue();
-    }
 
     private LoginTools() {
         super();
@@ -194,12 +176,6 @@ public final class LoginTools {
     }
 
     public static LoginRequestImpl parseLogin(HttpServletRequest req, String login, String password, boolean strict, String defaultClient, boolean forceHTTPS) throws OXException {
-        {
-            final int maxLoginLength = maxLoginLength();
-            if (maxLoginLength > 0 && maxLoginLength < login.length()) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(LoginFields.LOGIN_PARAM, Strings.abbreviate(login, 256));
-            }
-        }
         final String authId = parseAuthId(req, strict);
         final String client = parseClient(req, strict, defaultClient);
         final String version;
@@ -278,9 +254,8 @@ public final class LoginTools {
      *
      * @param newIP The possibly new IP address
      * @param session The session to update if IP addresses differ
-     * @throws OXException If operation fails
      */
-    public static void updateIPAddress(LoginConfiguration conf, String newIP, Session session) throws OXException {
+    public static void updateIPAddress(LoginConfiguration conf, String newIP, Session session) {
         if (conf.isInsecure()) {
             String oldIP = session.getLocalIp();
             if (null != newIP && !newIP.equals(oldIP)) {
