@@ -148,15 +148,17 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
     }
 
     private void init() throws OXException {
-        final Map<String, FullnameUIDPair> all = delegatee.getAllUIDLs();
-        final int size = all.size();
-        final Iterator<Entry<String, FullnameUIDPair>> iter = all.entrySet().iterator();
-        for (int i = 0; i < size; i++) {
-            final Entry<String, FullnameUIDPair> entry = iter.next();
-            pair2uidl.put(entry.getValue(), entry.getKey());
-            uidl2pair.put(entry.getKey(), entry.getValue());
+        if (Mode.RE_INIT == mode.get()) {
+            final Map<String, FullnameUIDPair> all = delegatee.getAllUIDLs();
+            final int size = all.size();
+            final Iterator<Entry<String, FullnameUIDPair>> iter = all.entrySet().iterator();
+            for (int i = 0; i < size; i++) {
+                final Entry<String, FullnameUIDPair> entry = iter.next();
+                pair2uidl.put(entry.getValue(), entry.getKey());
+                uidl2pair.put(entry.getKey(), entry.getValue());
+            }
+            mode.set(Mode.NONE);            
         }
-        mode.set(Mode.NONE);
     }
 
     private void checkInit(final Lock obtainedReadLock) throws OXException {
