@@ -56,8 +56,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -87,6 +89,8 @@ public final class JCSCacheServiceInit {
     private static final String REGION_PREFIX = "jcs.region.";
 
     private static final String AUX_PREFIX = "jcs.auxiliary.";
+
+    private static final String[] AUX_TYPES = { "LTCP", "SessionLTCP" };
 
     private static JCSCacheServiceInit SINGLETON;
 
@@ -159,9 +163,14 @@ public final class JCSCacheServiceInit {
     private Set<String> defaultCacheRegions;
 
     /**
-     * Holds all cache region names that were configured to use a lateral auxiliary cache
+     * Holds all cache region names with their defined cache type
      */
-    private final Set<String> auxiliaryCacheRegions;
+    private final Map<String, String> cacheRegionTypes;
+
+    /**
+     * The cache type of the default region (holding the value of the "jcs.default" property)
+     */
+    private String defaultRegionType;
 
     /**
      * Initializes a new {@link JCSCacheServiceInit}
@@ -170,7 +179,7 @@ public final class JCSCacheServiceInit {
         super();
         started = new AtomicBoolean();
         auxiliaryNames = new HashSet<String>(4);
-        auxiliaryCacheRegions = new HashSet<String>();
+        cacheRegionTypes = new HashMap<String, String>();
     }
 
     private static Properties loadProperties(final String cacheConfigFile) throws OXException {
@@ -198,20 +207,16 @@ public final class JCSCacheServiceInit {
     }
 
     private void configure(final Properties properties) throws OXException {
-        if (isEventInvalidation()) {
-            preProcessAuxiliaries(properties, "LTCP", "SessionLTCP");
-        }
-        doConfigure(properties);
-    }
-
-    private void doConfigure(final Properties properties) throws OXException {
         synchronized (ccmInstance) {
             if (null == props) {
                 /*
                  * This should be the initial configuration with cache.ccf
                  */
+                checkDefaultAuxiliary(properties);
+                if (isEventInvalidation()) {
+                    preProcessAuxiliaries(properties, AUX_TYPES);
+                }
                 props = properties;
-                checkDefaultAuxiliary();
                 auxiliaryProps = getAuxiliaryProps(properties);
                 configurator = ccmInstance.configure(props, false);
             } else {
@@ -223,6 +228,9 @@ public final class JCSCacheServiceInit {
                      * Nothing to do.
                      */
                     return;
+                }
+                if (isEventInvalidation()) {
+                    preProcessAuxiliaries(properties, AUX_TYPES);
                 }
                 final Properties additionalProps = new Properties();
                 boolean addAuxProps = false;
@@ -275,7 +283,11 @@ public final class JCSCacheServiceInit {
      * @return <code>true</code>, if the region has an auxiliary cache, <code>false</code>, otherwise
      */
     public boolean hasAuxiliary(String cacheName) {
-        return auxiliaryCacheRegions.contains(cacheName);
+        String cacheType = cacheRegionTypes.get(cacheName);
+        if (null == cacheType) {
+            cacheType = defaultRegionType;
+        }
+        return contains(cacheType, AUX_TYPES);
     }
 
     private void initializeCompositeCacheManager(final boolean obtainMutex) {
@@ -388,7 +400,6 @@ public final class JCSCacheServiceInit {
             final Properties properties = loadProperties(new FileInputStream(configurationService.getFileByName(cacheConfigFileName)));
             initializeCompositeCacheManager(obtainMutex);
             configure(properties);
-            checkDefaultAuxiliary();
             defaultCacheRegions = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(ccmInstance.getCacheNames())));
         } catch (final IOException e) {
             throw CacheExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -400,11 +411,11 @@ public final class JCSCacheServiceInit {
      *
      * @throws CacheException If default auxiliary is missing
      */
-    private void checkDefaultAuxiliary() throws OXException {
+    private static void checkDefaultAuxiliary(Properties properties) throws OXException {
         /*
          * Ensure an auxiliary cache is present
          */
-        final String value = props.getProperty(DEFAULT_REGION);
+        final String value = properties.getProperty(DEFAULT_REGION);
         if (null == value || 0 == value.length()) {
             throw CacheExceptionCode.MISSING_DEFAULT_AUX.create();
         }
@@ -508,8 +519,9 @@ public final class JCSCacheServiceInit {
     }
 
     /**
-     * Pre-processes the supplied JCS properties and removes all references to the supplied auxiliaries, storing the affected cache
-     * regions in the {@link #auxiliaryCacheRegions} set.
+     * Pre-processes the supplied JCS properties and stores all regions with their cache type definitions in the {@link #cacheRegionTypes}
+     * map, the default cache region type is stored in {@link #defaultRegionType}. Then, all cache region references to the supplied
+     * auxiliaries are removed from the properties.
      *
      * @param properties The properties to pre-process
      * @param auxiliaries The name of the auxiliary caches to remove
@@ -519,27 +531,31 @@ public final class JCSCacheServiceInit {
             List<Object> propertiesToClear = new ArrayList<Object>();
             for (Entry<Object, Object> property : properties.entrySet()) {
                 /*
-                 * check for matching auxiliary cache value
+                 * check for cache type definition
                  */
-                String auxiliary = (String)property.getValue();
-                boolean matches = false;
-                for (String aux : auxiliaries) {
-                    if (aux.equals(auxiliary)) {
-                        matches = true;
-                        break;
-                    }
-                }
-                if (matches) {
-                    String key = (String)property.getKey();
-                    if (key.startsWith(REGION_PREFIX)) {
-                        /*
-                         * remember cache region
-                         */
-                        auxiliaryCacheRegions.add(key.substring(REGION_PREFIX.length()));
-                        /*
-                         * remember property to clear afterwards
-                         */
+                String key = (String)property.getKey();
+                if (key.equals(DEFAULT_REGION)) {
+                    /*
+                     * remember original default cache region type
+                     */
+                    String value = (String)property.getValue();
+                    LOG.debug("Original default cache region type: " + value);
+                    defaultRegionType = value;
+                    if (contains(value, auxiliaries)) {
                         propertiesToClear.add(property.getKey());
+                    }
+                } else if (key.startsWith(REGION_PREFIX)) {
+                    String regionName = key.substring(REGION_PREFIX.length());
+                    if (false == regionName.contains("attributes")) {
+                        /*
+                         * remember original cache region type
+                         */
+                        String value = (String)property.getValue();
+                        LOG.debug("Original cache region type for '" + regionName + "': " + value);
+                        cacheRegionTypes.put(regionName, value);
+                        if (contains(value, auxiliaries)) {
+                            propertiesToClear.add(property.getKey());
+                        }
                     }
                 }
             }
@@ -547,9 +563,21 @@ public final class JCSCacheServiceInit {
              * clear properties referencing the auxiliaries
              */
             for (Object key : propertiesToClear) {
+                LOG.debug("Clearing cache region type property: " + key);
                 properties.put(key, "");
             }
         }
+    }
+
+    private static boolean contains(String value, String[] array) {
+        if (null != array) {
+            for (String string : array) {
+                if (null != string && string.equals(value)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
