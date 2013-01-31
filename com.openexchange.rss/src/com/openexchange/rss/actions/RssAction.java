@@ -181,20 +181,39 @@ public class RssAction implements AJAXActionService {
         return new AJAXRequestResult(results, "rss");
     }
 
-	private static String urlDecodeSafe(final String urlString) {
+	private static String urlDecodeSafe(final String urlString) throws MalformedURLException {
 	    if (isEmpty(urlString)) {
             return urlString;
         }
 	    try {
             final String ret = URLDecoder.decode(urlString, "ISO-8859-1");
             if (isAscii(ret)) {
-                return ret;
+                return checkUrl(ret);
             }
-            return URLDecoder.decode(urlString, "UTF-8");
+            return checkUrl(URLDecoder.decode(urlString, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             return urlString;
         }
 	}
+
+	/**
+     * Checks given URL string for syntactical correctness.
+     * 
+     * @param sUrl The URL string
+	 * @throws MalformedURLException If URL string is invalid
+     */
+    private static String checkUrl(final String sUrl) throws MalformedURLException {
+        if (isEmpty(sUrl)) {
+            // Nothing to check
+            return sUrl;
+        }
+        final java.net.URL url = new java.net.URL(sUrl);
+        final String protocol = url.getProtocol();
+        if (!"http".equals(protocol) && !"https".equals(protocol)) {
+            throw new MalformedURLException("Only http & https protocols supported.");
+        }
+        return sUrl;
+    }
 
 	/**
      * Checks whether the specified string's characters are ASCII 7 bit
