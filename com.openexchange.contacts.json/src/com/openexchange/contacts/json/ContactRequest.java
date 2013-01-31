@@ -202,7 +202,10 @@ public class ContactRequest {
     	if (null != mandatoryFields) {
     		fields = Arrays.add(fields, mandatoryFields);
     	}
-    	final int[] columnIDs = RequestTools.getColumnsAsIntArray(request, "columns");
+    	final int[] columnIDs = RequestTools.getColumnsAsIntArray(request);
+    	if (null == columnIDs) {
+    	    throw OXJSONExceptionCodes.MISSING_FIELD.create("columns");
+    	}
     	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, fields);
     }    
 
