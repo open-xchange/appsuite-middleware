@@ -849,6 +849,13 @@ public class RdbUserStorage extends UserStorage {
                     if (!onlyLogins) {
                         final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                         LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
+                        LOG.error("Expected lines: " + size + " Updated lines: " + lines);
+                        final Map<Integer, UserImpl> map = new HashMap<Integer, UserImpl>(1);
+                        map.put(I(userId), load);
+                        loadAttributes(ctx, con, map);
+                        for (int i : map.keySet()) {
+                            LOG.error("User " + i + ": " + map.get(i).getAttributes().toString());
+                        }
                         throw e;
                     }
                 }
