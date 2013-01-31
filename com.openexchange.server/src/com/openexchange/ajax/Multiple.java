@@ -186,7 +186,7 @@ public class Multiple extends SessionServlet {
                 List<JsonInOut> serialTasks = null;
                 CompletionService<Object> concurrentTasks = null;
                 int concurrentTasksCount = 0;
-                // Build-up mapping & schedule for serial or concurrent execution
+                // Build-up mapping & schedule for either serial or concurrent execution
                 final ConcurrentTIntObjectHashMap<JsonInOut> mapping = new ConcurrentTIntObjectHashMap<JsonInOut>(length);
                 for (int pos = 0; pos < length; pos++) {
                     final JSONObject dataObject = dataArray.getJSONObject(pos);
