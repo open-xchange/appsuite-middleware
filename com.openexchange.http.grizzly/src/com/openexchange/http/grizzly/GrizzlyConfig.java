@@ -119,7 +119,18 @@ public class GrizzlyConfig implements Initialization {
 
     /** Default encoding for incoming Http Requests, this value must be equal to the web server's default encoding */
     private String defaultEncoding = "UTF-8";
+    
+    /** Do we want to consider X-Forward-* Headers */ 
+    private boolean isConsiderXForwards = false;
 
+    /** A comma separated list of known proxies */
+    private String knownProxies = "";
+    /**
+     * The name of the protocolHeader used to identify the originating IP address of a client connecting to a web server through an HTTP
+     * proxy or load balancer
+     */
+    private String forHeader = "X-Forwarded-For";
+    
     /** The name of the protocolHeader used to decide if we are dealing with a in-/secure Request */
     private String protocolHeader = "X-Forwarded-Proto";
 
@@ -173,6 +184,9 @@ public class GrizzlyConfig implements Initialization {
         this.isForceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", false);
         this.isCookieHttpOnly = configService.getBoolProperty("com.openexchange.cookie.httpOnly", true);
         this.defaultEncoding = configService.getProperty("DefaultEncoding", "UTF-8");
+        this.isConsiderXForwards = configService.getBoolProperty("com.openexchange.server.considerXForwards", false);
+        this.knownProxies = configService.getProperty("com.openexchange.server.knownProxies", "");
+        this.forHeader = configService.getProperty("com.openexchange.server.forHeader", "X-Forwarded-For");
         this.protocolHeader = configService.getProperty("com.openexchange.server.protocolHeader", "X-Forwarded-Proto");
         this.httpsProtoValue = configService.getProperty("com.openexchange.server.httpsProtoValue", "https");
         this.httpProtoPort = configService.getIntProperty("com.openexchange.server.httpProtoPort", 80);
@@ -320,15 +334,21 @@ public class GrizzlyConfig implements Initialization {
 
 
     /**
-     * Gets the log
-     *
-     * @return The log
+     * Returns the known proxies as comma separated list of IPs
+     * @return the known proxies as comma separated list of IPs or an empty String
      */
-    public static Log getLog() {
-        return LOG;
+    public String getKnownProxies() {
+        return knownProxies;
     }
-
-
+    
+    /**
+     * Gets the name of forward for header 
+     * @return the forwardHeader
+     */
+    public String getForHeader() {
+        return forHeader;
+    }
+    
     /**
      * Gets the protocolHeader
      *
@@ -394,7 +414,7 @@ public class GrizzlyConfig implements Initialization {
      * @return
      */
     public boolean isConsiderXForwards() {
-        return false;
+        return isConsiderXForwards;
     }
 
 }
