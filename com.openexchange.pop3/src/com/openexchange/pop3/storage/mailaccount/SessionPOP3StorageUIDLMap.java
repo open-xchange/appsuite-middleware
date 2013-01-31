@@ -84,11 +84,11 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
     public static SessionPOP3StorageUIDLMap getInstance(final POP3Access pop3Access) throws OXException {
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getUIDLMap(pop3Access.getAccountId());
-        SessionPOP3StorageUIDLMap cached;
         Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
             lock = Session.EMPTY_LOCK;
         }
+        SessionPOP3StorageUIDLMap cached;
         lock.lock();
         try {
             try {
