@@ -348,7 +348,8 @@ public enum CIFSExceptionCodes implements OXExceptionCode {
      */
     NT_STATUS_NOT_FOUND(CIFSExceptionMessages.NT_STATUS_NOT_FOUND, CATEGORY_USER_INPUT),
     /**
-     * The referenced account is currently locked out and may not be logged on to.
+     * Your account has been blocked. This can have various reasons like having mistyped the password several times.<br>
+     * Please contact your system administrator or hoster in case you can no longer log in.
      */
     NT_STATUS_ACCOUNT_LOCKED_OUT(CIFSExceptionMessages.NT_STATUS_ACCOUNT_LOCKED_OUT, CATEGORY_USER_INPUT),
     /**

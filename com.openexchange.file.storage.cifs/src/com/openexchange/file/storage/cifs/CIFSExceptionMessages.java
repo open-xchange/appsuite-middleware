@@ -269,8 +269,9 @@ public final class CIFSExceptionMessages implements LocalizableStrings {
     // STATUS_NOT_FOUND
     public static final String NT_STATUS_NOT_FOUND = "STATUS_NOT_FOUND";
 
-    // The referenced account is currently locked out and may not be logged on to.
-    public static final String NT_STATUS_ACCOUNT_LOCKED_OUT = "The referenced account is currently locked out and may not be logged on to.";
+    // Your account has been blocked. This can have various reasons like having mistyped the password several times.
+    // Please contact your system administrator or hoster in case you can no longer log in.
+    public static final String NT_STATUS_ACCOUNT_LOCKED_OUT = "Your account has been blocked. This can have various reasons like having mistyped the password several times.\nPlease contact your system administrator or hoster in case you can no longer log in.";
 
     // The remote system is not reachable by the transport.
     public static final String NT_STATUS_PATH_NOT_COVERED = "The remote system is not reachable by the transport.";
