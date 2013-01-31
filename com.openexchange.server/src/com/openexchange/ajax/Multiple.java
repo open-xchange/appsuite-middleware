@@ -58,6 +58,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -89,7 +90,7 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.BoundedCompletionService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -151,8 +152,7 @@ public class Multiple extends SessionServlet {
                 Streams.close(reader);
             }
         }
-        JSONArray respArr = new JSONArray();
-
+        JSONArray respArr = null;
         try {
             final ServerSession session = getSessionObject(req);
             if (session == null) {
@@ -172,7 +172,7 @@ public class Multiple extends SessionServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         final Writer writer = resp.getWriter();
-        writeTo(respArr, writer);
+        writeTo(null == respArr ? new JSONArray(0) : respArr, writer);
         writer.flush();
     }
 
@@ -184,9 +184,9 @@ public class Multiple extends SessionServlet {
             try {
                 // Distinguish between serially and concurrently executable requests
                 List<JsonInOut> serialTasks = null;
-                ThreadPoolCompletionService<Object> concurrentTasks = null;
+                CompletionService<Object> concurrentTasks = null;
                 int concurrentTasksCount = 0;
-                // Build-up mapping & schedule for serial or concurrent execution
+                // Build-up mapping & schedule for either serial or concurrent execution
                 final ConcurrentTIntObjectHashMap<JsonInOut> mapping = new ConcurrentTIntObjectHashMap<JsonInOut>(length);
                 for (int pos = 0; pos < length; pos++) {
                     final JSONObject dataObject = dataArray.getJSONObject(pos);
@@ -204,7 +204,7 @@ public class Multiple extends SessionServlet {
                         serialTasks.add(jsonInOut);
                     } else {
                         if (null == concurrentTasks) {
-                            concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
+                            concurrentTasks = new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), 4).setTrackable(true);
                         }
                         concurrentTasks.submit(new CallableImpl(jsonInOut, session, module, req));
                         concurrentTasksCount++;

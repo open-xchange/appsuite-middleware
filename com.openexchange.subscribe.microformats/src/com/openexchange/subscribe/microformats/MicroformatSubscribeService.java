@@ -52,7 +52,6 @@ package com.openexchange.subscribe.microformats;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.java.UnsynchronizedStringReader;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -107,7 +107,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
 
         if (!objectParsers.isEmpty()) {
             data = read(htmlData);
-            htmlData = new StringReader(data);
+            htmlData = new UnsynchronizedStringReader(data);
         }
 
         OXMFParser parser = parserFactory.getParser();
@@ -116,7 +116,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         List results = new ArrayList(transformer.transform(parsed));
 
         for (ObjectParser objectParser : objectParsers) {
-            Collection parsedObjects = objectParser.parse(new StringReader(data));
+            Collection parsedObjects = objectParser.parse(new UnsynchronizedStringReader(data));
             results.addAll(parsedObjects);
         }
 
