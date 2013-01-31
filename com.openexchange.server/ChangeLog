@@ -5,6 +5,7 @@
                       stored/tracked per user
  - Fix for bug 24690: Accept null values
  - Fix for bug 24688: Check for a valid HTTP/S URL for OXMF subscriptions
+ - Fix for bug 24689: Improved check for image content when uploading contact image data
 
 * 2013-01-30 - marcus.klein@open-xchange.com
 
