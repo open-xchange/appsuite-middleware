@@ -2502,6 +2502,7 @@ msgstr ""
 
 #. The string cannot be parsed to a valid URL.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:82
 msgid "The string cannot be parsed to a valid URL."
 msgstr ""
 
