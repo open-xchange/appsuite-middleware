@@ -93,7 +93,6 @@ import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -203,8 +202,6 @@ public class AdminCache {
 
     public static final String PATTERN_REGEX_FUNCTION = "CREATE\\s+(FUNCTION|PROCEDURE) (.*?)END\\s*//";
 
-    private final Properties fallback_access_combinations = new Properties();
-
     private HashMap<String, UserModuleAccess> named_access_combinations = null;
 
     public AdminCache() {
@@ -227,7 +224,7 @@ public class AdminCache {
      *
      * @return
      */
-    public UserModuleAccess getDefaultUserModuleAccess() {
+    public static UserModuleAccess getDefaultUserModuleAccess() {
         final UserModuleAccess ret = new UserModuleAccess();
         ret.disableAll();
         ret.setWebmail(true);
@@ -356,7 +353,7 @@ public class AdminCache {
         }
     }
 
-    private Properties loadAccessCombinations() {
+    private static Properties loadAccessCombinations() {
         // Load properties from file , if does not exists use fallback
         // properties!
         final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -364,15 +361,6 @@ public class AdminCache {
             throw new IllegalStateException("Absent service: " + ConfigurationService.class.getName());
         }
         return service.getFile("ModuleAccessDefinitions.properties");
-    }
-
-    private Properties getFallbackAccessCombinations() {
-        // here we init the fallback access combinations when the file is not
-        // present.
-        fallback_access_combinations.put("basic", "contacts,webmail");
-        fallback_access_combinations.put("premium", "contacts,webmail,calendar,publicfolder");
-        fallback_access_combinations.put("standard", "contacts,webmail,calendar");
-        return fallback_access_combinations;
     }
 
     protected void initPool() {
@@ -489,7 +477,7 @@ public class AdminCache {
         return ox_queries_initial;
     }
 
-    public Connection getSimpleSqlConnection(String url, String user, String password, String driver) throws SQLException, ClassNotFoundException {
+    public static Connection getSimpleSqlConnection(String url, String user, String password, String driver) throws SQLException, ClassNotFoundException {
         // System.err.println("-->"+driver+" ->"+url+" "+user+" "+password);
         Class.forName(driver);
         // give database some time to react (in seconds)
@@ -585,7 +573,7 @@ public class AdminCache {
         return al;
     }
 
-    private String[] getOrdered(String data) {
+    private static String[] getOrdered(String data) {
         String[] ret = new String[0];
         if (data != null) {
             StringTokenizer st = new StringTokenizer(data, ",");
@@ -631,19 +619,22 @@ public class AdminCache {
      * @throws UnsupportedEncodingException
      */
     public String encryptPassword(final PasswordMechObject user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        final String passwordMech = user.getPasswordMech();
-        if (isEmpty(passwordMech) || "null".equals(toLowerCase(passwordMech))) {
+        String passwordMech = user.getPasswordMech();
+        if (passwordMech == null) {
             String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
             pwmech = "{" + pwmech + "}";
             if (pwmech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH)) {
-                user.setPasswordMech(PasswordMechObject.CRYPT_MECH);
+                passwordMech = PasswordMechObject.CRYPT_MECH;
             } else if (pwmech.equalsIgnoreCase(PasswordMechObject.SHA_MECH)) {
-                user.setPasswordMech(PasswordMechObject.SHA_MECH);
+                passwordMech = PasswordMechObject.SHA_MECH;
+            } else if (pwmech.equalsIgnoreCase(PasswordMechObject.BCRYPT_MECH)) {
+                passwordMech = PasswordMechObject.BCRYPT_MECH;
             } else {
                 log.warn("WARNING: unknown password mechanism " + pwmech + " using SHA");
-                user.setPasswordMech(PasswordMechObject.SHA_MECH);
+                passwordMech = PasswordMechObject.SHA_MECH;
             }
         }
+        user.setPasswordMech(passwordMech);
         final String passwd;
         if (PasswordMechObject.CRYPT_MECH.equals(passwordMech)) {
             passwd = UnixCrypt.crypt(user.getPassword());
@@ -759,32 +750,4 @@ public class AdminCache {
     public boolean isMasterAdmin(final Credentials auth) {
         return masterAuthenticationDisabled || (getMasterCredentials() != null && getMasterCredentials().getLogin().equals(auth.getLogin()));
     }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }
