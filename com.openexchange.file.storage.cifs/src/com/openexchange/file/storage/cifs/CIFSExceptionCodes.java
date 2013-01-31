@@ -357,7 +357,7 @@ public enum CIFSExceptionCodes implements OXExceptionCode {
      */
     NT_STATUS_PATH_NOT_COVERED(CIFSExceptionMessages.NT_STATUS_PATH_NOT_COVERED, CATEGORY_USER_INPUT),
     /**
-     * NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED
+     * I/O request could not be handled.
      */
     NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED(CIFSExceptionMessages.NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED, CATEGORY_USER_INPUT),
 

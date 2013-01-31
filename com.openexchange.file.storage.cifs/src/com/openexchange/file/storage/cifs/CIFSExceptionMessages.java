@@ -276,8 +276,8 @@ public final class CIFSExceptionMessages implements LocalizableStrings {
     // The remote system is not reachable by the transport.
     public static final String NT_STATUS_PATH_NOT_COVERED = "The remote system is not reachable by the transport.";
 
-    // NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED
-    public static final String NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED = "NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED";
+    // I/O request could not be handled.
+    public static final String NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED = "I/O request could not be handled.";
 
     /**
      * Initializes a new {@link CIFSExceptionMessages}.
