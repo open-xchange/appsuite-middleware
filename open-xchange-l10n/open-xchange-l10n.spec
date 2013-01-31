@@ -550,7 +550,6 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*cs_CZ*
-/opt/open-xchange/etc/languages/appsuite/cs_CZ.properties
 
 %files da-dk
 %defattr(-,root,root)
@@ -566,8 +565,6 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*de_DE*
-%dir /opt/open-xchange/etc/languages/appsuite/
-/opt/open-xchange/etc/languages/appsuite/de_DE.properties
 
 %files el-gr
 %defattr(-,root,root)
@@ -576,20 +573,16 @@ done
 
 %files en-us
 %defattr(-,root,root)
-%dir /opt/open-xchange/etc/languages/appsuite/
-/opt/open-xchange/etc/languages/appsuite/en_US.properties
 
 %files es-es
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*es_ES*
-/opt/open-xchange/etc/languages/appsuite/es_ES.properties
 
 %files es-mx
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*es_MX*
-/opt/open-xchange/etc/languages/appsuite/es_MX.properties
 
 %files eu-es
 %defattr(-,root,root)
@@ -600,14 +593,11 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*fr_CA*
-/opt/open-xchange/etc/languages/appsuite/fr_CA.properties
 
 %files fr-fr
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*fr_FR*
-%dir /opt/open-xchange/etc/languages/appsuite/
-/opt/open-xchange/etc/languages/appsuite/fr_FR.properties
 
 %files he-he
 %defattr(-,root,root)
@@ -618,19 +608,16 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*hu_HU*
-/opt/open-xchange/etc/languages/appsuite/hu_HU.properties
 
 %files it-it
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*it_IT*
-/opt/open-xchange/etc/languages/appsuite/it_IT.properties
 
 %files ja-jp
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*ja_JP*
-/opt/open-xchange/etc/languages/appsuite/ja_JP.properties
 
 %files ko-ko
 %defattr(-,root,root)
@@ -641,20 +628,16 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*lv_LV*
-%dir /opt/open-xchange/etc/languages/appsuite/
-/opt/open-xchange/etc/languages/appsuite/lv_LV.properties
 
 %files nl-nl
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*nl_NL*
-/opt/open-xchange/etc/languages/appsuite/nl_NL.properties
 
 %files pl-pl
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*pl_PL*
-/opt/open-xchange/etc/languages/appsuite/pl_PL.properties
 
 %files pt-br
 %defattr(-,root,root)
@@ -670,7 +653,6 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*ro_RO*
-/opt/open-xchange/etc/languages/appsuite/ro_RO.properties
 
 %files ru-ru
 %defattr(-,root,root)
@@ -681,7 +663,6 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*sk_SK*
-/opt/open-xchange/etc/languages/appsuite/sk_SK.properties
 
 %files sv-sv
 %defattr(-,root,root)
@@ -697,13 +678,11 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*zh_CN*
-/opt/open-xchange/etc/languages/appsuite/zh_CN.properties
 
 %files zh-tw
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*zh_TW*
-/opt/open-xchange/etc/languages/appsuite/zh_TW.properties
 
 %changelog
 * Mon Jan 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
