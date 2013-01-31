@@ -210,6 +210,13 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1302
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/user.properties
+if ! ox_exists_property com.openexchange.user.maxClientCount $pfile; then
+    ox_set_property com.openexchange.user.maxClientCount -1 $pfile
+fi
+
 # SoftwareChange_Request-1275
 pfile=/opt/open-xchange/etc/server.properties
 if grep -E "com.openexchange.log.propertyNames.*.ajp13." $pfile > /dev/null; then
