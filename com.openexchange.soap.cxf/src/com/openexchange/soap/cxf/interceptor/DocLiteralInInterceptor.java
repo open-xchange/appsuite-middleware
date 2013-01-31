@@ -30,7 +30,6 @@ import java.util.regex.Pattern;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
-import org.apache.cxf.common.logging.LogUtils;
 import org.apache.cxf.databinding.DataReader;
 import org.apache.cxf.endpoint.Endpoint;
 import org.apache.cxf.interceptor.AbstractInDatabindingInterceptor;
@@ -50,6 +49,7 @@ import org.apache.cxf.service.model.ServiceModelUtil;
 import org.apache.cxf.staxutils.DepthXMLStreamReader;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.ws.commons.schema.XmlSchemaElement;
+import com.openexchange.log.CommonsLoggingLogger;
 
 /**
  * {@link DocLiteralInInterceptor} - A rewrite of {@code org.apache.cxf.interceptor.DocLiteralInInterceptor} class for less strict parsing
@@ -61,7 +61,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
     public static final String KEEP_PARAMETERS_WRAPPER = DocLiteralInInterceptor.class.getName()
         + ".DocLiteralInInterceptor.keep-parameters-wrapper";
 
-    private static final Logger LOG = LogUtils.getL7dLogger(DocLiteralInInterceptor.class);
+    private static final Logger LOG = new CommonsLoggingLogger(DocLiteralInInterceptor.class);
 
     public DocLiteralInInterceptor() {
         super(Phase.UNMARSHAL);
