@@ -4,6 +4,7 @@
  - Fix for bug 24624: Introduced property "com.openexchange.user.maxClientCount" to limit allowed number of client identifiers
                       stored/tracked per user
  - Fix for bug 24690: Accept null values
+ - Fix for bug 24688: Check for a valid HTTP/S URL for OXMF subscriptions
 
 * 2013-01-30 - marcus.klein@open-xchange.com
 
