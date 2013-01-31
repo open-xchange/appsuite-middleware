@@ -78,6 +78,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
+import com.damienmiller.BCrypt;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -629,8 +630,8 @@ public class AdminCache {
      * @throws UnsupportedEncodingException
      */
     public String encryptPassword(final PasswordMechObject user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        String passwd = null;
-        if (user.getPasswordMech() == null) {
+        final String passwordMech = user.getPasswordMech();
+        if (passwordMech == null) {
             String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
             pwmech = "{" + pwmech + "}";
             if (pwmech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH)) {
@@ -642,13 +643,16 @@ public class AdminCache {
                 user.setPasswordMech(PasswordMechObject.SHA_MECH);
             }
         }
-        if (user.getPasswordMech().equals(PasswordMechObject.CRYPT_MECH)) {
+        final String passwd;
+        if (PasswordMechObject.CRYPT_MECH.equals(passwordMech)) {
             passwd = UnixCrypt.crypt(user.getPassword());
-        } else if (user.getPasswordMech().equals(PasswordMechObject.SHA_MECH)) {
+        } else if (PasswordMechObject.SHA_MECH.equals(passwordMech)) {
             passwd = SHACrypt.makeSHAPasswd(user.getPassword());
+        } else if (PasswordMechObject.BCRYPT_MECH.equals(passwordMech)) {
+            passwd = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
         } else {
-            log.error("unsupported password mechanism: " + user.getPasswordMech());
-            throw new StorageException("unsupported password mechanism: " + user.getPasswordMech());
+            log.error("unsupported password mechanism: " + passwordMech);
+            throw new StorageException("unsupported password mechanism: " + passwordMech);
         }
         return passwd;
     }
