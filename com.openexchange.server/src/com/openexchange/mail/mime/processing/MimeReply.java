@@ -56,11 +56,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -79,6 +79,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
@@ -104,7 +105,6 @@ import com.openexchange.mail.parser.handlers.InlineContentHandler;
 import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -433,7 +433,7 @@ public final class MimeReply {
             final ContentType retvalContentType = new ContentType();
             String replyText;
             {
-                final List<String> list = new ArrayList<String>();
+                final List<String> list = new LinkedList<String>();
                 {
                     final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
                     final Locale locale = user.getLocale();
@@ -745,6 +745,12 @@ public final class MimeReply {
              * Get any text content
              */
             found = getTextContent(htmlPreferred, !htmlPreferred, multipartPart, count, partContentType, pc);
+            if (!found) {
+                /*
+                 * No HTML part found, retry with any text part
+                 */
+                found = getTextContent(false, false, multipartPart, count, partContentType, pc);
+            }
         }
         /*
          * Look for enclosed messages in any case
