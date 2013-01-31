@@ -8,7 +8,8 @@ OXRevision: 7
 Bundle-Activator: com.openexchange.admin.osgi.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Open-Xchange Inc.
-Import-Package: com.mysql.jdbc,
+Import-Package: com.damienmiller,
+ com.mysql.jdbc,
  com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.exceptions,
