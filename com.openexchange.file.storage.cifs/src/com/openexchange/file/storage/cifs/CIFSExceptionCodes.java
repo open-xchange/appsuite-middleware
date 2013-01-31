@@ -344,7 +344,7 @@ public enum CIFSExceptionCodes implements OXExceptionCode {
      */
     NT_STATUS_PASSWORD_MUST_CHANGE(CIFSExceptionMessages.NT_STATUS_PASSWORD_MUST_CHANGE, CATEGORY_USER_INPUT),
     /**
-     * STATUS_NOT_FOUND
+     * Please use a hostname instead of an IP address in the SMB URL.
      */
     NT_STATUS_NOT_FOUND(CIFSExceptionMessages.NT_STATUS_NOT_FOUND, CATEGORY_USER_INPUT),
     /**

@@ -266,8 +266,8 @@ public final class CIFSExceptionMessages implements LocalizableStrings {
     // The user must change his password before he logs on the first time.
     public static final String NT_STATUS_PASSWORD_MUST_CHANGE = "The user must change his password before he logs on the first time.";
 
-    // STATUS_NOT_FOUND
-    public static final String NT_STATUS_NOT_FOUND = "STATUS_NOT_FOUND";
+    // Please use a hostname instead of an IP address in the SMB URL.
+    public static final String NT_STATUS_NOT_FOUND = "Please use a hostname instead of an IP address in the SMB URL.";
 
     // Your account has been blocked. This can have various reasons like having mistyped the password several times.
     // Please contact your system administrator or hoster in case you can no longer log in.
