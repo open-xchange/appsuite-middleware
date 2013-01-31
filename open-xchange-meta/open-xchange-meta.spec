@@ -134,7 +134,7 @@ Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX into Plesk integration
 Requires:	%{oxcommon}
 Requires:	%{alllang}
-Requires:	open-xchange-spamhandler-default, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui
+Requires:	open-xchange-spamhandler-default, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui
 
 %description -n open-xchange-meta-plesk
 The Open-Xchange Meta package for OX into Plesk integration
@@ -266,6 +266,8 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Mon Jan 21 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-01-24
 * Tue Jan 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-01-23
 * Thu Jan 03 2013 Carsten Hoeger <choeger@open-xchange.com>

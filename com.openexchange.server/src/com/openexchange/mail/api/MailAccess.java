@@ -104,17 +104,17 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     protected final Collection<OXException> warnings;
 
-    protected boolean cacheable;
+    protected volatile boolean cacheable;
 
     /**
      * Indicates if <tt>MailAccess</tt> is currently held in {@link SingletonMailAccessCache}.
      */
-    protected boolean cached;
+    protected volatile boolean cached;
 
     /**
      * A flag to check if this <tt>MailAccess</tt> is connected, but in IDLE mode, waiting for any server notifications.
      */
-    protected boolean waiting;
+    protected volatile boolean waiting;
 
     protected MailProvider provider;
 

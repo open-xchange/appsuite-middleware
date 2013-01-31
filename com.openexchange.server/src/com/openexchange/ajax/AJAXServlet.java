@@ -82,6 +82,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -771,34 +772,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             bitSet.set(' ');
             WWW_FORM_URL = bitSet;
         }
-        {
-            final BitSet bitSet = new BitSet(256);
-            // alpha characters
-            for (int i = 'a'; i <= 'z'; i++) {
-                bitSet.set(i);
-            }
-            for (int i = 'A'; i <= 'Z'; i++) {
-                bitSet.set(i);
-            }
-            // numeric characters
-            for (int i = '0'; i <= '9'; i++) {
-                bitSet.set(i);
-            }
-            // special chars
-            bitSet.set('-');
-            bitSet.set('_');
-            bitSet.set('.');
-            bitSet.set('*');
-            // blank to be replaced with +
-            bitSet.set(' ');
-            // Anchor characters
-            bitSet.set('/');
-            bitSet.set('#');
-            bitSet.set('%');
-            bitSet.set('?');
-            bitSet.set('&');
-            WWW_FORM_URL_ANCHOR = bitSet;
-        }
+        WWW_FORM_URL_ANCHOR = URIExtended.URI_REFERENCE;
     }
 
     /**
@@ -832,6 +806,25 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 return ascii;
             }
             return PATTERN_CRLF.matcher(ascii).replaceAll("");
+        } catch (final RuntimeException e) {
+            LOG.error("A runtime error occurred.", e);
+            return s;
+        }
+    }
+
+    /**
+     * Sanitizes specified parameter value.
+     */
+    public static String sanitizeParam(final String s) {
+        if (isEmpty(s)) {
+            return s;
+        }
+        try {
+            // Strip possible "\r?\n" and/or "%0A?%0D"
+            if (s.indexOf('\n') < 0 && s.indexOf("%0") < 0) {
+                return s;
+            }
+            return PATTERN_CRLF.matcher(s).replaceAll("");
         } catch (final RuntimeException e) {
             LOG.error("A runtime error occurred.", e);
             return s;
@@ -1350,6 +1343,17 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             module = -1;
         }
         return module;
+    }
+
+    private static final class URIExtended extends URI {
+
+        /**
+         * BitSet for URI-reference.
+         * <p><blockquote><pre>
+         * URI-reference = [ absoluteURI | relativeURI ] [ "#" fragment ]
+         * </pre></blockquote><p>
+         */
+        public static BitSet URI_REFERENCE = URI_reference;
     }
 
 }

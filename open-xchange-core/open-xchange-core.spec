@@ -210,6 +210,20 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1301
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/login.properties
+if ! ox_exists_property com.openexchange.login.maxLoginLength $pfile; then
+    ox_set_property com.openexchange.login.maxLoginLength 256 $pfile
+fi
+
+# SoftwareChange_Request-1302
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/user.properties
+if ! ox_exists_property com.openexchange.user.maxClientCount $pfile; then
+    ox_set_property com.openexchange.user.maxClientCount -1 $pfile
+fi
+
 # SoftwareChange_Request-1275
 pfile=/opt/open-xchange/etc/server.properties
 if grep -E "com.openexchange.log.propertyNames.*.ajp13." $pfile > /dev/null; then
@@ -268,6 +282,42 @@ done
 if [ "$jopts" != "$nopts" ]; then
    ox_set_property JAVA_XTRAOPTS \""$nopts"\" $pfile
 fi
+
+# SoftwareChange_Request-1141
+pfile=/opt/open-xchange/etc/mime.types
+if ! grep font-woff $pfile > /dev/null; then
+   ptmp=${pfile}.$$
+   cp $pfile $ptmp
+   cat<<EOF >> $ptmp
+application/font-woff woff
+text/cache-manifest appcache
+text/javascript js
+EOF
+   if [ -s $ptmp ]; then
+      cp $ptmp $pfile
+   fi
+   rm -f $ptmp
+fi
+if grep -E "application\/javascript.*js" $pfile > /dev/null; then
+   ptmp=${pfile}.$$
+   grep -vE "^application\/.*javascript" $pfile > $ptmp
+   cat<<EOF >> $ptmp
+application/javascript
+application/x-javascript
+EOF
+   if [ -s $ptmp ]; then
+      cp $ptmp $pfile
+   fi
+   rm -f $ptmp
+fi
+
+# SoftwareChange_Request-1214
+pfile=/opt/open-xchange/etc/file-logging.properties
+for opt in org.apache.cxf.level com.openexchange.soap.cxf.logger.level; do
+    if ! ox_exists_property $opt $pfile; then
+       ox_set_property $opt WARNING $pfile
+    fi
+done
 
 # SoftwareChange_Request-1184
 pfile=/opt/open-xchange/etc/file-logging.properties
@@ -454,6 +504,8 @@ ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 %config(noreplace) /opt/open-xchange/etc/requestwatcher.properties
 
 %changelog
+* Mon Jan 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-01-24
 * Tue Jan 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-23
 * Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>

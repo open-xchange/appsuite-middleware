@@ -113,7 +113,7 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest  {
 	}
 
 	public void testEmptyFileUploaded() throws Exception{
-		final InputStream is = new ByteArrayInputStream("".getBytes());
+		final InputStream is = new ByteArrayInputStream("Given name,Email 1, Display name".getBytes());
 		CSVImportResponse importResponse = client.execute(new CSVImportRequest(folderID, is, false));
 		assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-1314", importResponse.getException().getErrorCode());
 	}

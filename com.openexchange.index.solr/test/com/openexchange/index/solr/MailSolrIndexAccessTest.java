@@ -155,7 +155,7 @@ public class MailSolrIndexAccessTest extends TestCase {
             .setLength(len)
             .build();
         IndexResult<MailMessage> result = indexAccess.query(parameters, null);
-        assertTrue(result.getNumFound() == expected);
+        assertEquals(expected, result.getNumFound());
     }
 
 }

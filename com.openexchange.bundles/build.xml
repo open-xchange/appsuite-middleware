@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="OSGi bundles override" basedir=".">
 
-	<description>
-		Removes afterwards the bundle.d file for the OSGi system bundle. It must not be part of the bundle list.
-		Also remove the junit and osgi.tester bundles
-	</description>
+    <description>
+        Removes afterwards the bundle.d file for the OSGi system bundle. It must not be part of the bundle list.
+    </description>
 
     <import file="build-project.xml"/>
 
-	<target name="postInstall">
-		<delete dir="${destDir}/${bundle.dDir}">
-			<include name="org.eclipse.osgi_*"/>
-			<include name="com.buglabs.osgi.tester*"/>
-			<include name="junit-osgi-4.9b2*"/>
-		</delete>
+    <target name="postInstall">
+        <delete dir="${destDir}/${bundle.dDir}">
+            <include name="org.eclipse.osgi_*"/>
+        </delete>
     </target>
 
 </project>

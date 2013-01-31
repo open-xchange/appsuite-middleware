@@ -1,4 +1,4 @@
-/*-
+/*
  *
  *    OPEN-XCHANGE legal information
  *
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,21 +47,73 @@
  *
  */
 
-package com.openexchange.http.client.builder;
+package com.openexchange.frontend.uwa.internal;
+
+import java.net.MalformedURLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.frontend.uwa.UWAWidget;
+import com.openexchange.frontend.uwa.UWAWidgetExceptionCodes;
 
 /**
- * A builder for an HTTP request.
+ * {@link UWAUtility} - A utility class for UAW module.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface HTTPRequestBuilder {
-	
-	public HTTPPutRequestBuilder put();
-	
-	public HTTPPostRequestBuilder post();
-	
-	public HTTPMultipartPostRequestBuilder multipartPost();
-	
-	public HTTPGetRequestBuilder get();
-	
-	public HTTPDeleteRequestBuilder delete();
-	
+public final class UWAUtility {
+
+    /**
+     * Initializes a new {@link UWAUtility}.
+     */
+    private UWAUtility() {
+        super();
+    }
+
+    /**
+     * Checks given UWA widget's URL string for syntactical correctness.
+     * 
+     * @param uwaWidget The UWA widget
+     * @throws OXException If UWA widget's URL string is invalid
+     */
+    public static void checkUrl(final UWAWidget uwaWidget) throws OXException {
+        if (null == uwaWidget) {
+            return;
+        }
+        checkUrl(uwaWidget.getURL());
+    }
+
+    /**
+     * Checks given URL string for syntactical correctness.
+     * 
+     * @param sUrl The URL string
+     * @throws OXException If URL string is invalid
+     */
+    public static void checkUrl(final String sUrl) throws OXException {
+        if (isEmpty(sUrl)) {
+            // Nothing to check
+            return;
+        }
+        try {
+            final java.net.URL url = new java.net.URL(sUrl);
+            final String protocol = url.getProtocol();
+            if (!"http".equals(protocol) && !"https".equals(protocol)) {
+                throw new MalformedURLException("Only http & https protocols supported.");
+            }
+        } catch (final MalformedURLException e) {
+            throw UWAWidgetExceptionCodes.INVALID_URL.create(e, new Object[0]);
+        }
+    }
+
+    /** Checks for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }

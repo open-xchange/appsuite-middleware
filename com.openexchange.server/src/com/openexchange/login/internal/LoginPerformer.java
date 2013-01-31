@@ -445,7 +445,7 @@ public final class LoginPerformer {
     private static void logLoginRequest(final LoginRequest request, final LoginResult result) {
         final StringBuilder sb = new StringBuilder();
         sb.append("Login:");
-        sb.append(request.getLogin());
+        sb.append(Strings.abbreviate(request.getLogin(), 256));
         sb.append(" IP:");
         sb.append(request.getClientIP());
         sb.append(" AuthID:");

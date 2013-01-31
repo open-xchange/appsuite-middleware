@@ -86,7 +86,6 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
                 if (null != tableName && tableExists(con, tableName)) {
                     LOG.info("A table with name \"" + tableName + "\" already exists. Aborting table creation.");
                 } else {
-                    System.out.println(create);
                     stmt.execute(create);
                 }
             }

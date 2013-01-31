@@ -63,6 +63,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.Category;
@@ -110,9 +111,9 @@ public abstract class OXServlet extends WebDavServlet {
 
         public LoginRequestImpl(final String login, final String pass, final Interface interfaze, final HttpServletRequest req) {
             super();
-            this.client = req.getParameter(LoginFields.CLIENT_PARAM);
-            version = req.getParameter(LoginFields.VERSION_PARAM);
-            userAgent = req.getParameter("agent");
+            this.client = AJAXServlet.sanitizeParam(req.getParameter(LoginFields.CLIENT_PARAM));
+            version = AJAXServlet.sanitizeParam(req.getParameter(LoginFields.VERSION_PARAM));
+            userAgent = AJAXServlet.sanitizeParam(req.getParameter("agent"));
             this.login = login;
             this.req = req;
             this.pass = pass;
@@ -121,7 +122,12 @@ public abstract class OXServlet extends WebDavServlet {
 
         @Override
         public String getUserAgent() {
-            return null == userAgent ? req.getHeader("user-agent") : userAgent;
+            /*-
+             * Former code allowed User-Agent header. Needs to be denied as of bug #24654.
+             * 
+             * return null == userAgent ? req.getHeader("user-agent") : userAgent;
+             */
+            return userAgent;
         }
 
         @Override

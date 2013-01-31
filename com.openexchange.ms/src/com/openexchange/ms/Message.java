@@ -66,17 +66,31 @@ public class Message<E> extends EventObject {
     /** The sender identifier */
     protected final String senderId;
 
+    /** Whether this message has its origin from a remote sender */
+    protected final boolean remote;
+
     /**
      * Initializes a new {@link Message}.
      * 
      * @param name The name of associated topic/queue
      * @param senderId The identifier of the resource that dispatched this message
      * @param messageObject The message's object
+     * @param remote Whether this message has its origin from a remote sender
      */
-    public Message(final String name, final String senderId, final E messageObject) {
+    public Message(final String name, final String senderId, final E messageObject, final boolean remote) {
         super(name);
         this.messageObject = messageObject;
         this.senderId = senderId;
+        this.remote = remote;
+    }
+
+    /**
+     * Whether this message has its origin from a remote sender.
+     * 
+     * @return <code>true</code> if remote origin; otherwise <code>false</code>
+     */
+    public boolean isRemote() {
+        return remote;
     }
 
     /**
@@ -89,7 +103,7 @@ public class Message<E> extends EventObject {
     }
 
     /**
-     * Gets the sender identifier,
+     * Gets this message's sender identifier,
      * 
      * @return The sender identifier
      */

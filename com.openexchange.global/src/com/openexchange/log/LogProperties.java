@@ -227,6 +227,30 @@ public final class LogProperties {
          * com.openexchange.database.schema
          */
         DATABASE_SCHEMA("com.openexchange.database.schema"),
+        /**
+         * com.openexchange.login.login
+         */
+        LOGIN_LOGIN("com.openexchange.login.login"),
+        /**
+         * com.openexchange.login.clientIp
+         */
+        LOGIN_CLIENT_IP("com.openexchange.login.clientIp"),
+        /**
+         * com.openexchange.login.userAgent
+         */
+        LOGIN_USER_AGENT("com.openexchange.login.userAgent"),
+        /**
+         * com.openexchange.login.authId
+         */
+        LOGIN_AUTH_ID("com.openexchange.login.authId"),
+        /**
+         * com.openexchange.login.client
+         */
+        LOGIN_CLIENT("com.openexchange.login.client"),
+        /**
+         * com.openexchange.login.version
+         */
+        LOGIN_VERSION("com.openexchange.login.version"),
 
         ;
 
@@ -368,6 +392,18 @@ public final class LogProperties {
             }
         }
         return props;
+    }
+
+    /**
+     * Removes denoted log properties.
+     *
+     * @param names The log properties to remove
+     */
+    public static void removeLogProperties(final Collection<LogProperties.Name> names) {
+        final Props props = optLogProperties();
+        if (null != props) {
+            props.remove(names);
+        }
     }
 
     /**

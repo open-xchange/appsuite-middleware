@@ -35,6 +35,21 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1294
+    pfile=/opt/open-xchange/etc/settings/oxmobile.properties
+    if ! ox_exists_property mox/defaultContactStoreFolder $pfile; then
+        ox_set_property mox/defaultContactStoreFolder "-1" $pfile
+    fi
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -46,6 +61,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Mon Jan 21 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2013-01-24
 * Tue Jan 15 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-01-23
 * Thu Jan 03 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>

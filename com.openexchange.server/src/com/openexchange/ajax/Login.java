@@ -61,11 +61,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -156,6 +159,21 @@ public class Login extends AJAXServlet {
 
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Login.class));
 
+    /** The log properties for login-related information. */
+    protected static final Set<LogProperties.Name> LOG_PROPERTIES;
+
+    static {
+        final Set<LogProperties.Name> set = EnumSet.noneOf(LogProperties.Name.class);
+        set.add(LogProperties.Name.LOGIN_AUTH_ID);
+        set.add(LogProperties.Name.LOGIN_CLIENT);
+        set.add(LogProperties.Name.LOGIN_CLIENT_IP);
+        set.add(LogProperties.Name.LOGIN_LOGIN);
+        set.add(LogProperties.Name.LOGIN_USER_AGENT);
+        set.add(LogProperties.Name.LOGIN_VERSION);
+        set.addAll(SessionServlet.LOG_PROPERTIES);
+        LOG_PROPERTIES = Collections.unmodifiableSet(set);
+    }
+
     /**
      * <code>"open-xchange-session-"</code>
      */
@@ -184,12 +202,13 @@ public class Login extends AJAXServlet {
         SESSION, SECRET;
     }
 
-    protected final AtomicReference<LoginConfiguration> confReference = new AtomicReference<LoginConfiguration>();
-
-    private final Map<String, LoginRequestHandler> handlerMap = new ConcurrentHashMap<String, LoginRequestHandler>();
+    final AtomicReference<LoginConfiguration> confReference;
+    private final Map<String, LoginRequestHandler> handlerMap;
 
     public Login() {
         super();
+        confReference = new AtomicReference<LoginConfiguration>();
+        handlerMap = new ConcurrentHashMap<String, LoginRequestHandler>(16);
         handlerMap.put(ACTION_LOGIN, new LoginRequestHandler() {
 
             @Override
@@ -732,15 +751,19 @@ public class Login extends AJAXServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        final String action = req.getParameter(PARAMETER_ACTION);
-        final String subPath = getServletSpecificURI(req);
-        if (null != subPath && subPath.length() > 0 && subPath.startsWith("/httpAuth")) {
-            doHttpAuth(req, resp);
-        } else if (null != action) {
-            doJSONAuth(req, resp, action);
-        } else {
-            logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION));
-            return;
+        try {
+            final String action = req.getParameter(PARAMETER_ACTION);
+            final String subPath = getServletSpecificURI(req);
+            if (null != subPath && subPath.startsWith("/httpAuth")) {
+                doHttpAuth(req, resp);
+            } else if (null != action) {
+                doJSONAuth(req, resp, action);
+            } else {
+                logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION));
+                return;
+            }
+        } finally {
+            LogProperties.removeLogProperties(LOG_PROPERTIES);
         }
     }
 
@@ -1020,6 +1043,18 @@ public class Login extends AJAXServlet {
             result = login.doLogin(req);
             if (null == result) {
                 return true;
+            }
+            {
+                final Props props = LogProperties.optLogProperties();
+                if (null != props) {
+                    final Session session = result.getSession();
+                    props.put(LogProperties.Name.SESSION_SESSION_ID, session.getSessionID());
+                    props.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(session.getUserId()));
+                    props.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(session.getContextId()));
+                    final String client  = session.getClient();
+                    props.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : client);
+                    props.put(LogProperties.Name.SESSION_SESSION, session);
+                }
             }
             addHeadersAndCookies(result, resp);
             {

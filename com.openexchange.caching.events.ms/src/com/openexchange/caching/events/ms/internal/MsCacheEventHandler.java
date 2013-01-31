@@ -140,7 +140,7 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
 
     @Override
     public void onMessage(Message<CacheEvent> message) {
-        if (null != message && false == senderId.equals(message.getSenderId())) {
+        if (null != message && message.isRemote()) {
             CacheEvent cacheEvent = message.getMessageObject();
             if (null != cacheEvent) {
                 if (LOG.isDebugEnabled()) {

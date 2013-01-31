@@ -129,22 +129,35 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 	}
 
 	private void append(SingleSearchTerm term) throws OXException {
-		final Operand<?>[] operands = term.getOperands();
-		final Operation operation = term.getOperation();
-		this.stringBuilder.append(" ( ");
-		for (int i = 0; i < operands.length; i++) {
-			if (OperationPosition.BEFORE.equals(operation.getSqlPosition())) {
-				stringBuilder.append(operation.getSqlRepresentation());
-			}
-			append(operands[i]);
-			if (OperationPosition.AFTER.equals(operation.getSqlPosition())) {
-				stringBuilder.append(' ').append(operation.getSqlRepresentation());
-			} else if (OperationPosition.BETWEEN.equals(operation.getSqlPosition()) && i != operands.length - 1) {
-				//don't place an operator after the last operand here
-				stringBuilder.append(' ').append(operation.getSqlRepresentation()).append(' ');
-			}
-		}
-		stringBuilder.append(" ) ");
+        /*
+         * get relevant mapping for term
+         */
+		DbMapping<? extends Object, Contact> mapping = getMapping(term);
+        /*
+         * append terms
+         */
+		Operand<?>[] operands = term.getOperands();
+        Operation operation = term.getOperation();
+        this.stringBuilder.append(" ( ");
+        for (int i = 0; i < operands.length; i++) {
+            if (OperationPosition.BEFORE.equals(operation.getSqlPosition())) {
+                stringBuilder.append(operation.getSqlRepresentation());
+            }
+            if (Operand.Type.COLUMN.equals(operands[i].getType())) {
+                appendColumnOperand(operands[i].getValue());
+            } else if (Operand.Type.CONSTANT.equals(operands[i].getType())) {
+                appendConstantOperand(operands[i].getValue(), mapping);
+            } else {
+                throw new IllegalArgumentException("unknown type in operand: " + operands[i].getType());
+            }
+            if (OperationPosition.AFTER.equals(operation.getSqlPosition())) {
+                stringBuilder.append(' ').append(operation.getSqlRepresentation());
+            } else if (OperationPosition.BETWEEN.equals(operation.getSqlPosition()) && i != operands.length - 1) {
+                //don't place an operator after the last operand here
+                stringBuilder.append(' ').append(operation.getSqlRepresentation()).append(' ');
+            }
+        }
+        stringBuilder.append(" ) ");
 	}
 
 	private void append(CompositeSearchTerm term) throws OXException {
@@ -246,30 +259,26 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 		return true;
 	}
 
-    private void append(Operand<?> operand) throws OXException {
-		final Object value = operand.getValue();
-		if (null == value) {
-			throw new IllegalArgumentException("got no value for operand");
-		} else if (Operand.Type.COLUMN.equals(operand.getType())) {
-			appendColumnOperand(value);
-		} else if (Operand.Type.CONSTANT.equals(operand.getType())) {
-			appendConstantOperand(value);
-		} else {
-			throw new IllegalArgumentException("unknown type in operand: " + operand.getType());
-		}
+	private void appendConstantOperand(Object value, DbMapping<? extends Object, Contact> mapping) throws OXException {
+        appendConstantOperand(value, null != mapping ? mapping.getSqlType() : Integer.MIN_VALUE);
     }
-
-	private void appendConstantOperand(Object value) throws OXException {
-		this.appendConstantOperand(value, Integer.MIN_VALUE);
-	}
 
 	private void appendConstantOperand(Object value, int sqlType) throws OXException {
 		if (String.class.isInstance(value)) {
+            String stringValue = (String)value;
 			if (Types.INTEGER == sqlType) {
-				// fallback for numeric folder IDs in rdb storage
-				parameters.add(Integer.valueOf(Tools.parse((String) value)));
+			    if ("true".equalsIgnoreCase(stringValue)) {
+			        // special handling for "true" string
+			        parameters.add(Integer.valueOf(1));
+			    } else if ("false".equalsIgnoreCase(stringValue)) {
+                    // special handling for "false" string
+                    parameters.add(Integer.valueOf(0));
+			    } else {
+	                // fallback for numeric folder IDs in rdb storage
+	                parameters.add(Integer.valueOf(Tools.parse(stringValue)));
+			    }
 			} else {
-				String preparedPattern = StringCollection.prepareForSearch((String)value, false, true);
+				String preparedPattern = StringCollection.prepareForSearch(stringValue, false, true);
 				if (containsWildcards(preparedPattern)) {
 					// use "LIKE" search
 					final int index = stringBuilder.lastIndexOf("=");
@@ -277,7 +286,11 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 				}
 				parameters.add(preparedPattern);
 			}
+		} else if (Boolean.class.isInstance(value) && Types.INTEGER == sqlType) {
+            // special handling for Booleans
+            parameters.add(Integer.valueOf(Boolean.TRUE.equals(value) ? 1 : 0));
 		} else {
+		    // default
 			parameters.add(value);
 		}
 		stringBuilder.append('?');
@@ -312,6 +325,19 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 
 	private static DbMapping<? extends Object, Contact> getMapping(Object value) throws OXException {
 		return Mappers.CONTACT.get(getField(value));
+	}
+
+	private static DbMapping<? extends Object, Contact> getMapping(SingleSearchTerm term) throws OXException {
+	    DbMapping<? extends Object, Contact> mapping = null;
+        for (Operand<?> operand : term.getOperands()) {
+            if (Operand.Type.COLUMN.equals(operand.getType())) {
+                if (null != mapping) {
+                    throw new IllegalArgumentException("Unable to handle more than one COLUMN-type operand in single-searchterm.");
+                }
+                mapping = getMapping(operand.getValue());
+            }
+        }
+        return mapping;
 	}
 
 	private static ContactField getField(Object value) throws OXException {

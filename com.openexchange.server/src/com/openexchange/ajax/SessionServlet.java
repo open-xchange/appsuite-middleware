@@ -56,10 +56,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -106,7 +109,6 @@ import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import edu.emory.mathcs.backport.java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Overridden service method that checks if a valid session can be found for the request.
@@ -145,6 +147,22 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static volatile SubnetMask allowedSubnet;
 
+    /** The log properties for session-related information. */
+    protected static final Set<LogProperties.Name> LOG_PROPERTIES;
+
+    static {
+        final Set<LogProperties.Name> set = EnumSet.noneOf(LogProperties.Name.class);
+        set.add(LogProperties.Name.SESSION_SESSION_ID);
+        set.add(LogProperties.Name.SESSION_USER_ID);
+        set.add(LogProperties.Name.SESSION_CONTEXT_ID);
+        set.add(LogProperties.Name.SESSION_CLIENT_ID);
+        set.add(LogProperties.Name.SESSION_SESSION);
+        LOG_PROPERTIES = Collections.unmodifiableSet(set);
+    }
+
+    /**
+     * Initializes a new {@link SessionServlet}.
+     */
     protected SessionServlet() {
         super();
     }
@@ -337,16 +355,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 threadCounter.decrement(sessionId);
             }
             ThreadLocalSessionHolder.getInstance().setSession(null);
-            if (LogProperties.isEnabled()) {
-                final Props properties = LogProperties.optLogProperties();
-                if (null != properties) {
-                    properties.remove(LogProperties.Name.SESSION_SESSION_ID);
-                    properties.remove(LogProperties.Name.SESSION_USER_ID);
-                    properties.remove(LogProperties.Name.SESSION_CONTEXT_ID);
-                    properties.remove(LogProperties.Name.SESSION_CLIENT_ID);
-                    properties.remove(LogProperties.Name.SESSION_SESSION);
-                }
-            }
+            LogProperties.removeLogProperties(LOG_PROPERTIES);
             if (null != counter) {
                 counter.getAndDecrement();
             }
@@ -423,14 +432,7 @@ public abstract class SessionServlet extends AJAXServlet {
             } catch (final Exception e2) {
                 LOG.error("Cookies could not be removed.", e2);
             } finally {
-                if (LogProperties.isEnabled()) {
-                    final Props properties = LogProperties.getLogProperties();
-                    properties.remove(LogProperties.Name.SESSION_SESSION_ID);
-                    properties.remove(LogProperties.Name.SESSION_USER_ID);
-                    properties.remove(LogProperties.Name.SESSION_CONTEXT_ID);
-                    properties.remove(LogProperties.Name.SESSION_CLIENT_ID);
-                    properties.remove(LogProperties.Name.SESSION_SESSION);
-                }
+                LogProperties.removeLogProperties(LOG_PROPERTIES);
             }
         }
     }
@@ -570,7 +572,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
-        if (LogProperties.isEnabled()) {
+        {
             final Props properties = LogProperties.getLogProperties();
             properties.put(LogProperties.Name.SESSION_SESSION_ID, sessionId);
             properties.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(session.getUserId()));

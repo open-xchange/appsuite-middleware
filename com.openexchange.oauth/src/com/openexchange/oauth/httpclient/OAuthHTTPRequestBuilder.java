@@ -64,59 +64,56 @@ import com.openexchange.oauth.httpclient.impl.scribe.ScribeHTTPPutRequestBuilder
 
 public class OAuthHTTPRequestBuilder implements HTTPRequestBuilder {
 
+    private final OAuthHTTPClient client;
 
-	private final OAuthHTTPClient client;
+    public OAuthHTTPRequestBuilder(OAuthHTTPClient client) {
+        this.client = client;
+    }
 
-	public OAuthHTTPRequestBuilder(OAuthHTTPClient client) {
-		this.client = client;
-	}
+    @Override
+    public HTTPPutRequestBuilder put() {
+        return new ScribeHTTPPutRequestBuilder(this);
+    }
 
-	@Override
-	public HTTPPutRequestBuilder put() {
-		return new ScribeHTTPPutRequestBuilder(this);
-	}
+    @Override
+    public HTTPPostRequestBuilder post() {
+        return new ScribeHTTPPostRequestBuilder(this);
+    }
 
-	@Override
-	public HTTPPostRequestBuilder post() {
-		return new ScribeHTTPPostRequestBuilder(this);
-	}
+    @Override
+    public HTTPMultipartPostRequestBuilder multipartPost() {
+        throw new UnsupportedOperationException();
+        // return new ScribeHTTPMultipartPostRequestBuilder(this);
+    }
 
-	@Override
-	public HTTPMultipartPostRequestBuilder multipartPost() {
-		throw new UnsupportedOperationException();
-		//return new ScribeHTTPMultipartPostRequestBuilder(this);
-	}
+    @Override
+    public HTTPGetRequestBuilder get() {
+        return new ScribeHTTPGetRequestBuilder(this);
+    }
 
-	@Override
-	public HTTPGetRequestBuilder get() {
-		return new ScribeHTTPGetRequestBuilder(this);
-	}
+    @Override
+    public HTTPDeleteRequestBuilder delete() {
+        return new ScribeHTTPDeleteRequestBuilder(this);
+    }
 
-	@Override
-	public HTTPDeleteRequestBuilder delete() {
-		return new ScribeHTTPDeleteRequestBuilder(this);
-	}
+    public HTTPRequestBuilder getBuilder() {
+        return client.getBuilder();
+    }
 
-	public HTTPRequestBuilder getBuilder() {
-		return client.getBuilder();
-	}
+    public OAuthAccount getAccount() {
+        return client.getAccount();
+    }
 
-	public OAuthAccount getAccount() {
-		return client.getAccount();
-	}
+    public API getApi() {
+        return client.getApi();
+    }
 
-	public API getApi() {
-		return client.getApi();
-	}
+    public String getApiKey() {
+        return client.getApiKey();
+    }
 
-	public String getApiKey() {
-		return client.getApiKey();
-	}
-
-	public String getSecret() {
-		return client.getSecret();
-	}
-
-
+    public String getSecret() {
+        return client.getSecret();
+    }
 
 }

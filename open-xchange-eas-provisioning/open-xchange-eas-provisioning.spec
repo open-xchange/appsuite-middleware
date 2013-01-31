@@ -52,6 +52,9 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+cat<<EOF > README.TXT
+This is an empty package.
+EOF
 
 %post core
 . /opt/open-xchange/lib/oxfunctions.sh
@@ -75,6 +78,7 @@ fi
 
 %files
 %defattr(-,root,root)
+%doc README.TXT
 
 %files core
 %defattr(-,root,root)
@@ -90,6 +94,8 @@ fi
 %config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
+* Mon Jan 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-01-24
 * Tue Jan 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-23
 * Thu Jan 03 2013 Marcus Klein <marcus.klein@open-xchange.com>

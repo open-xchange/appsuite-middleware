@@ -168,12 +168,13 @@ public class ImprovedHazelcastJobStore implements JobStore {
         blockedJobs = hazelcast.getSet(instanceName + '/' + "quartzBlockedJobs-0");
         nodeIp = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
 
-        if (triggersByKey.isEmpty()) {
-            triggersByKey.addIndex("trigger.nextFireTime", true);
-            triggersByKey.addIndex("trigger.misfireInstruction", false);
-            triggersByKey.addIndex("trigger.jobKey", false);
-            triggersByKey.addIndex("trigger.calendarName", false);
-        }
+//TODO: deactivated due to bug #24647
+//        if (triggersByKey.isEmpty()) {
+//            triggersByKey.addIndex("trigger.nextFireTime", true);
+//            triggersByKey.addIndex("trigger.misfireInstruction", false);
+//            triggersByKey.addIndex("trigger.jobKey", false);
+//            triggersByKey.addIndex("trigger.calendarName", false);
+//        }
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Initialized HazelcastJobStore.");

@@ -70,6 +70,8 @@ done
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Mon Jan 21 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2013-01-24
 * Tue Jan 15 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2013-01-23
 * Thu Jan 03 2013 Steffen Templin <marcus.klein@open-xchange.com>

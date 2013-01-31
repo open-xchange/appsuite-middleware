@@ -1,8 +1,34 @@
+* 2013-01-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24654: Don't fall-back to User-Agent header if client identifier is missing on login attempt
+ - Fix for bug 24624: Introduced property "com.openexchange.user.maxClientCount" to limit allowed number of client identifiers
+                      stored/tracked per user
+
+* 2013-01-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24291: Corrected dependencies of the meta packages.
+
+* 2013-01-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24632: Respond with a meaningful error if OAuth.signed HTTP request cannot be performed
+ - Fix for bug 24677: Orderly delegate waiting/idl'ing flag to actual MailAccess instance
+ - Fix for bug 24666: Introduced property "com.openexchange.login.maxLoginLength" to specify max. allowed length for a login string
+ - Fix for bug 24680: Check file name prior to MIME encoding attempt
+
+* 2013-01-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24641: Added dynamic parsing for boolean operands in search filters  
+ 
 * 2013-01-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 24625: Proper wild-card to regex conversion
  - Fix for bug 24629: reduce connection's in-use time
  - Fix for bug 24638: Reduce connection's in-use time
+ - Fix for bug 24651: Fixed XSS vulnerability for UWA modules
+ - Fix for bug 24649: Fixed Path Traversal vulnerability at publications
+ - Fix for bug 24650: Fixed XSS vulnerability at TestServlet
+ - Fix for bug 24652: Fixed XSS vulnerability for (infostore) attachments
+ - Fix for bug 24653: Fixed HTTP Header Injection/Response Splitting vulnerability for "redirect" servlet and other places
 
 * 2013-01-28 - marcus.klein@open-xchange.com
 
