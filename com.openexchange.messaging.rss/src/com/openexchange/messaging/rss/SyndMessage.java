@@ -85,9 +85,11 @@ import com.sun.syndication.feed.synd.SyndImage;
 
 public class SyndMessage implements MessagingMessage {
 
-    private static final String CONTENT_TYPE = "Content-Type";
-    private final SyndEntry entry;
+    private static final long serialVersionUID = 7251763923455787058L;
 
+    private static final String CONTENT_TYPE = "Content-Type";
+
+    private final SyndEntry entry;
     private final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
     private MessagingContent content;
     private final String folder;
@@ -146,24 +148,25 @@ public class SyndMessage implements MessagingMessage {
             }
         }
 
-        if( isHTML(type) ) {
-            final String textVersion = Utility.textFormat(content.getValue());
-
+        if (isHTML(type) ) {
             final MimeMultipartContent multipart = new MimeMultipartContent();
-            final MimeMessagingBodyPart textPart = new MimeMessagingBodyPart();
-            textPart.setContent(new StringContent(textVersion), "text/plain");
-
-            multipart.addBodyPart(textPart);
-
-            final MimeMessagingBodyPart htmlPart = new MimeMessagingBodyPart();
-            final HtmlService htmlService = HTMLServiceProvider.getInstance().getHTMLService();
-            if (null == htmlService) {
-                htmlPart.setContent(new StringContent(content.getValue()), type);
-            } else {
-                htmlPart.setContent(new StringContent(htmlService.replaceImages(content.getValue(), sessionId)), type);
+            // Text plain
+            {
+                final MimeMessagingBodyPart textPart = new MimeMessagingBodyPart();
+                textPart.setContent(new StringContent(Utility.textFormat(content.getValue())), "text/plain");
+                multipart.addBodyPart(textPart);
             }
-
-            multipart.addBodyPart(htmlPart);
+            // HTML
+            {
+                final MimeMessagingBodyPart htmlPart = new MimeMessagingBodyPart();
+                final HtmlService htmlService = HTMLServiceProvider.getInstance().getHTMLService();
+                if (null == htmlService) {
+                    htmlPart.setContent(new StringContent(content.getValue()), type);
+                } else {
+                    htmlPart.setContent(new StringContent(htmlService.replaceImages(htmlService.sanitize(content.getValue(), null, false, null, null), sessionId)), type);
+                }
+                multipart.addBodyPart(htmlPart);
+            }
 
             final MimeContentType contentType = new MimeContentType("multipart/alternative");
             addHeader(KnownHeader.CONTENT_TYPE, contentType);
