@@ -49,6 +49,7 @@ import org.apache.cxf.service.model.ServiceModelUtil;
 import org.apache.cxf.staxutils.DepthXMLStreamReader;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.ws.commons.schema.XmlSchemaElement;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.CommonsLoggingLogger;
 
 /**
@@ -131,6 +132,12 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                             if (fault.getCause() instanceof javax.xml.bind.UnmarshalException) {
                                 final Throwable linkedException = ((javax.xml.bind.UnmarshalException) fault.getCause()).getLinkedException();
                                 if (linkedException != null && linkedException.getClass().getName().indexOf("SAXParseException") >= 0) {
+                                    {
+                                        final StringAllocator sb = new StringAllocator(fault.getMessage());
+                                        sb.append('\n');
+                                        appendStackTrace(fault.getStackTrace(), sb);
+                                        LOG.severe(sb.toString());
+                                    }
                                     final String[] info = extractUnexpectedElement(linkedException.getMessage());
                                     if (null != info) {
                                         final String m ;
@@ -365,4 +372,33 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
             return Boolean.parseBoolean(keepParametersWrapperFlag.toString());
         }
     }
+
+    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb) {
+        if (null == trace) {
+            return;
+        }
+        for (final StackTraceElement ste : trace) {
+            final String className = ste.getClassName();
+            if (null != className) {
+                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
+                    } else {
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber);
+                        }
+                        sb.append(')');
+                    }
+                }
+                sb.append('\n');
+            }
+        }
+    }
+
 }
