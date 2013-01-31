@@ -2136,9 +2136,9 @@ msgstr ""
 msgid "The remote system is not reachable by the transport."
 msgstr ""
 
-#. NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED
+#. I/O request could not be handled.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:280
-msgid "NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED"
+msgid "I/O request could not be handled."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:61
