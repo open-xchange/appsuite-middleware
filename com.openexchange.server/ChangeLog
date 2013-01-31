@@ -13,6 +13,7 @@
  - Fix for bug 24691: Added HTML sanitizing to RSS feeds
  - Fix for bug 24693: Added BCrypt to supported hash algorithms
  - Fix for bug 24695: Offer proper reply text version if HTML is not preferred
+ - Fix for bug 24714: Check for "null" as user's password mechanism, too
 
 * 2013-01-30 - marcus.klein@open-xchange.com
 
