@@ -7,6 +7,7 @@
  - Fix for bug 24688: Check for a valid HTTP/S URL for OXMF subscriptions
  - Fix for bug 24689: Improved check for image content when uploading contact image data
  - Fix for bug 24691: Added HTML sanitizing to RSS feeds
+ - Fix for bug 24693: Added BCrypt to supported hash algorithms
 
 * 2013-01-30 - marcus.klein@open-xchange.com
 
