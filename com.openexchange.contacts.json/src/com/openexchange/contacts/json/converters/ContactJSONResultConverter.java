@@ -119,7 +119,7 @@ public class ContactJSONResultConverter implements ResultConverter {
             /*
              * get requested column IDs
              */
-            int[] columnIDs = RequestTools.getColumnsAsIntArray(requestData, "columns");
+            int[] columnIDs = RequestTools.getColumnsAsIntArray(requestData);
             ContactField[] fields = null != columnIDs ? ContactMapper.getInstance().getFields(columnIDs) :
             	ContactMapper.getInstance().getAllFields();
             /*
