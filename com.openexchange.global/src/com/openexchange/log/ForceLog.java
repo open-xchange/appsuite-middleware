@@ -62,7 +62,6 @@ public final class ForceLog<V> {
      * Initializes a new {@link ForceLog} for specified value.
      *
      * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
      */
     public static <V> ForceLog<V> valueOf(final V value) {
         return new ForceLog<V>(value);
