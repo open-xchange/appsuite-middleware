@@ -49,12 +49,15 @@
 
 package com.openexchange.http.grizzly;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
+import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.server.Initialization;
 
 /**
@@ -124,7 +127,7 @@ public class GrizzlyConfig implements Initialization {
     private boolean isConsiderXForwards = false;
 
     /** A comma separated list of known proxies */
-    private String knownProxies = "";
+    private List<String> knownProxies = Collections.emptyList();
     /**
      * The name of the protocolHeader used to identify the originating IP address of a client connecting to a web server through an HTTP
      * proxy or load balancer
@@ -185,7 +188,8 @@ public class GrizzlyConfig implements Initialization {
         this.isCookieHttpOnly = configService.getBoolProperty("com.openexchange.cookie.httpOnly", true);
         this.defaultEncoding = configService.getProperty("DefaultEncoding", "UTF-8");
         this.isConsiderXForwards = configService.getBoolProperty("com.openexchange.server.considerXForwards", false);
-        this.knownProxies = configService.getProperty("com.openexchange.server.knownProxies", "");
+        String proxyCandidates = configService.getProperty("com.openexchange.server.knownProxies", "");
+        setKnownProxies(proxyCandidates);
         this.forHeader = configService.getProperty("com.openexchange.server.forHeader", "X-Forwarded-For");
         this.protocolHeader = configService.getProperty("com.openexchange.server.protocolHeader", "X-Forwarded-Proto");
         this.httpsProtoValue = configService.getProperty("com.openexchange.server.httpsProtoValue", "https");
@@ -333,11 +337,26 @@ public class GrizzlyConfig implements Initialization {
     }
 
 
+    private void setKnownProxies(String ipList) {
+        if(ipList.isEmpty()) {
+            this.knownProxies = Collections.emptyList();
+        } else {
+            List<String> proxyCandidates = IPTools.splitAndTrim(ipList, IPTools.COMMA_SEPARATOR);
+            List<String> erroneousIPs = IPTools.filterErroneousIPs(proxyCandidates);
+            if(!erroneousIPs.isEmpty()) {
+                if(LOG.isWarnEnabled()) {
+                    LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: "+erroneousIPs);
+                }
+            } else {
+                this.knownProxies = proxyCandidates;
+            }
+        }
+    }
     /**
      * Returns the known proxies as comma separated list of IPs
      * @return the known proxies as comma separated list of IPs or an empty String
      */
-    public String getKnownProxies() {
+    public List<String> getKnownProxies() {
         return knownProxies;
     }
     
