@@ -188,6 +188,9 @@ for FILE in ${COCONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/common /opt/open-xchange/etc $FILE
 done
 
+# SoftwareChange_Request-1297
+rm -f /opt/open-xchange/etc/sessioncache.ccf
+
 # SoftwareChange_Request-1094
 rm -f /opt/open-xchange/etc/groupware/mailjsoncache.properties
 # SoftwareChange_Request-1091
