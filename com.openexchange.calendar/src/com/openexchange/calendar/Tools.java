@@ -123,7 +123,7 @@ public final class Tools {
         return UserStorage.getInstance().getUser(so.getUserId(), ctx);
     }
 
-    static UserConfiguration getUserConfiguration(final Context ctx, final int userId) throws OXException {
+    public static UserConfiguration getUserConfiguration(final Context ctx, final int userId) throws OXException {
         return UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
     }
 

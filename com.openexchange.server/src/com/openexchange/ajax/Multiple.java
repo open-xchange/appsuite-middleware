@@ -91,12 +91,16 @@ import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.BoundedCompletionService;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
+/**
+ * The <tt>Multiple</tt> Servlet processes <a href="http://oxpedia.org/wiki/index.php?title=HTTP_API#Module_.22multiple.22">multiple incoming JSON</a> requests.
+ */
 public class Multiple extends SessionServlet {
 
     private static final long serialVersionUID = 3029074251138469122L;
@@ -176,6 +180,9 @@ public class Multiple extends SessionServlet {
         writer.flush();
     }
 
+    /** The concurrency level for processing multiple requests */
+    private static final int CONCURRENCY_LEVEL = 4;
+
     public static JSONArray perform(JSONArray dataArray, HttpServletRequest req, ServerSession session) throws OXException, JSONException {
     	final int length = dataArray.length();
         final JSONArray respArr = new JSONArray(length);
@@ -204,7 +211,12 @@ public class Multiple extends SessionServlet {
                         serialTasks.add(jsonInOut);
                     } else {
                         if (null == concurrentTasks) {
-                            concurrentTasks = new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), 4).setTrackable(true);
+                            final int concurrencyLevel = CONCURRENCY_LEVEL;
+                            if (length <= concurrencyLevel) {
+                                concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
+                            } else {
+                                concurrentTasks = new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), concurrencyLevel).setTrackable(true);
+                            }
                         }
                         concurrentTasks.submit(new CallableImpl(jsonInOut, session, module, req));
                         concurrentTasksCount++;
