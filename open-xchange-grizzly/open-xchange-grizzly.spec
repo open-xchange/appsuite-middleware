@@ -64,6 +64,10 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Fri Feb 01 2013 Marc Arens <marc.arens@open-xchange.com>
+First release candidate for 7.0.1
+* Thu Jan 10 2013 Marc Arens <marc.arens@open-xchange.com>
+prepare for 7.0.1
 * Tue Dec 04 2012 Marc Arens <marc.arens@open-xchange.com>
 First release candidate for 7.0.0
 * Tue Dec 04 2012 Marc Arens <marc.arens@open-xchange.com>

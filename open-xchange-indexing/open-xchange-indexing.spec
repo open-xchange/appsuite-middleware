@@ -55,6 +55,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/solr/*
 
 %changelog
+* Fri Feb 01 2013 Steffen Templin <steffen.templin@open-xchange.com>
+First release candidate for 7.0.1
+* Thu Jan 10 2013 Steffen Templin <steffen.templin@open-xchange.com>
+prepare for 7.0.1
 * Tue Dec 04 2012 Steffen Templin <steffen.templin@open-xchange.com>
 First release candidate for 7.0.0
 * Tue Dec 04 2012 Steffen Templin <steffen.templin@open-xchange.com>
@@ -79,8 +83,6 @@ prepare for next EDP drop
 Release build for EDP drop #2
 * Mon Jun 04 2012 Steffen Templin <steffen.templin@open-xchange.com>
 Release build for EDP drop #2
-* Fri May 11 2012 Steffen Templin <steffen.templin@open-xchange.com>
-Build for Rev. 4
 * Tue May 08 2012 Steffen Templin <steffen.templin@open-xchange.com>
 Build for Rev. 3
 * Mon May 07 2012 Marcus Klein <marcus.klein@open-xchange.com>
