@@ -43,6 +43,12 @@ if [ ${1:-0} -eq 2 ]; then
 
     ox_move_config_file /opt/open-xchange/etc /opt/open-xchange/etc/hazelcast sessionstorage_hazelcast.properties sessions.properties
 
+    # SoftwareChange_Request-1291
+    pfile=/opt/open-xchange/etc/hazelcast/sessions.properties
+    if ox_exists_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile; then
+       ox_remove_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile
+    fi
+
     # SoftwareChange_Request-1286
     pfile=/opt/open-xchange/etc/hazelcast/sessions.properties
     if ox_exists_property com.openexchange.sessionstorage.hazelcast.map.backupcount $pfile; then
@@ -64,9 +70,11 @@ if [ ${1:-0} -eq 2 ]; then
     if ! ox_exists_property com.openexchange.hazelcast.configuration.map.name $pfile; then
        ox_set_property com.openexchange.hazelcast.configuration.map.name "sessions-2" $pfile
     fi
-    if ! ox_exists_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile; then
-       ox_set_property com.openexchange.hazelcast.configuration.map.indexes.attributes "contextId,userId" $pfile
-    fi
+
+    # obsoleted by SoftwareChange_Request-1291
+    #if ! ox_exists_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile; then
+    #   ox_set_property com.openexchange.hazelcast.configuration.map.indexes.attributes "contextId,userId" $pfile
+    #fi
 
 fi
 
