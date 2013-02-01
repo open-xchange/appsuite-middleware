@@ -51,6 +51,7 @@ package com.openexchange.http.grizzly.servletfilter;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.List;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -63,6 +64,7 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
 import com.openexchange.http.grizzly.osgi.GrizzlyActivator;
+import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -71,18 +73,18 @@ import com.openexchange.log.Props;
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
  * and creates a new HttpSession if needed to achieve feature parity with the ajp based implementation.
- *
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class WrappingFilter implements Filter {
-    
+
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(WrappingFilter.class));
-    
-    RemoteIPFinder remoteIPFinder;
-    
+
+    IPTools remoteIPFinder;
+
     private String forHeader;
-    
-    private String knownProxies;
+
+    private List<String> knownProxies;
 
     private String protocolHeader;
 
@@ -116,30 +118,31 @@ public class WrappingFilter implements Filter {
         // Inspect X-Forwarded headers and create HttpServletRequestWrapper accordingly
         if (isConsiderXForwards) {
             String forHeaderValue = httpServletRequest.getHeader(forHeader);
-            String remoteIP = RemoteIPFinder.getRemoteIP(forHeaderValue, knownProxies);
-            
-            //TODO: || !isValidInetAddress()
-            if(remoteIP.isEmpty()) { 
-                LOG.info("Could not detect a valid remote ip in ["+forHeaderValue+"], falling back to default");
+            String remoteIP = IPTools.getRemoteIP(forHeaderValue, knownProxies);
+
+            if (remoteIP.isEmpty()) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Could not detect a valid remote ip in [" + forHeaderValue + "], falling back to default");
+                }
                 httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest.getRemoteAddr(), httpServletRequest);
             } else {
                 httpServletRequestWrapper = new HttpServletRequestWrapper(remoteIP, httpServletRequest);
             }
-            
-//            String protocolHeaderValue = httpServletRequest.getHeader(protocolHeader);
-//            if (protocolHeader == null) {
-//                httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);
-//            } else if (httpsProtoValue.equalsIgnoreCase(protocolHeaderValue)) {
-//                httpServletRequestWrapper = new HttpServletRequestWrapper(
-//                    httpServletRequest,
-//                    HttpServletRequestWrapper.HTTPS_SCHEME,
-//                    httpsPort);
-//            } else {
-//                httpServletRequestWrapper = new HttpServletRequestWrapper(
-//                    httpServletRequest,
-//                    HttpServletRequestWrapper.HTTP_SCHEME,
-//                    httpPort);
-//            }
+
+            // String protocolHeaderValue = httpServletRequest.getHeader(protocolHeader);
+            // if (protocolHeader == null) {
+            // httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);
+            // } else if (httpsProtoValue.equalsIgnoreCase(protocolHeaderValue)) {
+            // httpServletRequestWrapper = new HttpServletRequestWrapper(
+            // httpServletRequest,
+            // HttpServletRequestWrapper.HTTPS_SCHEME,
+            // httpsPort);
+            // } else {
+            // httpServletRequestWrapper = new HttpServletRequestWrapper(
+            // httpServletRequest,
+            // HttpServletRequestWrapper.HTTP_SCHEME,
+            // httpPort);
+            // }
         } else {
             httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);
         }

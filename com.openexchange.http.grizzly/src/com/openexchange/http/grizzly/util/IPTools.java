@@ -47,43 +47,63 @@
  *
  */
 
-package com.openexchange.http.grizzly.servletfilter;
+package com.openexchange.http.grizzly.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import com.google.common.net.InetAddresses;
+import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
+import com.openexchange.log.Log;
+import com.openexchange.log.LogFactory;
 
 /**
- * {@link RemoteIPFinder} Detects the first IP that isn't one of our known proxies and represents our new remoteIP.
+ * {@link IPTools} Detects the first IP that isn't one of our known proxies and represents our new remoteIP.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RemoteIPFinder {
+public class IPTools {
 
-    private final static String separator = ",";
-    
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(WrappingFilter.class));
+
+    public final static String COMMA_SEPARATOR = ",";
+
     /**
-     * Detects the first IP that isn't one of our known proxies and represents our new remoteIP
+     * Detects the first IP that isn't one of our known proxies and represents our new remoteIP. This is done by removing all known proxies
+     * from the list of forwarded-for header beginning frome the right side of the list. The rightmost leftover ip is then seen as our new
+     * remote ip as it represents the first IP not known to us. <h4>Example:</h4>
+     * 
+     * <pre>
+     * remotes  = 192.168.32.50, 192.168.33.225, 192.168.33.224
+     * known    = 192.168.33.225, 192.168.33.224
+     * remoteIP = 192.168.32.50
+     * </pre>
      * 
      * @param forwardedIPs A String containing the forwarded ips separated by comma
-     * @param knownProxies A String containing the known proxies separated by comma
-     * @return the first ip that isn't a known proxy iow. the remote IP or an empty String
+     * @param knownProxies A List of Strings containing the known proxies
+     * @return the first ip that isn't a known proxy iow. the remote IP or an empty String if no valid remote IP could be found
      */
-    public static String getRemoteIP(String forwardedIPs, String knownProxies) {
-        if(forwardedIPs == null || forwardedIPs.isEmpty()) {
+    public static String getRemoteIP(String forwardedIPs, List<String> knownProxies) {
+        if (forwardedIPs == null || forwardedIPs.isEmpty()) {
             return "";
         }
-        List<String> forwarded = splitAndTrim(forwardedIPs, separator);
-        List<String> known = splitAndTrim(knownProxies, separator);
+        List<String> forwarded = splitAndTrim(forwardedIPs, COMMA_SEPARATOR);
         ListIterator<String> iterator = forwarded.listIterator(forwarded.size());
         String remoteIP = "";
         while (iterator.hasPrevious()) {
             String previousIP = iterator.previous();
-            if (!known.contains(previousIP)) {
+            if (!knownProxies.contains(previousIP)) {
                 remoteIP = previousIP;
                 break;
             }
+        }
+        // Don't return invalid IPs
+        if (!InetAddresses.isInetAddress(remoteIP)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(remoteIP + " is not a valid IP. Discarding candidate for remote IP.");
+            }
+            return "";
         }
         return remoteIP;
     }
@@ -97,7 +117,7 @@ public class RemoteIPFinder {
      * @throws IllegalArgumentException if input or the seperator are missing
      * @throws PatternSyntaxException - if the regular expression's syntax of seperator is invalid
      */
-    private static List<String> splitAndTrim(String input, String separator) {
+    public static List<String> splitAndTrim(String input, String separator) {
         if (input == null) {
             throw new IllegalArgumentException("Missing input");
         }
@@ -113,6 +133,21 @@ public class RemoteIPFinder {
             trimmedSplits.add(string.trim());
         }
         return trimmedSplits;
+    }
+    
+    /**
+     * Takes a List of Strings representing IP addresses filters out the erroneous ones.
+     * @param ipList a List of Strings representing IP addresses
+     * @return the list of erroneous IPs or the empty list meaning that all IPs are valid
+     */
+    public static List<String> filterErroneousIPs(List<String> ipList) {
+        List<String> erroneousIPs = new ArrayList<String>();
+        for (String ip : ipList) {
+            if(!InetAddresses.isInetAddress(ip)) {
+                erroneousIPs.add(ip);
+            }
+        }
+        return erroneousIPs;
     }
 
 }
