@@ -210,6 +210,13 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1296
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/cache.properties
+if ! ox_exists_property com.openexchange.caching.jcs.eventInvalidation $pfile; then
+    ox_set_property com.openexchange.caching.jcs.eventInvalidation true $pfile
+fi
+
 # SoftwareChange_Request-1302
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/user.properties
