@@ -54,7 +54,7 @@ import junit.framework.TestSuite;
 
 /**
  * {@link CalDAVBugSuite}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class CalDAVBugSuite {
@@ -74,6 +74,7 @@ public final class CalDAVBugSuite {
         suite.addTestSuite(Bug22689Test.class);
         suite.addTestSuite(Bug23610Test.class);
         suite.addTestSuite(Bug23612Test.class);
+        suite.addTestSuite(Bug24682Test.class);
         return suite;
     }
 }
