@@ -452,7 +452,7 @@ public final class SessionHandler {
      *
      * @param session The session to store
      * @param sessionStorageService The storage service
-     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code>
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
      * @param async Whether to perform task asynchronously or not
      */
     public static void storeSessionSync(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
@@ -464,7 +464,7 @@ public final class SessionHandler {
      *
      * @param session The session to store
      * @param sessionStorageService The storage service
-     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code>
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
      * @param latch The latch needed to signal completion of invocation
      */
     public static void storeSessionAsync(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final CountDownLatch latch) {
@@ -476,7 +476,7 @@ public final class SessionHandler {
      *
      * @param session The session to store
      * @param sessionStorageService The storage service
-     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code>
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
      * @param async Whether to perform task asynchronously or not
      * @param latch The latch needed when invoked asynchronously; otherwise simply pass <code>null</code>
      */
