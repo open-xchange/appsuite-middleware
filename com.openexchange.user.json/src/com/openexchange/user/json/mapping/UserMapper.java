@@ -147,7 +147,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 
 			@Override
 			public Integer get(User object) {
-				return object.getId();
+				return Integer.valueOf(object.getId());
 			}
 
 			@Override
