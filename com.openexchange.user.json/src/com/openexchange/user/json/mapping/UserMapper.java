@@ -139,11 +139,10 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 
 			@Override
 			public void set(User object, Integer value) throws OXException {
-				if (ParsedUser.class.isInstance(object)) {
-					((ParsedUser)object).setId(null != value ? value.intValue() : -1);
-				} else {
+				if (!ParsedUser.class.isInstance(object)) {
 					throw new UnsupportedOperationException();
 				}
+                ((ParsedUser)object).setId(null != value ? value.intValue() : -1);
 			}
 
 			@Override
@@ -153,11 +152,10 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 
 			@Override
 			public void remove(User object) {
-				if (ParsedUser.class.isInstance(object)) {
-					((ParsedUser)object).setId(-1);
-				} else {
+				if (!ParsedUser.class.isInstance(object)) {
 					throw new UnsupportedOperationException();
 				}
+                ((ParsedUser)object).setId(-1);
 			}
 		});
 
@@ -203,11 +201,10 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 
 			@Override
 			public void set(User object, String value) throws OXException {
-				if (ParsedUser.class.isInstance(object)) {
-					((ParsedUser)object).setTimeZone(value);
-				} else {
+				if (!ParsedUser.class.isInstance(object)) {
 					throw new UnsupportedOperationException();
 				}
+                ((ParsedUser)object).setTimeZone(value);
 			}
 
 			@Override
@@ -217,11 +214,10 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 
 			@Override
 			public void remove(User object) {
-				if (ParsedUser.class.isInstance(object)) {
-					((ParsedUser)object).setTimeZone(null);
-				} else {
+				if (!ParsedUser.class.isInstance(object)) {
 					throw new UnsupportedOperationException();
 				}
+                ((ParsedUser)object).setTimeZone(null);
 			}
 		});
 
@@ -230,11 +226,10 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			@Override
 			public void deserialize(JSONObject from, User to) throws JSONException, OXException {
 				if (from.hasAndNotNull(getAjaxName())) {
-					if (ParsedUser.class.isInstance(to)) {
-						((ParsedUser)to).setLocale(parseLocaleString(from.getString(getAjaxName())));
-					} else {
+					if (!ParsedUser.class.isInstance(to)) {
 						throw new UnsupportedOperationException();
 					}
+                    ((ParsedUser)to).setLocale(parseLocaleString(from.getString(getAjaxName())));
 				}
 			}
 
@@ -245,11 +240,10 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 
 			@Override
 			public void set(User object, Locale value) throws OXException {
-				if (ParsedUser.class.isInstance(object)) {
-					((ParsedUser)object).setLocale(value);
-				} else {
+				if (!ParsedUser.class.isInstance(object)) {
 					throw new UnsupportedOperationException();
 				}
+                ((ParsedUser)object).setLocale(value);
 			}
 
 			@Override
