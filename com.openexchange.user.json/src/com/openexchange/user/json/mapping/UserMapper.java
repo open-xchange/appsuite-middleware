@@ -258,13 +258,12 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			}
 
 			@Override
-			public void remove(User object) {
-				if (ParsedUser.class.isInstance(object)) {
-					((ParsedUser)object).setLocale(null);
-				} else {
-					throw new UnsupportedOperationException();
-				}
-			}
+            public void remove(User object) {
+                if (!ParsedUser.class.isInstance(object)) {
+                    throw new UnsupportedOperationException();
+                }
+                ((ParsedUser) object).setLocale(null);
+            }
 		});
 
 		mappings.put(UserField.GROUPS, new DefaultJsonMapping<int[], User>("groups", 613) {
@@ -279,13 +278,12 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 		        int[] value = this.get(from);
 		        if (null == value) {
 		            return JSONObject.NULL;
-		        } else {
-		            JSONArray jsonArray = new JSONArray(value.length);
-		            for (int group : value) {
-                        jsonArray.put(group);
-                    }
-		            return jsonArray;
 		        }
+                final JSONArray jsonArray = new JSONArray(value.length);
+                for (final int group : value) {
+                    jsonArray.put(group);
+                }
+                return jsonArray;
 		    }
 
 			@Override
@@ -323,7 +321,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 
 			@Override
 			public Integer get(User object) {
-				return object.getContactId();
+				return Integer.valueOf(object.getContactId());
 			}
 
 			@Override
@@ -367,7 +365,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
      * @return The parsed instance of {@link Locale}
      * @throws OXException If locale string is invalid
      */
-    private static Locale parseLocaleString(final String localeStr) throws OXException {
+    static Locale parseLocaleString(final String localeStr) throws OXException {
         final Matcher match = identifierPattern.matcher(localeStr);
         Locale retval = null;
         if (match.matches()) {
