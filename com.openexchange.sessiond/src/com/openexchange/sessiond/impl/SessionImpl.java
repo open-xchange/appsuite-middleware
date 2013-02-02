@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
- * {@link SessionImpl} - Implements interface {@link Session}
+ * {@link SessionImpl} - Implements interface {@link Session} (and {@link PutIfAbsent}).
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
