@@ -65,6 +65,7 @@ import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 import com.openexchange.user.json.field.UserField;
 import com.openexchange.user.json.parser.ParsedUser;
@@ -350,24 +351,61 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 		return mappings;
 	}
 
-    private static final Pattern identifierPattern = Pattern.compile("(\\p{Lower}{2})(?:_(\\p{Upper}{2}))?(?:_([a-zA-Z]{2}))?");
+	private static final Pattern identifierPattern = Pattern.compile("(\\p{Lower}{2})(?:[_-]([a-zA-Z]{2}))?(?:[_-]([a-zA-Z]{2}))?");
 
     /**
      * Parses given locale string into an instance of {@link Locale}
      *
      * @param localeStr The locale string to parse
-     * @return The parsed instance of {@link Locale}
+     * @return The parsed instance of {@link Locale} or <code>null</code>
      * @throws OXException If locale string is invalid
      */
     static Locale parseLocaleString(final String localeStr) throws OXException {
+        if (null == localeStr) {
+            return null;
+        }
         final Matcher match = identifierPattern.matcher(localeStr);
         Locale retval = null;
         if (match.matches()) {
             final String country = match.group(2);
             final String variant = match.group(3);
-            retval = new Locale(match.group(1), country == null ? "" : country, variant == null ? "" : variant);
+            retval = new Locale(toLowerCase(match.group(1)), country == null ? "" : toUpperCase(country), variant == null ? "" : variant);
         }
         return retval;
+    }
+
+    /**
+     * An own implementation of toLowerCase() to avoid circularity problems between Locale and String. The most straightforward algorithm is
+     * used. Look at optimizations later.
+     */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
+
+    /**
+     * An own implementation of toUpperCase() to avoid circularity problems between Locale and String. The most straightforward algorithm is
+     * used. Look at optimizations later.
+     */
+    private static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+        }
+        return builder.toString();
     }
 
 }
