@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.notify;
 
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.ByteArrayOutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -57,7 +59,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -271,11 +272,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     // Override for testing
 
-    protected Set<Integer> loadAllUsersSet(final Context ctx) throws OXException {
+    protected TIntSet loadAllUsersSet(final Context ctx) throws OXException {
         final int[] uids = UserStorage.getInstance().listAllUser(ctx);
-        final Set<Integer> allIds = new HashSet<Integer>(uids.length);
+        final TIntSet allIds = new TIntHashSet(uids.length);
         for (final int id : uids) {
-            allIds.add(Integer.valueOf(id));
+            allIds.add(id);
         }
         return allIds;
     }
@@ -608,7 +609,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     private List<MailMessage> createMessageList(final CalendarObject oldObj, final CalendarObject newObj, final State state, final boolean forceNotifyOthers, final boolean isUpdate, final ServerSession session, final Map<Locale, List<EmailableParticipant>> receivers, final String title, final RenderMap renderMap) {
         final OXFolderAccess access = new OXFolderAccess(session.getContext());
         final StringBuilder b = new StringBuilder(2048);
-        Set<Integer> allUserIds = null;
+        TIntSet allUserIds = null;
         try {
             allUserIds = loadAllUsersSet(session.getContext());
         } catch (final OXException ue) {
@@ -634,7 +635,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 TimeZone tz = TimeZone.getDefault();
                 boolean sendMail = true;
 
-                if (p.type != Participant.EXTERNAL_USER && allUserIds.contains(Integer.valueOf(p.id))) {
+                if (p.type != Participant.EXTERNAL_USER && allUserIds.contains(p.id)) {
                     try {
                         sendMail = !p.ignoreNotification && state.sendMail(
                             getUserSettingMail(p.id, session.getContext()),
