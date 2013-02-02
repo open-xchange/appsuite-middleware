@@ -318,35 +318,42 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     @Override
     public void appointmentCreated(final Appointment appointmentObj, final Session session) {
-
+        // Empty method
     }
 
     @Override
     public void appointmentModified(final Appointment appointmentObj, final Session session) {
+        // Empty method
     }
 
     @Override
     public void appointmentModified(final Appointment oldAppointment, final Appointment newAppointment, final Session session) {
+        // Empty method
     }
 
     @Override
     public void appointmentAccepted(final Appointment appointmentObj, final Session session) {
+        // Empty method
     }
 
     @Override
     public void appointmentDeclined(final Appointment appointmentObj, final Session session) {
+        // Empty method
     }
 
     @Override
     public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session session) {
+        // Empty method
     }
 
     @Override
     public void appointmentWaiting(final Appointment appointmentObj, final Session session) {
+        // Empty method
     }
 
     @Override
     public void appointmentDeleted(final Appointment appointmentObj, final Session session) {
+        // Empty method
     }
 
     @Override
