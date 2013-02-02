@@ -70,17 +70,17 @@ import com.openexchange.sessionstorage.SessionStorageService;
 public final class SessionImpl implements PutIfAbsent {
 
     private final String loginName;
-    private String password;
+    private volatile String password;
     private final int contextId;
     private final int userId;
     private final String sessionId;
     private final String secret;
     private final String login;
-    private String randomToken;
-    private String localIp;
+    private volatile String randomToken;
+    private volatile String localIp;
     private final String authId;
-    private String hash;
-    private String client;
+    private volatile String hash;
+    private volatile String client;
     private final ConcurrentMap<String, Object> parameters;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionImpl.class));
