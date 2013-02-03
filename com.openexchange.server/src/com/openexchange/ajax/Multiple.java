@@ -90,11 +90,8 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
-<<<<<<< HEAD
 import com.openexchange.threadpool.BoundedCompletionService;
-=======
 import com.openexchange.threadpool.ThreadPoolCompletionService;
->>>>>>> cc18b351... revert
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -183,6 +180,9 @@ public class Multiple extends SessionServlet {
         writer.flush();
     }
 
+    /** The concurrency level for processing multiple requests */
+    private static final int CONCURRENCY_LEVEL = -1;
+
     public static JSONArray perform(JSONArray dataArray, HttpServletRequest req, ServerSession session) throws OXException, JSONException {
     	final int length = dataArray.length();
         final JSONArray respArr = new JSONArray(length);
@@ -212,10 +212,10 @@ public class Multiple extends SessionServlet {
                     } else {
                         if (null == concurrentTasks) {
                             final int concurrencyLevel = CONCURRENCY_LEVEL;
-                            if (length <= concurrencyLevel) {
+                            if (concurrencyLevel <= 0 || length <= concurrencyLevel) {
                                 concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
                             } else {
-                                concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);//new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), concurrencyLevel).setTrackable(true);
+                                concurrentTasks = new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), concurrencyLevel).setTrackable(true);
                             }
                         }
                         concurrentTasks.submit(new CallableImpl(jsonInOut, session, module, req));
