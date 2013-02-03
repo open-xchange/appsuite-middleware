@@ -49,27 +49,25 @@
 
 package com.openexchange.threadpool;
 
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.Semaphore;
 
 /**
  * {@link BoundedCompletionService} - Enhances {@link ThreadPoolCompletionService} by a bounded behavior.
  * <p>
  * If a proper bound is set - aka <code>concurrencyLevel</code> - it defines the max. number of concurrent threads executing submitted tasks
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class BoundedCompletionService<V> extends ThreadPoolCompletionService<V> {
 
-    private final Queue<FutureTask<V>> pendingTasks;
-    private int permits;
+    private final Semaphore semaphore;
 
     /**
      * Initializes a new {@link BoundedCompletionService}.
-     * 
+     *
      * @param threadPoolService The thread pool
      * @param concurrencyLevel The max. number of concurrent threads executing submitted tasks
      */
@@ -78,13 +76,12 @@ public class BoundedCompletionService<V> extends ThreadPoolCompletionService<V> 
         if (concurrencyLevel <= 0) {
             throw new IllegalArgumentException("concurrencyLevel must be greater than zero");
         }
-        permits = concurrencyLevel;
-        pendingTasks = new LinkedList<FutureTask<V>>();
+        semaphore = new Semaphore(concurrencyLevel);
     }
 
     /**
      * Initializes a new {@link BoundedCompletionService}.
-     * 
+     *
      * @param threadPoolService The thread pool
      * @param completionQueue The blocking queue
      * @param behavior The refused execution behavior to apply
@@ -95,44 +92,23 @@ public class BoundedCompletionService<V> extends ThreadPoolCompletionService<V> 
         if (concurrencyLevel <= 0) {
             throw new IllegalArgumentException("concurrencyLevel must be greater than zero");
         }
-        permits = concurrencyLevel;
-        pendingTasks = new LinkedList<FutureTask<V>>();
+        semaphore = new Semaphore(concurrencyLevel);
     }
 
     @Override
     protected void submitFutureTask(final FutureTask<V> f) {
-        // Synchronize submit attempts
-        synchronized (pendingTasks) {
-            // Be fair -- check for pending ones first
-            final FutureTask<V> task = pendingTasks.poll();
-            if (null != task) {
-                submitOrEnqueue(task);
-            }
-            // Submit current
-            submitOrEnqueue(f);
-        }
-    }
-
-    private void submitOrEnqueue(final FutureTask<V> task) {
-        if (--permits >= 0) {
-            // Acquired permit
-            super.submitFutureTask(task);
-        } else {
-            pendingTasks.offer(task);
+        try {
+            semaphore.acquire();
+            super.submitFutureTask(f);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
     @Override
     protected void taskDone(final Future<V> task) {
-        synchronized (pendingTasks) {
-            permits++;
-            super.taskDone(task);
-            // Re-submit possibly pending task
-            final FutureTask<V> pendingTask = pendingTasks.poll();
-            if (null != pendingTask) {
-                submitOrEnqueue(pendingTask);
-            }
-        }
+        semaphore.release();
+        super.taskDone(task);
     }
 
 }
