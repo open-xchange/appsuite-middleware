@@ -205,12 +205,13 @@ public class DispatcherServlet extends SessionServlet {
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
+        ServerSession session = null;
         boolean sessionParamFound = false;
         {
             final String sSession = req.getParameter("session");
             if (sSession != null && sSession.length() > 0) {
                 final String sessionId = getSessionId(req);
-                final ServerSession session = getSession(req, sessionId, sessiondService);
+                session = getSession(req, sessionId, sessiondService);
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
                 sessionParamFound = true;
@@ -228,18 +229,24 @@ public class DispatcherServlet extends SessionServlet {
         if (!mayOmitSession) {
             final Cookie[] cookies = req.getCookies();
             if (cookies != null) {
-                Session simpleSession = null;
+                ServerSession simpleSession = null;
                 for (final Cookie cookie : cookies) {
                     if (Login.PUBLIC_SESSION_NAME.equals(cookie.getName())) {
-                        simpleSession = sessiondService.getSessionByAlternativeId(cookie.getValue());
+                        final String altId = cookie.getValue();
+                        if (null != altId && null != session && altId.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
+                            // same session
+                            simpleSession = session;
+                        } else {
+                            // lookup session by alternative id
+                            simpleSession = ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(cookie.getValue()));
+                        }
                         break;
                     }
                 }
-                // CHeck if a simple (aka public) session has been found
+                // Check if a simple (aka public) session has been found
                 if (simpleSession != null) {
-                    final ServerSession session = ServerSessionAdapter.valueOf(simpleSession);
-                    verifySession(req, sessiondService, session.getSessionID(), session);
-                    rememberPublicSession(req, session);
+                    verifySession(req, sessiondService, simpleSession.getSessionID(), simpleSession);
+                    rememberPublicSession(req, simpleSession);
                 }
             }
         }

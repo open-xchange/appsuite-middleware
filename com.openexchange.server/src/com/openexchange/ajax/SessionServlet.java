@@ -232,11 +232,12 @@ public abstract class SessionServlet extends AJAXServlet {
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
+        ServerSession session = null;
         {
             final String sSession = req.getParameter("session");
             if (sSession != null && !sSession.equals("")) {
                 final String sessionId = getSessionId(req);
-                final ServerSession session = getSession(req, sessionId, sessiondService);
+                session = getSession(req, sessionId, sessiondService);
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
             }
@@ -244,17 +245,23 @@ public abstract class SessionServlet extends AJAXServlet {
         // Try public session
         final Cookie[] cookies = req.getCookies();
         if (cookies != null) {
-            Session simpleSession = null;
+            ServerSession simpleSession = null;
         	for (final Cookie cookie : cookies) {
                 if (Login.PUBLIC_SESSION_NAME.equals(cookie.getName())) {
-                    simpleSession = sessiondService.getSessionByAlternativeId(cookie.getValue());
+                    final String altId = cookie.getValue();
+                    if (null != altId && null != session && altId.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
+                        // same session
+                        simpleSession = session;
+                    } else {
+                        // lookup session by alternative id
+                        simpleSession = ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(cookie.getValue()));
+                    }
                     break;
                 }
             }
         	if (simpleSession != null) {
-        		final ServerSession session = ServerSessionAdapter.valueOf(simpleSession);
-        		verifySession(req, sessiondService, session.getSessionID(), session);
-        		rememberPublicSession(req, session);
+        		verifySession(req, sessiondService, simpleSession.getSessionID(), simpleSession);
+        		rememberPublicSession(req, simpleSession);
         	}
         }
     }
