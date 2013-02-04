@@ -64,6 +64,12 @@ open-xchange-pop3 (6.23.0-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 03 Sep 2012 13:46:15 +0200
 
+open-xchange-pop3 (6.22.1-10) unstable; urgency=low
+
+  * Build for patch 2013-01-28
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 29 Jan 2013 12:08:54 +0100
+
 open-xchange-pop3 (6.22.1-9) unstable; urgency=low
 
   * Build for public patch 2012-12-31

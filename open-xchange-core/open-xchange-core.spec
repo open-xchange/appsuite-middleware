@@ -442,8 +442,12 @@ ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 %config(noreplace) /opt/open-xchange/etc/contextSets/index.yml
 
 %changelog
+* Tue Jan 29 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-01-28
 * Mon Jan 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-24
+* Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-01-10
 * Thu Jan 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2013-01-15
 * Fri Dec 28 2012 Marcus Klein <marcus.klein@open-xchange.com>

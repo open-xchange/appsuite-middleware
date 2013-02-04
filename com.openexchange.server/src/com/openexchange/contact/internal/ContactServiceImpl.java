@@ -231,6 +231,7 @@ public class ContactServiceImpl extends DefaultContactService {
         	}
         }
         Tools.invalidateAddressesIfNeeded(delta);
+        Tools.setFileAsIfNeeded(delta);
 		/*
 		 * pass through to storage
 		 */
@@ -341,6 +342,7 @@ public class ContactServiceImpl extends DefaultContactService {
         	}
         }
         Tools.invalidateAddressesIfNeeded(delta);
+        Tools.setFileAsIfNeeded(delta);
 		/*
 		 * pass through to storage
 		 */
@@ -438,6 +440,7 @@ public class ContactServiceImpl extends DefaultContactService {
             }
         }
         Tools.invalidateAddressesIfNeeded(delta);
+        Tools.setFileAsIfNeeded(delta);
         /*
          * pass through to storage
          */

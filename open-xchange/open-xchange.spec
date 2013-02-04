@@ -69,6 +69,8 @@ ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
 /sbin/rcopen-xchange
 
 %changelog
+* Tue Jan 29 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-01-28
 * Mon Jan 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-24
 * Thu Jan 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
