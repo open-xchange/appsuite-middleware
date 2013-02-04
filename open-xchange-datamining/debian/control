@@ -1,0 +1,13 @@
+Source: open-xchange-datamining
+Section: web
+Priority: optional
+Maintainer: Karsten Will <karsten.will@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-datamining
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Description: This bundle provides a datamining tool (described at http://oxpedia.org/wiki/index.php?title=Datamining)

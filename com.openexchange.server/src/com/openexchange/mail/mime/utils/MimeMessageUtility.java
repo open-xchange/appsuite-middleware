@@ -372,12 +372,11 @@ public final class MimeMessageUtility {
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public static boolean containsContentId(final String contentId, final Collection<String> contentIds) {
-        for (final String current : contentIds) {
-            if (equalsCID(contentId, current)) {
-                return true;
-            }
+        boolean contains = false;
+        for (Iterator<String> iterator = contentIds.iterator(); !contains && iterator.hasNext();) {
+            contains = equalsCID(contentId, iterator.next());
         }
-        return false;
+        return contains;
     }
 
     /**
@@ -1241,7 +1240,8 @@ public final class MimeMessageUtility {
                 return encode ? MimeUtility.encodeWord(phrase) : phrase;
             }
             final String replaced = phrase.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\\\"");
-            return new StringBuilder(len + 2).append('"').append(encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
+            return new StringBuilder(len + 2).append('"').append(
+                encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());

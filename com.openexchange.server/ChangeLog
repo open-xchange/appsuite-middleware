@@ -2,6 +2,10 @@
 
  - Fix for bug 24362: Support AJP echo header with Coyote AJP handler
 
+* 2013-01-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24395: Adjusting 'file as' value if display name is set
+
 * 2012-12-22 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24168: Skip censorship restrictions when reading 'own' contact data
