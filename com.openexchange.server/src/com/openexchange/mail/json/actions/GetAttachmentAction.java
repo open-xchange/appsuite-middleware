@@ -88,7 +88,6 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -152,9 +151,6 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              * Read in parameters
              */
             final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            if (isEmpty(folderPath)) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_FOLDERID);
-            }
             final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             final String sequenceId = req.getParameter(Mail.PARAMETER_MAILATTCHMENT);
             final String imageContentId = req.getParameter(Mail.PARAMETER_MAILCID);
