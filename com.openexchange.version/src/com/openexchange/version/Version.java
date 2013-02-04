@@ -69,6 +69,12 @@ public class Version {
     private Numbers numbers = null;
     private String versionString = null;
 
+    private String date = null;
+    
+    public String getBuildDate() {
+        return date;
+    }
+
     public String getVersionString() {
         synchronized (this) {
             if (null == versionString) {
@@ -120,5 +126,9 @@ public class Version {
 
     public void setNumbers(Numbers numbers) {
         this.numbers = numbers;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 }

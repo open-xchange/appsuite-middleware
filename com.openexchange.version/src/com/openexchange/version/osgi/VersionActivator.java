@@ -85,6 +85,8 @@ public class VersionActivator implements BundleActivator {
         instance.setNumbers(new Numbers(version, buildNumber));
         LOG.info(Version.NAME + ' ' + instance.getVersionString());
         LOG.info("(c) Open-Xchange Inc. , Open-Xchange GmbH");
+        
+        instance.setDate(headers.get("OXBuildDate"));
     }
 
     @Override
