@@ -156,9 +156,6 @@ public final class GetAction extends AbstractMailAction {
              * Read in parameters
              */
             final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            if (isEmpty(folderPath)) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_FOLDERID);
-            }
             // final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             String tmp = req.getParameter(Mail.PARAMETER_SHOW_SRC);
             final boolean showMessageSource = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
