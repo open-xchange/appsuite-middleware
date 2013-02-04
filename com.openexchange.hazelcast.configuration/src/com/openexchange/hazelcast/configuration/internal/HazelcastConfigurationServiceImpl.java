@@ -106,6 +106,21 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
         config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true).setConnectionTimeoutSeconds(10);
         /*
+         * incoming / outgoing ports
+         */
+        config.getNetworkConfig().setPort(configService.getIntProperty("com.openexchange.hazelcast.networkConfig.port", 5701));
+        config.getNetworkConfig().setPortAutoIncrement(
+            configService.getBoolProperty("com.openexchange.hazelcast.networkConfig.portAutoIncrement", true));
+        String[] outboundPortDefinitions = Strings.splitByComma(
+            configService.getProperty("com.openexchange.hazelcast.networkConfig.outboundPortDefinitions", ""));
+        if (null != outboundPortDefinitions && 0 < outboundPortDefinitions.length) {
+            for (String portDefintion : outboundPortDefinitions) {
+                if (false == isEmpty(portDefintion)) {
+                    config.getNetworkConfig().addOutboundPortDefinition(portDefintion);
+                }
+            }
+        }
+        /*
          * data structure configs
          */
         applyDataStructures(config, listPropertyFiles());
