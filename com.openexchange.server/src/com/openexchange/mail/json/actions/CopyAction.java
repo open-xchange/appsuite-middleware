@@ -63,6 +63,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link CopyAction}
@@ -95,6 +96,9 @@ public final class CopyAction extends AbstractMailAction {
              */
             final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             final String sourceFolder = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            if (isEmpty(sourceFolder)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_FOLDERID);
+            }
             final String destFolder = ((JSONObject) req.getRequest().getData()).getString(FolderChildFields.FOLDER_ID);
             /*
              * Get mail interface
