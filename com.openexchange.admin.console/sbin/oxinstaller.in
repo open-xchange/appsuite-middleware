@@ -503,8 +503,8 @@ setup()
     v_setprop JAVA_XTRAOPTS "\"$SERVEROPTS\"" ${CONFDIR}/ox-scriptconf.sh
 
     GLOBIGNORE='*'
-    v_setprop AJP_JVM_ROUTE "$AJP_JVM_ROUTE" ${CONFDIR}/ajp.properties
-    v_setprop AJP_BIND_ADDR "$AJP_BIND_ADDR" ${CONFDIR}/ajp.properties
+    v_setprop com.openexchange.server.backendRoute "$AJP_JVM_ROUTE" ${CONFDIR}/server.properties
+    v_setprop com.openexchange.connector.networkListenerHost "$AJP_BIND_ADDR" ${CONFDIR}/server.properties
     GLOBIGNORE=
 
     v_setprop object_link "http://$OXOBJECT_LINK_HOSTNAME/#m=[module]&i=[object]&f=[folder]" ${CONFDIR}/notification.properties
