@@ -62,6 +62,7 @@ import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import com.damienmiller.BCrypt;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
@@ -253,6 +254,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     log.error("Error encrypting password for credential cache ", e);
                     throw new StorageException(e);
                 } catch (final UnsupportedEncodingException e) {
+                    log.error("Error encrypting password for credential cache ", e);
+                    throw new StorageException(e);
+                }
+            } else if ("{BCRYPT}".equals(mech)) {
+                try {
+                    cauth.setPassword(BCrypt.hashpw(usrdata.getPassword(), BCrypt.gensalt()));
+                } catch (final RuntimeException e) {
                     log.error("Error encrypting password for credential cache ", e);
                     throw new StorageException(e);
                 }

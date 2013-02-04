@@ -49,6 +49,7 @@
 
 package com.openexchange.version;
 
+import org.apache.commons.logging.Log;
 import com.openexchange.version.internal.Numbers;
 
 /**
@@ -57,6 +58,8 @@ import com.openexchange.version.internal.Numbers;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Version {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Version.class);
 
     public static final String CODENAME = "Hyperion";
     public static final String NAME = "Open-Xchange";
@@ -70,7 +73,9 @@ public class Version {
         synchronized (this) {
             if (null == versionString) {
                 if (null == numbers) {
-                    throw new IllegalStateException("Central backend version not initialized yet.");
+                    IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
+                    LOG.error(e.getMessage(), e);
+                    throw e;
                 }
                 versionString = numbers.getVersion() + "-Rev" + numbers.getBuildNumber();
             }
@@ -80,21 +85,27 @@ public class Version {
 
     public int getMajor() {
         if (null == numbers) {
-            throw new IllegalStateException("Central backend version not initialized yet.");
+            IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
+            LOG.error(e.getMessage(), e);
+            throw e;
         }
         return numbers.getMajor();
     }
 
     public int getMinor() {
         if (null == numbers) {
-            throw new IllegalStateException("Central backend version not initialized yet.");
+            IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
+            LOG.error(e.getMessage(), e);
+            throw e;
         }
         return numbers.getMinor();
     }
 
     public int getPatch() {
         if (null == numbers) {
-            throw new IllegalStateException("Central backend version not initialized yet.");
+            IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
+            LOG.error(e.getMessage(), e);
+            throw e;
         }
         return numbers.getPatch();
     }

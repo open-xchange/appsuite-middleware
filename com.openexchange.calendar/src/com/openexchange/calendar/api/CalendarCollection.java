@@ -3199,7 +3199,10 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             final Context ctx = ContextStorage.getStorageContext(session);
             final CalendarOperation co = new CalendarOperation();
             co.setResultSet(rs, prep, nfields, calendarsqlimp, readcon, 0, 0, session, ctx);
-            final SearchIterator<CalendarDataObject> it = new CachedCalendarIterator(co, ctx, session.getUserId());
+            User user = Tools.getUser(session, ctx);
+            UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
+            CalendarFolderObject visibleFolders = recColl.getAllVisibleAndReadableFolderObject(user.getId(), user.getGroups(), ctx, userConfig, readcon);
+            final SearchIterator<CalendarDataObject> it = new CachedCalendarIterator(visibleFolders, co, ctx, session.getUserId());
             final List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
             closeResources = false;
             try {

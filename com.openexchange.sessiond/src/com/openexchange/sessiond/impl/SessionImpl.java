@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
- * {@link SessionImpl} - Implements interface {@link Session}
+ * {@link SessionImpl} - Implements interface {@link Session} (and {@link PutIfAbsent}).
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -70,17 +70,17 @@ import com.openexchange.sessionstorage.SessionStorageService;
 public final class SessionImpl implements PutIfAbsent {
 
     private final String loginName;
-    private String password;
+    private volatile String password;
     private final int contextId;
     private final int userId;
     private final String sessionId;
     private final String secret;
     private final String login;
-    private String randomToken;
-    private String localIp;
+    private volatile String randomToken;
+    private volatile String localIp;
     private final String authId;
-    private String hash;
-    private String client;
+    private volatile String hash;
+    private volatile String client;
     private final ConcurrentMap<String, Object> parameters;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionImpl.class));
@@ -459,6 +459,33 @@ public final class SessionImpl implements PutIfAbsent {
                 sessionStorageService.setClient(sessionId, client);
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(128);
+        builder.append('{');
+        builder.append("contextId=").append(contextId).append(", userId=").append(userId).append(", ");
+        if (sessionId != null) {
+            builder.append("sessionId=").append(sessionId).append(", ");
+        }
+        if (login != null) {
+            builder.append("login=").append(login).append(", ");
+        }
+        if (localIp != null) {
+            builder.append("localIp=").append(localIp).append(", ");
+        }
+        if (authId != null) {
+            builder.append("authId=").append(authId).append(", ");
+        }
+        if (hash != null) {
+            builder.append("hash=").append(hash).append(", ");
+        }
+        if (client != null) {
+            builder.append("client=").append(client);
+        }
+        builder.append('}');
+        return builder.toString();
     }
 
 }

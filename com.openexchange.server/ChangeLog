@@ -1,8 +1,23 @@
+* 2013-02-01 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24682: Bad folder id in recurrence exceptions.
+
+* 2013-01-31 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24685: Apply cache invalidation settings for default caches, too 
+  
 * 2013-01-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 24654: Don't fall-back to User-Agent header if client identifier is missing on login attempt
  - Fix for bug 24624: Introduced property "com.openexchange.user.maxClientCount" to limit allowed number of client identifiers
                       stored/tracked per user
+ - Fix for bug 24690: Accept null values
+ - Fix for bug 24688: Check for a valid HTTP/S URL for OXMF subscriptions
+ - Fix for bug 24689: Improved check for image content when uploading contact image data
+ - Fix for bug 24691: Added HTML sanitizing to RSS feeds
+ - Fix for bug 24693: Added BCrypt to supported hash algorithms
+ - Fix for bug 24695: Offer proper reply text version if HTML is not preferred
+ - Fix for bug 24714: Check for "null" as user's password mechanism, too
 
 * 2013-01-30 - marcus.klein@open-xchange.com
 
@@ -12,7 +27,7 @@
 
  - Fix for bug 24632: Respond with a meaningful error if OAuth.signed HTTP request cannot be performed
  - Fix for bug 24677: Orderly delegate waiting/idl'ing flag to actual MailAccess instance
- - Fix for bug 24666: Introduced property "com.openexchange.login.maxLoginLength" to specify max. allowed length for a login string
+ - Fix for bug 24666: Truncating the login string when writing it to the logs.
  - Fix for bug 24680: Check file name prior to MIME encoding attempt
 
 * 2013-01-30 - tobias.friedrich@open-xchange.com

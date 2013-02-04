@@ -67,6 +67,7 @@ import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -101,6 +102,9 @@ public final class GetAttachmentTokenAction extends AbstractMailAction {
              * Read in parameters
              */
             final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            if (isEmpty(folderPath)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_FOLDERID);
+            }
             final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             final String sequenceId = req.getParameter(Mail.PARAMETER_MAILATTCHMENT);
             final String imageContentId = req.getParameter(Mail.PARAMETER_MAILCID);

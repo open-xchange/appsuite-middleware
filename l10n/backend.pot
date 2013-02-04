@@ -2116,25 +2116,29 @@ msgstr ""
 msgid "The user must change his password before he logs on the first time."
 msgstr ""
 
-#. STATUS_NOT_FOUND
+#. Please use a hostname instead of an IP address in the SMB URL.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:270
-msgid "STATUS_NOT_FOUND"
+msgid "Please use a hostname instead of an IP address in the SMB URL."
 msgstr ""
 
-#. The referenced account is currently locked out and may not be logged on to.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:273
+#. Your account has been blocked. This can have various reasons like having mistyped the password several times.
+#. Please contact your system administrator or hoster in case you can no longer log in.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:274
 msgid ""
-"The referenced account is currently locked out and may not be logged on to."
+"Your account has been blocked. This can have various reasons like having "
+"mistyped the password several times.\n"
+"Please contact your system administrator or hoster in case you can no longer "
+"log in."
 msgstr ""
 
 #. The remote system is not reachable by the transport.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:276
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:277
 msgid "The remote system is not reachable by the transport."
 msgstr ""
 
-#. NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:279
-msgid "NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED"
+#. I/O request could not be handled.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:280
+msgid "I/O request could not be handled."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:61
@@ -2502,6 +2506,7 @@ msgstr ""
 
 #. The string cannot be parsed to a valid URL.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:82
 msgid "The string cannot be parsed to a valid URL."
 msgstr ""
 

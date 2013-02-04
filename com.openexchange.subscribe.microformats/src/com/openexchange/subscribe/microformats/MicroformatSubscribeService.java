@@ -52,7 +52,7 @@ package com.openexchange.subscribe.microformats;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.StringReader;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.java.UnsynchronizedStringReader;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -75,18 +76,25 @@ import com.openexchange.subscribe.microformats.transformers.MapToObjectTransform
 public class MicroformatSubscribeService extends AbstractSubscribeService {
 
     private MapToObjectTransformer transformer;
-
     private OXMFParserFactoryService parserFactory;
-
     private OXMFDataSource mfSource;
-
     private final List<String> containers = new LinkedList<String>();
-
     private final List<String> prefixes = new LinkedList<String>();
-
     private SubscriptionSource source;
-
     private final List<ObjectParser> objectParsers = new LinkedList<ObjectParser>();
+
+    
+    /**
+     * Initializes a new {@link MicroformatSubscribeService}.
+     */
+    public MicroformatSubscribeService() {
+        super();
+    }
+
+    @Override
+    public void modifyIncoming(final Subscription subscription) throws OXException {
+        checkUrl((String) subscription.getConfiguration().get("url"));
+    }
 
     @Override
     public Collection getContent(Subscription subscription) throws OXException {
@@ -99,7 +107,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
 
         if (!objectParsers.isEmpty()) {
             data = read(htmlData);
-            htmlData = new StringReader(data);
+            htmlData = new UnsynchronizedStringReader(data);
         }
 
         OXMFParser parser = parserFactory.getParser();
@@ -108,7 +116,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         List results = new ArrayList(transformer.transform(parsed));
 
         for (ObjectParser objectParser : objectParsers) {
-            Collection parsedObjects = objectParser.parse(new StringReader(data));
+            Collection parsedObjects = objectParser.parse(new UnsynchronizedStringReader(data));
             results.addAll(parsedObjects);
         }
 
@@ -206,6 +214,41 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
 
     protected String getDisplayName(Subscription subscription) {
         return (String) subscription.getConfiguration().get("url");
+    }
+
+    /**
+     * Checks given URL string for syntactical correctness.
+     * 
+     * @param sUrl The URL string
+     * @throws OXException If URL string is invalid
+     */
+    private static void checkUrl(final String sUrl) throws OXException {
+        if (isEmpty(sUrl)) {
+            // Nothing to check
+            return;
+        }
+        try {
+            final java.net.URL url = new java.net.URL(sUrl);
+            final String protocol = url.getProtocol();
+            if (!"http".equals(protocol) && !"https".equals(protocol)) {
+                throw new MalformedURLException("Only http & https protocols supported.");
+            }
+        } catch (final MalformedURLException e) {
+            throw OXMFSubscriptionErrorMessage.INVALID_URL.create(e, new Object[0]);
+        }
+    }
+
+    /** Checks for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

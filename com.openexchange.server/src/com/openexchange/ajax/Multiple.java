@@ -58,6 +58,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -89,6 +90,7 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.BoundedCompletionService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -96,6 +98,9 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
+/**
+ * The <tt>Multiple</tt> Servlet processes <a href="http://oxpedia.org/wiki/index.php?title=HTTP_API#Module_.22multiple.22">multiple incoming JSON</a> requests.
+ */
 public class Multiple extends SessionServlet {
 
     private static final long serialVersionUID = 3029074251138469122L;
@@ -151,8 +156,7 @@ public class Multiple extends SessionServlet {
                 Streams.close(reader);
             }
         }
-        JSONArray respArr = new JSONArray();
-
+        JSONArray respArr = null;
         try {
             final ServerSession session = getSessionObject(req);
             if (session == null) {
@@ -172,9 +176,12 @@ public class Multiple extends SessionServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         final Writer writer = resp.getWriter();
-        writeTo(respArr, writer);
+        writeTo(null == respArr ? new JSONArray(0) : respArr, writer);
         writer.flush();
     }
+
+    /** The concurrency level for processing multiple requests */
+    private static final int CONCURRENCY_LEVEL = -1;
 
     public static JSONArray perform(JSONArray dataArray, HttpServletRequest req, ServerSession session) throws OXException, JSONException {
     	final int length = dataArray.length();
@@ -184,9 +191,9 @@ public class Multiple extends SessionServlet {
             try {
                 // Distinguish between serially and concurrently executable requests
                 List<JsonInOut> serialTasks = null;
-                ThreadPoolCompletionService<Object> concurrentTasks = null;
+                CompletionService<Object> concurrentTasks = null;
                 int concurrentTasksCount = 0;
-                // Build-up mapping & schedule for serial or concurrent execution
+                // Build-up mapping & schedule for either serial or concurrent execution
                 final ConcurrentTIntObjectHashMap<JsonInOut> mapping = new ConcurrentTIntObjectHashMap<JsonInOut>(length);
                 for (int pos = 0; pos < length; pos++) {
                     final JSONObject dataObject = dataArray.getJSONObject(pos);
@@ -204,7 +211,12 @@ public class Multiple extends SessionServlet {
                         serialTasks.add(jsonInOut);
                     } else {
                         if (null == concurrentTasks) {
-                            concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
+                            final int concurrencyLevel = CONCURRENCY_LEVEL;
+                            if (concurrencyLevel <= 0 || length <= concurrencyLevel) {
+                                concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
+                            } else {
+                                concurrentTasks = new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), concurrencyLevel).setTrackable(true);
+                            }
                         }
                         concurrentTasks.submit(new CallableImpl(jsonInOut, session, module, req));
                         concurrentTasksCount++;

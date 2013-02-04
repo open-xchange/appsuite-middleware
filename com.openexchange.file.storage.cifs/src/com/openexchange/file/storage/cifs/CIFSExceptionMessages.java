@@ -266,17 +266,18 @@ public final class CIFSExceptionMessages implements LocalizableStrings {
     // The user must change his password before he logs on the first time.
     public static final String NT_STATUS_PASSWORD_MUST_CHANGE = "The user must change his password before he logs on the first time.";
 
-    // STATUS_NOT_FOUND
-    public static final String NT_STATUS_NOT_FOUND = "STATUS_NOT_FOUND";
+    // Please use a hostname instead of an IP address in the SMB URL.
+    public static final String NT_STATUS_NOT_FOUND = "Please use a hostname instead of an IP address in the SMB URL.";
 
-    // The referenced account is currently locked out and may not be logged on to.
-    public static final String NT_STATUS_ACCOUNT_LOCKED_OUT = "The referenced account is currently locked out and may not be logged on to.";
+    // Your account has been blocked. This can have various reasons like having mistyped the password several times.
+    // Please contact your system administrator or hoster in case you can no longer log in.
+    public static final String NT_STATUS_ACCOUNT_LOCKED_OUT = "Your account has been blocked. This can have various reasons like having mistyped the password several times.\nPlease contact your system administrator or hoster in case you can no longer log in.";
 
     // The remote system is not reachable by the transport.
     public static final String NT_STATUS_PATH_NOT_COVERED = "The remote system is not reachable by the transport.";
 
-    // NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED
-    public static final String NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED = "NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED";
+    // I/O request could not be handled.
+    public static final String NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED = "I/O request could not be handled.";
 
     /**
      * Initializes a new {@link CIFSExceptionMessages}.

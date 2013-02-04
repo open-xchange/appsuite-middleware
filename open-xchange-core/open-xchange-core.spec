@@ -210,13 +210,6 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
-# SoftwareChange_Request-1301
-# -----------------------------------------------------------------------
-pfile=/opt/open-xchange/etc/login.properties
-if ! ox_exists_property com.openexchange.login.maxLoginLength $pfile; then
-    ox_set_property com.openexchange.login.maxLoginLength 256 $pfile
-fi
-
 # SoftwareChange_Request-1302
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/user.properties

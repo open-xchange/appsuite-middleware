@@ -344,11 +344,12 @@ public enum CIFSExceptionCodes implements OXExceptionCode {
      */
     NT_STATUS_PASSWORD_MUST_CHANGE(CIFSExceptionMessages.NT_STATUS_PASSWORD_MUST_CHANGE, CATEGORY_USER_INPUT),
     /**
-     * STATUS_NOT_FOUND
+     * Please use a hostname instead of an IP address in the SMB URL.
      */
     NT_STATUS_NOT_FOUND(CIFSExceptionMessages.NT_STATUS_NOT_FOUND, CATEGORY_USER_INPUT),
     /**
-     * The referenced account is currently locked out and may not be logged on to.
+     * Your account has been blocked. This can have various reasons like having mistyped the password several times.<br>
+     * Please contact your system administrator or hoster in case you can no longer log in.
      */
     NT_STATUS_ACCOUNT_LOCKED_OUT(CIFSExceptionMessages.NT_STATUS_ACCOUNT_LOCKED_OUT, CATEGORY_USER_INPUT),
     /**
@@ -356,7 +357,7 @@ public enum CIFSExceptionCodes implements OXExceptionCode {
      */
     NT_STATUS_PATH_NOT_COVERED(CIFSExceptionMessages.NT_STATUS_PATH_NOT_COVERED, CATEGORY_USER_INPUT),
     /**
-     * NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED
+     * I/O request could not be handled.
      */
     NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED(CIFSExceptionMessages.NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED, CATEGORY_USER_INPUT),
 

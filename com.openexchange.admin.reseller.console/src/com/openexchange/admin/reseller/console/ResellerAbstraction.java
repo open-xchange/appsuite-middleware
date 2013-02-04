@@ -56,9 +56,9 @@ import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -121,7 +121,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final void setPasswordMechOption(final AdminParser admp) {
-        this.passwordMechOption = setShortLongOpt(admp, OPT_PASSWORDMECH_SHORT, OPT_PASSWORDMECH_LONG, "Password mechanism to use (CRYPT/SHA)", true, NeededQuadState.notneeded);
+        this.passwordMechOption = setShortLongOpt(admp, OPT_PASSWORDMECH_SHORT, OPT_PASSWORDMECH_LONG, "Password mechanism to use (CRYPT/SHA/BCRYPT)", true, NeededQuadState.notneeded);
     }
 
     protected final void setAddRestrictionsOption(final AdminParser admp) {

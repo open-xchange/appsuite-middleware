@@ -525,7 +525,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                             // Another thread is already in process.
                             return;
                         }
-                    } catch (SQLException e) {
+                    } catch (final SQLException e) {
                         // INSERT failed. Another thread is already in process.
                         return;
                     }
@@ -543,7 +543,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                         return;
                     }
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 // Concurrency check failed
                 throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
@@ -885,9 +885,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
         try {
             f = POP3Folder.class.getDeclaredField("message_cache");
             f.setAccessible(true);
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
             f = null;
-        } catch (NoSuchFieldException e) {
+        } catch (final NoSuchFieldException e) {
             f = null;
         }
         messageCacheField = f;

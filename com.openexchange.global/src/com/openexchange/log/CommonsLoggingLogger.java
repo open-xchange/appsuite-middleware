@@ -61,7 +61,7 @@ import org.apache.commons.logging.Log;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CommonsLoggingLogger extends AbstractDelegatingLogger {
-
+    
     private final Log logger;
 
     /**
@@ -71,7 +71,7 @@ public class CommonsLoggingLogger extends AbstractDelegatingLogger {
      */
     public CommonsLoggingLogger(final Class<?> clazz) {
         super(clazz.getName(), null);
-        logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(clazz.getName()));
+        logger = com.openexchange.log.Log.loggerFor(clazz);
     }
 
     /**
