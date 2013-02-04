@@ -341,7 +341,7 @@ public class HazelcastSessionStorageService implements SessionStorageService, En
             try {
                  HazelcastStoredSession removedSession = future.getValue().get();
                  if (null != removedSession) {
-                     userSessions.remove(getKey(removedSession.getContextId(), removedSession.getContextId()));
+                     userSessions.remove(getKey(removedSession.getContextId(), removedSession.getUserId()));
                  } else {
                      LOG.debug("Session with ID '" + future.getKey() + "' not found, unable to remove from storage.");
                  }
