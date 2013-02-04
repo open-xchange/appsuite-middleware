@@ -11,3 +11,7 @@ folder > io.ox/core//folder
 # Timezones
 availableTimeZones > io.ox/core/settingOptions//availableTimeZones
 
+# Contact Collector
+modules/mail/contactCollectOnMailAccess > io.ox/mail//contactCollectOnMailAccess
+modules/mail/contactCollectOnMailTransport > io.ox/mail//contactCollectOnMailTransport
+
