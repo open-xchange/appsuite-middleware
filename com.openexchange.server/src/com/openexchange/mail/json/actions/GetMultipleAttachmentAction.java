@@ -66,6 +66,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -98,6 +99,9 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
              * Read in parameters
              */
             final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            if (isEmpty(folderPath)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_FOLDERID);
+            }
             final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             final String[] sequenceIds = req.checkStringArray(Mail.PARAMETER_MAILATTCHMENT);
             /*
