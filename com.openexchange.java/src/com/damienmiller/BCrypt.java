@@ -652,7 +652,7 @@ public class BCrypt {
         byte passwordb[], saltb[], hashed[];
         char minor = (char) 0;
         int rounds, off = 0;
-        StringBuilder rs = new StringBuilder();
+        StringBuilder rs = new StringBuilder(32);
 
         int saltLength = salt.length();
 
@@ -723,7 +723,7 @@ public class BCrypt {
         if (log_rounds < 4 || log_rounds > 31) {
             throw new IllegalArgumentException("Bad number of rounds");
         }
-        StringBuilder rs = new StringBuilder();
+        StringBuilder rs = new StringBuilder(64);
         byte rnd[] = new byte[BCRYPT_SALT_LEN];
 
         random.nextBytes(rnd);
