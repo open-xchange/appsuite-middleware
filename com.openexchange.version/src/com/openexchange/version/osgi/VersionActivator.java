@@ -81,12 +81,15 @@ public class VersionActivator implements BundleActivator {
         if (null == buildNumber) {
             throw new Exception("Can not read buildNumber from bundle manifest.");
         }
+        String date = headers.get("OXBuildDate");
+        if (null == date) {
+            throw new Exception("Can not read build date from bundle manifest.");
+        }
         Version instance = Version.getInstance();
         instance.setNumbers(new Numbers(version, buildNumber));
+        instance.setBuildDate(date);
         LOG.info(Version.NAME + ' ' + instance.getVersionString());
         LOG.info("(c) Open-Xchange Inc. , Open-Xchange GmbH");
-        
-        instance.setDate(headers.get("OXBuildDate"));
     }
 
     @Override

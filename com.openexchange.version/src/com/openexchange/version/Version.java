@@ -67,12 +67,16 @@ public class Version {
     public static final Version SINGLETON = new Version();
 
     private Numbers numbers = null;
+    private String buildDate = null;
     private String versionString = null;
 
-    private String date = null;
-    
     public String getBuildDate() {
-        return date;
+        if (null == buildDate) {
+            IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+        return buildDate;
     }
 
     public String getVersionString() {
@@ -128,7 +132,7 @@ public class Version {
         this.numbers = numbers;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setBuildDate(String buildDate) {
+        this.buildDate = buildDate;
     }
 }

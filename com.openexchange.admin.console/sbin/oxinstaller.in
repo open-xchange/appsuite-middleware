@@ -568,8 +568,6 @@ setup()
     # administration configuration files
     #
 
-    v_setprop SERVER_NAME $SERVER_NAME ${CONFDIR}/AdminDaemon.properties
-
     CUROPTS=$(eval ox_read_property JAVA_OXCMD_OPTS ${CONFDIR}/ox-scriptconf.sh)
     CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+[Mm]*[ ]*//')
     CLTOPTS="$CUROPTS -Xmx${CLT_MEMORY}m"
