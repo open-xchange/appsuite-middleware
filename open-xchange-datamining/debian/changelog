@@ -16,8 +16,14 @@ open-xchange-datamining (7.0.0-1) unstable; urgency=low
 
  -- Karsten Will <karsten.will@open-xchange.com>  Tue, 15 Jan 2013 14:55:20 +0100
 
-open-xchange-datamining (7.0.0-0) unstable; urgency=low
+open-xchange-datamining (6.22.1-1) unstable; urgency=low
 
-  * initial import
+  * Build for patch 2013-01-28
 
- -- Karsten Will <karsten.will@open-xchange.com>  Fri, 21 Dec 2012 14:40:00 +0100
+ -- Karsten Will <karsten.will@open-xchange.com>  Tue, 29 Jan 2013 12:08:51 +0100
+
+open-xchange-datamining (6.22.1-0) unstable; urgency=low
+
+  * Initial import
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Tue, 15 Jan 2013 11:50:00 +0100

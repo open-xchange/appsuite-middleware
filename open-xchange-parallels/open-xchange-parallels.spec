@@ -78,6 +78,8 @@ fi
 %changelog
 * Fri Feb 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.0.1
+* Tue Jan 29 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-01-28
 * Tue Jan 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-23
 * Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
