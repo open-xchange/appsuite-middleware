@@ -160,10 +160,7 @@ public class JSONCoercion {
      * @throws JSONException If coercion fails
      */
     public static Object coerceToJSON(final Object value) throws JSONException {
-        if (value instanceof JSONObject) {
-            return value;
-        }
-        if (value instanceof JSONArray) {
+        if (value instanceof JSONValue) {
             return value;
         }
         if (value instanceof Map) {
