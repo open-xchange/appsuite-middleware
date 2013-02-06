@@ -81,7 +81,14 @@ public final class SnippetUtils {
             return content;
         }
         try {
-            return service.sanitize(content, null, false, null, null);
+            String retval = service.sanitize(content, null, false, null, null).trim();
+            if (retval.startsWith("<body>")) {
+                retval = retval.substring(6);
+            }
+            if (retval.endsWith("</body>")) {
+                retval = retval.substring(0, retval.length() - 7);
+            }
+            return retval;
         } catch (final Exception e) {
             // Ignore
             return content;
