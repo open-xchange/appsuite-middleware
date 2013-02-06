@@ -238,7 +238,9 @@ public class HazelcastSessionStorageService implements SessionStorageService, En
             boolean addedSession = false;
             try {
                 Future<HazelcastStoredSession> future = sessions().putAsync(session.getSessionID(), new HazelcastStoredSession(session));
-                userSessions().put(getKey(session.getContextId(), session.getUserId()), session.getSessionID());
+                if (false == userSessions().put(getKey(session.getContextId(), session.getUserId()), session.getSessionID())) {
+                    LOG.warn("Session '" + session.getSessionID() + "' not added to user sessions.");
+                }
                 future.get();
                 addedSession = true;
             } catch (HazelcastException e) {
@@ -268,7 +270,9 @@ public class HazelcastSessionStorageService implements SessionStorageService, En
             try {
                 HazelcastStoredSession removedSession = sessions().remove(sessionId);
                 if (null != removedSession) {
-                    userSessions().remove(getKey(removedSession.getContextId(), removedSession.getUserId()), sessionId);
+                    if (false == userSessions().remove(getKey(removedSession.getContextId(), removedSession.getUserId()), sessionId)) {
+                        LOG.warn("Session '" + sessionId + "' not removed from user sessions.");
+                    }
                 } else {
                     LOG.debug("Session with ID '" + sessionId + "' not found, unable to remove from storage.");
                 }
@@ -629,7 +633,7 @@ public class HazelcastSessionStorageService implements SessionStorageService, En
          * calling containsKey resets map entries idle-time
          */
         if (false == sessions().containsKey(sessionID)) {
-            LOG.warn("Ignoring keep-alive even for not found session ID: " + sessionID);
+            LOG.debug("Ignoring keep-alive even for not found session ID: " + sessionID);
         } else {
             LOG.debug("Received keep-alive for '" + sessionID + "'.");
         }
