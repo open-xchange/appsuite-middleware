@@ -8,14 +8,14 @@ $showexec="$showruntimestats -x";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {
-	if (-x $showruntimestats) {
-		print "yes\n";
-		exit 0;
-	}
-	else {
-		print "no\n";
-		exit 0;
-	}
+    $bundles = `/opt/open-xchange/sbin/listbundles`;
+    if($bundles =~ /com.openexchange.ajp/) {
+        print "yes\n";
+        exit 0;
+     } else {
+        print "no\n";
+        exit 0;
+     }
 }
 
 if ( $ARGV[0] and $ARGV[0] eq "config")
