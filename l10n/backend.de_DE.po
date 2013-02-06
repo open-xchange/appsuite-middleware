@@ -9824,8 +9824,8 @@ msgid ""
 "A folder named %1$s already exists on server %2$s with login %3$s (user=%4"
 "$s, context=%5$s)."
 msgstr ""
-"Eine Verzeichnis namens %1$s ist bereits vorhanden auf dem Server %2$s mit "
-"dem Login %3$s (Benutzer=%4$s, Kontext=%5$s)."
+"Für das Login %3$s ist bereits ein Verzeichnis namens %1$s auf dem Server"
+"%2$s vorhanden (Benutzer=%4$s, Kontext=%5$s)."
 
 #. *
 #. * No create access on mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
