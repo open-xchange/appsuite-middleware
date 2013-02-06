@@ -54,9 +54,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
@@ -192,6 +190,8 @@ public class TaskResource extends CalDAVResource<Task> {
                 if (Task.STATUS == field) {
                     // '1' is the default value for state
                     updatedTask.setStatus(Task.NOT_STARTED);
+                } else if (Task.PERCENT_COMPLETED == field) {
+                    // treat non-existant percentage as no-change (bug #24812)
                 } else {
                     // use generic setter with default value
                     updatedTask.set(field, updatedTask.get(field));

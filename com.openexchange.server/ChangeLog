@@ -1,3 +1,7 @@
+* 2013-02-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24812: Treat non-existent PERCENT-COMPLETE property in VTODO as no change of existing percentage 
+
 * 2013-02-06 - marcus.klein@open-xchange.com
 
  - Fix for bug 24715: Do not use only attribute names if name is detected from the type of the generic attribute otherwise not typed generic
