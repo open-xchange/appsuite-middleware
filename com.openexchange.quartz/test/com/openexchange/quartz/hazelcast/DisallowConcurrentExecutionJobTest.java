@@ -62,7 +62,7 @@ import com.openexchange.quartz.hazelcast.TestJobs.TestJob;
  */
 public class DisallowConcurrentExecutionJobTest {
 
-    private static final String JOB_STORE = "com.openexchange.service.indexing.hazelcast.TestableHazelcastJobStore";
+    private static final String JOB_STORE = "com.openexchange.quartz.hazelcast.TestableHazelcastJobStore";
 
 //     private static final String JOB_STORE = "org.quartz.simpl.RAMJobStore";
 
