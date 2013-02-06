@@ -3,7 +3,7 @@
 
 /*
  * Helper class
- * 
+ *
  */
 
 $SOAPHOST = "localhost";
@@ -26,9 +26,7 @@ class Context {
 	var $filestoreId;
 	var $filestore_name;
 	var $id;
-	var $idAsString;
 	var $loginMappings;
-	var $maintenanceReason;
 	var $maxQuota;
 	var $name;
 	var $readDatabase;
@@ -67,7 +65,7 @@ class Filestore {
 	var $reserved;
 	var $url;
 	var $used;
-	var $size;		
+	var $size;
 }
 
 class User {
@@ -97,12 +95,11 @@ class User {
 	var $email2;
 	var $email3;
 	var $employeeType;
-	var $extensions;
 	var $fax_business;
 	var $fax_home;
 	var $fax_other;
 	var $given_name;
-	var $guiPreference;
+	var $guiPreferencesForSoap;
 	var $id;
 	var $imapLogin;
 	var $imapPort;
@@ -128,7 +125,7 @@ class User {
 	var $number_of_children;
 	var $number_of_employee;
 	var $password;
-	var $passwordMech2String;
+	var $passwordMech;
 	var $password_expired;
 	var $position;
 	var $postal_code_business;
@@ -191,8 +188,6 @@ class User {
 	var $userfield18;
 	var $userfield19;
 	var $userfield20;
-	
-
 }
 
 class UserModuleAccess{
@@ -217,7 +212,6 @@ class UserModuleAccess{
 	var $webdav;
 	var $webdavXml;
 	var $webmail;
-	
 }
 
 class Group {
@@ -388,7 +382,7 @@ function getFullResourceObject($name, $random_id) {
 }
 
 function getFullUserObject($name, $random_id) {
-	$user = new User();	
+	$user = new User();
 	$user->name = $name;
 	$user->display_name = $name." Soap User " . $random_id;
 	$user->given_name = $name." Soap Given Name" . $random_id;
@@ -397,7 +391,7 @@ function getFullUserObject($name, $random_id) {
 	$user->email1 = $name . "@context" . $random_id . ".org";
 	$user->primaryEmail = $name . "@context" . $random_id . ".org";
 	//$user->aliases = $name . "@context" . $random_id . ".org";
-	$user->anniversary = "2007-02-02T00:00:00.00Z";	
+	$user->anniversary = "2007-02-02T00:00:00.00Z";
 	$user->birthday = "2007-02-02T00:00:00.00Z";
 	$user->assistant_name = $name." assistant name";
 	$user->branches = $name."_branches";
@@ -414,24 +408,23 @@ function getFullUserObject($name, $random_id) {
 	$user->country_home = $name."_country_home";
 	$user->country_other = $name."_country_other";
 	$user->defaultSenderAddress = $name . "@context" . $random_id . ".org";
-	
+
 	$group = new Group();
 	$group->name = "users";
 	$group->id = 1;
 	$user->default_group = $group;
-	
+
 	$user->department = $name."_department";
 	$user->email2 = $name . "_email2@context" . $random_id . ".org";
 	$user->email3 = $name . "_email3@context" . $random_id . ".org";
 	$user->employeeType = $name."_employeeType";
-	$user->extensions = $name."_extensions";
 	$user->fax_business = $name."_fax_business";
 	$user->fax_home = $name."_fax_home";
 	$user->fax_other = $name."_fax_other";
-	
+
 	$user->imapLogin = $name."_imapLogin";
 	$user->imapServer = "imaps://".$name."Imapserver:993";
-	
+
 	$user->info = $name."_info";
 	$user->instant_messenger1 = $name."_instant_messenger1";
 	$user->instant_messenger2 = $name."_instant_messenger2";
@@ -456,10 +449,10 @@ function getFullUserObject($name, $random_id) {
 	$user->postal_code_other = $name."_postal_code_other";
 	$user->profession = $name."_profession";
 	$user->room_number = $name."_room_number";
-	$user->sales_volume = $name."_sales_volume";	
-	
+	$user->sales_volume = $name."_sales_volume";
+
 	$user->smtpServer = "smtps://".$name."SmtpServer:583";
-	
+
 	$user->gui_spam_filter_enabled = true;
 	$user->spouse_name = $name."_spouse_name";
 	$user->state_business = $name."_state_business";
@@ -509,22 +502,21 @@ function getFullUserObject($name, $random_id) {
 	$user->userfield18 = $name."_userfield18";
 	$user->userfield19 = $name."_userfield19";
 	$user->userfield20 = $name."_userfield20";
-	
+
 	return $user;
 }
 
 /*
- * This function modfifies all user attributes 
- * and appends/prepends the given $changed_suffix
- * 
- * If changed_suffix is null then "changed" is used! 
+ * This function modfifies all user attributes and appends/prepends the given $changed_suffix
+ *
+ * If changed_suffix is null then "changed" is used!
  */
 function modifyUserData($user,$changed_suffix){
 	if($changed_suffix==null){
 		$changed_suffix = "changed";
 	}
 	$user->name = $user->name.$changed_suffix;
-	
+
 	$user->display_name = $user->display_name.$changed_suffix;
 	$user->given_name = $user->given_name.$changed_suffix;
 	$user->sur_name = $user->sur_name.$changed_suffix;
@@ -556,12 +548,12 @@ function modifyUserData($user,$changed_suffix){
 	$user->country_business = $user->country_business.$changed_suffix;
 	$user->country_home = $user->country_home.$changed_suffix;
 	$user->country_other = $user->country_other.$changed_suffix;
-	$user->defaultSenderAddress = $changed_suffix.$user->defaultSenderAddress;	
-	
+	$user->defaultSenderAddress = $changed_suffix.$user->defaultSenderAddress;
+
 	$user->department = $user->department.$changed_suffix;
 	$user->email2 = $changed_suffix.$user->email2;
 	$user->email3 = $changed_suffix.$user->email3;
-	$user->employeeType = $user->employeeType.$changed_suffix;	
+	$user->employeeType = $user->employeeType.$changed_suffix;
 	$user->fax_business = $user->fax_business.$changed_suffix;
 	$user->fax_home = $user->fax_home.$changed_suffix;
 	$user->fax_other = $user->fax_other.$changed_suffix;
@@ -594,7 +586,7 @@ function modifyUserData($user,$changed_suffix){
 	$user->postal_code_other = $user->postal_code_other.$changed_suffix;
 	$user->profession = $user->profession.$changed_suffix;
 	$user->room_number = $user->room_number.$changed_suffix;
-	$user->sales_volume = $user->sales_volume.$changed_suffix;	
+	$user->sales_volume = $user->sales_volume.$changed_suffix;
 
 	$user->smtpServer = "smtps://".$user->smtpServer.$changed_suffix.":583";
 
@@ -646,10 +638,8 @@ function modifyUserData($user,$changed_suffix){
 	$user->userfield18 = $user->userfield18.$changed_suffix;
 	$user->userfield19 = $user->userfield19.$changed_suffix;
 	$user->userfield20 = $user->userfield20.$changed_suffix;
-	
-	
+
 	return $user;
-	
 }
 
 ?>

@@ -148,7 +148,7 @@ class ResourceTests extends PHPUnit_Framework_TestCase {
 			$found_changed_res = false;
 			if(is_array($res_list_response)){
 				foreach ($res_list_response['return'] as $ret_group){
-					$query_res = new Group();
+					$query_res = new Resource();
 					$query_res->id = $ret_group->id;
 					$res_get_response = getResourceClient($SOAPHOST)->getData($ctx, $query_res, getCredentialsObject($admin_user->name, $admin_user->password));
 					if($group_get_response->name == $res->name){
@@ -158,7 +158,7 @@ class ResourceTests extends PHPUnit_Framework_TestCase {
 				}	
 			} else {
 				// only 1 res left in system, is it the deleted one?
-				$query_res = new Group();
+				$query_res = new Resource();
 				$query_res->id = $res_list_response->id;
 				$res_get_response = getResourceClient($SOAPHOST)->getData($ctx, $query_res, getCredentialsObject($admin_user->name, $admin_user->password));
 				if($res_get_response->name == $res->name){
