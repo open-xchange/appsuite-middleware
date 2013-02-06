@@ -1,3 +1,7 @@
+* 2013-02-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24770: Unregister HazelcastInstance prior to its shut-down
+
 * 2013-02-04 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24756: Correct handling of parameters map for stored sessions
