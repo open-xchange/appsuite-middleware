@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.hazelcast;
+package com.openexchange.quartz.hazelcast;
 
 import java.util.Date;
 import java.util.List;

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.hazelcast;
+package com.openexchange.quartz.hazelcast;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
