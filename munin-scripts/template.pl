@@ -14,7 +14,8 @@ if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 	}
 	else {
 		print "no\n";
-		exit 1;
+		# Always return 0 (see http://munin-monitoring.org/wiki/ConcisePlugins)
+		exit 0;
 	}
 }
 

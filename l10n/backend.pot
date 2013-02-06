@@ -4115,6 +4115,11 @@ msgstr ""
 msgid "Please provide a display name."
 msgstr ""
 
+#. The associated OAuth provider denied the request: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:147
+msgid "The associated OAuth provider denied the request: %1$s."
+msgstr ""
+
 #. *
 #. * Cannot change password for any reason.
 #.
