@@ -1,3 +1,8 @@
+* 2013-02-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24715: Do not use only attribute names if name is detected from the type of the generic attribute otherwise not typed generic
+   attributes fail.
+
 * 2013-02-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 24770: Unregister HazelcastInstance prior to its shut-down

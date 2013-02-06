@@ -98,7 +98,7 @@ public class CapabilityServiceImpl implements CapabilityService {
             synchronized (this) {
                 tmp = autologin;
                 if (null == tmp) {
-                    tmp = Boolean.valueOf(services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.ajax.login.http-auth.autologin", false));
+                    tmp = Boolean.valueOf(services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.sessiond.autologin", false));
                     autologin = tmp;
                 }
             }
