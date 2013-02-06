@@ -129,6 +129,7 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
@@ -170,7 +171,6 @@ import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.structure.parser.MIMEStructureParser;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
@@ -250,10 +250,11 @@ public class Mail extends PermissionServlet implements UploadListener {
             sb.append("<missing stack trace>\n");
             return;
         }
+        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {
-                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
                 if (ste.isNativeMethod()) {
                     sb.append("(Native Method)");
                 } else {
@@ -269,7 +270,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         sb.append(')');
                     }
                 }
-                sb.append('\n');
+                sb.append(lineSeparator);
             }
         }
     }

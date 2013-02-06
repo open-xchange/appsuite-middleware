@@ -98,6 +98,12 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * ############### MEMBERS ###############
      */
 
+    /**
+     * Line separator string. This is the value of the line.separator
+     * property at the moment that the MailAccess was created.
+     */
+    protected final String lineSeparator;
+
     protected final transient Session session;
 
     protected final int accountId;
@@ -143,6 +149,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     protected MailAccess(final Session session, final int accountId) {
         super();
+        lineSeparator = System.getProperty("line.separator");
         warnings = new ArrayList<OXException>(2);
         this.session = session;
         this.accountId = accountId;
@@ -743,23 +750,23 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     public final String getTrace() {
         final com.openexchange.java.StringAllocator sBuilder = new com.openexchange.java.StringAllocator(512);
         sBuilder.append(toString());
-        sBuilder.append("\nMail connection established (or fetched from cache) at: ").append('\n');
+        sBuilder.append(lineSeparator).append("Mail connection established (or fetched from cache) at: ").append(lineSeparator);
         /*
          * Start at index 3
          */
         for (int i = 3; i < trace.length; i++) {
-            sBuilder.append("\tat ").append(trace[i]).append('\n');
+            sBuilder.append("    at ").append(trace[i]).append(lineSeparator);
         }
         if ((null != usingThread) && usingThread.isAlive()) {
-            sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append('\n');
+            sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append(lineSeparator);
             /*
              * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
              * MailAccessWatcher.
              */
             final StackTraceElement[] trace = usingThread.getStackTrace();
-            sBuilder.append("\tat ").append(trace[0]);
+            sBuilder.append("    at ").append(trace[0]);
             for (int i = 1; i < trace.length; i++) {
-                sBuilder.append('\n').append("\tat ").append(trace[i]);
+                sBuilder.append(lineSeparator).append("    at ").append(trace[i]);
             }
         }
         return sBuilder.toString();

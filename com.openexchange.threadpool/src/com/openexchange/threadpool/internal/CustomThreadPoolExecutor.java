@@ -1177,9 +1177,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         private final TaskInfo poison = new TaskInfo(null);
         private final long minWaitTime;
         private final long maxRunningTime;
+        private final String lineSeparator;
 
         ActiveTaskWatcher() {
             super();
+            lineSeparator = System.getProperty("line.separator");
             tasks = new NonBlockingHashMap<Long, TaskInfo>(8192);
             final ConfigurationService service = ThreadPoolServiceRegistry.getService(ConfigurationService.class);
             minWaitTime = null == service ? 20000L : service.getIntProperty("AJP_WATCHER_FREQUENCY", 20000);
@@ -1286,10 +1288,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             if (null == trace) {
                 return;
             }
+            final String lineSeparator = this.lineSeparator;
             for (final StackTraceElement ste : trace) {
                 final String className = ste.getClassName();
                 if (null != className) {
-                    sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                    sb.append("    at ").append(className).append('.').append(ste.getMethodName());
                     if (ste.isNativeMethod()) {
                         sb.append("(Native Method)");
                     } else {
@@ -1305,7 +1308,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                             sb.append(')');
                         }
                     }
-                    sb.append('\n');
+                    sb.append(lineSeparator);
                 }
             }
         }
