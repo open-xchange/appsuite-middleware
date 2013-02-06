@@ -1,0 +1,143 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats -g";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    $bundles = `/opt/open-xchange/sbin/listbundles`;
+    if($bundles =~ /com.openexchange.http.grizzly/) {
+        print "yes\n";
+        exit 0;
+     } else {
+        print "no\n";
+        exit 0;
+     }
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config") {
+    print "graph_title Grizzly TCPNIOTransport\n";
+    print "graph_args --base 1000 -l 0\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel Number\n";
+    
+    print "bytes-read.label bytes-read\n";
+    print "bytes-read.draw LINE1\n";
+    print "bytes-read.type DERIVE\n";
+    print "bytes-read.min 0\n";
+
+    print "bytes-written.label bytes-written\n";
+    print "bytes-written.draw LINE1\n";
+    print "bytes-written.type DERIVE\n";
+    print "bytes-written.min 0\n";
+
+    print "client-connect-timeout-millis.label client-connect-timeout-millis\n";
+    print "client-connect-timeout-millis.draw LINE1\n";
+    print "client-connect-timeout-millis.type DERIVE\n";
+    print "client-connect-timeout-millis.min 0\n";
+
+    print "client-socket-so-timeout.label client-socket-so-timeout\n";
+    print "client-socket-so-timeout.draw LINE1\n";
+    print "client-socket-so-timeout.type DERIVE\n";
+    print "client-socket-so-timeout.min 0\n";
+    
+    print "last-error.label last-error\n";
+    print "last-error.draw LINE1\n";
+    print "last-error.type DERIVE\n";
+    print "last-error.min 0\n";
+    
+    print "open-connections-count.label open-connections-count\n";
+    print "open-connections-count.draw LINE1\n";
+    print "open-connections-count.type DERIVE\n";
+    print "open-connections-count.min 0\n";
+
+    print "total-connections-count.label total-connections-count\n";
+    print "total-connections-count.draw LINE1\n";
+    print "total-connections-count.type DERIVE\n";
+    print "total-connections-count.min 0\n";
+
+    print "read-buffer-size.label read-buffer-size\n";
+    print "read-buffer-size.draw LINE1\n";
+    print "read-buffer-size.type DERIVE\n";
+    print "read-buffer-size.min 0\n";
+
+    print "selector-threads-count.label selector-threads-count\n";
+    print "selector-threads-count.draw LINE1\n";
+    print "selector-threads-count.type DERIVE\n";
+    print "selector-threads-count.min 0\n";
+    
+    exit 0;
+}
+
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
+
+while (<SHOWRUNTIME>) {
+    if ( $_ =~ /TCPNIOTransport,name=Transport,bytes-read/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "bytes-read.value $val\n";
+        next;
+    }
+    
+    if ( $_ =~ /TCPNIOTransport,name=Transport,bytes-written/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "bytes-written.value $val\n";
+        next;
+    }
+    
+    if ( $_ =~ /TCPNIOTransport,name=Transport,client-connect-timeout-millis/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "client-connect-timeout-millis.value $val\n";
+        next;
+    }
+
+    if ( $_ =~ /TCPNIOTransport,name=Transport,client-socket-so-timeout/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "client-socket-so-timeout.value $val\n";
+        next;
+    }
+    
+    if ( $_ =~ /TCPNIOTransport,name=Transport,last-error/) {
+        s/.*\=//;
+        $val=$_;
+        if($val =~ /N\/A/ ) {
+            $val=0;
+        }	
+        print "last-error.value $val\n";
+        next;
+    }
+
+    if ( $_ =~ /TCPNIOTransport,name=Transport,open-connections-count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "open-connections-count.value $val\n";
+        next;
+    }
+    
+    if ( $_ =~ /TCPNIOTransport,name=Transport,total-connections-count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "total-connections-count.value $val\n";
+        next;
+    }
+    
+    if ( $_ =~ /TCPNIOTransport,name=Transport,read-buffer-size/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "read-buffer-size.value $val\n";
+        next;
+    }
+
+    if ( $_ =~ /TCPNIOTransport,name=Transport,selector-threads-count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "selector-threads-count.value $val\n";
+        next;
+    }
+    
+}

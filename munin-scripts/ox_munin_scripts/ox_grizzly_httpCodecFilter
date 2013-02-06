@@ -1,0 +1,102 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats -g";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    $bundles = `/opt/open-xchange/sbin/listbundles`;
+    if($bundles =~ /com.openexchange.http.grizzly/) {
+        print "yes\n";
+        exit 0;
+     } else {
+        print "no\n";
+        exit 0;
+     }
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config") {
+    print "graph_title Grizzly HttpCodecFilter\n";
+    print "graph_args --base 1000 -l 0\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel Number\n";
+    
+    print "total-bytes-written.label total-bytes-written\n";
+    print "total-bytes-written.draw LINE1\n";
+    print "total-bytes-written.type DERIVE\n";
+    print "total-bytes-written.min 0\n";
+    
+    print "total-bytes-received.label total-bytes-received\n";
+    print "total-bytes-received.draw LINE1\n";
+    print "total-bytes-received.type DERIVE\n";
+    print "total-bytes-received.min 0\n";
+    
+    print "http-codec-error-count.label http-codec-error-count\n";
+    print "http-codec-error-count.draw LINE1\n";
+    print "http-codec-error-count.type DERIVE\n";
+    print "http-codec-error-count.min 0\n";
+    
+    exit 0
+}
+
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
+
+while (<SHOWRUNTIME>) {
+    if ( $_ =~ /HttpCodecFilter,total-bytes-written/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "total-bytes-written.value $val\n";
+        next;
+    }
+
+    if ( $_ =~ /HttpCodecFilter,total-bytes-received/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "total-bytes-received.value $val\n";
+        next;
+    }
+    
+    if ( $_ =~ /HttpCodecFilter,http-codec-error-count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "http-codec-error-count.value $val\n";
+        next;
+    }
+
+    if ( $_ =~ /HttpServerFilter,current-suspended-request-count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "current-suspended-request-count.value $val\n";
+        next;
+    }
+    
+    if ( $_ =~ /HttpServerFilter,requests-cancelled-count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "requests-cancelled-count.value $val\n";
+        next;
+    }
+    
+    if ( $_ =~ /HttpServerFilter,requests-completed-count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "requests-completed-count.value $val\n";
+        next;
+    }
+
+    if ( $_ =~ /HttpServerFilter,requests-received-count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "requests-received-count.value $val\n";
+        next;
+    }
+    
+    if ( $_ =~ /HttpServerFilter,requests-timed-out-count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "requests-timed-out-count.value $val\n";
+        next;
+    }
+}
