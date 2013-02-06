@@ -87,7 +87,8 @@ public class IndexingServiceMonitoringCLT {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
         options.addOption(createOption("r", "running", false, "Lists only jobs that are currently running on this node.", false));
-        options.addOption(createOption("c", "count", false, "Only return the number jobs but not a list of names.", false));
+        options.addOption(createOption("s", "scheduled", false, "Lists only all cluster-wide scheduled jobs.", false));
+        options.addOption(createOption("d", "details", false, "Does not only list the numbers of jobs but also the job names.", false));
         CommandLineParser parser = new PosixParser();
         JMXConnector jmxConnector = null;
         try {
@@ -101,18 +102,33 @@ public class IndexingServiceMonitoringCLT {
             jmxConnector = JMXConnectorFactory.connect(url, null);
             MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
             IndexingServiceMBean proxy = indexingServiceMBeanProxy(mbsc);
-            List<String> jobs;
-            if (cmd.hasOption('r')) {
-                jobs = proxy.getAllLocalRunningJobs();
-                System.out.println("Currently running jobs on this node: " + jobs.size());
+            List<String> scheduledJobs = null;
+            List<String> runningJobs = null;
+            if (cmd.hasOption('s')) {
+                scheduledJobs = proxy.getAllScheduledJobs();
+            } else if (cmd.hasOption('r')) {
+                runningJobs = proxy.getAllLocalRunningJobs();
             } else {
-                jobs = proxy.getAllScheduledJobs();
-                System.out.println("All scheduled jobs: " + jobs.size());
+                scheduledJobs = proxy.getAllScheduledJobs();
+                runningJobs = proxy.getAllLocalRunningJobs();
             }
-
-            if (!cmd.hasOption('c')) {
-                for (String job : jobs) {
-                    System.out.println("    " + job);
+            
+            if (scheduledJobs != null) {
+                System.out.println("All scheduled jobs: " + scheduledJobs.size());
+                if (cmd.hasOption('d')) {
+                    for (String job : scheduledJobs) {
+                        System.out.println("    " + job);
+                    }
+                }
+            }
+            
+            System.out.println();
+            if (runningJobs != null) {
+                System.out.println("Currently running jobs on this node: " + runningJobs.size());
+                if (cmd.hasOption('d')) {
+                    for (String job : runningJobs) {
+                        System.out.println("    " + job);
+                    }
                 }
             }
 
@@ -154,7 +170,7 @@ public class IndexingServiceMonitoringCLT {
 
     private static void printHelp(Options options) {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("listindexingjobs", "Lists all indexing jobs that are scheduled (cluster-wide).", options, null, false);
+        formatter.printHelp("listindexingjobs", "Lists all scheduled indexing jobs and the ones that are currently running on this node.", options, null, false);
     }
 
     private static Option createOption(String shortArg, String longArg, boolean hasArg, String description, boolean required) {
