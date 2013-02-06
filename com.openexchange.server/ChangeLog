@@ -14,6 +14,7 @@
  - Fix for bug 24764: Sanitize Snippet content storing it
  - Fix for bug 24786: Passing proper error message arguments
  - Fix for bug 24799: Ignore posts from "FB_In_Feed" sender
+ - Fix for bug 24724: Use system property "line.separator" to print/output a line-feed
 
 * 2013-02-04 - tobias.friedrich@open-xchange.com
 
