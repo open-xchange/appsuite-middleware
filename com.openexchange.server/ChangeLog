@@ -2,6 +2,7 @@
 
  - Fix for bug 24770: Unregister HazelcastInstance prior to its shut-down
  - Fix for bug 24794: Discard invalid time zone identifiers when responding list of available time zones (as per JVM)
+ - Fix for bug 24764: Sanitize Snippet content storing it
 
 * 2013-02-04 - tobias.friedrich@open-xchange.com
 
