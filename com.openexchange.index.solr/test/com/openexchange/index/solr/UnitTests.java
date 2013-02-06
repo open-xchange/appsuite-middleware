@@ -64,7 +64,6 @@ import org.junit.runners.Suite.SuiteClasses;
     ModuleSetTest.class,
     SimpleConfigurationTest.class,
     SolrAttachmentSearchTermVisitorTest.class,
-    SolrIndexFacadeTest.class,
     SimpleQueryBuilderTest.class,
     MailSolrIndexAccessTest.class,
     AddressComparatorTest.class,
