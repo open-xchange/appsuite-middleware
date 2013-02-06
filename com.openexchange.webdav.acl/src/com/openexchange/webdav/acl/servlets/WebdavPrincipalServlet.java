@@ -72,6 +72,9 @@ import com.openexchange.webdav.acl.servlets.WebdavPrincipalPerformer.Action;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebdavPrincipalServlet extends OXServlet {
+
+    private static final long serialVersionUID = 4646903712578496388L;
+
     private static final transient Log LOG = com.openexchange.log.Log.loggerFor(WebdavPrincipalServlet.class);
 
     @Override
@@ -150,17 +153,17 @@ public class WebdavPrincipalServlet extends OXServlet {
     }
 
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {
-        ServerSession session;
+        ServerSession session = null;
         try {
-            session = ServerSessionAdapter.valueOf(getSession(req));
-        } catch (final com.openexchange.exception.OXException exc) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
-        try {
-                WebdavPrincipalPerformer.getInstance().doIt(req, resp, action, session);
+            try {
+                session = ServerSessionAdapter.valueOf(getSession(req));
+            } catch (final com.openexchange.exception.OXException exc) {
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                return;
+            }
+            WebdavPrincipalPerformer.getInstance().doIt(req, resp, action, session);
         } finally {
-            if (mustLogOut(req)) {
+            if (null != session && mustLogOut(req)) {
                 logout(session, req, resp);
             }
         }

@@ -171,21 +171,21 @@ public class CalDAV extends OXServlet {
     }
 
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final CaldavPerformer.Action action) throws ServletException, IOException {
-        ServerSession session;
+        ServerSession session = null;
         try {
-            session = ServerSessionAdapter.valueOf(getSession(req));
-            if (!checkPermission(session)) {
-                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            try {
+                session = ServerSessionAdapter.valueOf(getSession(req));
+                if (!checkPermission(session)) {
+                    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+            } catch (final OXException exc) {
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 return;
             }
-        } catch (final OXException exc) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
-        try {
             CaldavPerformer.getInstance().doIt(req, resp, action, session);
         } finally {
-            if (mustLogOut(req)) {
+            if (null != session && mustLogOut(req)) {
                 logout(session, req, resp);
             }
         }
