@@ -56,9 +56,11 @@ for FILE in ${CONFFILES}; do
 done
 
 PROTECT="facebookoauth.properties linkedinoauth.properties msnoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
-for FILE in $PROTECT
+for FILE in ${PROTECT}
 do
-    ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
+    echo $FILE
+    ox_update_permissions /opt/open-xchange/etc/$FILE root:open-xchange 640
+    echo "done"
 done
 
 %clean
