@@ -56,14 +56,23 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
+import com.openexchange.java.UnsynchronizedStringReader;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.microformats.datasources.OXMFDataSource;
+import com.openexchange.subscribe.microformats.osgi.Services;
 import com.openexchange.subscribe.microformats.parser.ObjectParser;
 import com.openexchange.subscribe.microformats.transformers.MapToObjectTransformer;
 
@@ -220,6 +229,35 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         return (String) subscription.getConfiguration().get("url");
     }
 
+    private static volatile Set<Pattern> allowedHosts;
+    private static Set<Pattern> allowedHosts() {
+        Set<Pattern> tmp = allowedHosts;
+        if (null == allowedHosts) {
+            synchronized (MicroformatSubscribeService.class) {
+                tmp = allowedHosts;
+                if (null == allowedHosts) {
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    final String sProp = null == service ? "" : service.getProperty("com.openexchange.subscribe.microformats.allowedHosts", "").trim();
+                    if (isEmpty(sProp)) {
+                        tmp = Collections.emptySet();
+                    } else {
+                        final String[] sPatterns = Strings.splitByComma(sProp);
+                        tmp = new HashSet<Pattern>(sPatterns.length);
+                        for (final String sPattern : sPatterns) {
+                            try {
+                                tmp.add(Pattern.compile(wildcardToRegex(sPattern)));
+                            } catch (final Exception x) {
+                                // Ignore
+                            }
+                        }
+                    }
+                    allowedHosts = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
     /**
      * Checks given URL string for syntactical correctness.
      * 
@@ -237,6 +275,17 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
             if (!"http".equals(protocol) && !"https".equals(protocol)) {
                 throw new MalformedURLException("Only http & https protocols supported.");
             }
+            // Check host
+            final Set<Pattern> allowedHosts = allowedHosts();
+            if (!allowedHosts.isEmpty()) {
+                final String host = url.getHost();
+                for (final Pattern allowedHost : allowedHosts) {
+                    if (allowedHost.matcher(host).matches()) {
+                        return;
+                    }
+                }
+                throw new MalformedURLException("Host is not allowed: " + host);
+            }
         } catch (final MalformedURLException e) {
             throw OXMFSubscriptionErrorMessage.INVALID_URL.create(e, new Object[0]);
         }
@@ -253,6 +302,45 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static final gnu.trove.set.TIntSet SPECIALS = new gnu.trove.set.hash.TIntHashSet(new int[] {
+        '+', '(', ')', '[', ']', '$', '^', '.', '{', '}', '|', '\\' });
+
+    /**
+     * Converts specified wild-card string to a regular expression
+     *
+     * @param wildcard The wild-card string to convert
+     * @return An appropriate regular expression ready for being used in a {@link Pattern#compile(String) pattern}
+     */
+    private static String wildcardToRegex(final String wildcard) {
+        if (null == wildcard) {
+            // Accept all if null
+            return "^.*$";
+        }
+        if (wildcard.indexOf('*') < 0 && wildcard.indexOf('?') < 0) {
+            // Literal pattern
+            return Pattern.quote(wildcard);
+        }
+        // Generate appropriate regex
+        final StringBuilder s = new StringBuilder(wildcard.length() << 1);
+        s.append('^');
+        final int len = wildcard.length();
+        for (int i = 0; i < len; i++) {
+            final char c = wildcard.charAt(i);
+            if (c == '*') {
+                s.append(".*");
+            } else if (c == '?') {
+                s.append('.');
+            } else if (SPECIALS.contains(c)) {
+                s.append('\\');
+                s.append(c);
+            } else {
+                s.append(c);
+            }
+        }
+        s.append('$');
+        return (s.toString());
     }
 
 }
