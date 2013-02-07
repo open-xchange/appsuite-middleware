@@ -56,10 +56,8 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.FacetParameters;
@@ -70,7 +68,6 @@ import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
-import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -176,21 +173,23 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
         SolrQuery solrQuery = queryBuilder.buildQuery(newParameters);
         setFieldList(solrQuery, fields);
-        List<IndexDocument<MailMessage>> results = queryChunkWise(
+        IndexResult<MailMessage> indexResult = queryChunkWise(
             fieldConfig.getUUIDField(),
             converter,
             solrQuery,
             newParameters.getOff(),
             newParameters.getLen(),
             100);
-        if (results.isEmpty()) {
-            return Indexes.emptyResult();
+        
+        if (indexResult.equals(Indexes.emptyResult())) {
+            return indexResult;
         }
 
         if (sortManually) {
-            Collections.sort(results, new AddressComparator((MailIndexField) sortField, order));
+            Collections.sort(indexResult.getResults(), new AddressComparator((MailIndexField) sortField, order));
         }
-        return new SolrIndexResult<MailMessage>(results.size(), results, null);
+        
+        return indexResult;
     }
 
     @Override

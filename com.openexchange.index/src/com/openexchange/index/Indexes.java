@@ -77,8 +77,8 @@ public final class Indexes {
         }
 
         @Override
-        public int getNumFound() {
-            return 0;
+        public long getNumFound() {
+            return 0L;
         }
 
         @Override

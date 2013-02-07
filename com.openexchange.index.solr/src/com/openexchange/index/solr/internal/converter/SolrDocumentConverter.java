@@ -69,6 +69,6 @@ public interface SolrDocumentConverter<V> {
 
     IndexDocument<V> convert(SolrDocument document, Map<String, List<String>> highlightedFields) throws OXException;
 
-    IndexResult<V> createIndexResult(List<IndexDocument<V>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException;
+    IndexResult<V> createIndexResult(long numFound, List<IndexDocument<V>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException;
 
 }

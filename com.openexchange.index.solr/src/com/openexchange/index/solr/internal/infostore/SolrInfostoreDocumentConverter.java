@@ -87,8 +87,8 @@ public class SolrInfostoreDocumentConverter extends AbstractDocumentConverter<Do
     }
 
     @Override
-    public IndexResult<DocumentMetadata> createIndexResult(List<IndexDocument<DocumentMetadata>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
-        return new SolrIndexResult<DocumentMetadata>(documents.size(), documents, facetCounts);
+    public IndexResult<DocumentMetadata> createIndexResult(long numFound, List<IndexDocument<DocumentMetadata>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
+        return new SolrIndexResult<DocumentMetadata>(numFound, documents, facetCounts);
     }
 
     @Override
