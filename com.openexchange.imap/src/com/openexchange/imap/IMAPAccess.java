@@ -801,9 +801,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error(e.getMessage(), e);
                 }
             }
-            final boolean certainPassword = ("emailmx.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainPassword = false; //("emailmx.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
             if (certainPassword) {
-                tmpPass = "tt000001";
+                tmpPass = "oxuser1";
             }
             final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
             /*
