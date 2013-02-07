@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Utility Bundle
+Bundle-SymbolicName: com.openexchange.utils
+Bundle-Version: 7.0.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.osgi.framework,
+ org.osgi.util.tracker
+Export-Package: com.openexchange.utils

@@ -110,7 +110,6 @@ import com.openexchange.image.ImageActionFactory;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -371,12 +370,11 @@ public final class MimeMessageUtility {
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public static boolean containsContentId(final String contentId, final Collection<String> contentIds) {
-        for (final String current : contentIds) {
-            if (equalsCID(contentId, current)) {
-                return true;
-            }
+        boolean contains = false;
+        for (Iterator<String> iterator = contentIds.iterator(); !contains && iterator.hasNext();) {
+            contains = equalsCID(contentId, iterator.next());
         }
-        return false;
+        return contains;
     }
 
     /**
@@ -1162,7 +1160,7 @@ public final class MimeMessageUtility {
             return s;
         }
         final int length = s.length();
-        final StringAllocator sb = new StringAllocator(length << 1);
+        final StringBuilder sb = new StringBuilder(length << 1);
         for (int i = 0; i < length; i++) {
             final char c = s.charAt(i);
             if (c == '\\') {
@@ -1241,7 +1239,7 @@ public final class MimeMessageUtility {
                 return encode ? MimeUtility.encodeWord(phrase) : phrase;
             }
             final String replaced = phrase.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\\\"");
-            return new com.openexchange.java.StringAllocator(len + 2).append('"').append(
+            return new StringBuilder(len + 2).append('"').append(
                 encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);

@@ -14,7 +14,7 @@
  * under the License.
  */
 
-package com.openexchange.service.indexing.hazelcast;
+package com.openexchange.quartz.hazelcast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,11 +48,11 @@ import org.quartz.simpl.SimpleThreadPool;
 import org.quartz.spi.JobStore;
 
 import com.openexchange.quartz.hazelcast.ConsistencyTask;
-import com.openexchange.service.indexing.hazelcast.TestJobs.ChangingDetailJob;
-import com.openexchange.service.indexing.hazelcast.TestJobs.LongRunningJob;
-import com.openexchange.service.indexing.hazelcast.TestJobs.ReschedulingTestJob;
-import com.openexchange.service.indexing.hazelcast.TestJobs.SleepingTestJob;
-import com.openexchange.service.indexing.hazelcast.TestJobs.TestJob;
+import com.openexchange.quartz.hazelcast.TestJobs.ChangingDetailJob;
+import com.openexchange.quartz.hazelcast.TestJobs.LongRunningJob;
+import com.openexchange.quartz.hazelcast.TestJobs.ReschedulingTestJob;
+import com.openexchange.quartz.hazelcast.TestJobs.SleepingTestJob;
+import com.openexchange.quartz.hazelcast.TestJobs.TestJob;
 
 /**
  * Integration test for using DisallowConcurrentExecution annot.
@@ -62,7 +62,7 @@ import com.openexchange.service.indexing.hazelcast.TestJobs.TestJob;
  */
 public class DisallowConcurrentExecutionJobTest {
 
-    private static final String JOB_STORE = "com.openexchange.service.indexing.hazelcast.TestableHazelcastJobStore";
+    private static final String JOB_STORE = "com.openexchange.quartz.hazelcast.TestableHazelcastJobStore";
 
 //     private static final String JOB_STORE = "org.quartz.simpl.RAMJobStore";
 

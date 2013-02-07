@@ -47,48 +47,26 @@
  *
  */
 
-package com.openexchange.service.indexing.hazelcast;
+package com.openexchange.quartz.hazelcast;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import org.quartz.simpl.RAMJobStoreTest;
 
-import org.quartz.JobPersistenceException;
-import org.quartz.TriggerKey;
-
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
-import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
 
 /**
+ * {@link UnitTests}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
+@RunWith(Suite.class)
+@SuiteClasses({
+    DisallowConcurrentExecutionJobTest.class,
+    HazelcastJobStoreTest.class,
+    RAMJobStoreTest.class
+})
 
-    private HazelcastInstance hazelcast = null;
+public class UnitTests {
 
-    @Override
-    public void shutdown() {
-        Collection<Instance> instances = hazelcast.getInstances();
-        for (Instance instance : instances) {
-            instance.destroy();
-        }
-    }
-
-    @Override
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
-        }
-
-        return hazelcast;
-    }
-
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
-        return locallyAcquiredTriggers;
-    }
-
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
-        return locallyExecutingTriggers;
-    }
 }

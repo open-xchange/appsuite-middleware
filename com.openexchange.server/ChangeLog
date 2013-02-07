@@ -1,3 +1,7 @@
+* 2013-02-01 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 24597: Added new options to showruntimestats
+
 * 2013-02-01 - martin.herfurth@open-xchange.com
 
  - Fix for bug 24682: Bad folder id in recurrence exceptions.

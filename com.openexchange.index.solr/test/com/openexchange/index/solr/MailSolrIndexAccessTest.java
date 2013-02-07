@@ -72,6 +72,8 @@ public class MailSolrIndexAccessTest extends TestCase {
     private static final int QUERY_ROWS = MockMailSolrIndexAccess.getQueryRows();
 
     private static final int DOCS = QUERY_ROWS * 2;
+    
+    private static final Random RANDOM = new Random();
 
 
     public void testChunkLoading() throws Exception {
@@ -110,14 +112,13 @@ public class MailSolrIndexAccessTest extends TestCase {
          * Get less than one chunk size
          */
         MockMailSolrIndexAccess indexAccess = new MockMailSolrIndexAccess(DOCS);
-        Random random = new Random();
-        int len = random.nextInt(QUERY_ROWS);
+        int len = getRandomIntGreater0(QUERY_ROWS);
         searchAndCheckLength(indexAccess, 0, len, len);
 
         /*
          * Get more than one chunk but less than index size
          */
-        len = QUERY_ROWS + 11;
+        len = QUERY_ROWS + (QUERY_ROWS / 2);
         searchAndCheckLength(indexAccess, 0, len, len);
 
         /*
@@ -129,21 +130,21 @@ public class MailSolrIndexAccessTest extends TestCase {
         /*
          * Get less than one chunk size with offset > 0
          */
-        int off = random.nextInt(QUERY_ROWS);
-        len = random.nextInt(QUERY_ROWS);
+        int off = getRandomIntGreater0(QUERY_ROWS);
+        len = getRandomIntGreater0(QUERY_ROWS);
         searchAndCheckLength(indexAccess, off, len, len);
 
         /*
          * Get more than one chunk but less than index size with offset > 0
          */
-        off = random.nextInt(QUERY_ROWS);
-        len = QUERY_ROWS + 11;
+        off = getRandomIntGreater0(QUERY_ROWS);
+        len = getRandomIntGreater0(DOCS - off);
         searchAndCheckLength(indexAccess, off, len, len);
 
         /*
          * Search for more than index size with offset > 0
          */
-        off = random.nextInt(QUERY_ROWS);
+        off = getRandomIntGreater0(QUERY_ROWS);
         len = DOCS * 2;
         searchAndCheckLength(indexAccess, off, len, DOCS - off);
     }
@@ -156,6 +157,17 @@ public class MailSolrIndexAccessTest extends TestCase {
             .build();
         IndexResult<MailMessage> result = indexAccess.query(parameters, null);
         assertEquals(expected, result.getNumFound());
+    }
+    
+    
+    
+    private int getRandomIntGreater0(int max) {
+        int retval = 0;
+        do {
+            retval = RANDOM.nextInt(max);
+        } while (retval == 0);
+        
+        return retval;
     }
 
 }
