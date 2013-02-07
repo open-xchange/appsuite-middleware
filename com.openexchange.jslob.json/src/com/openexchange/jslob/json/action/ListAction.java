@@ -102,11 +102,9 @@ public final class ListAction extends JSlobAction {
         final JSONArray ids = (JSONArray) jslobRequest.getRequestData().getData();
         final int length = ids.length();
         final List<JSlob> jslobs = new ArrayList<JSlob>(length);
-
         for (int i = 0; i < length; i++) {
             jslobs.add(jslobService.get(ids.getString(i), jslobRequest.getSession()));
         }
-
         return new AJAXRequestResult(jslobs, "jslob");
     }
 
