@@ -68,7 +68,8 @@ import com.openexchange.java.Strings;
  */
 public final class CSSMatcher {
 
-    private static final boolean respectInnerBlocks = true;
+    /** Perform CSS sanitizing with respect to nested blocks */
+    private static final boolean CONSIDER_NESTED_BLOCKS = true;
 
     /**
      * Initializes a new {@link CSSMatcher}
@@ -258,7 +259,7 @@ public final class CSSMatcher {
         }
     }
 
-    private static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("((?:#|\\.|@|[a-zA-Z])[^{]*?\\{)");
+    private static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:#|\\.|@|[a-zA-Z])[^{]*?\\{");
     private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z])[^{]*?\\{)([^}]+)\\}");
     private static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
 
@@ -286,11 +287,12 @@ public final class CSSMatcher {
         cssBuilder.setLength(0);
         final StringBuilder cssElemsBuffer = new StringBuilder(length);
         // Block-wise sanitizing
-        if (respectInnerBlocks) {
+        if (CONSIDER_NESTED_BLOCKS) {
             int off = 0;
             Matcher m;
             while (off < length && (m = PATTERN_STYLE_STARTING_BLOCK.matcher(css.substring(off))).find()) {
-                int index = m.end() + off;
+                final int end = m.end() + off;
+                int index = end;
                 int level = 1;
                 while (level > 0 && index < length) {
                     final char c = css.charAt(index++);
@@ -301,15 +303,16 @@ public final class CSSMatcher {
                     }
                 }
                 // Check prefix part
-                cssElemsBuffer.append(css.substring(off, m.start() + off));
+                final int start = m.start() + off;
+                cssElemsBuffer.append(css.substring(off, start));
                 modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
                 final String prefix = cssElemsBuffer.toString();
                 cssElemsBuffer.setLength(0);
                 // Check block part
-                cssElemsBuffer.append(css.substring(m.end() + off, index - 1));
+                cssElemsBuffer.append(css.substring(end, index - 1));
                 modified |= checkCSS(cssElemsBuffer, styleMap, cssPrefix);
                 // Check selector part
-                cssElemsBuffer.insert(0, prefixBlock(css.substring(m.start() + off, m.end() + off - 1), cssPrefix)).append('}').append('\n'); // Surround with block definition
+                cssElemsBuffer.insert(0, prefixBlock(css.substring(start, end - 1), cssPrefix)).append('}').append('\n'); // Surround with block definition
                 final String block = cssElemsBuffer.toString();
                 cssElemsBuffer.setLength(0);
                 // Add to main builder
