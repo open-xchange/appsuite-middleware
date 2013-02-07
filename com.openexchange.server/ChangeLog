@@ -1,3 +1,7 @@
+* 2013-02-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24824: Only emit COMPLETED attribute if a task is 'done' 
+
 * 2013-02-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 24694: Setting file permissions for configuration files with sensitive content without read permission for all users in
