@@ -1,3 +1,7 @@
+* 2013-02-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24818: Determine locale with respect to "language" parameter
+
 * 2013-02-07 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24824: Only emit COMPLETED attribute if a task is 'done' 
