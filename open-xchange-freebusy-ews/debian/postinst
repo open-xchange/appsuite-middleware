@@ -17,6 +17,8 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+. /opt/open-xchange/lib/oxfunctions.sh
+
 PROTECT="freebusy_provider_ews.properties freebusy_publisher_ews.properties"
 
 setConfigFilePermissions() {

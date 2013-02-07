@@ -37,6 +37,7 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml build
 
 %post
+. /opt/open-xchange/lib/oxfunctions.sh
 PROTECT="freebusy_provider_ews.properties freebusy_publisher_ews.properties"
 for FILE in $PROTECT
 do
