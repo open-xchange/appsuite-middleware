@@ -62,7 +62,7 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace)%attr(640,root,open-xchange) /opt/open-xchange/etc/mailfilter.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/mailfilter.properties
 
 %changelog
 * Fri Feb 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
