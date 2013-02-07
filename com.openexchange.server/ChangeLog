@@ -10,6 +10,7 @@
 
  - Fix for bug 24694: Setting file permissions for configuration files with sensitive content without read permission for all users in
    system.
+ - Fix for bug 24795: Sending only the single version of the backend and its build date.
 
 * 2013-02-06 - tobias.friedrich@open-xchange.com
 
