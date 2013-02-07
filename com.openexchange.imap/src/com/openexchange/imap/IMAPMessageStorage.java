@@ -1384,9 +1384,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Perform sort on temporary list
                  */
-                final List<MailMessage> msgList = Arrays.asList(mails);
-                Collections.sort(msgList, new MailMessageComparator(effectiveSortField, order == OrderDirection.DESC, getLocale()));
-                mails = msgList.toArray(mails);
+                {
+                    final int length = mails.length;
+                    final List<MailMessage> msgList = new ArrayList<MailMessage>(length);
+                    for (int i = 0; i < length; i++) {
+                        final MailMessage tmp = mails[i];
+                        if (null != tmp) {
+                            msgList.add(tmp);
+                        }
+                    }
+                    Collections.sort(msgList, new MailMessageComparator(effectiveSortField, order == OrderDirection.DESC, getLocale()));
+                    mails = msgList.toArray(new MailMessage[0]);
+                }
                 /*
                  * Get proper sub-array if an index range is specified
                  */
