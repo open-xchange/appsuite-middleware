@@ -53,8 +53,8 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.LogFactory;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -73,20 +73,18 @@ public class PushDiscoverySender implements Runnable {
 
     private final int remoteHostFresh;
 
-    private final String discoveryData;
-
     private final String packetData;
 
     private final byte[] packetBytes;
 
-    private ScheduledTimerTask task;
+    private volatile ScheduledTimerTask task;
 
     public PushDiscoverySender(final PushConfiguration pushConfigInterface) {
         super();
 
         InetAddress hostname = pushConfigInterface.getHostName();
 
-        discoveryData = String.valueOf(PushRequest.REMOTE_HOST_REGISTER) + '\1' + hostname.getCanonicalHostName()
+        final String discoveryData = String.valueOf(PushRequest.REMOTE_HOST_REGISTER) + '\1' + hostname.getCanonicalHostName()
             + '\1' + String.valueOf(pushConfigInterface.getRegisterPort());
         packetData = String.valueOf(PushRequest.MAGIC) + '\1' + String.valueOf(discoveryData.length()) + '\1' + discoveryData;
         packetBytes = Charsets.toAsciiBytes(packetData);
@@ -109,10 +107,18 @@ public class PushDiscoverySender implements Runnable {
     }
 
     public void startSender(final TimerService service) {
-        task = service.scheduleAtFixedRate(this, 0, remoteHostFresh);
+        ScheduledTimerTask task = this.task;
+        if (null == task) {
+            task = service.scheduleAtFixedRate(this, 0, remoteHostFresh);
+            this.task = task;
+        }
     }
 
     public void stopSender() {
-        task.cancel();
+        final ScheduledTimerTask task = this.task;
+        if (null != task) {
+            task.cancel();
+            this.task = null;
+        }
     }
 }
