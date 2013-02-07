@@ -53,12 +53,17 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Queue;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailInitialization;
@@ -748,7 +753,23 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return the trace of the thread that lastly obtained this access
      */
     public final String getTrace() {
-        final com.openexchange.java.StringAllocator sBuilder = new com.openexchange.java.StringAllocator(512);
+        final com.openexchange.java.StringAllocator sBuilder = new com.openexchange.java.StringAllocator(2048);
+        {
+            final Props taskProps = LogProperties.optLogProperties(usingThread);
+            final Map<String, String> sorted = new TreeMap<String, String>();
+            for (final Entry<String, Object> entry : taskProps.asMap().entrySet()) {
+                final String propertyName = entry.getKey();
+                final Object value = entry.getValue();
+                if (null != value) {
+                    sorted.put(propertyName, value.toString());
+                }
+            }
+            for (final Map.Entry<String, String> entry : sorted.entrySet()) {
+                sBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append(lineSeparator);
+            }
+            sBuilder.append(lineSeparator);
+            
+        }
         sBuilder.append(toString());
         sBuilder.append(lineSeparator).append("Mail connection established (or fetched from cache) at: ").append(lineSeparator);
         /*
