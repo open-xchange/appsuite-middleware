@@ -58,7 +58,7 @@ done
 PROTECT="facebookoauth.properties linkedinoauth.properties msnoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
 for FILE in $PROTECT
 do
-    ox_update_permissions /opt/open-xchange/etc/$FILE root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
 done
 
 %clean
