@@ -40,6 +40,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
 ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mobile_configuration_action_sms.properties eas-provisioning-sms.properties
+ox_update_permissions /opt/open-xchange/etc/eas-provisioning-sms.properties root:open-xchange 640
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -51,7 +52,7 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mobile
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/eas-provisioning-sms.properties
 
 %changelog
 * Fri Feb 01 2013 Marcus Klein <marcus.klein@open-xchange.com>

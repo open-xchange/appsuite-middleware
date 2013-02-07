@@ -1,3 +1,8 @@
+* 2013-02-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24694: Setting file permissions for configuration files with sensitive content without read permission for all users in
+   system.
+
 * 2013-02-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24812: Treat non-existent PERCENT-COMPLETE property in VTODO as no change of existing percentage 

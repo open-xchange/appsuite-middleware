@@ -17,9 +17,20 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+. /opt/open-xchange/lib/oxfunctions.sh
+
+PROTECT="facebookoauth.properties linkedinoauth.properties msnoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
+
+setConfigFilePermissions() {
+    for FILE in $PROTECT
+    do
+        ox_update_permissions /opt/open-xchange/etc/$FILE root:open-xchange 640
+    done
+}
 
 case "$1" in
     configure)
+        setConfigFilePermissions
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

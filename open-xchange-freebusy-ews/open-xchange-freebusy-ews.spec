@@ -36,6 +36,14 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml build
 
+%post
+. /opt/open-xchange/lib/oxfunctions.sh
+PROTECT="freebusy_provider_ews.properties freebusy_publisher_ews.properties"
+for FILE in $PROTECT
+do
+    ox_update_permissions /opt/open-xchange/etc/$FILE root:open-xchange 640
+done
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -44,7 +52,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/freebusy_provider_ews.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/freebusy_publisher_ews.properties
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 

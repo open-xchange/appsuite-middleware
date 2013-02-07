@@ -41,6 +41,7 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc report
 if [ -e /opt/open-xchange/etc/common/licensekeys.properties ]; then
    mv /opt/open-xchange/etc/common/licensekeys.properties /opt/open-xchange/etc/licensekeys.properties
 fi
+ox_update_permissions /opt/open-xchange/etc/reportclient.properties root:open-xchange 640
 
 %clean
 %{__rm} -rf %{buildroot}

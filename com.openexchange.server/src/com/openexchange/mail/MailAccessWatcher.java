@@ -199,9 +199,7 @@ public final class MailAccessWatcher {
     private static class WatcherTask implements Runnable {
 
         private final ConcurrentMap<MailAccess<?, ?>, Long> map;
-
         private final org.apache.commons.logging.Log logger;
-
         private final boolean traceEnabled;
 
         public WatcherTask(final ConcurrentMap<MailAccess<?, ?>, Long> mailAccesses, final org.apache.commons.logging.Log logger) {

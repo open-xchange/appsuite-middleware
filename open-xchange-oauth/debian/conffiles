@@ -6,4 +6,5 @@ opt/open-xchange/etc/oauth.properties
 opt/open-xchange/etc/twitteroauth.properties
 opt/open-xchange/etc/yahoooauth.properties
 opt/open-xchange/etc/xingoauth.properties
+opt/open-xchange/etc/settings/flickroauth.properties
 opt/open-xchange/etc/settings/tumblroauth.properties
