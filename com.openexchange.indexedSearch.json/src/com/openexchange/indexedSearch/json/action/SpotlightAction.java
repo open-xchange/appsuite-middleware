@@ -49,40 +49,26 @@
 
 package com.openexchange.indexedSearch.json.action;
 
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 import javax.mail.internet.InternetAddress;
-
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.attach.index.Attachment;
-import com.openexchange.groupware.attach.index.AttachmentIndexField;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.indexedSearch.json.IndexAJAXRequest;
+import com.openexchange.indexedSearch.json.IndexedSearchExceptionCodes;
 import com.openexchange.indexedSearch.json.ResultConverters;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.threadpool.Task;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -108,157 +94,108 @@ public class SpotlightAction extends AbstractIndexAction {
     protected AJAXRequestResult perform(IndexAJAXRequest req) throws OXException, JSONException {
         long start = System.currentTimeMillis();
         final ServerSession session = req.getSession();
-        final String searchTerm = req.checkParameter("searchTerm");
         final int maxPersons = req.optInt("maxPersons") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxPersons");
         final int maxTopics = req.optInt("maxTopics") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxTopics");
-        final boolean searchAttachments = req.optBoolean("searchAttachments", false);
-        final int maxAttachments = req.optInt("maxAttachments") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxAttachments");
+        final String q = req.checkParameter("q");
+        final String field = req.checkParameter("field");
         final IndexFacadeService indexFacade = getService(IndexFacadeService.class);
-
-        Future<JSONArray> attachmentFuture = null;
-        if (searchAttachments) {
-            ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
-            attachmentFuture = threadPoolService.submit(new Task<JSONArray>() {
-                @Override
-                public void setThreadName(ThreadRenamer threadRenamer) {}
-
-                @Override
-                public void beforeExecute(Thread t) {}
-
-                @Override
-                public void afterExecute(Throwable t) {}
-
-                @Override
-                public JSONArray call() throws Exception {
-                    IndexAccess<Attachment> indexAccess = indexFacade.acquireIndexAccess(Types.ATTACHMENT, session);
-                    QueryParameters params = new QueryParameters.Builder()
-                        .setHandler(SearchHandler.PERSONS_AND_TOPICS)
-                        .setSearchTerm(searchTerm)
-                        .setLength(maxAttachments)
-                        .build();
-
-                    IndexResult<Attachment> result = indexAccess.query(params, null);
-                    List<IndexDocument<Attachment>> documents = result.getResults();
-                    Set<String> attachments = new LinkedHashSet<String>();
-                    for (IndexDocument<Attachment> document : documents) {
-                        Attachment attachment = document.getObject();
-                        Map<IndexField, List<String>> highlighting = document.getHighlighting();
-                        if (highlighting != null) {
-                            if (highlighting.containsKey(AttachmentIndexField.FILE_NAME) || highlighting.containsKey(AttachmentIndexField.CONTENT)) {
-                                String fileName = attachment.getFileName();
-                                if (fileName != null) {
-                                    attachments.add(fileName);
-                                }
-                            }
-                        }
-                    }
-
-                    JSONArray array = new JSONArray();
-                    for (String attachment : attachments) {
-                        JSONObject json = new JSONObject();
-                        json.put("value", attachment);
-                        array.put(json);
-                    }
-
-                    return array;
-                }
-            });
+        final SearchHandler searchHandler;
+        if ("from".equals(field)) {
+            searchHandler = SearchHandler.SPOTLIGHT_FROM;
+        } else if ("to".equals(field)) {
+            searchHandler = SearchHandler.SPOTLIGHT_TO;
+        } else if ("subject".equals(field)) {
+            searchHandler = SearchHandler.SPOTLIGHT_SUBJECT;
+        } else {
+            throw IndexedSearchExceptionCodes.UNKNOWN_HANDLER.create(field);
         }
 
         IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
         QueryParameters params = new QueryParameters.Builder()
-            .setHandler(SearchHandler.PERSONS_AND_TOPICS)
-            .setSearchTerm(searchTerm)
+            .setHandler(searchHandler)
+            .setSearchTerm(q)
             .setLength(maxPersons + maxTopics)
             .build();
 
         IndexResult<MailMessage> result = indexAccess.query(params, null);
+        JSONObject responseObject = new JSONObject();
+        responseObject.put("numFound", result.getNumFound());
+        
         List<IndexDocument<MailMessage>> documents = result.getResults();
-        Set<String> persons = new LinkedHashSet<String>();
-        Set<String> topics = new LinkedHashSet<String>();
+        JSONArray docs = new JSONArray();
         for (IndexDocument<MailMessage> document : documents) {
             MailMessage mailMessage = document.getObject();
-            Map<IndexField, List<String>> highlighting = document.getHighlighting();
-            if (highlighting != null) {
-                if (highlighting.containsKey(MailIndexField.FROM)) {
-                    addInternetAddresses(mailMessage.getFrom(), persons);
-                }
-                if (highlighting.containsKey(MailIndexField.TO)) {
-                    addInternetAddresses(mailMessage.getTo(), persons);
-                }
-                if (highlighting.containsKey(MailIndexField.SUBJECT)) {
-                    String subject = mailMessage.getSubject();
-                    if (subject != null) {
-                        topics.add(subject);
+            int accountId = mailMessage.getAccountId();
+            String folder = mailMessage.getFolder();
+            String mailId = mailMessage.getMailId();
+            InternetAddress[] from = mailMessage.getFrom();
+            InternetAddress[] to = mailMessage.getTo();
+            String subject = mailMessage.getSubject();
+            
+            JSONObject json = new JSONObject();
+            if (accountId >= 0) {
+                json.put("account", accountId);
+            } else {
+                json.put("account", JSONObject.NULL);
+            }
+            
+            json.put("folder", folder);
+            json.put("mailId", mailId);
+            json.put("subject", subject);
+            
+            if (from == null) {
+                json.put("from", new JSONArray());
+            } else {
+                JSONArray addrs = new JSONArray();
+                for (InternetAddress addr : from) {
+                    String personal = addr.getPersonal();
+                    String address = addr.getAddress();
+                    String value;
+                    if (personal == null) {
+                        value = address;
+                    } else {
+                        value = personal + " <" + address + ">";
                     }
+                    
+                    addrs.put(value);
                 }
-                if (highlighting.containsKey(MailIndexField.CC)) {
-                    addInternetAddresses(mailMessage.getCc(), persons);
+                
+                json.put("from", addrs);
+            }
+            
+            if (to == null) {
+                json.put("to", new JSONArray());
+            } else {
+                JSONArray addrs = new JSONArray();
+                for (InternetAddress addr : to) {
+                    String personal = addr.getPersonal();
+                    String address = addr.getAddress();
+                    String value;
+                    if (personal == null) {
+                        value = address;
+                    } else {
+                        value = personal + " <" + address + ">";
+                    }
+                    
+                    addrs.put(value);
                 }
-                if (highlighting.containsKey(MailIndexField.BCC)) {
-                    addInternetAddresses(mailMessage.getBcc(), persons);
-                }
+                
+                json.put("to", addrs);
             }
+            
+            docs.put(json);
         }
-
-        JSONArray personsArray = new JSONArray();
-        int i = 0;
-        for (String person : persons) {
-            if (++i > maxPersons) {
-                break;
-            }
-
-            JSONObject json = new JSONObject();
-            json.put("value", person);
-            personsArray.put(json);
-        }
-
-        JSONArray topicsArray = new JSONArray();
-        i = 0;
-        for (String topic : topics) {
-            if (++i > maxTopics) {
-                break;
-            }
-
-            JSONObject json = new JSONObject();
-            json.put("value", topic);
-            topicsArray.put(json);
-        }
-
-        JSONObject resultObject = new JSONObject();
-        resultObject.put("persons", personsArray);
-        resultObject.put("topics", topicsArray);
-
-        if (searchAttachments && attachmentFuture != null) {
-            try {
-                JSONArray attachmentsArray = attachmentFuture.get();
-                resultObject.put("attachments", attachmentsArray);
-            } catch (InterruptedException e) {
-                LOG.warn("Could not search for attachments", e);
-            } catch (ExecutionException e) {
-                LOG.warn("Could not search for attachments", e);
-            }
-        }
+        responseObject.put("docs", docs);
 
         long diff = System.currentTimeMillis() - start;
         LOG.warn("Duration: " + diff + "ms.");
-        return new AJAXRequestResult(resultObject, "json");
-    }
-
-    private static void addInternetAddresses(InternetAddress[] addrs, Set<String> resultSet) {
-        if (addrs == null || addrs.length == 0) {
-            return;
-        }
-
-        for (InternetAddress addr : addrs) {
-            String personal = addr.getPersonal();
-            String address = addr.getAddress();
-            if (personal == null) {
-                resultSet.add(address);
-            } else {
-                resultSet.add(personal + " <" + address + ">");
-            }
-        }
+        
+        JSONObject resultObject = new JSONObject();
+        JSONObject responseHeader = new JSONObject();
+        responseHeader.put("QTime", diff);
+        resultObject.put("responseHeader", responseHeader);
+        resultObject.put("response", responseObject);
+        return new AJAXRequestResult(resultObject, "apiResponse");
     }
 
     @Override

@@ -74,6 +74,10 @@ public enum IndexedSearchExceptionCodes implements OXExceptionCode {
      * Index-based search is not supported for module: %1$s
      */
     MODULE_NOT_SUPPORTED(IndexedSearchExceptionMessages.MODULE_NOT_SUPPORTED, EnumCategory.ERROR, 3),
+    /**
+     * There is no search handler for field %1$s.
+     */
+    UNKNOWN_HANDLER(IndexedSearchExceptionMessages.UNKNOWN_HANDLER, EnumCategory.USER_INPUT, 4),
 
     ;
 
