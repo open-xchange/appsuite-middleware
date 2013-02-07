@@ -68,15 +68,10 @@ public class PushDiscoverySender implements Runnable {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushDiscoverySender.class));
 
     private final int multicastPort;
-
     private final InetAddress multicastAddress;
-
     private final int remoteHostFresh;
-
     private final String packetData;
-
     private final byte[] packetBytes;
-
     private volatile ScheduledTimerTask task;
 
     public PushDiscoverySender(final PushConfiguration pushConfigInterface) {
