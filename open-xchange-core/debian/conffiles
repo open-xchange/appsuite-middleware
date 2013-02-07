@@ -33,6 +33,7 @@ opt/open-xchange/etc/messaging.properties
 opt/open-xchange/etc/mime.types
 opt/open-xchange/etc/noipcheck.cnf
 opt/open-xchange/etc/notification.properties
+opt/open-xchange/etc/oauth-provider.properties
 opt/open-xchange/etc/ox-scriptconf.sh
 opt/open-xchange/etc/participant.properties
 opt/open-xchange/etc/passwordchange.properties
@@ -41,6 +42,8 @@ opt/open-xchange/etc/publications.properties
 opt/open-xchange/etc/push-udp.properties
 opt/open-xchange/etc/requestwatcher.properties
 opt/open-xchange/etc/rmi.properties
+opt/open-xchange/etc/secret.properties
+opt/open-xchange/etc/secrets
 opt/open-xchange/etc/server.properties
 opt/open-xchange/etc/sessiond.properties
 opt/open-xchange/etc/sql.properties

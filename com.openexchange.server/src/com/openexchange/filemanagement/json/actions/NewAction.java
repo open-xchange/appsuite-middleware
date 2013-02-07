@@ -117,7 +117,7 @@ public final class NewAction implements AJAXActionService {
              */
             final ContentType ct = new ContentType(uploadFile.getContentType());
             if (!checkFileType(fileTypeFilter, ct)) {
-                throw UploadException.UploadCode.INVALID_FILE_TYPE.create("new", uploadFile.getContentType(), fileTypeFilter);
+                throw UploadException.UploadCode.INVALID_FILE_TYPE.create(uploadFile.getContentType(), fileTypeFilter);
             }
             jArray.put(processFileItem(uploadFile, management));
         }

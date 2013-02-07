@@ -1,3 +1,30 @@
+* 2013-02-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24824: Only emit COMPLETED attribute if a task is 'done' 
+
+* 2013-02-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24694: Setting file permissions for configuration files with sensitive content without read permission for all users in
+   system.
+
+* 2013-02-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24812: Treat non-existent PERCENT-COMPLETE property in VTODO as no change of existing percentage 
+
+* 2013-02-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24715: Do not use only attribute names if name is detected from the type of the generic attribute otherwise not typed generic
+   attributes fail.
+
+* 2013-02-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24770: Unregister HazelcastInstance prior to its shut-down
+ - Fix for bug 24794: Discard invalid time zone identifiers when responding list of available time zones (as per JVM)
+ - Fix for bug 24764: Sanitize Snippet content storing it
+ - Fix for bug 24786: Passing proper error message arguments
+ - Fix for bug 24799: Ignore posts from "FB_In_Feed" sender
+ - Fix for bug 24724: Use system property "line.separator" to print/output a line-feed
+
 * 2013-02-04 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24756: Correct handling of parameters map for stored sessions

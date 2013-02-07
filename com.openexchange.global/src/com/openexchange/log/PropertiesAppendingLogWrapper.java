@@ -67,6 +67,11 @@ import com.openexchange.log.LogPropertyName.LogLevel;
  */
 public class PropertiesAppendingLogWrapper implements Log {
 
+    /**
+     * Line separator string.  This is the value of the line.separator
+     * property at the moment that the PropertiesAppendingLogWrapper was created.
+     */
+    private final String lineSeparator;
     private final org.apache.commons.logging.Log delegate;
 
     /**
@@ -75,6 +80,8 @@ public class PropertiesAppendingLogWrapper implements Log {
      * @param delegate The delegate logger
      */
     protected PropertiesAppendingLogWrapper(final org.apache.commons.logging.Log delegate) {
+        super();
+        lineSeparator = System.getProperty("line.separator");
         this.delegate = delegate;
     }
 
@@ -224,10 +231,11 @@ public class PropertiesAppendingLogWrapper implements Log {
         }
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
         if (!isEmpty) {
+            final String lineSeparator = this.lineSeparator;
             for (final Entry<String, String> entry : sorted.entrySet()) {
-                sb.append('\n').append(entry.getKey()).append('=').append(entry.getValue());
+                sb.append(lineSeparator).append(entry.getKey()).append('=').append(entry.getValue());
             }
-            sb.deleteCharAt(0).append("\n\n");
+            sb.deleteCharAt(0).append(lineSeparator).append(lineSeparator);
         }
         sb.append(message);
         return sb.toString();

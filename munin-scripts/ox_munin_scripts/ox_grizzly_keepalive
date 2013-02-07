@@ -1,0 +1,106 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats -g";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    if (-e "/opt/open-xchange/bundles/com.openexchange.http.grizzly/com.openexchange.http.grizzly.jar") {
+        print "yes\n";
+        exit 0;
+    } else {
+        print "no\n";
+        exit 0;
+    }
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config") {
+    print "graph_title Grizzly KeepAlive\n";
+    print "graph_args --base 1000 -l 0\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel Number\n";
+    
+    print "hits-count.label hits-count\n";
+    print "hits-count.draw LINE1\n";
+    print "hits-count.type DERIVE\n";
+    print "hits-count.min 0\n";
+    
+    print "idle-timeout-seconds.label idle-timeout-seconds\n";
+    print "idle-timeout-seconds.draw LINE1\n";
+    print "idle-timeout-seconds.type DERIVE\n";
+    print "idle-timeout-seconds.min 0\n";
+    
+    print "live-connections-count.label live-connections-count\n";
+    print "live-connections-count.draw LINE1\n";
+    print "live-connections-count.type DERIVE\n";
+    print "live-connections-count.min 0\n";
+    
+    print "max-requests-count.label max-request-count\n";
+    print "max-requests-count.draw LINE1\n";
+    print "max-requests-count.type DERIVE\n";
+    print "max-requests-count.min 0\n";
+
+    print "refuses-count.label refuses-count\n";
+    print "refuses-count.draw LINE1\n";
+    print "refuses-count.type DERIVE\n";
+    print "refuses-count.min 0\n";
+
+    print "timeouts-count.label timeouts-count\n";
+    print "timeouts-count.draw LINE1\n";
+    print "timeouts-count.type DERIVE\n";
+    print "timeouts-count.min 0\n";
+
+    print "idle-timeout-seconds.label idle-timeout-seconds\n";
+    print "idle-timeout-seconds.draw LINE1\n";
+    print "idle-timeout-seconds.type DERIVE\n";
+    print "idle-timeout-seconds.min 0\n";
+    exit 0
+}
+
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
+
+while (<SHOWRUNTIME>) {
+    if ( $_ =~ /Keep-Alive,hits-count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "hits-count.value $val\n";
+        next;
+    }
+
+    if ( $_ =~ /Keep-Alive,idle-timeout-seconds/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "idle-timeout-seconds.value $val\n";
+        next;
+    }
+    
+    if ( $_ =~ /Keep-Alive,live-connections-count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "live-connections-count.value $val\n";
+        next;
+    }
+
+    if ( $_ =~ /Keep-Alive,max-requests-count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "max-requests-count.value $val\n";
+        next;
+    }
+    
+    if ( $_ =~ /Keep-Alive,refuses-count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "refuses-count.value $val\n";
+        next;
+    }
+    
+    if ( $_ =~ /Keep-Alive,timeouts-count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "timeouts-count.value $val\n";
+        next;
+    }
+}

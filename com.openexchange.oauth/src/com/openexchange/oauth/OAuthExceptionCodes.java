@@ -118,6 +118,10 @@ public enum OAuthExceptionCodes implements OXExceptionCode {
      * Please provide a display name.
      */
     MISSING_DISPLAY_NAME(OAuthExceptionMessages.MISSING_DISPLAY_NAME_MSG, CATEGORY_USER_INPUT, 14),
+    /**
+     * The associated OAuth provider denied the request: %1$s.
+     */
+    DENIED_BY_PROVIDER(OAuthExceptionMessages.DENIED_BY_PROVIDER_MSG, CATEGORY_USER_INPUT, 15),
     ;
 
     private final Category category;

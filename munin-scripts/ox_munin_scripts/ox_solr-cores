@@ -1,0 +1,38 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+$listcores="/opt/open-xchange/sbin/listactivesolrcores";
+
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf") {
+    if (-x $listcores) {
+        print "yes\n";
+        exit 0;
+    } else {
+        print "no\n";
+        exit 0;
+    }
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config") {
+    print "graph_title Solr Cores\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel total\n";
+    print "a.label active solr cores\n";
+    exit 0
+}
+
+open(CORES,"$listcores |") || die "can not read monitoring output";
+
+while (<CORES>)
+{
+    if ( $_ =~ /Number of active Solr Cores/) {
+        s/.*://;
+        $val=$_+0;
+        print "a.value $val\n";
+        next;
+    }
+}
+
+close (CORES);

@@ -204,8 +204,8 @@ public class HazelcastActivator extends HousekeepingActivator {
                     return;
                 }
                 if (isSingleton) {
-                    shutdown();
                     context.ungetService(reference);
+                    shutdown();
                     clusterDiscoveryServiceReference.set(null);
                     return;
                 }
@@ -220,8 +220,8 @@ public class HazelcastActivator extends HousekeepingActivator {
                         }
                     }
                     if (service == clusterDiscoveryService) {
-                        shutdown();
                         context.ungetService(reference);
+                        shutdown();
                         clusterDiscoveryService = null;
                         clusterDiscoveryServiceRanking = 0;
                         if (!deactivated.isEmpty()) {

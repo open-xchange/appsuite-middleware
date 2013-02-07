@@ -68,8 +68,10 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.AbstractSetting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
+import com.openexchange.html.HtmlService;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -177,16 +179,20 @@ public final class PUTAction extends AbstractConfigAction {
         if (setting.isLeaf()) {
             if (!ignorees.contains(setting.getPath())) {
                 final String value = (String) setting.getSingleValue();
-                if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
-                    final JSONArray array = new JSONArray(value);
-                    if (array.length() == 0) {
-                        setting.setEmptyMultiValue();
-                    } else {
-                        for (int i = 0; i < array.length(); i++) {
-                            setting.addMultiValue(array.getString(i));
+                if (!isEmpty(value)) {
+                    if ('[' == value.charAt(0)) {
+                        final JSONArray array = new JSONArray(value);
+                        if (array.length() == 0) {
+                            setting.setEmptyMultiValue();
+                        } else {
+                            for (int i = 0; i < array.length(); i++) {
+                                setting.addMultiValue(array.getString(i));
+                            }
                         }
+                        setting.setSingleValue(null);
+                    } else if ('{' == value.charAt(0)) {
+                        sanitizeJsonSetting(setting);
                     }
-                    setting.setSingleValue(null);
                 }
                 storage.save(setting);
             }
@@ -215,6 +221,44 @@ public final class PUTAction extends AbstractConfigAction {
             if (null != exc) {
                 throw exc;
             }
+        }
+    }
+
+    /** Sanitizes possible JSON setting */
+    public static void sanitizeJsonSetting(final Setting setting) {
+        try {
+            final String value = (String) setting.getSingleValue();
+            boolean saveBack = false;
+            final JSONObject jConfig = new JSONObject(value);
+            final JSONObject jMailConfig = jConfig.optJSONObject("mail");
+            if (null != jMailConfig && jMailConfig.hasAndNotNull("signatures")) {
+                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                if (null != htmlService) {
+                    final JSONArray jSignatures = jMailConfig.getJSONArray("signatures");
+                    final int length = jSignatures.length();
+                    for (int i = 0; i < length; i++) {
+                        final JSONObject jSignature = jSignatures.getJSONObject(i);
+                        String content = jSignature.optString("signature_text", null);
+                        if (null != content) {
+                            content = htmlService.sanitize(content, null, false, null, null);
+                            if (content.startsWith("<body>")) {
+                                content = content.substring(6);
+                            }
+                            if (content.endsWith("</body>")) {
+                                content = content.substring(0, content.length() - 7);
+                            }
+                            jSignature.put("signature_text", content);
+                            saveBack = true;
+                        }
+                    }
+                }
+                
+            }
+            if (saveBack) {
+                setting.setSingleValue(jConfig.toString());
+            }
+        } catch (Exception e) {
+            // Ignore
         }
     }
 

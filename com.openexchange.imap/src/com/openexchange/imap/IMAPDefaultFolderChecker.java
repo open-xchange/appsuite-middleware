@@ -866,11 +866,12 @@ public class IMAPDefaultFolderChecker {
         if (null == trace) {
             return;
         }
+        final String lineSeparator = System.getProperty("line.separator");
         for (int i = 0; i < trace.length && matcher.accepts(trace[i]); i++) {
             final StackTraceElement ste = trace[i];
             final String className = ste.getClassName();
             if (null != className) {
-                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
                 if (ste.isNativeMethod()) {
                     sb.append("(Native Method)");
                 } else {
@@ -886,7 +887,7 @@ public class IMAPDefaultFolderChecker {
                         sb.append(')');
                     }
                 }
-                sb.append('\n');
+                sb.append(lineSeparator);
             }
         }
     }
