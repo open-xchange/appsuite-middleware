@@ -7,14 +7,13 @@ $showexec="$showruntimestats -g";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {
-    $bundles = `/opt/open-xchange/sbin/listbundles`;
-    if($bundles =~ /com.openexchange.http.grizzly/) {
+    if (-e "/opt/open-xchange/bundles/com.openexchange.http.grizzly/com.openexchange.http.grizzly.jar") {
         print "yes\n";
         exit 0;
-     } else {
+    } else {
         print "no\n";
         exit 0;
-     }
+    }
 }
 
 if ( $ARGV[0] and $ARGV[0] eq "config") {
