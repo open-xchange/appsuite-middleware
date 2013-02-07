@@ -50,12 +50,19 @@
 package com.openexchange.i18n;
 
 /**
- * Marker interface to tell the string extractor that this class contains strings that have to be translated on the backend.
- *
+ * Marker interface to tell the string extractor that this class contains strings that have to be translated on the back-end.
+ * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface LocalizableStrings {
 
     // Empty interface for classes containing string to translate.
+
+    /**
+     * Line separator string.
+     * <p>
+     * This is the value of the line.separator property at the moment that the <tt>LocalizableStrings</tt> class was loaded.
+     */
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
 }
