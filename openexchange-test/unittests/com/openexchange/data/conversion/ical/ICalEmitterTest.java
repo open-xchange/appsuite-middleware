@@ -92,7 +92,7 @@ public class ICalEmitterTest extends TestCase {
     private MockUserLookup users;
     private UserResolver oldUserResolver;
     private final TimeZone tz = TimeZone.getDefault();
-    
+
 
     private Appointment getDefault() {
         final Appointment app = new Appointment();
@@ -496,15 +496,26 @@ public class ICalEmitterTest extends TestCase {
         task.setTitle("The Title");
         task.setNote("The Note");
         task.setCategories("cat1, cat2, cat3");
-        task.setDateCompleted(D("24/02/2009 10:00"));
         task.setPercentComplete(23);
 
         final ICalFile ical = serialize(task);
         assertProperty(ical, "SUMMARY", "The Title");
         assertProperty(ical, "DESCRIPTION", "The Note");
         assertProperty(ical, "CATEGORIES","cat1, cat2, cat3");
-        assertProperty(ical, "COMPLETED", "20090224T100000Z");
         assertProperty(ical, "PERCENT-COMPLETE", "23");
+    }
+
+    public void testTaskCompleted() throws IOException {
+        final Task task = new Task();
+        task.setTitle("The Title");
+        task.setDateCompleted(D("24/02/2009 10:00"));
+        task.setPercentComplete(100);
+        task.setStatus(Task.DONE);
+
+        final ICalFile ical = serialize(task);
+        assertProperty(ical, "SUMMARY", "The Title");
+        assertProperty(ical, "COMPLETED", "20090224T100000Z");
+        assertProperty(ical, "PERCENT-COMPLETE", "100");
     }
 
     public void testTaskCategoriesMayBeNullOrUnset() throws Exception {
