@@ -105,9 +105,7 @@ public final class ListAction extends JSlobAction {
             final JSlobService jslobService = getJSlobService(serviceId);
             final JSONArray ids = (JSONArray) jslobRequest.getRequestData().getData();
             final int length = ids.length();
-
-            final long st = DEBUG ? System.currentTimeMillis() : 0L;
-
+            // Check length
             if (length <= 1) {
                 if (0 == length) {
                     return new AJAXRequestResult(Collections.<JSlob> emptyList(), "jslob");
@@ -116,19 +114,16 @@ public final class ListAction extends JSlobAction {
                 for (int i = 0; i < length; i++) {
                     jslobs.add(jslobService.get(ids.getString(i), jslobRequest.getSession()));
                 }
-                if (DEBUG) {
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("JSlob ListAction.perform() took " + dur + "msec");
-                }
                 return new AJAXRequestResult(jslobs, "jslob");
             }
-
+            // More than one to load
             final ServerSession session = jslobRequest.getSession();
             // Create completion service and result map
             final CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool());
             final ConcurrentMap<String, JSlob> results = new ConcurrentHashMap<String, JSlob>(length);
             // Submit tasks
-            for (int i = 0; i < length; i++) {
+            final int numTasks = length - 1;
+            for (int i = 0; i < numTasks; i++) {
                 final String id = ids.getString(i);
                 completionService.submit(new Callable<Void>() {
 
@@ -143,8 +138,13 @@ public final class ListAction extends JSlobAction {
                     }
                 });
             }
+            // Perform last with current thread
+            {
+                final String id = ids.getString(numTasks);
+                results.put(id, jslobService.get(id, session));
+            }
             // Await completion
-            for (int i = 0; i < length; i++) {
+            for (int i = 0; i < numTasks; i++) {
                 completionService.take();
             }
             // Assign to list
@@ -155,12 +155,6 @@ public final class ListAction extends JSlobAction {
                     jslobs.add(jSlob);
                 }
             }
-
-            if (DEBUG) {
-                final long dur = System.currentTimeMillis() - st;
-                LOG.debug("JSlob ListAction.perform() took " + dur + "msec");
-            }
-
             return new AJAXRequestResult(jslobs, "jslob");
         } catch (final InterruptedException e) {
             // Keep interrupted status
