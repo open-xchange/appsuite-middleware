@@ -283,7 +283,6 @@ public class ObjectHandler {
 
     protected static List<List<Object>> createVersionList(final String[] versions) {
         final List<List<Object>> retval = new ArrayList<List<Object>>();
-        retval.add(Arrays.asList((Object) "module", "version"));
         retval.add(Arrays.asList((Object) "version", versions[0]));
         retval.add(Arrays.asList((Object) "build date", versions[1]));
         return retval;
