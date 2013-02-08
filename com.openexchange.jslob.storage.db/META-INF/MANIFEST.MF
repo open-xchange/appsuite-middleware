@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.jslob.storage.db
 Bundle-Version: 7.0.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.database,
+Import-Package: com.openexchange.config,
+ com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.delete,

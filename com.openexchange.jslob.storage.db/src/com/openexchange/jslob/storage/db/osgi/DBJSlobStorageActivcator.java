@@ -49,6 +49,7 @@
 
 package com.openexchange.jslob.storage.db.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -111,7 +112,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+        return new Class<?>[] { DatabaseService.class, ConfigurationService.class };
     }
 
 }
