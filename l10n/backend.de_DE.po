@@ -33,7 +33,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2013-02-07 11:05+0100\n"
+"PO-Revision-Date: 2013-02-08 11:56+0100\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -69,7 +69,7 @@ msgstr "Kein Delegierungs-Ticket für %1$s erhalten."
 #. %1$s will be replaced with the message from the underlying exception.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:75
 msgid "Communication to Kerberos server failed: %1$s"
-msgstr "Communication to Kerberos server failed: %1$s"
+msgstr "Die Kommunikation mit dem Kerberos-Server ist fehlgeschlagen: %1$s"
 
 #. Initial login of this service on the Kerberos server failed.
 #. %1$s will be replaced with the detailed not translated message from the underlying implementation.
@@ -873,7 +873,7 @@ msgstr "Der Termin hat eine neue Beschreibung: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:202
 msgid "The appointment will now be shown as: \"%1$s\"."
-msgstr "Der Termin wird nun folgendermaßen angezeigt: %1$s."
+msgstr "Der Termin wird nun folgendermaßen angezeigt: \"%1$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:204
 msgid "The appointment timezone was changed to: %1$s"
@@ -1990,7 +1990,7 @@ msgstr "Das System konnte die angegebene Datei nicht finden."
 #. More data is available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:123
 msgid "More data is available."
-msgstr "Es sind weitere Datene verfügbar."
+msgstr "Es sind weitere Daten verfügbar."
 
 #. Access is denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:126
@@ -2429,13 +2429,13 @@ msgstr "Das Verzeichnis \"%1$s\" darf nicht aktualisiert werden."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:88
 msgid "Invalid or missing credentials to access WebDAV server \"%1$s\"."
 msgstr ""
-"Ungültige oder fehlende Zugangsdaten zum Zugriff auf den WebDAV-Server \"%1$s"
-"\"."
+"Ungültige oder fehlende Zugangsdaten für den Zugriff auf den WebDAV-Server "
+"\"%1$s\"."
 
 #. The resource is not a file: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:91
 msgid "The resource is not a file: %1$s"
-msgstr "Die Ressourcen ist keine Datei: %1$s"
+msgstr "Die Ressource ist keine Datei: %1$s"
 
 #. Versioning not supported by WebDAV.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:94
@@ -2448,8 +2448,8 @@ msgid ""
 "File storage account %1$s of service \"%2$s\" could not be found for user %3"
 "$s in context %4$s."
 msgstr ""
-"Dateispeicher-Account %1$s des Dienstes \"%2$s\" nicht für Benutzer %3$s im "
-"Kontext %4$s gefunden."
+"Der Dateispeicher-Account %1$s des Dienstes \"%2$s\" konnte für den Benutzer "
+"%3$s im Kontext %4$s nicht gefunden werden."
 
 #. The operation is not supported by service %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:79
@@ -2686,7 +2686,8 @@ msgstr "Unbekanntes Problem: \"%s\"."
 #. This message can be used if the authentication systems are not reachable. The customer should try some time later again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:76
 msgid "Login not possible at the moment. Please try again later."
-msgstr "Login derzeit nicht möglich. Bitte später erneut versuchen."
+msgstr ""
+"Eine Anmeldung ist derzeit nicht möglich. Bitte später erneut versuchen."
 
 #. The supplied credentials for the authentication are invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:79
@@ -2771,7 +2772,7 @@ msgstr "Es wurde kein serverseitiges Token für eine Token-Anmeldung erstellt."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/cache/OXCachingExceptionMessage.java:71
 msgid "Put into cache failed."
-msgstr "Legen in Cache fehlgeschlagen"
+msgstr "'Put' in Cache fehlgeschlagen"
 
 #. *
 #. * The default element attributes could not be retrieved
@@ -2903,7 +2904,7 @@ msgstr "%1$s ist nicht initialisiert."
 #. %1$d is replaced with the time in milliseconds the connection has been used.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:99
 msgid "Connection used for %1$d milliseconds."
-msgstr "Verbindung verwendet für %1$d Millisekunden."
+msgstr "Verbindung %1$d Millisekunden verwendet."
 
 #. %1$d is replaced with the number of statements that have not been closed before returning the connection.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:102
@@ -3456,15 +3457,15 @@ msgstr "Keine vCard zum Importieren gefunden"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:99
 msgid "Problem while parsing the vcard. Reason: %s"
-msgstr "Problem beim Analysieren der vCard, Grund: %s"
+msgstr "Problem beim Analysieren der vCard. Ursache: %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:101
 msgid "Problem while converting the vcard to a contact. Reason: %s"
-msgstr "Probleme beim Konvertieren der vCard in einen Kontakt, Grund: %s"
+msgstr "Probleme beim Konvertieren der vCard in einen Kontakt. Ursache: %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:103
 msgid "Can only import into one folder at a time."
-msgstr "Es kann auf einmal nur in einen Ordner importiert werden."
+msgstr "Es kann immer nur in einen Ordner importiert werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:105
 msgid "Could not find the following fields %s"
@@ -3814,7 +3815,7 @@ msgstr "Fehler bei der Kommunikation mit dem Facebook-Dienst: %1$s"
 #. Login to Facebook failed for login %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:79
 msgid "Login to Facebook failed for login %1$s."
-msgstr "Das Anmelden bei Facebook ist fehlgeschlagen für den Login %1$s."
+msgstr "Das Anmelden bei Facebook ist für das Login %1$s fehlgeschlagen."
 
 #. Login form not found on page: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:82
@@ -3874,7 +3875,7 @@ msgstr "Nicht unterstützter Anfrage-Typ: %1$s."
 #. An OAuth error occurred: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:106
 msgid "An OAuth error occurred: %1$s."
-msgstr "Es trat ein OAuths-Fehler auf: %1$s"
+msgstr "Es trat ein OAuth-Fehler auf: %1$s"
 
 #. A FQL error of type %1$s occurred: %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:109
@@ -3945,7 +3946,7 @@ msgstr "Bestätigter Ham"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:67
 msgid "Confirmed ham folder"
-msgstr "Bestätigter Ham-Ordner"
+msgstr "Ordner 'Bestätigter Ham'"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:69
@@ -3955,7 +3956,7 @@ msgstr "Bestätigter Spam"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:71
 msgid "Confirmed spam folder"
-msgstr "Bestätigter Spam-Ordner"
+msgstr "Ordner 'Bestätigter Spam'"
 
 #. The internationalized name for the drafts mail folder
 #. The name for trash folder
@@ -3969,7 +3970,7 @@ msgstr "Entwürfe"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:75
 msgid "Drafts folder"
-msgstr "Entwürfe-Ordner"
+msgstr "Ordner 'Entwürfe'"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:77
 msgid "Sent"
@@ -3977,7 +3978,7 @@ msgstr "Gesendet"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:79
 msgid "Sent folder"
-msgstr "Ordner Gesendet"
+msgstr "Ordner 'Gesendet'"
 
 #. The internationalized name for the spam mail folder
 #. The name for trash folder
@@ -3991,7 +3992,7 @@ msgstr "Spam"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:83
 msgid "Spam folder"
-msgstr "Spam-Ordner"
+msgstr "Ordner 'Spam'"
 
 #. The internationalized name for the trash mail folder
 #. The name for trash folder
@@ -4005,7 +4006,7 @@ msgstr "Papierkorb"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:87
 msgid "Trash folder"
-msgstr "Ordner Papierkorb"
+msgstr "Ordner 'Papierkorb'"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:89
 msgid "Mail port"
@@ -4062,12 +4063,12 @@ msgstr "Unified Mail aktiviert"
 #. Communication error with facebook service: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:75
 msgid "Communication error with facebook service: %1$s"
-msgstr "Fehler bei der Kommunikation mit dem Facebook-Service: %1$s"
+msgstr "Fehler bei der Kommunikation mit dem Facebook-Dienst: %1$s"
 
 #. Login to facebook failed for login %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:78
 msgid "Login to facebook failed for login %1$s."
-msgstr "Das Anmelden bei Facebook ist fehlgeschlagen für den Login %1$s."
+msgstr "Das Anmelden bei Facebook ist fehlgeschlagen für das Login %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:88
 msgid ""
@@ -4289,7 +4290,7 @@ msgstr "Allgemeiner Fehler: %1$s"
 #. Not found: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:81
 msgid "Not found: %1$s"
-msgstr "Nicht gefunden. %1$s"
+msgstr "Nicht gefunden: %1$s"
 
 #. The source and destination URIs are equal: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:84
@@ -4302,7 +4303,7 @@ msgid ""
 "Conflict. The resource cannot be created until one or more parental "
 "directories have been created: %1$s."
 msgstr ""
-"Konflikt. Die Ressource kann nicht angelegt werden solange nicht eines oder "
+"Konflikt. Die Ressource kann nicht angelegt werden, solange nicht eines oder "
 "mehrere übergeordnete Verzeichnisse erstellt wurden: %1$s."
 
 #. Such a resource already exists: %1$s.
@@ -4517,7 +4518,7 @@ msgstr "Kein Einfügezugriff auf den E-Mail-Ordner %1$s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:100
 msgid "No administer access to mail folder %1$s"
-msgstr "Kein Admin-Zugriff auf E-Mail-Ordner %1$s"
+msgstr "Kein Admin-Zugriff auf den E-Mail-Ordner %1$s"
 
 #. *
 #. * No write access to POP3 folder %1$s
@@ -4582,7 +4583,7 @@ msgstr "Der Standardordner %1$s kann nicht aktualisiert werden."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:133
 msgid "Deletion of folder %1$s failed"
-msgstr "Das Löschen des Ordnders %1$s ist fehlgeschlagen."
+msgstr "Das Löschen des Ordners %1$s ist fehlgeschlagen."
 
 #. *
 #. * POP3 default folder %1$s could not be created
@@ -4634,7 +4635,7 @@ msgstr "Flag %1$s konnte aus folgendem Grund nicht geändert werden: %2$s"
 msgid ""
 "Number of search fields (%d) do not match number of search patterns (%d)"
 msgstr ""
-"Die Anzahl der Suchfelder (%d) stimmen nicht mit der Anzahl der Suchmuster (%"
+"Die Anzahl der Suchfelder (%d) stimmt nicht mit der Anzahl der Suchmuster (%"
 "d) überein."
 
 #. *
@@ -4646,7 +4647,7 @@ msgid ""
 "application-based search"
 msgstr ""
 "Die POP3-Suche ist aus folgendem Grund fehlgeschlagen:%1$s. Es wird auf "
-"applikationsbasierte  Suche umgeschaltet."
+"applikationsbasierte Suche umgeschaltet."
 
 #. *
 #. * POP3 sort failed due to following reason: %1$s Switching to application-based sorting
@@ -4664,7 +4665,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:173
 msgid "Unknown search field: %1$s"
-msgstr "Unbekanntes Such-Feld: %1$s"
+msgstr "Unbekanntes Suchfeld: %1$s"
 
 #. *
 #. * Mail folder %1$s must not be moved to subsequent folder %2$s
@@ -4758,7 +4759,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:214
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:202
 msgid "No attachment was found with id %1$s in message"
-msgstr "Keine Anlage mit der ID %1$s in Nachricht gefunden"
+msgstr "Keine Anlage mit der ID %1$s in der Nachricht gefunden"
 
 #. *
 #. * Versit object %1$s could not be saved
@@ -5628,7 +5629,7 @@ msgid ""
 "A folder named \"%1$s\" already exists below parent folder \"%2$s\" in tree "
 "\"%3$s\"."
 msgstr ""
-"Eine Verzeichnis namens \"%1$s\" ist bereits im übergeordneten Ordner \"%2$s"
+"Ein Verzeichnis namens \"%1$s\" ist bereits im übergeordneten Ordner \"%2$s"
 "\" im Baum \"%3$s\" vorhanden."
 
 #. Subscribe operation not permitted on tree "%1$s".
@@ -9834,8 +9835,9 @@ msgid ""
 "A folder named %1$s already exists on server %2$s with login %3$s (user=%4"
 "$s, context=%5$s)."
 msgstr ""
-"Eine Verzeichnis namens %1$s ist bereits vorhanden auf dem Server %2$s mit "
-"dem Login %3$s (Benutzer=%4$s, Kontext=%5$s)."
+"Für das Login %3$s ist bereits ein Verzeichnis namens %1$s auf dem Server "
+"%2$s "
+"vorhanden (Benutzer=%4$s, Kontext=%5$s)."
 
 #. *
 #. * No create access on mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
@@ -12829,7 +12831,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.user.copy/src/com/openexchange/user/copy/UserCopyExceptionMessages.java:81
 msgid "A user named %1$s already exists in destination context %2$s."
-msgstr "Eine Benutzer namens %1$s ist bereits Im Zielkontext %2$s vorhanden."
+msgstr "Ein Benutzer namens %1$s ist bereits Im Zielkontext %2$s vorhanden."
 
 #. Missing main extension attribute for user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:71
