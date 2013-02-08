@@ -1,6 +1,7 @@
 * 2013-02-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 24848: Adopted to other handling
+ - Fix for bug 24850: Added missing bundle to CLI's classpath
 
 * 2013-02-07 - thorben.betten@open-xchange.com
 
