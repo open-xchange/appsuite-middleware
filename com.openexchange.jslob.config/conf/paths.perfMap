@@ -8,6 +8,8 @@ timezone > io.ox/core//timezone
 serverVersion > io.ox/core//serverVersion
 folder > io.ox/core//folder
 
+identifier > identifier
+
 # Timezones
 availableTimeZones > io.ox/core/settingOptions//availableTimeZones
 
@@ -15,3 +17,16 @@ availableTimeZones > io.ox/core/settingOptions//availableTimeZones
 modules/mail/contactCollectOnMailAccess > io.ox/mail//contactCollectOnMailAccess
 modules/mail/contactCollectOnMailTransport > io.ox/mail//contactCollectOnMailTransport
 
+# Mail
+modules/mail/defaultseparator > io.ox/mail//defaultseparator
+modules/mail/defaultFolder > io.ox/mail//defaultFolder
+modules/mail/addresses > io.ox/mail//addresses
+mail/folder > io.ox/mail//folder
+mail/vcard > io.ox/mail//vcard
+
+# CalDAV
+modules/caldav/active > io.ox/caldav//active
+modules/caldav/url > io.ox/caldav//url
+
+# Migration
+gui > io.ox/migration//gui

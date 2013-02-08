@@ -52,9 +52,9 @@ package com.openexchange.subscribe.microformats.osgi;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.external.ExternalSubscriptionSourceDiscoveryService;
@@ -94,12 +94,13 @@ public class ExternalSourcesActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
         tryConfig();
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        // Nope
+        Services.setServiceLookup(null);
     }
 
     private void tryConfig() {

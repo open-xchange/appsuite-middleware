@@ -65,6 +65,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.json.JSONException;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -85,12 +86,10 @@ public final class DBJSlobStorage implements JSlobStorage {
     private static final String ID = "io.ox.wd.jslob.storage.db";
 
     private final ServiceLookup services;
-
     private final Lock rlock;
-
     private final Lock wlock;
-
     private final Condition wlockCondition;
+    private volatile Boolean streamBasedJDBC;
 
     /**
      * Initializes a new {@link DBJSlobStorage}.
@@ -102,6 +101,21 @@ public final class DBJSlobStorage implements JSlobStorage {
         rlock = rwLock.readLock();
         wlock = rwLock.writeLock();
         wlockCondition = wlock.newCondition();
+    }
+
+    private boolean streamBasedJDBC() {
+        Boolean tmp = streamBasedJDBC;
+        if (null == tmp) {
+            synchronized (DBJSlobStorage.class) {
+                tmp = streamBasedJDBC;
+                if (null == tmp) {
+                    final ConfigurationService service = services.getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.jslob.storage.db.streamBasedJDBC", true));
+                    streamBasedJDBC = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
     }
 
     @Override
@@ -356,6 +370,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                 return null;
             }
             return new JSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(id);
+            // return new JSlob(new JSONObject(new AsciiReader(rs.getBlob(1).getBinaryStream()))).setId(id);
         } catch (final SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
@@ -363,6 +378,7 @@ public final class DBJSlobStorage implements JSlobStorage {
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
+        
     }
 
     @Override

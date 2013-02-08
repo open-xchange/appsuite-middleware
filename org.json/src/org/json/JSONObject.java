@@ -90,6 +90,8 @@ import com.fasterxml.jackson.core.JsonToken;
  */
 public class JSONObject extends AbstractJSONValue {
 
+    private static final long serialVersionUID = 3666538885751033341L;
+
     /**
      * The logger reference.
      */
@@ -181,7 +183,7 @@ public class JSONObject extends AbstractJSONValue {
          */
         @Override
         public String toString() {
-            return STR_NULL;
+            return "null".intern();
         }
     }
 
@@ -642,6 +644,11 @@ public class JSONObject extends AbstractJSONValue {
      */
     public Set<Map.Entry<String, Object>> entrySet() {
         return this.myHashMap.entrySet();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return myHashMap.isEmpty();
     }
 
     /**

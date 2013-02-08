@@ -54,7 +54,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -103,8 +102,8 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		limit = limit < 0 ? 10 : limit;
 
 		List<String> addresses = getEMailAddresses(query.getContact());
-		if(isUserThemselves(session.getUser(), addresses)){
-			return new AJAXRequestResult(new LinkedList<MailMessage>(), "mail");
+		if (isUserThemselves(session.getUser(), addresses)){
+			return new AJAXRequestResult(Collections.<MailMessage> emptyList(), "mail");
 		}
 
 		MailField[] requestedFields = MailField.getFields(params);
@@ -113,7 +112,7 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		MailAccountStorageService mailAccountService = services.getService(MailAccountStorageService.class);
 
 		MailAccount[] userMailAccounts;
-		if(searchingExternalMailboxesIsFast()){
+		if (searchingExternalMailboxesIsFast()){
 			userMailAccounts = mailAccountService.getUserMailAccounts(session.getUserId(), session.getContextId());
 		} else {
 			userMailAccounts = new MailAccount[]{mailAccountService.getDefaultMailAccount(session.getUserId(), session.getContextId())};

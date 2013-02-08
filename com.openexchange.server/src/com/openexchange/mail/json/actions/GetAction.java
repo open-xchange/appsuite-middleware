@@ -73,6 +73,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.log.Log;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -150,6 +152,7 @@ public final class GetAction extends AbstractMailAction {
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
     private AJAXRequestResult performGet(final MailRequest req) throws OXException {
+        final Props logProperties = LogProperties.getLogProperties();
         try {
             final ServerSession session = req.getSession();
             /*
@@ -214,6 +217,8 @@ public final class GetAction extends AbstractMailAction {
                     uid = tmp2;
                 }
             }
+            logProperties.put(LogProperties.Name.MAIL_MAIL_ID, uid);
+            logProperties.put(LogProperties.Name.MAIL_FULL_NAME, folderPath);
             AJAXRequestResult data = getJSONNullResult();
             if (showMessageSource) {
                 /*
@@ -400,6 +405,9 @@ public final class GetAction extends AbstractMailAction {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            logProperties.remove(LogProperties.Name.MAIL_MAIL_ID);
+            logProperties.remove(LogProperties.Name.MAIL_FULL_NAME);
         }
     }
 

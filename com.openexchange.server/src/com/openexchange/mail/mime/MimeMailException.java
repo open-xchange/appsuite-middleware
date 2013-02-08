@@ -323,6 +323,9 @@ public class MimeMailException extends OXException {
                 /*
                  * Default case
                  */
+                if ("Failed to load IMAP envelope".equals(e.getMessage())) {
+                    return MimeMailExceptionCode.MESSAGE_NOT_DISPLAYED.create(e);
+                }
                 return MimeMailExceptionCode.MESSAGING_ERROR.create(e, appendInfo(e.getMessage(), folder));
             }
             /*
