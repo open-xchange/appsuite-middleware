@@ -10,6 +10,7 @@
  - Fix for bug 24852: Added null guard
  - Fix for bug 24854: Added null guard
  - Fix for bug 24855: Added null guard
+ - Fix for bug 24881: Fixed logging
 
 * 2013-02-07 - thorben.betten@open-xchange.com
 
