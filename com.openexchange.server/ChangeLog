@@ -1,5 +1,9 @@
 * 2013-02-07 - thorben.betten@open-xchange.com
 
+ - Fix for bug 24848: Adopted to other handling
+
+* 2013-02-07 - thorben.betten@open-xchange.com
+
  - Fix for bug 24818: Determine locale with respect to "language" parameter
 
 * 2013-02-07 - tobias.friedrich@open-xchange.com
