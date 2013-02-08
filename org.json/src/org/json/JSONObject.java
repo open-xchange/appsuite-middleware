@@ -183,7 +183,7 @@ public class JSONObject extends AbstractJSONValue {
          */
         @Override
         public String toString() {
-            return STR_NULL;
+            return "null".intern();
         }
     }
 
