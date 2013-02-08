@@ -90,6 +90,8 @@ import com.fasterxml.jackson.core.JsonToken;
  */
 public class JSONObject extends AbstractJSONValue {
 
+    private static final long serialVersionUID = 3666538885751033341L;
+
     /**
      * The logger reference.
      */

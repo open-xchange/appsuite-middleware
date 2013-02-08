@@ -49,6 +49,7 @@
 
 package org.json;
 
+import java.io.Serializable;
 import java.io.Writer;
 
 /**
@@ -56,7 +57,7 @@ import java.io.Writer;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface JSONValue {
+public interface JSONValue extends Serializable {
 
     /**
      * Write the contents of this JSON value as JSON text to a writer. For compactness, no whitespace is added.<br>

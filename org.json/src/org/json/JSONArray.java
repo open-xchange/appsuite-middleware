@@ -76,6 +76,8 @@ import com.fasterxml.jackson.core.JsonToken;
  */
 public class JSONArray extends AbstractJSONValue {
 
+    private static final long serialVersionUID = -3408431864592339725L;
+
     /**
      * The arrayList where the JSONArray's properties are kept.
      */
