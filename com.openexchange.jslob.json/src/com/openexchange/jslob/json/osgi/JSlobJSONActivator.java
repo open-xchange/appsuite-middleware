@@ -51,7 +51,6 @@ package com.openexchange.jslob.json.osgi;
 
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -61,7 +60,9 @@ import com.openexchange.jslob.json.JSlobActionFactory;
 import com.openexchange.jslob.json.converter.JSlobJSONResultConverter;
 import com.openexchange.jslob.json.rest.jslob.JSlobRestServlet;
 import com.openexchange.jslob.registry.JSlobServiceRegistry;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link JSlobJSONActivator} - Activator for the JSlob JSON interface.
@@ -72,7 +73,7 @@ public class JSlobJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { JSlobServiceRegistry.class };
+        return new Class<?>[] { JSlobServiceRegistry.class, ThreadPoolService.class };
     }
 
     @Override
