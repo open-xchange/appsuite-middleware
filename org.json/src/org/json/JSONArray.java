@@ -380,6 +380,11 @@ public class JSONArray extends AbstractJSONValue {
         return sb.toString();
     }
 
+    @Override
+    public boolean isEmpty() {
+        return myArrayList.isEmpty();
+    }
+
     /**
      * Get the number of elements in the JSONArray, included nulls.
      *

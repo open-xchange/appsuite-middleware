@@ -644,6 +644,11 @@ public class JSONObject extends AbstractJSONValue {
         return this.myHashMap.entrySet();
     }
 
+    @Override
+    public boolean isEmpty() {
+        return myHashMap.isEmpty();
+    }
+
     /**
      * Get the number of keys stored in the JSONObject.
      *

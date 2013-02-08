@@ -95,6 +95,13 @@ public interface JSONValue {
     public int length();
 
     /**
+     * Checks if this JSON value contains no elements.
+     *
+     * @return <tt>true</tt> if this JSON value contains no elements
+     */
+    boolean isEmpty();
+
+    /**
      * Make a pretty-printed JSON text of this JSON value.
      * <p>
      * Warning: This method assumes that the data structure is acyclically.
