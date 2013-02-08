@@ -50,6 +50,7 @@
 package com.openexchange.jslob.json.action;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -108,6 +109,9 @@ public final class ListAction extends JSlobAction {
             final long st = DEBUG ? System.currentTimeMillis() : 0L;
 
             if (length <= 1) {
+                if (0 == length) {
+                    return new AJAXRequestResult(Collections.<JSlob> emptyList(), "jslob");
+                }
                 final List<JSlob> jslobs = new ArrayList<JSlob>(length);
                 for (int i = 0; i < length; i++) {
                     jslobs.add(jslobService.get(ids.getString(i), jslobRequest.getSession()));
