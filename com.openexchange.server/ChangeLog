@@ -1,3 +1,7 @@
+* 2013-02-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24875: Fall back to default LDAP folder ID when no folders are defined in search term 
+
 * 2013-02-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 24848: Adopted to other handling

@@ -839,13 +839,19 @@ public class LdapContactInterface implements ContactInterface {
         final int folderId;
         {
             final List<String> folders = parser.getFolders();
-            if (null == folders) {
-                throw LdapExceptionCode.FOLDERID_OBJECT_NULL.create();
-            }
-            if (folders.size() != 1) {
+            if (null == folders || 0 == folders.size()) {
+                /*
+                 * fall back to default folder ID
+                 */
+                folderId = this.folderid;
+            } else if (1 == folders.size()) {
+                /*
+                 * use folder parsed folder ID
+                 */
+                folderId = Integer.parseInt(folders.get(0));
+            } else {
                 throw LdapExceptionCode.TOO_MANY_FOLDERS.create();
             }
-            folderId = Integer.parseInt(folders.get(0));
         }
         final ArrayList<Contact> arrayList;
 
