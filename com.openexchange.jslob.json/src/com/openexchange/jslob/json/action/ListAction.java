@@ -52,6 +52,7 @@ package com.openexchange.jslob.json.action;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -82,6 +83,9 @@ import com.openexchange.server.ServiceLookup;
 )
 public final class ListAction extends JSlobAction {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ListAction.class);
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     /**
      * Initializes a new {@link ListAction}.
      *
@@ -99,12 +103,20 @@ public final class ListAction extends JSlobAction {
         }
         final JSlobService jslobService = getJSlobService(serviceId);
 
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
+
         final JSONArray ids = (JSONArray) jslobRequest.getRequestData().getData();
         final int length = ids.length();
         final List<JSlob> jslobs = new ArrayList<JSlob>(length);
         for (int i = 0; i < length; i++) {
             jslobs.add(jslobService.get(ids.getString(i), jslobRequest.getSession()));
         }
+
+        if (DEBUG) {
+            final long dur = System.currentTimeMillis() - st;
+            LOG.debug("JSlob ListAction.perform() took " + dur + "msec");
+        }
+
         return new AJAXRequestResult(jslobs, "jslob");
     }
 
