@@ -82,7 +82,6 @@ import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.AbstractTask;
@@ -1135,12 +1134,13 @@ public final class SessionHandler {
             // Asynchronous remove from session storage
             final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
             if (sessionStorageService != null) {
+                final List<SessionControl> tSessionControls = new ArrayList<SessionControl>(sessionControls);
                 ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
 
                     @Override
                     public Void call() {
                         try {
-                            for (final SessionControl sessionControl : sessionControls) {
+                            for (final SessionControl sessionControl : tSessionControls) {
                                 SessionImpl session = sessionControl.getSession();
                                 if (null != session && false == session.isTransient()) {
                                     try {
@@ -1190,33 +1190,6 @@ public final class SessionHandler {
     }
 
     private static void postSessionDataRemoval(final List<SessionControl> controls) {
-        // Asynchronous remove from session storage
-        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-        if (sessionStorageService != null) {
-            ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
-
-                @Override
-                public Void call() {
-                    try {
-                        for (final SessionControl sessionControl : controls) {
-                            SessionImpl session = sessionControl.getSession();
-                            if (null != session && false == session.isTransient()) {
-                                try {
-                                    sessionStorageService.removeSession(session.getSessionID());
-                                } catch (final OXException e) {
-                                    LOG.error(e.getMessage(), e);
-                                } catch (final RuntimeException e) {
-                                    LOG.error(e.getMessage(), e);
-                                }
-                            }
-                        }
-                    } catch (final RuntimeException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                    return null;
-                }
-            });
-        }
         // Post event
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
@@ -1436,8 +1409,9 @@ public final class SessionHandler {
             synchronized (SessionHandler.class) {
                 tmp = timeout;
                 if (null == tmp) {
-                    final ConfigurationService service = SessiondServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? 250 : service.getIntProperty("com.openexchange.sessiond.sessionstorage.timeout", 250));
+                    final ConfigurationService service = getServiceRegistry().getService(ConfigurationService.class);
+                    final int defaultTimeout = 3000;
+                    tmp = Integer.valueOf(null == service ? defaultTimeout : service.getIntProperty("com.openexchange.sessiond.sessionstorage.timeout", defaultTimeout));
                     timeout = tmp;
                 }
             }
