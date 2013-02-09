@@ -97,7 +97,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
         LOG.info("Starting bundle: com.openexchange.jslob.storage.db");
         try {
             final DBJSlobStorage dbJSlobStorage = new DBJSlobStorage(this);
-            registerService(JSlobStorage.class, CachingJSlobStorage.initialize(dbJSlobStorage));
+            registerService(JSlobStorage.class, dbJSlobStorage /*CachingJSlobStorage.initialize(dbJSlobStorage)*/);
             /*
              * Register services for table creation
              */
