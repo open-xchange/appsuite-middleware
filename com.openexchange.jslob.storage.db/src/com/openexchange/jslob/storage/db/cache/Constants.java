@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,78 +47,17 @@
  *
  */
 
-package com.openexchange.jslob.test;
-
-import org.json.JSONObject;
-import com.openexchange.jslob.JSlob;
-import com.openexchange.jslob.DefaultJSlob;
-import com.openexchange.jslob.JSlobId;
-import com.openexchange.jslob.shared.SharedJSlobService;
+package com.openexchange.jslob.storage.db.cache;
 
 /**
- * {@link SimSharedJSlobService}
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link Constants} - Constants for database-backed JSlob storage.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SimSharedJSlobService implements SharedJSlobService {
-
-    private final String serviceId;
-
-    private final JSlob jslob;
+public interface Constants {
 
     /**
-     * Initializes a new {@link SimSharedJSlobService}.
+     * The cache region name.
      */
-    public SimSharedJSlobService(JSONObject jsonObject) {
-        super();
-        serviceId = "com.openexchange.jslob.config";
-        jslob = new DefaultJSlob(jsonObject);
-        jslob.setId(new JSlobId(serviceId, "sharedjslob", 0, 0));
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getServiceId()
-     */
-    @Override
-    public String getServiceId() {
-        return serviceId;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getJSlob()
-     */
-    @Override
-    public JSlob getJSlob() {
-        return jslob;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getId()
-     */
-    @Override
-    public String getId() {
-        return jslob.getId().getId();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#setJSONObject()
-     */
-    @Override
-    public void setJSONObject(JSONObject jsonObject) {
-        jslob.setJsonObject(jsonObject);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#setMetaObject()
-     */
-    @Override
-    public void setMetaObject(JSONObject metaObject) {
-        jslob.setMetaObject(metaObject);
-    }
-
+    public static final String REGION_NAME = "DBJSlobStorageCache";
 }

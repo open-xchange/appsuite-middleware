@@ -87,6 +87,13 @@ public interface JSlobStorage {
     JSlob load(JSlobId id) throws OXException;
 
     /**
+     * Invalidates denoted element.
+     *
+     * @param id The identifier
+     */
+    void invalidate(JSlobId id);
+
+    /**
      * Reads the element associated with the given identifier.
      *
      * @param id The identifier.

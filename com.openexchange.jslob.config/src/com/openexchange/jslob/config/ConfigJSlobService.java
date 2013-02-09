@@ -84,6 +84,7 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSONPathElement;
 import com.openexchange.jslob.JSONUpdate;
 import com.openexchange.jslob.JSlob;
@@ -270,7 +271,7 @@ public final class ConfigJSlobService implements JSlobService {
         }
         final ConfigView view = getConfigViewFactory().getView(userId, contextId);
         for (final Entry<String, Map<String, AttributedProperty>> entry : preferenceItems.entrySet()) {
-            final JSlob jSlob = new JSlob(new JSONObject());
+            final DefaultJSlob jSlob = new DefaultJSlob(new JSONObject());
             jSlob.setId(new JSlobId(SERVICE_ID, entry.getKey(), userId, contextId));
             for (final Entry<String, AttributedProperty> entry2 : entry.getValue().entrySet()) {
                 add2JSlob(entry2.getValue(), jSlob, view);
@@ -282,7 +283,7 @@ public final class ConfigJSlobService implements JSlobService {
             ret.add(jSlob);
         }
         if (!coreIncluded) {
-            final JSlob jSlob = new JSlob(new JSONObject());
+            final JSlob jSlob = new DefaultJSlob(new JSONObject());
             jSlob.setId(new JSlobId(SERVICE_ID, CORE, userId, contextId));
             addConfigTreeToJslob(session, jSlob);
         }
@@ -304,7 +305,7 @@ public final class ConfigJSlobService implements JSlobService {
          */
         JSlob jsonJSlob = getStorage().opt(new JSlobId(SERVICE_ID, id, userId, contextId));
         if (null == jsonJSlob) {
-            jsonJSlob = new JSlob(new JSONObject());
+            jsonJSlob = new DefaultJSlob(new JSONObject());
             jsonJSlob.setId(new JSlobId(SERVICE_ID, id, userId, contextId));
         }
         /*
@@ -334,7 +335,7 @@ public final class ConfigJSlobService implements JSlobService {
      * 
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return The {@link JSlob} instance.
+     * @return The {@link DefaultJSlob} instance.
      * @throws OXException If operation fails
      */
     private void addConfigTreeToJslob(final ServerSession session, final JSlob jsLob) throws OXException {
@@ -581,7 +582,7 @@ public final class ConfigJSlobService implements JSlobService {
             final JSONObject storageObject;
             JSlob jsonJSlob = storage.opt(jslobId);
             if (null == jsonJSlob) {
-                jsonJSlob = new JSlob();
+                jsonJSlob = new DefaultJSlob();
                 storageObject = new JSONObject();
             } else {
                 storageObject = jsonJSlob.getJsonObject();

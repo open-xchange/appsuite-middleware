@@ -49,14 +49,25 @@
 
 package com.openexchange.jslob.storage.db.osgi;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.java.Streams;
+import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.db.DBJSlobStorage;
+import com.openexchange.jslob.storage.db.cache.CachingJSlobStorage;
+import com.openexchange.jslob.storage.db.cache.Constants;
 import com.openexchange.jslob.storage.db.groupware.DBJSlobCreateTableService;
 import com.openexchange.jslob.storage.db.groupware.DBJSlobCreateTableTask;
 import com.openexchange.jslob.storage.db.groupware.JSlobDBDeleteListener;
@@ -64,12 +75,15 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link DBJSlobStorageActivcator}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DBJSlobStorageActivcator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(DBJSlobStorageActivcator.class);
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(DBJSlobStorageActivcator.class);
+
+    /** List of known JSlobService identifiers */
+    public static final List<String> SERVICE_IDS = new CopyOnWriteArrayList<String>();
 
     /**
      * Initializes a new {@link DBJSlobStorageActivcator}.
@@ -83,7 +97,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
         LOG.info("Starting bundle: com.openexchange.jslob.storage.db");
         try {
             final DBJSlobStorage dbJSlobStorage = new DBJSlobStorage(this);
-            registerService(JSlobStorage.class, dbJSlobStorage);
+            registerService(JSlobStorage.class, CachingJSlobStorage.initialize(dbJSlobStorage));
             /*
              * Register services for table creation
              */
@@ -93,6 +107,84 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
              * Register delete listener
              */
             registerService(DeleteListener.class, new JSlobDBDeleteListener(dbJSlobStorage), null);
+            /*
+             * Add tracker for cache service
+             */
+            final BundleContext context = this.context;
+            {
+                final String regionName = Constants.REGION_NAME;
+                final ServiceTrackerCustomizer<CacheService, CacheService> stc =
+                    new ServiceTrackerCustomizer<CacheService, CacheService>() {
+
+                        @Override
+                        public CacheService addingService(final ServiceReference<CacheService> reference) {
+                            final CacheService cacheService = context.getService(reference);
+                            try {
+                                final byte[] ccf =
+                                    ("jcs.region." + regionName + "=LTCP\n" + "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + "jcs.region." + regionName + ".cacheattributes.MaxObjects=10000000\n" + "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=180\n" + "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=60\n" + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=300\n" + "jcs.region." + regionName + ".elementattributes.IdleTime=180\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" + "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
+                                cacheService.loadConfiguration(Streams.newByteArrayInputStream(ccf));
+                                addService(CacheService.class, cacheService);
+                                CachingJSlobStorage.setCacheService(cacheService);
+                                return cacheService;
+                            } catch (final Exception e) {
+                                LOG.error("Starting up cache for 'com.openexchange.jslob.storage.db' failed.", e);
+                            }
+                            context.ungetService(reference);
+                            return null;
+                        }
+
+                        @Override
+                        public void modifiedService(final ServiceReference<CacheService> reference, final CacheService service) {
+                            // Ignore
+                        }
+
+                        @Override
+                        public void removedService(final ServiceReference<CacheService> reference, final CacheService service) {
+                            if (null != service) {
+                                try {
+                                    CachingJSlobStorage.setCacheService(null);
+                                    removeService(CacheService.class);
+                                    final Cache cache = service.getCache(regionName);
+                                    cache.clear();
+                                    cache.dispose();
+                                } catch (final Exception e) {
+                                    // Ignore
+                                }
+                            }
+                        }
+
+                    };
+                track(CacheService.class, stc);
+            }
+            /*
+             * Add tracker for JSlobService instances
+             */
+            {
+                final ServiceTrackerCustomizer<JSlobService, JSlobService> stc =
+                    new ServiceTrackerCustomizer<JSlobService, JSlobService>() {
+
+                        @Override
+                        public void removedService(final ServiceReference<JSlobService> reference, final JSlobService service) {
+                            if (null != service) {
+                                context.ungetService(reference);
+                            }
+                        }
+
+                        @Override
+                        public void modifiedService(final ServiceReference<JSlobService> reference, final JSlobService service) {
+                            // ignore
+                        }
+
+                        @Override
+                        public JSlobService addingService(final ServiceReference<JSlobService> reference) {
+                            final JSlobService service = context.getService(reference);
+                            SERVICE_IDS.add(service.getIdentifier());
+                            return null;
+                        }
+                    };
+                track(JSlobService.class, stc);
+            }
+            openTrackers();
         } catch (final Exception e) {
             LOG.error("Starting bundle \"com.openexchange.jslob.storage.db\" failed: " + e.getMessage());
             throw e;
@@ -100,10 +192,21 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
     }
 
     @Override
+    public <S> boolean addService(final Class<S> clazz, final S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> boolean removeService(final Class<? extends S> clazz) {
+        return super.removeService(clazz);
+    }
+
+    @Override
     protected void stopBundle() throws Exception {
         LOG.info("Stopping bundle: com.openexchange.jslob.storage.db");
         try {
-            cleanUp();
+            CachingJSlobStorage.shutdown();
+            super.stopBundle();
         } catch (final Exception e) {
             LOG.error("Stopping bundle \"com.openexchange.jslob.storage.db\" failed: " + e.getMessage());
             throw e;

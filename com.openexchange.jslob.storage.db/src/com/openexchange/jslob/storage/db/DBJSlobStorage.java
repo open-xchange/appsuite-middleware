@@ -70,10 +70,12 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.AsciiReader;
+import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.storage.JSlobStorage;
+import com.openexchange.jslob.storage.db.cache.CachingJSlobStorage;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -135,6 +137,12 @@ public final class DBJSlobStorage implements JSlobStorage {
     public void dropAllUserJSlobs(final int userId, final int contextId) throws OXException {
         wlock.lock();
         try {
+            {
+                final CachingJSlobStorage cachingJSlobStorage = CachingJSlobStorage.getInstance();
+                if (null != cachingJSlobStorage) {
+                    cachingJSlobStorage.dropAllUserJSlobs(userId, contextId);
+                }
+            }
             final DatabaseService databaseService = getDatabaseService();
             final Connection con = databaseService.getWritable(contextId);
             boolean committed = true;
@@ -337,6 +345,11 @@ public final class DBJSlobStorage implements JSlobStorage {
     }
 
     @Override
+    public void invalidate(final JSlobId id) {
+        // nothing to do
+    }
+
+    @Override
     public JSlob opt(final JSlobId id) throws OXException {
         rlock.lock();
         try {
@@ -369,7 +382,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             if (!rs.next()) {
                 return null;
             }
-            return new JSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(id);
+            return new DefaultJSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(id);
             // return new JSlob(new JSONObject(new AsciiReader(rs.getBlob(1).getBinaryStream()))).setId(id);
         } catch (final SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -415,13 +428,67 @@ public final class DBJSlobStorage implements JSlobStorage {
             }
             final List<JSlob> list = new LinkedList<JSlob>();
             do {
-                list.add(new JSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(new JSlobId(id.getServiceId(), rs.getString(2), id.getUser(), contextId)));
+                list.add(new DefaultJSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(new JSlobId(id.getServiceId(), rs.getString(2), id.getUser(), contextId)));
             } while (rs.next());
             return list;
         } catch (final SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
+     * Loads all identifiers.
+     *
+     * @param id The JSlob identifier
+     * @return The identifiers
+     * @throws OXException  f operation fails
+     */
+    public Collection<String> getIDs(final JSlobId id) throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final int contextId = id.getContext();
+        final Connection con = databaseService.getReadOnly(contextId);
+        try {
+            return getIDs(id, contextId, con);
+        } finally {
+            databaseService.backReadOnly(contextId, con);
+        }
+    }
+
+    /**
+     * Loads all identifiers.
+     *
+     * @param id The JSlob identifier
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @return The identifiers
+     * @throws OXException  f operation fails
+     */
+    public Collection<String> getIDs(final JSlobId id, final int contextId, final Connection con) throws OXException {
+        if (false && checkLocked(id, false, con)) {
+            throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT id FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, id.getUser());
+            stmt.setString(3, id.getServiceId());
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptyList();
+            }
+            final List<String> list = new LinkedList<String>();
+            do {
+                list.add(rs.getString(1));
+            } while (rs.next());
+            return list;
+        } catch (final SQLException e) {
+            throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }

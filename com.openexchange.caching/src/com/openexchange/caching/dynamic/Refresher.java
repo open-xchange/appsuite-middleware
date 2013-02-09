@@ -134,6 +134,7 @@ public abstract class Refresher<T extends Serializable> {
             return null;
         }
         final Serializable key = factory.getKey();
+        final String groupName = factory instanceof GroupAware ? ((GroupAware<T>) factory).getGroupName() : null;
         T retval = null;
         /*
          * Check for distributed cache nature
@@ -151,7 +152,7 @@ public abstract class Refresher<T extends Serializable> {
                         throw e;
                     }
                     // Obviously another thread put in the meantime
-                    retval = (T) cache.get(key);
+                    retval = (T) (null == groupName ? cache.get(key) : cache.getFromGroup(key, groupName));
                 }
                 return retval;
             } catch (final RuntimeException e) {
@@ -164,11 +165,19 @@ public abstract class Refresher<T extends Serializable> {
         final Lock lock = getLock(cache, factory);
         lock.lock();
         try {
-            final Object tmp = cache.get(key);
+            final Object tmp = null == groupName ? cache.get(key) : cache.getFromGroup(key, groupName);
             if (null == tmp) {
-                cache.put(key, obj, false);
+                if (null == groupName) {
+                    cache.put(key, obj, false);
+                } else {
+                    cache.putInGroup(key, groupName, obj, false);
+                }
             } else if (tmp instanceof Condition) {
-                cache.put(key, obj, false);
+                if (null == groupName) {
+                    cache.put(key, obj, false);
+                } else {
+                    cache.putInGroup(key, groupName, obj, false);
+                }
                 ((Condition) tmp).signalAll();
             } else {
                 // If object is already in cache, return it instead of putting new object into cache.
@@ -198,13 +207,14 @@ public abstract class Refresher<T extends Serializable> {
             return factory.load();
         }
         final Serializable key = factory.getKey();
+        final String groupName = factory instanceof GroupAware ? ((GroupAware<T>) factory).getGroupName() : null;
         T retval = null;
         /*
          * Check for distributed cache nature
          */
         if (cache.isDistributed()) {
             // No need for locks
-            retval = (T) cache.get(key);
+            retval = (T) (null == groupName ? cache.get(key) : cache.getFromGroup(key, groupName));
             if (null == retval) {
                 try {
                     if (cache instanceof PutIfAbsent) {
@@ -216,14 +226,18 @@ public abstract class Refresher<T extends Serializable> {
                     } else {
                         try {
                             final T newVal = factory.load();
-                            cache.putSafe(key, newVal);
+                            if (null == groupName) {
+                                cache.putSafe(key, newVal);
+                            } else {
+                                cache.putInGroup(key, groupName, newVal, false);
+                            }
                             retval = newVal;
                         } catch (final OXException e) {
                             if (!CacheExceptionCode.FAILED_SAFE_PUT.equals(e)) {
                                 throw e;
                             }
                             // Obviously another thread put in the meantime
-                            retval = (T) cache.get(key);
+                            retval = (T) (null == groupName ? cache.get(key) : cache.getFromGroup(key, groupName));
                         }
                     }
                 } catch (final RuntimeException e) {
@@ -249,20 +263,22 @@ public abstract class Refresher<T extends Serializable> {
          */
         Condition cond = null;
         try {
-            final Object tmp = cache.get(key);
+            final Object tmp = (null == groupName ? cache.get(key) : cache.getFromGroup(key, groupName));
             if (null == tmp) {
                 // I am the thread to load the object. Put temporary condition
                 // into cache.
                 cond = lock.newCondition();
-                {
+                if (null == groupName) {
                     cache.putSafe(key, (Serializable) cond);
+                } else {
+                    cache.putInGroup(key, groupName, (Serializable) cond, false);
                 }
             } else if (tmp instanceof Condition) {
                 // I have to wait for another thread to load the object.
                 cond = (Condition) tmp;
                 if (cond.await(1, TimeUnit.SECONDS)) {
                     // Other thread finished loading the object.
-                    final Object tmp2 = cache.get(key);
+                    final Object tmp2 = (null == groupName ? cache.get(key) : cache.getFromGroup(key, groupName));
                     if (null != tmp2 && !(tmp2 instanceof Condition)) {
                         @SuppressWarnings("unchecked") final T tmp3 = (T) tmp2;
                         retval = tmp3;
@@ -286,20 +302,32 @@ public abstract class Refresher<T extends Serializable> {
             try {
                 retval = factory.load();
             } catch (final OXException e) {
-                cache.remove(key);
+                if (null == groupName) {
+                    cache.remove(key);
+                } else {
+                    cache.removeFromGroup(key, groupName);
+                }
                 throw e;
             }
             lock.lock();
             try {
                 if (removeBeforePut) {
                     // Do we replace an existing value?
-                    final Object prev = cache.get(key);
+                    final Object prev = (null == groupName ? cache.get(key) : cache.getFromGroup(key, groupName));
                     if (null != prev && !(prev instanceof Condition)) {
                         // Issue remove for lateral distribution
-                        cache.remove(key);
+                        if (null == groupName) {
+                            cache.remove(key);
+                        } else {
+                            cache.removeFromGroup(key, groupName);
+                        }
                     }
                 }
-                cache.put(key, retval, false);
+                if (null == groupName) {
+                    cache.put(key, retval, false);
+                } else {
+                    cache.putInGroup(key, groupName, retval, false);
+                }
                 cond.signalAll();
             } finally {
                 lock.unlock();
