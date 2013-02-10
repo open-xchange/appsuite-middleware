@@ -198,7 +198,7 @@ public final class CachingJSlobStorage implements JSlobStorage {
             return delegate.store(id, t);
         }
         final boolean storeResult = delegate.store(id, t);
-        cache.putInGroup(id.getId(), groupName(id), t, !storeResult);
+        cache.putInGroup(id.getId(), groupName(id), t.setId(id), !storeResult);
         return storeResult;
     }
 
@@ -241,7 +241,7 @@ public final class CachingJSlobStorage implements JSlobStorage {
             }
 
             @Override
-            public JSlob modify(JSlob element) throws OXException {
+            public JSlob modify(final JSlob element) throws OXException {
                 // Ensure we return a cloned version
                 return (JSlob) (null == element ? null : element.clone());
             }
@@ -284,7 +284,7 @@ public final class CachingJSlobStorage implements JSlobStorage {
                     }
 
                     @Override
-                    public JSlob modify(JSlob element) throws OXException {
+                    public JSlob modify(final JSlob element) throws OXException {
                         // Ensure we return a cloned version
                         return (JSlob) (null == element ? null : element.clone());
                     }
@@ -319,7 +319,7 @@ public final class CachingJSlobStorage implements JSlobStorage {
                 }
 
                 @Override
-                public JSlob modify(JSlob element) throws OXException {
+                public JSlob modify(final JSlob element) throws OXException {
                     // Ensure we return a cloned version
                     return (JSlob) (null == element ? null : element.clone());
                 }
@@ -338,9 +338,9 @@ public final class CachingJSlobStorage implements JSlobStorage {
         }
         final Collection<String> ids = delegate.getIDs(id);
         final List<JSlob> ret = new ArrayList<JSlob>(ids.size());
-        String serviceId = id.getServiceId();
-        int user = id.getUser();
-        int context = id.getContext();
+        final String serviceId = id.getServiceId();
+        final int user = id.getUser();
+        final int context = id.getContext();
         for (final String sId : ids) {
             ret.add(load(new JSlobId(serviceId, sId, user, context)));
         }
