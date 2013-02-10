@@ -130,12 +130,24 @@ public abstract class Refresher<T extends Serializable> {
     }
 
     public static <T extends Serializable> T cache(final T obj, final Cache cache, final OXObjectFactory<T> factory) throws OXException {
+        T retval = innerCache(obj, cache, factory);
+        if (null == retval) {
+            return retval;
+        }
+        // Check for modifying nature
+        if (factory instanceof ModifyingOXObjectFactory) {
+            retval = ((ModifyingOXObjectFactory<T>) factory).modify(retval);
+        }
+        return retval;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Serializable> T innerCache(final T obj, final Cache cache, final OXObjectFactory<T> factory) throws OXException {
         if (null == cache) {
             return null;
         }
         final Serializable key = factory.getKey();
         final String groupName = factory instanceof GroupAwareOXObjectFactory ? ((GroupAwareOXObjectFactory<T>) factory).getGroupName() : null;
-        final ModifyingOXObjectFactory<T> modifier = factory instanceof ModifyingOXObjectFactory ? ((ModifyingOXObjectFactory<T>) factory) : null;
         T retval = null;
         /*
          * Check for distributed cache nature
@@ -143,23 +155,17 @@ public abstract class Refresher<T extends Serializable> {
         if (cache.isDistributed()) {
             try {
                 if (cache instanceof PutIfAbsent) {
-                    if (null == modifier) {
-                        return (T) ((PutIfAbsent) cache).putIfAbsent(key, obj);
-                    }
-                    return modifier.modify((T) ((PutIfAbsent) cache).putIfAbsent(key, obj));
+                    return (T) ((PutIfAbsent) cache).putIfAbsent(key, obj);
                 }
                 try {
                     cache.putSafe(key, obj);
-                    return null == modifier ? obj : modifier.modify(obj);
+                    return obj;
                 } catch (final OXException e) {
                     if (!CacheExceptionCode.FAILED_SAFE_PUT.equals(e)) {
                         throw e;
                     }
                     // Obviously another thread put in the meantime
                     retval = (T) (null == groupName ? cache.get(key) : cache.getFromGroup(key, groupName));
-                }
-                if (null != modifier) {
-                    retval = modifier.modify(retval);
                 }
                 return retval;
             } catch (final RuntimeException e) {
@@ -188,14 +194,10 @@ public abstract class Refresher<T extends Serializable> {
                 ((Condition) tmp).signalAll();
             } else {
                 // If object is already in cache, return it instead of putting new object into cache.
-                @SuppressWarnings("unchecked") final T tmp2 = (T) tmp;
-                retval = tmp2;
+                retval = (T) tmp;
             }
         } finally {
             lock.unlock();
-        }
-        if (null != modifier) {
-            retval = modifier.modify(retval);
         }
         return retval;
     }
@@ -211,14 +213,25 @@ public abstract class Refresher<T extends Serializable> {
         return refresh(regionName, getCache(regionName), factory, removeBeforePut);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends Serializable> T refresh(final String regionName, final Cache cache, final OXObjectFactory<T> factory, final boolean removeBeforePut) throws OXException {
+        T retval = innerRefresh(regionName, cache, factory, removeBeforePut);
+        if (null == retval) {
+            return retval;
+        }
+        // Check for modifying nature
+        if (factory instanceof ModifyingOXObjectFactory) {
+            retval = ((ModifyingOXObjectFactory<T>) factory).modify(retval);
+        }
+        return retval;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Serializable> T innerRefresh(final String regionName, final Cache cache, final OXObjectFactory<T> factory, final boolean removeBeforePut) throws OXException {
         if (null == cache) {
             return factory.load();
         }
         final Serializable key = factory.getKey();
         final String groupName = factory instanceof GroupAwareOXObjectFactory ? ((GroupAwareOXObjectFactory<T>) factory).getGroupName() : null;
-        final ModifyingOXObjectFactory<T> modifier = factory instanceof ModifyingOXObjectFactory ? ((ModifyingOXObjectFactory<T>) factory) : null;
         T retval = null;
         /*
          * Check for distributed cache nature
@@ -254,9 +267,6 @@ public abstract class Refresher<T extends Serializable> {
                 } catch (final RuntimeException e) {
                     throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
                 }
-            }
-            if (null != modifier) {
-                retval = modifier.modify(retval);
             }
             return retval;
         }
@@ -294,8 +304,7 @@ public abstract class Refresher<T extends Serializable> {
                     // Other thread finished loading the object.
                     final Object tmp2 = (null == groupName ? cache.get(key) : cache.getFromGroup(key, groupName));
                     if (null != tmp2 && !(tmp2 instanceof Condition)) {
-                        @SuppressWarnings("unchecked") final T tmp3 = (T) tmp2;
-                        retval = tmp3;
+                        retval = (T) tmp2;
                         cond = null;
                     }
                 } else {
@@ -304,8 +313,7 @@ public abstract class Refresher<T extends Serializable> {
                 }
             } else {
                 // Only other option is that the cache contains the delegate object.
-                @SuppressWarnings("unchecked") final T tmp2 = (T) tmp;
-                retval = tmp2;
+                retval = (T) tmp;
             }
         } catch (final InterruptedException e) {
             LOG.error(e.getMessage(), e);
@@ -346,9 +354,6 @@ public abstract class Refresher<T extends Serializable> {
             } finally {
                 lock.unlock();
             }
-        }
-        if (null != modifier) {
-            retval = modifier.modify(retval);
         }
         return retval;
     }
