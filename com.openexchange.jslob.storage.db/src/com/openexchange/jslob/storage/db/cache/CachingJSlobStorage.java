@@ -242,6 +242,7 @@ public final class CachingJSlobStorage implements JSlobStorage {
 
             @Override
             public JSlob modify(JSlob element) throws OXException {
+                // Ensure we return a cloned version
                 return (JSlob) (null == element ? null : element.clone());
             }
         };
@@ -284,6 +285,7 @@ public final class CachingJSlobStorage implements JSlobStorage {
 
                     @Override
                     public JSlob modify(JSlob element) throws OXException {
+                        // Ensure we return a cloned version
                         return (JSlob) (null == element ? null : element.clone());
                     }
                 };
@@ -318,6 +320,7 @@ public final class CachingJSlobStorage implements JSlobStorage {
 
                 @Override
                 public JSlob modify(JSlob element) throws OXException {
+                    // Ensure we return a cloned version
                     return (JSlob) (null == element ? null : element.clone());
                 }
             };
