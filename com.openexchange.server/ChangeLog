@@ -1,6 +1,7 @@
 * 2013-02-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 24823: Keep text formatting when performing auto-save operation
+ - Fix for bug 24863: Added null guard
 
 * 2013-02-08 - tobias.friedrich@open-xchange.com
 
