@@ -183,7 +183,7 @@ public final class CachingJSlobStorage implements JSlobStorage {
     }
 
     String groupName(final JSlobId id) {
-        return new StringAllocator(id.getServiceId()).append('.').append(id.getUser()).append('.').append(id.getContext()).toString();
+        return new StringAllocator(id.getServiceId()).append('@').append(id.getUser()).append('@').append(id.getContext()).toString();
     }
 
     @Override
