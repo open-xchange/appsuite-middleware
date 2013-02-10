@@ -583,12 +583,13 @@ public final class DBJSlobStorage implements JSlobStorage {
     private static final String SQL_UPDATE = "UPDATE jsonStorage SET data = ? WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?";
 
     @Override
-    public void store(final JSlobId id, final JSlob jslob) throws OXException {
+    public boolean store(final JSlobId id, final JSlob jslob) throws OXException {
         wlock.lock();
         try {
             final DatabaseService databaseService = getDatabaseService();
             final int contextId = id.getContext();
             final Connection con = databaseService.getWritable(contextId);
+            final boolean insert;
             boolean committed = true;
             PreparedStatement stmt = null;
             try {
@@ -611,6 +612,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                     stmt.setString(4, id.getServiceId());
                     stmt.setString(5, id.getId());
                     stmt.executeUpdate();
+                    insert = true;
                 } else {
                     /*
                      * Insert
@@ -622,9 +624,11 @@ public final class DBJSlobStorage implements JSlobStorage {
                     stmt.setString(4, id.getId());
                     stmt.setBinaryStream(5, new JSONInputStream(jslob.getJsonObject(), "US-ASCII"));
                     stmt.executeUpdate();
+                    insert = false;
                 }
                 con.commit();
                 committed = true;
+                return insert;
             } catch (final DataTruncation e) {
                 throw JSlobExceptionCodes.JSLOB_TOO_BIG.create(e, id.getId());
             } catch (final SQLException e) {

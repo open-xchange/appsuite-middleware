@@ -192,16 +192,22 @@ public final class CachingJSlobStorage implements JSlobStorage {
     }
 
     @Override
-    public void store(final JSlobId id, final JSlob t) throws OXException {
+    public boolean store(final JSlobId id, final JSlob t) throws OXException {
         final Cache cache = optCache();
         if (null == cache) {
-            delegate.store(id, t);
-            return;
+            return delegate.store(id, t);
         }
-        final String sId = id.getId();
-        final String groupName = groupName(id);
-        final Object prev = cache.getFromGroup(sId, groupName);
-        cache.putInGroup(sId, groupName, t, null != prev);
+        final boolean storeResult = delegate.store(id, t);
+        cache.putInGroup(id.getId(), groupName(id), t, !storeResult);
+        return storeResult;
+    }
+
+    @Override
+    public void invalidate(final JSlobId id) {
+        final Cache cache = optCache();
+        if (null != cache) {
+            cache.removeFromGroup(id.getId(), groupName(id));
+        }
     }
 
     @Override
@@ -240,14 +246,6 @@ public final class CachingJSlobStorage implements JSlobStorage {
             }
         };
         return new JSlobReloader(factory, REGION_NAME);
-    }
-
-    @Override
-    public void invalidate(final JSlobId id) {
-        final Cache cache = optCache();
-        if (null != cache) {
-            cache.removeFromGroup(id.getId(), groupName(id));
-        }
     }
 
     @Override
