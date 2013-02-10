@@ -72,7 +72,7 @@ public final class JSlobReloader extends Refresher<JSlob> implements JSlob {
      */
     public JSlobReloader(final OXObjectFactory<JSlob> factory, final String regionName) throws OXException {
         super(factory, regionName, true);
-        js = (JSlob) refresh().clone();
+        js = refresh();
     }
 
     @Override
@@ -85,7 +85,7 @@ public final class JSlobReloader extends Refresher<JSlob> implements JSlob {
      */
     private void updateDelegate() throws RuntimeException {
         try {
-            js = (JSlob) refresh().clone();
+            js = refresh();
         } catch (final OXException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
