@@ -1344,15 +1344,15 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
     private static boolean userIsParticipant(final int uid, final CalendarDataObject cdao) {
-        boolean retval = false;
+        if (null == cdao) {
+            return false;
+        }
         for (final UserParticipant u : cdao.getUsers()) {
-            if (u.getIdentifier() == uid) {
-                retval = true;
-                break;
+            if (null != u && u.getIdentifier() == uid) {
+                return true;
             }
         }
-
-        return retval;
+        return false;
     }
 
     /**
