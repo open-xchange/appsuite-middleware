@@ -5,6 +5,7 @@
  - Fix for bug 24864: Added null guard
  - Fix for bug 24867: Added null guard
  - Fix for bug 24874: Added null guard
+ - Fix for bug 24879: Added null guard
 
 * 2013-02-08 - tobias.friedrich@open-xchange.com
 
