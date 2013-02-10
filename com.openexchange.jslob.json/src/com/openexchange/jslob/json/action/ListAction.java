@@ -110,11 +110,7 @@ public final class ListAction extends JSlobAction {
                 if (0 == length) {
                     return new AJAXRequestResult(Collections.<JSlob> emptyList(), "jslob");
                 }
-                final List<JSlob> jslobs = new ArrayList<JSlob>(length);
-                for (int i = 0; i < length; i++) {
-                    jslobs.add(jslobService.get(ids.getString(i), jslobRequest.getSession()));
-                }
-                return new AJAXRequestResult(jslobs, "jslob");
+                return new AJAXRequestResult(Collections.singletonList(jslobService.get(ids.getString(0), jslobRequest.getSession())), "jslob");
             }
             // More than one to load
             final ServerSession session = jslobRequest.getSession();
