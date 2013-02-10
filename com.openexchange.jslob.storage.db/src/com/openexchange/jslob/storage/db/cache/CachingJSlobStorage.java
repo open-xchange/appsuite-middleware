@@ -59,7 +59,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
-import com.openexchange.caching.dynamic.GroupAware;
+import com.openexchange.caching.dynamic.ModifyingOXObjectFactory;
 import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
@@ -212,7 +212,7 @@ public final class CachingJSlobStorage implements JSlobStorage {
         }
         final DBJSlobStorage d = delegate;
         final Lock l = cacheLock;
-        final OXObjectFactory<JSlob> factory = new GroupAware<JSlob>() {
+        final OXObjectFactory<JSlob> factory = new ModifyingOXObjectFactory<JSlob>() {
 
             @Override
             public Serializable getKey() {
@@ -232,6 +232,11 @@ public final class CachingJSlobStorage implements JSlobStorage {
             @Override
             public Lock getCacheLock() {
                 return l;
+            }
+
+            @Override
+            public JSlob modify(JSlob element) throws OXException {
+                return (JSlob) (null == element ? null : element.clone());
             }
         };
         return new JSlobReloader(factory, REGION_NAME);
@@ -257,7 +262,7 @@ public final class CachingJSlobStorage implements JSlobStorage {
             if (null != fromCache) {
                 final DBJSlobStorage d = delegate;
                 final Lock l = cacheLock;
-                final OXObjectFactory<JSlob> factory = new GroupAware<JSlob>() {
+                final OXObjectFactory<JSlob> factory = new ModifyingOXObjectFactory<JSlob>() {
 
                     @Override
                     public Serializable getKey() {
@@ -278,6 +283,11 @@ public final class CachingJSlobStorage implements JSlobStorage {
                     public Lock getCacheLock() {
                         return l;
                     }
+
+                    @Override
+                    public JSlob modify(JSlob element) throws OXException {
+                        return (JSlob) (null == element ? null : element.clone());
+                    }
                 };
                 return new JSlobReloader(factory, REGION_NAME);
             }
@@ -285,9 +295,8 @@ public final class CachingJSlobStorage implements JSlobStorage {
         // Optional retrieval from DB storage
         final JSlob opt = delegate.opt(id);
         if (null != opt) {
-            final DBJSlobStorage d = delegate;
             final Lock l = cacheLock;
-            final OXObjectFactory<JSlob> factory = new GroupAware<JSlob>() {
+            final OXObjectFactory<JSlob> factory = new ModifyingOXObjectFactory<JSlob>() {
 
                 @Override
                 public Serializable getKey() {
@@ -307,6 +316,11 @@ public final class CachingJSlobStorage implements JSlobStorage {
                 @Override
                 public Lock getCacheLock() {
                     return l;
+                }
+
+                @Override
+                public JSlob modify(JSlob element) throws OXException {
+                    return (JSlob) (null == element ? null : element.clone());
                 }
             };
             return new JSlobReloader(factory, REGION_NAME);

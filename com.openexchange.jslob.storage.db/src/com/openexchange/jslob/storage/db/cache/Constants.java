@@ -59,5 +59,5 @@ public interface Constants {
     /**
      * The cache region name.
      */
-    public static final String REGION_NAME = "DBJSlobStorageCache";
+    public static final String REGION_NAME = "DBJSlobStorageCache".intern();
 }
