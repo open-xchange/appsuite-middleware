@@ -51,14 +51,14 @@ package com.openexchange.caching.dynamic;
 
 
 /**
- * {@link GroupAware} - Extends {@link OXObjectFactory}.
+ * {@link GroupAwareOXObjectFactory} - Extends {@link OXObjectFactory} by {@link #getGroupName()}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface GroupAware<T> extends OXObjectFactory<T> {
+public interface GroupAwareOXObjectFactory<T> extends OXObjectFactory<T> {
 
     /**
-     * Gets the group name.
+     * Gets the <i>optional</i> group name.
      *
      * @return The group name or <code>null</code>
      */

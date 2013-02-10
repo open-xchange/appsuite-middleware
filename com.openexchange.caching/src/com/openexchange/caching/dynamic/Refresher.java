@@ -134,7 +134,8 @@ public abstract class Refresher<T extends Serializable> {
             return null;
         }
         final Serializable key = factory.getKey();
-        final String groupName = factory instanceof GroupAware ? ((GroupAware<T>) factory).getGroupName() : null;
+        final String groupName = factory instanceof GroupAwareOXObjectFactory ? ((GroupAwareOXObjectFactory<T>) factory).getGroupName() : null;
+        final ModifyingOXObjectFactory<T> modifier = factory instanceof ModifyingOXObjectFactory ? ((ModifyingOXObjectFactory<T>) factory) : null;
         T retval = null;
         /*
          * Check for distributed cache nature
@@ -142,17 +143,23 @@ public abstract class Refresher<T extends Serializable> {
         if (cache.isDistributed()) {
             try {
                 if (cache instanceof PutIfAbsent) {
-                    return (T) ((PutIfAbsent) cache).putIfAbsent(key, obj);
+                    if (null == modifier) {
+                        return (T) ((PutIfAbsent) cache).putIfAbsent(key, obj);
+                    }
+                    return modifier.modify((T) ((PutIfAbsent) cache).putIfAbsent(key, obj));
                 }
                 try {
                     cache.putSafe(key, obj);
-                    return obj;
+                    return null == modifier ? obj : modifier.modify(obj);
                 } catch (final OXException e) {
                     if (!CacheExceptionCode.FAILED_SAFE_PUT.equals(e)) {
                         throw e;
                     }
                     // Obviously another thread put in the meantime
                     retval = (T) (null == groupName ? cache.get(key) : cache.getFromGroup(key, groupName));
+                }
+                if (null != modifier) {
+                    retval = modifier.modify(retval);
                 }
                 return retval;
             } catch (final RuntimeException e) {
@@ -187,6 +194,9 @@ public abstract class Refresher<T extends Serializable> {
         } finally {
             lock.unlock();
         }
+        if (null != modifier) {
+            retval = modifier.modify(retval);
+        }
         return retval;
     }
 
@@ -207,7 +217,8 @@ public abstract class Refresher<T extends Serializable> {
             return factory.load();
         }
         final Serializable key = factory.getKey();
-        final String groupName = factory instanceof GroupAware ? ((GroupAware<T>) factory).getGroupName() : null;
+        final String groupName = factory instanceof GroupAwareOXObjectFactory ? ((GroupAwareOXObjectFactory<T>) factory).getGroupName() : null;
+        final ModifyingOXObjectFactory<T> modifier = factory instanceof ModifyingOXObjectFactory ? ((ModifyingOXObjectFactory<T>) factory) : null;
         T retval = null;
         /*
          * Check for distributed cache nature
@@ -243,6 +254,9 @@ public abstract class Refresher<T extends Serializable> {
                 } catch (final RuntimeException e) {
                     throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
                 }
+            }
+            if (null != modifier) {
+                retval = modifier.modify(retval);
             }
             return retval;
         }
@@ -332,6 +346,9 @@ public abstract class Refresher<T extends Serializable> {
             } finally {
                 lock.unlock();
             }
+        }
+        if (null != modifier) {
+            retval = modifier.modify(retval);
         }
         return retval;
     }
