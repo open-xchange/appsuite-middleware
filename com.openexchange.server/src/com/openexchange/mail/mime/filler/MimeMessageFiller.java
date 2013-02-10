@@ -106,6 +106,7 @@ import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
@@ -1022,10 +1023,11 @@ public class MimeMessageFiller {
         /*
          * Create a non-multipart message
          */
-        if (mail.getContentType().startsWith("text/")) {
-            final boolean isPlainText = mail.getContentType().startsWith(MimeTypes.MIME_TEXT_PLAIN);
-            if (mail.getContentType().getCharsetParameter() == null) {
-                mail.getContentType().setCharsetParameter(charset);
+        final ContentType contentType = mail.getContentType();
+        if (contentType.startsWith("text/")) {
+            final boolean isPlainText = contentType.startsWith(MimeTypes.MIME_TEXT_PLAIN);
+            if (contentType.getCharsetParameter() == null) {
+                contentType.setCharsetParameter(charset);
             }
             if (primaryMultipart == null) {
                 final String mailText;
@@ -1038,14 +1040,19 @@ public class MimeMessageFiller {
                     {
                         final String plainText = textBodyPart.getPlainText();
                         if (null == plainText) {
-                            isHtml = true;
                             /*-
-                             * Expect HTML content
+                             * Check for HTML content
                              *
                              * Well-formed HTML
                              */
-                            final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
-                            text = wellFormedHTMLContent;
+                            if (HTMLDetector.containsHTMLTags(content.getBytes(Charsets.ISO_8859_1))) {
+                                isHtml = true;
+                                final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
+                                text = wellFormedHTMLContent;                                
+                            } else {
+                                isHtml = false;
+                                text = content;
+                            }
                         } else {
                             isHtml = false;
                             text = plainText;
@@ -1062,16 +1069,16 @@ public class MimeMessageFiller {
                         mailText = ComposeType.NEW_SMS.equals(type) ? text : performLineFolding(text, usm.getAutoLinebreak());
                     }
                 } else {
-                    mailText = htmlService.getConformHTML(content, mail.getContentType().getCharsetParameter());
+                    mailText = htmlService.getConformHTML(content, contentType.getCharsetParameter());
                 }
-                mimeMessage.setContent(mailText, mail.getContentType().toString());
+                mimeMessage.setContent(mailText, contentType.toString());
                 mimeMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-                mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(mail.getContentType().toString()));
+                mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
             } else {
                 final MimeBodyPart msgBodyPart = new MimeBodyPart();
-                msgBodyPart.setContent(mail.getContent(), mail.getContentType().toString());
+                msgBodyPart.setContent(mail.getContent(), contentType.toString());
                 msgBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-                msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(mail.getContentType().toString()));
+                msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
                 primaryMultipart.addBodyPart(msgBodyPart);
             }
         } else {

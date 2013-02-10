@@ -90,7 +90,13 @@ public final class HTMLDetector {
         if (containsIgnoreCase(sequence, "javascript")) {
             return true;
         }
-        if (containsHTMLTag(sequence, "img")) {
+        if (containsIgnoreCase(sequence, "<img")) {
+            return true;
+        }
+        if (containsIgnoreCase(sequence, "<br>")) {
+            return true;
+        }
+        if (containsIgnoreCase(sequence, "<p>")) {
             return true;
         }
         return false;
@@ -133,7 +139,13 @@ public final class HTMLDetector {
         if (containsIgnoreCase(b, "javascript")) {
             return true;
         }
-        if (containsHTMLTag(b, "img")) {
+        if (containsIgnoreCase(b, "<img")) {
+            return true;
+        }
+        if (containsIgnoreCase(b, "<br>")) {
+            return true;
+        }
+        if (containsIgnoreCase(b, "<p>")) {
             return true;
         }
         return false;
