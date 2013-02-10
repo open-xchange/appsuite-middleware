@@ -200,11 +200,11 @@ public final class HTMLDetector {
      */
     private static boolean containsIgnoreCase(final byte[] sequence, final String str) {
         // lower-case
-        if (indexOf(sequence, Charsets.toAsciiBytes(toLowerCase(str)), 0, sequence.length, null) != -1) {
+        if (indexOf(sequence, Charsets.toAsciiBytes(toLowerCase(str)), 0, sequence.length) != -1) {
             return true;
         }
         // upper-case
-        return (indexOf(sequence, Charsets.toAsciiBytes(toUpperCase(str)), 0, sequence.length, null) != -1);
+        return (indexOf(sequence, Charsets.toAsciiBytes(toUpperCase(str)), 0, sequence.length) != -1);
     }
 
     /**
@@ -217,12 +217,10 @@ public final class HTMLDetector {
      * @param pattern The byte pattern to search for
      * @param beginIndex The beginning index, inclusive.
      * @param endIndex The ending index, exclusive.
-     * @param computedFailures The computed failures where the pattern matches against itself; leave to <code>null</code> to compute from
-     *            within
      * @return The index of the first occurrence of the pattern in the byte array starting from given index or <code>-1</code> if none
      *         found.
      */
-    private static int indexOf(final byte[] data, final byte[] pattern, final int beginIndex, final int endIndex, final int[] computedFailures) {
+    private static int indexOf(final byte[] data, final byte[] pattern, final int beginIndex, final int endIndex) {
         if ((beginIndex < 0) || (beginIndex > data.length)) {
             throw new IndexOutOfBoundsException(Integer.toString(beginIndex));
         }
@@ -233,14 +231,9 @@ public final class HTMLDetector {
             throw new IndexOutOfBoundsException(Integer.toString(endIndex - beginIndex));
         }
 
-        final int[] failure;
-        if (computedFailures == null) {
-            failure = computeFailure(pattern);
-            if (failure == null) {
-                throw new IllegalArgumentException("pattern is null");
-            }
-        } else {
-            failure = computedFailures;
+        final int[] failure = computeFailure(pattern);
+        if (failure == null) {
+            throw new IllegalArgumentException("pattern is null");
         }
 
         int j = 0;
