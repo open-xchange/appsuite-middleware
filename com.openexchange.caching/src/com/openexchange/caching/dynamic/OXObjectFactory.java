@@ -66,6 +66,7 @@ public interface OXObjectFactory<T> extends Serializable{
 
     /**
      * @return the key for identifying the cached object.
+     * @see GroupAwareOXObjectFactory#getGroupName()
      */
     Serializable getKey();
 
