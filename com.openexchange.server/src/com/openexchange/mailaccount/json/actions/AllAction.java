@@ -110,7 +110,7 @@ public final class AllAction extends AbstractMailAccountAction {
         }
         userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
 
-        final JSONArray jsonArray = MailAccountWriter.writeArray(userMailAccounts, attributes, session);
+        final JSONArray jsonArray = MailAccountWriter.writeArray(userMailAccounts, attributes);
         return new AJAXRequestResult(jsonArray);
     }
 

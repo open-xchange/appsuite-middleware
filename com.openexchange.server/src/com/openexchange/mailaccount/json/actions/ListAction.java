@@ -103,7 +103,7 @@ public final class ListAction extends AbstractMailAccountAction {
             }
         }
 
-        return new AJAXRequestResult(MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes, session));
+        return new AJAXRequestResult(MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes));
     }
 
 }
