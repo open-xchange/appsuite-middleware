@@ -47,78 +47,23 @@
  *
  */
 
-package com.openexchange.jslob.test;
+package com.openexchange.caching.dynamic;
 
-import org.json.JSONObject;
-import com.openexchange.jslob.JSlob;
-import com.openexchange.jslob.DefaultJSlob;
-import com.openexchange.jslob.JSlobId;
-import com.openexchange.jslob.shared.SharedJSlobService;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SimSharedJSlobService}
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link ModifyingOXObjectFactory} - Extends {@link OXObjectFactory} by {@link #getGroupName()} and {@link #modify(Object)}.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SimSharedJSlobService implements SharedJSlobService {
-
-    private final String serviceId;
-
-    private final JSlob jslob;
+public interface ModifyingOXObjectFactory<T> extends GroupAwareOXObjectFactory<T> {
 
     /**
-     * Initializes a new {@link SimSharedJSlobService}.
+     * (Optionally) Modifies given cache element.
+     * 
+     * @param element The element retrieved from cache
+     * @return The possibly modified element
+     * @throws OXException If operation fails for any reason
      */
-    public SimSharedJSlobService(JSONObject jsonObject) {
-        super();
-        serviceId = "com.openexchange.jslob.config";
-        jslob = new DefaultJSlob(jsonObject);
-        jslob.setId(new JSlobId(serviceId, "sharedjslob", 0, 0));
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getServiceId()
-     */
-    @Override
-    public String getServiceId() {
-        return serviceId;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getJSlob()
-     */
-    @Override
-    public JSlob getJSlob() {
-        return jslob;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getId()
-     */
-    @Override
-    public String getId() {
-        return jslob.getId().getId();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#setJSONObject()
-     */
-    @Override
-    public void setJSONObject(JSONObject jsonObject) {
-        jslob.setJsonObject(jsonObject);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#setMetaObject()
-     */
-    @Override
-    public void setMetaObject(JSONObject metaObject) {
-        jslob.setMetaObject(metaObject);
-    }
-
+    T modify(T element) throws OXException;
 }

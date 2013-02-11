@@ -49,6 +49,7 @@
 
 package org.json;
 
+import java.io.Serializable;
 import java.io.Writer;
 
 /**
@@ -56,7 +57,7 @@ import java.io.Writer;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface JSONValue {
+public interface JSONValue extends Serializable {
 
     /**
      * Write the contents of this JSON value as JSON text to a writer. For compactness, no whitespace is added.<br>
@@ -93,6 +94,13 @@ public interface JSONValue {
      * @return The number of elements stored in this JSON value.
      */
     public int length();
+
+    /**
+     * Checks if this JSON value contains no elements.
+     *
+     * @return <tt>true</tt> if this JSON value contains no elements
+     */
+    boolean isEmpty();
 
     /**
      * Make a pretty-printed JSON text of this JSON value.

@@ -60,7 +60,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.server.ServiceLookup;
@@ -110,7 +110,7 @@ public final class SetAction extends JSlobAction {
         /*
          * A null value is considered as a remove operation
          */
-        final JSlob jslob = null == data || JSONObject.NULL.equals(data) ? JSlob.EMPTY_JSLOB : new JSlob((JSONObject) data);
+        final DefaultJSlob jslob = null == data || JSONObject.NULL.equals(data) ? DefaultJSlob.EMPTY_JSLOB : new DefaultJSlob((JSONObject) data);
         jslobService.set(id, jslob, jslobRequest.getSession());
         return new AJAXRequestResult();
     }

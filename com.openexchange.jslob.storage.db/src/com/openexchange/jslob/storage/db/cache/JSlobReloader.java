@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,78 +47,93 @@
  *
  */
 
-package com.openexchange.jslob.test;
+package com.openexchange.jslob.storage.db.cache;
 
 import org.json.JSONObject;
+import com.openexchange.caching.dynamic.OXObjectFactory;
+import com.openexchange.caching.dynamic.Refresher;
+import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlob;
-import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlobId;
-import com.openexchange.jslob.shared.SharedJSlobService;
 
 /**
- * {@link SimSharedJSlobService}
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link JSlobReloader}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SimSharedJSlobService implements SharedJSlobService {
+public final class JSlobReloader extends Refresher<JSlob> implements JSlob {
 
-    private final String serviceId;
+    private static final long serialVersionUID = -5530962482214019318L;
 
-    private final JSlob jslob;
+    private JSlob js;
 
     /**
-     * Initializes a new {@link SimSharedJSlobService}.
+     * Initializes a new {@link JSlobReloader}.
      */
-    public SimSharedJSlobService(JSONObject jsonObject) {
-        super();
-        serviceId = "com.openexchange.jslob.config";
-        jslob = new DefaultJSlob(jsonObject);
-        jslob.setId(new JSlobId(serviceId, "sharedjslob", 0, 0));
+    public JSlobReloader(final OXObjectFactory<JSlob> factory, final String regionName) throws OXException {
+        super(factory, regionName, true);
+        js = refresh();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getServiceId()
-     */
     @Override
-    public String getServiceId() {
-        return serviceId;
+    public Object clone() {
+        return this;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getJSlob()
+    /**
+     * @throws RuntimeException if refreshing fails.
      */
-    @Override
-    public JSlob getJSlob() {
-        return jslob;
+    private void updateDelegate() throws RuntimeException {
+        try {
+            js = refresh();
+        } catch (final OXException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getId()
-     */
     @Override
-    public String getId() {
-        return jslob.getId().getId();
+    public String toString() {
+        updateDelegate();
+        return js.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#setJSONObject()
-     */
     @Override
-    public void setJSONObject(JSONObject jsonObject) {
-        jslob.setJsonObject(jsonObject);
+    public JSlobId getId() {
+        updateDelegate();
+        return js.getId();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#setMetaObject()
-     */
     @Override
-    public void setMetaObject(JSONObject metaObject) {
-        jslob.setMetaObject(metaObject);
+    public JSlob setId(final JSlobId id) {
+        updateDelegate();
+        js.setId(id);
+        return this;
+    }
+
+    @Override
+    public JSONObject getJsonObject() {
+        updateDelegate();
+        return js.getJsonObject();
+    }
+
+    @Override
+    public JSlob setJsonObject(final JSONObject jsonObject) {
+        updateDelegate();
+        js.setJsonObject(jsonObject);
+        return this;
+    }
+
+    @Override
+    public JSONObject getMetaObject() {
+        updateDelegate();
+        return js.getMetaObject();
+    }
+
+    @Override
+    public JSlob setMetaObject(final JSONObject metaObject) {
+        updateDelegate();
+        js.setMetaObject(metaObject);
+        return this;
     }
 
 }

@@ -59,6 +59,7 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -103,7 +104,7 @@ public class JSlobJSONResultConverter implements ResultConverter {
             /*
              * Collection of JSlobs
              */
-            @SuppressWarnings("unchecked") final Collection<JSlob> jslobs = (Collection<JSlob>) resultObject;
+            @SuppressWarnings("unchecked") final Collection<DefaultJSlob> jslobs = (Collection<DefaultJSlob>) resultObject;
             final JSONArray jArray = new JSONArray();
             for (final JSlob jslob : jslobs) {
                 jArray.put(convertJSlob(jslob));

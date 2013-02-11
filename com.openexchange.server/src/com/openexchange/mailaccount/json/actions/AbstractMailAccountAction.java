@@ -287,8 +287,10 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             } catch (final URISyntaxException e) {
                 throw MailExceptionCode.URI_PARSE_FAILED.create(e, mailServerURL);
             }
-            mailConfig.setServer(uri.getHost());
-            mailConfig.setPort(uri.getPort());
+            if (null != uri) {
+                mailConfig.setServer(uri.getHost());
+                mailConfig.setPort(uri.getPort());
+            }
             mailConfig.setSecure(accountDescription.isMailSecure());
             mailAccess.setCacheable(false);
             return mailAccess;
