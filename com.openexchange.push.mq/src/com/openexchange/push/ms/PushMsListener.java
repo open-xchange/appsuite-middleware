@@ -62,8 +62,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.log.LogFactory;
 import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageListener;
-import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.push.ms.registry.PushMsServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link PushMsListener} - The {@link MessageListener message listener} for messaging-based push bundle.
@@ -87,7 +86,7 @@ public class PushMsListener implements MessageListener<PushMsObject> {
     public void onMessage(final Message<PushMsObject> message) {
         final PushMsObject pushObj = message.getMessageObject();
         if (!getHostname().equals(pushObj.getHostname())) {
-            final ServiceRegistry registry = PushMsServiceRegistry.getServiceRegistry();
+            final ServiceLookup registry = Services.getServiceLookup();
             final EventAdmin eventAdmin = registry.getService(EventAdmin.class);
             final EventFactoryService eventFactoryService = registry.getService(EventFactoryService.class);
             if (eventAdmin != null && eventFactoryService != null) {

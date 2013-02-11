@@ -70,7 +70,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.log.LogFactory;
 import com.openexchange.ms.Topic;
-import com.openexchange.push.ms.registry.PushMsServiceRegistry;
 
 /**
  * {@link PushMsHandler}
@@ -110,7 +109,7 @@ public class PushMsHandler implements EventHandler {
         final int contextId = event.getContextId();
         final Context ctx;
         try {
-            final ContextService contextService = PushMsServiceRegistry.getServiceRegistry().getService(ContextService.class);
+            final ContextService contextService = Services.getService(ContextService.class);
             ctx = contextService.getContext(contextId);
         } catch (final OXException exc) {
             LOG.error("cannot resolve context id: " + contextId, exc);

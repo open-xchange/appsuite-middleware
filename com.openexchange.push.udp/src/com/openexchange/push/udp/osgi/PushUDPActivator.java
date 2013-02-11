@@ -83,7 +83,7 @@ public class PushUDPActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, EventFactoryService.class, ContextService.class, FolderService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, EventFactoryService.class, TimerService.class, ContextService.class, FolderService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -127,12 +127,6 @@ public class PushUDPActivator extends HousekeepingActivator {
              */
             PushInit.getInstance().start();
             addRegisterService();
-            /*
-             * Service trackers
-             */
-            track(EventFactoryService.class);
-            track(TimerService.class);
-            openTrackers();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

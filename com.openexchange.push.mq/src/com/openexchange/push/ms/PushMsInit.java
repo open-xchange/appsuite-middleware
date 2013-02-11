@@ -53,7 +53,6 @@ import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.MsExceptionCodes;
 import com.openexchange.ms.MsService;
 import com.openexchange.ms.Topic;
-import com.openexchange.push.ms.registry.PushMsServiceRegistry;
 
 /**
  * {@link PushMsInit} - Initializes the messaging-based push bundle.
@@ -102,7 +101,7 @@ public class PushMsInit {
                 publisher = this.publisher;
                 if (null == publisher) {
                     try {
-                        final MsService msService = PushMsServiceRegistry.getServiceRegistry().getService(MsService.class);
+                        final MsService msService = Services.getService(MsService.class);
                         if (null == msService) {
                             throw MsExceptionCodes.ILLEGAL_STATE.create("Missing service: " + MsService.class.getName());
                         }

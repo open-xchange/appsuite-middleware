@@ -49,7 +49,6 @@
 
 package com.openexchange.push.ms.osgi;
 
-import static com.openexchange.push.ms.registry.PushMsServiceRegistry.getServiceRegistry;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
@@ -62,9 +61,9 @@ import com.openexchange.folder.FolderService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.ms.MsService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.push.ms.PushMsHandler;
 import com.openexchange.push.ms.PushMsInit;
+import com.openexchange.push.ms.Services;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -99,15 +98,7 @@ public class PushMsActivator extends HousekeepingActivator {
             /*
              * (Re-)Initialize service registry with available services
              */
-            final ServiceRegistry registry = getServiceRegistry();
-            registry.clearRegistry();
-            final Class<?>[] classes = getNeededServices();
-            for (final Class<?> classe : classes) {
-                final Object service = getService(classe);
-                if (null != service) {
-                    registry.addService(classe, service);
-                }
-            }
+            Services.setServiceLookup(this);
             /*
              * Start-up
              */
@@ -141,15 +132,8 @@ public class PushMsActivator extends HousekeepingActivator {
                 init.close();
                 INIT_REF.set(null);
             }
-
-            final ServiceRegistry registry = getServiceRegistry();
-            if (registry != null) {
-                registry.clearRegistry();
-            }
-
-            unregisterServices();
-            closeTrackers();
             cleanUp();
+            Services.setServiceLookup(null);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
