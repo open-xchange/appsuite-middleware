@@ -622,7 +622,7 @@ public final class MailAccountRequest {
         }
         userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
 
-        return MailAccountWriter.writeArray(userMailAccounts, attributes);
+        return MailAccountWriter.writeArray(userMailAccounts, attributes, session);
     }
 
     private List<Attribute> getColumns(final String colString) {
@@ -661,7 +661,7 @@ public final class MailAccountRequest {
             }
         }
 
-        return MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes);
+        return MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes, session);
     }
 
     private static boolean isUnifiedINBOXAccount(final MailAccount mailAccount) {

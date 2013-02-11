@@ -104,7 +104,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /** The service identifier for JSlob */
-    protected static final String JSLOB_SERVICE_ID = "com.openexchange.mailaccount";
+    public static final String JSLOB_SERVICE_ID = "com.openexchange.mailaccount";
 
     /** The reference to JSlobStorageRegistry */
     private static final AtomicReference<JSlobStorageRegistry> STORAGE_REGISTRY = new AtomicReference<JSlobStorageRegistry>();
@@ -158,7 +158,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @throws OXException If service cannot be returned
      * @see #JSLOB_SERVICE_ID
      */
-    protected static JSlobStorage getStorage() throws OXException {
+    public static JSlobStorage getStorage() throws OXException {
         final JSlobStorageRegistry storageRegistry = STORAGE_REGISTRY.get();
         // TODO: Make configurable
         final String storageId = "io.ox.wd.jslob.storage.db";

@@ -57,10 +57,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.JSlobId;
+import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailAccountWriter} - Writes mail account as JSON data.
@@ -161,8 +166,9 @@ public final class MailAccountWriter {
      * @return A JSON array of JSON arrays for each account
      * @throws OXException If writing JSON fails
      */
-    public static JSONArray writeArray(final MailAccount[] mailAccounts, final List<Attribute> attributes) throws OXException {
+    public static JSONArray writeArray(final MailAccount[] mailAccounts, final List<Attribute> attributes, final Session session) throws OXException {
         final JSONArray rows = new JSONArray(mailAccounts.length);
+        final JSlobStorage jSlobStorage = AbstractMailAccountAction.getStorage(); 
         for (final MailAccount account : mailAccounts) {
             final MailAccountGetSwitch getter = new MailAccountGetSwitch(account);
             final JSONArray row = new JSONArray(64);
@@ -177,6 +183,12 @@ public final class MailAccountWriter {
                         row.put(JSONObject.NULL);
                     } else {
                         row.put(prepareFullname(account.getId(), value.toString()));
+                    }
+                } else if (Attribute.META == attribute) {
+                    final JSlobId jSlobId = new JSlobId(AbstractMailAccountAction.JSLOB_SERVICE_ID, Integer.toString(account.getId()), session.getUserId(), session.getContextId());
+                    final JSlob jSlob = jSlobStorage.opt(jSlobId);
+                    if (null != jSlob) {
+                        row.put(jSlob.getJsonObject());
                     }
                 } else {
                     final Object value  = attribute.doSwitch(getter);
