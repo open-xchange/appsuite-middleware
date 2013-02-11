@@ -51,7 +51,6 @@ package com.openexchange.mailaccount.json.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -59,12 +58,9 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.jslob.JSlob;
-import com.openexchange.jslob.JSlobId;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -79,7 +75,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "id", description = "The ID of the account to return.")
 }, responseDescription = "A JSON object representing the desired mail account. See mail account data.")
-public final class GetAction extends AbstractMailAccountAction implements MailAccountFields {
+public final class GetAction extends AbstractMailAccountAction {
 
     public static final String ACTION = AJAXServlet.ACTION_GET;
 
@@ -91,7 +87,7 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
     }
 
     @Override
-    protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jVoid) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         final int id = parseIntParameter(AJAXServlet.PARAMETER_ID, requestData);
 
         try {
@@ -115,15 +111,6 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
             }
 
             final JSONObject jsonAccount = MailAccountWriter.write(checkFullNames(mailAccount, storageService, session));
-
-            {
-                final JSlobId jSlobId = new JSlobId(JSLOB_SERVICE_ID, Integer.toString(id), session.getUserId(), session.getContextId());
-                final JSlob jSlob = getStorage().opt(jSlobId);
-                if (null != jSlob) {
-                    jsonAccount.put(META, jSlob.getJsonObject());
-                }
-            }
-
             return new AJAXRequestResult(jsonAccount);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());

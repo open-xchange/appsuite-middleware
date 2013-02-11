@@ -50,7 +50,6 @@
 package com.openexchange.mailaccount.json.actions;
 
 import org.json.JSONException;
-import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -60,6 +59,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -81,32 +81,36 @@ public final class GetTreeAction extends AbstractMailAccountTreeAction {
     }
 
     @Override
-    protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jVoid) throws OXException, JSONException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         final int id = parseIntParameter(AJAXServlet.PARAMETER_ID, requestData);
 
-        final MailAccountStorageService storageService =
-            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        try {
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-        final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+            final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
-        if (isUnifiedINBOXAccount(mailAccount)) {
-            // Treat as no hit
-            throw MailAccountExceptionCodes.NOT_FOUND.create(
-                Integer.valueOf(id),
-                Integer.valueOf(session.getUserId()),
-                Integer.valueOf(session.getContextId()));
+            if (isUnifiedINBOXAccount(mailAccount)) {
+                // Treat as no hit
+                throw MailAccountExceptionCodes.NOT_FOUND.create(
+                    Integer.valueOf(id),
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+
+            if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
+                throw
+                    MailAccountExceptionCodes.NOT_ENABLED.create(
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+
+            // Create a mail access instance
+            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+            return new AJAXRequestResult(actionValidateTree0(mailAccess, session));
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
-
-        if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
-            throw
-                MailAccountExceptionCodes.NOT_ENABLED.create(
-                Integer.valueOf(session.getUserId()),
-                Integer.valueOf(session.getContextId()));
-        }
-
-        // Create a mail access instance
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-        return new AJAXRequestResult(actionValidateTree0(mailAccess, session));
     }
 
 }

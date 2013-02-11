@@ -65,32 +65,21 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link MailAccountParser} - Parses a JSON object to a mail account.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountParser extends DataParser {
 
-    private static final MailAccountParser INSTANCE = new MailAccountParser();
-
-    /**
-     * Gets the instance.
-     * 
-     * @return The instance
-     */
-    public static MailAccountParser getInstance() {
-        return INSTANCE;
-    }
-
     /**
      * Default constructor.
      */
-    private MailAccountParser() {
+    public MailAccountParser() {
         super();
     }
 
     /**
      * Parses the attributes from the JSON and writes them into the account object.
-     * 
+     *
      * @param account Any attributes will be stored in this account object.
      * @param json A JSON object containing a reminder.
      * @throws OXException If parsing fails.
@@ -104,7 +93,7 @@ public class MailAccountParser extends DataParser {
         }
     }
 
-    protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json) throws JSONException, OXException {
+    protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json) throws JSONException, OXException, OXException {
         final Set<Attribute> attributes = new HashSet<Attribute>();
         if (json.has(MailAccountFields.ID)) {
             account.setId(parseInt(json, MailAccountFields.ID));
@@ -255,7 +244,7 @@ public class MailAccountParser extends DataParser {
             account.setConfirmedHamFullname(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
         }
-        final Map<String, String> props = new HashMap<String, String>(8);
+        final Map<String, String> props = new HashMap<String, String>();
         if (json.hasAndNotNull(MailAccountFields.POP3_DELETE_WRITE_THROUGH)) {
             props.put("pop3.deletewt", json.getString(MailAccountFields.POP3_DELETE_WRITE_THROUGH).trim());
             attributes.add(Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL);
@@ -288,7 +277,7 @@ public class MailAccountParser extends DataParser {
                 attributes.add(Attribute.POP3_PATH_LITERAL);
             }
         }
-         */
+        */
         account.setProperties(props);
         return attributes;
     }

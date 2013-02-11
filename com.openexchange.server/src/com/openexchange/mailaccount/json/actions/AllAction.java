@@ -52,7 +52,6 @@ package com.openexchange.mailaccount.json.actions;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
-import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -89,7 +88,7 @@ public final class AllAction extends AbstractMailAccountAction {
     }
 
     @Override
-    protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jVoid) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         final String colString = requestData.getParameter(AJAXServlet.PARAMETER_COLUMNS);
 
         final List<Attribute> attributes = getColumns(colString);
