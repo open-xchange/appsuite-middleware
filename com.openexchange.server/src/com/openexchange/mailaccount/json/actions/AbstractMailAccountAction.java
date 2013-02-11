@@ -59,8 +59,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
+import org.json.JSONException;
+import org.json.JSONValue;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
@@ -112,6 +115,32 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     protected AbstractMailAccountAction() {
         super();
     }
+
+    @Override
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        try {
+            final Object data = requestData.getData();
+            if (data instanceof JSONValue) {
+                final JSONValue jBody = (JSONValue) data;
+                return innerPerform(requestData, session, jBody);
+            }
+            return innerPerform(requestData, session, null);
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
+        }
+    }
+
+    /**
+     * Performs given request.
+     *
+     * @param requestData The request to perform
+     * @param session The session providing needed user data
+     * @param optBody The optional JSON body
+     * @return The result yielded from given request
+     * @throws OXException If an error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    protected abstract AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue optBody) throws OXException, JSONException;
 
     /**
      * Sets the JSlobStorageRegistry.
