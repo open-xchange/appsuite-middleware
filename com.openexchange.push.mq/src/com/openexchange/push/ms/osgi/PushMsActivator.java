@@ -113,7 +113,6 @@ public class PushMsActivator extends HousekeepingActivator {
              * Service trackers
              */
             track(ManagementService.class, new ManagementRegisterer(context));
-            track(EventFactoryService.class);
             track(TimerService.class);
             openTrackers();
         } catch (final Exception e) {
