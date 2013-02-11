@@ -94,8 +94,8 @@ import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ConfigJSlobService}
@@ -253,9 +253,9 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public Collection<JSlob> get(final ServerSession session) throws OXException {
-    	final int userId = session.getUserId();
-    	final int contextId = session.getContextId();
+    public Collection<JSlob> get(final Session session) throws OXException {
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
 
         final Collection<JSlob> list = getStorage().list(new JSlobId(SERVICE_ID, null, userId, contextId));
         final List<JSlob> ret = new ArrayList<JSlob>(list.size() << 1);
@@ -295,7 +295,7 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public JSlob get(final String id, final ServerSession session) throws OXException {
+    public JSlob get(final String id, final Session session) throws OXException {
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
         /*
@@ -336,7 +336,7 @@ public final class ConfigJSlobService implements JSlobService {
      * @return The {@link JSlob} instance.
      * @throws OXException If operation fails
      */
-    private void addConfigTreeToJslob(final ServerSession session, final JSlob jsLob) throws OXException {
+    private void addConfigTreeToJslob(final Session session, final JSlob jsLob) throws OXException {
         try {
             final Map<String, String>[] maps = configTreeEquivalents.get(jsLob.getId().getId());
             if (maps == null) {
@@ -423,9 +423,9 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public void set(final String id, final JSlob jsonJSlob, final ServerSession session) throws OXException {
-    	final int userId = session.getUserId();
-    	final int contextId = session.getContextId();
+    public void set(final String id, final JSlob jsonJSlob, final Session session) throws OXException {
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
 
     	if (null == jsonJSlob) {
             getStorage().remove(new JSlobId(SERVICE_ID, id, userId, contextId));
@@ -566,9 +566,9 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public void update(final String id, final JSONUpdate jsonUpdate, final ServerSession session) throws OXException {
-    	try {
-    		/*
+    public void update(final String id, final JSONUpdate jsonUpdate, final Session session) throws OXException {
+        try {
+            /*
              * Look-up appropriate storage
              */
     		final int userId = session.getUserId();
