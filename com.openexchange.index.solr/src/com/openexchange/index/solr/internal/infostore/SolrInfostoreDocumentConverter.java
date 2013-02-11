@@ -149,7 +149,8 @@ public class SolrInfostoreDocumentConverter extends AbstractDocumentConverter<Do
             }
         }
 
-        StandardIndexDocument<DocumentMetadata> indexDocument = new StandardIndexDocument<DocumentMetadata>(file);
+        String documentId = String.valueOf(document.getFieldValue(fieldConfig.getUUIDField()));
+        StandardIndexDocument<DocumentMetadata> indexDocument = new StandardIndexDocument<DocumentMetadata>(documentId, file);
         return indexDocument;
     }
 }

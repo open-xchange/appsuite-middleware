@@ -507,7 +507,7 @@ public class SolrAttachmentDocumentConverterTest {
         attachment.setMd5Sum("fasdfsdfgsdgfsd89787897dfs90");
         attachment.setContent(new EmptyInputStream());
 
-        SolrInputDocument document = converter.convert(1, 2, new StandardIndexDocument<Attachment>(attachment));
+        SolrInputDocument document = converter.convert(1, 2, new StandardIndexDocument<Attachment>(null, attachment));
         Assert.assertEquals("Wrong value uuid", document.getFieldValue("uuid"), AttachmentUUID.newUUID(1, 2, attachment).toString());
         Assert.assertEquals("Wrong value module", document.getFieldValue("module"), attachment.getModule());
         Assert.assertEquals("Wrong value account", document.getFieldValue("account"), attachment.getAccount());
@@ -567,7 +567,7 @@ public class SolrAttachmentDocumentConverterTest {
         Attachment attachment = new Attachment();
         attachment.setFolder("INBOX");
         attachment.setObjectId("1234");
-        SolrInputDocument inputDocument = converter.convert(1, 2, new StandardIndexDocument<Attachment>(attachment));
+        SolrInputDocument inputDocument = converter.convert(1, 2, new StandardIndexDocument<Attachment>(null, attachment));
         Assert.assertNotNull(inputDocument);
         Assert.assertNotNull(inputDocument.getFieldValue("uuid"));
     }

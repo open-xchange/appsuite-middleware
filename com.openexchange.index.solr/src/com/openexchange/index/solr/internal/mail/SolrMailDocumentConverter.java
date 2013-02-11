@@ -255,7 +255,8 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
             mail.setSubject(subject);
         }
 
-        return new StandardIndexDocument<MailMessage>(mail);
+        String documentId = String.valueOf(document.getFieldValue(fieldConfig.getUUIDField()));
+        return new StandardIndexDocument<MailMessage>(documentId, mail);
     }
 
     private void setFlags(MailMessage mail, SolrDocument document) throws OXException {

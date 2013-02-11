@@ -52,24 +52,32 @@ package com.openexchange.index;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * {@link IndexDocument} - Represents an indexed document.
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexDocument<V> {
+
+    /**
+     * Returns the unique id of this document within the index. This may be <code>null</code> dependent on the chosen search handler or
+     * field list.
+     * 
+     * @return The id
+     */
+    public String getDocumentId();
+
     /**
      * Gets the object associated with this index document.
-     *
+     * 
      * @return The associated object
      */
     public V getObject();
 
     /**
-     * @return Optionally highlighted search results. If highlighting is supported depends on the
-     * search handler configuration of the underlying index implementation. May be <code>null</code>
+     * @return Optionally highlighted search results. If highlighting is supported depends on the search handler configuration of the
+     *         underlying index implementation. May be <code>null</code>
      */
     public Map<IndexField, List<String>> getHighlighting();
 

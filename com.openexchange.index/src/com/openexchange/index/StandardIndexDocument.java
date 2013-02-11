@@ -64,14 +64,21 @@ public class StandardIndexDocument<V> implements IndexDocument<V> {
     private Map<IndexField, List<String>> highlighting = null;
 
     private final V object;
+    
+    private final String documentId;
 
 
     public StandardIndexDocument(V object) {
-        this(object, null);
+        this(null, object, null);
+    }
+    
+    public StandardIndexDocument(String documentId, V object) {
+        this(documentId, object, null);
     }
 
-    public StandardIndexDocument(V object, Map<IndexField, List<String>> highlighting) {
+    public StandardIndexDocument(String documentId, V object, Map<IndexField, List<String>> highlighting) {
         super();
+        this.documentId = documentId;
         this.object = object;
         if (highlighting != null) {
             this.highlighting = new HashMap<IndexField, List<String>>(highlighting);
@@ -99,5 +106,10 @@ public class StandardIndexDocument<V> implements IndexDocument<V> {
         } else {
             previous.addAll(highlights);
         }
+    }
+
+    @Override
+    public String getDocumentId() {
+        return documentId;
     }
 }

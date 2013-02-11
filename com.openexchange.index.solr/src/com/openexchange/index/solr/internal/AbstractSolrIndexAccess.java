@@ -337,6 +337,10 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
             QueryResponse queryResponse = query(solrQuery);
             Map<String, Map<String, List<String>>> highlighting = queryResponse.getHighlighting();
             SolrDocumentList results = queryResponse.getResults();
+            if (results == null) {
+                return Indexes.emptyResult();
+            }
+            
             if (numFound < 0) {
                 numFound = results.getNumFound();
             }

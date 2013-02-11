@@ -143,7 +143,8 @@ public class SolrAttachmentDocumentConverter extends AbstractDocumentConverter<A
             attachment.setAttachmentId(attachmentId);
         }
 
-        return new StandardIndexDocument<Attachment>(attachment);
+        String documentId = String.valueOf(document.getFieldValue(fieldConfig.getUUIDField()));
+        return new StandardIndexDocument<Attachment>(documentId, attachment);
     }
 
     public SolrInputDocument convert(int contextId, int userId, IndexDocument<Attachment> document) throws OXException {
