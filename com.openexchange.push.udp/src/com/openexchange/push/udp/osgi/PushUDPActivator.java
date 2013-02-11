@@ -126,7 +126,7 @@ public class PushUDPActivator extends HousekeepingActivator {
              * Start-up
              */
             PushInit.getInstance().start();
-            addRegisterService();
+            registerEventHandler();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -154,10 +154,9 @@ public class PushUDPActivator extends HousekeepingActivator {
         }
     }
 
-    protected void addRegisterService() {
-        final String[] topics = new String[] { EventConstants.EVENT_TOPIC, "com/openexchange/*" };
+    protected void registerEventHandler() {
         final Hashtable<String, Object> ht = new Hashtable<String, Object>(1);
-        ht.put(EventConstants.EVENT_TOPIC, topics);
+        ht.put(EventConstants.EVENT_TOPIC, new String[] { EventConstants.EVENT_TOPIC, "com/openexchange/*" });
         registerService(EventHandler.class, new PushHandler(), ht);
     }
 
