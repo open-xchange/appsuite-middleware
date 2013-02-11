@@ -72,7 +72,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountWriter implements MailAccountFields {
+public final class MailAccountWriter {
 
     private MailAccountWriter() {
         super();
@@ -88,64 +88,64 @@ public final class MailAccountWriter implements MailAccountFields {
     public static JSONObject write(final MailAccount account) throws JSONException {
         final JSONObject json = new JSONObject(48);
         final int accountId = account.getId();
-        json.put(ID, accountId);
-        json.put(LOGIN, account.getLogin());
-        // json.put(PASSWORD, account.getLogin());
-        json.put(MAIL_PORT, account.getMailPort());
-        json.put(MAIL_PROTOCOL, account.getMailProtocol());
-        json.put(MAIL_SECURE, account.isMailSecure());
-        json.put(MAIL_SERVER, account.getMailServer());
-        json.put(MAIL_URL, account.generateMailServerURL());
+        json.put(MailAccountFields.ID, accountId);
+        json.put(MailAccountFields.LOGIN, account.getLogin());
+        // json.put(MailAccountFields.PASSWORD, account.getLogin());
+        json.put(MailAccountFields.MAIL_PORT, account.getMailPort());
+        json.put(MailAccountFields.MAIL_PROTOCOL, account.getMailProtocol());
+        json.put(MailAccountFields.MAIL_SECURE, account.isMailSecure());
+        json.put(MailAccountFields.MAIL_SERVER, account.getMailServer());
+        json.put(MailAccountFields.MAIL_URL, account.generateMailServerURL());
 
-        json.put(TRANSPORT_PORT, account.getTransportPort());
-        json.put(TRANSPORT_PROTOCOL, account.getTransportProtocol());
-        json.put(TRANSPORT_SECURE, account.isTransportSecure());
-        json.put(TRANSPORT_SERVER, account.getTransportServer());
-        json.put(TRANSPORT_URL, account.generateTransportServerURL());
+        json.put(MailAccountFields.TRANSPORT_PORT, account.getTransportPort());
+        json.put(MailAccountFields.TRANSPORT_PROTOCOL, account.getTransportProtocol());
+        json.put(MailAccountFields.TRANSPORT_SECURE, account.isTransportSecure());
+        json.put(MailAccountFields.TRANSPORT_SERVER, account.getTransportServer());
+        json.put(MailAccountFields.TRANSPORT_URL, account.generateTransportServerURL());
 
-        json.put(TRANSPORT_LOGIN, account.getTransportLogin());
-        // json.put(TRANSPORT_PASSWORD, account.getTransportPassword());
+        json.put(MailAccountFields.TRANSPORT_LOGIN, account.getTransportLogin());
+        // json.put(MailAccountFields.TRANSPORT_PASSWORD, account.getTransportPassword());
 
-        json.put(NAME, account.getName());
-        json.put(PRIMARY_ADDRESS, account.getPrimaryAddress());
-        json.put(PERSONAL, account.getPersonal());
-        json.put(REPLY_TO, account.getReplyTo());
-        json.put(SPAM_HANDLER, account.getSpamHandler());
+        json.put(MailAccountFields.NAME, account.getName());
+        json.put(MailAccountFields.PRIMARY_ADDRESS, account.getPrimaryAddress());
+        json.put(MailAccountFields.PERSONAL, account.getPersonal());
+        json.put(MailAccountFields.REPLY_TO, account.getReplyTo());
+        json.put(MailAccountFields.SPAM_HANDLER, account.getSpamHandler());
         // Folder names
-        json.put(TRASH, account.getTrash());
-        json.put(SENT, account.getSent());
-        json.put(DRAFTS, account.getDrafts());
-        json.put(SPAM, account.getSpam());
-        json.put(CONFIRMED_SPAM, account.getConfirmedSpam());
-        json.put(CONFIRMED_HAM, account.getConfirmedHam());
+        json.put(MailAccountFields.TRASH, account.getTrash());
+        json.put(MailAccountFields.SENT, account.getSent());
+        json.put(MailAccountFields.DRAFTS, account.getDrafts());
+        json.put(MailAccountFields.SPAM, account.getSpam());
+        json.put(MailAccountFields.CONFIRMED_SPAM, account.getConfirmedSpam());
+        json.put(MailAccountFields.CONFIRMED_HAM, account.getConfirmedHam());
         // Folder full names
-        json.put(TRASH_FULLNAME, prepareFullname(accountId, account.getTrashFullname()));
-        json.put(SENT_FULLNAME, prepareFullname(accountId, account.getSentFullname()));
-        json.put(DRAFTS_FULLNAME, prepareFullname(accountId, account.getDraftsFullname()));
-        json.put(SPAM_FULLNAME, prepareFullname(accountId, account.getSpamFullname()));
-        json.put(CONFIRMED_SPAM_FULLNAME, prepareFullname(accountId, account.getConfirmedSpamFullname()));
-        json.put(CONFIRMED_HAM_FULLNAME, prepareFullname(accountId, account.getConfirmedHamFullname()));
+        json.put(MailAccountFields.TRASH_FULLNAME, prepareFullname(accountId, account.getTrashFullname()));
+        json.put(MailAccountFields.SENT_FULLNAME, prepareFullname(accountId, account.getSentFullname()));
+        json.put(MailAccountFields.DRAFTS_FULLNAME, prepareFullname(accountId, account.getDraftsFullname()));
+        json.put(MailAccountFields.SPAM_FULLNAME, prepareFullname(accountId, account.getSpamFullname()));
+        json.put(MailAccountFields.CONFIRMED_SPAM_FULLNAME, prepareFullname(accountId, account.getConfirmedSpamFullname()));
+        json.put(MailAccountFields.CONFIRMED_HAM_FULLNAME, prepareFullname(accountId, account.getConfirmedHamFullname()));
         // Unified Mail enabled
-        json.put(UNIFIED_INBOX_ENABLED, account.isUnifiedINBOXEnabled());
+        json.put(MailAccountFields.UNIFIED_INBOX_ENABLED, account.isUnifiedINBOXEnabled());
         // Properties
         final Map<String, String> props = account.getProperties();
         if (props.containsKey("pop3.deletewt")) {
-            json.put(POP3_DELETE_WRITE_THROUGH, Boolean.parseBoolean(props.get("pop3.deletewt")));
+            json.put(MailAccountFields.POP3_DELETE_WRITE_THROUGH, Boolean.parseBoolean(props.get("pop3.deletewt")));
         }
         if (props.containsKey("pop3.expunge")) {
-            json.put(POP3_EXPUNGE_ON_QUIT, Boolean.parseBoolean(props.get("pop3.expunge")));
+            json.put(MailAccountFields.POP3_EXPUNGE_ON_QUIT, Boolean.parseBoolean(props.get("pop3.expunge")));
         }
         if (props.containsKey("pop3.refreshrate")) {
-            json.put(POP3_REFRESH_RATE, props.get("pop3.refreshrate"));
+            json.put(MailAccountFields.POP3_REFRESH_RATE, props.get("pop3.refreshrate"));
         }
         if (props.containsKey("pop3.storage")) {
-            json.put(POP3_STORAGE, props.get("pop3.storage"));
+            json.put(MailAccountFields.POP3_STORAGE, props.get("pop3.storage"));
         }
         if (props.containsKey("pop3.path")) {
-            json.put(POP3_PATH, props.get("pop3.path"));
+            json.put(MailAccountFields.POP3_PATH, props.get("pop3.path"));
         }
-        if (props.containsKey(ADDRESSES)) {
-            json.put(ADDRESSES, props.get(ADDRESSES));
+        if (props.containsKey("addresses")) {
+            json.put(MailAccountFields.ADDRESSES, props.get("addresses"));
         }
         return json;
     }
