@@ -52,7 +52,7 @@ package com.openexchange.jslob;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
 /**
  * {@link JSlobService} - The JSlob service.
@@ -83,7 +83,7 @@ public interface JSlobService {
      * @return The JSlob
      * @throws OXException If JSlob cannot be returned
      */
-    JSlob get(String id, ServerSession session) throws OXException;
+    JSlob get(String id, Session session) throws OXException;
 
     /**
      * Gets the shared JSlob.
@@ -101,7 +101,7 @@ public interface JSlobService {
      * @return The JSlobs
      * @throws OXException If JSlobs cannot be returned
      */
-    Collection<JSlob> get(ServerSession session) throws OXException;
+    Collection<JSlob> get(Session session) throws OXException;
 
     /**
      * Gets the shared JSlobs.
@@ -121,7 +121,7 @@ public interface JSlobService {
      * @param session an active session
      * @throws OXException If JSlob cannot be set
      */
-    void set(String id, JSlob jsonJSlob, ServerSession session) throws OXException;
+    void set(String id, JSlob jsonJSlob, Session session) throws OXException;
 
     /**
      * Sets the shared JSlob.
@@ -142,6 +142,6 @@ public interface JSlobService {
      * @param session an active session
      * @throws OXException If update fails
      */
-    void update(String id, JSONUpdate update, ServerSession session) throws OXException;
+    void update(String id, JSONUpdate update, Session session) throws OXException;
 
 }
