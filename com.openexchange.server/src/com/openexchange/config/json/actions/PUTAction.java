@@ -69,6 +69,8 @@ import com.openexchange.groupware.settings.impl.AbstractSetting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.HTMLDetector;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -224,6 +226,8 @@ public final class PUTAction extends AbstractConfigAction {
         }
     }
 
+    private static final Pattern P_TAG_BODY = Pattern.compile("(?:\r?\n)?</?body>(?:\r?\n)?", Pattern.CASE_INSENSITIVE);
+
     /** Sanitizes possible JSON setting */
     public static void sanitizeJsonSetting(final Setting setting) {
         try {
@@ -239,14 +243,9 @@ public final class PUTAction extends AbstractConfigAction {
                     for (int i = 0; i < length; i++) {
                         final JSONObject jSignature = jSignatures.getJSONObject(i);
                         String content = jSignature.optString("signature_text", null);
-                        if (null != content) {
+                        if (null != content && HTMLDetector.containsHTMLTags(content.getBytes(Charsets.ISO_8859_1))) {
                             content = htmlService.sanitize(content, null, false, null, null);
-                            if (content.startsWith("<body>")) {
-                                content = content.substring(6);
-                            }
-                            if (content.endsWith("</body>")) {
-                                content = content.substring(0, content.length() - 7);
-                            }
+                            content = P_TAG_BODY.matcher(content).replaceAll("");
                             jSignature.put("signature_text", content);
                             saveBack = true;
                         }

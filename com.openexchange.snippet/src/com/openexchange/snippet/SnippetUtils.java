@@ -49,7 +49,10 @@
 
 package com.openexchange.snippet;
 
+import java.util.regex.Pattern;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.HTMLDetector;
 import com.openexchange.snippet.internal.Services;
 
 /**
@@ -66,6 +69,8 @@ public final class SnippetUtils {
         super();
     }
 
+    private static final Pattern P_TAG_BODY = Pattern.compile("(?:\r?\n)?</?body>(?:\r?\n)?", Pattern.CASE_INSENSITIVE);
+
     /**
      * Sanitizes given Snippet content.
      * 
@@ -73,7 +78,7 @@ public final class SnippetUtils {
      * @return The sanitized content
      */
     public static String sanitizeContent(final String content) {
-        if (isEmpty(content)) {
+        if (isEmpty(content) || !HTMLDetector.containsHTMLTags(content.getBytes(Charsets.ISO_8859_1))) {
             return content;
         }
         final HtmlService service = Services.getService(HtmlService.class);
@@ -82,12 +87,7 @@ public final class SnippetUtils {
         }
         try {
             String retval = service.sanitize(content, null, false, null, null).trim();
-            if (retval.startsWith("<body>")) {
-                retval = retval.substring(6);
-            }
-            if (retval.endsWith("</body>")) {
-                retval = retval.substring(0, retval.length() - 7);
-            }
+            retval = P_TAG_BODY.matcher(retval).replaceAll("");
             return retval;
         } catch (final Exception e) {
             // Ignore
