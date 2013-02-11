@@ -233,4 +233,9 @@ public class TargetFolderSession implements Session {
         }
     }
 
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
+
 }

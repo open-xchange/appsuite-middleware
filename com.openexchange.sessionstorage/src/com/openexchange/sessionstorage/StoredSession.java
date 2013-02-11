@@ -379,6 +379,11 @@ public class StoredSession implements PutIfAbsent, Serializable {
     }
 
     @Override
+    public boolean isTransient() {
+        return false;
+    }
+
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(512);
         final String delim = ", ";

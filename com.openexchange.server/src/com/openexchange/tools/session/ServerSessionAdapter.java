@@ -411,4 +411,9 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     	return session.getUserId() == 0;
     }
 
+    @Override
+    public boolean isTransient() {
+        return session.isTransient();
+    }
+
 }

@@ -471,11 +471,7 @@ public final class SessionImpl implements PutIfAbsent {
         }
     }
 
-    /**
-     * Gets a value indicating whether the session is transient or not.
-     *
-     * @return <code>true</code> if the session is transient, <code>false</code>, otherwise
-     */
+    @Override
     public boolean isTransient() {
         return tranzient;
     }

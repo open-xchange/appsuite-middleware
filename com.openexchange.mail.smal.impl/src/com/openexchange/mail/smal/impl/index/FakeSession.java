@@ -181,4 +181,9 @@ public final class FakeSession implements Session, Serializable {
         // Nothing to do
     }
 
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
+
 }
