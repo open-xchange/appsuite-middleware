@@ -1,3 +1,7 @@
+* 2013-02-11 - marc.arens@open-xchange.com
+
+ - Fix for bug 24828: Showruntimestats for Grizzly's HttpCodecFilter always returns 0
+ 
 * 2013-02-11 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24885: Skip unmapped properties in advanced search filters 
