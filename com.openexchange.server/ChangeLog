@@ -5,6 +5,7 @@
 * 2013-02-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 24896: Use interface class where possible
+ - Fix for bug 24893: Restored crawler-bases XING subscriber
 
 * 2013-02-10 - thorben.betten@open-xchange.com
 
