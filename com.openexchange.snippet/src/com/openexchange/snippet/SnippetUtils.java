@@ -69,7 +69,7 @@ public final class SnippetUtils {
         super();
     }
 
-    private static final Pattern P_TAG_BODY = Pattern.compile("(?:\r?\n)?</?body>(?:\r?\n)?", Pattern.CASE_INSENSITIVE);
+    private static final Pattern P_TAG_BODY = Pattern.compile("(?:\r?\n)?</?body[^<]*>(?:\r?\n)?", Pattern.CASE_INSENSITIVE);
 
     /**
      * Sanitizes given Snippet content.
