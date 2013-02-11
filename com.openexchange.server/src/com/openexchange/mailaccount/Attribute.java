@@ -107,7 +107,7 @@ public enum Attribute {
     REPLY_TO_LITERAL(MailAccountFields.REPLY_TO, 1038),
     // Addresses
     ADDRESSES(MailAccountFields.ADDRESSES, 1039),
-    /** (Virtual attribute) Meta */
+    // (Virtual attribute) Meta
     META(MailAccountFields.META, 1040),
 
     ;
