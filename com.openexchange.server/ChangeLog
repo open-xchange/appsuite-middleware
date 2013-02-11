@@ -1,3 +1,7 @@
+* 2013-02-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24885: Skip unmapped properties in advanced search filters 
+
 * 2013-02-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 24896: Use interface class where possible
