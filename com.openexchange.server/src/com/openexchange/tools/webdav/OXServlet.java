@@ -549,6 +549,7 @@ public abstract class OXServlet extends WebDavServlet {
         case WEBDAV_INFOSTORE:
         case WEBDAV_ICAL:
         case WEBDAV_VCARD:
+        case OUTLOOK_UPDATER:
             return true;
         default:
             return false;
