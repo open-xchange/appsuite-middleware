@@ -7,6 +7,7 @@
  - Fix for bug 24896: Use interface class where possible
  - Fix for bug 24893: Restored crawler-bases XING subscriber
  - Fix for bug 24900: Fixed multiple request
+ - Fix for bug 24785: Fixed start-up with required services for push-udp
 
 * 2013-02-10 - thorben.betten@open-xchange.com
 
