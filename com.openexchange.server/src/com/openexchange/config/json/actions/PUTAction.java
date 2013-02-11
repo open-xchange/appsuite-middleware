@@ -159,7 +159,7 @@ public final class PUTAction extends AbstractConfigAction {
         }
     }
 
-    private static final Pattern P_TAG_BODY = Pattern.compile("(?:\r?\n)?</?body>(?:\r?\n)?", Pattern.CASE_INSENSITIVE);
+    private static final Pattern P_TAG_BODY = Pattern.compile("(?:\r?\n)?</?body[^<]*>(?:\r?\n)?", Pattern.CASE_INSENSITIVE);
 
     /** Sanitizes possible JSON setting */
     public static void sanitizeJsonSetting(final Setting setting) {
